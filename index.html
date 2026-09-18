@@ -436,6 +436,42 @@ html{scroll-behavior:smooth}
   *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
 
+
+/* ======================================================================
+   v35 · CASA VIVA — rediseño de interfaz y sistemas de dinastía
+   ====================================================================== */
+.sa35-shell{max-width:1180px;margin:0 auto}
+.sa35-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.sa35-span-8{grid-column:span 8}.sa35-span-4{grid-column:span 4}.sa35-span-6{grid-column:span 6}.sa35-span-12{grid-column:1/-1}
+.sa35-card{background:linear-gradient(180deg,rgba(255,255,255,.028),rgba(255,255,255,.012));border:1px solid rgba(214,166,72,.18);border-radius:16px;padding:14px;box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.sa35-card.gold{background:linear-gradient(180deg,rgba(214,166,72,.10),rgba(214,166,72,.025));border-color:rgba(214,166,72,.34)}
+.sa35-kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--laton);font-weight:700;margin-bottom:4px}
+.sa35-title{font-family:var(--display);font-size:21px;line-height:1.1;color:var(--marfil);margin:0 0 6px}
+.sa35-sub{font-size:12px;color:var(--humo);line-height:1.5}
+.sa35-statrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.sa35-stat{padding:9px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(0,0,0,.12)}
+.sa35-stat b{display:block;color:var(--marfil);font-size:14px}.sa35-stat span{font-size:10px;color:var(--humo2);text-transform:uppercase;letter-spacing:.06em}
+.sa35-person-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.sa35-person{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.10);color:inherit;cursor:pointer}
+.sa35-person:hover{border-color:rgba(214,166,72,.32);transform:translateY(-1px)}
+.sa35-person .meta{min-width:0}.sa35-person b{display:block;color:var(--marfil);font-size:13px}.sa35-person small{display:block;color:var(--humo);font-size:11px;line-height:1.35;margin-top:2px}
+.sa35-pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.sa35-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(214,166,72,.17);border-radius:999px;padding:5px 8px;color:var(--humo);font-size:10.5px;background:rgba(214,166,72,.04)}.sa35-pill strong{color:var(--marfil)}
+.sa35-feed{display:grid;gap:7px;margin-top:8px}.sa35-news{display:grid;grid-template-columns:54px 1fr;gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.055)}.sa35-news:first-child{border-top:0}.sa35-year{color:var(--laton);font-size:11px;font-weight:700}.sa35-news b{color:var(--marfil);font-size:12px}.sa35-news p{margin:2px 0 0;color:var(--humo);font-size:11px;line-height:1.45}
+.sa35-offer{display:flex;gap:10px;align-items:flex-start;padding:11px;border-radius:14px;border:1px solid rgba(214,166,72,.24);background:linear-gradient(180deg,rgba(214,166,72,.08),rgba(0,0,0,.08));margin-top:8px}.sa35-offer .sig{width:36px;height:36px;border-radius:10px;background:#1b160f;border:1px solid rgba(214,166,72,.3);display:grid;place-items:center;flex:0 0 36px;color:var(--laton)}
+.sa35-tree{overflow:auto;padding:12px;border-radius:14px;background:radial-gradient(circle at top,rgba(214,166,72,.06),rgba(0,0,0,.13));border:1px solid rgba(214,166,72,.13)}
+.sa35-node{display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:10px 12px;min-width:130px;border:1px solid rgba(214,166,72,.16);background:rgba(25,19,13,.84);border-radius:12px;cursor:pointer;color:var(--marfil)}
+.sa35-node.primary{border-color:rgba(214,166,72,.5);box-shadow:0 8px 26px rgba(0,0,0,.18)}
+.sa35-node b{font-size:11px}.sa35-node small{font-size:9.5px;color:var(--humo)}
+.sa35-line{height:18px;width:1px;background:rgba(214,166,72,.25);margin:0 auto}.sa35-row{display:flex;gap:18px;justify-content:center;align-items:flex-start;min-width:max-content}.sa35-branch{display:flex;flex-direction:column;align-items:center;position:relative}.sa35-branch:before{content:"";position:absolute;top:0;left:50%;height:10px;border-left:1px solid rgba(214,166,72,.25)}
+.sa35-house{display:grid;grid-template-columns:70px 1fr;gap:10px;align-items:center}.sa35-house-mark{width:70px;height:70px;border-radius:18px;border:1px solid rgba(214,166,72,.28);background:linear-gradient(145deg,#241a11,#14100c);display:grid;place-items:center;color:var(--laton);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.sa35-collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.sa35-art{padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.10)}.sa35-art b{font-size:12px;color:var(--marfil)}.sa35-art small{display:block;color:var(--humo);font-size:10.5px;margin-top:2px}
+.sa35-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;border-radius:10px;border:1px solid rgba(214,166,72,.2);background:rgba(214,166,72,.07);color:var(--marfil);padding:8px 11px;font:600 12px var(--ui);cursor:pointer}.sa35-btn:hover{border-color:rgba(214,166,72,.5);background:rgba(214,166,72,.11)}
+.sa35-icon{width:18px;height:18px;display:inline-grid;place-items:center;color:var(--laton)}.sa35-icon svg{width:100%;height:100%}
+.sa35-hero{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;margin:12px 0}.sa35-hero-copy{padding:22px;border-radius:18px;border:1px solid rgba(214,166,72,.22);background:linear-gradient(135deg,rgba(214,166,72,.11),rgba(36,28,21,.75) 55%,rgba(20,16,12,.88));box-shadow:0 18px 42px rgba(0,0,0,.18)}.sa35-hero h2{font-family:var(--display);font-size:32px;line-height:1;margin:0 0 7px}.sa35-hero p{max-width:680px;color:var(--humo);line-height:1.6;font-size:12.5px;margin:0}
+.sa35-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:12px;background:rgba(178,65,58,.09);border:1px solid rgba(178,65,58,.24);font-size:11px;color:#D8B5AE;margin-top:9px}.sa35-banner strong{color:var(--marfil)}
+@media(max-width:780px){.sa35-grid,.sa35-hero{grid-template-columns:1fr}.sa35-span-4,.sa35-span-6,.sa35-span-8{grid-column:1/-1}.sa35-statrow{grid-template-columns:repeat(2,minmax(0,1fr))}.sa35-person-grid{grid-template-columns:1fr}.sa35-collection{grid-template-columns:1fr 1fr}.sa35-house{grid-template-columns:54px 1fr}.sa35-house-mark{width:54px;height:54px}.sa35-hero h2{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.sa35-person,.sa35-btn{transition:none!important;transform:none!important}}
+
 </style>
 </head>
 <body>
@@ -9039,9 +9075,269 @@ function correrFundacion(res,m){
 
 </script>
 <script>
+/* v35: fuerza la actualización del service worker sin eliminar la PWA. */
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+  window.addEventListener('load',async()=>{
+    try{ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.update().catch(()=>null))); }catch(e){}
+    try{ await navigator.serviceWorker.register('./sw.js?sa35=1',{updateViaCache:'none'}); }catch(e){}
+  });
 }
 </script>
+
+<script>
+/* ======================================================================
+   SOCIEDAD ANÓNIMA v35 — CASA VIVA
+   Capa adicional defensiva: no reemplaza el motor anterior; lo extiende.
+   Todo está encapsulado, con migraciones y try/catch para conservar partidas.
+   ====================================================================== */
+(()=>{
+  'use strict';
+  const V='v35';
+  const safe=(fn,fallback)=>{try{return fn()}catch(e){return fallback;}};
+  const root=()=>typeof window!=='undefined'?window:null;
+  const svg=(name)=>{
+    const a={
+      house:'<svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5 12 4l9 7.5V21H3z" stroke="currentColor" stroke-width="1.4"/><path d="M9 21v-6h6v6M7 11h10" stroke="currentColor" stroke-width="1.2"/></svg>',
+      crown:'<svg viewBox="0 0 24 24" fill="none"><path d="m3 7 4 4 5-7 5 7 4-4-2 11H5z" stroke="currentColor" stroke-width="1.3"/><path d="M6 20h12" stroke="currentColor" stroke-width="1.3"/></svg>',
+      tree:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 20V10" stroke="currentColor" stroke-width="1.4"/><path d="m12 4 6 5h-3l4 4h-5l3 3H7l3-3H5l4-4H6z" stroke="currentColor" stroke-width="1.2"/></svg>',
+      globe:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.3"/><path d="M3.8 12h16.4M12 3.5c2.5 2.5 3.4 5.5 3.4 8.5S14.5 18 12 20.5M12 3.5C9.5 6 8.6 9 8.6 12s.9 6 3.4 8.5" stroke="currentColor" stroke-width="1.1"/></svg>',
+      brief:'<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="7" width="17" height="12.5" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 7V5.4c0-.9.7-1.6 1.6-1.6h4.8c.9 0 1.6.7 1.6 1.6V7M3.5 11h17M10 11v2h4v-2" stroke="currentColor" stroke-width="1.2"/></svg>',
+      coin:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.3"/><path d="M9.3 9.1c.5-1 1.5-1.5 2.8-1.5 1.5 0 2.6.7 2.6 1.8 0 2.8-5.4 1.2-5.4 4 0 1.1 1 2 2.7 2 1.4 0 2.5-.5 3-1.6M12 5.9v12.2" stroke="currentColor" stroke-width="1.1"/></svg>',
+      book:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 0-3 0z" stroke="currentColor" stroke-width="1.3"/><path d="M8 7h8M8 10h7M8 13h6" stroke="currentColor" stroke-width="1.1"/></svg>',
+      star:'<svg viewBox="0 0 24 24" fill="none"><path d="m12 3 2.7 5.7 6.3.8-4.7 4.3 1.2 6.2-5.5-3-5.5 3 1.2-6.2L3 9.5l6.3-.8z" stroke="currentColor" stroke-width="1.2"/></svg>'
+    }; return a[name]||a.star;
+  };
+  function s35Asegurar(){
+    if(!window.S) return false;
+    S.vida=(S.vida&&typeof S.vida==='object')?S.vida:{};
+    if(!Array.isArray(S.vida.momentos))S.vida.momentos=[];
+    const c=(S.vida.casaViva&&typeof S.vida.casaViva==='object')?S.vida.casaViva:{};
+    if(!Array.isArray(c.noticias))c.noticias=[];
+    if(!Array.isArray(c.anios))c.anios=[];
+    if(!Array.isArray(c.familias))c.familias=[];
+    if(!Array.isArray(c.arte))c.arte=[];
+    if(!Array.isArray(c.momentos))c.momentos=[];
+    if(!Array.isArray(c.alumnos))c.alumnos=[];
+    if(!Array.isArray(c.propiedades))c.propiedades=[];
+    if(!isFinite(c.prestigioCasa))c.prestigioCasa=Math.round(safe(()=>prestigio(),50));
+    c.version=V;
+    S.vida.casaViva=c;
+    (S.familia?.hijos||[]).forEach(s35NormalizarHijo);
+    return true;
+  }
+  const paisDeCiudad=(ciudad)=>safe(()=>{const g=ciudadGlobalDe(ciudad);return g?g.pais:'Colombia'},'Colombia');
+  function s35NormalizarHijo(h){
+    if(!h||typeof h!=='object')return;
+    if(!isFinite(h.patrimonio))h.patrimonio=Math.max(0,Number(h.caudal||0));
+    if(!Array.isArray(h.ofertas))h.ofertas=[];
+    if(!Array.isArray(h.hitos))h.hitos=[];
+    if(!h.ocupacion){
+      if(h.carreraProf) h.ocupacion=safe(()=>carreraProfesionalDe(h.carreraProf)?.tit,'profesional');
+      else if(h.rumbo) h.ocupacion=String(h.rumbo);
+      else h.ocupacion=h.edad<18?'estudiante':'vida profesional';
+    }
+    h.ciudad=h.ciudad||S.p?.ciudad||'Medellín';
+    h.pais=h.pais||paisDeCiudad(h.ciudad);
+    if(!isFinite(h.reputacion))h.reputacion=clamp((h.vinculo||60)+ri(-10,10),0,100);
+    if(!h.rasgos)h.rasgos={ambicion:ri(35,85),familia:ri(35,90),riesgo:ri(20,80),diplomacia:ri(30,90)};
+  }
+  function s35Registrar(txt,tono){
+    s35Asegurar(); const item={anio:S.anio,txt:String(txt),tono:tono||''}; S.vida.casaViva.momentos.push(item); S.vida.casaViva.momentos=S.vida.casaViva.momentos.slice(-160); S.vida.momentos.push(item); S.vida.momentos=S.vida.momentos.slice(-160);
+  }
+  const FAMILIAS={
+    Colombia:['Restrepo','Arango','Ospina','Londoño','Echeverri','Vélez'],
+    USA:['Whitmore','Bennett','Harrison','Carter','Prescott','Montgomery'],
+    UK:['Ashford','Pembroke','Montgomery','Beaumont','Harrington'],
+    France:['Beaumont','Delacroix','Montreuil','Duvall','Renaud'],
+    Germany:['Keller','Wittmann','Falken','Schneider','von Eltz'],
+    Japan:['Takahashi','Fujimoto','Nakamura','Kobayashi','Matsuda'],
+    China:['Zhang','Wang','Li','Chen','Xu'],
+    Brazil:['Almeida','Ferreira','Moraes','Carvalho','Azevedo'],
+    Singapore:['Tan','Lim','Koh','Lee','Wong'],
+    Panama:['Arias','Vallarino','Delgado','Porras']
+  };
+  const SECTORES_H=['industria','finanzas','comercio','infraestructura','agroindustria','tecnología','medios','servicios profesionales'];
+  function s35CrearFamilias(){
+    s35Asegurar(); const c=S.vida.casaViva;
+    if(c.familias.length)return;
+    const ciudad=S.p?.ciudad||'Medellín', pais=paisDeCiudad(ciudad), pool=FAMILIAS[pais]||FAMILIAS.Colombia;
+    const usados=new Set([S.p?.apellido||''].filter(Boolean));
+    const ciudades=[ciudad,...safe(()=>CIUDADES_GLOBALES.filter(g=>g.n!==ciudad).slice(0,5).map(g=>g.n),[])];
+    for(let i=0;i<5;i++){
+      let apellido=pick(pool); let guard=0; while(usados.has(apellido)&&guard++<8)apellido=pick(pool); usados.add(apellido);
+      const local=ciudades[i%ciudades.length], riqueza=Math.round(rnd(350,6500));
+      c.familias.push({id:'fam35-'+S.anio+'-'+i,apellido,ciudad:local,pais:paisDeCiudad(local),sector:pick(SECTORES_H),patrimonio:riqueza,reputacion:ri(35,88),relacion:ri(32,64),generaciones:ri(2,6),miembros:ri(8,42),empresa:pick(['Grupo '+apellido,'Inversiones '+apellido,'Compañía '+apellido,'Casa '+apellido+' & Asociados']),alianzas:0,ultimaActividad:S.anio});
+    }
+  }
+  function s35Familias(){s35CrearFamilias();return S.vida.casaViva.familias;}
+  function s35PersonaPorId(id){
+    const hijos=S.familia?.hijos||[]; for(const h of hijos){if('h35-'+h.nombre===id||'h35-'+(h.pid||'')===id)return h; for(const g of (h.hijos||[])){if('g35-'+g.nombre===id||'g35-'+(g.pid||'')===id)return g;}}
+    return null;
+  }
+  function s35NombreParentesco(h){return h?.sexo==='m'?'hijo':'hija'}
+  function s35OfertaHijo(h){
+    if(!h||h.edad<24||h.independiente===false)return;
+    const nivel=(h.nivelProf||0)+1;
+    if(chance(.10+(Math.min(40,h.reputacion||50)/1000))){
+      const lugares=[h.ciudad||S.p.ciudad,...safe(()=>CIUDADES_GLOBALES.slice(0,7).map(g=>g.n),[])];
+      const ciudad=pick(lugares.filter(Boolean)), titulo=pick(['Gerente de estrategia','Directora de desarrollo','Director de operaciones','Consultor principal','Gerente de inversiones','Directora de relaciones institucionales']);
+      const o={id:'ofh35-'+S.anio+'-'+ri(1,99999),anio:S.anio,caduca:S.anio+2,titulo,empresa:pick(['Grupo '+h.apellido,'Banco Continental','Red Empresarial Internacional','Universidad Metropolitana','Consorcio Global']),ciudad,salario:Math.round(rnd(45,260)*(1+Math.min(60,nivel)*.012)),prestigio:ri(3,11),estado:'pendiente'};
+      h.ofertas.push(o); h.ofertas=h.ofertas.slice(-5); h.hitos.push({anio:S.anio,txt:'Recibió una oferta: '+titulo});
+      s35Registrar(h.nombre+' recibió una oferta para '+titulo+' en '+ciudad,'hito');
+    }
+  }
+  function s35EvolucionHijos(){
+    s35Asegurar();
+    (S.familia?.hijos||[]).forEach(h=>{
+      s35NormalizarHijo(h);
+      const edad=Math.max(0,Number(h.edad)||0);
+      if(edad>=22){
+        const base=Number(h.patrimonio)||0;
+        const salario= h.carreraProf ? rnd(20,85) : (h.rumbo?rnd(16,55):rnd(8,30));
+        const rendimiento=(h.rasgos?.ambicion||50)/100*.06 + (h.reputacion||50)/100*.03 + rnd(-.035,.055);
+        h.patrimonio=Math.max(0,base+Math.max(0,salario)*(1+rendimiento));
+        h.ocupacion=h.carreraProf?safe(()=>carreraProfesionalDe(h.carreraProf)?.tit,'profesional'):h.rumbo||'profesional independiente';
+        if(chance(.035+(h.rasgos?.ambicion||50)/4000)){
+          h.ciudad=pick(safe(()=>[h.ciudad,...CIUDADES_GLOBALES.filter(g=>g.n!==h.ciudad).slice(0,6).map(g=>g.n)], [h.ciudad]));
+          h.pais=paisDeCiudad(h.ciudad); h.independiente=true;
+          s35Registrar(h.nombre+' se estableció en '+h.ciudad+' por una oportunidad profesional.','bien');
+        }
+        s35OfertaHijo(h);
+      }
+      if(chance(.025)) h.reputacion=clamp((h.reputacion||55)+ri(-5,7),0,100);
+    });
+  }
+  function s35MundoAnual(){
+    s35Asegurar(); const c=S.vida.casaViva, m=S.macro||{}; s35CrearFamilias();
+    const evs=[
+      {tit:'Expansión industrial',txt:'La inversión productiva acelera la demanda de maquinaria, logística y construcción.',sec:['industrial','infraestructura'],ef:.025},
+      {tit:'Temporada de crédito caro',txt:'El costo del dinero sube y las empresas endeudadas sienten la presión.',sec:['finanzas'],ef:-.018},
+      {tit:'Salto tecnológico',txt:'Una nueva ola de tecnología cambia la productividad de varias industrias.',sec:['tecnología'],ef:.035},
+      {tit:'Buen ciclo inmobiliario',txt:'La demanda de vivienda y oficinas fortalece el mercado inmobiliario.',sec:['infraestructura'],ef:.022},
+      {tit:'Dólar volátil',txt:'Los mercados internacionales tienen un año de alta volatilidad cambiaria.',sec:['comercio','finanzas'],ef:-.012},
+      {tit:'Auge del consumo',txt:'Los hogares gastan más y favorecen a las compañías de consumo y servicios.',sec:['comercio','servicios profesionales'],ef:.024},
+      {tit:'Cosecha excepcional',txt:'Una temporada agrícola favorable mejora el abastecimiento y los márgenes del agro.',sec:['agroindustria'],ef:.032},
+      {tit:'Crisis logística',txt:'Un cuello de botella internacional encarece transporte y suministros.',sec:['comercio','industria'],ef:-.022},
+      {tit:'Boom de servicios profesionales',txt:'Las empresas externalizan funciones y aumenta la demanda de consultoría.',sec:['servicios profesionales'],ef:.028},
+      {tit:'Mercados tranquilos',txt:'La confianza mejora y los inversores vuelven a activos de riesgo moderado.',sec:['finanzas'],ef:.02}
+    ];
+    let ev=null; if(chance(.58)){ev=pick(evs); if(isFinite(m.ciclo))m.ciclo=clamp(m.ciclo+ev.ef,-.18,.18); if(S.emp){const sec=String(safe(()=>sectorDe(S.emp).id,''));if(ev.sec.includes(sec))S.emp.crecimiento=(S.emp.crecimiento||0)+ev.ef*.65;else if(ev.ef<0)S.emp.crecimiento=(S.emp.crecimiento||0)+ev.ef*.18;}}
+    const top=s35Familias().slice().sort((a,b)=>b.patrimonio-a.patrimonio)[0];
+    if(top&&chance(.18)){top.patrimonio=Math.max(0,top.patrimonio*(1+rnd(-.04,.08)));top.ultimaActividad=S.anio;}
+    const noticia=ev?{anio:S.anio,titulo:ev.tit,txt:ev.txt,tono:ev.ef>=0?'bien':'mal'}:null;
+    if(noticia){c.noticias.push(noticia);c.noticias=c.noticias.slice(-40);s35Registrar('Mundo: '+ev.tit,ev.ef>=0?'bien':'mal');}
+    return noticia;
+  }
+  function s35ResumenAnual(noticia){
+    s35Asegurar(); const c=S.vida.casaViva, hijos=S.familia?.hijos||[], nietos=hijos.reduce((a,h)=>a+(h.hijos||[]).length,0), comps=safe(()=>companias().length,S.emp?1:0), patrim=safe(()=>patrimonio(),0), rol=safe(()=>rolActualDashboard(),'');
+    const r={anio:S.anio,patrimonio:patrim,hijos:hijos.length,nietos,companias:comps,ciudad:S.p?.ciudad||'',rol,noticia:noticia?.titulo||null,evento:(S.vida.momentos||[]).filter(x=>x.anio===S.anio).slice(-3).map(x=>x.txt)};
+    c.anios.push(r);c.anios=c.anios.slice(-100);return r;
+  }
+  function s35CorrerAnual(){
+    if(!window.S||S.muerto)return;
+    safe(()=>s35MundoAnual(),null); safe(()=>s35EvolucionHijos(),null); safe(()=>s35ResumenAnual(),null); safe(()=>{S.vida.casaViva.prestigioCasa=Math.round(safe(()=>prestigio(),S.vida.casaViva.prestigioCasa||50));},null);
+  }
+  function s35EscenaPerfil(h){
+    if(!h)return;
+    s35NormalizarHijo(h);
+    const nietos=(h.hijos||[]).length, pareja=h.pareja?.nombre||'Sin pareja registrada';
+    const profesion=safe(()=>h.carreraProf?carreraProfesionalDe(h.carreraProf)?.tit:null,null)||h.ocupacion||'Trayectoria en formación';
+    escena({rubro:'Miembro de la casa',titulo:esc(h.nombre+' '+(h.apellido||S.p.apellido)),ancho:true,
+      cuerpo:'Un miembro de la dinastía con vida propia. Sus decisiones pueden fortalecer o complicar el futuro de la casa.',
+      html:'<div class="sa35-grid">'
+        +'<div class="sa35-card gold sa35-span-8"><div class="sa35-house"><div class="sa35-house-mark">'+svg('crown')+'</div><div><div class="sa35-kicker">Perfil familiar</div><div class="sa35-title">'+esc(profesion)+'</div><div class="sa35-sub">'+esc(h.edad)+' años · '+esc(h.ciudad||S.p.ciudad)+' · '+esc(h.pais||paisDeCiudad(h.ciudad))+'</div></div></div>'
+        +'<div class="sa35-statrow"><div class="sa35-stat"><b>'+fmt(h.patrimonio||0)+'</b><span>patrimonio</span></div><div class="sa35-stat"><b>'+Math.round(h.vinculo||60)+'/100</b><span>vínculo</span></div><div class="sa35-stat"><b>'+Math.round(h.reputacion||50)+'/100</b><span>reputación</span></div><div class="sa35-stat"><b>'+nietos+'</b><span>hijos</span></div></div></div>'
+        +'<div class="sa35-card sa35-span-4"><div class="sa35-kicker">Vida personal</div><div class="sa35-sub"><b style="color:var(--marfil)">'+esc(pareja)+'</b><br>'+((h.hitos||[]).slice(-4).reverse().map(x=>esc(x.anio)+': '+esc(x.txt)).join('<br>')||'Todavía no hay hitos recientes.')+'</div></div>'
+        +'</div>',
+      opciones:[{t:'Cerrar perfil',cat:'familia',run:()=>{}}],cerrable:true});
+  }
+  function s35EscenaFamilias(){
+    const fs=s35Familias();
+    escena({rubro:'Red de casas',titulo:'Otras familias que importan',ancho:true,
+      cuerpo:'Estas casas tienen patrimonio, reputación y negocios propios. Sus decisiones evolucionan aunque tú no intervengas.',
+      html:'<div class="sa35-person-grid">'+fs.map(f=>'<button type="button" class="sa35-person" data-sa35-family="'+esc(f.id)+'"><span class="sa35-icon">'+svg('house')+'</span><span class="meta"><b>Casa '+esc(f.apellido)+'</b><small>'+esc(f.sector)+' · '+fmt(f.patrimonio)+' · '+esc(f.ciudad)+' · relación '+Math.round(f.relacion)+'/100</small></span></button>').join('')+'</div><div class="sa35-pillrow"><span class="sa35-pill"><strong>'+fs.length+'</strong> casas observadas</span><span class="sa35-pill"><strong>'+Math.round(fs.reduce((a,f)=>a+f.patrimonio,0))+'</strong> patrimonio agregado observado</span></div>',
+      opciones:[{t:'Cerrar',cat:'familia',run:()=>{}}],cerrable:true});
+    const box=document.querySelector('.escena'); if(!box)return;
+    box.querySelectorAll('[data-sa35-family]').forEach(b=>b.onclick=()=>{
+      const f=fs.find(x=>x.id===b.dataset.sa35Family); if(!f)return;
+      escena({rubro:'Casa '+esc(f.apellido),titulo:'Una casa del entorno',ancho:true,
+        cuerpo:'Una dinastía externa también tiene ciclos, alianzas y decisiones propias. Puedes fortalecer el vínculo o simplemente observar.',
+        html:'<div class="sa35-grid"><div class="sa35-card gold sa35-span-8"><div class="sa35-kicker">Casa '+esc(f.apellido)+'</div><div class="sa35-title">'+esc(f.empresa)+'</div><div class="sa35-sub">'+esc(f.pais)+' · '+esc(f.ciudad)+' · sector '+esc(f.sector)+'</div><div class="sa35-statrow"><div class="sa35-stat"><b>'+fmt(f.patrimonio)+'</b><span>patrimonio</span></div><div class="sa35-stat"><b>'+f.miembros+'</b><span>miembros</span></div><div class="sa35-stat"><b>'+f.generaciones+'</b><span>generaciones</span></div><div class="sa35-stat"><b>'+Math.round(f.reputacion)+'/100</b><span>reputación</span></div></div></div><div class="sa35-card sa35-span-4"><div class="sa35-kicker">Vínculo</div><div class="sa35-title">'+Math.round(f.relacion)+'/100</div><div class="sa35-sub">' + (f.alianzas?'Ya existe una alianza formal.':'Todavía no existe una alianza formal.') + '</div></div></div>',
+        opciones:[{t:f.alianzas?'Fortalecer la alianza':'Proponer una alianza',cat:'familia',dis:S.efectivo<12?'Costaría 12 en recepción y relacionamiento':null,run:()=>{S.efectivo-=12;f.relacion=clamp(f.relacion+15,0,100);f.alianzas++;S.p.redes=clamp(S.p.redes+4,0,100);moverPrestigio(2,'una alianza entre casas');s35Registrar('La Casa '+S.dinastia+' estrechó vínculos con la Casa '+f.apellido,'hito');log('Fortaleciste el vínculo con la <b>Casa '+esc(f.apellido)+'</b>.','bien');}}],cerrable:true});
+    });
+  }
+  function s35EscenaColeccion(){
+    s35Asegurar(); const c=S.vida.casaViva, base=Math.max(18,Math.min(850,safe(()=>patrimonio(),200)*.012));
+    const piezas=[
+      ['Retrato familiar','Pintura de salón con marco antiguo',base*1.05,3],['Reloj de sobremesa','Pieza mecánica de colección',base*.72,2],['Mapa antiguo','Cartografía histórica restaurada',base*.48,2],['Escultura','Pieza contemporánea de autor',base*.86,3],['Biblioteca de archivo','Conjunto de libros y documentos',base*.62,4],['Joyería de casa','Pieza ceremonial de larga duración',base*1.25,3]
+    ];
+    escena({rubro:'Colección',titulo:'Adquirir una pieza para la casa',ancho:true,
+      cuerpo:'Las piezas de colección no son solo un gasto: aumentan la memoria, el prestigio cultural y el valor simbólico del patrimonio familiar.',
+      opciones:piezas.map(x=>({t:x[0],cat:'legado',d:x[1]+' · '+fmt(x[2]),dis:S.efectivo<x[2]?'No te alcanza':null,run:()=>{S.efectivo-=x[2];c.arte.push({anio:S.anio,nombre:x[0],descripcion:x[1],valor:x[2],prestigio:x[3]});moverPrestigio(x[3],'una pieza de colección');s35Registrar('La casa incorporó '+x[0]+' a su colección.','hito');log('Adquiriste <b>'+esc(x[0])+'</b> para la colección familiar.','bien');}})),cerrable:true});
+  }
+  function s35Periódico(){
+    s35Asegurar(); const c=S.vida.casaViva, anios=c.anios.slice().reverse(), news=c.noticias.slice().reverse(), last=anios[0];
+    escena({rubro:'Archivo',titulo:'El periódico de la casa',ancho:true,
+      cuerpo:'Un registro anual de cómo cambió tu vida, la familia, el patrimonio y el entorno.',
+      html:'<div class="sa35-grid"><div class="sa35-card gold sa35-span-8"><div class="sa35-kicker">Último cierre</div><div class="sa35-title">'+(last?'Año '+last.anio:'Todavía no hay cierre registrado')+'</div><div class="sa35-statrow"><div class="sa35-stat"><b>'+fmt(last?.patrimonio||safe(()=>patrimonio(),0))+'</b><span>patrimonio</span></div><div class="sa35-stat"><b>'+(last?.hijos||S.familia.hijos.length)+'</b><span>hijos</span></div><div class="sa35-stat"><b>'+(last?.nietos||0)+'</b><span>nietos</span></div><div class="sa35-stat"><b>'+(last?.companias||safe(()=>companias().length,0))+'</b><span>compañías</span></div></div></div>'
+        +'<div class="sa35-card sa35-span-4"><div class="sa35-kicker">Mundo</div><div class="sa35-feed">'+(news.slice(0,4).map(n=>'<div class="sa35-news"><div class="sa35-year">'+n.anio+'</div><div><b>'+esc(n.titulo)+'</b><p>'+esc(n.txt)+'</p></div></div>').join('')||'<div class="sa35-sub">Todavía no hay noticias del mundo.</div>')+'</div></div>'
+        +'<div class="sa35-card sa35-span-12"><div class="sa35-kicker">Crónica de años</div><div class="sa35-feed">'+(anios.slice(0,12).map(a=>'<div class="sa35-news"><div class="sa35-year">'+a.anio+'</div><div><b>'+fmt(a.patrimonio)+' · '+esc(a.rol||'vida privada')+'</b><p>'+esc(a.ciudad||'')+(a.noticia?' · '+esc(a.noticia):'')+(a.evento?.length?' · '+esc(a.evento.join(' · ')):'')+'</p></div></div>').join('')||'<div class="sa35-sub">A partir del próximo cierre, cada año quedará registrado aquí.</div>')+'</div></div></div>',
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}],cerrable:true});
+  }
+  function s35Tree(){
+    s35Asegurar(); const hs=S.familia?.hijos||[];
+    let h='<div class="sa35-tree"><div style="text-align:center"><button class="sa35-node primary" type="button" data-sa35-main="1"><span class="sa35-icon">'+svg('crown')+'</span><b>'+esc(S.p.nombre+' '+S.p.apellido)+'</b><small>'+esc(S.p.edad)+' años · generación '+esc(genLabel(S.gen))+'</small></button></div><div class="sa35-line"></div>';
+    if(hs.length){h+='<div class="sa35-row">'+hs.map(x=>'<div class="sa35-branch"><button class="sa35-node" type="button" data-sa35-h="'+esc('h35-'+x.nombre)+'">'+avatarSVG(x.nombre+' '+(x.apellido||S.p.apellido),{sexo:x.sexo,edad:x.edad,tam:38})+'<b>'+esc(x.nombre)+'</b><small>'+esc(x.edad)+' años · '+esc(x.ciudad||S.p.ciudad)+'</small></button><div class="sa35-line"></div>'+(x.hijos?.length?'<div class="sa35-row">'+x.hijos.slice(0,4).map(g=>'<button class="sa35-node" type="button" data-sa35-grand="'+esc('g35-'+g.nombre)+'"><b>'+esc(g.nombre)+'</b><small>'+esc(g.edad)+' años · nieto/a</small></button>').join('')+'</div>':'')+'</div>').join('')+'</div>'}
+    else h+='<div class="sa35-sub" style="text-align:center">La siguiente generación todavía no ha comenzado.</div>';
+    h+='</div>';return h;
+  }
+  function s35Render(){
+    if(!window.S||typeof render!=='function')return;
+    s35Asegurar(); s35CrearFamilias();
+    const host=document.querySelector('#lienzoJuego'); if(!host)return;
+    host.querySelectorAll('.sa35-inject').forEach(x=>x.remove());
+    if(tab==='mesa'){
+      const wrap=document.createElement('div');wrap.className='sa35-inject sa35-shell';
+      const c=S.vida.casaViva, hs=S.familia?.hijos||[], nietos=hs.reduce((a,h)=>a+(h.hijos||[]).length,0), ofertas=safe(()=>S.vida.ofertasCargos?.length||0,0);
+      wrap.innerHTML='<div class="sa35-hero"><div class="sa35-hero-copy"><div class="sa35-kicker">Sociedad Anónima · casa viva</div><h2>La historia ya no depende solo de ti.</h2><p>Tus hijos construyen carreras, viajan, reciben ofertas y forman nuevas ramas. Mientras tanto, el mundo, las otras casas y tus compañías siguen moviéndose.</p><div class="sa35-statrow"><div class="sa35-stat"><b>'+hs.length+'</b><span>hijos</span></div><div class="sa35-stat"><b>'+nietos+'</b><span>nietos</span></div><div class="sa35-stat"><b>'+s35Familias().length+'</b><span>casas entorno</span></div><div class="sa35-stat"><b>'+c.arte.length+'</b><span>piezas</span></div></div>'+(ofertas?'<div class="sa35-banner"><span><strong>Hay '+ofertas+' oferta'+(ofertas===1?'':'s')+' de cargo pendiente'+(ofertas===1?'':'s')+'.</strong> El mercado está llamando.</span><button class="sa35-btn" id="sa35Offers">Abrir</button></div>':'')+'</div><div class="sa35-card"><div class="sa35-house"><div class="sa35-house-mark">'+svg('house')+'</div><div><div class="sa35-kicker">Casa '+esc(S.dinastia)+'</div><div class="sa35-title">'+fmt(safe(()=>patrimonio(),0))+'</div><div class="sa35-sub">Patrimonio total · '+esc(S.p?.ciudad||'')+' · '+esc(rolActualDashboard())+'</div></div></div><div class="sa35-pillrow"><span class="sa35-pill"><strong>'+Math.round(c.prestigioCasa)+'</strong> prestigio</span><span class="sa35-pill"><strong>'+new Set(hs.map(h=>h.ciudad||S.p.ciudad)).size+'</strong> ciudades familiares</span><span class="sa35-pill"><strong>'+c.noticias.slice(-1).length+'</strong> pulso del mundo</span></div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px"><button class="sa35-btn" id="sa35Paper">'+svg('book')+' Periódico</button><button class="sa35-btn" id="sa35Families">'+svg('tree')+' Otras casas</button><button class="sa35-btn" id="sa35Collection">'+svg('star')+' Colección</button></div></div></div>';
+      host.prepend(wrap);
+      const offers=wrap.querySelector('#sa35Offers'); if(offers)offers.onclick=()=>safe(()=>window.dxOpenOffersV33(),()=>{});
+      wrap.querySelector('#sa35Paper').onclick=()=>s35Periódico();wrap.querySelector('#sa35Families').onclick=()=>s35EscenaFamilias();wrap.querySelector('#sa35Collection').onclick=()=>s35EscenaColeccion();
+    }
+    if(tab==='familia'){
+      const wrap=host.querySelector('.wrap'); if(wrap){
+        const sec=document.createElement('div');sec.className='seccion sa35-inject';
+        const hs=S.familia?.hijos||[], c=S.vida.casaViva; sec.innerHTML='<h3>Casa viva<em>familia, ramas y casas del entorno</em></h3><div class="sa35-grid"><div class="sa35-card gold sa35-span-8"><div class="sa35-kicker">Árbol interactivo</div><div class="sa35-title">Casa '+esc(S.dinastia)+'</div>'+s35Tree()+'</div><div class="sa35-card sa35-span-4"><div class="sa35-kicker">Red de familias</div><div class="sa35-title">'+c.familias.length+' casas</div><div class="sa35-sub">Otras dinastías también acumulan patrimonio, reputación y generaciones.</div><div style="margin-top:10px"><button class="sa35-btn" id="sa35OpenFamilies">Explorar casas</button></div></div></div>'
+          +'<div class="sa35-card sa35-span-12" style="margin-top:10px"><div class="sa35-kicker">Miembros</div><div class="sa35-person-grid">'+(hs.map(x=>'<button type="button" class="sa35-person" data-sa35-h="'+esc('h35-'+x.nombre)+'">'+avatarSVG(x.nombre+' '+(x.apellido||S.p.apellido),{sexo:x.sexo,edad:x.edad,tam:44})+'<span class="meta"><b>'+esc(x.nombre)+' '+esc(x.apellido||S.p.apellido)+'</b><small>'+esc(x.edad)+' años · '+esc(x.ocupacion||safe(()=>carreraProfesionalDe(x.carreraProf)?.tit,'trayectoria'))+' · '+esc(x.ciudad||S.p.ciudad)+'</small></span></button>').join('')||'<div class="sa35-sub">Aún no tienes hijos registrados.</div>')+'</div></div>'
+          +'<div class="sa35-card sa35-span-12" style="margin-top:10px"><div class="sa35-kicker">Colección</div><div class="sa35-title">Memoria material de la casa</div><div class="sa35-collection">'+(c.arte.slice(-9).reverse().map(a=>'<div class="sa35-art"><span class="sa35-icon">'+svg('star')+'</span><b>'+esc(a.nombre)+'</b><small>'+esc(a.descripcion)+' · '+fmt(a.valor)+'</small></div>').join('')||'<div class="sa35-sub">Todavía no hay piezas en la colección.</div>')+'</div></div>';
+        wrap.prepend(sec);
+        sec.querySelectorAll('[data-sa35-h],[data-sa35-grand]').forEach(b=>{const key=b.dataset.sa35H||b.dataset.sa35Grand;b.onclick=()=>s35EscenaPerfil(s35PersonaPorId(key));});
+        const fm=sec.querySelector('#sa35OpenFamilies'); if(fm)fm.onclick=()=>s35EscenaFamilias();
+      }
+    }
+    if(tab==='acta'){
+      const wrap=host.querySelector('.wrap'); if(wrap){const sec=document.createElement('div');sec.className='seccion sa35-inject';const c=S.vida.casaViva;sec.innerHTML='<h3>Archivo de la Casa<em>'+c.anios.length+' años registrados</em></h3><div class="sa35-grid"><div class="sa35-card gold sa35-span-8"><div class="sa35-kicker">Crónica</div><div class="sa35-feed">'+(c.anios.slice().reverse().slice(0,16).map(a=>'<div class="sa35-news"><div class="sa35-year">'+a.anio+'</div><div><b>'+fmt(a.patrimonio)+' · '+esc(a.rol||'vida privada')+'</b><p>'+esc(a.ciudad||'')+(a.noticia?' · '+esc(a.noticia):'')+'</p></div></div>').join('')||'<div class="sa35-sub">El archivo se llenará cuando cierres años.</div>')+'</div></div><div class="sa35-card sa35-span-4"><div class="sa35-kicker">Mundo</div><div class="sa35-feed">'+(c.noticias.slice().reverse().slice(0,8).map(n=>'<div class="sa35-news"><div class="sa35-year">'+n.anio+'</div><div><b>'+esc(n.titulo)+'</b><p>'+esc(n.txt)+'</p></div></div>').join('')||'<div class="sa35-sub">Sin noticias recientes.</div>')+'</div></div></div>';wrap.prepend(sec);}}
+    if(tab==='empleo'){
+      const wrap=host.querySelector('.wrap');if(wrap){const sec=document.createElement('div');sec.className='seccion sa35-inject';const hs=S.familia?.hijos||[];sec.innerHTML='<h3>La familia también trabaja<em>trayectorias autónomas</em></h3><div class="sa35-grid">'+(hs.slice(0,8).map(h=>'<div class="sa35-card sa35-span-6"><div class="sa35-kicker">'+esc(s35NombreParentesco(h))+'</div><div class="sa35-title">'+esc(h.nombre)+'</div><div class="sa35-sub">'+esc(h.ocupacion||'trayectoria en formación')+' · '+esc(h.ciudad||S.p.ciudad)+'<br>Patrimonio propio: <b style="color:var(--marfil)">'+fmt(h.patrimonio||0)+'</b></div>'+(h.ofertas?.length?'<div class="sa35-offer"><span class="sig">'+svg('brief')+'</span><div><b>'+esc(h.ofertas[h.ofertas.length-1].titulo)+'</b><div class="sa35-sub">'+esc(h.ofertas[h.ofertas.length-1].empresa)+' · '+esc(h.ofertas[h.ofertas.length-1].ciudad)+'</div></div></div>':'')+'</div>').join('')||'<div class="sa35-sub">La siguiente generación todavía está formándose.</div>')+'</div></div>';wrap.prepend(sec);}}
+  }
+  // Acción anual: la capa autónoma corre después del motor principal.
+  const oldPaso=window.pasarAnio;
+  if(typeof oldPaso==='function'&&!window.__SA35_PASO){
+    window.pasarAnio=function(){let before=safe(()=>window.S?.anio,null); const r=oldPaso.apply(this,arguments); try{if(window.S&&!S.muerto){s35CorrerAnual();}}catch(e){} try{render();}catch(e){} return r;}; window.__SA35_PASO=true;
+  }
+  const oldInit=window.iniciar;
+  if(typeof oldInit==='function'&&!window.__SA35_INIT){
+    window.iniciar=function(){const r=oldInit.apply(this,arguments);safe(()=>{s35Asegurar();s35CrearFamilias();},null);safe(()=>render(),null);return r;}; window.__SA35_INIT=true;
+  }
+  const oldRender=window.render;
+  if(typeof oldRender==='function'&&!window.__SA35_RENDER){
+    window.render=function(){const r=oldRender.apply(this,arguments);try{s35Render();}catch(e){}return r;}; window.__SA35_RENDER=true;
+  }
+  // Migración inmediata para partidas ya existentes.
+  safe(()=>{s35Asegurar();s35CrearFamilias();},null);
+  window.__SA35={version:V,asegurar:s35Asegurar,render:s35Render,familias:s35Familias,periodico:s35Periódico};
+})();
+</script>
+
 </body>
 </html>

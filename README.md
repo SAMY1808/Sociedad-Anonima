@@ -1,11 +1,14 @@
-# Sociedad Anónima
+# Sociedad Anónima — GitHub Pages v35
 
-Versión 34 · paquete listo para GitHub Pages / PWA.
+Paquete listo para GitHub Pages.
 
-Archivos:
-- `index.html`
-- `manifest.webmanifest`
-- `sw.js`
-- `icon-180.png`
+## Archivos
+- `index.html` — juego v35
+- `manifest.webmanifest` — configuración PWA
+- `sw.js` — service worker v35 con actualización network-first para HTML
+- `icon-180.png` — icono
 
-Para publicar en GitHub Pages: sube estos archivos a la raíz del repositorio y usa la rama `main` en `/ (root)`.
+## Publicar
+Sube/reemplaza los cuatro archivos en la raíz del repositorio GitHub. Mantén Pages en `main` + `/ (root)`.
+
+Para actualizar: reemplaza `index.html` y `sw.js`, haz commit y recarga la página.
