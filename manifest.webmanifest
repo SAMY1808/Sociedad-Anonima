@@ -1,9 +1,8 @@
 {
-  "name": "Sociedad Anónima — crónica de una dinastía",
+  "name": "Sociedad Anónima",
   "short_name": "Sociedad Anónima",
   "lang": "es-CO",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#14100C",
   "theme_color": "#14100C",
