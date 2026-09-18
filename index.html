@@ -8755,10 +8755,124 @@ function correrFundacion(res,m){
       cerrable:true});
   }
 
+  /* =====================================================================
+     v33 · EL MUNDO TE BUSCA — sistema de ofertas de cargos y oportunidades
+     Las instituciones, empresas y organizaciones pueden acercarse al personaje.
+     Las ofertas se guardan, caducan y pueden aceptarse, rechazarse o negociarse.
+     ===================================================================== */
+  function dxOfertaAsegurar(){
+    dxAsegurar();
+    if(!Array.isArray(S.vida.ofertasCargos)) S.vida.ofertasCargos=[];
+    S.vida.ofertasCargos=S.vida.ofertasCargos.filter(o=>o&&o.estado==='pendiente'&&o.caduca>=S.anio).slice(-8);
+  }
+  function dxOfertaTitulo(o){ return o&&o.titulo?o.titulo:'Oferta profesional'; }
+  function dxOfertaElegibleBase(){ return S&&S.p&&S.p.edad>=22&&!S.penal?.prisionRestante&&!S.penal?.penaMuerte; }
+  function dxCrearOferta(o){
+    dxOfertaAsegurar();
+    if(!o||!o.titulo) return null;
+    const oferta=Object.assign({id:'of-'+Date.now()+'-'+ri(100,999),anio:S.anio,caduca:S.anio+2,estado:'pendiente',empresa:'',ciudad:S.p.ciudad,salario:0,prestigio:0,descripcion:'',tipo:'empleo'},o);
+    S.vida.ofertasCargos.push(oferta); S.vida.ofertasCargos=S.vida.ofertasCargos.slice(-8);
+    S.vida.ofertas.push({anio:S.anio,tipo:'cargo',titulo:oferta.titulo,empresa:oferta.empresa,ciudad:oferta.ciudad});
+    return oferta;
+  }
+  function dxOfertaGenerar(){
+    if(!dxOfertaElegibleBase()) return;
+    dxOfertaAsegurar();
+    if(S.vida.ofertasCargos.some(o=>o.estado==='pendiente')) return;
+    if(chance(.34)) return;
+    const p=S.p,c=S.carrera||{}, ciudad=p.ciudad||'Medellín';
+    const cr=c.profesion?carreraProfesionalDe(c.profesion):null;
+    const nivel=c.nivelProf||0;
+    const ofertas=[];
+    // Profesión especializada
+    if(cr){
+      const nv=cr.niveles[clamp(nivel,0,cr.niveles.length-1)];
+      const empresas={medicina:['Clínica Metropolitana','Red Salud Nacional','Hospital Universitario'],derecho:['Firma Andina','Grupo Jurídico Internacional','Consultores Asociados'],ingenieria:['Infraestructura Global','Proyectos Andinos','Ingeniería Continental'],geologia:['Minerales del Sur','Recursos Andinos','GeoExplora'],economia:['Banco Andino','Centro de Estudios Económicos','Grupo Financiero Nacional'],relaciones_internacionales:['Comercio Global','Fundación Internacional','Consultores Diplomáticos'],finanzas:['Banco Continental','Gestora Capital','Inversiones del Pacífico'],administracion:['Grupo Empresarial Andino','Compañía Metropolitana','Holding Nacional'],arquitectura:['Arquitectura Urbana','Constructora Central','Estudio Internacional']};
+      const emp=pick(empresas[cr.id]||['Grupo Empresarial Nacional']);
+      const next=cr.niveles[clamp(nivel+1,0,cr.niveles.length-1)];
+      if(next) ofertas.push({tipo:'empleo',titulo:next.n,empresa:emp,ciudad:pick([ciudad,'Bogotá','Medellín','Cali','Barranquilla']),salario:next.s*1.08,prestigio:5+nivel*2,descripcion:'Tu experiencia profesional llamó la atención. Te ofrecen un cargo con mayor responsabilidad y una trayectoria más visible.',req:'Formación en '+cr.n});
+    }
+    // Empleo corporativo/academia/consultoría/Estado
+    if(!c.politica?.activo&&!c.diplomacia?.activo&&!c.judicatura?.activo){
+      if(c.ruta==='corporativo'||p.educacion>=3){
+        ofertas.push({tipo:'empleo',titulo:pick(['Director de estrategia','Gerente de expansión','Director financiero','Vicepresidente de operaciones']),empresa:pick(['Grupo Continental','Holding Andino','Corporación Global','Inversiones del Centro']),ciudad:pick([ciudad,'Bogotá','Medellín','Nueva York','Miami','Panamá']),salario:Math.max(110,(c.nivel>=0&&RUTAS.corporativo?.niveles[c.nivel]?.s||90)*1.45),prestigio:9,descripcion:'Una organización externa quiere incorporarte a un cargo directivo. La oferta reconoce tu experiencia y tus contactos.',req:'Experiencia y reputación profesional'});
+      }
+      if(p.educacion>=4&&p.edad>=28){
+        ofertas.push({tipo:'academico',titulo:pick(['Profesor asociado','Director de programa','Decano','Director de investigación']),empresa:pick(['Universidad Nacional','Universidad de Antioquia','Universidad del Valle','Universidad Internacional']),ciudad:pick([ciudad,'Bogotá','Medellín','Madrid','Londres']),salario:pick([95,130,180,230]),prestigio:10,descripcion:'Una universidad se ha interesado por tu trayectoria y quiere ofrecerte una posición académica con mayor responsabilidad.',req:'Formación universitaria avanzada'});
+      }
+      if(p.educacion>=4&&p.edad>=27&&p.reputacion>=45){
+        ofertas.push({tipo:'publico',titulo:pick(['Asesor principal','Director de programa público','Director técnico']),empresa:pick(['Ministerio','Departamento Nacional','Agencia Nacional','Gobernación','Alcaldía']),ciudad:pick([ciudad,'Bogotá','Medellín']),salario:pick([85,120,165]),prestigio:11,descripcion:'Una entidad pública ha preguntado por tu trayectoria para un cargo técnico o directivo.',req:'Formación y trayectoria profesional'});
+      }
+    }
+    // Servicio exterior: oferta de incorporación o destino, separada de la candidatura política.
+    if(!c.diplomacia?.activo&&p.edad>=23&&(perfilDiplomaticoValido()||p.educacion>=4)){
+      ofertas.push({tipo:'diplomacia',titulo:'Ingreso al servicio exterior',empresa:'Cancillería',ciudad:pick(['Bogotá','Londres','Nueva York','Madrid','París','Tokio']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[0],prestigio:12,descripcion:'Tu perfil ha sido considerado para incorporarte al servicio exterior. El primer destino puede ser en la sede central o en una misión.',req:'Formación universitaria y perfil compatible'});
+    } else if(c.diplomacia?.activo&&c.diplomacia.nivel<TRAYECTORIAS_PUBLICAS.diplomacia.puertas.length-1&&c.diplomacia.anios>=1){
+      const nl=c.diplomacia.nivel+1;
+      ofertas.push({tipo:'diplomacia',titulo:TRAYECTORIAS_PUBLICAS.diplomacia.puertas[nl],empresa:'Cancillería',ciudad:pick(['Bogotá','Washington','Nueva York','Londres','París','Tokio','Singapur','Montevideo']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[nl],prestigio:10+nl*2,descripcion:'La Cancillería te ha propuesto asumir una categoría superior y un nuevo destino.',req:'Experiencia en el servicio exterior'});
+    }
+    // Judicatura
+    if(!c.judicatura?.activo&&p.edad>=25&&perfilJudicialValido()){
+      ofertas.push({tipo:'judicial',titulo:'Ingreso a la carrera judicial',empresa:'Rama Judicial',ciudad:pick(['Bogotá','Medellín','Cali','Manizales']),salario:TRAYECTORIAS_PUBLICAS.judicatura.salarios[0],prestigio:10,descripcion:'Tu formación jurídica ha llamado la atención de la rama judicial para iniciar una trayectoria formal.',req:'Derecho y experiencia requerida'});
+    } else if(c.judicatura?.activo&&c.judicatura.nivel<TRAYECTORIAS_PUBLICAS.judicatura.puertas.length-1&&c.judicatura.anios>=1){
+      const nl=c.judicatura.nivel+1;
+      ofertas.push({tipo:'judicial',titulo:TRAYECTORIAS_PUBLICAS.judicatura.puertas[nl],empresa:'Rama Judicial',ciudad:pick(['Bogotá','Medellín','Cali','Barranquilla']),salario:TRAYECTORIAS_PUBLICAS.judicatura.salarios[nl],prestigio:8+nl*2,descripcion:'Has sido considerado para avanzar a una posición judicial de mayor responsabilidad.',req:'Experiencia y formación judicial'});
+    }
+    // Junta directiva: compatible con conservar empleo o empresa.
+    if(p.edad>=30&&p.reputacion>=50&&p.redes>=35){
+      ofertas.push({tipo:'junta',titulo:'Miembro de junta directiva',empresa:pick(['Banco Regional','Compañía Industrial','Grupo de Infraestructura','Empresa de Tecnología']),ciudad:pick([ciudad,'Bogotá','Nueva York','Panamá','Miami']),salario:pick([18,28,42,65]),prestigio:12,descripcion:'Una compañía quiere incorporarte a su junta por tu experiencia, contactos y reputación.',req:'Trayectoria directiva o empresarial'});
+    }
+    if(!ofertas.length) return;
+    // Se evita generar una oferta idéntica de forma inmediata.
+    const oferta=pick(ofertas);
+    if(S.vida.ofertasCargos.some(x=>x.titulo===oferta.titulo&&x.empresa===oferta.empresa)) return;
+    dxCrearOferta(oferta);
+    log('<b>📩 Has recibido una oferta:</b> '+esc(oferta.titulo)+' en '+esc(oferta.empresa)+'.','hito');
+    dxRegistrarMomento('Recibió una oferta: '+oferta.titulo+' en '+oferta.empresa,'hito');
+  }
+  function dxAplicarOferta(o){
+    if(!o) return;
+    const c=S.carrera,p=S.p;
+    if(o.tipo==='junta'){
+      S.sillas=S.sillas||[]; S.sillas.push({nombre:o.empresa,honorarios:o.salario,desde:S.anio});
+      p.reputacion=clamp(p.reputacion+o.prestigio*.25,0,100); p.redes=clamp(p.redes+4,0,100);
+      return 'Aceptaste el cargo de '+o.titulo+' en '+o.empresa+'. Conservas tu actividad principal y ahora tienes una responsabilidad adicional.';
+    }
+    if(o.tipo==='diplomacia'){
+      c.diplomacia=c.diplomacia||{activo:false,nivel:0,anios:0,cargo:'',pais:'Colombia',sede:'Bogotá'};
+      if(c.diplomacia.activo){c.diplomacia.nivel=Math.min(TRAYECTORIAS_PUBLICAS.diplomacia.puertas.length-1,c.diplomacia.nivel+1);c.diplomacia.anios=0;c.diplomacia.cargo=TRAYECTORIAS_PUBLICAS.diplomacia.puertas[c.diplomacia.nivel];}
+      else {c.diplomacia.activo=true;c.diplomacia.nivel=0;c.diplomacia.anios=0;c.diplomacia.cargo=TRAYECTORIAS_PUBLICAS.diplomacia.puertas[0];}
+      c.diplomacia.pais='Colombia';c.diplomacia.sede=o.ciudad;p.redes=clamp(p.redes+6,0,100);p.reputacion=clamp(p.reputacion+o.prestigio*.3,0,100);
+      return 'Aceptaste la oferta de '+o.empresa+' como '+o.titulo+'. Tu destino será '+o.ciudad+'.';
+    }
+    if(o.tipo==='judicial'){
+      c.judicatura=c.judicatura||{activo:false,nivel:0,anios:0,cargo:''};
+      if(c.judicatura.activo)c.judicatura.nivel=Math.min(TRAYECTORIAS_PUBLICAS.judicatura.puertas.length-1,c.judicatura.nivel+1);else{c.judicatura.activo=true;c.judicatura.nivel=0;}
+      c.judicatura.anios=0;c.judicatura.cargo=TRAYECTORIAS_PUBLICAS.judicatura.puertas[c.judicatura.nivel];p.reputacion=clamp(p.reputacion+o.prestigio*.25,0,100);
+      return 'Aceptaste la oferta de la '+o.empresa+' como '+o.titulo+'.';
+    }
+    // Ofertas de empleo: sustituyen la trayectoria laboral ordinaria, pero no la empresa propia.
+    if(o.tipo==='academico'&&RUTAS.academico){ c.ruta='academico'; c.nivel=clamp(2,0,RUTAS.academico.niveles.length-1); }
+    else if(o.tipo==='publico'&&RUTAS.publico){ c.ruta='publico'; c.nivel=clamp(2,0,RUTAS.publico.niveles.length-1); }
+    else if(o.tipo==='empleo'&&crOf(c)){ c.ruta='profesional'; c.profesion=crOf(c).id; c.nivelProf=Math.min(crOf(c).niveles.length-1,Math.max(c.nivelProf||0,1)); }
+    else if(o.tipo==='empleo'){ c.ruta='corporativo'; c.nivel=clamp(3,0,(RUTAS.corporativo?.niveles.length||5)-2); }
+    c.empleador=o.empresa;c.anios=0;c.desempeno=clamp((c.desempeno||55)+8,0,100);c.salarioExtra=clamp((c.salarioExtra||0)+.10,0,.45);
+    p.reputacion=clamp(p.reputacion+o.prestigio*.3,0,100);p.redes=clamp(p.redes+5,0,100);
+    return 'Aceptaste el cargo de '+o.titulo+' en '+o.empresa+'. La nueva posición mejora tu trayectoria, pero tendrás que demostrar resultados.';
+  }
+  function crOf(c){ return c&&c.profesion?carreraProfesionalDe(c.profesion):null; }
+  function dxEscenaOfertas(){
+    dxOfertaAsegurar();
+    const os=S.vida.ofertasCargos;
+    if(!os.length){escena({rubro:'Oportunidades',titulo:'Bandeja de ofertas',cuerpo:'No tienes ofertas de cargo pendientes. Pueden llegar de empresas, universidades, entidades públicas, organismos internacionales, juntas directivas y el servicio exterior.',opciones:[{t:'Esperar nuevas oportunidades',cat:'empleo',run:()=>{cerrarModal();render();}}],cerrable:true});return;}
+    escena({rubro:'Oportunidades',titulo:'Te están buscando',ancho:true,cuerpo:'Estas instituciones se acercaron a ti. Una oferta puede aceptarse, rechazarse o negociarse. Las ofertas caducan después de un tiempo.',opciones:os.map(o=>({t:'📩 '+o.titulo+' · '+o.empresa,cat:'empleo',d:o.ciudad+' · '+fmt(o.salario)+' al año · '+o.descripcion,run:()=>{escena({rubro:'Oferta de cargo',titulo:o.titulo,cuerpo:'<b>'+esc(o.empresa)+'</b><br>'+esc(o.ciudad)+' · remuneración propuesta: <b>'+fmt(o.salario)+'</b> al año.<br><br>'+esc(o.descripcion)+'<br><br><span class="muted">Requisito de referencia: '+esc(o.req||'Trayectoria profesional')+'</span>',opciones:[{t:'Aceptar el cargo',cat:'empleo',run:()=>{const msg=dxAplicarOferta(o);o.estado='aceptada';log(msg,'hito');hito('Aceptó: '+o.titulo);S.mov--;cerrarModal();render();}},{t:'Negociar condiciones',cat:'empleo',run:()=>{const prob=clamp(.35+S.p.atr.carisma/25+S.p.reputacion/260,.20,.88);if(chance(prob)){o.salario*=1.12;o.prestigio+=2;log('La negociación funcionó: '+esc(o.empresa)+' mejoró la propuesta.','bien');}else{log('La negociación no prosperó. La propuesta original sigue disponible.','mal');}S.mov--;render();}},{t:'Rechazar',cat:'legado',run:()=>{o.estado='rechazada';log('Rechazaste la oferta de '+esc(o.titulo)+' en '+esc(o.empresa)+'.','');S.mov--;cerrarModal();render();}}],cerrable:true});}})),cerrable:true});
+  }
+
   /* Acciones adicionales: solo aparecen cuando tienen sentido. */
   const baseLista=listaAcciones;
   listaAcciones=function(){
-    const A=baseLista(); dxAsegurar();
+    const A=baseLista(); dxAsegurar(); dxOfertaAsegurar();
+    if(S.vida.ofertasCargos.length&&S.mov>0) A.unshift({t:'Revisar ofertas de cargos ('+S.vida.ofertasCargos.length+')',cat:'empleo',d:'Empresas, universidades, entidades públicas y otras instituciones pueden buscarte directamente.',mov:1,modal:true,run:()=>dxEscenaOfertas()});
     const hijos=S.familia.hijos||[];
     if(hijos.length&&S.mov>0){
       const h=pick(hijos.slice().sort((a,b)=>(a.vinculo||60)-(b.vinculo||60)).slice(0,4));
@@ -8818,6 +8932,7 @@ function correrFundacion(res,m){
   pasarAnio=function(){
     dxEvolucionFamiliaAntes(); dxCorrerInstitucionesYVida();
     basePasar();
+    try{dxOfertaGenerar();}catch(e){}
   };
 
   const baseHeredar=heredar;
@@ -8883,6 +8998,15 @@ function correrFundacion(res,m){
         else if(c.judicatura&&c.judicatura.activo)info='Judicatura · '+(c.judicatura.cargo||'ruta judicial');
         sec.innerHTML='<h3>Tu trayectoria<em>lo que puede pasar después</em></h3><div class="dx30-opportunity"><div class="dx30-title">'+esc(puesto)+'</div><div class="dx30-text">'+esc(info||'Puedes crecer, cambiar de trabajo, recibir una oferta inesperada o renunciar para emprender.')+'</div></div>';
         wrap.insertBefore(sec,wrap.querySelector('.seccion'));
+        dxOfertaAsegurar();
+        const of=document.createElement('div'); of.className='seccion dx30-life';
+        if(S.vida.ofertasCargos.length){
+          const o=S.vida.ofertasCargos[0];
+          of.innerHTML='<h3>Te están buscando <em>'+S.vida.ofertasCargos.length+' oferta'+(S.vida.ofertasCargos.length===1?'':'s')+' pendiente'+(S.vida.ofertasCargos.length===1?'':'s')+'</em></h3><div class="dx30-opportunity"><div class="dx30-label">📩 Oferta recibida</div><div class="dx30-title">'+esc(o.titulo)+'</div><div class="dx30-text"><b>'+esc(o.empresa)+'</b> · '+esc(o.ciudad)+' · '+fmt(o.salario)+' al año<br>'+esc(o.descripcion)+'</div><button class="btn btn-primary" type="button" onclick="dxOpenOffersV33()">Ver ofertas</button></div>';
+        }else{
+          of.innerHTML='<h3>Radar de oportunidades <em>el mundo puede buscarte</em></h3><div class="dx30-opportunity"><div class="dx30-text">Empresas, universidades, entidades públicas, juntas y el servicio exterior pueden enviarte ofertas cuando tu trayectoria las haga plausibles.</div></div>';
+        }
+        wrap.insertBefore(of,wrap.querySelector('.seccion'));
       }
     }
     if(tab==='compania'&&S.emp){
@@ -8907,7 +9031,8 @@ function correrFundacion(res,m){
 
   // Carga también partidas antiguas y normaliza la nueva capa.
   const baseCargar=window.__dx30_baseCargar;
-  window.__DX30={asegurar:dxAsegurar,nietos:dxNietos};
+  window.dxOpenOffersV33=()=>dxEscenaOfertas();
+  window.__DX30={asegurar:dxAsegurar,nietos:dxNietos,ofertas:dxEscenaOfertas};
 })();
 
 </script>
