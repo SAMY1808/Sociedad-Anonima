@@ -438,7 +438,7 @@ html{scroll-behavior:smooth}
 
 
 /* ======================================================================
-   v35 · CASA VIVA — rediseño de interfaz y sistemas de dinastía
+   v36 · CASA VIVA — FERTILIDAD Y VIDA SENTIMENTAL — rediseño de interfaz y sistemas de dinastía
    ====================================================================== */
 .sa35-shell{max-width:1180px;margin:0 auto}
 .sa35-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
@@ -3365,6 +3365,146 @@ function centralDe(e){
   return c? CENTRALES.find(x=>x.id===c) : null;
 }
 
+
+/* ============================================================================
+   FERTILIDAD, CONCEPCIONES NATURALES Y VIDA SENTIMENTAL
+   - La descendencia biológica ya no se activa con un botón "Tener un hijo".
+   - La probabilidad se resuelve de forma anual según edad, fertilidad y vínculo.
+   - Los amantes son adultos, opcionales y pueden generar hijos naturales.
+   ============================================================================ */
+function fertilidadBase(p){
+  if(!p) return 0;
+  const a=Number(p.edad)||0, sexo=p.sexo==='m'?'m':'f';
+  // Indicador lúdico, no clínico: representa capacidad reproductiva relativa.
+  if(sexo==='f'){
+    if(a<20) return 92;
+    if(a<30) return 100;
+    if(a<35) return 88-(a-30)*3;
+    if(a<40) return 73-(a-35)*5;
+    if(a<45) return 48-(a-40)*7;
+    if(a<50) return 13-(a-45)*2.2;
+    return 2;
+  }
+  if(a<25) return 96;
+  if(a<35) return 94-(a-25)*1.2;
+  if(a<45) return 82-(a-35)*2;
+  if(a<55) return 62-(a-45)*3;
+  if(a<65) return 32-(a-55)*2.8;
+  return 4;
+}
+function fertilidadActual(p){
+  if(!p) return 0;
+  const base=fertilidadBase(p);
+  const salud=Number(p.salud)||60;
+  const animo=Number(p.felicidad)||60;
+  return clamp(base + (salud-60)*.10 + (animo-60)*.025,0,100);
+}
+function fertilidadPareja(){
+  const q=S.familia&&S.familia.pareja;
+  if(!q) return 0;
+  if(!isFinite(q.fertilidad)) q.fertilidad=clamp(fertilidadBase(q),0,100);
+  return q.fertilidad;
+}
+function sincronizarFertilidad(){
+  if(!S||!S.p) return;
+  S.p.fertilidad=Number.isFinite(S.p.fertilidad)?clamp(S.p.fertilidad,0,100):fertilidadActual(S.p);
+  const q=S.familia&&S.familia.pareja;
+  if(q){ q.fertilidad=Number.isFinite(q.fertilidad)?clamp(q.fertilidad,0,100):fertilidadActual(q); }
+  (S.familia&&S.familia.amantes||[]).forEach(a=>{
+    a.fertilidad=Number.isFinite(a.fertilidad)?clamp(a.fertilidad,0,100):fertilidadActual(a);
+  });
+}
+function probConcepcion(f1,f2,calidad){
+  const media=Math.sqrt(Math.max(0,f1)*Math.max(0,f2))/100;
+  return clamp(.012 + media*.145*(qualityFactor(calidad)),.003,.16);
+}
+function qualityFactor(v){ return clamp(Number(v)||1,.55,1.25); }
+function nuevoAmante(){
+  const sx=S.p.sexo==='h'?'m':'h';
+  const edad=clamp(S.p.edad+ri(-7,7),21,Math.max(22,S.p.edad+12));
+  return {id:'a'+Date.now().toString(36)+ri(100,999),nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),sexo:sx,edad,
+    rol:pick(['empresaria','abogado','médica','consultor','profesora','directivo','arquitecta','empresario','periodista']),
+    fertilidad:fertilidadActual({sexo:sx,edad,salud:ri(65,95),felicidad:ri(55,90)}),afecto:ri(35,72),desde:S.anio,
+    discrecion:ri(35,78),activo:true};
+}
+function escenaAmantes(){
+  S.familia.amantes=S.familia.amantes||[];
+  const activos=S.familia.amantes.filter(a=>a.activo!==false);
+  const q=S.familia.pareja;
+  const cuerpo=(q?'Tu vida sentimental tiene una relación formal y también puede tener relaciones fuera de ella. ':'')+
+    'Una relación paralela puede elevar el ánimo, pero introduce riesgo de conflicto, reputación y descendencia natural fuera de la pareja.';
+  const opciones=[];
+  if(S.p.edad>=21) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',d:'Una relación adulta, privada y sin promesa de matrimonio. Puede mejorar tu ánimo.',run:()=>{
+    const a=nuevoAmante(); S.familia.amantes.push(a); S.p.felicidad=clamp(S.p.felicidad+ri(7,13),0,100); S.p.escandalos=clamp((S.p.escandalos||0)+(q?0.4:.1),0,20); S.mov--; log('Conociste discretamente a <b>'+esc(a.nombre)+'</b>. Tu ánimo mejoró, pero ahora hay algo más que cuidar.','bien'); cerrarModal(); render();
+  }});
+  activos.slice(0,4).forEach(a=>opciones.push({t:'Ver a '+a.nombre.split(' ')[0],cat:'familia',d:'Sube el ánimo, pero una relación paralela tiene riesgo.',run:()=>{
+    const riesgo=q?.casados?.12:.05;
+    a.afecto=clamp(a.afecto+ri(4,10),0,100); S.p.felicidad=clamp(S.p.felicidad+ri(5,11),0,100);
+    if(q&&chance(riesgo)){ q.paciencia=clamp((q.paciencia||60)-ri(4,11),0,100); log('Una indiscreción llegó a oídos de '+esc(q.nombre)+'. La relación formal quedó más tensa.','mal'); }
+    S.mov--; cerrarModal(); render();
+  }}));
+  if(activos.length) opciones.push({t:'Terminar una relación',cat:'familia',d:'Cerrar una relación paralela antes de que crezca el problema.',run:()=>{const a=activos[0];a.activo=false;a.fin=S.anio;S.p.felicidad=clamp(S.p.felicidad-2,0,100);S.mov--;log('Terminaste tu relación con <b>'+esc(a.nombre)+'</b>.','bien');cerrarModal();render();}});
+  opciones.push({t:'Dejarlo así',cat:'familia',run:()=>{S.mov--;}});
+  escena({rubro:'Vida sentimental',titulo:'Relaciones y vida privada',ancho:true,cuerpo,
+    html:'<div class="apunte"><b>Fertilidad actual:</b> '+Math.round(fertilidadActual(S.p))+'/100 · <b>Relaciones paralelas activas:</b> '+activos.length+(q?' · <b>Pareja:</b> '+esc(q.nombre):'')+'</div>',opciones,cerrable:true});
+}
+function crearHijoBiologico(origen,otro,contexto){
+  const sx=chance(.5)?'h':'m';
+  const cerca=(S.familia.pareja&&S.familia.pareja.esPrima)?1:0;
+  const lastre=cerca?(1+Math.min(3,(S.endogamia||1)-1)):0;
+  const h=nuevoHijo(nombreLocal(S.p.ciudad,sx),sx,0,{intelecto:clamp(ri(3,7)+Math.round(S.p.atr.intelecto/4)-lastre,1,10),carisma:clamp(ri(3,7)+Math.round(S.p.atr.carisma/4),1,10),disciplina:clamp(ri(3,7),1,10),suerte:clamp(ri(3,8)-lastre,1,10)});
+  h.origen='biologico'; h.nacido=S.anio; h.madre=(S.p.sexo==='m'?(otro?.nombre||''):S.p.nombre); h.padre=(S.p.sexo==='h'?S.p.nombre:(otro?.nombre||''));
+  h.progenitorExterno=otro&&otro.nombre?otro.nombre:null;
+  h.fertilizacionContexto=contexto||'pareja'; h.salud=clamp(100-lastre*9-rnd(0,8),45,100); h.vinculo=60; asignarTemperamento(h);
+  S.familia.hijos.push(h);
+  S.p.felicidad=clamp(S.p.felicidad+8,0,100);
+  anunciarLlegadaHijo(h,'nacimiento');
+  if(contexto==='amante'){
+    S.p.escandalos=clamp((S.p.escandalos||0)+ri(1,3),0,20);
+    if(S.familia.pareja) S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)-ri(10,22),0,100);
+  }
+  setTimeout(()=>escenaBautizo(h,contexto==='amante'?'Nacimiento fuera del matrimonio':'Nacimiento'),0);
+  return h;
+}
+function resolverConcepcionesNaturales(res){
+  sincronizarFertilidad();
+  const q=S.familia&&S.familia.pareja;
+  const edad=S.p.edad;
+  // La fecundidad es un evento anual, no una acción del jugador. Límite familiar amplio para permitir dinastías.
+  if(q && q.edad>=18 && q.edad<=70 && edad>=18 && edad<=70 && S.familia.hijos.length<12){
+    const f1=fertilidadActual(S.p), f2=fertilidadActual(q);
+    const intimidad=clamp(.72+(q.paciencia||60)/500+(S.p.felicidad||60)/700,.55,1.05);
+    const pr=probConcepcion(f1,f2,intimidad);
+    if(chance(pr)){
+      crearHijoBiologico(q,q,'pareja');
+      res.push(['Nacimiento natural',0,'pos']);
+      log('La probabilidad anual de concepción se materializó: <b>nació un hijo natural</b> de la pareja.','hito');
+    }
+  }
+  const amantes=(S.familia&&S.familia.amantes||[]).filter(a=>a.activo!==false&&a.edad>=18);
+  amantes.forEach(a=>{
+    if(S.familia.hijos.length>=12) return;
+    const f1=fertilidadActual(S.p), f2=Number(a.fertilidad)||fertilidadActual(a);
+    const discre=clamp((a.discrecion||50)/100,.35,.95);
+    const pr=probConcepcion(f1,f2,.65+discre*.35)*.72;
+    if(chance(pr)){
+      crearHijoBiologico(a,a,'amante');
+      res.push(['Nacimiento natural fuera de la pareja',0,'neg']);
+      log('Una relación paralela tuvo una consecuencia que no se puede deshacer: <b>nació un hijo natural</b> fuera de la pareja.','mal');
+    }
+  });
+  // El indicador acompaña la edad y se actualiza después de cada año.
+  S.p.fertilidad=clamp(fertilidadActual(S.p),0,100);
+  if(q) q.fertilidad=clamp(fertilidadActual(q),0,100);
+  amantes.forEach(a=>a.fertilidad=clamp(fertilidadActual(a),0,100));
+}
+function asegurarVidaFamiliar(){
+  if(!S||!S.familia) return;
+  S.familia.amantes=Array.isArray(S.familia.amantes)?S.familia.amantes:[];
+  S.familia.amantes.forEach(a=>{if(a.activo===undefined)a.activo=true;if(!a.fertilidad)a.fertilidad=fertilidadActual(a);});
+  sincronizarFertilidad();
+}
+
 /* ==========================================================================
    ADOPCIÓN Y TRATO DIRECTO CON CADA QUIEN
    ========================================================================== */
@@ -4655,7 +4795,7 @@ function iniciar(cfg,legado){
     portafolio:legadoValido&&Array.isArray(legado.portafolio)?legado.portafolio:[],
     bienes:(legadoValido&&Array.isArray(legado.bienes))?legado.bienes:[],
     hogar:null,
-    familia:{pareja:null,hijos:legado?[]:[]},
+    familia:{pareja:null,hijos:legado?[]:[],amantes:[]},
     macro:{colcap:_ep.macro.colcap,usd:_ep.macro.usd,inflacion:_ep.macro.inflacion,tasa:_ep.macro.tasa,ciclo:_ep.macro.ciclo},
     legado:legadoValido&&legado.legado&&typeof legado.legado==='object'?legado.legado:{hitos:[],pico:0,ancestros:[]},
     casa:legadoValido&&legado.casa?legado.casa:{prestigio:({popular:4,media:12,comercio:24,elite:52})[cfg.origen]||10},
@@ -4698,6 +4838,8 @@ function iniciar(cfg,legado){
   if(legadoValido&&legado.emp&&!legado.grupo){ S.emp=legado.emp; S.junta=legado.junta; Object.assign(S.carrera,{ruta:null,nivel:-1,empleador:null,anios:0,desempeno:55,estudio:null,profesion:null,nivelProf:0,experienciaProf:0}); }
   normalizarCarrera();
   if(legadoValido&&Array.isArray(legado.hijos)) S.familia.hijos=legado.hijos;
+  if(legadoValido&&Array.isArray(legado.amantes)) S.familia.amantes=legado.amantes;
+  asegurarVidaFamiliar();
   migrarFamilia();
   normalizarFamiliaGeneros();
   asegurarInstitucionesCasa();
@@ -5585,24 +5727,8 @@ function listaAcciones(){
       } else { S.p.felicidad-=2; log('Año de citas malas y agendas imposibles.'); }}});
   if(S.familia.pareja&&!S.familia.pareja.casados) A.push({t:'Casarte', d:'Sube felicidad y estabilidad. Ojo con el régimen de bienes.', mov:1, modal:true,
     run:()=>modalMatrimonio()});
-  if(S.familia.pareja&&S.p.edad<58) A.push({t:'Tener un hijo', d:'La única forma de que esto siga cuando te mueras.', mov:1,
-    run:()=>{ if(chance(clamp(.8-(S.p.edad-30)*.018,.18,.9))){
-        const sx=chance(.5)?'h':'m';
-        const cerca=(S.familia.pareja&&S.familia.pareja.esPrima)?1:0;
-        const lastre=cerca?(1+Math.min(3,(S.endogamia||1)-1)):0;   // casarse en casa, generación tras generación, cobra
-        const h={nombre:nombreLocal(S.p.ciudad,sx),sexo:sx,edad:0,
-          atr:{intelecto:clamp(ri(3,7)+Math.round(S.p.atr.intelecto/4)-lastre,1,10),
-               carisma:clamp(ri(3,7)+Math.round(S.p.atr.carisma/4),1,10),
-               disciplina:clamp(ri(3,7),1,10),suerte:clamp(ri(3,8)-lastre,1,10)},
-          educacion:0,formacion:0,acciones:0,efectivo:0,vinculo:60,
-          salud:clamp(100-lastre*9,50,100),fid:'h'+Date.now().toString(36)+ri(100,999),orden:S.familia.hijos.length+1,origen:'biologico',nacido:S.anio,etapa:'infancia'};
-        if(cerca&&lastre>=2) log('El médico anotó que en esta familia ya son varias generaciones casándose entre primos.','mal');
-        asignarTemperamento(h);
-        S.familia.hijos.push(h);
-        S.p.felicidad+=10;
-        hito('Nació '+h.nombre+' '+S.p.apellido);
-        setTimeout(()=>escenaBautizo(h,'Nació en '+S.anio),0);
-      } else { log('Este año no se pudo.'); }}});
+  if(S.p.edad>=21) A.push({t:'Vida sentimental y relaciones', d:'La descendencia natural ocurre según los indicadores de fertilidad y la vida de pareja; aquí gestionas relaciones privadas y sus consecuencias.', mov:1, modal:true,
+    run:()=>escenaAmantes()});
   S.familia.hijos.filter(h=>h.edad>=4&&h.edad<24).forEach(h=>{
     if(h.edad>=15) A.push({t:'Hablar del futuro con '+h.nombre,d:'Universidad, empresa, independencia o una vida lejos del apellido.',mov:1,modal:true,run:()=>escenaFuturoHeredero(h)});
     const costo=42+h.edad*3;
@@ -5791,6 +5917,9 @@ function pasarAnio(){
     }
   });
   revisarViudez();
+
+  /* concepciones naturales y vida sentimental: evento anual, sin botón de 'tener un hijo' */
+  resolverConcepcionesNaturales(res);
 
   /* familia */
   if(S.familia.pareja){
@@ -6748,7 +6877,7 @@ function catDe(t){
   if(/mausoleo|nichos|crónica de la casa/.test(t)) return 'legado';
   if(/Constituir una sociedad|Nombrar gerente|reorganización|Mover capital|Armar el holding|Fusionar/.test(t)) return 'capital';
   if(/Fundar otra compañía|Sentarte en la presidencia|Nombrar presidente/.test(t)) return 'compania';
-  if(/conocer gente|Casarte|hijo|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
+  if(/conocer gente|Casarte|hijo|Vida sentimental|amante|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
   if(/Cuidarte|Vacaciones/.test(t)) return 'salud';
   if(/palancas/.test(t)) return 'riesgo';
   if(/Obra social/.test(t)) return 'legado';
@@ -6875,7 +7004,8 @@ function renderHud(){
     +anilloHtml('ánimo',p.felicidad,100,p.felicidad<32?'#B2413A':'#D6A648',p.felicidad<32)
     +anilloHtml(e?'control':'nombre',ctrl,100,e?(miPct(e)<.5?'#D6A648':'#6CC08F'):'#D6A648',!!(e&&miPct(e)<.35))
     +anilloHtml(S.junta.length?'junta':'red',conf,100,conf<38?'#B2413A':'#6CC08F',!!(S.junta.length&&conf<38))
-    +anilloHtml('casa',prestigio(),100,'#D6A648',false);
+    +anilloHtml('casa',prestigio(),100,'#D6A648',false)
+    +anilloHtml('fertilidad',fertilidadActual(p),100,fertilidadActual(p)<25?'#B2413A':fertilidadActual(p)<50?'#D6A648':'#6CC08F',fertilidadActual(p)<25);
 }
 const PESTANAS=[['mesa','Inicio'],['empleo','Trabajo'],['compania','Negocios'],['junta','Junta'],['mercado','Patrimonio'],['casa','Hogar'],['familia','Familia'],['legado','Legado'],['acta','Crónica']];
 function renderPestanas(){
@@ -6994,6 +7124,7 @@ function lugarDashboard(){
 function dashboardFamilia(){
   const hijos=Array.isArray(S.familia?.hijos)?S.familia.hijos:[], pareja=S.familia?.pareja;
   let h='<div class="dash-family-head"><div><div class="dash-kicker">TU FAMILIA</div><h3>La casa '+esc(S.dinastia)+'</h3></div><span class="dash-badge">'+hijos.length+' '+(hijos.length===1?'hijo':'hijos')+'</span></div>';
+  const fert=Math.round(fertilidadActual(S.p)), amantes=(S.familia?.amantes||[]).filter(a=>a.activo!==false).length; h+='<div class="sa35-pillrow"><span class="sa35-pill"><strong>Fertilidad</strong> '+fert+'/100</span><span class="sa35-pill"><strong>Relaciones privadas</strong> '+amantes+'</span></div>';
   h+='<div class="family-strip">';
   if(pareja){
     h+='<button type="button" class="family-card clicable" data-per="pareja::x">'+avatarSVG(pareja.nombre,{sexo:pareja.sexo,edad:pareja.edad,tam:48})
@@ -8396,7 +8527,7 @@ function modalCodigo(){
     try{
       const obj=JSON.parse(decodeURIComponent(escape(atob(v))));
       if(!obj||!obj.p||!obj.legado) throw new Error('formato');
-      cerrarModal(); S=obj; S.patrPintado=undefined; migrarFamilia(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render();
+      cerrarModal(); S=obj; S.patrPintado=undefined; migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render();
     }catch(e){ n.value=''; n.placeholder='Ese código no se pudo leer'; n.focus(); }
   };
 }
@@ -8470,7 +8601,7 @@ $('btnAnio').onclick=()=>{ if(!S||S.muerto) return; $('btnAnio').disabled=true; 
   }
   if(!g&&typeof window!=='undefined'&&window.storage) g=await cargar();
   if(g&&g.p){ const b=$('btnCargar'); b.classList.remove('oculto');
-    b.onclick=()=>{ S=g; S.patrPintado=undefined; migrarFamilia(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render(); }; }
+    b.onclick=()=>{ S=g; S.patrPintado=undefined; migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render(); }; }
 })();
 
 
