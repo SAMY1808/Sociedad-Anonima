@@ -1,24 +1,16 @@
-# Sociedad Anónima — Crónica de una Dinastía v38
+# Sociedad Anónima — Crónica de una Dinastía v39
 
 Paquete listo para GitHub Pages.
 
-Incluye `index.html`, `manifest.webmanifest`, `sw.js` e icono PWA.
+## v39 — contabilidad separada
+- La caja personal/familiar y la caja corporativa quedan separadas.
+- Expansiones regionales se financian con caja o deuda de la compañía; nunca consumen automáticamente la caja personal.
+- Las adquisiciones de competidores se pagan con caja/deuda corporativa.
+- Las plantas nuevas se financian con recursos de la sociedad.
+- Filiales internacionales y joint ventures dejan de descontar automáticamente del bolsillo personal.
+- Se añadió una acción explícita para aportar capital personal a una compañía.
+- El HUD identifica la caja del personaje como **Caja personal**.
+- El panel de negocios explica la separación entre ambas cajas.
 
-## v38
-- Fundación de compañías desde cero, incluso manteniendo otros negocios.
-- Embarazos naturales con anuncio y nacimiento separados por un año.
-- El embarazo reduce en una movida el ciclo siguiente.
-- Hijos pueden formar parejas y tener hijos; los nietos continúan como personajes de la dinastía.
-- Visitas y ayuda a hijos y nietos.
-- Luna de miel tras el matrimonio.
-- Divorcio con proceso de dos años.
-- Elección del apellido del hijo: apellido de una rama o ambos.
-- Cesión de propiedades a los hijos en vida.
-- Insinuación a familiares para ser incluidos en testamentos.
-- Abuelos y abuelas en la parentela y representación sucesoral cuando fallece antes el padre/madre.
-
-
-## v38
-- La pestaña **Negocios** aparece desde el inicio, incluso sin compañía.
-- Se puede entrar a Negocios y fundar la primera compañía sin adquirir previamente otra.
-- Solo la pestaña Junta depende de tener una compañía.
+## Versiones anteriores
+Incluye las funcionalidades acumuladas de v38: negocios desde cero, embarazo con espera anual, nietos, visitas, luna de miel, divorcio, apellidos, cesión de propiedades, testamentos y sucesión multigeneracional.

@@ -511,7 +511,7 @@ html{scroll-behavior:smooth}
         <div class="delta" id="hudDelta"></div>
       </div>
       <div class="bolsillo">
-        <div class="et">En caja</div>
+        <div class="et">Caja personal</div>
         <span class="val" id="hudCaja">—</span>
         <div class="delta" id="hudCajaNota"></div>
       </div>
@@ -3971,8 +3971,8 @@ function escenaExportacion(){
 function escenaJointVenture(){
   const e=S.emp,base=e.ingresos*.16;
   escena({rubro:'Alianza internacional',titulo:'Empresa conjunta con un socio local',ancho:true,cuerpo:'El socio extranjero aporta distribución, licencias o conocimiento del mercado. Tú pones capital y tecnología. La empresa queda compartida: ganas acceso, pero no mandas solo.',
-    opciones:PAISES.map(pz=>({t:pz.n,cat:'mercado',d:'Aportas '+fmt(base*pz.costo*.55)+' y recibes cerca del 45% del proyecto.',dis:S.efectivo+e.caja<base*pz.costo*.55?'No hay con qué entrar':null,run:()=>{
-      const aporte=base*pz.costo*.55,deEmpresa=Math.min(e.caja,aporte);e.caja-=deEmpresa;S.efectivo-=aporte-deEmpresa;e.jv=e.jv||[];e.jv.push({pais:pz.id,n:pz.n,desde:S.anio,aporte,participacion:.45,base});e.ingresos+=base*.06;e.marca=clamp(e.marca+5,0,100);e.innovacion=clamp(e.innovacion+4,0,100);
+    opciones:PAISES.map(pz=>({t:pz.n,cat:'mercado',d:'Aportas '+fmt(base*pz.costo*.55)+' y recibes cerca del 45% del proyecto.',dis:e.caja+capacidadDeudaDe(e)<base*pz.costo*.55?'La empresa no tiene caja ni capacidad de deuda suficiente':null,run:()=>{
+      const aporte=base*pz.costo*.55,pago=financiarEmpresa(e,aporte,true); if(!pago.ok){log('La empresa no pudo financiar la alianza; tu caja personal quedó intacta.','mal');return;} if(pago.deuda>0) log('La alianza tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien'); e.jv=e.jv||[];e.jv.push({pais:pz.id,n:pz.n,desde:S.anio,aporte,participacion:.45,base});e.ingresos+=base*.06;e.marca=clamp(e.marca+5,0,100);e.innovacion=clamp(e.innovacion+4,0,100);
       log('Creaste una empresa conjunta en '+esc(pz.n)+'. Tu participación es 45% y el socio local controla el resto.','hito');S.mov--;}})).concat([{t:'No por ahora',cat:'compania',run:()=>{S.mov--;}}])});
 }
 function correrJointVentures(res){
@@ -4003,10 +4003,11 @@ function escenaInternacional(){
     opciones:PAISES.filter(x=>ya.indexOf(x.id)<0).map(pz=>({t:pz.n,cat:'mercado',
       d:pz.d+' Montarla cuesta '+fmt(e.ingresos*pz.costo)+'; devuelve cerca del '+pc(pz.ret)
         +' de eso al año en '+(pz.div==='eur'?'euros':'dólares')+'.',
-      dis:(e.caja+S.efectivo)<e.ingresos*pz.costo?'No hay con qué montarla':null,
+      dis:(e.caja+capacidadDeudaDe(e))<e.ingresos*pz.costo?'La empresa no tiene caja ni capacidad de deuda suficiente':null,
       run:()=>{
         const x=e.ingresos*pz.costo;
-        const dc=Math.min(e.caja,x); e.caja-=dc; S.efectivo-=(x-dc);
+        const pago=financiarEmpresa(e,x,true); if(!pago.ok){log('La filial no pudo financiarse; tu caja personal quedó intacta.','mal');return;}
+        if(pago.deuda>0) log('La filial tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien');
         iniciarCompromiso({titulo:'Filial en '+pz.n,restan:2,mov:1,cerrar:()=>{
           if(!companias().includes(e)) return null;
           if(chance(pz.riesgo)){
@@ -5531,12 +5532,16 @@ function listaAcciones(){
     A.push({t:'Tomar deuda bancaria', d:'Hasta '+fmt(capacidadDeuda())+'. Entra a caja, paga intereses al '+pc(S.macro.tasa+.03)+'.', mov:1, modal:true,
       dis: capacidadDeuda()<=0?'Ya estás muy apalancado':null,
       run:()=>modalDeuda()});
+    A.push({t:'Aportar capital personal a la compañía', d:'Inyección voluntaria: sacas dinero de tu caja personal y lo pasas a la sociedad. No ocurre de manera automática.', mov:1, modal:true,
+      dis:S.efectivo<20?'Necesitas al menos '+fmt(20)+' de caja personal':null,
+      run:()=>escenaAporteCapitalEmpresa()});
     if(e.deuda>0) A.push({t:'Abonar a la deuda', d:'Debes '+fmt(e.deuda)+'. Bajar deuda sube la valuación.', mov:1,
       dis: e.caja<=0?'No hay caja':null,
       run:()=>{ const x=Math.min(e.caja,e.deuda); e.caja-=x; e.deuda-=x; log('Abonaste '+fmt(x)+' a la deuda. Quedan '+fmt(e.deuda)+'.');}});
-    A.push({t:'Expandirte a otra región', d:'Cuesta '+fmt(e.ingresos*.18)+' y te ocupa una movida durante dos años. El resultado se ve al final.', mov:1,
-      dis: e.caja+S.efectivo<e.ingresos*.18?'No hay recursos':null,
-      run:()=>{ const x=e.ingresos*.18; const dcaja=Math.min(e.caja,x); e.caja-=dcaja; S.efectivo-=(x-dcaja);
+    A.push({t:'Expandirte a otra región', d:'Cuesta '+fmt(e.ingresos*.18)+' y te ocupa una movida durante dos años. Se financia con caja corporativa o deuda corporativa; la caja personal no entra sola.', mov:1,
+      dis: e.caja+capacidadDeudaDe(e)<e.ingresos*.18?'La empresa no tiene caja ni capacidad de deuda suficiente':null,
+      run:()=>{ const x=e.ingresos*.18; const pago=financiarEmpresa(e,x,true); if(!pago.ok){log('La empresa no pudo financiar la expansión. Tu caja personal no se toca automáticamente.','mal');return;}
+        if(pago.deuda>0) log('La expansión tomó '+fmt(pago.deuda)+' de deuda corporativa; tu caja personal no se tocó.','bien');
         const dis=p.atr.disciplina;
         iniciarCompromiso({titulo:'Expansión de '+e.nombre,restan:2,mov:1,cerrar:()=>{
           if(!companias().includes(e)) return 'La expansión murió con la compañía.';
@@ -5545,9 +5550,10 @@ function listaAcciones(){
           e.ingresos*=rnd(1.0,1.06); e.moral-=8;
           return 'La expansión de '+esc(e.nombre)+' se atascó: costos arriba y poco ingreso nuevo.';
         }}); }});
-    if(valuar(e)>4000) A.push({t:'Adquirir un competidor', d:'Cuesta '+fmt(valuar(e)*.22)+' entre caja y deuda. Suma ingresos de golpe.', mov:2,
-      dis: (e.caja+capacidadDeuda())<valuar(e)*.22?'No hay músculo financiero':(S.mov<2?'Necesitas dos movidas libres':null),
-      run:()=>{ const precio=valuar(e)*.22; const dcaja=Math.min(e.caja,precio); e.caja-=dcaja; e.deuda+=(precio-dcaja);
+    if(valuar(e)>4000) A.push({t:'Adquirir un competidor', d:'Cuesta '+fmt(valuar(e)*.22)+' y se paga exclusivamente con caja o deuda de la empresa. Tu dinero personal no se usa automáticamente.', mov:2,
+      dis: (e.caja+capacidadDeudaDe(e))<valuar(e)*.22?'La empresa no tiene músculo financiero':(S.mov<2?'Necesitas dos movidas libres':null),
+      run:()=>{ const precio=valuar(e)*.22; const pago=financiarEmpresa(e,precio,true); if(!pago.ok){log('La adquisición no pudo financiarse: tu caja personal quedó intacta.','mal');return;}
+        if(pago.deuda>0) log('La adquisición tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien');
         const nom=pick(EMPLEADORES);
         log('Compraste <b>'+esc(nom)+'</b> por '+fmt(precio)+'. Integrar dos culturas toma un par de años.','hito');
         hito('Adquirió '+nom+' por '+fmt(precio));
@@ -5557,9 +5563,10 @@ function listaAcciones(){
           e.eficiencia=clamp(e.eficiencia-6,0,100);
           return 'Quedó integrada '+esc(nom)+' en '+esc(e.nombre)+'.';
         }});}});
-    A.push({t:'Construir una planta nueva', d:'Tres años ocupando una movida y '+fmt(e.ingresos*.35)+'. Cuando abre, cambia la escala del negocio.', mov:1,
-      dis: e.caja+S.efectivo<e.ingresos*.35?'No hay con qué':null,
-      run:()=>{ const x=e.ingresos*.35; const dc=Math.min(e.caja,x); e.caja-=dc; S.efectivo-=(x-dc);
+    A.push({t:'Construir una planta nueva', d:'Tres años ocupando una movida y '+fmt(e.ingresos*.35)+'. Se financia con caja o deuda corporativa, no con tu bolsillo por defecto.', mov:1,
+      dis: e.caja+capacidadDeudaDe(e)<e.ingresos*.35?'La empresa no tiene con qué financiarla':null,
+      run:()=>{ const x=e.ingresos*.35; const pago=financiarEmpresa(e,x,true); if(!pago.ok){log('La planta no pudo financiarse. La caja personal no se toca automáticamente.','mal');return;}
+        if(pago.deuda>0) log('La planta tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien');
         iniciarCompromiso({titulo:'Planta nueva de '+e.nombre,restan:3,mov:1,cerrar:()=>{
           if(!companias().includes(e)) return null;
           e.ingresos*=1+rnd(.4,.75)*escalaTamano(e);
@@ -5841,13 +5848,63 @@ function listaAcciones(){
   return A;
 }
 
-function capacidadDeuda(){
-  const e=S.emp; if(!e) return 0;
+function capacidadDeudaDe(e){
+  if(!e) return 0;
   let techo = Math.max(e.ingresos*.6, (e.utilidad>0?e.utilidad*3:0));
-  let bonoJunta=0; S.junta.forEach(j=>{ bonoJunta+=(arq(j.arq).ef.credito||0);});
+  let bonoJunta=0;
+  (e.junta||[]).forEach(j=>{ bonoJunta+=(arq(j.arq).ef.credito||0); });
   techo*=1+bonoJunta+bonoGremio('credito');
   if(e.publica) techo*=1.3;
   return Math.max(0,techo-e.deuda);
+}
+function capacidadDeuda(){ return capacidadDeudaDe(S.emp); }
+
+/*
+   CONTABILIDAD SEPARADA: el efectivo personal/familiar (S.efectivo) y la caja
+   corporativa (e.caja) no se mezclan automáticamente. Una expansión, adquisición,
+   planta o filial primero usa caja de la empresa y, si se permite, deuda de la
+   empresa. Para poner dinero personal en una compañía debe existir una acción
+   explícita de aporte de capital.
+*/
+function financiarEmpresa(e,costo,usarDeuda=true){
+  if(!e || !(costo>0)) return {ok:true,caja:0,deuda:0,faltante:0};
+  let faltante=costo, cajaUsada=0, deudaUsada=0;
+  const desdeCaja=Math.min(Math.max(0,e.caja),faltante);
+  e.caja-=desdeCaja; faltante-=desdeCaja; cajaUsada=desdeCaja;
+  if(faltante>0.0001 && usarDeuda){
+    const disponible=capacidadDeudaDe(e);
+    const tomar=Math.min(disponible,faltante);
+    if(tomar>0){ e.deuda+=tomar; faltante-=tomar; deudaUsada=tomar; }
+  }
+  if(faltante>0.0001){
+    e.caja+=cajaUsada;
+    e.deuda-=deudaUsada;
+    return {ok:false,caja:cajaUsada,deuda:deudaUsada,faltante};
+  }
+  return {ok:true,caja:cajaUsada,deuda:deudaUsada,faltante:0};
+}
+function escenaAporteCapitalEmpresa(){
+  const e=S.emp;
+  if(!e) return;
+  const max=Math.max(20,Math.floor(S.efectivo*.35));
+  const caja=escena({rubro:'Capital familiar',titulo:'Aportar capital a la compañía',ancho:true,
+    cuerpo:'Este es el único camino automático para pasar dinero personal a la empresa: tú haces un aporte de capital y la compañía recibe una caja separada. El dinero deja de ser personal y pasa a ser capital de la sociedad.',
+    html:'<label class="campo">Aporte<input type="range" id="capAporte" min="20" max="'+Math.max(20,max)+'" value="'+Math.min(max,Math.max(20,e.ingresos*.08))+'" step="1"></label><div class="apunte" id="capTxt"></div>',
+    opciones:[{t:'Aportar a la compañía',cat:'capital',cerrar:false,run:()=>{}}],cerrable:true});
+  const rng=caja.querySelector('#capAporte'),txt=caja.querySelector('#capTxt');
+  const refrescar=()=>{
+    const x=Math.min(S.efectivo,Math.max(20,+rng.value));
+    rng.value=x;
+    txt.textContent='Aportas '+fmt(x)+'. Tu caja personal queda en '+fmt(S.efectivo-x)+' y la caja de '+esc(e.nombre)+' pasa a '+fmt(e.caja+x)+'.';
+  };
+  rng.oninput=refrescar; refrescar();
+  botonEscena().onclick=()=>{
+    const x=Math.min(S.efectivo,Math.max(20,+rng.value));
+    if(S.efectivo<x){log('No tienes suficiente efectivo personal para ese aporte.','mal');return;}
+    S.efectivo-=x; e.caja+=x; e.capitalAportado=(e.capitalAportado||0)+x;
+    log('Aportaste '+fmt(x)+' de capital personal a <b>'+esc(e.nombre)+'</b>. Quedó dentro de la caja corporativa, separado de tu bolsillo.','hito');
+    S.mov--; cerrarModal(); render();
+  };
 }
 function confianzaJunta(){
   if(!S.junta.length) return 100;
@@ -7320,6 +7377,7 @@ function renderLienzo(){
     h+='<div class="wrap">';
     h+='<div class="seccion"><h3>Negocios<em>puedes empezar desde cero</em></h3>'
       +'<div class="apunte">No necesitas comprar, adquirir ni heredar una empresa para entrar aquí. Puedes constituir tu primera compañía con capital propio y pasar a dirigirla desde este mismo año.</div>'
+      +'<div class="apunte"><b>Cajas separadas:</b> la caja personal financia tu vida; la caja de la compañía financia expansión, adquisiciones, plantas y operación. Para pasar dinero personal a la empresa debes hacer un aporte de capital explícito.</div>'
       +baraja(ACC.filter(a=>catDe(a.t)==='compania' || /Constituir una sociedad/.test(a.t)),false)
       +'</div></div>';
   }
