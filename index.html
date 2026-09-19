@@ -7086,7 +7086,9 @@ const PESTANAS=[['mesa','Inicio'],['empleo','Trabajo'],['compania','Negocios'],[
 function renderPestanas(){
   const n=$('pestanas'); n.innerHTML='';
   PESTANAS.forEach(([k,t])=>{
-    if((k==='compania'||k==='junta')&&!S.emp) return;
+    // Negocios debe existir desde el inicio: no hace falta comprar una compañía
+    // para entrar al módulo y fundar la primera. Solo Junta depende de una empresa.
+    if(k==='junta'&&!S.emp) return;
     const b=document.createElement('button');
     b.innerHTML=t+((k==='junta'&&(S.destitucionAviso||confianzaJunta()<38&&S.junta.length))?'<span class="pip"></span>':'');
     b.setAttribute('aria-selected',tab===k?'true':'false');
@@ -7312,6 +7314,14 @@ function renderLienzo(){
     h+='<div class="seccion"><h3>Decisiones personales que afectan tu carrera</h3>'+baraja(ACC.filter(a=>catDe(a.t)==='salud'||catDe(a.t)==='familia'),false)+'</div>';
     if(legal) h+='<div class="seccion penal-alert"><h3>Justicia<em>situación activa</em></h3>'+baraja(ACC.filter(a=>catDe(a.t)==='riesgo'),false)+'</div>';
     h+='</div>';
+  }
+
+  if(tab==='compania'&&!e){
+    h+='<div class="wrap">';
+    h+='<div class="seccion"><h3>Negocios<em>puedes empezar desde cero</em></h3>'
+      +'<div class="apunte">No necesitas comprar, adquirir ni heredar una empresa para entrar aquí. Puedes constituir tu primera compañía con capital propio y pasar a dirigirla desde este mismo año.</div>'
+      +baraja(ACC.filter(a=>catDe(a.t)==='compania' || /Constituir una sociedad/.test(a.t)),false)
+      +'</div></div>';
   }
 
   if(tab==='compania'&&e){

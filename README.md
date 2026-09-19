@@ -1,10 +1,10 @@
-# Sociedad Anónima — Crónica de una Dinastía v37
+# Sociedad Anónima — Crónica de una Dinastía v38
 
 Paquete listo para GitHub Pages.
 
 Incluye `index.html`, `manifest.webmanifest`, `sw.js` e icono PWA.
 
-## v37
+## v38
 - Fundación de compañías desde cero, incluso manteniendo otros negocios.
 - Embarazos naturales con anuncio y nacimiento separados por un año.
 - El embarazo reduce en una movida el ciclo siguiente.
@@ -16,3 +16,9 @@ Incluye `index.html`, `manifest.webmanifest`, `sw.js` e icono PWA.
 - Cesión de propiedades a los hijos en vida.
 - Insinuación a familiares para ser incluidos en testamentos.
 - Abuelos y abuelas en la parentela y representación sucesoral cuando fallece antes el padre/madre.
+
+
+## v38
+- La pestaña **Negocios** aparece desde el inicio, incluso sin compañía.
+- Se puede entrar a Negocios y fundar la primera compañía sin adquirir previamente otra.
+- Solo la pestaña Junta depende de tener una compañía.
