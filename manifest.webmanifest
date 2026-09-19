@@ -1,10 +1,10 @@
 {
-  "name": "Sociedad Anónima",
-  "short_name": "Sociedad Anónima",
-  "lang": "es-CO",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#14100C",
-  "theme_color": "#14100C",
-  "icons": [{"src":"./icon-180.png","sizes":"180x180","type":"image/png","purpose":"any maskable"}]
+  "name":"Sociedad Anónima",
+  "short_name":"Sociedad Anónima",
+  "lang":"es-CO",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#14100C",
+  "theme_color":"#14100C",
+  "icons":[{"src":"./icon-180.png","sizes":"180x180","type":"image/png","purpose":"any maskable"}]
 }

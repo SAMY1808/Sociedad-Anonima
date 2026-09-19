@@ -1,14 +1,18 @@
-# Sociedad Anónima — GitHub Pages v35
+# Sociedad Anónima — Crónica de una Dinastía v37
 
 Paquete listo para GitHub Pages.
 
-## Archivos
-- `index.html` — juego v35
-- `manifest.webmanifest` — configuración PWA
-- `sw.js` — service worker v35 con actualización network-first para HTML
-- `icon-180.png` — icono
+Incluye `index.html`, `manifest.webmanifest`, `sw.js` e icono PWA.
 
-## Publicar
-Sube/reemplaza los cuatro archivos en la raíz del repositorio GitHub. Mantén Pages en `main` + `/ (root)`.
-
-Para actualizar: reemplaza `index.html` y `sw.js`, haz commit y recarga la página.
+## v37
+- Fundación de compañías desde cero, incluso manteniendo otros negocios.
+- Embarazos naturales con anuncio y nacimiento separados por un año.
+- El embarazo reduce en una movida el ciclo siguiente.
+- Hijos pueden formar parejas y tener hijos; los nietos continúan como personajes de la dinastía.
+- Visitas y ayuda a hijos y nietos.
+- Luna de miel tras el matrimonio.
+- Divorcio con proceso de dos años.
+- Elección del apellido del hijo: apellido de una rama o ambos.
+- Cesión de propiedades a los hijos en vida.
+- Insinuación a familiares para ser incluidos en testamentos.
+- Abuelos y abuelas en la parentela y representación sucesoral cuando fallece antes el padre/madre.
