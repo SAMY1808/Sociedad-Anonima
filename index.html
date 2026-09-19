@@ -10,6 +10,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>Sociedad Anónima — crónica de una dinastía</title>
 <style>
 :root{
@@ -2046,14 +2048,8 @@ function escenaFundacion(){
     S.mov--; render();
   };
 }
-function correrFundacion(res,m){
-  const F=S.fundacion; if(!F) return;
-  F.activos*=1+clamp(m.ciclo*.4+rnd(-.03,.07),-.15,.2);
-  const obra=F.activos*.05;
-  F.activos-=obra;
-  res.push([F.nombre+' (obra social)',-obra,'neg']);
-  if(chance(.25)) moverPrestigio(1,'');
-}
+/* correrFundacion: versión anterior retirada; la vigente está más abajo. */
+
 
 /* ---------------- lobby y sobornos ---------------- */
 const LEYES=[
@@ -3715,7 +3711,7 @@ function escenaConPareja(){
   escena({rubro:'En casa',titulo:esc(pa.nombre),ancho:true,
     html:'<div style="display:flex;gap:14px;align-items:center;margin:4px 0 10px">'
       +avatarSVG(pa.nombre,{sexo:pa.sexo,edad:pa.edad,tam:64})
-      +'<div><div style="font-size:13.5px;color:var(--humo)">'+(pa.casados?'cónyuge':'pareja')+', '+esc(pa.rol)+', '+pa.edad+' años'
+      +'<div><div style="font-size:13.5px;color:var(--humo)">'+(pa.casados?'cónyuge':'pareja')+', '+esc(pa.rol||pa.oficio||'sin oficio conocido')+', '+pa.edad+' años'
       +(pa.casa?' · de los '+esc(pa.casa.apellido):'')+'</div>'
       +'<div style="font-size:12.5px;color:var(--humo2);margin-top:3px">Paciencia '+Math.round(pa.paciencia)
       +(pa.porInteres?' · fue un matrimonio por conveniencia':'')+'</div></div></div>',
@@ -3876,7 +3872,7 @@ function escenaMatrimonioEnCasa(){
         +'. Afecto contigo '+Math.round(p.afecto)+'.',
       run:()=>{
         p.casadoConmigo=true;
-        S.familia.pareja={nombre:p.nombre+' '+S.dinastia, rol:p.oficio, sexo:p.sexo, edad:p.edad,
+        S.familia.pareja={nombre:p.nombre+' '+S.dinastia, rol:p.oficio||pick(OFICIOS_FAM), sexo:p.sexo, edad:p.edad,
           casados:true, paciencia:clamp(55+p.afecto*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
           casa:{apellido:S.dinastia,prestigio:prestigio()}, afecto:p.afecto, porInteres:true,
           separacionBienes:false, esPrima:true, pid:p.pid};
@@ -4223,7 +4219,7 @@ function reacomodarParentela(heredero){
   if(S.familia.pareja){
     nuevos.push({ pid:'p'+(UIDP++), rel:S.familia.pareja.sexo==='m'?'madre':'padre',
       sexo:S.familia.pareja.sexo, edad:S.familia.pareja.edad, nombre:S.familia.pareja.nombre.split(' ')[0],
-      oficio:S.familia.pareja.rol, afecto:75, capaz:ri(3,8), honrado:ri(4,9), rama:'materna', vivo:true });
+      oficio:S.familia.pareja.rol||S.familia.pareja.oficio||pick(OFICIOS_FAM), afecto:75, capaz:ri(3,8), honrado:ri(4,9), rama:'materna', vivo:true });
   }
   return nuevos.slice(0,18);
 }
@@ -4266,7 +4262,7 @@ function terminosPretendiente(pr){
 }
 function desposar(pr,porInteres){
   S.familia.pareja={
-    nombre:pr.nombre, rol:pr.rol, sexo:pr.sexo, edad:pr.edad, casados:true,
+    nombre:pr.nombre, rol:pr.rol||pick(PAREJAS_ROL), sexo:pr.sexo, edad:pr.edad, casados:true,
     paciencia:clamp(45+pr.afecto*.4,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
     casa:pr.casa, afecto:pr.afecto, porInteres:!!porInteres, separacionBienes:false
   };
@@ -4842,8 +4838,11 @@ function nuevoPersonaje(cfg,legado){
     atr, educacion:or.id==='elite'?1:0,
     salud:clamp(ri(72,92)+(or.id==='popular'?-4:2),0,100),
     felicidad:ri(55,72),
-    reputacion:clamp(or.redes+(ciu.ef.redes||0)+bonusRep,0,100),
-    redes:clamp(or.redes+(ciu.ef.redes||0)+bonusRedes,0,100),
+    // Un heredero arranca con lo que la casa le haya construido, no con un
+    // tope fijo: heredar un apellido grande no puede valer lo mismo que
+    // heredar uno arruinado.
+    reputacion:clamp(legado ? (10+bonusRep) : (or.redes+(ciu.ef.redes||0)),0,100),
+    redes:clamp(legado ? (12+bonusRedes) : (or.redes+(ciu.ef.redes||0)),0,100),
     escandalos:0
   };
 }
@@ -5232,33 +5231,12 @@ function patrimonio(){
 }
 
 /* ---------------- nuevas instituciones de la casa ---------------- */
-function valorFamilyOffice(){ return S.familyOffice ? S.familyOffice.activos : 0; }
-function escenaFamilyOffice(){
-  const fo=S.familyOffice;
-  if(fo){
-    escena({rubro:'Family office',titulo:fo.nombre,ancho:true,
-      cuerpo:'Una oficina patrimonial de la familia: coordina inversiones, propiedades, seguros y sucesión. No crea dinero por sí sola; cobra por administrar y ayuda a ordenar el patrimonio.',
-      opciones:[
-        {t:'Aportar patrimonio',cat:'capital',d:'Destinar efectivo para que la oficina lo gestione.',cerrar:false,run:()=>{ const x=Math.min(Math.max(100,patrimonio()*.08),S.efectivo*.45); if(x<100||S.efectivo<x){log('No hay efectivo suficiente para ampliar el family office.','mal');return;} S.efectivo-=x; fo.activos+=x; fo.escala++; log('Aportaste '+fmt(x)+' al family office.','bien'); cerrarModal(); render(); }},
-        {t:'Retirar parte del mandato',cat:'capital',d:'Recuperar una parte de los activos administrados.',cerrar:false,run:()=>{ const x=Math.min(fo.activos*.15,Math.max(0,fo.activos-100)); if(x<=0){log('El mandato es demasiado pequeño para retirar sin desarmarlo.','mal');return;} fo.activos-=x; S.efectivo+=x; log('El family office devolvió '+fmt(x)+' a la familia.','bien'); cerrarModal(); render(); }}
-      ],cerrable:true});
-  }else{
-    const aporte=Math.max(180,patrimonio()*.05);
-    escena({rubro:'Patrimonio',titulo:'Crear un family office',ancho:true,
-      cuerpo:'Separar la administración del patrimonio familiar de las compañías operativas. Requiere '+fmt(aporte)+' de capital inicial y una pequeña estructura profesional.',
-      html:'<div class="apunte">La oficina gestionará inversiones y bienes familiares, con una reserva para honorarios y administración.</div>',
-      opciones:[{t:'Constituir family office',cat:'capital',cerrar:false,run:()=>{}}],cerrable:true});
-    botonEscena().onclick=()=>{ if(S.efectivo<aporte){cerrarModal();log('No alcanzaba para constituir el family office.','mal');render();return;} S.efectivo-=aporte; S.familyOffice={nombre:'Family Office '+S.dinastia,activos:aporte,escala:1,desde:S.anio}; cerrarModal(); moverPrestigio(4,'se organizó el patrimonio familiar'); log('Se constituyó el <b>Family Office '+esc(S.dinastia)+'</b>.','hito'); hito('Creó un family office'); S.mov--; render(); };
-  }
-}
-function correrFamilyOffice(res){
-  const f=S.familyOffice; if(!f) return;
-  const costo=f.activos*.012;
-  f.activos=Math.max(0,f.activos*(1+S.macro.ciclo*.55+rnd(-.035,.055)));
-  S.efectivo-=costo;
-  res.push(['Family office: administración',-costo,'neg']);
-  if(f.activos>patrimonio()*.35) f.escala=Math.min(5,f.escala+1);
-}
+/* valorFamilyOffice: versión anterior retirada; la vigente está más abajo. */
+
+/* escenaFamilyOffice: versión anterior retirada; la vigente está más abajo. */
+
+/* correrFamilyOffice: versión anterior retirada; la vigente está más abajo. */
+
 function escenaResidenciaInternacional(){
   const r=S.residenciaInternacional;
   if(r){
@@ -6897,8 +6875,8 @@ function heredar(h,frac,vivo,pleito){
     emp:null, junta:[], hijos:[],
     bienes:bienesHeredados,
     hogar:{ciudad:S.hogar.ciudad,zona:S.hogar.zona,nivel:clamp(S.hogar.nivel,0,4)},
-    bonoRep:Math.round(clamp(viejo.reputacion*.32+prestigio()*.34+S.legado.pico/11000,0,52)),
-    bonoRedes:Math.round(clamp(viejo.redes*.45+prestigio()*.25+S.legado.hitos.length*2,0,58)),
+    bonoRep:Math.round(clamp(viejo.reputacion*.30+prestigio()*.55+S.legado.pico/11000,0,85)),
+    bonoRedes:Math.round(clamp(viejo.redes*.40+prestigio()*.45+S.legado.hitos.length*2,0,82)),
     legado:S.legado,
     casa:{prestigio:clamp(prestigio()-(castigo>0?4:0),0,100)},
     anio:S.anio,
@@ -7679,7 +7657,7 @@ function renderLienzo(){
       h+='<div class="retrato clicable '+(pa.paciencia<35?'hostil':'propio')+'" data-per="pareja::x"><div class="fila-r">'
         +avatarSVG(pa.nombre,{sexo:pa.sexo,edad:pa.edad,tam:44})
         +'<div class="quien"><div class="nom">'+esc(pa.nombre)+'</div>'
-        +'<div class="rol">'+(pa.casados?(pa.separacionBienes?'cónyuge, con capitulaciones':'cónyuge'):'pareja')+', '+esc(pa.rol)+', '+pa.edad+' años</div>'
+        +'<div class="rol">'+(pa.casados?(pa.separacionBienes?'cónyuge, con capitulaciones':'cónyuge'):'pareja')+', '+esc(pa.rol||pa.oficio||'sin oficio conocido')+', '+pa.edad+' años</div>'
         +medida('paciencia',pa.paciencia,100,pa.paciencia<35?'r':'v')
         +'<div class="det">'+(pa.separacionBienes?'Con capitulaciones firmadas, una ruptura no toca el patrimonio.':'Sin capitulaciones, una ruptura se lleva cerca de un tercio de todo.')+'</div></div></div></div>';
     } else h+='<div class="vacio">No tienes pareja. Sin descendencia, la partida se acaba contigo.</div>';
@@ -9393,7 +9371,7 @@ function correrFundacion(res,m){
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   window.addEventListener('load',async()=>{
     try{ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.update().catch(()=>null))); }catch(e){}
-    try{ await navigator.serviceWorker.register('./sw.js?sa35=1',{updateViaCache:'none'}); }catch(e){}
+    try{ await navigator.serviceWorker.register('./sw.js?v=41',{updateViaCache:'none'}); }catch(e){}
   });
 }
 </script>
@@ -9772,7 +9750,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function asegurarPrestamo40(){ if(!S.emp)return; S.emp.prestamoDueno=Math.max(0,Number(S.emp.prestamoDueno||0)); S.emp.interesPrestamoDueno=Number.isFinite(S.emp.interesPrestamoDueno)?S.emp.interesPrestamoDueno:.055; }
   function addAcciones40(){
-    asegurar40(); if(!S.emp)return;
+    safe40(()=>asegurar40());
+    // El wrapper se instala aunque todavía no haya partida ni empresa:
+    // la comprobación de S.emp va dentro, en cada llamada.
     const old=window.listaAcciones;
     if(typeof old!=='function'||window.__SA40_ACC)return;
     window.listaAcciones=function(){ const A=old.apply(this,arguments)||[]; asegurar40(); if(S.emp&&S.carrera?.ruta==='fundador') A.push({t:'Préstamo del propietario a la empresa',cat:'capital',d:'Financiar la sociedad desde tu patrimonio personal, con deuda separada a tu favor.',mov:1,modal:true,run:()=>escenaPrestamoDueno40()}); return A;};
@@ -9838,10 +9818,28 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{if(S&&!S.muerto){asegurar40();correrDescendencia40();}}catch(e){} try{render();}catch(e){} return r;}; window.__SA40_PASO=true;
   }
   function init40(){
-    asegurar40(); addAcciones40(); wrapEmpresa40(); patchGobierno40(); addApellidoNieto40(); wrapPaso40();
-    const oldR=window.render;if(typeof oldR==='function'&&!window.__SA40_RENDER){window.render=function(){const r=oldR.apply(this,arguments);try{financiero40();}catch(e){}return r;};window.__SA40_RENDER=true;}
+    [asegurar40,addAcciones40,wrapEmpresa40,patchGobierno40,addApellidoNieto40,wrapPaso40]
+      .forEach(fn=>{ try{ fn(); }catch(e){ console.warn('v40: falló '+(fn.name||'?'),e); } });
+    try{
+      const oldR=window.render;
+      if(typeof oldR==='function'&&!window.__SA40_RENDER){
+        window.render=function(){const r=oldR.apply(this,arguments);try{financiero40();}catch(e){}return r;};
+        window.__SA40_RENDER=true;
+      }
+    }catch(e){ console.warn('v40: falló el wrap de render',e); }
   }
   setTimeout(init40,0);
+  // Red de seguridad: si algo no quedó instalado (por orden de carga o por una
+  // partida que arranca después), se vuelve a intentar al empezar a jugar.
+  (function reintento40(){
+    let intentos=0;
+    const t=setInterval(()=>{
+      intentos++;
+      const listo=window.__SA40_ACC&&window.__SA40_EMP&&window.__SA40_PASO&&window.__SA40_RENDER;
+      if(listo||intentos>40){ clearInterval(t); return; }
+      try{ init40(); }catch(e){}
+    },250);
+  })();
 })();
 </script>
 
