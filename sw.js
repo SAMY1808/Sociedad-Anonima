@@ -1,6 +1,6 @@
-/* Sociedad Anónima — service worker v41
+/* Sociedad Anónima — service worker v42
    Estrategia: red primero, caché como respaldo cuando no hay conexión. */
-const CACHE = 'sociedad-anonima-v41';
+const CACHE = 'sociedad-anonima-v42';
 const CORE = [
   './',
   './index.html',

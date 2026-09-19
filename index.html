@@ -5758,7 +5758,8 @@ function listaAcciones(){
     A.push({t:'Casar a '+h.nombre, d:'Una alianza con otra casa: dote, contactos y prestigio para el apellido.', mov:1, modal:true,
       run:()=>escenaCasarHijo(h)});
   });
-  A.push({t:'Fundar una compañía desde cero',d:'Empieza una compañía propia desde cero, aunque ya tengas otros negocios o trabajes para alguien.',mov:1,modal:true,dis:sectoresDisponibles().length?'': 'No hay sectores disponibles para este año',run:()=>modalFundar()});
+  /* La carta de fundar desde cero ya se agrega más arriba, con su control de
+     capital mínimo; aquí estaba repetida y aparecía dos veces en la mesa. */
   A.push({t:'Constituir una sociedad', d:'Un negocio aparte que administre alguien más. Desde '+fmt(RAMOS[0].min)+'.', mov:1, modal:true,
     dis:S.efectivo<RAMOS[0].min?'Necesitas al menos '+fmt(RAMOS[0].min):null,
     run:()=>escenaCrearSociedad()});
@@ -9125,10 +9126,10 @@ function correrFundacion(res,m){
     // Empleo corporativo/academia/consultoría/Estado
     if(!c.politica?.activo&&!c.diplomacia?.activo&&!c.judicatura?.activo){
       if(c.ruta==='corporativo'||p.educacion>=3){
-        ofertas.push({tipo:'empleo',titulo:pick(['Director de estrategia','Gerente de expansión','Director financiero','Vicepresidente de operaciones']),empresa:pick(['Grupo Continental','Holding Andino','Corporación Global','Inversiones del Centro']),ciudad:pick([ciudad,'Bogotá','Medellín','Nueva York','Miami','Panamá']),salario:Math.max(110,(c.nivel>=0&&RUTAS.corporativo?.niveles[c.nivel]?.s||90)*1.45),prestigio:9,descripcion:'Una organización externa quiere incorporarte a un cargo directivo. La oferta reconoce tu experiencia y tus contactos.',req:'Experiencia y reputación profesional'});
+        ofertas.push({tipo:'empleo',titulo:pick(['Director de estrategia','Gerente de expansión','Director financiero','Vicepresidente de operaciones']),empresa:pick(['Grupo Continental','Holding Andino','Corporación Global','Inversiones del Centro']),ciudad:pick([ciudad,'Bogotá','Medellín','Nueva York','Miami','Ciudad de Panamá']),salario:Math.max(110,(c.nivel>=0&&RUTAS.corporativo?.niveles[c.nivel]?.s||90)*1.45),prestigio:9,descripcion:'Una organización externa quiere incorporarte a un cargo directivo. La oferta reconoce tu experiencia y tus contactos.',req:'Experiencia y reputación profesional'});
       }
       if(p.educacion>=4&&p.edad>=28){
-        ofertas.push({tipo:'academico',titulo:pick(['Profesor asociado','Director de programa','Decano','Director de investigación']),empresa:pick(['Universidad Nacional','Universidad de Antioquia','Universidad del Valle','Universidad Internacional']),ciudad:pick([ciudad,'Bogotá','Medellín','Madrid','Londres']),salario:pick([95,130,180,230]),prestigio:10,descripcion:'Una universidad se ha interesado por tu trayectoria y quiere ofrecerte una posición académica con mayor responsabilidad.',req:'Formación universitaria avanzada'});
+        ofertas.push({tipo:'academico',titulo:pick(['Profesor asociado','Director de programa','Decano','Director de investigación']),empresa:pick(['Universidad Nacional','Universidad de Antioquia','Universidad del Valle','Universidad Internacional']),ciudad:pick([ciudad,'Bogotá','Medellín','Londres','París']),salario:pick([95,130,180,230]),prestigio:10,descripcion:'Una universidad se ha interesado por tu trayectoria y quiere ofrecerte una posición académica con mayor responsabilidad.',req:'Formación universitaria avanzada'});
       }
       if(p.educacion>=4&&p.edad>=27&&p.reputacion>=45){
         ofertas.push({tipo:'publico',titulo:pick(['Asesor principal','Director de programa público','Director técnico']),empresa:pick(['Ministerio','Departamento Nacional','Agencia Nacional','Gobernación','Alcaldía']),ciudad:pick([ciudad,'Bogotá','Medellín']),salario:pick([85,120,165]),prestigio:11,descripcion:'Una entidad pública ha preguntado por tu trayectoria para un cargo técnico o directivo.',req:'Formación y trayectoria profesional'});
@@ -9136,10 +9137,10 @@ function correrFundacion(res,m){
     }
     // Servicio exterior: oferta de incorporación o destino, separada de la candidatura política.
     if(!c.diplomacia?.activo&&p.edad>=23&&(perfilDiplomaticoValido()||p.educacion>=4)){
-      ofertas.push({tipo:'diplomacia',titulo:'Ingreso al servicio exterior',empresa:'Cancillería',ciudad:pick(['Bogotá','Londres','Nueva York','Madrid','París','Tokio']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[0],prestigio:12,descripcion:'Tu perfil ha sido considerado para incorporarte al servicio exterior. El primer destino puede ser en la sede central o en una misión.',req:'Formación universitaria y perfil compatible'});
+      ofertas.push({tipo:'diplomacia',titulo:'Ingreso al servicio exterior',empresa:'Cancillería',ciudad:pick(['Bogotá','Londres','Nueva York','París','Tokio']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[0],prestigio:12,descripcion:'Tu perfil ha sido considerado para incorporarte al servicio exterior. El primer destino puede ser en la sede central o en una misión.',req:'Formación universitaria y perfil compatible'});
     } else if(c.diplomacia?.activo&&c.diplomacia.nivel<TRAYECTORIAS_PUBLICAS.diplomacia.puertas.length-1&&c.diplomacia.anios>=1){
       const nl=c.diplomacia.nivel+1;
-      ofertas.push({tipo:'diplomacia',titulo:TRAYECTORIAS_PUBLICAS.diplomacia.puertas[nl],empresa:'Cancillería',ciudad:pick(['Bogotá','Washington','Nueva York','Londres','París','Tokio','Singapur','Montevideo']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[nl],prestigio:10+nl*2,descripcion:'La Cancillería te ha propuesto asumir una categoría superior y un nuevo destino.',req:'Experiencia en el servicio exterior'});
+      ofertas.push({tipo:'diplomacia',titulo:TRAYECTORIAS_PUBLICAS.diplomacia.puertas[nl],empresa:'Cancillería',ciudad:pick(['Bogotá','Nueva York','Londres','París','Tokio','Singapur','São Paulo']),salario:TRAYECTORIAS_PUBLICAS.diplomacia.salarios[nl],prestigio:10+nl*2,descripcion:'La Cancillería te ha propuesto asumir una categoría superior y un nuevo destino.',req:'Experiencia en el servicio exterior'});
     }
     // Judicatura
     if(!c.judicatura?.activo&&p.edad>=25&&perfilJudicialValido()){
@@ -9150,7 +9151,7 @@ function correrFundacion(res,m){
     }
     // Junta directiva: compatible con conservar empleo o empresa.
     if(p.edad>=30&&p.reputacion>=50&&p.redes>=35){
-      ofertas.push({tipo:'junta',titulo:'Miembro de junta directiva',empresa:pick(['Banco Regional','Compañía Industrial','Grupo de Infraestructura','Empresa de Tecnología']),ciudad:pick([ciudad,'Bogotá','Nueva York','Panamá','Miami']),salario:pick([18,28,42,65]),prestigio:12,descripcion:'Una compañía quiere incorporarte a su junta por tu experiencia, contactos y reputación.',req:'Trayectoria directiva o empresarial'});
+      ofertas.push({tipo:'junta',titulo:'Miembro de junta directiva',empresa:pick(['Banco Regional','Compañía Industrial','Grupo de Infraestructura','Empresa de Tecnología']),ciudad:pick([ciudad,'Bogotá','Nueva York','Ciudad de Panamá','Miami']),salario:pick([18,28,42,65]),prestigio:12,descripcion:'Una compañía quiere incorporarte a su junta por tu experiencia, contactos y reputación.',req:'Trayectoria directiva o empresarial'});
     }
     if(!ofertas.length) return;
     // Se evita generar una oferta idéntica de forma inmediata.
@@ -9195,7 +9196,7 @@ function correrFundacion(res,m){
     dxOfertaAsegurar();
     const os=S.vida.ofertasCargos;
     if(!os.length){escena({rubro:'Oportunidades',titulo:'Bandeja de ofertas',cuerpo:'No tienes ofertas de cargo pendientes. Pueden llegar de empresas, universidades, entidades públicas, organismos internacionales, juntas directivas y el servicio exterior.',opciones:[{t:'Esperar nuevas oportunidades',cat:'empleo',run:()=>{cerrarModal();render();}}],cerrable:true});return;}
-    escena({rubro:'Oportunidades',titulo:'Te están buscando',ancho:true,cuerpo:'Estas instituciones se acercaron a ti. Una oferta puede aceptarse, rechazarse o negociarse. Las ofertas caducan después de un tiempo.',opciones:os.map(o=>({t:'📩 '+o.titulo+' · '+o.empresa,cat:'empleo',d:o.ciudad+' · '+fmt(o.salario)+' al año · '+o.descripcion,run:()=>{escena({rubro:'Oferta de cargo',titulo:o.titulo,cuerpo:'<b>'+esc(o.empresa)+'</b><br>'+esc(o.ciudad)+' · remuneración propuesta: <b>'+fmt(o.salario)+'</b> al año.<br><br>'+esc(o.descripcion)+'<br><br><span class="muted">Requisito de referencia: '+esc(o.req||'Trayectoria profesional')+'</span>',opciones:[{t:'Aceptar el cargo',cat:'empleo',run:()=>{const msg=dxAplicarOferta(o);o.estado='aceptada';log(msg,'hito');hito('Aceptó: '+o.titulo);S.mov--;cerrarModal();render();}},{t:'Negociar condiciones',cat:'empleo',run:()=>{const prob=clamp(.35+S.p.atr.carisma/25+S.p.reputacion/260,.20,.88);if(chance(prob)){o.salario*=1.12;o.prestigio+=2;log('La negociación funcionó: '+esc(o.empresa)+' mejoró la propuesta.','bien');}else{log('La negociación no prosperó. La propuesta original sigue disponible.','mal');}S.mov--;render();}},{t:'Rechazar',cat:'legado',run:()=>{o.estado='rechazada';log('Rechazaste la oferta de '+esc(o.titulo)+' en '+esc(o.empresa)+'.','');S.mov--;cerrarModal();render();}}],cerrable:true});}})),cerrable:true});
+    escena({rubro:'Oportunidades',titulo:'Te están buscando',ancho:true,cuerpo:'Estas instituciones se acercaron a ti. Una oferta puede aceptarse, rechazarse o negociarse. Las ofertas caducan después de un tiempo.',opciones:os.map(o=>({t:'📩 '+o.titulo+' · '+o.empresa,cat:'empleo',d:o.ciudad+' · '+fmt(o.salario)+' al año · '+o.descripcion,run:()=>{escena({rubro:'Oferta de cargo',titulo:o.titulo,cuerpo:'<b>'+esc(o.empresa)+'</b><br>'+esc(o.ciudad)+' · remuneración propuesta: <b>'+fmt(o.salario)+'</b> al año.<br><br>'+esc(o.descripcion)+'<br><br><span class="muted">Requisito de referencia: '+esc(o.req||'Trayectoria profesional')+'</span>',opciones:[{t:'Aceptar el cargo',cat:'empleo',run:()=>{const aplicar=()=>{const msg=dxAplicarOferta(o);o.estado='aceptada';log(msg,'hito');hito('Aceptó: '+o.titulo);S.mov--;cerrarModal();render();};if(typeof window.sa42Traslado==='function'){window.sa42Traslado(o,aplicar);}else{aplicar();}}},{t:'Negociar condiciones',cat:'empleo',run:()=>{const prob=clamp(.35+S.p.atr.carisma/25+S.p.reputacion/260,.20,.88);if(chance(prob)){o.salario*=1.12;o.prestigio+=2;log('La negociación funcionó: '+esc(o.empresa)+' mejoró la propuesta.','bien');}else{log('La negociación no prosperó. La propuesta original sigue disponible.','mal');}S.mov--;render();}},{t:'Rechazar',cat:'legado',run:()=>{o.estado='rechazada';log('Rechazaste la oferta de '+esc(o.titulo)+' en '+esc(o.empresa)+'.','');S.mov--;cerrarModal();render();}}],cerrable:true});}})),cerrable:true});
   }
 
   /* Acciones adicionales: solo aparecen cuando tienen sentido. */
@@ -9371,7 +9372,7 @@ function correrFundacion(res,m){
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   window.addEventListener('load',async()=>{
     try{ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.update().catch(()=>null))); }catch(e){}
-    try{ await navigator.serviceWorker.register('./sw.js?v=41',{updateViaCache:'none'}); }catch(e){}
+    try{ await navigator.serviceWorker.register('./sw.js?v=42',{updateViaCache:'none'}); }catch(e){}
   });
 }
 </script>
@@ -9400,7 +9401,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     }; return a[name]||a.star;
   };
   function s35Asegurar(){
-    if(!window.S) return false;
+    if(!S) return false;
     S.vida=(S.vida&&typeof S.vida==='object')?S.vida:{};
     if(!Array.isArray(S.vida.momentos))S.vida.momentos=[];
     const c=(S.vida.casaViva&&typeof S.vida.casaViva==='object')?S.vida.casaViva:{};
@@ -9529,7 +9530,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     c.anios.push(r);c.anios=c.anios.slice(-100);return r;
   }
   function s35CorrerAnual(){
-    if(!window.S||S.muerto)return;
+    if(!S||S.muerto)return;
     safe(()=>s35MundoAnual(),null); safe(()=>s35EvolucionHijos(),null); safe(()=>s35ResumenAnual(),null); safe(()=>{S.vida.casaViva.prestigioCasa=Math.round(safe(()=>prestigio(),S.vida.casaViva.prestigioCasa||50));},null);
   }
   function s35EscenaPerfil(h){
@@ -9587,7 +9588,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     h+='</div>';return h;
   }
   function s35Render(){
-    if(!window.S||typeof render!=='function')return;
+    if(!S||typeof render!=='function')return;
     s35Asegurar(); s35CrearFamilias();
     const host=document.querySelector('#lienzoJuego'); if(!host)return;
     host.querySelectorAll('.sa35-inject').forEach(x=>x.remove());
@@ -9618,7 +9619,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   // Acción anual: la capa autónoma corre después del motor principal.
   const oldPaso=window.pasarAnio;
   if(typeof oldPaso==='function'&&!window.__SA35_PASO){
-    window.pasarAnio=function(){let before=safe(()=>window.S?.anio,null); const r=oldPaso.apply(this,arguments); try{if(window.S&&!S.muerto){s35CorrerAnual();}}catch(e){} try{render();}catch(e){} return r;}; window.__SA35_PASO=true;
+    window.pasarAnio=function(){let before=safe(()=>(S?S.anio:null),null); const r=oldPaso.apply(this,arguments); try{if(S&&!S.muerto){s35CorrerAnual();}}catch(e){} try{render();}catch(e){} return r;}; window.__SA35_PASO=true;
   }
   const oldInit=window.iniciar;
   if(typeof oldInit==='function'&&!window.__SA35_INIT){
@@ -9645,7 +9646,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const V40='v40';
   const safe40=(fn,ret)=>{try{return fn()}catch(e){return ret;}};
   function asegurar40(){
-    if(!window.S||!S.familia) return;
+    if(!S||!S.familia) return;
     S.familia.hijos=S.familia.hijos||[];
     S.familia.hijos.forEach(h=>{
       h.bienes=Array.isArray(h.bienes)?h.bienes:[];
@@ -9783,7 +9784,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.accionesGobiernoFamilia=function(A){old.apply(this,arguments); if(S.gobiernoFamilia?.protocolo) A.push({t:'Consejo: designar heredero de referencia',cat:'familia',d:'El consejo expresa quién debería liderar la Casa; el testamento sigue siendo independiente.',mov:1,modal:true,run:()=>consejo40()});}; window.__SA40_GOB=true;
   }
   function financiero40(){
-    if(!window.S||!document.querySelector('#lienzoJuego')||typeof render!=='function')return;
+    if(!S||!document.querySelector('#lienzoJuego')||typeof render!=='function')return;
     const host=document.querySelector('#lienzoJuego'); host.querySelectorAll('.sa40-fin').forEach(x=>x.remove());
     if(tab!=='mercado')return;
     const wrap=host.querySelector('.wrap'); if(!wrap)return;
@@ -9841,6 +9842,404 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     },250);
   })();
 })();
+
+
+/* ======================================================================
+   SOCIEDAD ANÓNIMA v42
+   - Pensiones: cotización, semanas, régimen y mesada.
+   - Salario del presidente en compañía propia, negociado con la junta.
+   - Ofertas de trabajo en el exterior: mudarse deja de ser opcional.
+   Se monta encima del motor con envoltorios; cada paso va protegido.
+   ====================================================================== */
+(function(){
+  'use strict';
+  const V42='v42';
+  const safe42=(fn,ret)=>{try{return fn()}catch(e){return ret;}};
+  const MINIMO_ANUAL=21;                 // salario mínimo anual del juego, en millones
+  const SEMANAS_MIN=1300;                // 25 años cotizados
+  const edadPension=sexo=>sexo==='m'?57:62;
+
+  /* ---------------- estado ---------------- */
+  function asegurar42(){
+    if(!S||!S.p) return false;
+    if(!S.pension||typeof S.pension!=='object') S.pension={};
+    const P=S.pension;
+    if(!isFinite(P.semanas)) P.semanas=0;
+    if(!isFinite(P.aportado)) P.aportado=0;
+    if(!isFinite(P.saldo)) P.saldo=0;
+    if(!isFinite(P.baseSuma)) P.baseSuma=0;
+    if(!isFinite(P.baseAnios)) P.baseAnios=0;
+    if(!P.regimen) P.regimen='prima';     // 'prima' (Colpensiones) o 'ahorro' (fondo privado)
+    if(typeof P.activa!=='boolean') P.activa=false;
+    if(!isFinite(P.mesada)) P.mesada=0;
+    if(!isFinite(P.desde)) P.desde=0;
+    P.version=V42;
+    if(S.emp&&!isFinite(S.emp.salarioPresidente)) S.emp.salarioPresidente=0;
+    return true;
+  }
+  function añosCotizados(){ return Math.floor((S.pension.semanas||0)/52); }
+  function ibl(){   // ingreso base de liquidación: el promedio de lo cotizado
+    const P=S.pension;
+    return P.baseAnios>0 ? P.baseSuma/P.baseAnios : 0;
+  }
+  function mesadaPrimaMedia(){
+    const base=ibl();
+    if(base<=0) return 0;
+    // tasa de reemplazo: sube con las semanas, como en el régimen de prima media
+    const extra=Math.max(0,(S.pension.semanas-SEMANAS_MIN)/52)*.015;
+    const tasa=clamp(.65+extra,.65,.80);
+    return Math.max(MINIMO_ANUAL,base*tasa);
+  }
+  function mesadaAhorro(){
+    // el saldo se reparte en la expectativa de vida restante
+    const saldo=Math.max(0,S.pension.saldo||0);
+    if(saldo<=0) return 0;
+    return Math.max(0,saldo/20);
+  }
+  function mesadaEstimada(){
+    return S.pension.regimen==='ahorro'?mesadaAhorro():mesadaPrimaMedia();
+  }
+  function cumpleEdad(){ return S.p.edad>=edadPension(S.p.sexo); }
+  function puedePensionarse(){
+    if(S.pension.activa) return false;
+    if(S.pension.regimen==='ahorro') return mesadaAhorro()>=MINIMO_ANUAL||(cumpleEdad()&&S.pension.saldo>0);
+    return cumpleEdad()&&S.pension.semanas>=SEMANAS_MIN;
+  }
+  function faltaParaPension(){
+    if(S.pension.regimen==='ahorro'){
+      const m=mesadaAhorro();
+      if(m>=MINIMO_ANUAL) return null;
+      return 'El saldo alcanza para una mesada de '+fmt(m)+' y el mínimo es '+fmt(MINIMO_ANUAL)+'.';
+    }
+    const faltaEdad=Math.max(0,edadPension(S.p.sexo)-S.p.edad);
+    const faltaSem=Math.max(0,SEMANAS_MIN-(S.pension.semanas||0));
+    if(!faltaEdad&&!faltaSem) return null;
+    const partes=[];
+    if(faltaEdad) partes.push('te faltan '+faltaEdad+' años de edad');
+    if(faltaSem) partes.push('te faltan '+Math.ceil(faltaSem/52)+' años de cotización');
+    return partes.join(' y ')+'.';
+  }
+
+  /* ---------------- cotización anual ---------------- */
+  function ingresoLaboralDelAnio(){
+    const c=S.carrera||{}, m=S.macro||{inflacion:.05};
+    let sal=0;
+    if(c.ruta&&RUTAS[c.ruta]&&RUTAS[c.ruta].niveles&&RUTAS[c.ruta].niveles[c.nivel]){
+      const nv=RUTAS[c.ruta].niveles[c.nivel];
+      sal=nv.s*(1+(m.inflacion||0)*.7)*(1+((c.desempeno||50)-50)/300)*(1+(c.salarioExtra||0));
+    }
+    if(c.ruta==='fundador'&&S.emp) sal=Math.max(sal,S.emp.salarioPresidente||0);
+    if(safe42(()=>c.diplomacia&&c.diplomacia.activo,false))
+      sal=Math.max(sal,TRAYECTORIAS_PUBLICAS.diplomacia.salarios[clamp(c.diplomacia.nivel||0,0,TRAYECTORIAS_PUBLICAS.diplomacia.salarios.length-1)]);
+    if(safe42(()=>c.judicatura&&c.judicatura.activo,false))
+      sal=Math.max(sal,TRAYECTORIAS_PUBLICAS.judicatura.salarios[clamp(c.judicatura.nivel||0,0,TRAYECTORIAS_PUBLICAS.judicatura.salarios.length-1)]);
+    return Math.max(0,sal);
+  }
+  function correrPension42(){
+    if(!asegurar42()) return;
+    const P=S.pension, m=S.macro||{inflacion:.05};
+    if(P.activa){
+      P.mesada=Math.max(MINIMO_ANUAL,(P.mesada||0)*(1+(m.inflacion||0)));   // se ajusta con la inflación
+      S.efectivo+=P.mesada;
+      if(P.regimen==='ahorro') P.saldo=Math.max(0,P.saldo-P.mesada);
+      S.p.felicidad=clamp(S.p.felicidad+1,0,100);   // no trabajar no es estar desempleado
+      log('Mesada pensional del año: '+fmt(P.mesada)+'.','bien');
+      return;
+    }
+    const sal=ingresoLaboralDelAnio();
+    if(sal<=0) return;
+    const aporte=sal*.16;                 // 16%, como en el sistema real
+    S.efectivo-=Math.min(S.efectivo,aporte);
+    P.aportado+=aporte;
+    P.semanas+=52;
+    P.baseSuma+=sal; P.baseAnios+=1;
+    if(P.regimen==='ahorro'){
+      const rend=clamp(.045+(m.ciclo||0)*.6+rnd(-.02,.035),-.08,.16);
+      P.saldo=Math.max(0,(P.saldo+aporte)*(1+rend));
+    }
+  }
+
+  /* ---------------- escena de pensión ---------------- */
+  function escenaPension(){
+    asegurar42();
+    const P=S.pension;
+    const regimen=P.regimen==='ahorro'?'fondo privado de pensiones':'Colpensiones (prima media)';
+    const falta=faltaParaPension();
+    const est=mesadaEstimada();
+    if(P.activa){
+      escena({rubro:'Pensión',titulo:'Estás pensionado',ancho:true,
+        cuerpo:'Te pensionaste en '+P.desde+' por el '+esc(regimen)+'. La mesada de este año es de <b>'+fmt(P.mesada)
+          +'</b> y se ajusta con la inflación.'
+          +(P.regimen==='ahorro'?'<br><br>Queda un saldo de '+fmt(P.saldo)+' en la cuenta. Si se agota, la mesada baja al mínimo.':'')
+          +'<br><br>Nada te impide volver a trabajar: la mesada sigue entrando.',
+        opciones:[{t:'Está bien así',cat:'legado',run:()=>{}}],cerrable:true});
+      return;
+    }
+    const filas=[
+      ['Régimen',regimen],
+      ['Semanas cotizadas',Math.round(P.semanas)+' de '+SEMANAS_MIN+' ('+añosCotizados()+' años)'],
+      ['Edad',S.p.edad+' · se requieren '+edadPension(S.p.sexo)],
+      ['Aportado hasta hoy',fmt(P.aportado)],
+      [P.regimen==='ahorro'?'Saldo en la cuenta':'Ingreso base de liquidación',fmt(P.regimen==='ahorro'?P.saldo:ibl())],
+      ['Mesada que saldría',fmt(est)+' al año']
+    ];
+    const opciones=[];
+    if(puedePensionarse()){
+      opciones.push({t:'Pensionarte',cat:'legado',
+        d:'Dejas el trabajo y entra una mesada de '+fmt(est)+' al año, ajustada por inflación, de por vida.',
+        run:()=>{
+          P.activa=true; P.desde=S.anio; P.mesada=est;
+          const c=S.carrera;
+          if(c&&c.ruta&&c.ruta!=='fundador'){ c.ruta='desempleado'; c.empleador=null; c.nivel=-1; }
+          S.p.felicidad=clamp(S.p.felicidad+12,0,100);
+          moverPrestigio(2,'te pensionaste con todas las de la ley');
+          log('Te pensionaste por el <b>'+esc(regimen)+'</b>: '+fmt(est)+' al año.','hito');
+          hito('Se pensionó a los '+S.p.edad+' años');
+          S.mov--;
+        }});
+    }
+    if(!P.activa&&cumpleEdad()&&P.regimen==='prima'&&P.semanas<SEMANAS_MIN&&P.aportado>0){
+      opciones.push({t:'Pedir la indemnización sustitutiva',cat:'capital',
+        d:'No alcanzaste las semanas. Te devuelven lo aportado, '+fmt(P.aportado*1.05)+', y renuncias a la mesada.',
+        run:()=>{
+          const x=P.aportado*1.05;
+          S.efectivo+=x; P.aportado=0; P.semanas=0; P.baseSuma=0; P.baseAnios=0;
+          log('Recibiste '+fmt(x)+' como indemnización sustitutiva. No habrá mesada.','mal');
+          S.mov--;
+        }});
+    }
+    const puedeTrasladarse=!P.activa&&S.p.edad<edadPension(S.p.sexo)-10;
+    opciones.push({t:P.regimen==='ahorro'?'Trasladarte a Colpensiones':'Trasladarte a un fondo privado',
+      cat:'capital',
+      d:P.regimen==='ahorro'
+        ? 'La mesada dependería del promedio de lo cotizado y no del saldo. Más previsible, con tope.'
+        : 'La mesada dependería del saldo acumulado y su rendimiento. Más arriesgado, sin tope.',
+      dis:puedeTrasladarse?null:'Solo se puede trasladar hasta diez años antes de la edad de pensión',
+      run:()=>{
+        if(P.regimen==='ahorro'){ P.regimen='prima'; P.saldo=0; }
+        else { P.regimen='ahorro'; P.saldo=P.aportado*.92; }
+        log('Te trasladaste de régimen pensional.','');
+        S.mov--;
+      }});
+    opciones.push({t:'Seguir cotizando',cat:'empleo',d:falta?'Por ahora, '+falta:'Puedes esperar para que suba la mesada.',run:()=>{}});
+    escena({rubro:'Pensión',titulo:'Tu pensión',ancho:true,
+      cuerpo:'El 16% de lo que ganas se va a pensión todos los años. Lo que recibas al final depende del régimen, '
+        +'de cuánto cotizaste y de cuántos años.'+(falta?'<br><br><b>Todavía no puedes pensionarte:</b> '+esc(falta):'<br><br><b>Ya cumples los requisitos.</b>'),
+      html:'<div class="mesa-trato">'+filas.map(f=>'<div class="trato-fila"><span>'+f[0]+'</span><span>'+f[1]+'</span></div>').join('')+'</div>',
+      opciones,cerrable:true});
+  }
+
+  /* ---------------- salario del presidente ---------------- */
+  const NIVELES_SUELDO=[
+    {id:'ninguno',n:'No cobrar sueldo',pct:0,     d:'Vives de los dividendos. La junta lo aplaude y los empleados lo notan.'},
+    {id:'austero',n:'Sueldo austero',  pct:.006,  d:'Por debajo del mercado. Nadie va a decir que te llevas la plata.'},
+    {id:'mercado',n:'Sueldo de mercado',pct:.014, d:'Lo que gana un presidente de una compañía así. Nadie opina.'},
+    {id:'alto',   n:'Sueldo alto',     pct:.028,  d:'Por encima del mercado. La junta lo va a mirar con lupa.'},
+    {id:'discreto',n:'El que tú decidas',pct:.05, d:'Mandas tú. Si el año viene malo, esto se convierte en el tema.'}
+  ];
+  function escenaSalarioPresidente(){
+    asegurar42();
+    const e=S.emp;
+    if(!e){ return; }
+    const actual=e.salarioPresidente||0;
+    escena({rubro:'Remuneración',titulo:'Tu sueldo como presidente',ancho:true,
+      cuerpo:'Presidir la compañía es un cargo, aunque la compañía sea tuya. El sueldo sale de la caja de '
+        +esc(e.nombre)+' y entra a tu bolsillo personal, cotiza a pensión y lo aprueba la junta. '
+        +'Cobrar de más cuando la compañía va mal es la forma más rápida de perder una junta.'
+        +'<br><br>Hoy cobras <b>'+(actual>0?fmt(actual)+' al año':'nada')+'</b>. '
+        +'Utilidad del último año: '+fmt(e.utilidad||0)+'.',
+      opciones:NIVELES_SUELDO.map(nv=>{
+        const monto=e.ingresos*nv.pct;
+        return {t:nv.n,cat:'capital',
+          d:nv.d+(monto>0?' Serían '+fmt(monto)+' al año.':''),
+          run:()=>{
+            e.salarioPresidente=monto;
+            const junta=e.junta||S.junta||[];
+            if(nv.pct>=.028){
+              const enfado=(e.utilidad||0)<0?14:6;
+              junta.forEach(j=>j.lealtad=clamp(j.lealtad-enfado,0,100));
+              e.moral=clamp((e.moral||60)-(nv.pct>=.05?8:4),0,100);
+              if((e.utilidad||0)<0) moverPrestigio(-3,'te subiste el sueldo con la compañía en pérdidas');
+              log('Fijaste tu sueldo en '+fmt(monto)+'. La junta tomó nota'+((e.utilidad||0)<0?' y no le gustó':'')+'.', (e.utilidad||0)<0?'mal':'');
+            } else if(nv.pct===0){
+              junta.forEach(j=>j.lealtad=clamp(j.lealtad+5,0,100));
+              e.moral=clamp((e.moral||60)+3,0,100);
+              log('Renunciaste al sueldo de presidente. En la compañía se supo.','bien');
+            } else {
+              junta.forEach(j=>j.lealtad=clamp(j.lealtad+2,0,100));
+              log('Tu sueldo como presidente de '+esc(e.nombre)+' queda en '+fmt(monto)+' al año.','');
+            }
+            S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function correrSalarioPresidente42(){
+    if(!asegurar42()) return;
+    const e=S.emp;
+    if(!e||!S.carrera||S.carrera.ruta!=='fundador') return;
+    const sal=e.salarioPresidente||0;
+    if(sal<=0) return;
+    const disponible=Math.min(sal,Math.max(0,e.caja));
+    if(disponible<sal*.5){
+      log('La caja de <b>'+esc(e.nombre)+'</b> no alcanzó para pagar tu sueldo completo de presidente.','mal');
+    }
+    e.caja-=disponible;
+    S.efectivo+=disponible;
+    if(disponible>0) log('Cobraste '+fmt(disponible)+' de sueldo como presidente de '+esc(e.nombre)+'.','');
+  }
+
+  /* ---------------- traslado obligatorio por oferta ---------------- */
+  function ciudadDeOferta(o){ return o&&o.ciudad?o.ciudad:null; }
+  function ciudadValida(c){
+    if(!c) return false;
+    return safe42(()=>!!datosCiudad(c),false);
+  }
+  function requiereTraslado(o){
+    if(!o||o.tipo==='junta') return false;          // una silla de junta se atiende viajando
+    const c=ciudadDeOferta(o);
+    if(!c||c===S.p.ciudad) return false;
+    if(!ciudadValida(c)) return false;              // destino no reconocido: no se fuerza nada
+    return true;
+  }
+  function esOtroPais(ciudad){
+    const g=safe42(()=>ciudadGlobalDe(ciudad),null);
+    return !!g;
+  }
+  function costosTraslado(ciudad){
+    const g=safe42(()=>ciudadGlobalDe(ciudad),null);
+    const nivel=clamp(S.hogar?S.hogar.nivel:1,0,4);
+    const personas=safe42(()=>personasEnCasa(),1);
+    if(g){
+      const c=safe42(()=>costoMudanzaGlobal(g,nivel),{arriendo:20,deposito:30,total:60});
+      const tiquetes=Math.max(6,3.2*personas*g.costo);
+      const tramites=Math.max(4,2.6*personas*g.costo);
+      const enseres=Math.max(5,8*g.costo*(.7+.15*nivel));
+      return {global:true,g,tiquetes,tramites,enseres,instalacion:g.traslado,
+        deposito:c.deposito,arriendo:c.arriendo,
+        total:tiquetes+tramites+enseres+g.traslado+c.deposito};
+    }
+    const mult=safe42(()=>multCiudad(ciudad),1);
+    const arr=safe42(()=>arriendoActual(),24)*mult;
+    const tiquetes=Math.max(1,.6*personas);
+    const enseres=Math.max(2,3.5*(.7+.15*nivel));
+    const deposito=arr*.5;
+    return {global:false,tiquetes,tramites:0,enseres,instalacion:0,deposito,arriendo:arr,
+      total:tiquetes+enseres+deposito};
+  }
+  function ejecutarTraslado(ciudad,costos){
+    const viv=safe42(()=>viviendaPropia(),null);
+    let neto=0;
+    if(viv){ neto=safe42(()=>venderBien(viv,.05),0);
+      log('Vendiste la vivienda de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar el traslado.'); }
+    S.efectivo-=Math.min(S.efectivo,costos.total);
+    S.hogar.ciudad=ciudad; S.hogar.zona=1; S.hogar.vivienda=null; S.hogar.conLosPadres=false;
+    S.p.ciudad=ciudad;
+    S.p.redes=clamp(S.p.redes*(costos.global?.55:.75),0,100);
+    if(costos.global) S.p.felicidad=clamp(S.p.felicidad-4,0,100);
+    hito('Se trasladó a '+ciudad);
+  }
+  /* La llama la escena de ofertas antes de aplicar el cargo. */
+  window.sa42Traslado=function(o,alAceptar){
+    if(!asegurar42()||!requiereTraslado(o)){ alAceptar(); return; }
+    const ciudad=ciudadDeOferta(o);
+    const fuera=esOtroPais(ciudad);
+    const c=costosTraslado(ciudad);
+    const viv=safe42(()=>viviendaPropia(),null);
+    const personas=safe42(()=>personasEnCasa(),1);
+    const filas=[];
+    if(c.tiquetes) filas.push(['Tiquetes para '+personas+(personas===1?' persona':' personas'),fmt(c.tiquetes)]);
+    if(c.tramites) filas.push(['Visados y trámites migratorios',fmt(c.tramites)]);
+    if(c.enseres) filas.push(['Trasteo de enseres',fmt(c.enseres)]);
+    if(c.instalacion) filas.push(['Instalación en destino',fmt(c.instalacion)]);
+    if(c.deposito) filas.push(['Depósito y primer arriendo',fmt(c.deposito)]);
+    filas.push(['<b>Total para cruzar la puerta</b>','<b>'+fmt(c.total)+'</b>']);
+    const alcanza=S.efectivo>=c.total;
+    escena({rubro:fuera?'Traslado al exterior':'Traslado de ciudad',
+      titulo:'El cargo es en '+esc(ciudad),ancho:true,
+      cuerpo:(fuera
+        ? 'Este cargo no se puede atender desde Colombia: hay que <b>vivir en '+esc(ciudad)+'</b>. '
+          +'La familia se va contigo y el hogar completo se traslada allá.'
+        : 'El cargo es en '+esc(ciudad)+', así que toca mover la casa hasta allá.')
+        +'<br><br>'+(viv
+          ? 'Tienes vivienda propia en '+esc(S.hogar.ciudad)+': se vende para financiar el traslado.'
+          : 'No tienes vivienda propia aquí, así que no hay nada que vender.')
+        +' En destino empiezas arrendando.'
+        +'<br>Los contactos no se mudan contigo: pierdes cerca del '
+        +(fuera?'45%':'25%')+' de tu red.'
+        +(fuera?' El costo de vida allá es '+(c.g?c.g.costo.toFixed(2):'1.00')+' veces el de aquí, y queda integrado al hogar desde el año siguiente.':''),
+      html:'<div class="mesa-trato">'+filas.map(f=>'<div class="trato-fila"><span>'+f[0]+'</span><span>'+f[1]+'</span></div>').join('')
+        +'<div class="apunte">Tienes '+fmt(S.efectivo)+' en caja.'+(alcanza?'':' <b>No alcanza.</b>')+'</div></div>',
+      opciones:[
+        {t:'Aceptar el cargo y mudarse',cat:'empleo',
+         d:alcanza?'Se paga el traslado y la familia se instala en '+esc(ciudad)+'.':'Te faltan '+fmt(c.total-S.efectivo)+'.',
+         dis:alcanza?null:'No tienes con qué pagar el traslado',
+         run:()=>{ ejecutarTraslado(ciudad,c); alAceptar(); }},
+        {t:'Rechazar: no me muevo de aquí',cat:'legado',
+         d:'Se pierde la oferta, pero la casa sigue donde está.',
+         run:()=>{ log('Rechazaste el cargo en '+esc(ciudad)+': habría que mudarse.',''); }}
+      ]});
+  };
+
+  /* ---------------- cartas nuevas ---------------- */
+  function addAcciones42(){
+    if(window.__SA42_ACC) return;
+    const old=window.listaAcciones;
+    if(typeof old!=='function') return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      if(!asegurar42()) return A;
+      const P=S.pension;
+      if(P.activa||P.semanas>0||S.p.edad>=30){
+        A.push({t:P.activa?'Tu pensión':'Revisar tu pensión',cat:'legado',mov:1,modal:true,
+          d:P.activa
+            ? 'Mesada de '+fmt(P.mesada)+' al año.'
+            : (añosCotizados()+' años cotizados · '+(puedePensionarse()?'ya puedes pensionarte':(faltaParaPension()||''))),
+          run:()=>escenaPension()});
+      }
+      if(S.emp&&S.carrera&&S.carrera.ruta==='fundador'){
+        A.push({t:'Fijar tu sueldo como presidente',cat:'capital',mov:1,modal:true,
+          d:(S.emp.salarioPresidente>0?'Hoy cobras '+fmt(S.emp.salarioPresidente)+' al año.':'Hoy no te pagas sueldo.')
+            +' Sale de la caja de la compañía y cotiza a pensión.',
+          run:()=>escenaSalarioPresidente()});
+      }
+      return A;
+    };
+    window.__SA42_ACC=true;
+  }
+  function wrapPaso42(){
+    if(window.__SA42_PASO) return;
+    const old=window.pasarAnio;
+    if(typeof old!=='function') return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(S&&!S.muerto){ correrSalarioPresidente42(); correrPension42(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA42_PASO=true;
+  }
+  /* La escena de ofertas vive dentro de otro módulo: se intercepta el clic
+     de "Aceptar el cargo" para exigir el traslado antes de aplicarlo. */
+  function wrapOfertas42(){
+    if(window.__SA42_OFERTA) return;
+    window.__SA42_OFERTA=true;
+  }
+  function init42(){
+    [asegurar42,addAcciones42,wrapPaso42,wrapOfertas42].forEach(fn=>{
+      try{ fn(); }catch(e){ console.warn('v42: falló '+(fn.name||'?'),e); }
+    });
+  }
+  setTimeout(init42,0);
+  (function reintento42(){
+    let n=0;
+    const t=setInterval(()=>{
+      n++;
+      if((window.__SA42_ACC&&window.__SA42_PASO)||n>40){ clearInterval(t); return; }
+      try{ init42(); }catch(e){}
+    },250);
+  })();
+})();
+
 </script>
 
 </body>
