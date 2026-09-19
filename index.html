@@ -3132,8 +3132,6 @@ function escenaSucesionAjena(pa,alTerminar){
     const padreMuerto=progenitor&&!progenitor.vivo;
     representacion=!!padreMuerto;
     reclamantes=Math.max(1,ramaHijos.filter(x=>x.vivo).length+(padreMuerto?1:0));
-    if(padreMuerto) intro='Tu '+esc(rel)+' sigue viva y tu '+esc(progenitor.rel)+' ya murió. Puedes reclamar como representante de la rama familiar que dejó tu '+esc(progenitor.rel)+'.';
-    else intro='Tu '+esc(rel)+' sigue viva, pero la rama de tu '+esc(progenitor.rel||'progenitor')+' todavía existe. La herencia corresponde primero a esa generación.';
   }
   else if(rel==='hermano'||rel==='hermana') reclamantes=Math.max(1,hermanos.filter(x=>x.pid!==pa.pid).length+1);
   else reclamantes=Math.max(1,parientesVivos().filter(x=>x.rama===pa.rama&&x.pid!==pa.pid).length+1);
@@ -6056,13 +6054,15 @@ function pasarAnio(){
   if(S.familia.pareja){
     const desatendida = (c.ruta==='fundador'? 8:4) + (S.p.felicidad<40?6:0);
     S.familia.pareja.paciencia=clamp(S.familia.pareja.paciencia-desatendida+ri(0,6),0,100);
-    if(S.familia.pareja.paciencia<12&&chance(.45)){
+    if(S.familia.pareja.paciencia<12&&S.familia.pareja.casados&&!S.familia.pareja.divorcioEnCurso&&chance(.45)){
       const nom=S.familia.pareja.nombre;
-      const corte = S.familia.pareja.casados&&!S.familia.pareja.separacionBienes ? .35:.08;
-      const perdida=patrimonio()*corte;
-      S.efectivo=Math.max(0,S.efectivo-Math.min(S.efectivo,perdida));
-      log('<b>'+esc(nom)+'</b> se fue. El divorcio se llevó cerca de '+fmt(perdida)+'.','mal');
-      S.familia.pareja=null; S.p.felicidad-=18;
+      S.familia.pareja.divorcioEnCurso=true;
+      iniciarCompromiso({titulo:'Proceso de divorcio con '+nom,restan:2,mov:1,cerrar:()=>ejecutarDivorcio()});
+      log('<b>'+esc(nom)+'</b> inició una separación formal. El divorcio tardará dos años y ocupará una movida por año.','mal');
+    } else if(S.familia.pareja.paciencia<12&&!S.familia.pareja.casados&&chance(.45)){
+      const nom=S.familia.pareja.nombre;
+      log('La relación con <b>'+esc(nom)+'</b> terminó antes del matrimonio.','mal');
+      S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-8,0,100);
     }
   }
   S.familia.hijos.forEach(h=>{ h.edad++; h.etapa=h.edad<13?'infancia':h.edad<18?'adolescencia':h.edad<25?'juventud':'adulto';
@@ -6129,7 +6129,14 @@ function correrEmpresa(res,cual){
   if(presides(e)) { /* la diriges tú */ }
   else if(e.presidente) g += (e.presidente.capaz-5)*.013;
   else g -= .055;
-  if(e.presidente&&e.presidente.sueldo){ e.caja-=e.presidente.sueldo; }
+  if(e.presidente&&e.presidente.sueldo){
+    const sueldoPres=e.presidente.sueldo;
+    e.caja-=sueldoPres;
+    if(presides(e)){
+      S.efectivo+=sueldoPres;
+      res.push(['Sueldo de presidente · '+e.nombre,sueldoPres,'pos']);
+    }
+  }
   if(hayMatriz()) g += .004*Math.min(4,companias().length-1);
   (e.junta||[]).forEach(j=>{const a=arq(j.arq);
     if(!isFinite(j.lealtad)) j.lealtad=50;
@@ -6870,9 +6877,10 @@ function heredar(h,frac,vivo,pleito){
   }
   // los bienes grandes pasan enteros al heredero hasta donde llegue su parte;
   // lo que no le toca se vende y entra como efectivo al reparto
+  const bienesPropiosHeredero=(h&&Array.isArray(h.bienes)?h.bienes:[]).map(b=>({...b}));
   const bienesOrd=(S.bienes||[]).slice().sort((a,b)=>b.valor-a.valor);
   const totalBienes=bienesOrd.reduce((a,b)=>a+b.valor,0);
-  const bienesHeredados=[]; let acumB=0, liquidado=0;
+  const bienesHeredados=bienesPropiosHeredero.slice(); let acumB=0, liquidado=0;
   bienesOrd.forEach(b=>{
     if(acumB+b.valor<=totalBienes*frac+1){ bienesHeredados.push(b); acumB+=b.valor; }
     else liquidado+=Math.max(0,b.valor-(b.hipoteca||0));
@@ -9017,19 +9025,40 @@ function correrFundacion(res,m){
     }
   }
   function dxHijoTieneNieto(h){
-    if(!h.pareja||h.edad<27||h.edad>45||(h.hijos||[]).length>=4) return;
-    if(!chance(clamp(.045+(42-Math.abs(36-h.edad))*.0025,.045,.12))) return;
-    const sx=chance(.5)?'h':'m';
-    const ciudad=h.ciudad||S.p.ciudad;
-    const g={
-      nombre:nombreLocal(ciudad,sx),sexo:sx,edad:0,apellido:(h.apellido||S.p.apellido),ciudad,
-      gid:'g'+Date.now().toString(36)+ri(100,999),nacido:S.anio,origen:'nieto',padres:[h.nombre,h.pareja.nombre],vinculo:70,
-      atr:{intelecto:ri(3,8),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)},formacion:0,etapa:'infancia'
-    };
-    h.hijos.push(g);
-    hito('Nació '+(sx==='m'?'una niña':'un niño')+': '+g.nombre+' '+S.p.apellido+', nieto/a de la casa');
-    log('<b>'+esc(h.nombre)+'</b> tuvo '+(sx==='m'?'una niña':'un niño')+': <b>'+esc(g.nombre)+' '+esc(S.p.apellido)+'</b>. La siguiente generación ya empezó.','hito');
-    dxRegistrarMomento('Nació '+g.nombre+' '+S.p.apellido+', descendiente de '+h.nombre,'hito');
+    if(!h||!h.pareja||h.edad<27||h.edad>50||(h.hijos||[]).length>=4) return;
+    h.embarazos=h.embarazos||[];
+    // Primero resolvemos embarazos anunciados el año anterior: nunca aparece un nieto de golpe.
+    h.embarazos.filter(x=>x.naceEn<=S.anio).forEach(preg=>{
+      const sx=preg.sexo|| (chance(.5)?'h':'m');
+      const ciudad=h.ciudad||S.p.ciudad;
+      const apPadre=h.apellido||S.p.apellido;
+      const apPareja=(h.pareja&&h.pareja.apellido)||apellidoCiudad(ciudad)||S.p.apellido;
+      const modo=preg.apellidoModo||pick(['rama','pareja','doble']);
+      const apellido=modo==='doble'&&apPadre&&apPareja?(apPadre+' '+apPareja):(modo==='pareja'?apPareja:apPadre);
+      const g={
+        nombre:preg.nombre||nombreLocal(ciudad,sx),sexo:sx,edad:0,apellido,ciudad,
+        gid:preg.gid||'g'+Date.now().toString(36)+ri(100,999),nacido:S.anio,origen:'nieto',
+        padres:[h.nombre,h.pareja.nombre],vinculo:70,confianza:65,rivalidad:0,
+        atr:{intelecto:ri(3,8),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)},formacion:0,etapa:'infancia',
+        bienes:[],patrimonio:0
+      };
+      h.hijos.push(g);
+      hito('Nació '+(sx==='m'?'una niña':'un niño')+': '+g.nombre+' '+g.apellido+', nieto/a de la casa');
+      log('<b>'+esc(h.nombre)+'</b> y '+esc(h.pareja.nombre)+' tuvieron '+(sx==='m'?'una niña':'un niño')+': <b>'+esc(g.nombre+' '+g.apellido)+'</b>. La siguiente generación ya empezó.','hito');
+      dxRegistrarMomento('Nació '+g.nombre+' '+g.apellido+', descendiente de '+h.nombre,'hito');
+    });
+    h.embarazos=h.embarazos.filter(x=>x.naceEn>S.anio);
+    if(h.embarazos.length) return;
+    if(chance(clamp(.045+(42-Math.abs(36-h.edad))*.0025,.045,.12))){
+      const sx=chance(.5)?'h':'m';
+      const ciudad=h.ciudad||S.p.ciudad;
+      const nombre=nombreLocal(ciudad,sx);
+      h.embarazos.push({id:'embh'+Date.now().toString(36)+ri(100,999),concebido:S.anio,naceEn:S.anio+1,
+        nombre,sexo:sx,pareja:h.pareja.nombre,apellidoModo:pick(['rama','rama','doble','pareja']),estado:'embarazo'});
+      log('Hay una nueva noticia familiar: <b>'+esc(h.nombre)+'</b> y '+esc(h.pareja.nombre)+' esperan un hijo. El nacimiento será el próximo año.','hito');
+      hito(h.nombre+' anunció un embarazo');
+      dxRegistrarMomento(h.nombre+' anunció un embarazo en su rama familiar','hito');
+    }
   }
   function dxEvolucionFamiliaAntes(){
     if(!S) return; dxAsegurar();
@@ -9413,7 +9442,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const paisDeCiudad=(ciudad)=>safe(()=>{const g=ciudadGlobalDe(ciudad);return g?g.pais:'Colombia'},'Colombia');
   function s35NormalizarHijo(h){
     if(!h||typeof h!=='object')return;
-    if(!isFinite(h.patrimonio))h.patrimonio=Math.max(0,Number(h.caudal||0));
+    if(!Array.isArray(h.bienes))h.bienes=[];
+    const bienesH=(h.bienes||[]).reduce((a,b)=>a+Number(b.valor||0)-Number(b.hipoteca||0),0);
+    if(!isFinite(h.patrimonio))h.patrimonio=Math.max(0,Number(h.caudal||0)+bienesH);
+    else h.patrimonio=Math.max(0,Number(h.patrimonio||0),Number(h.caudal||0)+bienesH);
     if(!Array.isArray(h.ofertas))h.ofertas=[];
     if(!Array.isArray(h.hitos))h.hitos=[];
     if(!h.ocupacion){
@@ -9621,6 +9653,195 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   // Migración inmediata para partidas ya existentes.
   safe(()=>{s35Asegurar();s35CrearFamilias();},null);
   window.__SA35={version:V,asegurar:s35Asegurar,render:s35Render,familias:s35Familias,periodico:s35Periódico};
+})();
+
+/* =====================================================================
+   v40 · AUDITORÍA DE DINASTÍA Y CONTABILIDAD
+   - Finanzas personales/corporativas visibles y separadas.
+   - Préstamos del propietario a la sociedad.
+   - Nietos/bisnietos con vida autónoma y descendencia escalonada.
+   - Consejo familiar con designación consultiva de sucesor.
+   - Apellido y patrimonio de ramas descendientes.
+   ===================================================================== */
+(function(){
+  const V40='v40';
+  const safe40=(fn,ret)=>{try{return fn()}catch(e){return ret;}};
+  function asegurar40(){
+    if(!window.S||!S.familia) return;
+    S.familia.hijos=S.familia.hijos||[];
+    S.familia.hijos.forEach(h=>{
+      h.bienes=Array.isArray(h.bienes)?h.bienes:[];
+      h.embarazos=Array.isArray(h.embarazos)?h.embarazos:[];
+      h.hijos=Array.isArray(h.hijos)?h.hijos:[];
+    });
+    if(S.emp){
+      S.emp.prestamoDueno=Math.max(0,Number(S.emp.prestamoDueno||0));
+      S.emp.interesPrestamoDueno=Number.isFinite(S.emp.interesPrestamoDueno)?S.emp.interesPrestamoDueno:.055;
+    }
+    if(!S.gobiernoFamilia) S.gobiernoFamilia={protocolo:false,reglaLiderazgo:'descendencia',reglaEducacion:false,reglaEmpleo:false,reuniones:0,ultimaReunion:0,normas:[]};
+    if(!S.gobiernoFamilia.herederoDesignado) S.gobiernoFamilia.herederoDesignado=null;
+  }
+  function apellidoRama40(d){ return d&&d.apellido ? d.apellido : safe40(()=>S.p.apellido,''); }
+  function apellidoPareja40(p){
+    if(!p) return '';
+    if(p.apellido) return p.apellido;
+    const a=String(p.nombre||'').trim().split(/\s+/); return a.length>1?a.slice(1).join(' '):'';
+  }
+  function crearDesc40(parent){
+    const partner=parent.pareja; if(!partner) return null;
+    const sx=chance(.5)?'h':'m', ciudad=parent.ciudad||S.p.ciudad;
+    const ap1=apellidoRama40(parent), ap2=apellidoPareja40(partner);
+    const modo=pick(['rama','rama','doble','pareja']);
+    const apellido=modo==='doble'&&ap1&&ap2?ap1+' '+ap2:(modo==='pareja'?ap2:ap1);
+    const n=nombreLocal(ciudad,sx);
+    const c={nombre:n,sexo:sx,edad:0,apellido:apellido||ap1||S.p.apellido,ciudad,
+      gid:'g40-'+Date.now().toString(36)+'-'+ri(100,999),nacido:S.anio,origen:'descendiente',
+      padres:[parent.nombre,partner.nombre],vinculo:70,confianza:65,rivalidad:0,formacion:0,etapa:'infancia',
+      atr:{intelecto:ri(3,8),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)},
+      bienes:[],hijos:[],embarazos:[],patrimonio:0};
+    parent.hijos=parent.hijos||[]; parent.hijos.push(c);
+    log('<b>'+esc(parent.nombre)+'</b> y '+esc(partner.nombre)+' tuvieron '+(sx==='m'?'una niña':'un niño')+': <b>'+esc(n+' '+c.apellido)+'</b>. La dinastía suma una nueva rama.','hito');
+    hito('Nació '+(sx==='m'?'una niña':'un niño')+': '+n+' '+c.apellido);
+    safe40(()=>{S.vida.momentos.push({anio:S.anio,txt:'Nació '+n+' '+c.apellido+', descendiente de '+parent.nombre,tono:'hito'});},null);
+    return c;
+  }
+  function pareja40(d){
+    if(d.pareja||d.edad<23) return;
+    const prob=clamp(.035+(d.edad-23)*.003,.035,.105);
+    if(!chance(prob)) return;
+    const sx=d.sexo==='h'?'m':'h', ciudad=d.ciudad||S.p.ciudad;
+    const ap=apellidoCiudad(ciudad);
+    d.pareja={nombre:nombreLocal(ciudad,sx)+' '+ap,apellido:ap,sexo:sx,edad:clamp(d.edad+ri(-3,4),20,60),casados:chance(.55),afecto:ri(48,88),paciencia:ri(48,82),ciudad};
+    d.vinculo=clamp((d.vinculo||60)+5,0,100);
+    log(esc(d.nombre)+' presentó a <b>'+esc(d.pareja.nombre)+'</b>. La relación entra en una etapa seria.','bien');
+  }
+  function embarazo40(d){
+    d.embarazos=d.embarazos||[];
+    d.hijos=d.hijos||[];
+    // Resolución: un embarazo siempre ocupa un año completo.
+    d.embarazos.filter(x=>x.naceEn<=S.anio).forEach(()=>crearDesc40(d));
+    d.embarazos=d.embarazos.filter(x=>x.naceEn>S.anio);
+    if(d.embarazos.length||!d.pareja||d.edad<24||d.edad>52||d.hijos.length>=5) return;
+    const f=clamp(((d.atr?.salud||70)+(d.vinculo||60))/200,.45,1);
+    if(chance(clamp(.035+Math.min(.07,(d.edad<38?d.edad-24:52-d.edad)*.0035)*f,.02,.105))){
+      d.embarazos.push({id:'emb40-'+Date.now().toString(36)+'-'+ri(100,999),concebido:S.anio,naceEn:S.anio+1,estado:'embarazo'});
+      log('La rama de <b>'+esc(d.nombre)+'</b> anunció un embarazo. El nacimiento será el próximo año.','hito');
+    }
+  }
+  function carrera40(d){
+    if(d.edad<18) return;
+    if(!d.rumbo) d.rumbo=pick(['carrera profesional','empresa propia','sector público','finanzas','profesión independiente']);
+    if(d.edad>=24&&!d.carreraProf) d.carreraProf=d.rumbo;
+    if(d.edad>=25){ d.experienciaProf=(d.experienciaProf||0)+1; d.patrimonio=Math.max(d.patrimonio||0,(d.edad-23)*ri(4,14)); }
+    if(d.edad>=30&&d.rumbo==='empresa propia'&&!d.empresaProfesional&&chance(.025)){
+      d.empresaProfesional={nombre:d.nombre+' '+(d.apellido||S.p.apellido)+' & Cía.',valor:Math.max(80,(d.patrimonio||80)*2)};
+      log('<b>'+esc(d.nombre)+'</b> fundó '+esc(d.empresaProfesional.nombre)+'.','hito');
+    }
+  }
+  function evolucion40(d,prof=0,yaEnvejecido=false){
+    if(!d||prof>5) return;
+    if(!yaEnvejecido){ d.edad=Math.min(100,(d.edad||0)+1); d.etapa=d.edad<13?'infancia':d.edad<18?'adolescencia':d.edad<25?'juventud':'adulto'; }
+    d.hijos=d.hijos||[]; d.embarazos=d.embarazos||[]; d.bienes=d.bienes||[];
+    // Los nietos ya fueron envejecidos por la capa v30; aquí damos autonomía a partir de ellos.
+    if(d._v40Visitado===S.anio) return;
+    d._v40Visitado=S.anio;
+    if(d.edad>=22) pareja40(d);
+    if(d.pareja){ d.pareja.edad=Math.min(100,(d.pareja.edad||d.edad)+0); }
+    embarazo40(d); carrera40(d);
+    if(d.edad>=27&&chance(.018) && !d.independiente) d.independiente=true;
+    if(d.edad>=28&&chance(.025)){
+      const gs=CIUDADES_GLOBALES.filter(g=>g.n!==(d.ciudad||S.p.ciudad));
+      if(gs.length){ const g=pick(gs); d.ciudad=g.n; d.independiente=true; }
+    }
+    (d.hijos||[]).forEach(x=>evolucion40(x,prof+1,false));
+  }
+  function correrDescendencia40(){
+    asegurar40();
+    // Los directos ya pasan por v30. La capa nueva empieza desde nietos y ramas posteriores.
+    (S.familia.hijos||[]).forEach(h=>(h.hijos||[]).forEach(g=>evolucion40(g,1,true)));
+  }
+
+  function escenaPrestamoDueno40(){
+    const e=S.emp;if(!e)return;
+    e.prestamoDueno=Number(e.prestamoDueno||0);
+    const opciones=[];
+    const max=Math.max(20,Math.min(S.efectivo*.35,Math.max(20,e.ingresos*.18)));
+    opciones.push({t:'Prestar '+fmt(max)+' a la compañía',cat:'capital',d:'La empresa recibe caja; tú conservas un crédito contra ella al '+pc(e.interesPrestamoDueno||.055)+' anual.',dis:S.efectivo<max?'No tienes suficiente caja personal':null,run:()=>{S.efectivo-=max;e.caja+=max;e.prestamoDueno+=max;e.interesPrestamoDueno=e.interesPrestamoDueno||.055;log('Prestaste '+fmt(max)+' a <b>'+esc(e.nombre)+'</b>. Ahora la sociedad te debe ese capital.','hito');S.mov--;}});
+    if(e.prestamoDueno>0) opciones.push({t:'Cobrar parte del préstamo',cat:'capital',d:'La empresa devuelve principal desde su caja corporativa.',dis:e.caja<Math.min(e.prestamoDueno,e.caja*.6)?'La empresa no tiene caja suficiente':null,run:()=>{const x=Math.min(e.prestamoDueno,e.caja*.6);e.caja-=x;e.prestamoDueno-=x;S.efectivo+=x;log('La compañía te devolvió '+fmt(x)+' de principal.','bien');S.mov--;}});
+    escena({rubro:'Finanzas del grupo',titulo:'Préstamo del propietario',ancho:true,cuerpo:'El préstamo no mezcla las cajas: el dinero sale de tu patrimonio, entra a la sociedad y queda registrado como una obligación corporativa contigo.',html:'<div class="apunte">Préstamo pendiente: <b>'+fmt(e.prestamoDueno)+'</b> · interés anual '+pc(e.interesPrestamoDueno||.055)+'</div>',opciones,cerrable:true});
+  }
+  function asegurarPrestamo40(){ if(!S.emp)return; S.emp.prestamoDueno=Math.max(0,Number(S.emp.prestamoDueno||0)); S.emp.interesPrestamoDueno=Number.isFinite(S.emp.interesPrestamoDueno)?S.emp.interesPrestamoDueno:.055; }
+  function addAcciones40(){
+    asegurar40(); if(!S.emp)return;
+    const old=window.listaAcciones;
+    if(typeof old!=='function'||window.__SA40_ACC)return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments)||[]; asegurar40(); if(S.emp&&S.carrera?.ruta==='fundador') A.push({t:'Préstamo del propietario a la empresa',cat:'capital',d:'Financiar la sociedad desde tu patrimonio personal, con deuda separada a tu favor.',mov:1,modal:true,run:()=>escenaPrestamoDueno40()}); return A;};
+    window.__SA40_ACC=true;
+  }
+  function wrapEmpresa40(){
+    const old=window.correrEmpresa;if(typeof old!=='function'||window.__SA40_EMP)return;
+    window.correrEmpresa=function(res,e){
+      const r=old.apply(this,arguments);
+      try{
+        if(e&&e.prestamoDueno>0){
+          const i=e.prestamoDueno*(e.interesPrestamoDueno||.055);
+          if(e.caja>=i){ e.caja-=i; S.efectivo+=i; res.push(['Intereses del préstamo del propietario · '+e.nombre,i,'pos']); }
+          else { e.deuda=(e.deuda||0)+i; res.push(['Intereses capitalizados · '+e.nombre,-i,'neg']); }
+        }
+      }catch(err){}
+      return r;
+    }; window.__SA40_EMP=true;
+  }
+  function consejo40(){
+    asegurar40(); const g=S.gobiernoFamilia, hs=(S.familia.hijos||[]).filter(h=>h.edad>=18);
+    if(!hs.length){log('El consejo todavía no tiene un descendiente adulto para designar.','mal');return;}
+    const opciones=hs.slice(0,8).map(h=>({t:h.nombre+' '+(h.apellido||S.p.apellido),cat:'legado',d:'Designar a '+h.nombre+' como heredero de referencia del gobierno familiar. No cambia por sí solo el testamento.',run:()=>{g.herederoDesignado=h.fid||h.nombre;g.reuniones++;h.formacion=(h.formacion||0)+5;log('El consejo designó a <b>'+esc(h.nombre)+'</b> como heredero de referencia de la Casa.','hito');S.mov--;}}));
+    escena({rubro:'Consejo de la Casa',titulo:'Designar heredero de referencia',ancho:true,cuerpo:'El consejo puede fijar una orientación política para la casa. El testamento sigue siendo un documento separado y prevalece sobre esta recomendación.',opciones,cerrable:true});
+  }
+  function patchGobierno40(){
+    const old=window.accionesGobiernoFamilia;if(typeof old!=='function'||window.__SA40_GOB)return;
+    window.accionesGobiernoFamilia=function(A){old.apply(this,arguments); if(S.gobiernoFamilia?.protocolo) A.push({t:'Consejo: designar heredero de referencia',cat:'familia',d:'El consejo expresa quién debería liderar la Casa; el testamento sigue siendo independiente.',mov:1,modal:true,run:()=>consejo40()});}; window.__SA40_GOB=true;
+  }
+  function financiero40(){
+    if(!window.S||!document.querySelector('#lienzoJuego')||typeof render!=='function')return;
+    const host=document.querySelector('#lienzoJuego'); host.querySelectorAll('.sa40-fin').forEach(x=>x.remove());
+    if(tab!=='mercado')return;
+    const wrap=host.querySelector('.wrap'); if(!wrap)return;
+    const e=S.emp;
+    const sec=document.createElement('div');sec.className='seccion sa40-fin';
+    sec.innerHTML='<h3>Estado financiero de la casa<em>cajas separadas</em></h3><div class="dash-grid">'
+      +'<section class="dash-card"><div class="et">Patrimonio personal</div><div class="big-num">'+fmt(S.efectivo)+'</div><div class="muted">Caja personal · deuda personal '+fmt(S.deuda||0)+'</div></section>'
+      +'<section class="dash-card"><div class="et">Caja corporativa</div><div class="big-num">'+(e?fmt(e.caja):'—')+'</div><div class="muted">'+(e?'Deuda corporativa '+fmt(e.deuda||0):'Todavía no tienes compañía')+'</div></section>'
+      +'<section class="dash-card"><div class="et">Relación dueño ↔ empresa</div><div class="big-num">'+(e?fmt(e.prestamoDueno||0):'—')+'</div><div class="muted">'+(e?'Préstamo pendiente de la sociedad contigo':'No hay préstamo propietario')+'</div></section>'
+      +'</div>';
+    wrap.prepend(sec);
+  }
+  function addApellidoNieto40(){
+    const old=window.escenaConNieto;if(typeof old!=='function'||window.__SA40_NIETO)return;
+    window.escenaConNieto=function(h,g){
+      const base=old.apply(this,arguments);
+      try{
+        // No sustituimos la escena existente: añadimos una opción desde el perfil cuando existe un modal.
+        setTimeout(()=>{
+          const host=document.querySelector('#escenaHost'); const cards=host?.querySelectorAll('.carta');
+          if(!cards||!cards.length||g.__sa40Apellido) return;
+          const cont=host.querySelector('#eleccion'); if(!cont)return;
+          const opts=[['Mantener '+(h.apellido||S.p.apellido),'rama'],['Usar el apellido de '+h.pareja?.nombre?.split(' ')[0],'pareja'],['Usar ambos linajes','doble']];
+          opts.forEach(([txt,modo])=>{const b=document.createElement('button');b.className='carta';b.innerHTML='<div class="carta-t">'+esc(txt)+'</div><div class="carta-d">Orientar el apellido de la siguiente rama familiar.</div>';b.onclick=()=>{const ap1=h.apellido||S.p.apellido,ap2=(h.pareja&&h.pareja.apellido)||apellidoPareja40(h.pareja);g.apellido=modo==='doble'&&ap1&&ap2?ap1+' '+ap2:(modo==='pareja'?ap2:ap1);g.__sa40Apellido=true;log('La familia acordó que <b>'+esc(g.nombre+' '+g.apellido)+'</b> conservará este linaje.','hito');S.mov=Math.max(0,S.mov-1);cerrarModal();render();};cont.appendChild(b);});
+        },30);
+      }catch(e){}
+      return base;
+    }; window.__SA40_NIETO=true;
+  }
+  function wrapPaso40(){
+    const old=window.pasarAnio;if(typeof old!=='function'||window.__SA40_PASO)return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{if(S&&!S.muerto){asegurar40();correrDescendencia40();}}catch(e){} try{render();}catch(e){} return r;}; window.__SA40_PASO=true;
+  }
+  function init40(){
+    asegurar40(); addAcciones40(); wrapEmpresa40(); patchGobierno40(); addApellidoNieto40(); wrapPaso40();
+    const oldR=window.render;if(typeof oldR==='function'&&!window.__SA40_RENDER){window.render=function(){const r=oldR.apply(this,arguments);try{financiero40();}catch(e){}return r;};window.__SA40_RENDER=true;}
+  }
+  setTimeout(init40,0);
 })();
 </script>
 
