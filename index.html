@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v43</div>
+<div class="version-badge" id="versionBadge">v44</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -9960,12 +9960,17 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         integradaHolding:false,
         participacionJugador:0,
         problemas:[],
-        patFin:{efectivo:Math.round(d.patrimonio*.6),empresas:0,inmuebles:0,deudas:0}
+        patFin:{efectivo:Math.round(d.patrimonio*.6),empresas:0,inmuebles:0,deudas:0},
+        ciudadesVividas:[], carreraPublica:null
       };
     }
     const c=d.casa43;
     const ciudad=d.ciudad||ciudadDefault||S.p.ciudad;
     c.nombre=c.nombreManual||('Rama de '+(ciudad||'la familia'));
+    c.ciudadesVividas=Array.isArray(c.ciudadesVividas)?c.ciudadesVividas:[];
+    if(ciudad&&c.ciudadesVividas[c.ciudadesVividas.length-1]!==ciudad) c.ciudadesVividas.push(ciudad);
+    if(c.ciudadesVividas.length>12) c.ciudadesVividas=c.ciudadesVividas.slice(-12);
+    c.carreraPublica=c.carreraPublica&&typeof c.carreraPublica==='object'?c.carreraPublica:null;
     c.prestigio=clamp(isFinite(c.prestigio)?c.prestigio:20,0,100);
     c.influencia=clamp(isFinite(c.influencia)?c.influencia:15,0,100);
     c.lealtad=clamp(isFinite(c.lealtad)?c.lealtad:60,0,100);
@@ -10105,6 +10110,14 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     }});
     if(c.integradaHolding) opciones.push({t:'Dejarla independiente otra vez',cat:'legado',run:()=>{
       c.integradaHolding=false; log('La rama de '+esc(nombreCompleto)+' vuelve a operar de forma independiente.','hito'); S.mov--;
+    }});
+    opciones.push({t:'Mudar la rama a otra ciudad',cat:'familia',d:'Una mudanza real: cambia de ciudad, y sus hijos crecerán ahí.',cerrar:false,run:()=>{
+      cerrarModal();
+      if(typeof window.mudarRama44==='function') window.mudarRama44(d); else render();
+    }});
+    opciones.push({t:c.carreraPublica?'Seguir orientando su carrera pública':'Orientar su carrera pública',cat:'empleo',d:c.carreraPublica?('Hoy: '+esc(c.carreraPublica.titulo)+' ('+esc(c.carreraPublica.tipoN)+').'):'Empresarial, política, diplomática, académica, militar o bancaria.',cerrar:false,run:()=>{
+      cerrarModal();
+      if(typeof window.orientarCarrera44==='function') window.orientarCarrera44(d); else render();
     }});
     opciones.push({t:c.favorito?'Ya es tu sucesora preferida':'Apoyarla como sucesora',cat:'familia',d:'La marcas como la orientación del consejo familiar para la sucesión.',dis:c.favorito?'Ya tiene ese lugar':null,run:()=>{
       asegurarGobiernoFamilia43(); S.gobiernoFamilia.herederoDesignado=idCasa43(d);
@@ -10299,7 +10312,314 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init43,40);
   setTimeout(init43,200);
   setTimeout(init43,600);
-  window.__SA43={version:V43,asegurar:asegurar43,ramas:ramasElegibles43,consolidado:consolidado43};
+  window.__SA43={version:V43,asegurar:asegurar43,ramas:ramasElegibles43,consolidado:consolidado43,escenaCasa:escenaCasa43,idCasa:idCasa43};
+})();
+
+/* ========================================================================
+   v44 · VIDA INTERNACIONAL, CARRERA PÚBLICA, CRISIS FAMILIARES,
+   PROPIEDADES CON HISTORIA Y EL DIARIO DE LA CASA
+   Segunda entrega de "casas vivas": construye sobre v43.
+   ======================================================================== */
+(function(){
+  const V44='v44';
+  function safe44(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  const SECTORES_CIUDAD_44={
+    'Nueva York':['finanzas','medios','tecnología'],
+    'Londres':['finanzas','diplomacia','universidades'],
+    'París':['lujo','cultura','diplomacia'],
+    'Singapur':['comercio','banca'],
+    'Dubái':['bienes raíces','comercio','lujo'],
+    'São Paulo':['industria','finanzas','conglomerados'],
+    'Miami':['finanzas','comercio'],
+    'Hong Kong':['comercio','banca'],
+    'Fráncfort':['finanzas','industria'],
+    'Tokio':['tecnología','industria'],
+    'Shanghái':['industria','comercio'],
+    'Ciudad de Panamá':['comercio','banca']
+  };
+
+  const CARRERAS_PUBLICAS_44={
+    empresarial:{n:'Empresarial',titulos:['Emprendedor','Empresario','Empresario consolidado','Magnate sectorial']},
+    politica:{n:'Política',titulos:['Concejal','Congresista','Ministro','Ministro retirado']},
+    diplomatica:{n:'Diplomática',titulos:['Agregado diplomático','Cónsul','Embajador','Embajador emérito']},
+    academica:{n:'Académica',titulos:['Profesor','Investigador','Decano','Académico de número']},
+    militar:{n:'Militar',titulos:['Oficial','Comandante','Coronel','General retirado']},
+    bancaria:{n:'Bancaria',titulos:['Analista financiero','Banquero','Banquero senior','Banquero de la casa']}
+  };
+
+  function normalizarHistoriaBienes44(bienes){
+    (bienes||[]).forEach(b=>{
+      if(!Array.isArray(b.cronica)) b.cronica=[];
+      if(!b.estado) b.estado=b.historica?'patrimonio histórico':'activo';
+      if(!isFinite(b.comprado)) b.comprado=S.anio;
+      if(!isFinite(b.precioCompra)) b.precioCompra=b.valor;
+    });
+  }
+  function asegurar44(){
+    if(typeof S==='undefined'||!S) return;
+    S.periodicoCasa=S.periodicoCasa&&typeof S.periodicoCasa==='object'?S.periodicoCasa:{titulares:[]};
+    S.periodicoCasa.titulares=Array.isArray(S.periodicoCasa.titulares)?S.periodicoCasa.titulares:[];
+    normalizarHistoriaBienes44(S.bienes);
+    (S.familia&&S.familia.hijos||[]).forEach(h=>{
+      normalizarHistoriaBienes44(h.bienes);
+      (h.hijos||[]).forEach(g=>normalizarHistoriaBienes44(g.bienes));
+    });
+  }
+  function publicar44(titular,texto,tono){
+    if(typeof S==='undefined'||!S) return;
+    asegurar44();
+    S.periodicoCasa.titulares.push({anio:S.anio,titular,texto,tono:tono||''});
+    if(S.periodicoCasa.titulares.length>60) S.periodicoCasa.titulares.shift();
+  }
+
+  function ramas44(){ return safe44(()=>window.__SA43.ramas(),[]); }
+
+  // ---------- #9 vida internacional real ----------
+  function ciudadesDisponibles44(d){ return CIUDADES_GLOBALES.filter(g=>g.n!==(d.ciudad||S.p.ciudad)); }
+  function volverACasa44(d){ if(window.__SA43&&window.__SA43.escenaCasa) window.__SA43.escenaCasa(d); else render(); }
+  window.mudarRama44=function(d){
+    asegurar44();
+    const c=d.casa43; if(!c) return;
+    const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+    const destinos=ciudadesDisponibles44(d);
+    const opciones=destinos.map(g=>{
+      const costo=Math.max(30,(d.patrimonio||0)*.08);
+      const sectores=SECTORES_CIUDAD_44[g.n];
+      return {t:g.n,cat:'familia',d:(sectores?('Fuerte en '+sectores.join(', ')+'. '):'')+g.d+' Costo de mudanza aproximado: '+fmt(costo)+'.',
+        dis:c.patFin.efectivo<costo?'La rama no tiene efectivo suficiente para mudarse':null,cerrar:false,
+        run:()=>{
+          const origen=d.ciudad||S.p.ciudad;
+          c.patFin.efectivo-=costo; d.ciudad=g.n; d.independiente=true;
+          if(c.ciudadesVividas[c.ciudadesVividas.length-1]!==g.n) c.ciudadesVividas.push(g.n);
+          log('La rama de '+esc(nombreCompleto)+' se mudó de '+esc(origen)+' a <b>'+esc(g.n)+'</b>.','hito');
+          hito(nombreCompleto+' mudó su rama a '+g.n);
+          publicar44('LA CASA LLEGA A '+g.n.toUpperCase(),nombreCompleto+' trasladó su rama de '+origen+' a '+g.n+'. Sus hijos crecerán ahí.','hito');
+          volverACasa44(d);
+        }};
+    });
+    escena({rubro:'Vida internacional',titulo:'Mudar a '+nombreCompleto,ancho:true,
+      cuerpo:'Ciudad actual: '+esc(d.ciudad||S.p.ciudad)+'. Mudarse cambia de verdad la vida de la rama: negocios, contactos y la ciudad donde crecerán sus hijos.'+(c.ciudadesVividas.length>1?' Ciudades vividas: '+c.ciudadesVividas.map(esc).join(', ')+'.':''),
+      opciones,cerrable:true,alCerrar:()=>volverACasa44(d)});
+  };
+  function bonoSector44(d){
+    const sectores=SECTORES_CIUDAD_44[d.ciudad]; if(!sectores) return 0;
+    const c=d.casa43;
+    const perfil=((d.rumbo||'')+' '+(d.empresaProfesional?d.empresaProfesional.nombre:'')+' '+(c.carreraPublica?c.carreraPublica.tipoN:'')).toLowerCase();
+    const match=sectores.some(s=>perfil.includes(s.split(' ')[0].toLowerCase()));
+    return match?.02:.006;
+  }
+
+  // ---------- #12 carrera pública de los miembros ----------
+  window.orientarCarrera44=function(d){
+    asegurar44();
+    const c=d.casa43; if(!c) return;
+    const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+    if(c.carreraPublica){
+      const t=CARRERAS_PUBLICAS_44[c.carreraPublica.tipo]; const nivel=c.carreraPublica.nivel||0;
+      escena({rubro:'Carrera pública',titulo:nombreCompleto,ancho:true,
+        cuerpo:'Trayectoria '+esc(t.n.toLowerCase())+': actualmente <b>'+esc(t.titulos[nivel])+'</b>.'+(nivel<t.titulos.length-1?' Con el tiempo puede seguir ascendiendo.':' Llegó al techo de esta trayectoria.'),
+        opciones:[
+          {t:'Dejarla seguir su curso',cat:'legado',cerrar:false,run:()=>volverACasa44(d)},
+          {t:'Cambiar de trayectoria',cat:'empleo',cerrar:false,run:()=>{ c.carreraPublica=null; volverACasa44(d); }}
+        ],cerrable:true,alCerrar:()=>volverACasa44(d)});
+      return;
+    }
+    const opciones=Object.keys(CARRERAS_PUBLICAS_44).map(k=>{
+      const t=CARRERAS_PUBLICAS_44[k];
+      return {t:t.n,cat:'empleo',d:'Empieza como '+t.titulos[0].toLowerCase()+'.',cerrar:false,run:()=>{
+        c.carreraPublica={tipo:k,tipoN:t.n,titulo:t.titulos[0],nivel:0,anios:0};
+        log(esc(nombreCompleto)+' orientó su vida hacia la carrera '+t.n.toLowerCase()+', como '+t.titulos[0].toLowerCase()+'.','bien');
+        volverACasa44(d);
+      }};
+    });
+    escena({rubro:'Carrera pública',titulo:'Orientar a '+nombreCompleto,ancho:true,
+      cuerpo:'Elige el camino que puede convertirla en una fuente propia de prestigio para la Casa.',
+      opciones,cerrable:true,alCerrar:()=>volverACasa44(d)});
+  };
+  function avanzarCarrera44(d){
+    const c=d.casa43; if(!c||!c.carreraPublica) return;
+    const t=CARRERAS_PUBLICAS_44[c.carreraPublica.tipo]; if(!t) return;
+    c.carreraPublica.anios=(c.carreraPublica.anios||0)+1;
+    if(c.carreraPublica.nivel>=t.titulos.length-1) return;
+    const prob=clamp(.05+c.prestigio/500+c.carreraPublica.anios*.01,.03,.22);
+    if(chance(prob)){
+      c.carreraPublica.nivel++; c.carreraPublica.titulo=t.titulos[c.carreraPublica.nivel]; c.carreraPublica.anios=0;
+      c.prestigio=clamp(c.prestigio+ri(3,8),0,100);
+      const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+      log(esc(nombreCompleto)+' avanzó en su carrera '+t.n.toLowerCase()+': ahora es <b>'+esc(c.carreraPublica.titulo)+'</b>.','bien');
+      publicar44('ASCENSO EN LA CASA',nombreCompleto+' fue nombrado '+c.carreraPublica.titulo.toLowerCase()+'.','hito');
+    }
+  }
+  function tituloJugadorTipo44(){
+    if(safe44(()=>S.carrera.politica&&S.carrera.politica.activo,false)) return 'politica';
+    if(safe44(()=>S.carrera.diplomacia&&S.carrera.diplomacia.activo,false)) return 'diplomatica';
+    if(safe44(()=>S.carrera.judicatura&&S.carrera.judicatura.activo,false)) return 'politica';
+    if(S.emp||safe44(()=>S.carrera.ruta==='fundador',false)) return 'empresarial';
+    if(safe44(()=>S.carrera.ruta==='profesional',false)) return 'academica';
+    return null;
+  }
+  function miembrosDestacados44(){
+    const conteo={};
+    ramas44().forEach(d=>{ if(d.casa43.carreraPublica){ const k=d.casa43.carreraPublica.tipo; conteo[k]=(conteo[k]||0)+1; } });
+    const propio=tituloJugadorTipo44(); if(propio) conteo[propio]=(conteo[propio]||0)+1;
+    return Object.keys(conteo).map(k=>({tipo:k,n:conteo[k],nombre:(CARRERAS_PUBLICAS_44[k]||{n:k}).n}));
+  }
+
+  // ---------- #13 crisis y tragedias familiares ----------
+  function crisisPool44(d,otras){
+    const c=d.casa43; const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+    const pool=[];
+    if(d.empresaProfesional&&(d.empresaProfesional.valor||0)>40) pool.push({p:1,run:()=>{
+      const perdida=d.empresaProfesional.valor*rnd(.3,.7);
+      d.empresaProfesional.valor=Math.max(0,d.empresaProfesional.valor-perdida);
+      c.prestigio=clamp(c.prestigio-ri(4,10),0,100);
+      log(esc(nombreCompleto)+' atravesó una mala racha y su empresa perdió '+fmt(perdida)+' de valor.','mal');
+      publicar44('REVÉS EMPRESARIAL',nombreCompleto+' vio caer el valor de su empresa tras un mal año.','mal');
+    }});
+    if((d.hijos||[]).length) pool.push({p:.7,run:()=>{
+      const nieto=pick(d.hijos); nieto.vinculo=clamp((nieto.vinculo||60)-ri(15,30),0,100);
+      c.problemas.push({anio:S.anio,txt:'ruptura con un nieto'}); if(c.problemas.length>5) c.problemas.shift();
+      log('Un hijo de '+esc(nombreCompleto)+' rompió relación con la familia.','mal');
+      publicar44('RUPTURA FAMILIAR','Un hijo de '+nombreCompleto+' se distanció de la familia.','mal');
+    }});
+    if(c.integradaHolding) pool.push({p:.6,run:()=>{
+      c.integradaHolding=false; c.relacion=clamp(c.relacion-ri(10,20),0,100);
+      log('La rama de '+esc(nombreCompleto)+' se declaró independiente del holding familiar.','mal');
+      publicar44('RUPTURA CON EL HOLDING','La rama de '+nombreCompleto+' decidió salir del holding familiar.','mal');
+    }});
+    if(c.favorito) pool.push({p:.4,run:()=>{
+      c.favorito=false; if(S.gobiernoFamilia) S.gobiernoFamilia.herederoDesignado=null;
+      c.prestigio=clamp(c.prestigio-ri(6,14),0,100);
+      log(esc(nombreCompleto)+' se alejó del mundo empresarial de la familia. Ya no es la sucesora de referencia.','mal');
+      publicar44('EL HEREDERO SE ALEJA',nombreCompleto+' dejó de participar activamente en los negocios de la Casa.','mal');
+    }});
+    if(S.fundacion) pool.push({p:.3,run:()=>{
+      const golpe=Math.max(0,(S.fundacion.activos||0)*rnd(.05,.15));
+      S.fundacion.activos=Math.max(0,S.fundacion.activos-golpe);
+      moverPrestigio(-3,'un escándalo en la fundación');
+      log('Un manejo cuestionado salpicó a la fundación de la familia.','mal');
+      publicar44('ESCÁNDALO EN LA FUNDACIÓN','La fundación de la Casa enfrentó cuestionamientos y perdió '+fmt(golpe)+'.','mal');
+    }});
+    if(otras&&otras.length) pool.push({p:.5,run:()=>{
+      const otra=pick(otras); const nombreOtra=otra.nombre+' '+(otra.apellido||S.p.apellido);
+      c.relacion=clamp(c.relacion-ri(8,16),0,100); otra.casa43.relacion=clamp(otra.casa43.relacion-ri(8,16),0,100);
+      c.problemas.push({anio:S.anio,txt:'distanciada de '+nombreOtra}); if(c.problemas.length>5) c.problemas.shift();
+      log(esc(nombreCompleto)+' y '+esc(nombreOtra)+' llevan tiempo sin hablarse por un desacuerdo de familia.','mal');
+      publicar44('DOS RAMAS DISTANCIADAS',nombreCompleto+' y '+nombreOtra+' están enfrentadas.','mal');
+    }});
+    pool.push({p:1.2,run:()=>{
+      c.prestigio=clamp(c.prestigio+ri(3,7),0,100);
+      log('La rama de '+esc(nombreCompleto)+' tuvo un año notable en '+esc(d.ciudad||S.p.ciudad)+'.','bien');
+      publicar44('BUEN AÑO PARA LA CASA','La rama de '+nombreCompleto+' ganó reconocimiento en '+esc(d.ciudad||S.p.ciudad)+'.','bien');
+    }});
+    return pool;
+  }
+
+  function correrCasas44(){
+    asegurar44();
+    const ramas=ramas44();
+    ramas.forEach(d=>{
+      const c=d.casa43; if(!c) return;
+      const bono=bonoSector44(d);
+      if(bono>0) c.patFin.efectivo=Math.max(0,c.patFin.efectivo*(1+bono));
+      avanzarCarrera44(d);
+      if(chance(.045)){
+        const otras=ramas.filter(x=>x!==d);
+        const pool=crisisPool44(d,otras);
+        const total=pool.reduce((a,x)=>a+x.p,0);
+        let r=Math.random()*total;
+        for(const ev of pool){ if((r-=ev.p)<=0){ ev.run(); break; } }
+      }
+    });
+  }
+
+  // ---------- #16 propiedades con historia ----------
+  function propiedadesNotables44(){
+    const out=[];
+    (S.bienes||[]).forEach(b=>out.push({b,propietario:'Tú',administrador:'Tú'}));
+    (S.familia&&S.familia.hijos||[]).forEach(h=>{
+      (h.bienes||[]).forEach(b=>out.push({b,propietario:b.ramaPropietariaNombre||h.nombre,administrador:b.ramaAdministradorNombre||h.nombre}));
+      (h.hijos||[]).forEach(g=>(g.bienes||[]).forEach(b=>out.push({b,propietario:b.ramaPropietariaNombre||g.nombre,administrador:b.ramaAdministradorNombre||g.nombre})));
+    });
+    return out;
+  }
+  function escenaHistoriaPropiedad44(entry){
+    const b=entry.b;
+    const cronica=(b.cronica||[]).slice().reverse();
+    escena({rubro:'Propiedades con historia',titulo:esc(b.nombre||b.tipo||'Propiedad'),ancho:true,
+      cuerpo:'Ciudad: '+esc(b.ciudad||'—')+' · Adquirida en '+(b.comprado||'—')+' · Valor original '+fmt(b.precioCompra||0)+' · Valor actual '+fmt(b.valor||0)+'. Propietario: <b>'+esc(entry.propietario)+'</b>'+(entry.administrador&&entry.administrador!==entry.propietario?' · Administra: '+esc(entry.administrador):'')+'. Estado: '+esc(b.estado||'activo')+'.'+(b.cedidoPorNombre?' Cedida por '+esc(b.cedidoPorNombre)+' en '+b.cedidoEn+'.':''),
+      html:'<div class="apunte">'+(cronica.length?cronica.map(e=>'<div>'+e.anio+' — '+esc(e.txt)+'</div>').join(''):'Todavía no tiene hechos notables registrados.')+'</div>',
+      opciones:[
+        {t:b.historica?'Ya es patrimonio histórico':'Declarar patrimonio histórico de la Casa',cat:'legado',dis:b.historica?'Ya tiene ese estatus':(S.efectivo<Math.max(12,(b.valor||80)*.035)?'No tienes efectivo suficiente para la restauración':null),run:()=>{
+          const costo=Math.max(12,(b.valor||80)*.035);
+          S.efectivo-=costo; b.historica=true; b.estado='patrimonio histórico';
+          b.historiaFamiliar=(b.historiaFamiliar||[]).concat([S.anio]);
+          b.cronica=b.cronica||[]; b.cronica.push({anio:S.anio,txt:'Declarada patrimonio histórico de la Casa.'});
+          safe44(()=>{ if(S.vida&&Array.isArray(S.vida.propiedadesHistoricas)) S.vida.propiedadesHistoricas.push(b.uid||b.nombre); },null);
+          moverPrestigio(3,'la conservación de un bien familiar');
+          log('<b>'+esc(b.nombre||b.tipo)+'</b> pasó a ser patrimonio histórico de la Casa.','hito');
+          publicar44('MEMORIA DE LA CASA',esc(b.nombre||b.tipo)+' fue declarada patrimonio histórico de la familia.','hito');
+          S.mov--;
+        }},
+        {t:'Cerrar',cat:'legado',run:()=>{}}
+      ],cerrable:true});
+  }
+  function escenaTodasPropiedades44(){
+    const props=propiedadesNotables44();
+    escena({rubro:'Patrimonio inmobiliario',titulo:'Todas las propiedades de la Casa',ancho:true,
+      cuerpo:'Cada propiedad conserva quién la posee, quién la administra y su propia crónica.',
+      opciones:props.slice(0,20).map(e=>({t:esc(e.b.nombre||e.b.tipo||'Propiedad'),cat:'casa',d:esc(e.propietario)+' · '+fmt(e.b.valor||0)+' · '+esc(e.b.estado||'activo'),cerrar:false,run:()=>escenaHistoriaPropiedad44(e)})).concat(props.length?[]:[{t:'Todavía no hay propiedades registradas',cat:'legado',dis:'—',run:()=>{}}]),
+      cerrable:true});
+  }
+
+  // ---------- #11 el diario de la casa ----------
+  function renderDiario44(){
+    if(typeof S==='undefined'||!S||typeof render!=='function') return;
+    const host=document.querySelector('#lienzoJuego'); if(!host) return;
+    host.querySelectorAll('.sa44-inject').forEach(x=>x.remove());
+    if(tab!=='acta') return;
+    const wrap=host.querySelector('.wrap'); if(!wrap) return;
+    asegurar44();
+    const titulares=S.periodicoCasa.titulares.slice().reverse().slice(0,12);
+    const props=propiedadesNotables44().filter(e=>e.b.historica||(e.b.cronica||[]).length).slice(0,8);
+    const destacados=miembrosDestacados44();
+    const sec=document.createElement('div'); sec.className='seccion sa44-inject';
+    sec.innerHTML='<h3>El Diario de la Casa<em>'+titulares.length+' titulares recientes</em></h3>'
+      +'<div class="sa35-person-grid" style="grid-template-columns:1fr">'+(titulares.length?titulares.map(t=>'<div class="sa35-person" style="cursor:default"><span class="meta"><b>'+esc(t.titular)+'</b><small>'+t.anio+' · '+esc(t.texto)+'</small></span></div>').join(''):'<div class="sa35-sub">Todavía no hay titulares. Mudanzas, carreras y crisis de las ramas irán apareciendo aquí.</div>')+'</div>'
+      +'<h3 style="margin-top:18px">Miembros destacados de la Casa</h3>'
+      +'<div class="family-house-tools">'+(destacados.length?destacados.map(x=>'<div class="family-house-card"><div class="fh-label">'+esc(x.nombre)+'</div><div class="fh-title">'+x.n+'</div></div>').join(''):'<div class="sa35-sub">Todavía ninguna rama orientó su carrera pública.</div>')+'</div>'
+      +'<h3 style="margin-top:18px">Propiedades con historia</h3>'
+      +'<div class="sa35-person-grid" style="margin-top:6px">'+(props.length?props.map((e,i)=>'<button type="button" class="sa35-person" data-sa44-bien="'+i+'"><span class="meta"><b>'+esc(e.b.nombre||e.b.tipo||'Propiedad')+'</b><small>'+esc(e.propietario)+' · '+fmt(e.b.valor||0)+' · '+esc(e.b.estado||'activo')+'</small></span></button>').join(''):'<div class="sa35-sub">Declara una propiedad como patrimonio histórico para que empiece su crónica.</div>')+'</div>'
+      +'<div style="margin-top:8px"><button type="button" class="sa44-ver-todo" style="all:unset;cursor:pointer;color:#D6A648;font-size:12px">Ver todas las propiedades →</button></div>';
+    wrap.appendChild(sec);
+    sec.querySelectorAll('[data-sa44-bien]').forEach(btn=>{
+      const i=Number(btn.dataset.sa44Bien);
+      btn.onclick=()=>escenaHistoriaPropiedad44(props[i]);
+    });
+    const verTodo=sec.querySelector('.sa44-ver-todo'); if(verTodo) verTodo.onclick=()=>escenaTodasPropiedades44();
+  }
+
+  function wrapPaso44(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA44_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar44(); correrCasas44(); } }catch(e){} try{ render(); }catch(e){} return r; };
+    window.__SA44_PASO=true;
+  }
+  function wrapRender44(){
+    const old=window.render; if(typeof old!=='function'||window.__SA44_RENDER) return;
+    window.render=function(){ const r=old.apply(this,arguments); try{ renderDiario44(); }catch(e){} return r; };
+    window.__SA44_RENDER=true;
+  }
+  function wrapInit44(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA44_INIT) return;
+    window.iniciar=function(){ const r=old.apply(this,arguments); safe44(()=>{ asegurar44(); },null); safe44(()=>render(),null); return r; };
+    window.__SA44_INIT=true;
+  }
+  function init44(){ asegurar44(); wrapPaso44(); wrapRender44(); wrapInit44(); }
+  setTimeout(init44,40);
+  setTimeout(init44,220);
+  setTimeout(init44,650);
+  window.__SA44={version:V44,publicar:publicar44,periodico:()=>S.periodicoCasa};
 })();
 </script>
 
