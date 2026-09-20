@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v44</div>
+<div class="version-badge" id="versionBadge">v45</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -10140,6 +10140,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       cerrarModal();
       if(typeof window.orientarCarrera44==='function') window.orientarCarrera44(d); else render();
     }});
+    opciones.push({t:d.pareja?'Ya tiene pareja':'Buscar alianza matrimonial',cat:'familia',d:d.pareja?'Está con '+esc(d.pareja.nombre)+'.':'Casarla con otra casa: dote, prestigio y una alianza real entre familias.',dis:d.pareja?'Ya está en pareja':null,cerrar:false,run:()=>{
+      cerrarModal();
+      if(typeof window.casarRama45==='function') window.casarRama45(d); else render();
+    }});
     opciones.push({t:c.favorito?'Ya es tu sucesora preferida':'Apoyarla como sucesora',cat:'familia',d:'La marcas como la orientación del consejo familiar para la sucesión.',dis:c.favorito?'Ya tiene ese lugar':null,run:()=>{
       asegurarGobiernoFamilia43(); S.gobiernoFamilia.herederoDesignado=idCasa43(d);
       ramasElegibles43().forEach(x=>{ x.casa43.favorito=(idCasa43(x)===idCasa43(d)); });
@@ -10641,6 +10645,379 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init44,220);
   setTimeout(init44,650);
   window.__SA44={version:V44,publicar:publicar44,periodico:()=>S.periodicoCasa};
+})();
+
+/* ========================================================================
+   v45 · MATRIMONIOS DINÁSTICOS, TESTAMENTOS COMPLEJOS, MUERTE MÁS
+   COMPLETA Y HOLDING REPOTENCIADO
+   Tercera entrega de "casas vivas": une matrimonios y holding a las
+   casas rivales que ya existían, sin tocar el motor de sucesión.
+   ======================================================================== */
+(function(){
+  const V45='v45';
+  function safe45(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+  function volverACasa45(d){ if(window.__SA43&&window.__SA43.escenaCasa) window.__SA43.escenaCasa(d); else render(); }
+
+  // ---------- #6 matrimonios dinásticos ----------
+  function rivalConDatos45(r){
+    if(!r.pais){ r.pais=chance(.72)?'Colombia':(pick(CIUDADES_GLOBALES).pais); }
+    return r;
+  }
+  function enriquecerPretendiente45(pr){
+    const vivas=rivalesVivas(); if(!vivas.length) return pr;
+    const r=pick(vivas); rivalConDatos45(r);
+    const dif=r.prestigio-prestigio();
+    const base=Math.max(40,patrimonio()*.12+valorBienes()*.05);
+    const dote=Math.round(base*clamp(1-dif/70,-.6,1.9)*rnd(.6,1.4));
+    pr.casa={apellido:r.apellido,prestigio:r.prestigio,patrimonio:r.patrimonio,pais:r.pais,rid:r.rid,compania:r.compania};
+    pr.dote=dote; pr.exigente=dif>10;
+    return pr;
+  }
+  function wrapPretendientes45(){
+    const old=window.generarPretendiente; if(typeof old!=='function'||window.__SA45_PRETEND) return;
+    window.generarPretendiente=function(){ const pr=old.apply(this,arguments); try{ if(chance(.6)) enriquecerPretendiente45(pr); }catch(e){} return pr; };
+    window.__SA45_PRETEND=true;
+  }
+  function wrapDescripcion45(){
+    const old=window.descripcionPretendiente; if(typeof old!=='function'||window.__SA45_DESC) return;
+    window.descripcionPretendiente=function(pr){
+      let base=old.apply(this,arguments);
+      try{ if(pr&&pr.casa&&isFinite(pr.casa.patrimonio)) base+=' Patrimonio de su casa: '+fmt(pr.casa.patrimonio)+(pr.casa.pais&&pr.casa.pais!=='Colombia'?' · '+esc(pr.casa.pais):'')+'.'; }catch(e){}
+      return base;
+    };
+    window.__SA45_DESC=true;
+  }
+  function wrapDesposar45(){
+    const old=window.desposar; if(typeof old!=='function'||window.__SA45_DESPOSAR) return;
+    window.desposar=function(pr){
+      const r=pr&&pr.casa&&pr.casa.rid?(S.rivales||[]).find(x=>x.rid===pr.casa.rid):null;
+      const ret=old.apply(this,arguments);
+      try{ if(r){ r.relacionCasa=clamp((r.relacionCasa||50)+20,0,100); log('La alianza matrimonial con los '+esc(r.apellido)+' quedó sellada entre las dos casas.','hito'); } }catch(e){}
+      return ret;
+    };
+    window.__SA45_DESPOSAR=true;
+  }
+  window.casarRama45=function(d){
+    const c=d.casa43; if(!c) return;
+    const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+    if(d.pareja){
+      escena({rubro:'Alianza matrimonial',titulo:nombreCompleto,cuerpo:'Ya tiene pareja: '+esc(d.pareja.nombre)+'.',opciones:[{t:'Volver',cat:'legado',cerrar:false,run:()=>volverACasa45(d)}],cerrable:true,alCerrar:()=>volverACasa45(d)});
+      return;
+    }
+    const vivas=rivalesVivas();
+    if(!vivas.length){
+      escena({rubro:'Alianza matrimonial',titulo:'No hay casas disponibles',cuerpo:'Por ahora no hay otras casas con quien negociar una alianza.',opciones:[{t:'Volver',cat:'legado',cerrar:false,run:()=>volverACasa45(d)}],cerrable:true,alCerrar:()=>volverACasa45(d)});
+      return;
+    }
+    const cands=vivas.slice().sort(()=>Math.random()-.5).slice(0,3).map(r=>rivalConDatos45(r));
+    const sexoBuscado=d.sexo==='h'?'m':'h';
+    escena({rubro:'Alianza matrimonial',titulo:'Buscar alianza para '+nombreCompleto,ancho:true,
+      cuerpo:'Un matrimonio entre casas también es un negocio. Elige con quién se alía la rama.',
+      opciones:cands.map(r=>{
+        const dif=r.prestigio-c.prestigio;
+        const dote=Math.round(Math.max(20,(d.patrimonio||0)*.15)*clamp(1-dif/70,-.5,1.8));
+        return {t:'Con los '+r.apellido,cat:'familia',d:'Prestigio '+Math.round(r.prestigio)+'/100 · patrimonio '+fmt(r.patrimonio)+(r.pais&&r.pais!=='Colombia'?' · '+esc(r.pais):'')+'. '+(dote>=0?'Traen '+fmt(dote)+' de dote.':'Hay que poner '+fmt(-dote)+'.'),
+          dis:dote<0&&c.patFin.efectivo<-dote?'La rama no tiene efectivo para responder':null,
+          cerrar:false,
+          run:()=>{
+            d.pareja={nombre:nombreLocal(d.ciudad||S.p.ciudad,sexoBuscado)+' '+r.apellido,apellido:r.apellido,sexo:sexoBuscado,edad:clamp(d.edad+ri(-4,4),18,70),casados:true,afecto:ri(45,90),paciencia:ri(50,85),ciudad:d.ciudad||S.p.ciudad,casa:{apellido:r.apellido,prestigio:r.prestigio,patrimonio:r.patrimonio,pais:r.pais,rid:r.rid}};
+            if(dote>=0) c.patFin.efectivo+=dote; else c.patFin.efectivo=Math.max(0,c.patFin.efectivo+dote);
+            c.relacion=clamp(c.relacion+6,0,100); c.prestigio=clamp(c.prestigio+clamp(dif*.2,-4,8),0,100);
+            r.relacionCasa=clamp((r.relacionCasa||50)+20,0,100);
+            log('La rama de '+esc(nombreCompleto)+' se alió por matrimonio con los <b>'+esc(r.apellido)+'</b>.','hito');
+            hito(nombreCompleto+' se casó con los '+r.apellido);
+            safe45(()=>{ if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('ALIANZA ENTRE CASAS',nombreCompleto+' se casó con los '+r.apellido+', sellando una alianza entre familias.','hito'); },null);
+            volverACasa45(d);
+          }};
+      }),cerrable:true,alCerrar:()=>volverACasa45(d)});
+  };
+  function accionCapitulaciones45(A){
+    const pa=S.familia.pareja;
+    if(pa&&pa.casados&&!pa.separacionBienes&&!pa.divorcioEnCurso){
+      A.push({t:'Negociar capitulaciones matrimoniales',cat:'familia',d:'Separar bienes protege tu patrimonio si el matrimonio termina, pero es una conversación incómoda.',mov:1,modal:true,run:()=>escenaCapitulaciones45()});
+    }
+  }
+  function escenaCapitulaciones45(){
+    const pa=S.familia.pareja; if(!pa) return;
+    escena({rubro:'Notaría',titulo:'Capitulaciones matrimoniales',ancho:true,
+      cuerpo:'Firmar separación de bienes protege lo tuyo si el matrimonio termina, pero '+esc(pa.nombre)+' puede tomarlo como desconfianza.',
+      opciones:[
+        {t:'Proponerlo',cat:'familia',run:()=>{
+          const prob=clamp(.35+(pa.afecto||60)/200-(pa.casa&&pa.casa.prestigio>prestigio()?.15:0),.15,.85);
+          if(chance(prob)){ pa.separacionBienes=true; pa.paciencia=clamp(pa.paciencia-6,0,100); log('Firmaron capitulaciones: separación de bienes.','bien'); }
+          else { pa.paciencia=clamp(pa.paciencia-16,0,100); log(esc(pa.nombre)+' se negó a firmar capitulaciones. Quedó un mal sabor.','mal'); }
+          S.mov--;
+        }},
+        {t:'Dejarlo así',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+
+  // ---------- #15 testamentos complejos ----------
+  function asegurarTestamentoRico45(){
+    S.testamentoRico=S.testamentoRico&&typeof S.testamentoRico==='object'?S.testamentoRico:{legados:[],herederoFid:null};
+    S.testamentoRico.legados=Array.isArray(S.testamentoRico.legados)?S.testamentoRico.legados:[];
+  }
+  function activosParaLegado45(){ return (S.bienes||[]).filter(b=>b.uid!==(S.hogar&&S.hogar.vivienda)); }
+  function bienesLegablesRestriccion45(){
+    const out=activosParaLegado45().slice();
+    (S.familia.hijos||[]).forEach(h=>(h.bienes||[]).forEach(b=>out.push(b)));
+    return out.filter(b=>!b.restriccionAnios);
+  }
+  function resumenTestamento45(){
+    asegurarTestamentoRico45();
+    const partes=[];
+    if(S.testamento&&S.testamento.tipo==='hijo') partes.push(esc(S.testamento.nombre)+' queda al frente de la casa.');
+    else if(S.testamento&&S.testamento.tipo==='parejo') partes.push('El resto se reparte parejo.');
+    else if(S.testamento&&S.testamento.tipo==='fundacion') partes.push('Todo lo demás va a una fundación con tu nombre.');
+    S.testamentoRico.legados.forEach(l=>{
+      if(l.tipo==='bien') partes.push(esc(l.nombre)+' pasa a '+esc(l.paraNombre)+'.');
+      else if(l.tipo==='acciones') partes.push('El '+l.pct+'% de las acciones de '+esc(l.empresa)+' pasa a '+esc(l.paraNombre)+'.');
+      else if(l.tipo==='fundacion') partes.push(fmt(l.monto)+' fueron a la fundación.');
+      else if(l.tipo==='restriccion') partes.push(esc(l.nombre)+' deberá conservarse '+l.anios+' años.');
+    });
+    return partes;
+  }
+  function escenaTestamentoDetallado45(){
+    asegurarTestamentoRico45();
+    const hijos=(S.familia.hijos||[]).filter(h=>h.edad>=0);
+    const resumen=resumenTestamento45();
+    const opciones=[];
+    opciones.push({t:'Elegir quién queda al frente',cat:'legado',dis:!hijos.length?'No hay hijos':null,cerrar:false,run:()=>{
+      cerrarModal();
+      escena({rubro:'Testamento detallado',titulo:'¿Quién queda al frente?',ancho:true,
+        opciones:hijos.map(h=>({t:h.nombre,cat:'familia',cerrar:false,run:()=>{
+          S.testamento={tipo:'hijo',nombre:h.nombre,frac:.65}; S.testamentoRico.herederoFid=h.fid;
+          log('El testamento deja a <b>'+esc(h.nombre)+'</b> al frente de la casa.','hito'); S.mov--;
+          escenaTestamentoDetallado45();
+        }})).concat([{t:'Repartir parejo entre todos',cat:'familia',cerrar:false,run:()=>{ S.testamento={tipo:'parejo'}; S.testamentoRico.herederoFid=null; S.mov--; escenaTestamentoDetallado45(); }}]),
+        cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+    }});
+    opciones.push({t:'Legar una propiedad a alguien',cat:'legado',dis:(!activosParaLegado45().length?'No tienes propiedades disponibles':(!hijos.length?'No hay hijos':null)),cerrar:false,run:()=>{
+      cerrarModal();
+      escena({rubro:'Testamento detallado',titulo:'Elegí la propiedad',ancho:true,
+        opciones:activosParaLegado45().map(b=>({t:esc(b.nombre||b.tipo||'Propiedad'),cat:'casa',d:fmt(b.valor)+(b.ciudad?' · '+esc(b.ciudad):''),cerrar:false,run:()=>{
+          cerrarModal();
+          escena({rubro:'Testamento detallado',titulo:'¿Para quién es '+esc(b.nombre||b.tipo||'esta propiedad')+'?',
+            opciones:hijos.map(h=>({t:h.nombre,cat:'familia',cerrar:false,run:()=>{
+              S.bienes=S.bienes.filter(x=>x.uid!==b.uid);
+              h.bienes=h.bienes||[]; marcarPropiedadDeRama(h,b); h.bienes.push(b);
+              h.vinculo=clamp((h.vinculo||60)+8,0,100);
+              S.testamentoRico.legados=S.testamentoRico.legados.filter(l=>!(l.tipo==='bien'&&l.bienUid===b.uid));
+              S.testamentoRico.legados.push({tipo:'bien',bienUid:b.uid,nombre:b.nombre||b.tipo,paraNombre:h.nombre,paraFid:h.fid});
+              log('El testamento deja <b>'+esc(b.nombre||b.tipo)+'</b> a '+esc(h.nombre)+'.','hito');
+              S.mov--; escenaTestamentoDetallado45();
+            }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+        }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+    }});
+    opciones.push({t:'Legar acciones de la empresa',cat:'legado',dis:(!S.emp?'No tienes una empresa':(!hijos.length?'No hay hijos':null)),cerrar:false,run:()=>{
+      cerrarModal();
+      const e=S.emp;
+      escena({rubro:'Testamento detallado',titulo:'¿A quién de '+esc(e.nombre)+'?',ancho:true,
+        opciones:hijos.map(h=>({t:h.nombre,cat:'familia',cerrar:false,run:()=>{
+          cerrarModal();
+          escena({rubro:'Testamento detallado',titulo:'¿Qué porcentaje para '+esc(h.nombre)+'?',
+            opciones:[5,10,15,20,25].map(pct=>({t:pct+'%',cat:'capital',dis:miPct(e)*100<pct?'No tienes ese porcentaje disponible':null,run:()=>{
+              const total=totalAcciones(e); const mover=Math.round(total*pct/100); const mio=e.holders.find(x=>x.id==='tu');
+              if(!mio||mio.n<mover){ log('No tienes suficientes acciones para ese legado.','mal'); return; }
+              mio.n-=mover;
+              let dest=e.holders.find(x=>x.id==='legado-'+h.fid);
+              if(dest) dest.n+=mover; else e.holders.push({id:'legado-'+h.fid,nombre:h.nombre+' (legado)',tipo:'familia',n:mover});
+              S.testamentoRico.legados.push({tipo:'acciones',pct,empresa:e.nombre,paraNombre:h.nombre,paraFid:h.fid});
+              log('El testamento entregó el '+pct+'% de <b>'+esc(e.nombre)+'</b> a '+esc(h.nombre)+'.','hito');
+              S.mov--; escenaTestamentoDetallado45();
+            }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+        }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+    }});
+    opciones.push({t:'Donar un monto a la fundación',cat:'legado',dis:!S.fundacion?'Todavía no existe una fundación de la casa':(S.efectivo<50?'Necesitas al menos '+fmt(50):null),cerrar:false,run:()=>{
+      cerrarModal();
+      escena({rubro:'Testamento detallado',titulo:'¿Cuánto va a la fundación?',
+        opciones:[50,120,250,500].filter(m=>m<=S.efectivo).map(m=>({t:fmt(m),cat:'legado',run:()=>{
+          S.efectivo-=m; S.fundacion.activos=(S.fundacion.activos||0)+m;
+          S.testamentoRico.legados.push({tipo:'fundacion',monto:m});
+          log('Dejaste asentado un legado de '+fmt(m)+' para la fundación.','hito'); S.mov--;
+        }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+    }});
+    opciones.push({t:'Poner una cláusula de conservación',cat:'legado',dis:!bienesLegablesRestriccion45().length?'No hay propiedades disponibles para una cláusula':null,cerrar:false,run:()=>{
+      cerrarModal();
+      escena({rubro:'Testamento detallado',titulo:'¿Qué propiedad se conserva?',ancho:true,
+        opciones:bienesLegablesRestriccion45().map(b=>({t:esc(b.nombre||b.tipo||'Propiedad'),cat:'casa',run:()=>{
+          b.restriccionAnios=S.anio+20; b.restriccionTexto='No debe venderse antes de '+(S.anio+20)+'.';
+          b.cronica=Array.isArray(b.cronica)?b.cronica:[]; b.cronica.push({anio:S.anio,txt:'El testamento ordenó conservarla durante 20 años.'});
+          S.testamentoRico.legados.push({tipo:'restriccion',nombre:b.nombre||b.tipo,anios:20});
+          log('El testamento ordena conservar <b>'+esc(b.nombre||b.tipo)+'</b> durante 20 años.','hito'); S.mov--;
+          escenaTestamentoDetallado45();
+        }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+    }});
+    opciones.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Testamento detallado',titulo:'Cómo se reparte la casa',ancho:true,
+      cuerpo:resumen.length?('Hoy el testamento dice: '+resumen.join(' ')):'Todavía no has dejado legados específicos por escrito.',
+      opciones,cerrable:true});
+  }
+  function accionTestamentoDetallado45(A){
+    if((S.familia.hijos||[]).length||S.fundacion){
+      A.push({t:'Testamento detallado',cat:'legado',d:'Deja por escrito quién recibe qué: propiedades, acciones, donaciones y cláusulas de conservación.',mov:1,modal:true,run:()=>escenaTestamentoDetallado45()});
+    }
+  }
+
+  // ---------- #14 muerte más completa ----------
+  function epitafio45(){
+    const nacido=S.anio-S.p.edad;
+    const nietos=(S.familia.hijos||[]).reduce((a,h)=>a+(h.hijos||[]).length,0);
+    const hitos=(S.legado&&S.legado.hitos)||[];
+    const ultimoHito=hitos.length?hitos[hitos.length-1].t:null;
+    let txt=esc(S.p.nombre+' '+S.p.apellido)+', '+nacido+'–'+S.anio+'.';
+    if(ultimoHito) txt+=' '+esc(ultimoHito)+'.';
+    txt+=' Dejó '+(S.familia.hijos.length?S.familia.hijos.length+' hijo'+(S.familia.hijos.length===1?'':'s'):'ningún hijo directo')+(nietos?' y '+nietos+' nieto'+(nietos===1?'':'s'):'')+'.';
+    return txt;
+  }
+  function wrapMorir45(){
+    const old=window.morir; if(typeof old!=='function'||window.__SA45_MORIR) return;
+    window.morir=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const epitafio=epitafio45();
+        if(S.mausoleo&&S.mausoleo.cupos>0){
+          S.mausoleo.cupos--; S.mausoleo.enterrados=(S.mausoleo.enterrados||[]).concat([S.p.nombre+' '+S.p.apellido]);
+          log('Descansa en el '+(S.mausoleo.tipo==='nichos'?'nicho':'mausoleo')+' de la familia.');
+        }
+        if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('MURIÓ '+(S.p.nombre+' '+S.p.apellido).toUpperCase(),epitafio,'mal');
+      }catch(e){}
+      return r;
+    };
+    window.__SA45_MORIR=true;
+  }
+  function chequearSaludTerminal45(){
+    if(S._avisoSaludGrave) return;
+    if(S.p.salud<22||(S.p.edad>=78&&S.p.salud<40)){
+      S._avisoSaludGrave=true;
+      escena({rubro:'Salud',titulo:'El médico fue claro',ancho:true,
+        cuerpo:'"No sé cuánto tiempo más tenemos." La salud de '+esc(S.p.nombre)+' preocupa en serio. Es momento de dejar los asuntos en orden: testamento, sucesión y despedidas.',
+        opciones:[
+          {t:'Dejar el testamento en orden',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaTestamentoDetallado45(); }},
+          {t:'Tomarlo con calma',cat:'legado',run:()=>{}}
+        ],cerrable:true});
+    }
+  }
+
+  // ---------- #17 holding repotenciado ----------
+  const FILIALES_SUGERIDAS_45=[
+    {sectorId:'financiero',nombreBase:'Banco',etiqueta:'Banco'},
+    {sectorId:'energia',nombreBase:'Energía',etiqueta:'Energía'},
+    {sectorId:'tech',nombreBase:'Tecnología',etiqueta:'Tecnología'},
+    {sectorId:'agro',nombreBase:'Agro',etiqueta:'Agroindustria'},
+    {sectorId:'logistica',nombreBase:'Internacional',etiqueta:'Comercio internacional'}
+  ];
+  function asegurarHolding45(){ if(S.holding) S.holding.joints=Array.isArray(S.holding.joints)?S.holding.joints:[]; }
+  function empresasDeRamas45(){
+    const out=[];
+    (S.familia.hijos||[]).forEach(h=>{
+      if(h.empresaProfesional) out.push({nombre:h.empresaProfesional.nombre,valor:h.empresaProfesional.valor,de:h.nombre});
+      (h.hijos||[]).forEach(g=>{ if(g.empresaProfesional) out.push({nombre:g.empresaProfesional.nombre,valor:g.empresaProfesional.valor,de:g.nombre}); });
+    });
+    return out;
+  }
+  function valorHolding45(){
+    asegurarHolding45();
+    const filiales=safe45(()=>valorGrupo(),0);
+    const ramas=empresasDeRamas45().reduce((a,x)=>a+(x.valor||0),0);
+    const joints=(S.holding&&S.holding.joints||[]).reduce((a,j)=>a+j.valor*(j.capitalTuyo/(j.capitalTuyo+j.capitalSocio)),0);
+    return filiales+ramas+joints;
+  }
+  function escenaHolding45(){
+    if(!hayMatriz()){ escenaMatriz(); return; }
+    asegurarHolding45();
+    const g=companias(), ramas=empresasDeRamas45(), joints=S.holding.joints;
+    const opciones=[];
+    opciones.push({t:'Fundar una filial especializada',cat:'compania',cerrar:false,run:()=>{
+      cerrarModal();
+      const disponibles=FILIALES_SUGERIDAS_45.filter(f=>!g.some(e=>e.sector===f.sectorId));
+      escena({rubro:'Grupo '+esc(S.holding.nombre),titulo:'Fundar una filial',ancho:true,
+        cuerpo:disponibles.length?'Elige el sector para la nueva filial del grupo.':'Ya tienes filiales en todos los sectores sugeridos. Puedes seguir fundando compañías desde el menú de Negocios.',
+        opciones:disponibles.map(f=>{ const s=SECTORES.find(x=>x.id===f.sectorId); const costo=s.cap*.12;
+          return {t:f.etiqueta,cat:'compania',d:s.d+' Aporte inicial sugerido: '+fmt(costo)+'.',dis:S.efectivo<costo?'Necesitas al menos '+fmt(costo):null,run:()=>{
+            fundarEn(f.nombreBase+' '+S.dinastia,f.sectorId,costo);
+            log('<b>'+esc(f.nombreBase+' '+S.dinastia)+'</b> nace como filial del grupo '+esc(S.holding.nombre)+'.','hito');
+          }};
+        }).concat([{t:'Volver',cat:'legado',run:()=>{}}]),cerrable:true});
+    }});
+    opciones.push({t:'Proponer joint venture con una casa rival',cat:'compania',dis:!rivalesVivas().length?'No hay casas rivales disponibles':null,cerrar:false,run:()=>{
+      cerrarModal();
+      const cands=rivalesVivas().slice().sort((a,b)=>b.patrimonio-a.patrimonio).slice(0,5).map(r=>rivalConDatos45(r));
+      escena({rubro:'Grupo '+esc(S.holding.nombre),titulo:'Proponer una joint venture',ancho:true,
+        cuerpo:'Combinar capital con otra casa reparte el riesgo y las ganancias según el aporte de cada una.',
+        opciones:cands.map(r=>{ const capitalTuyo=Math.max(40,Math.min(S.efectivo*.3,r.patrimonio*.08));
+          return {t:'Con los '+r.apellido,cat:'compania',d:'Patrimonio '+fmt(r.patrimonio)+' · sector '+esc((SECTORES.find(x=>x.id===r.sector)||{n:r.sector}).n)+'. Aportarías '+fmt(capitalTuyo)+'.',
+            dis:S.efectivo<capitalTuyo?'No tienes el capital para esta escala':null,
+            run:()=>{
+              S.efectivo-=capitalTuyo;
+              S.holding.joints.push({id:'jv'+ri(1000,9999),rid:r.rid,socioNombre:r.apellido,sector:r.sector,capitalTuyo,capitalSocio:capitalTuyo*rnd(.8,1.3),valor:capitalTuyo*2,anios:0,desde:S.anio});
+              log('Formaste una joint venture con los <b>'+esc(r.apellido)+'</b>.','hito');
+              hito('Formó una joint venture con los '+r.apellido);
+            }};
+        }),cerrable:true});
+    }});
+    if(joints.length) opciones.push({t:'Liquidar una joint venture',cat:'compania',cerrar:false,run:()=>{
+      cerrarModal();
+      escena({rubro:'Grupo '+esc(S.holding.nombre),titulo:'Liquidar joint venture',ancho:true,
+        opciones:joints.map(j=>({t:'Con los '+j.socioNombre,cat:'compania',d:'Valor actual '+fmt(j.valor)+' · tu parte '+fmt(j.valor*(j.capitalTuyo/(j.capitalTuyo+j.capitalSocio))),run:()=>{
+          const parte=j.valor*(j.capitalTuyo/(j.capitalTuyo+j.capitalSocio));
+          S.efectivo+=parte; S.holding.joints=S.holding.joints.filter(x=>x.id!==j.id);
+          log('Liquidaste la joint venture con los '+esc(j.socioNombre)+' y recibiste '+fmt(parte)+'.','bien'); S.mov--;
+        }})),cerrable:true});
+    }});
+    opciones.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Panorama del grupo',titulo:esc(S.holding.nombre),ancho:true,
+      cuerpo:'Valor consolidado del grupo: <b>'+fmt(valorHolding45())+'</b>. '+g.length+' filial'+(g.length===1?'':'es')+' directa'+(g.length===1?'':'s')+(ramas.length?', '+ramas.length+' empresa'+(ramas.length===1?'':'s')+' de ramas familiares':'')+(joints.length?', '+joints.length+' joint venture'+(joints.length===1?'':'s'):'')+'.',
+      html:'<div class="apunte">'+g.map(e=>'<div>'+esc(e.nombre)+' · '+esc((SECTORES.find(x=>x.id===e.sector)||{n:e.sector}).n)+' · '+fmt(valuar(e))+'</div>').join('')
+        +ramas.map(x=>'<div>'+esc(x.nombre)+' · empresa de '+esc(x.de)+' · '+fmt(x.valor)+'</div>').join('')
+        +joints.map(j=>'<div>Joint venture con los '+esc(j.socioNombre)+' · '+fmt(j.valor)+'</div>').join('')+'</div>',
+      opciones,cerrable:true});
+  }
+  function accionHolding45(A){
+    if(hayMatriz()) A.push({t:'Panorama del holding',cat:'compania',d:'Filiales, empresas de las ramas y joint ventures bajo un mismo techo.',mov:1,modal:true,run:()=>escenaHolding45()});
+  }
+  function correrJoints45(){
+    if(!S.holding||!Array.isArray(S.holding.joints)||!S.holding.joints.length) return;
+    S.holding.joints.forEach(j=>{
+      const r=(S.rivales||[]).find(x=>x.rid===j.rid);
+      const s=SECTORES.find(x=>x.id===j.sector)||SECTORES[0];
+      const ciclo=(S.macro&&S.macro.ciclo)||0;
+      const g=s.g+ciclo*.8+rnd(-s.vol,s.vol);
+      j.valor=Math.max(0,j.valor*(1+clamp(g,-.4,.5))); j.anios=(j.anios||0)+1;
+      if(!r||!r.viva){
+        const parte=j.valor*(j.capitalTuyo/(j.capitalTuyo+j.capitalSocio));
+        S.efectivo+=parte;
+        log('La casa de los '+esc(j.socioNombre)+' se acabó y la joint venture se liquidó: recibiste '+fmt(parte)+'.','mal');
+        j._eliminar=true;
+      }
+    });
+    S.holding.joints=S.holding.joints.filter(j=>!j._eliminar);
+  }
+
+  function wrapListaAcciones45(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA45_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionTestamentoDetallado45(A); accionHolding45(A); accionCapitulaciones45(A); }catch(e){}
+      return A;
+    };
+    window.__SA45_LISTA=true;
+  }
+  function wrapPaso45(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA45_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ correrJoints45(); chequearSaludTerminal45(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA45_PASO=true;
+  }
+  function init45(){ wrapPretendientes45(); wrapDescripcion45(); wrapDesposar45(); wrapMorir45(); wrapListaAcciones45(); wrapPaso45(); }
+  setTimeout(init45,40);
+  setTimeout(init45,220);
+  setTimeout(init45,650);
+  window.__SA45={version:V45,valorHolding:valorHolding45,resumenTestamento:resumenTestamento45};
 })();
 </script>
 
