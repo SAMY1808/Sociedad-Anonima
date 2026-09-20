@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v48</div>
+<div class="version-badge" id="versionBadge">v49</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -10570,11 +10570,22 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     });
     return out;
   }
+  function fichaFinanciera44(b){
+    if(!b) return '';
+    const ingresos=(b.clase==='renta'&&b.arrendado)?b.valor*(b.renta||0):(b.clase==='finca'?b.valor*(b.renta||0):0);
+    const gastos=b.valor*(b.mant||0);
+    const noi=ingresos-gastos;
+    const deuda=b.hipoteca||0;
+    const neto=b.valor-deuda;
+    const rentabilidad=b.valor>0?noi/b.valor:0;
+    if(!ingresos&&!gastos&&!deuda) return '';
+    return ' <div class="apunte" style="margin-top:8px">Ficha financiera — Ingresos: '+fmt(ingresos)+' · Gastos: '+fmt(gastos)+' · NOI: '+fmt(noi)+' · Deuda: '+fmt(deuda)+' · Patrimonio neto: '+fmt(neto)+' · Rentabilidad: '+pc(rentabilidad)+'.</div>';
+  }
   function escenaHistoriaPropiedad44(entry){
     const b=entry.b;
     const cronica=(b.cronica||[]).slice().reverse();
     escena({rubro:'Propiedades con historia',titulo:esc(b.nombre||b.tipo||'Propiedad'),ancho:true,
-      cuerpo:'Ciudad: '+esc(b.ciudad||'—')+' · Adquirida en '+(b.comprado||'—')+' · Valor original '+fmt(b.precioCompra||0)+' · Valor actual '+fmt(b.valor||0)+'. Propietario: <b>'+esc(entry.propietario)+'</b>'+(entry.administrador&&entry.administrador!==entry.propietario?' · Administra: '+esc(entry.administrador):'')+'. Estado: '+esc(b.estado||'activo')+'.'+(b.cedidoPorNombre?' Cedida por '+esc(b.cedidoPorNombre)+' en '+b.cedidoEn+'.':''),
+      cuerpo:'Ciudad: '+esc(b.ciudad||'—')+' · Adquirida en '+(b.comprado||'—')+' · Valor original '+fmt(b.precioCompra||0)+' · Valor actual '+fmt(b.valor||0)+'. Propietario: <b>'+esc(entry.propietario)+'</b>'+(entry.administrador&&entry.administrador!==entry.propietario?' · Administra: '+esc(entry.administrador):'')+'. Estado: '+esc(b.estado||'activo')+'.'+(b.cedidoPorNombre?' Cedida por '+esc(b.cedidoPorNombre)+' en '+b.cedidoEn+'.':'')+fichaFinanciera44(b),
       html:'<div class="apunte">'+(cronica.length?cronica.map(e=>'<div>'+e.anio+' — '+esc(e.txt)+'</div>').join(''):'Todavía no tiene hechos notables registrados.')+'</div>',
       opciones:[
         {t:b.historica?'Ya es patrimonio histórico':'Declarar patrimonio histórico de la Casa',cat:'legado',dis:b.historica?'Ya tiene ese estatus':(S.efectivo<Math.max(12,(b.valor||80)*.035)?'No tienes efectivo suficiente para la restauración':null),run:()=>{
@@ -10908,7 +10919,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     {sectorId:'agro',nombreBase:'Agro',etiqueta:'Agroindustria'},
     {sectorId:'logistica',nombreBase:'Internacional',etiqueta:'Comercio internacional'}
   ];
-  function asegurarHolding45(){ if(S.holding) S.holding.joints=Array.isArray(S.holding.joints)?S.holding.joints:[]; }
+  function asegurarHolding45(){ if(S.holding){ S.holding.joints=Array.isArray(S.holding.joints)?S.holding.joints:[]; S.holding.caja=isFinite(S.holding.caja)?Math.max(0,S.holding.caja):0; } }
   function empresasDeRamas45(){
     const out=[];
     (S.familia.hijos||[]).forEach(h=>{
@@ -10966,12 +10977,22 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('Liquidaste la joint venture con los '+esc(j.socioNombre)+' y recibiste '+fmt(parte)+'.','bien'); S.mov--;
         }})),cerrable:true});
     }});
+    const cajaHolding=S.holding.caja||0;
+    if(cajaHolding>5) opciones.push({t:'Repartir dividendo del holding',cat:'capital',d:'Caja del holding: '+fmt(cajaHolding)+'.',cerrar:false,run:()=>{
+      cerrarModal();
+      const monto=cajaHolding*.7;
+      S.holding.caja-=monto; S.efectivo+=monto;
+      log('El holding <b>'+esc(S.holding.nombre)+'</b> repartió un dividendo de '+fmt(monto)+'.','hito');
+      render();
+    }});
+    const inmobiliaria=safe45(()=>window.__SA49&&window.__SA49.resumenInmobiliario(),null);
     opciones.push({t:'Cerrar',cat:'legado',run:()=>{}});
     escena({rubro:'Panorama del grupo',titulo:esc(S.holding.nombre),ancho:true,
-      cuerpo:'Valor consolidado del grupo: <b>'+fmt(valorHolding45())+'</b>. '+g.length+' filial'+(g.length===1?'':'es')+' directa'+(g.length===1?'':'s')+(ramas.length?', '+ramas.length+' empresa'+(ramas.length===1?'':'s')+' de ramas familiares':'')+(joints.length?', '+joints.length+' joint venture'+(joints.length===1?'':'s'):'')+'.',
+      cuerpo:'Valor consolidado del grupo: <b>'+fmt(valorHolding45())+'</b>. '+g.length+' filial'+(g.length===1?'':'es')+' directa'+(g.length===1?'':'s')+(ramas.length?', '+ramas.length+' empresa'+(ramas.length===1?'':'s')+' de ramas familiares':'')+(joints.length?', '+joints.length+' joint venture'+(joints.length===1?'':'s'):'')+'.'+(cajaHolding>0?' Caja del holding: '+fmt(cajaHolding)+'.':''),
       html:'<div class="apunte">'+g.map(e=>'<div>'+esc(e.nombre)+' · '+esc((SECTORES.find(x=>x.id===e.sector)||{n:e.sector}).n)+' · '+fmt(valuar(e))+'</div>').join('')
         +ramas.map(x=>'<div>'+esc(x.nombre)+' · empresa de '+esc(x.de)+' · '+fmt(x.valor)+'</div>').join('')
-        +joints.map(j=>'<div>Joint venture con los '+esc(j.socioNombre)+' · '+fmt(j.valor)+'</div>').join('')+'</div>',
+        +joints.map(j=>'<div>Joint venture con los '+esc(j.socioNombre)+' · '+fmt(j.valor)+'</div>').join('')+'</div>'
+        +(inmobiliaria&&inmobiliaria.total>0?'<h3 style="margin-top:14px">División Real Estate<em>'+fmt(inmobiliaria.total)+'</em></h3><div class="apunte">'+inmobiliaria.n+' inmueble'+(inmobiliaria.n===1?'':'s')+' vinculado'+(inmobiliaria.n===1?'':'s')+' al holding.</div>':''),
       opciones,cerrable:true});
   }
   function accionHolding45(A){
@@ -11551,6 +11572,321 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init48,220);
   setTimeout(init48,650);
   window.__SA48={version:V48};
+})();
+
+/* ========================================================================
+   v49 · ECONOMÍA INMOBILIARIA: ZONAS VIVAS, TERRENOS Y DESARROLLO,
+   FICHA FINANCIERA, CAMBIO DE USO, INMOBILIARIA Y HOLDING INMOBILIARIO
+   Primera entrega del cambio de arquitectura: terreno → desarrollo →
+   explotación → valorización, conectado con el holding (v45) y la
+   ficha de propiedades con historia (v44).
+   ======================================================================== */
+(function(){
+  const V49='v49';
+  function safe49(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  function asegurar49(){
+    if(typeof S==='undefined'||!S) return;
+    S.mercadoInmobiliario=S.mercadoInmobiliario&&typeof S.mercadoInmobiliario==='object'?S.mercadoInmobiliario:{zonas:{}};
+    if(!S.mercadoInmobiliario.zonas||typeof S.mercadoInmobiliario.zonas!=='object') S.mercadoInmobiliario.zonas={};
+    if(S.holding) S.holding.caja=isFinite(S.holding.caja)?Math.max(0,S.holding.caja):0;
+  }
+
+  // ---------- zonas vivas ----------
+  function claveZona49(ciudad,idx){ return ciudad+'|'+idx; }
+  function indiceZona49(ciudad,idx){
+    asegurar49();
+    const k=claveZona49(ciudad,idx);
+    let z=S.mercadoInmobiliario.zonas[k];
+    if(!z){ z={indice:1,demanda:ri(45,70),seguridad:ri(45,80),infraestructura:ri(45,80)}; S.mercadoInmobiliario.zonas[k]=z; }
+    return z;
+  }
+  function correrMercado49(){
+    asegurar49();
+    Object.keys(S.mercadoInmobiliario.zonas).forEach(k=>{
+      const z=S.mercadoInmobiliario.zonas[k];
+      const ciclo=(S.macro&&S.macro.ciclo)||0;
+      z.indice=clamp(z.indice*(1+ciclo*.6+rnd(-.03,.05)),.5,3.2);
+      z.demanda=clamp(z.demanda+rnd(-3,3),10,100);
+      z.seguridad=clamp(z.seguridad+rnd(-2,2),5,100);
+      z.infraestructura=clamp(z.infraestructura+rnd(-1,2),5,100);
+    });
+    if(chance(.12)){
+      const ciudad=pick(Object.keys(ZONAS));
+      const zs=zonasDe(ciudad);
+      if(zs&&zs.length){
+        const idx=ri(0,zs.length-1);
+        const z=indiceZona49(ciudad,idx);
+        const eventos=[
+          {t:'Nueva línea de transporte en '+zs[idx].n+', '+ciudad,f:()=>{ z.indice=clamp(z.indice*1.12,.5,3.2); z.infraestructura=clamp(z.infraestructura+12,5,100); },txt:'La valorización de la zona subió con la nueva infraestructura.'},
+          {t:'Nuevo centro comercial en '+zs[idx].n+', '+ciudad,f:()=>{ z.indice=clamp(z.indice*1.08,.5,3.2); z.demanda=clamp(z.demanda+10,10,100); },txt:'El comercio de la zona se dinamizó.'},
+          {t:'Inseguridad golpea '+zs[idx].n+', '+ciudad,f:()=>{ z.indice=clamp(z.indice*.9,.5,3.2); z.seguridad=clamp(z.seguridad-15,5,100); },txt:'Los precios de la zona bajaron.'}
+        ];
+        const ev=pick(eventos); ev.f();
+        log('<b>'+esc(ev.t)+'</b>. '+ev.txt,'');
+        safe49(()=>{ if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar(ev.t.toUpperCase(),ev.txt,''); },null);
+      }
+    }
+  }
+  function wrapPrecioVivienda49(){
+    const old=window.precioVivienda; if(typeof old!=='function'||window.__SA49_PRECIO) return;
+    window.precioVivienda=function(ciudad,idxZona){
+      const base=old.apply(this,arguments);
+      try{ return base*indiceZona49(ciudad,idxZona).indice; }catch(e){ return base; }
+    };
+    window.__SA49_PRECIO=true;
+  }
+
+  // ---------- terrenos y desarrollo ----------
+  const TIPOS_TERRENO_49=[
+    {id:'urbano',n:'Lote urbano',base:380,d:'Un lote dentro de la ciudad, listo para construir.'},
+    {id:'suburbano',n:'Lote suburbano',base:220,d:'En la periferia; más barato, crece si llega infraestructura.'},
+    {id:'rural',n:'Terreno rural',base:140,d:'Tierra de vocación agrícola o de reserva.'},
+    {id:'comercial',n:'Terreno comercial',base:460,d:'Sobre una vía con tráfico; ideal para locales o bodegas.'},
+    {id:'industrial',n:'Terreno industrial',base:340,d:'Zona franca o industrial; para bodegas y plantas.'}
+  ];
+  function precioTerreno49(ciudad,idxZona,tipo){
+    const t=TIPOS_TERRENO_49.find(x=>x.id===tipo)||TIPOS_TERRENO_49[0];
+    const z=indiceZona49(ciudad,idxZona);
+    return Math.round(t.base*multCiudad(ciudad)*z.indice);
+  }
+  function escenaComprarTerreno49(){
+    const ciudad=S.hogar.ciudad;
+    const zonas=zonasVivienda(ciudad);
+    const idxZona=clamp(S.hogar.zona,0,zonas.length-1);
+    escena({rubro:'Mercado inmobiliario',titulo:'Comprar un terreno en '+esc(zonas[idxZona].n)+', '+esc(ciudad),ancho:true,
+      cuerpo:'El punto de partida de cualquier desarrollo. Elige el tipo de terreno.',
+      opciones:TIPOS_TERRENO_49.map(t=>{
+        const precio=precioTerreno49(ciudad,idxZona,t.id);
+        return {t:t.n,cat:'casa',d:t.d+' Precio aproximado: '+fmt(precio)+'.',
+          dis:S.efectivo<precio*.4?'Necesitas al menos '+fmt(precio*.4):null,
+          run:()=>{
+            const b=comprarBien({clase:'terreno',tipo:t.id,nombre:t.n+' en '+zonas[idxZona].n,valor:precio,mant:.006,renta:0,ciudad,zona:idxZona,cuotaInicial:S.efectivo>=precio?1:.4,anios:10});
+            if(!b) return;
+            log('Compraste <b>'+esc(b.nombre)+'</b> por '+fmt(precio)+'.','hito');
+            hito('Compró un terreno en '+ciudad); S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function accionComprarTerreno49(A){
+    A.push({t:'Comprar un terreno',cat:'casa',d:'El punto de partida para desarrollar: construir, o vender a una constructora.',mov:1,modal:true,run:()=>escenaComprarTerreno49()});
+  }
+  function terrenosPropios49(){ return (S.bienes||[]).filter(b=>b.clase==='terreno'&&!b.enConstruccion); }
+  const PROYECTOS_49=[
+    {id:'vivienda',n:'Construir una casa',anios:2,costoFactor:2.2,valorFactor:3.4,resultado:{clase:'vivienda',tipo:'casa_grande'}},
+    {id:'apartamentos',n:'Construir apartamentos para arrendar',anios:2,costoFactor:2.8,valorFactor:4.4,resultado:{clase:'renta',tipo:'apto'}},
+    {id:'local',n:'Construir un local comercial',anios:1,costoFactor:1.8,valorFactor:2.9,resultado:{clase:'renta',tipo:'local'}},
+    {id:'bodega',n:'Construir una bodega',anios:1,costoFactor:2.0,valorFactor:3.0,resultado:{clase:'renta',tipo:'bodega'}},
+    {id:'torre',n:'Desarrollar una torre de oficinas',anios:3,costoFactor:5.5,valorFactor:8.5,resultado:{clase:'renta',tipo:'oficina'},grande:true}
+  ];
+  function accionesDesarrollo49(A){
+    terrenosPropios49().forEach(b=>{
+      A.push({t:'Desarrollar '+b.nombre,cat:'casa',d:'Convertir el terreno en un proyecto real.',mov:1,modal:true,run:()=>escenaDesarrollar49(b)});
+    });
+  }
+  function escenaDesarrollar49(b){
+    const opciones=PROYECTOS_49.map(p=>{
+      const costo=Math.round(b.valor*p.costoFactor);
+      const valorFinal=Math.round(b.valor*p.valorFactor);
+      return {t:p.n,cat:'casa',d:'Costo del proyecto: '+fmt(costo)+' · Valor esperado al terminar: '+fmt(valorFinal)+' · '+p.anios+' año'+(p.anios>1?'s':'')+' de obra.',
+        dis:S.efectivo<costo*.5?'Necesitas al menos '+fmt(costo*.5)+' para arrancar':null,
+        cerrar:false,
+        run:()=>{
+          cerrarModal();
+          if(p.grande) escenaPreventa49(b,p,costo,valorFinal);
+          else arrancarProyecto49(b,p,costo,valorFinal,0);
+        }};
+    }).concat([
+      {t:'Venderlo a una constructora',cat:'casa',run:()=>{
+        const neto=venderBien(b,-.05);
+        log('Vendiste '+esc(b.nombre)+' a una constructora por '+fmt(neto)+'.','bien'); S.mov--;
+      }},
+      {t:'Dejarlo así por ahora',cat:'legado',run:()=>{S.mov--;}}
+    ]);
+    escena({rubro:'Desarrollo inmobiliario',titulo:'¿Qué construyes en '+esc(b.nombre)+'?',ancho:true,
+      cuerpo:'Valor del terreno: '+fmt(b.valor)+'. Elige el proyecto.',opciones,cerrable:true});
+  }
+  function escenaPreventa49(b,p,costo,valorFinal){
+    escena({rubro:'Financiación del proyecto',titulo:'¿Cómo financias '+esc(p.n.toLowerCase())+'?',ancho:true,
+      cuerpo:'Un proyecto grande se puede financiar completo, o cubrir parte con preventas: entra caja ya, pero cedes parte de la utilidad final.',
+      opciones:[
+        {t:'Financiarlo tú mismo',cat:'capital',dis:S.efectivo<costo*.6?'Necesitas al menos '+fmt(costo*.6):null,run:()=>{ arrancarProyecto49(b,p,costo,valorFinal,0); }},
+        {t:'Preventas: cubrir el 40% ahora',cat:'capital',run:()=>{
+          const preventa=costo*.4;
+          S.efectivo+=preventa*.5;
+          log('Vendiste en preventa una parte de '+esc(p.n.toLowerCase())+' por adelantado.','bien');
+          arrancarProyecto49(b,p,costo,valorFinal,.4);
+        }},
+        {t:'No arrancar todavía',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function arrancarProyecto49(b,p,costo,valorFinal,preventaPct){
+    const costoNeto=costo*(1-preventaPct*.5);
+    if(S.efectivo<costoNeto*.5){ log('No alcanza el capital para arrancar el proyecto.','mal'); return; }
+    const entrada=Math.min(S.efectivo,costoNeto*.6);
+    S.efectivo-=entrada;
+    b.enConstruccion=true; b.proyecto=p.id; b.costoProyecto=costoNeto; b.entradaPagada=entrada;
+    b.valorFinalEsperado=valorFinal*(1-preventaPct*.15);
+    b.nombreOriginal=b.nombre; b.nombre='Obra en curso: '+b.nombre;
+    log('Arrancó la obra en <b>'+esc(b.nombreOriginal)+'</b>. Faltan '+p.anios+' año'+(p.anios>1?'s':'')+'.','hito');
+    iniciarCompromiso({titulo:'Construcción en '+b.nombreOriginal,restan:p.anios,mov:1,cerrar:()=>completarDesarrollo49(b,p)});
+    S.mov--;
+  }
+  function completarDesarrollo49(b,p){
+    const saldo=Math.max(0,b.costoProyecto-b.entradaPagada);
+    if(S.efectivo>=saldo) S.efectivo-=saldo;
+    else { b.valorFinalEsperado*=.85; log('El saldo de la obra se cubrió con más deuda de la prevista; el proyecto rindió menos.','mal'); }
+    b.clase=p.resultado.clase; b.tipo=p.resultado.tipo;
+    const perfil=RENTAS.find(r=>r.id===p.resultado.tipo);
+    b.nombre=(perfil?perfil.n:(p.resultado.clase==='vivienda'?'Casa nueva':'Edificio nuevo'))+' en '+(b.ciudad||S.p.ciudad);
+    b.valor=Math.round(b.valorFinalEsperado);
+    b.precioCompra=b.valor;
+    if(perfil){ b.renta=perfil.renta; b.vac=perfil.vac; b.mant=perfil.mant; b.arrendado=true; }
+    else { b.renta=0; b.mant=.012; }
+    b.enConstruccion=false; b.comprado=S.anio;
+    b.cronica=Array.isArray(b.cronica)?b.cronica:[]; b.cronica.push({anio:S.anio,txt:'Terminó la construcción: '+b.nombre+'.'});
+    moverPrestigio(3,'un desarrollo inmobiliario terminado');
+    log('<b>'+esc(b.nombre)+'</b> quedó terminado y vale '+fmt(b.valor)+'.','hito');
+    hito('Terminó un desarrollo inmobiliario: '+b.nombre);
+    safe49(()=>{ if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('NUEVO DESARROLLO INMOBILIARIO',b.nombre+' quedó terminado y ya vale '+fmt(b.valor)+'.','hito'); },null);
+  }
+
+  // ---------- cambio de uso ----------
+  function accionesCambioUso49(A){
+    (S.bienes||[]).filter(b=>b.clase==='renta'&&!b.enConstruccion).forEach(b=>{
+      A.push({t:'Cambiar el uso de '+b.nombre,cat:'casa',d:'Reconvertir el inmueble a otro tipo de negocio.',mov:1,modal:true,run:()=>escenaCambiarUso49(b)});
+    });
+  }
+  function escenaCambiarUso49(b){
+    const opciones=RENTAS.filter(r=>r.id!==b.tipo).map(r=>{
+      const costo=Math.round(b.valor*.18);
+      return {t:'Convertir a '+r.n.toLowerCase(),cat:'casa',d:r.d+' Costo de conversión: '+fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+        S.efectivo-=costo;
+        b.tipo=r.id; b.nombre=r.n; b.renta=r.renta; b.vac=r.vac; b.mant=r.mant; b.arrendado=false;
+        b.cronica=Array.isArray(b.cronica)?b.cronica:[]; b.cronica.push({anio:S.anio,txt:'Se reconvirtió a '+r.n.toLowerCase()+'.'});
+        log('Convertiste el inmueble en <b>'+esc(r.n)+'</b>.','hito'); S.mov--;
+      }};
+    });
+    escena({rubro:'Cambio de uso',titulo:'Reconvertir '+esc(b.nombre),ancho:true,
+      cuerpo:'Tipo actual: '+esc(b.nombre)+'. Cambiar de uso cuesta, pero puede salvar un inmueble que ya no rinde.',
+      opciones,cerrable:true});
+  }
+
+  // ---------- inmobiliaria para inmuebles vacíos ----------
+  function accionesInmobiliaria49(A){
+    (S.bienes||[]).filter(b=>b.clase==='renta'&&!b.arrendado&&!b.inmobiliaria).forEach(b=>{
+      const costo=Math.max(10,b.valor*.02);
+      A.push({t:'Vincular '+b.nombre+' a una inmobiliaria',cat:'casa',d:'Pagas '+fmt(costo)+' de comisión y una agencia se encarga de arrendarlo.',mov:1,modal:true,run:()=>escenaVincularInmobiliaria49(b,costo)});
+    });
+  }
+  function escenaVincularInmobiliaria49(b,costo){
+    escena({rubro:'Inmobiliaria',titulo:'Vincular '+esc(b.nombre)+' a una inmobiliaria',ancho:true,
+      cuerpo:'Hoy está vacío. Una inmobiliaria consigue arrendatario a cambio de comisión, y sigue ayudando a mantenerlo ocupado.',
+      opciones:[
+        {t:'Vincularlo ('+fmt(costo)+')',cat:'casa',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+          S.efectivo-=costo; b.inmobiliaria=true; b.arrendado=true;
+          log('Vinculaste <b>'+esc(b.nombre)+'</b> a una inmobiliaria. Ya quedó arrendado.','bien'); S.mov--;
+        }},
+        {t:'Buscarlo por tu cuenta',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function reforzarInmobiliaria49(){
+    (S.bienes||[]).filter(b=>b.clase==='renta'&&b.inmobiliaria&&!b.arrendado).forEach(b=>{ if(chance(.7)) b.arrendado=true; });
+  }
+
+  // ---------- vivienda con más tipos ----------
+  const TIPOS_VIVIENDA_49=[
+    {id:'apartamento',n:'Apartamento',tipo:'apartamento',holgura:.72,fel:5},
+    {id:'casa',n:'Casa',tipo:'casa',holgura:1.0,fel:7},
+    {id:'duplex',n:'Dúplex',tipo:'casa_grande',holgura:1.18,fel:8},
+    {id:'penthouse',n:'Penthouse',tipo:'mansion',holgura:1.65,fel:12}
+  ];
+  function escenaComprarViviendaTipo49(){
+    const ciudad=S.hogar.ciudad;
+    const zonas=zonasVivienda(ciudad);
+    const idxZona=clamp(S.hogar.zona,0,zonas.length-1);
+    escena({rubro:'Vivienda',titulo:'Comprar otro tipo de vivienda en '+esc(zonas[idxZona].n),ancho:true,
+      cuerpo:'Más allá de casa pequeña, grande o mansión: elige el tipo de vivienda que quieres tener.',
+      opciones:TIPOS_VIVIENDA_49.map(t=>{
+        const precio=precioVivienda(ciudad,idxZona,t.holgura);
+        return {t:t.n,cat:'casa',d:'Cerca de '+fmt(precio)+' en '+esc(zonas[idxZona].n)+'.',
+          dis:S.efectivo<precio*.25?'Necesitas al menos '+fmt(precio*.25)+' de cuota inicial':null,
+          run:()=>{
+            const b=comprarBien({clase:'vivienda',tipo:t.tipo,nombre:t.n+' en '+zonas[idxZona].n,valor:precio,mant:.012,ciudad,zona:idxZona,cuotaInicial:S.efectivo>=precio?1:.3,anios:15});
+            if(!b) return;
+            S.hogar.vivienda=b.uid; S.hogar.zona=idxZona; S.hogar.conLosPadres=false;
+            S.p.felicidad=clamp(S.p.felicidad+t.fel,0,100);
+            log('Compraste <b>'+esc(b.nombre)+'</b> por '+fmt(precio)+(b.hipoteca>0?' con crédito de '+fmt(b.hipoteca):' de contado')+'.','hito');
+            hito('Compró '+t.n.toLowerCase()+' en '+zonas[idxZona].n); S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function accionComprarViviendaTipo49(A){
+    A.push({t:'Comprar otro tipo de vivienda',cat:'casa',d:'Apartamento, dúplex o penthouse, además de casa o mansión.',mov:1,modal:true,run:()=>escenaComprarViviendaTipo49()});
+  }
+
+  // ---------- holding: caja, dividendos y herencia ----------
+  function correrHolding49(){
+    if(!S.holding) return;
+    let skim=0;
+    safe49(()=>companias(),[]).forEach(e=>{ if(isFinite(e.utilidad)&&e.utilidad>0) skim+=e.utilidad*.02; });
+    (S.bienes||[]).forEach(b=>{ if(b.clase==='renta'&&b.arrendado) skim+=b.valor*(b.renta||0)*.03; });
+    if(skim>0) S.holding.caja=(S.holding.caja||0)+skim;
+  }
+  function wrapHeredar49(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA49_HEREDAR) return;
+    window.heredar=function(){
+      const holdingViejo=S.holding?JSON.parse(JSON.stringify(S.holding)):null;
+      const r=old.apply(this,arguments);
+      try{ if(holdingViejo&&typeof S!=='undefined'&&S) S.holding=holdingViejo; }catch(e){}
+      return r;
+    };
+    window.__SA49_HEREDAR=true;
+  }
+  function wrapPatrimonio49(){
+    const old=window.patrimonio; if(typeof old!=='function'||window.__SA49_PATR) return;
+    window.patrimonio=function(){
+      let v=old.apply(this,arguments);
+      try{ if(S.holding&&isFinite(S.holding.caja)) v+=S.holding.caja; }catch(e){}
+      return v;
+    };
+    window.__SA49_PATR=true;
+  }
+  function resumenInmobiliario49(){
+    const bienesRelevantes=(S.bienes||[]).filter(b=>b.clase==='terreno'||b.clase==='renta');
+    return {n:bienesRelevantes.length,total:bienesRelevantes.reduce((a,b)=>a+(b.valor||0),0)};
+  }
+
+  function wrapListaAcciones49(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA49_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        accionComprarViviendaTipo49(A);
+        accionComprarTerreno49(A);
+        accionesDesarrollo49(A);
+        accionesCambioUso49(A);
+        accionesInmobiliaria49(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA49_LISTA=true;
+  }
+  function wrapPaso49(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA49_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar49(); correrMercado49(); correrHolding49(); reforzarInmobiliaria49(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA49_PASO=true;
+  }
+  function init49(){ asegurar49(); wrapPrecioVivienda49(); wrapHeredar49(); wrapPatrimonio49(); wrapListaAcciones49(); wrapPaso49(); }
+  setTimeout(init49,40);
+  setTimeout(init49,220);
+  setTimeout(init49,650);
+  window.__SA49={version:V49,resumenInmobiliario:resumenInmobiliario49,indiceZona:indiceZona49};
 })();
 </script>
 
