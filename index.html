@@ -9926,6 +9926,377 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init42,180);
   setTimeout(init42,500);
 })();
+
+/* ========================================================================
+   v43 · CASAS VIVAS
+   Primera entrega: ramas familiares como entidades con patrimonio propio,
+   banca privada extendida, family office con equipo, y poder interno
+   (prestigio, influencia, lealtad) entre las casas de la dinastía.
+   ======================================================================== */
+(function(){
+  const V43='v43';
+  function safe43(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+  const paisDeCiudad43=(ciudad)=>safe43(()=>{ const g=ciudadGlobalDe(ciudad); return g?g.pais:'Colombia'; },'Colombia');
+
+  function idCasa43(d){ return d.gid||d.fid||('id43-'+(d.nombre||'')+'-'+(d.nacido!==undefined?d.nacido:d.edad)); }
+
+  function normalizarCasa43(d,ciudadDefault,esNieto){
+    if(!d) return null;
+    d.__esNieto43=!!esNieto;
+    d.patrimonio=isFinite(d.patrimonio)?Math.max(0,d.patrimonio):0;
+    if(!d.casa43||typeof d.casa43!=='object'){
+      d.casa43={
+        id:idCasa43(d),
+        nombreManual:null,
+        prestigio:ri(15,38),
+        influencia:ri(8,30),
+        lealtad:ri(52,80),
+        relacion:ri(55,80),
+        favorito:false, rebelde:false,
+        integradaHolding:false,
+        participacionJugador:0,
+        problemas:[],
+        patFin:{efectivo:Math.round(d.patrimonio*.6),empresas:0,inmuebles:0,deudas:0}
+      };
+    }
+    const c=d.casa43;
+    const ciudad=d.ciudad||ciudadDefault||S.p.ciudad;
+    c.nombre=c.nombreManual||('Rama de '+(ciudad||'la familia'));
+    c.prestigio=clamp(isFinite(c.prestigio)?c.prestigio:20,0,100);
+    c.influencia=clamp(isFinite(c.influencia)?c.influencia:15,0,100);
+    c.lealtad=clamp(isFinite(c.lealtad)?c.lealtad:60,0,100);
+    c.relacion=clamp(isFinite(c.relacion)?c.relacion:65,0,100);
+    c.participacionJugador=clamp(isFinite(c.participacionJugador)?c.participacionJugador:0,0,100);
+    c.problemas=Array.isArray(c.problemas)?c.problemas:[];
+    c.patFin=c.patFin&&typeof c.patFin==='object'?c.patFin:{efectivo:0,empresas:0,inmuebles:0,deudas:0};
+    c.patFin.efectivo=Math.max(0,Number(c.patFin.efectivo)||0);
+    c.patFin.empresas=Math.max(0,d.empresaProfesional?(d.empresaProfesional.valor||0):0);
+    c.patFin.inmuebles=Math.max(0,(d.bienes||[]).reduce((a,b)=>a+(b.valor||0),0));
+    c.patFin.deudas=Math.max(0,Number(c.patFin.deudas)||0);
+    // Si otra capa del juego (v40, v35) subió d.patrimonio por su cuenta, absorbemos
+    // la diferencia como efectivo de la rama en vez de pisar ese avance.
+    const suma=c.patFin.efectivo+c.patFin.empresas+c.patFin.inmuebles-c.patFin.deudas;
+    const brecha=(d.patrimonio||0)-suma;
+    if(brecha>0.01) c.patFin.efectivo+=brecha;
+    d.patrimonio=Math.max(0,c.patFin.efectivo+c.patFin.empresas+c.patFin.inmuebles-c.patFin.deudas);
+    c.favorito=!!(S.gobiernoFamilia&&S.gobiernoFamilia.herederoDesignado&&S.gobiernoFamilia.herederoDesignado===c.id);
+    c.rebelde=c.relacion<28&&!c.favorito;
+    return c;
+  }
+
+  function ramasElegibles43(){
+    const out=[];
+    if(!S||!S.familia) return out;
+    (S.familia.hijos||[]).forEach(h=>{
+      if(h.edad>=18&&(h.independiente||h.edad>=27)){ normalizarCasa43(h,h.ciudad,false); out.push(h); }
+      (h.hijos||[]).forEach(g=>{
+        if(g.edad>=18&&(g.independiente||g.edad>=27)){ normalizarCasa43(g,g.ciudad||h.ciudad,true); out.push(g); }
+      });
+    });
+    return out;
+  }
+
+  function asegurarGobiernoFamilia43(){
+    if(!S.gobiernoFamilia) S.gobiernoFamilia={protocolo:false,reglaLiderazgo:'descendencia',reglaEducacion:false,reglaEmpleo:false,reuniones:0,ultimaReunion:0,normas:[]};
+    if(S.gobiernoFamilia.herederoDesignado===undefined) S.gobiernoFamilia.herederoDesignado=null;
+  }
+
+  function asegurar43(){
+    if(typeof S==='undefined'||!S||!S.familia) return;
+    asegurarGobiernoFamilia43();
+    ramasElegibles43();
+    if(S.bancoFamilia){
+      const b=S.bancoFamilia;
+      b.tasaInteres=isFinite(b.tasaInteres)?clamp(b.tasaInteres,.03,.18):.07;
+      b.sucursales=isFinite(b.sucursales)?Math.max(1,Math.round(b.sucursales)):1;
+      b.presidente=b.presidente&&typeof b.presidente==='object'?b.presidente:null;
+      b.carteraMorosa=isFinite(b.carteraMorosa)?Math.max(0,b.carteraMorosa):0;
+      b.prestamosFamilia=Array.isArray(b.prestamosFamilia)?b.prestamosFamilia:[];
+    }
+    if(S.familyOffice){
+      S.familyOffice.staff=S.familyOffice.staff&&typeof S.familyOffice.staff==='object'?S.familyOffice.staff:{abogado:null,contador:null,administrador:null};
+    }
+  }
+
+  function nombreHerederoDesignado43(){
+    asegurarGobiernoFamilia43();
+    const id=S.gobiernoFamilia.herederoDesignado;
+    if(!id) return 'sin designar';
+    const directo=(S.familia.hijos||[]).find(h=>idCasa43(h)===id);
+    if(directo) return directo.nombre+' '+(directo.apellido||S.p.apellido);
+    for(const h of (S.familia.hijos||[])){
+      const g=(h.hijos||[]).find(x=>idCasa43(x)===id);
+      if(g) return g.nombre+' '+(g.apellido||h.apellido||S.p.apellido);
+    }
+    return 'sin designar';
+  }
+
+  function consolidado43(){
+    const ramas=ramasElegibles43();
+    const patRamas=ramas.reduce((a,d)=>a+(d.patrimonio||0),0);
+    const empresasRamas=ramas.filter(d=>d.empresaProfesional).length;
+    const empresasGrupo=safe43(()=>companias().length,0);
+    const inmueblesPersonal=(S.bienes||[]).length;
+    const inmueblesRamas=ramas.reduce((a,d)=>a+((d.bienes||[]).length),0);
+    const ciudades=new Set([S.p.ciudad].concat(ramas.map(d=>d.ciudad||S.p.ciudad)));
+    let nietos=0; (S.familia.hijos||[]).forEach(h=>nietos+=(h.hijos||[]).length);
+    const miembros=1+(S.familia.hijos||[]).length+nietos;
+    return {
+      total:safe43(()=>patrimonio(),S.efectivo)+patRamas,
+      patRamas, empresas:empresasGrupo+empresasRamas,
+      inmuebles:inmueblesPersonal+inmueblesRamas,
+      ciudades:ciudades.size, miembros, casas:ramas.length
+    };
+  }
+
+  function profesionCasa43(d){
+    if(d.carreraProf){ const cr=safe43(()=>carreraProfesionalDe(d.carreraProf),null); if(cr&&cr.tit) return cr.tit; }
+    return d.ocupacion||d.rumbo||'trayectoria en formación';
+  }
+
+  function casaCard43(d){
+    const c=d.casa43;
+    const badge=c.favorito?'Sucesora preferida':c.rebelde?'Rama distante':c.relacion>=75?'Rama aliada':'En la familia';
+    return '<button type="button" class="sa35-person" data-sa43="'+esc(idCasa43(d))+'">'
+      +avatarSVG(d.nombre+' '+(d.apellido||S.p.apellido),{sexo:d.sexo,edad:d.edad,tam:44})
+      +'<span class="meta"><b>'+esc(c.nombre)+'</b><small>'+esc(d.nombre)+' '+esc(d.apellido||S.p.apellido)+' · '+fmt(d.patrimonio||0)+' · '+esc(badge)+'</small></span></button>';
+  }
+
+  function convocarConsejoGeneral43(){
+    asegurarGobiernoFamilia43();
+    if(S.mov<=0){ log('No te quedan movidas este año para convocar al consejo.','mal'); render(); return; }
+    const ramas=ramasElegibles43();
+    S.gobiernoFamilia.reuniones=(S.gobiernoFamilia.reuniones||0)+1; S.gobiernoFamilia.ultimaReunion=S.anio;
+    ramas.forEach(d=>{ d.casa43.lealtad=clamp(d.casa43.lealtad+ri(2,6),0,100); d.casa43.relacion=clamp(d.casa43.relacion+ri(1,4),0,100); });
+    moverPrestigio(1,'un consejo con todas las casas de la familia');
+    log('Convocaste un consejo con todas las casas de la dinastía. '+(ramas.length?ramas.length+' rama'+(ramas.length===1?'':'s')+' asistieron.':'Todavía no hay ramas independientes, pero quedó el precedente.'),'hito');
+    S.mov--; render();
+  }
+
+  function escenaCasa43(d){
+    asegurar43();
+    const c=d.casa43; if(!c) return;
+    const nombreCompleto=d.nombre+' '+(d.apellido||S.p.apellido);
+    const opciones=[];
+    opciones.push({t:'Invertir en la rama',cat:'capital',d:'Refuerzas su patrimonio con capital de tu propia caja.',dis:S.efectivo<40?'Necesitas al menos '+fmt(40):null,run:()=>{
+      const x=Math.min(Math.max(40,patrimonio()*.04),S.efectivo*.4);
+      S.efectivo-=x; c.patFin.efectivo+=x; c.relacion=clamp(c.relacion+4,0,100); c.prestigio=clamp(c.prestigio+2,0,100);
+      log('Invertiste '+fmt(x)+' en la '+esc(c.nombre.toLowerCase())+' de '+esc(nombreCompleto)+'.','bien'); S.mov--;
+    }});
+    opciones.push({t:'Prestarle capital personal',cat:'capital',d:'Un préstamo directo, con interés a tu favor, separado de la banca familiar.',dis:S.efectivo<60?'Necesitas al menos '+fmt(60):null,run:()=>{
+      const x=Math.min(Math.max(60,patrimonio()*.05),S.efectivo*.35);
+      S.efectivo-=x; c.patFin.efectivo+=x; c.patFin.deudas+=x;
+      c.prestamoJugador={monto:x,saldo:x,tasa:.08,desde:S.anio};
+      log('Le prestaste '+fmt(x)+' a la rama de '+esc(nombreCompleto)+'. Quedó registrado como deuda con vos.','bien'); S.mov--;
+    }});
+    opciones.push({t:'Comprar participación de la rama',cat:'capital',d:'Adquieres una parte de su patrimonio a cambio de efectivo para ellos.',dis:c.participacionJugador>=60?'Ya tienes una participación mayoritaria':(S.efectivo<30?'Necesitas al menos '+fmt(30):null),run:()=>{
+      const pctComprado=10; const costo=Math.max(30,(d.patrimonio||0)*pctComprado/100);
+      if(S.efectivo<costo){ log('No tienes efectivo suficiente para comprar esa participación.','mal'); return; }
+      S.efectivo-=costo; c.patFin.efectivo+=costo*.6; c.participacionJugador=clamp(c.participacionJugador+pctComprado,0,100);
+      log('Compraste un '+pctComprado+'% de la rama de '+esc(nombreCompleto)+'. Ahora controlas '+c.participacionJugador+'%.','hito'); S.mov--;
+    }});
+    opciones.push({t:c.integradaHolding?'Ya está integrada al holding':'Integrar al holding familiar',cat:'legado',d:c.integradaHolding?'Su patrimonio ya se consolida dentro del grupo.':'La rama pasa a formar parte formal del holding familiar.',dis:c.integradaHolding?'Ya está integrada':(!safe43(()=>hayMatriz(),false)?'Todavía no existe un holding familiar':null),run:()=>{
+      c.integradaHolding=true; c.relacion=clamp(c.relacion+6,0,100); moverPrestigio(2,'la integración de una rama al holding');
+      log('La rama de '+esc(nombreCompleto)+' se integró al holding familiar.','hito'); S.mov--;
+    }});
+    if(c.integradaHolding) opciones.push({t:'Dejarla independiente otra vez',cat:'legado',run:()=>{
+      c.integradaHolding=false; log('La rama de '+esc(nombreCompleto)+' vuelve a operar de forma independiente.','hito'); S.mov--;
+    }});
+    opciones.push({t:c.favorito?'Ya es tu sucesora preferida':'Apoyarla como sucesora',cat:'familia',d:'La marcas como la orientación del consejo familiar para la sucesión.',dis:c.favorito?'Ya tiene ese lugar':null,run:()=>{
+      asegurarGobiernoFamilia43(); S.gobiernoFamilia.herederoDesignado=idCasa43(d);
+      ramasElegibles43().forEach(x=>{ x.casa43.favorito=(idCasa43(x)===idCasa43(d)); });
+      c.relacion=clamp(c.relacion+8,0,100); c.prestigio=clamp(c.prestigio+5,0,100);
+      log('La familia empezó a mirar a '+esc(nombreCompleto)+' como la sucesora de referencia de la Casa.','hito'); hito('Apoyó a '+nombreCompleto+' como sucesor de la Casa'); S.mov--;
+    }});
+    opciones.push({t:'Convocar consejo con esta rama',cat:'familia',d:'Una reunión para alinear expectativas y reforzar lealtad.',run:()=>{
+      asegurarGobiernoFamilia43(); S.gobiernoFamilia.reuniones=(S.gobiernoFamilia.reuniones||0)+1; S.gobiernoFamilia.ultimaReunion=S.anio;
+      c.lealtad=clamp(c.lealtad+6,0,100); c.relacion=clamp(c.relacion+4,0,100);
+      log('Convocaste un consejo con la rama de '+esc(nombreCompleto)+'.','bien'); S.mov--;
+    }});
+    if(c.relacion<45||c.problemas.length){
+      opciones.push({t:'Reconciliarte con esta rama',cat:'familia',d:'Buscas cerrar la tensión acumulada con esta rama.',run:()=>{
+        c.relacion=clamp(c.relacion+18,0,100); c.problemas=[];
+        log('Lograste reconciliarte con la rama de '+esc(nombreCompleto)+'.','hito'); S.mov--;
+      }});
+    }
+    if(S.bancoFamilia){
+      const b=S.bancoFamilia;
+      const max=Math.max(0,Math.min(b.capital-b.reserva,Math.max(40,(d.patrimonio||0)*.5)));
+      opciones.push({t:'Crédito de la banca de la casa',cat:'capital',d:'La rama recibe financiamiento de la banca privada familiar, a la tasa vigente ('+pc(b.tasaInteres||.07)+').',dis:max<40?'La banca no tiene capital libre suficiente':null,run:()=>{
+        b.capital-=max; b.prestamosFamilia=b.prestamosFamilia||[];
+        b.prestamosFamilia.push({pid:idCasa43(d),nombre:nombreCompleto,monto:max,saldo:max,tasa:b.tasaInteres||.07,plazo:10,desde:S.anio,riesgo:.08,esCasa:true});
+        c.patFin.efectivo+=max; c.patFin.deudas+=max;
+        log('La banca de la casa le otorgó un crédito de '+fmt(max)+' a la rama de '+esc(nombreCompleto)+'.','bien'); S.mov--;
+      }});
+    }
+    opciones.push({t:'No intervenir por ahora',cat:'legado',run:()=>{ S.mov--; }});
+    escena({rubro:'Casas de la dinastía',titulo:c.nombre+' — '+nombreCompleto,ancho:true,
+      cuerpo:'Patrimonio propio: <b>'+fmt(d.patrimonio||0)+'</b> (efectivo '+fmt(c.patFin.efectivo)+', empresas '+fmt(c.patFin.empresas)+', inmuebles '+fmt(c.patFin.inmuebles)+', deudas '+fmt(c.patFin.deudas)+'). '
+        +'Ciudad: '+esc(d.ciudad||S.p.ciudad)+' · Profesión: '+esc(profesionCasa43(d))+(d.pareja?' · Pareja: '+esc(d.pareja.nombre):'')+(d.hijos&&d.hijos.length?' · '+d.hijos.length+' hijo'+(d.hijos.length===1?'':'s'):'')+'. '
+        +'Prestigio '+Math.round(c.prestigio)+'/100 · Influencia '+Math.round(c.influencia)+'/100 · Lealtad '+Math.round(c.lealtad)+'/100 · Relación con la casa principal '+Math.round(c.relacion)+'/100.'
+        +(c.participacionJugador?' Tu participación en su patrimonio: '+c.participacionJugador+'%.':'')+(c.integradaHolding?' Integrada al holding familiar.':''),
+      opciones,cerrable:true});
+  }
+
+  function candidatosStaff43(){
+    return [
+      {nombre:'Renata Uribe',capaz:8,sueldo:10},
+      {nombre:'Ignacio Beltrán',capaz:7,sueldo:8},
+      {nombre:'Camila Restrepo',capaz:9,sueldo:13}
+    ];
+  }
+  function escenaEquipoOficina43(){
+    asegurar43();
+    if(!S.familyOffice){ log('Primero constituye el family office desde la sección de Familia.','mal'); render(); return; }
+    const fo=S.familyOffice; fo.staff=fo.staff||{abogado:null,contador:null,administrador:null};
+    const roles=[
+      ['abogado','Abogado patrimonial','Reduce fricciones legales y sucesorias de la casa.'],
+      ['contador','Contador de la casa','Mejora la eficiencia administrativa del patrimonio.'],
+      ['administrador','Administrador de inversiones','Suma un pequeño retorno adicional, independiente del director.']
+    ];
+    const opciones=roles.map(([k,titulo,desc])=>{
+      const actual=fo.staff[k];
+      return {t:actual?'Cambiar '+titulo.toLowerCase()+' (hoy: '+esc(actual.nombre)+')':'Contratar '+titulo.toLowerCase(),cat:'empleo',d:desc,cerrar:false,run:()=>{
+        cerrarModal();
+        const cands=candidatosStaff43();
+        escena({rubro:'Oficina patrimonial',titulo:titulo,ancho:true,cuerpo:'Elige quién ocupa este puesto en la oficina de la casa.',
+          opciones:cands.map(cn=>({t:cn.nombre,cat:'empleo',d:'Capacidad '+cn.capaz+'/10 · honorarios '+fmt(cn.sueldo)+' al año.',run:()=>{
+            fo.staff[k]={nombre:cn.nombre,capaz:cn.capaz,sueldo:cn.sueldo,anios:0};
+            log('<b>'+esc(cn.nombre)+'</b> se unió a la oficina patrimonial como '+titulo.toLowerCase()+'.','hito'); S.mov--;
+          }})).concat(actual?[{t:'Dejar el puesto vacante',cat:'legado',run:()=>{ fo.staff[k]=null; log('La oficina dejó vacante el puesto de '+titulo.toLowerCase()+'.'); S.mov--; }}]:[]),
+          cerrable:true});
+      }};
+    });
+    escena({rubro:'Oficina patrimonial',titulo:'Equipo de '+fo.nombre,ancho:true,
+      cuerpo:'Además de la dirección, la oficina puede tener un abogado patrimonial, un contador y un administrador de inversiones. Cada uno cobra honorarios anuales y aporta un beneficio propio.',
+      opciones,cerrable:true});
+  }
+
+  function escenaBancoFamilia43(oldFn){
+    asegurar43();
+    const b=S.bancoFamilia;
+    if(!b) return oldFn();
+    const candidatosPresidente=[{nombre:'Tú',pid:'tu'}].concat((S.familia.hijos||[]).filter(h=>h.edad>=25).map(h=>({nombre:h.nombre+' '+(h.apellido||S.p.apellido),pid:h.fid})));
+    escena({rubro:'Banca de la casa',titulo:b.nombre,ancho:true,
+      cuerpo:'Banca privada de la familia: administra liquidez, financia empresas, presta a familiares y ramas, y puede mantener una línea de emergencia. No capta depósitos del público. '
+        +'Tasa familiar vigente: <b>'+pc(b.tasaInteres||.07)+'</b> · '+(b.sucursales||1)+' sucursal'+((b.sucursales||1)===1?'':'es')+' · cartera morosa aproximada '+fmt(b.carteraMorosa||0)+' · presidencia: <b>'+esc(b.presidente?b.presidente.nombre:'vacante')+'</b>.',
+      opciones:[
+        {t:'Capitalizar la banca',cat:'capital',d:'Aumenta capacidad de crédito y reserva.',dis:S.efectivo<100?'Necesitas al menos '+fmt(100):null,run:()=>{const x=Math.min(500,S.efectivo*.35);S.efectivo-=x;b.capital+=x;b.reserva+=x*.35;log('Capitalizaste la banca familiar con '+fmt(x)+'.','bien');S.mov--; }},
+        {t:'Prestarle a una compañía de la casa',cat:'capital',d:'Financia expansión sin acudir a un banco externo.',dis:!companias().length?'No tienes una compañía que financiar':null,run:()=>{const e=companias().sort((a,c)=>a.caja-c.caja)[0];const x=Math.min(Math.max(50,b.capital*.18),Math.max(50,e.ingresos*.08));if(x<=0)return;b.prestamos=(b.prestamos||0)+x;e.caja+=x;e.deuda+=x;log('La banca de la casa le prestó '+fmt(x)+' a <b>'+esc(e.nombre)+'</b>.','bien');S.mov--; }},
+        {t:'Prestarle a un familiar',cat:'familia',d:'Financia estudio, vivienda o un negocio y queda registrado como crédito.',dis:!((S.familia.hijos||[]).some(h=>h.edad>=18)||parientesVivos().length)?'No hay un familiar disponible':null,cerrar:false,run:()=>escenaPrestamoFamiliar()},
+        {t:'Fijar la tasa de interés familiar',cat:'capital',d:'Define cuánto cobra la banca a la familia y a las ramas por sus créditos.',cerrar:false,run:()=>{
+          cerrarModal();
+          escena({rubro:'Banca de la casa',titulo:'Tasa de interés familiar',cuerpo:'Una tasa más baja fortalece a las ramas; una tasa más alta protege el capital del banco.',
+            opciones:[.04,.06,.08,.10,.12].map(v=>({t:pc(v),cat:'capital',run:()=>{ b.tasaInteres=v; log('La banca familiar fijó su tasa en '+pc(v)+'.','hito'); S.mov--; }})),cerrable:true});
+        }},
+        {t:'Nombrar presidencia del banco',cat:'empleo',d:'Quién representa a la banca privada de la familia.',cerrar:false,run:()=>{
+          cerrarModal();
+          escena({rubro:'Banca de la casa',titulo:'Presidencia de la banca',cuerpo:'Elige quién preside la institución.',
+            opciones:candidatosPresidente.map(cd=>({t:cd.nombre,cat:'empleo',run:()=>{ b.presidente={nombre:cd.nombre,pid:cd.pid,desde:S.anio}; log('<b>'+esc(cd.nombre)+'</b> asumió la presidencia de la banca familiar.','hito'); S.mov--; }})),cerrable:true});
+        }},
+        {t:'Abrir una nueva sucursal',cat:'capital',d:'Amplía la red de la banca de la casa; cuesta capital pero da un pequeño ingreso adicional cada año.',dis:b.capital<250?'Necesitas al menos '+fmt(250)+' de capital libre':null,run:()=>{ b.capital-=180; b.sucursales=(b.sucursales||1)+1; log('La banca familiar abrió una nueva sucursal. Ya son '+b.sucursales+'.','hito'); S.mov--; }},
+        {t:b.lineaEmergencia?'Administrar línea de emergencia':'Crear línea de emergencia familiar',cat:'familia',d:b.lineaEmergencia?'Reserva separada para crisis familiares.':'Reserva parte del capital para una emergencia grave.',run:()=>{ b.lineaEmergencia=true; b.reserva=Math.max(b.reserva,b.capital*.38); log('La banca estableció una línea de emergencia familiar.','hito'); S.mov--; }},
+        {t:'Pedir liquidez a la banca',cat:'capital',d:'Retirar una parte del capital libre sin tocar la reserva mínima.',dis:b.capital-b.reserva<40?'La banca no tiene capital libre suficiente':null,run:()=>{const x=Math.min(b.capital-b.reserva,Math.max(40,b.capital*.12));b.capital-=x;S.efectivo+=x;log('La banca familiar te entregó '+fmt(x)+' de liquidez.','bien');S.mov--; }},
+        {t:'No tocarla',cat:'legado',d:'La dejas conservadora para la siguiente generación.',run:()=>{ log('Mantuviste la banca familiar conservadora.'); S.mov--; }}
+      ],cerrable:true});
+  }
+
+  function correrCasas43(){
+    asegurar43();
+    const ramas=ramasElegibles43();
+    ramas.forEach(d=>{
+      const c=d.casa43;
+      const tasa=rnd(-.02,.07);
+      c.patFin.efectivo=Math.max(0,c.patFin.efectivo*(1+tasa*.5));
+      if(d.empresaProfesional) d.empresaProfesional.valor=Math.max(0,(d.empresaProfesional.valor||0)*(1+rnd(-.03,.08)));
+      if(c.prestamoJugador&&c.prestamoJugador.saldo>0){
+        const pago=Math.min(c.prestamoJugador.saldo,c.prestamoJugador.saldo*.22+c.prestamoJugador.monto*.08);
+        if(c.patFin.efectivo>=pago){ c.patFin.efectivo-=pago; c.patFin.deudas=Math.max(0,c.patFin.deudas-pago); c.prestamoJugador.saldo-=pago; S.efectivo+=pago; }
+      }
+      c.lealtad=clamp(c.lealtad+rnd(-2,1.4)+(c.favorito?1.2:0),0,100);
+      c.relacion=clamp(c.relacion+rnd(-1.6,1.6),0,100);
+      c.prestigio=clamp(c.prestigio+rnd(-1,2)+(d.patrimonio>500?1:0),0,100);
+      c.rebelde=c.relacion<28&&!c.favorito;
+      normalizarCasa43(d,d.ciudad,d.__esNieto43);
+      if(chance(.05)){
+        if(chance(.55)){ c.prestigio=clamp(c.prestigio+ri(2,6),0,100); log('La rama de '+esc(d.nombre)+' tuvo un buen año y ganó reconocimiento en '+esc(d.ciudad||S.p.ciudad)+'.','bien'); }
+        else { c.relacion=clamp(c.relacion-ri(3,9),0,100); c.problemas.push({anio:S.anio,txt:'tensión familiar'}); if(c.problemas.length>5) c.problemas.shift(); log('Hay tensión con la rama de '+esc(d.nombre)+' por un desacuerdo familiar.','mal'); }
+      }
+    });
+    if(S.bancoFamilia){
+      const b=S.bancoFamilia; b.prestamosFamilia=b.prestamosFamilia||[];
+      if((b.sucursales||1)>1) b.capital+=((b.sucursales||1)-1)*2;
+      b.carteraMorosa=b.prestamosFamilia.filter(p=>chance(p.riesgo||.06)).reduce((a,p)=>a+p.saldo,0);
+    }
+    if(S.familyOffice&&S.familyOffice.staff){
+      const fo=S.familyOffice, st=fo.staff;
+      ['abogado','contador','administrador'].forEach(k=>{
+        const m=st[k]; if(!m) return; m.anios=(m.anios||0)+1;
+        const pago=Math.min(fo.reserva,m.sueldo); fo.reserva-=pago; fo.activos=Math.max(0,fo.reserva+fo.inversiones);
+        if(k==='administrador') fo.inversiones=Math.max(0,fo.inversiones*(1+.006+m.capaz*.0006));
+        if(k==='contador') fo.inversiones=Math.max(0,fo.inversiones*(1+.003));
+      });
+    }
+  }
+
+  function renderCasas43(){
+    if(typeof S==='undefined'||!S||typeof render!=='function') return;
+    const host=document.querySelector('#lienzoJuego'); if(!host) return;
+    host.querySelectorAll('.sa43-inject').forEach(x=>x.remove());
+    if(tab!=='familia') return;
+    const wrap=host.querySelector('.wrap'); if(!wrap) return;
+    asegurar43();
+    const ramas=ramasElegibles43();
+    const cons=consolidado43();
+    const sec=document.createElement('div'); sec.className='seccion sa43-inject';
+    sec.innerHTML='<h3>Las casas de la dinastía<em>'+ramas.length+' rama'+(ramas.length===1?'':'s')+' con vida propia</em></h3>'
+      +'<div class="family-house-tools">'
+      +'<div class="family-house-card oro"><div class="fh-label">Patrimonio consolidado</div><div class="fh-title">'+fmt(cons.total)+'</div><div class="fh-meta">'+cons.casas+' casas · '+cons.empresas+' empresas · '+cons.inmuebles+' inmuebles</div></div>'
+      +'<div class="family-house-card"><div class="fh-label">Miembros</div><div class="fh-title">'+cons.miembros+'</div><div class="fh-meta">en '+cons.ciudades+' ciudad'+(cons.ciudades===1?'':'es')+'</div></div>'
+      +'<div class="family-house-card"><div class="fh-label">Patrimonio de las ramas</div><div class="fh-title">'+fmt(cons.patRamas)+'</div><div class="fh-meta">fuera de tu caja personal</div></div>'
+      +'<div class="family-house-card"><div class="fh-label">Oficina patrimonial</div><div class="fh-title">'+(S.familyOffice?'Gestionar equipo':'Sin crear')+'</div><div class="fh-meta"><button type="button" class="sa43-eq-btn" style="all:unset;cursor:pointer;color:#D6A648">Abogado, contador, inversiones →</button></div></div>'
+      +'</div>'
+      +'<div class="family-house-tools" style="grid-template-columns:repeat(2,1fr);margin-top:10px">'
+      +'<div class="family-house-card"><div class="fh-label">Consejo de familia</div><div class="fh-title">'+((S.gobiernoFamilia&&S.gobiernoFamilia.reuniones)||0)+' reuniones</div><div class="fh-meta"><button type="button" class="sa43-consejo-btn" style="all:unset;cursor:pointer;color:#D6A648">Convocar a todas las casas →</button></div></div>'
+      +'<div class="family-house-card"><div class="fh-label">Sucesor de referencia</div><div class="fh-title">'+esc(nombreHerederoDesignado43())+'</div><div class="fh-meta">Lo define el consejo o la rama que decidas apoyar.</div></div>'
+      +'</div>'
+      +'<div class="sa35-person-grid" style="margin-top:12px">'+(ramas.length?ramas.map(d=>casaCard43(d)).join(''):'<div class="sa35-sub">Todavía ninguna rama se independizó del todo. Cuando un hijo o nieto forme su propia vida, aparecerá aquí con patrimonio, ciudad y prestigio propios.</div>')+'</div>';
+    wrap.appendChild(sec);
+    sec.querySelectorAll('[data-sa43]').forEach(btn=>{
+      const id=btn.dataset.sa43; const d=ramas.find(x=>idCasa43(x)===id);
+      if(d) btn.onclick=()=>escenaCasa43(d);
+    });
+    const eq=sec.querySelector('.sa43-eq-btn'); if(eq) eq.onclick=()=>escenaEquipoOficina43();
+    const cj=sec.querySelector('.sa43-consejo-btn'); if(cj) cj.onclick=()=>convocarConsejoGeneral43();
+  }
+
+  function wrapBanco43(){
+    if(window.__SA43_BANCO) return;
+    const old=window.escenaBancoFamilia; if(typeof old!=='function') return;
+    window.escenaBancoFamilia=function(){ asegurar43(); return escenaBancoFamilia43(old); };
+    window.__SA43_BANCO=true;
+  }
+  function wrapPaso43(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA43_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar43(); correrCasas43(); } }catch(e){} try{ render(); }catch(e){} return r; };
+    window.__SA43_PASO=true;
+  }
+  function wrapRender43(){
+    const old=window.render; if(typeof old!=='function'||window.__SA43_RENDER) return;
+    window.render=function(){ const r=old.apply(this,arguments); try{ renderCasas43(); }catch(e){} return r; };
+    window.__SA43_RENDER=true;
+  }
+  function wrapInit43(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA43_INIT) return;
+    window.iniciar=function(){ const r=old.apply(this,arguments); safe43(()=>{ asegurar43(); },null); safe43(()=>render(),null); return r; };
+    window.__SA43_INIT=true;
+  }
+  function init43(){ asegurar43(); wrapBanco43(); wrapPaso43(); wrapRender43(); wrapInit43(); }
+  setTimeout(init43,40);
+  setTimeout(init43,200);
+  setTimeout(init43,600);
+  window.__SA43={version:V43,asegurar:asegurar43,ramas:ramasElegibles43,consolidado:consolidado43};
+})();
 </script>
 
 </body>
