@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v47</div>
+<div class="version-badge" id="versionBadge">v48</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2933,10 +2933,10 @@ function avatarSVG(nombre,op){
   const edad=op.edad===undefined?35:op.edad;
   const mujer=op.sexo==='m';
   const bebe=edad<7, nino=edad<15;
-  const piel=PIELES[d(PIELES.length)];
+  const piel=PIELES[op.pielIdx!==undefined?clamp(op.pielIdx,0,PIELES.length-1):d(PIELES.length)];
   const fondo=FONDOS_CARA[d(FONDOS_CARA.length)];
   const ropa=ROPAS[d(ROPAS.length)];
-  let pelo=PELOS[d(6)];
+  let pelo=op.peloIdx!==undefined?PELOS[clamp(op.peloIdx,0,PELOS.length-1)]:PELOS[d(6)];
   if(edad>58&&d(3)!==0) pelo=PELOS[6];
   if(edad>72) pelo=d(2)?PELOS[7]:PELOS[6];
   const calvo=!mujer&&edad>48&&d(3)===0;
@@ -3039,7 +3039,7 @@ const ICONOS_BIEN={
   oficina:'<rect x="9" y="6" width="30" height="38" rx="1" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><g fill="#B9DCE6"><rect x="13" y="10" width="6" height="7"/><rect x="21" y="10" width="6" height="7"/><rect x="29" y="10" width="6" height="7"/><rect x="13" y="20" width="6" height="7"/><rect x="21" y="20" width="6" height="7"/><rect x="29" y="20" width="6" height="7"/><rect x="13" y="30" width="6" height="7"/><rect x="21" y="30" width="6" height="7"/></g><path d="M9 44h30" stroke="#E4C66A" stroke-width="1.5"/>',
   mausoleo:'<path d="M9 43V21h30v22z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M6 21L24 7l18 14" fill="#8E887F" stroke="#E4C66A" stroke-width="1.5"/><path d="M16 43V27h16v16" fill="#6C665E"/><path d="M19 43V33h10v10" fill="#3B342E"/><path d="M20 23h8M13 27h22M13 32h7M28 32h7" stroke="#E6D7B0" stroke-width="1.2"/><path d="M4 43h40" stroke="#E4C66A" stroke-width="1.6"/><path d="M22 13h4v5h-4z" fill="#E8D38A"/>'
 };
-function iconoBien(tipo,clase,tam){
+function iconoBien(tipo,clase,tam,seed){
   let id=tipo;
   if(!ICONOS_BIEN[id]){
     if(clase==='finca') id= tipo==='cafe'?'cafe':(tipo==='ganaderia'||tipo==='ganado'?'ganado':'finca');
@@ -3047,7 +3047,8 @@ function iconoBien(tipo,clase,tam){
     else if(/mansion|mansión/.test(tipo||'')) id='mansion'; else if(/grande/.test(tipo||'')) id='casa_grande'; else if(/pequeña|pequena/.test(tipo||'')) id='casa_pequena'; else id= /casa/.test(tipo||'')?'casa':'apartamento';
   }
   const t=tam||40;
-  return '<svg class="icono-bien" viewBox="0 0 48 48" width="'+t+'" height="'+t+'" aria-hidden="true">'
+  const filtro=seed?(' style="filter:hue-rotate('+(semillaDe(String(seed))%360)+'deg) saturate('+(0.85+(semillaDe(String(seed)+'s')%30)/100).toFixed(2)+')"'):'';
+  return '<svg class="icono-bien"'+filtro+' viewBox="0 0 48 48" width="'+t+'" height="'+t+'" aria-hidden="true">'
     +'<defs><linearGradient id="gMansion" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2D2B5"/><stop offset="1" stop-color="#9E886A"/></linearGradient><linearGradient id="gWarm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C99769"/><stop offset="1" stop-color="#7D4D34"/></linearGradient><linearGradient id="gStone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D0C7B7"/><stop offset="1" stop-color="#77716A"/></linearGradient><linearGradient id="gSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#758391"/><stop offset="1" stop-color="#39444E"/></linearGradient><linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#658A58"/><stop offset="1" stop-color="#294A31"/></linearGradient></defs>'
     +'<rect x="1" y="1" width="46" height="46" rx="6" fill="#191309" stroke="#8C6B2C" stroke-width=".7"/>'
     +ICONOS_BIEN[id]+'</svg>';
@@ -7630,7 +7631,7 @@ function renderLienzo(){
     const fijos=compromisosAnuales(), renta=rentaAnualEstimada();
     const cg=ciudadGlobalDe(H.ciudad); h+='<div class="wrap"><div class="seccion"><h3>Dónde viven<em>'+esc(H.ciudad)+', '+esc(z.n)+(cg?' · '+esc(cg.pais):'')+'</em></h3>';
     h+='<div class="retrato propio"><div class="fila-r">'
-      +iconoBien(viv?viv.tipo:(H.conLosPadres?'casa_pequena':(H.nivel>=4?'mansion':H.nivel>=2?'casa_grande':'apartamento')),'vivienda',46)
+      +iconoBien(viv?viv.tipo:(H.conLosPadres?'casa_pequena':(H.nivel>=4?'mansion':H.nivel>=2?'casa_grande':'apartamento')),'vivienda',46,viv?viv.uid:H.ciudad)
       +'<div class="quien"><div class="nom">'
       +(H.conLosPadres?'En casa de tus papás':(viv?esc(viv.nombre):'Arrendando en '+esc(z.n)))+'</div>'
       +'<div class="rol">'+(cg?'Plaza global · ':'')+'Tren de vida '+nv.n+' · '+personasEnCasa()+' persona'+(personasEnCasa()===1?'':'s')+' en la casa'
@@ -7671,7 +7672,7 @@ function renderLienzo(){
           : b.clase==='finca'? (b.renta>0?'Produce cerca de '+fmt(b.valor*b.renta)+' al año, según clima y dólar':'No produce; cuesta mantenerla')
           : '';
         h+='<div class="retrato '+(esVivienda?'propio':(b.clase==='renta'&&!b.arrendado?'hostil':'leal'))+'"><div class="fila-r">'
-          +iconoBien(b.tipo,b.clase,46)
+          +iconoBien(b.tipo,b.clase,46,b.uid||b.nombre)
           +'<div class="quien"><div class="nom">'+esc(b.nombre)+'</div>'
           +'<div class="rol">'+fmt(b.valor)+(b.ciudad?' · '+esc(b.ciudad):'')
           +(b.hipoteca>0?' · debes '+fmt(b.hipoteca):' · sin deudas')+'</div>'
@@ -11391,6 +11392,165 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init47,220);
   setTimeout(init47,650);
   window.__SA47={version:V47};
+})();
+
+/* ========================================================================
+   v48 · PENSIÓN Y RETIRO, APARIENCIA DEL PERSONAJE, ICONOS CON VARIACIÓN
+   Y QUÉ HACER CON LA VIVIENDA ANTERIOR AL MUDARSE
+   ======================================================================== */
+(function(){
+  const V48='v48';
+  function safe48(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  // ---------- pensión y retiro ----------
+  function calcularPension48(){
+    const c=S.carrera;
+    const anios=Math.max(c.anios||0,c.experienciaProf||0,(c.politica&&c.politica.anios)||0,(c.diplomacia&&c.diplomacia.anios)||0,(c.judicatura&&c.judicatura.anios)||0);
+    return Math.max(12,Math.round(anios*1.8+prestigio()*.5+patrimonio()*.002));
+  }
+  function escenaRetiro48(){
+    const pension=calcularPension48();
+    escena({rubro:'Retiro',titulo:'Retirarte de la vida activa',ancho:true,
+      cuerpo:'Dejar la vida activa no es lo mismo que entregar la casa: seguís siendo el mismo personaje, pero sin trabajo ni empresa que dirigir de forma activa. A cambio, una pensión te da '+fmt(pension)+' al año, quieto.',
+      opciones:[
+        {t:'Retirarte ahora',cat:'legado',run:()=>{
+          S.retirado=true; S.pension=pension;
+          S.carrera.ruta='desempleado'; S.carrera.empleador=null; S.carrera.nivel=-1;
+          if(S.carrera.politica) S.carrera.politica.activo=false;
+          if(S.carrera.diplomacia) S.carrera.diplomacia.activo=false;
+          if(S.carrera.judicatura) S.carrera.judicatura.activo=false;
+          log('Te retiraste de la vida activa. Ahora vives de una pensión de '+fmt(pension)+' al año.','hito');
+          hito('Se retiró de la vida activa'); S.mov--;
+        }},
+        {t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function escenaVolverActivo48(){
+    escena({rubro:'Retiro',titulo:'Volver a la vida activa',ancho:true,
+      cuerpo:'Dejas la pensión de '+fmt(S.pension||0)+' al año y vuelves a estar disponible para trabajar o dirigir una empresa.',
+      opciones:[
+        {t:'Volver a trabajar',cat:'empleo',run:()=>{
+          S.retirado=false; S.pension=0;
+          log('Volviste a la vida activa.','hito'); S.mov--;
+        }},
+        {t:'Seguir retirado',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionRetiro48(A){
+    if(S.retirado){
+      A.push({t:'Volver a la vida activa',cat:'empleo',d:'Hoy vives de una pensión de '+fmt(S.pension||0)+' al año.',mov:1,modal:true,run:()=>escenaVolverActivo48()});
+    } else if(S.p.edad>=55){
+      A.push({t:'Retirarte de la vida activa',cat:'legado',d:'Dejas de trabajar y empiezas a recibir una pensión de '+fmt(calcularPension48())+' al año.',mov:1,modal:true,run:()=>escenaRetiro48()});
+    }
+  }
+  function pagarPension48(){
+    if(S.retirado&&S.pension>0){ S.efectivo+=S.pension; }
+  }
+
+  // ---------- apariencia del personaje ----------
+  function swatch48(color){ return '<span style="display:inline-flex;align-items:center;gap:8px"><span style="width:15px;height:15px;border-radius:50%;background:'+color+';display:inline-block;border:1px solid rgba(255,255,255,.35)"></span>'; }
+  function escenaTonoPiel48(){
+    escena({rubro:'Apariencia',titulo:'Elegir tu tono de piel',ancho:true,
+      cuerpo:'Elige cómo se ve tu personaje en los retratos de la casa.',
+      opciones:PIELES.map((color,i)=>({t:swatch48(color)+'Tono '+(i+1)+'</span>',cat:'salud',cerrar:false,run:()=>{
+        S.p.pielIdx=i; log('Cambiaste tu tono de piel.'); escenaApariencia48();
+      }})),cerrable:true,alCerrar:()=>escenaApariencia48()});
+  }
+  function escenaColorPelo48(){
+    escena({rubro:'Apariencia',titulo:'Elegir el color de tu cabello',ancho:true,
+      cuerpo:'Elige el color de cabello de tu personaje.',
+      opciones:PELOS.map((color,i)=>({t:swatch48(color)+'Color '+(i+1)+'</span>',cat:'salud',cerrar:false,run:()=>{
+        S.p.peloIdx=i; log('Cambiaste el color de tu cabello.'); escenaApariencia48();
+      }})),cerrable:true,alCerrar:()=>escenaApariencia48()});
+  }
+  function escenaApariencia48(){
+    escena({rubro:'Apariencia',titulo:'Cambiar tu apariencia',ancho:true,
+      cuerpo:'Es puramente estético: cambia cómo te ves en los retratos de la casa, no afecta el juego.',
+      opciones:[
+        {t:'Elegir tono de piel',cat:'salud',cerrar:false,run:()=>{ cerrarModal(); escenaTonoPiel48(); }},
+        {t:'Elegir color de cabello',cat:'salud',cerrar:false,run:()=>{ cerrarModal(); escenaColorPelo48(); }},
+        {t:'Dejarlo como está',cat:'legado',run:()=>{}}
+      ],cerrable:true});
+  }
+  function accionApariencia48(A){
+    A.push({t:'Cambiar tu apariencia',cat:'salud',d:'Tono de piel y color de cabello. Puramente estético.',mov:0,modal:true,run:()=>escenaApariencia48()});
+  }
+  function wrapAvatarSVG48(){
+    const old=window.avatarSVG; if(typeof old!=='function'||window.__SA48_AVATAR) return;
+    window.avatarSVG=function(nombre,op){
+      try{
+        if(typeof S!=='undefined'&&S&&S.p&&nombre===(S.p.nombre+' '+S.p.apellido)&&(isFinite(S.p.pielIdx)||isFinite(S.p.peloIdx))){
+          op=Object.assign({},op||{});
+          if(isFinite(S.p.pielIdx)) op.pielIdx=S.p.pielIdx;
+          if(isFinite(S.p.peloIdx)) op.peloIdx=S.p.peloIdx;
+        }
+      }catch(e){}
+      return old.call(this,nombre,op);
+    };
+    window.__SA48_AVATAR=true;
+  }
+
+  // ---------- vivienda anterior al mudarte ----------
+  function escenaQueHacerConViviendaVieja48(b){
+    escena({rubro:'La vivienda anterior',titulo:'¿Qué haces con '+esc(b.nombre||b.tipo||'tu antigua vivienda')+'?',ancho:true,
+      cuerpo:'Ya no vives ahí. Puedes venderla, ponerla en arriendo, o dejarla vacía por ahora.',
+      opciones:[
+        {t:'Venderla',cat:'casa',run:()=>{
+          const neto=venderBien(b,.03);
+          log('Vendiste <b>'+esc(b.nombre||b.tipo)+'</b>. Te entraron '+fmt(Math.max(0,neto))+'.','bien');
+        }},
+        {t:'Ponerla en arriendo',cat:'casa',run:()=>{
+          b.clase='renta';
+          b.renta=isFinite(b.renta)&&b.renta>0?b.renta:.062;
+          b.vac=isFinite(b.vac)&&b.vac>0?b.vac:.08;
+          b.mant=isFinite(b.mant)&&b.mant>0?b.mant:.018;
+          b.arrendado=true;
+          log('Pusiste <b>'+esc(b.nombre||b.tipo)+'</b> en arriendo. Ahora te genera renta cada año.','hito');
+        }},
+        {t:'Dejarla vacía por ahora',cat:'legado',run:()=>{}}
+      ],cerrable:true});
+  }
+  function wrapComprarBien48(){
+    const old=window.comprarBien; if(typeof old!=='function'||window.__SA48_COMPRAR) return;
+    window.comprarBien=function(cfg){
+      const esVivienda=cfg&&cfg.clase==='vivienda';
+      const anteriorUid=(esVivienda&&S.hogar)?S.hogar.vivienda:null;
+      const b=old.apply(this,arguments);
+      try{
+        if(b&&esVivienda&&anteriorUid&&anteriorUid!==b.uid){
+          const anterior=(S.bienes||[]).find(x=>x.uid===anteriorUid);
+          if(anterior&&anterior.clase==='vivienda') setTimeout(()=>escenaQueHacerConViviendaVieja48(anterior),30);
+        }
+      }catch(e){}
+      return b;
+    };
+    window.__SA48_COMPRAR=true;
+  }
+
+  function wrapListaAcciones48(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA48_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionRetiro48(A); accionApariencia48(A); }catch(e){}
+      return A;
+    };
+    window.__SA48_LISTA=true;
+  }
+  function wrapPaso48(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA48_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto) pagarPension48(); }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA48_PASO=true;
+  }
+  function init48(){ wrapAvatarSVG48(); wrapComprarBien48(); wrapListaAcciones48(); wrapPaso48(); }
+  setTimeout(init48,40);
+  setTimeout(init48,220);
+  setTimeout(init48,650);
+  window.__SA48={version:V48};
 })();
 </script>
 
