@@ -9223,6 +9223,27 @@ function correrFundacion(res,m){
     log('<b>📩 Has recibido una oferta:</b> '+esc(oferta.titulo)+' en '+esc(oferta.empresa)+'.','hito');
     dxRegistrarMomento('Recibió una oferta: '+oferta.titulo+' en '+oferta.empresa,'hito');
   }
+  // Si el cargo aceptado queda en otra ciudad, la vida (y la vivienda) se mudan con él.
+  // Las sillas de junta son la excepción: son compatibles con la actividad principal
+  // y no obligan a mudarse.
+  function dxRelocalizarPorOferta(o,mensaje){
+    const p=S.p;
+    if(!o||!o.ciudad||o.ciudad===p.ciudad) return mensaje;
+    const origen=p.ciudad;
+    let esGlobal=false; try{ esGlobal=esCiudadGlobal(o.ciudad); }catch(e){}
+    let viv=null; try{ viv=viviendaPropia(); }catch(e){}
+    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda de '+esc(origen)+' por '+fmt(neto)+' netos al mudarte por el nuevo cargo.'); }
+    S.hogar=S.hogar||{};
+    S.hogar.ciudad=o.ciudad; S.hogar.zona=1; S.hogar.conLosPadres=false; S.hogar.vivienda=null;
+    p.ciudad=o.ciudad;
+    const costo=Math.min(S.efectivo,Math.max(15,(o.salario||40)*.15));
+    S.efectivo-=costo;
+    if(esGlobal){ let g=null; try{ g=ciudadGlobalDe(o.ciudad); }catch(e){} p.redes=clamp(p.redes*.55+(g?g.redes:6),0,100); }
+    else p.redes=clamp(p.redes*.78,0,100);
+    log('El nuevo cargo obligó a mudarse de <b>'+esc(origen)+'</b> a <b>'+esc(o.ciudad)+'</b>.','hito');
+    hito('Se mudó a '+o.ciudad+' por '+o.titulo);
+    return mensaje+' La familia se mudó de '+origen+' a '+o.ciudad+' para asumirlo.';
+  }
   function dxAplicarOferta(o){
     if(!o) return;
     const c=S.carrera,p=S.p;
@@ -9236,13 +9257,13 @@ function correrFundacion(res,m){
       if(c.diplomacia.activo){c.diplomacia.nivel=Math.min(TRAYECTORIAS_PUBLICAS.diplomacia.puertas.length-1,c.diplomacia.nivel+1);c.diplomacia.anios=0;c.diplomacia.cargo=TRAYECTORIAS_PUBLICAS.diplomacia.puertas[c.diplomacia.nivel];}
       else {c.diplomacia.activo=true;c.diplomacia.nivel=0;c.diplomacia.anios=0;c.diplomacia.cargo=TRAYECTORIAS_PUBLICAS.diplomacia.puertas[0];}
       c.diplomacia.pais='Colombia';c.diplomacia.sede=o.ciudad;p.redes=clamp(p.redes+6,0,100);p.reputacion=clamp(p.reputacion+o.prestigio*.3,0,100);
-      return 'Aceptaste la oferta de '+o.empresa+' como '+o.titulo+'. Tu destino será '+o.ciudad+'.';
+      return dxRelocalizarPorOferta(o,'Aceptaste la oferta de '+o.empresa+' como '+o.titulo+'. Tu destino será '+o.ciudad+'.');
     }
     if(o.tipo==='judicial'){
       c.judicatura=c.judicatura||{activo:false,nivel:0,anios:0,cargo:''};
       if(c.judicatura.activo)c.judicatura.nivel=Math.min(TRAYECTORIAS_PUBLICAS.judicatura.puertas.length-1,c.judicatura.nivel+1);else{c.judicatura.activo=true;c.judicatura.nivel=0;}
       c.judicatura.anios=0;c.judicatura.cargo=TRAYECTORIAS_PUBLICAS.judicatura.puertas[c.judicatura.nivel];p.reputacion=clamp(p.reputacion+o.prestigio*.25,0,100);
-      return 'Aceptaste la oferta de la '+o.empresa+' como '+o.titulo+'.';
+      return dxRelocalizarPorOferta(o,'Aceptaste la oferta de la '+o.empresa+' como '+o.titulo+'.');
     }
     // Ofertas de empleo: sustituyen la trayectoria laboral ordinaria, pero no la empresa propia.
     if(o.tipo==='academico'&&RUTAS.academico){ c.ruta='academico'; c.nivel=clamp(2,0,RUTAS.academico.niveles.length-1); }
@@ -9251,7 +9272,7 @@ function correrFundacion(res,m){
     else if(o.tipo==='empleo'){ c.ruta='corporativo'; c.nivel=clamp(3,0,(RUTAS.corporativo?.niveles.length||5)-2); }
     c.empleador=o.empresa;c.anios=0;c.desempeno=clamp((c.desempeno||55)+8,0,100);c.salarioExtra=clamp((c.salarioExtra||0)+.10,0,.45);
     p.reputacion=clamp(p.reputacion+o.prestigio*.3,0,100);p.redes=clamp(p.redes+5,0,100);
-    return 'Aceptaste el cargo de '+o.titulo+' en '+o.empresa+'. La nueva posición mejora tu trayectoria, pero tendrás que demostrar resultados.';
+    return dxRelocalizarPorOferta(o,'Aceptaste el cargo de '+o.titulo+' en '+o.empresa+'. La nueva posición mejora tu trayectoria, pero tendrás que demostrar resultados.');
   }
   function crOf(c){ return c&&c.profesion?carreraProfesionalDe(c.profesion):null; }
   function dxEscenaOfertas(){
