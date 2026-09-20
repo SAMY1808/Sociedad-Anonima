@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v45</div>
+<div class="version-badge" id="versionBadge">v46</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -11018,6 +11018,73 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init45,220);
   setTimeout(init45,650);
   window.__SA45={version:V45,valorHolding:valorHolding45,resumenTestamento:resumenTestamento45};
+})();
+
+/* ========================================================================
+   v46 · SALARIO DE PRESIDENTE PARA TU PROPIA COMPAÑÍA
+   correrEmpresa() ya sabía pagarle un sueldo a "e.presidente" cuando
+   presides(e) es cierto; solo faltaba la acción para que el fundador se
+   lo asigne a sí mismo. "Nombrar presidente de X" seguía existiendo,
+   pero solo para compañías que NO presides.
+   ======================================================================== */
+(function(){
+  const V46='v46';
+  function tiersSalario46(e){
+    return [0,.03,.06,.10,.15].map(pct=>({pct,monto:Math.round(e.ingresos*pct)}));
+  }
+  function escenaSalarioPresidente46(e){
+    const actual=(e.presidente&&presides(e)&&e.presidente.sueldo)?e.presidente.sueldo:0;
+    const tiers=tiersSalario46(e);
+    escena({rubro:'Presidencia',titulo:'Tu salario como presidente de '+esc(e.nombre),ancho:true,
+      cuerpo:'Puedes asignarte un salario fijo que la compañía te paga cada año desde su caja. '
+        +(actual?'Hoy te pagas '+fmt(actual)+' al año.':'Hoy no te pagas salario: todo el retorno depende de dividendos o de vender acciones.')
+        +' Caja actual de la compañía: '+fmt(e.caja)+'.',
+      opciones:tiers.map(t=>({t:t.pct===0?'Sin salario':pc(t.pct)+' de los ingresos ('+fmt(t.monto)+' al año)',cat:'empleo',
+        dis:t.monto>0&&e.caja<t.monto?'La caja de la compañía no alcanza para ese salario':null,
+        run:()=>{
+          if(t.monto<=0){
+            if(e.presidente&&e.presidente.tipo==='fundador') e.presidente=null;
+            log('Dejaste de pagarte un salario en '+esc(e.nombre)+'.');
+          } else {
+            e.presidente={nombre:S.p.nombre+' '+S.p.apellido,tipo:'fundador',sueldo:t.monto};
+            log('Te asignaste un salario de '+fmt(t.monto)+' al año como presidente de <b>'+esc(e.nombre)+'</b>.','hito');
+          }
+          S.mov--;
+        }})),cerrable:true});
+  }
+  function accionSalarioPresidente46(A){
+    if(S.emp&&presides(S.emp)){
+      A.push({t:'Asignarte un salario como presidente',cat:'empleo',d:'Fija cuánto te paga la compañía cada año desde su caja.',mov:1,modal:true,run:()=>escenaSalarioPresidente46(S.emp)});
+    }
+  }
+  // Si dejas la silla de una compañía donde te habías asignado un salario, hay que
+  // limpiar esa marca: de lo contrario correrEmpresa() seguiría descontando el
+  // sueldo de la caja sin acreditártelo a ti (presides() ya sería falso ahí), y
+  // el cálculo de crecimiento leería un e.presidente sin "capaz" (NaN).
+  function wrapSentarseEn46(){
+    const old=window.sentarseEn; if(typeof old!=='function'||window.__SA46_SENTAR) return;
+    window.sentarseEn=function(){
+      const antes=S.emp;
+      const r=old.apply(this,arguments);
+      try{ if(antes&&antes!==S.emp&&antes.presidente&&antes.presidente.tipo==='fundador') antes.presidente=null; }catch(e){}
+      return r;
+    };
+    window.__SA46_SENTAR=true;
+  }
+  function wrapListaAcciones46(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA46_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionSalarioPresidente46(A); }catch(e){}
+      return A;
+    };
+    window.__SA46_LISTA=true;
+  }
+  function init46(){ wrapSentarseEn46(); wrapListaAcciones46(); }
+  setTimeout(init46,40);
+  setTimeout(init46,220);
+  setTimeout(init46,650);
+  window.__SA46={version:V46};
 })();
 </script>
 
