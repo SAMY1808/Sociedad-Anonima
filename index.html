@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v49</div>
+<div class="version-badge" id="versionBadge">v50</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -10572,6 +10572,15 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function fichaFinanciera44(b){
     if(!b) return '';
+    if(b.clase==='hotel'){
+      const rendBase=isFinite(b.rendBase)?b.rendBase:.22;
+      const ingresos=b.valor*rendBase*((b.ocupacion||0)/100);
+      const gastos=b.valor*(b.mant||.05);
+      const noi=ingresos-gastos;
+      const deuda=b.hipoteca||0, neto=b.valor-deuda, rentabilidad=b.valor>0?noi/b.valor:0;
+      const tarifaNoche=(b.habitaciones||0)>0?ingresos/(b.habitaciones*365):0;
+      return ' <div class="apunte" style="margin-top:8px">Ficha del hotel — '+(b.habitaciones||0)+' habitaciones · '+(b.categoria||3)+' estrellas · Ocupación: '+Math.round(b.ocupacion||0)+'% · Tarifa: '+fmt(tarifaNoche)+'/habitación/noche. Ingresos: '+fmt(ingresos)+' · Gastos: '+fmt(gastos)+' · NOI: '+fmt(noi)+' · Deuda: '+fmt(deuda)+' · Patrimonio neto: '+fmt(neto)+' · Rentabilidad: '+pc(rentabilidad)+'.</div>';
+    }
     const ingresos=(b.clase==='renta'&&b.arrendado)?b.valor*(b.renta||0):(b.clase==='finca'?b.valor*(b.renta||0):0);
     const gastos=b.valor*(b.mant||0);
     const noi=ingresos-gastos;
@@ -11677,7 +11686,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     {id:'apartamentos',n:'Construir apartamentos para arrendar',anios:2,costoFactor:2.8,valorFactor:4.4,resultado:{clase:'renta',tipo:'apto'}},
     {id:'local',n:'Construir un local comercial',anios:1,costoFactor:1.8,valorFactor:2.9,resultado:{clase:'renta',tipo:'local'}},
     {id:'bodega',n:'Construir una bodega',anios:1,costoFactor:2.0,valorFactor:3.0,resultado:{clase:'renta',tipo:'bodega'}},
-    {id:'torre',n:'Desarrollar una torre de oficinas',anios:3,costoFactor:5.5,valorFactor:8.5,resultado:{clase:'renta',tipo:'oficina'},grande:true}
+    {id:'torre',n:'Desarrollar una torre de oficinas',anios:3,costoFactor:5.5,valorFactor:8.5,resultado:{clase:'renta',tipo:'oficina'},grande:true},
+    {id:'hotel',n:'Construir un hotel',anios:2,costoFactor:3.2,valorFactor:4.6,resultado:{clase:'hotel',tipo:'hotel'}}
   ];
   function accionesDesarrollo49(A){
     terrenosPropios49().forEach(b=>{
@@ -11738,10 +11748,13 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     else { b.valorFinalEsperado*=.85; log('El saldo de la obra se cubrió con más deuda de la prevista; el proyecto rindió menos.','mal'); }
     b.clase=p.resultado.clase; b.tipo=p.resultado.tipo;
     const perfil=RENTAS.find(r=>r.id===p.resultado.tipo);
-    b.nombre=(perfil?perfil.n:(p.resultado.clase==='vivienda'?'Casa nueva':'Edificio nuevo'))+' en '+(b.ciudad||S.p.ciudad);
+    b.nombre=(p.resultado.clase==='hotel'?'Hotel':(perfil?perfil.n:(p.resultado.clase==='vivienda'?'Casa nueva':'Edificio nuevo')))+' en '+(b.ciudad||S.p.ciudad);
     b.valor=Math.round(b.valorFinalEsperado);
     b.precioCompra=b.valor;
-    if(perfil){ b.renta=perfil.renta; b.vac=perfil.vac; b.mant=perfil.mant; b.arrendado=true; }
+    if(p.resultado.clase==='hotel'){
+      b.habitaciones=ri(30,90); b.categoria=ri(3,5); b.ocupacion=ri(45,65); b.rendBase=rnd(.18,.26);
+      b.mant=.05; b.renta=0;
+    } else if(perfil){ b.renta=perfil.renta; b.vac=perfil.vac; b.mant=perfil.mant; b.arrendado=true; }
     else { b.renta=0; b.mant=.012; }
     b.enConstruccion=false; b.comprado=S.anio;
     b.cronica=Array.isArray(b.cronica)?b.cronica:[]; b.cronica.push({anio:S.anio,txt:'Terminó la construcción: '+b.nombre+'.'});
@@ -11887,6 +11900,289 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init49,220);
   setTimeout(init49,650);
   window.__SA49={version:V49,resumenInmobiliario:resumenInmobiliario49,indiceZona:indiceZona49};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V50='v50';
+  function safe50(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  function asegurar50(){
+    if(typeof S==='undefined'||!S) return;
+    if(!Array.isArray(S.marcas)) S.marcas=[];
+    if(!RAMOS.some(r=>r.id==='vinicola')) RAMOS.push({id:'vinicola',n:'Vinícola',min:900,rend:.15,vol:.22,
+      d:'Transforma la uva del viñedo propio en vino. Rinde bien en años buenos, sufre con el clima y el dólar.'});
+  }
+
+  /* ==========================================================================
+     #1 PORTAFOLIO PATRIMONIAL
+     ========================================================================== */
+  function resumenPortafolio50(){
+    asegurar50();
+    const cats=[];
+    cats.push({n:'Efectivo neto (caja menos deudas)',v:S.efectivo-S.deuda});
+    const empresas=safe50(()=>companias().reduce((a,e)=>a+miPct(e)*valuar(e),0),0);
+    if(Math.abs(empresas)>.5) cats.push({n:'Empresas propias',v:empresas});
+    const soc=safe50(()=>(S.sociedades||[]).reduce((a,x)=>a+x.capital,0),0);
+    if(soc) cats.push({n:'Sociedades y negocios',v:soc});
+    const inv=safe50(()=>S.portafolio.reduce((a,p)=>a+p.valor,0),0);
+    if(inv) cats.push({n:'Portafolio financiero',v:inv});
+    const porClase=(clase,etiqueta)=>{
+      const v=(S.bienes||[]).filter(b=>b.clase===clase).reduce((a,b)=>a+b.valor-(b.hipoteca||0),0);
+      if(v) cats.push({n:etiqueta,v});
+    };
+    porClase('vivienda','Vivienda');
+    porClase('renta','Inmuebles de renta');
+    porClase('finca','Fincas y tierra');
+    porClase('hotel','Hoteles');
+    porClase('terreno','Terrenos en desarrollo');
+    const fo=safe50(()=>valorFamilyOffice(),0); if(fo) cats.push({n:'Family office',v:fo});
+    const fi=safe50(()=>valorFideicomiso(),0); if(fi) cats.push({n:'Fideicomiso',v:fi});
+    const dv=safe50(()=>valorDivisas(),0); if(dv) cats.push({n:'Divisas',v:dv});
+    const pa=safe50(()=>valorParticipaciones(),0); if(pa) cats.push({n:'Participaciones',v:pa});
+    const fu=safe50(()=>valorFundacion()*.5,0); if(fu) cats.push({n:'Fundación (valor social)',v:fu});
+    if(S.holding&&isFinite(S.holding.caja)&&S.holding.caja>0) cats.push({n:'Caja del holding',v:S.holding.caja});
+    const total=cats.reduce((a,c)=>a+c.v,0);
+    return {cats,total};
+  }
+  function escenaPortafolio50(){
+    const r=resumenPortafolio50();
+    const filas=r.cats.map(c=>'<div class="apunte" style="display:flex;justify-content:space-between;gap:10px"><span>'+esc(c.n)+'</span><b>'+fmt(c.v)+'</b></div>').join('');
+    escena({rubro:'Patrimonio consolidado',titulo:'Portafolio patrimonial',ancho:true,
+      cuerpo:'Todo lo que tiene la casa hoy, agrupado por tipo de activo.',
+      html:'<div style="display:flex;flex-direction:column;gap:6px">'+filas
+        +'<div class="apunte" style="display:flex;justify-content:space-between;gap:10px;margin-top:8px;border-top:1px solid rgba(255,255,255,.15);padding-top:8px"><span><b>Patrimonio total</b></span><b>'+fmt(r.total)+'</b></div></div>',
+      opciones:[],cerrable:true});
+  }
+  function accionPortafolio50(A){
+    A.push({t:'Ver portafolio patrimonial',d:'Todo lo que tienes, agrupado por tipo de activo.',mov:0,modal:true,
+      run:()=>escenaPortafolio50()});
+  }
+
+  /* ==========================================================================
+     #2 MARCAS
+     ========================================================================== */
+  function idActivoCompania50(e){ if(!e._id50) e._id50=nuevoUid(); return e._id50; }
+  function activosVinculablesMarca50(){
+    const out=[];
+    safe50(()=>companias(),[]).forEach(e=>out.push({tipo:'compania',id:idActivoCompania50(e),nombre:e.nombre,obj:e}));
+    safe50(()=>sociedades(),[]).forEach(s=>out.push({tipo:'sociedad',id:s.sid,nombre:s.nombre,obj:s}));
+    (S.bienes||[]).filter(b=>b.clase==='hotel'&&!b.enConstruccion).forEach(b=>out.push({tipo:'hotel',id:b.uid,nombre:b.nombre,obj:b}));
+    return out;
+  }
+  function activoPorRef50(v){ return activosVinculablesMarca50().find(a=>a.tipo===v.tipo&&a.id===v.id)||null; }
+  function etiquetaTipoActivo50(t){ return ({compania:'Empresa del grupo',sociedad:'Sociedad',hotel:'Hotel'})[t]||t; }
+  function saludActivo50(a){
+    if(!a||!a.obj) return 50;
+    if(a.tipo==='compania'){ const e=a.obj; return clamp(50+(e.crecimiento||0)*150+((e.utilidad>0)?10:-10),0,100); }
+    if(a.tipo==='sociedad'){ const s=a.obj; return clamp(50+((s.ultimaUtilidad||0)>0?15:-10),0,100); }
+    if(a.tipo==='hotel'){ const b=a.obj; return clamp(b.ocupacion||50,0,100); }
+    return 50;
+  }
+  function escenaMarcas50(){
+    asegurar50();
+    const opciones=S.marcas.map(m=>({t:m.nombre,cat:'compania',
+      d:'Reputación '+Math.round(m.reputacion)+'/100 · '+m.vinculos.length+' activo'+(m.vinculos.length===1?'':'s')+' vinculado'+(m.vinculos.length===1?'':'s')+'.',
+      run:()=>escenaMarca50(m)}));
+    opciones.push({t:'Fundar una nueva marca',cat:'compania',d:'Crear una marca propia para agrupar reputación entre varios activos. Cuesta '+fmt(80)+'.',
+      dis:S.efectivo<80?'Necesitas al menos '+fmt(80):null,
+      run:()=>escenaCrearMarca50()});
+    escena({rubro:'Marcas de la casa',titulo:'Marcas',ancho:true,
+      cuerpo:'Una marca agrupa reputación entre varias empresas, hoteles o sociedades. Cuanto mejor le vaya a lo que lleva su nombre, más sube su reputación, y una marca fuerte empuja de regreso a lo que tiene vinculado.',
+      opciones,cerrable:true});
+  }
+  function escenaCrearMarca50(){
+    const costo=80;
+    escena({rubro:'Nueva marca',titulo:'Fundar una marca',
+      cuerpo:'Registrar una marca cuesta '+fmt(costo)+'. Empieza con reputación neutral y sube o baja según cómo le vaya a lo que lleve su nombre.',
+      html:'<label class="campo">Nombre de la marca<input type="text" id="brNom" maxlength="30" value="'+esc(S.dinastia)+'"></label>',
+      opciones:[{t:'Registrar la marca',cat:'compania',cerrar:false,run:()=>{
+        if(S.efectivo<costo){ log('No hay efectivo para registrar la marca.','mal'); return; }
+        const el=document.getElementById('brNom');
+        const nombre=(el&&el.value||'').trim()||(S.dinastia+' Marcas');
+        S.efectivo-=costo;
+        S.marcas.push({id:nuevoUid(),nombre,reputacion:50,creada:S.anio,vinculos:[]});
+        log('Registraste la marca <b>'+esc(nombre)+'</b>.','hito');
+        hito('Registró la marca '+nombre);
+        S.mov--; cerrarModal(); escenaMarcas50();
+      }}],cerrable:true});
+  }
+  function escenaMarca50(m){
+    const libres=activosVinculablesMarca50().filter(a=>!m.vinculos.some(v=>v.tipo===a.tipo&&v.id===a.id));
+    const opciones=[];
+    if(libres.length) opciones.push({t:'Vincular un activo',cat:'compania',d:'Ligar una empresa, hotel o sociedad a esta marca.',run:()=>escenaVincularMarca50(m)});
+    m.vinculos.forEach(v=>{
+      const a=activoPorRef50(v);
+      opciones.push({t:'Desvincular '+(a?a.nombre:'(activo desaparecido)'),cat:'compania',cerrar:false,run:()=>{
+        m.vinculos=m.vinculos.filter(x=>!(x.tipo===v.tipo&&x.id===v.id));
+        log('Desvinculaste '+(a?esc(a.nombre):'un activo')+' de la marca <b>'+esc(m.nombre)+'</b>.','');
+        cerrarModal(); escenaMarca50(m);
+      }});
+    });
+    escena({rubro:'Marca',titulo:m.nombre,ancho:true,
+      cuerpo:'Reputación: <b>'+Math.round(m.reputacion)+'/100</b>. Fundada en '+m.creada+'. '
+        +(m.vinculos.length?'Vinculada a '+m.vinculos.length+' activo'+(m.vinculos.length===1?'':'s')+'.':'Todavía no está vinculada a ningún activo: no hace nada por sí sola.'),
+      opciones,cerrable:true});
+  }
+  function escenaVincularMarca50(m){
+    const libres=activosVinculablesMarca50().filter(a=>!m.vinculos.some(v=>v.tipo===a.tipo&&v.id===a.id));
+    escena({rubro:'Vincular activo',titulo:m.nombre,ancho:true,
+      cuerpo:'Elige qué empresa, hotel o sociedad llevará esta marca.',
+      opciones:libres.map(a=>({t:a.nombre,cat:a.tipo==='hotel'?'casa':'compania',d:etiquetaTipoActivo50(a.tipo),
+        run:()=>{ m.vinculos.push({tipo:a.tipo,id:a.id}); log('Vinculaste <b>'+esc(a.nombre)+'</b> a la marca <b>'+esc(m.nombre)+'</b>.','bien'); S.mov--; cerrarModal(); escenaMarca50(m); }})),
+      cerrable:true});
+  }
+  function accionesMarca50(A){
+    asegurar50();
+    A.push({t:'Marcas',d:S.marcas.length?S.marcas.length+' marca'+(S.marcas.length===1?'':'s')+' registrada'+(S.marcas.length===1?'':'s')+'.':'Registra una marca para agrupar reputación entre tus activos.',
+      mov:0,modal:true,run:()=>escenaMarcas50()});
+  }
+  function correrMarcas50(){
+    asegurar50();
+    S.marcas.forEach(m=>{
+      if(!m.vinculos.length) return;
+      const activos=m.vinculos.map(activoPorRef50).filter(Boolean);
+      if(!activos.length) return;
+      const salud=activos.reduce((a,x)=>a+saludActivo50(x),0)/activos.length;
+      m.reputacion=clamp(m.reputacion+(salud-50)*.06+rnd(-1.5,1.5),5,100);
+      const bono=(m.reputacion-50)/50;
+      activos.forEach(a=>{
+        if(a.tipo==='compania') a.obj.marca=clamp((a.obj.marca||50)+bono*1.5,0,100);
+        else if(a.tipo==='hotel') a.obj.ocupacion=clamp((a.obj.ocupacion||55)+bono*2,20,95);
+        else if(a.tipo==='sociedad') a.obj.capital=Math.max(1,a.obj.capital*(1+bono*.01));
+      });
+      if(chance(.06)){
+        if(m.reputacion>=75) log('La marca <b>'+esc(m.nombre)+'</b> está en su mejor momento: '+Math.round(m.reputacion)+' de reputación.','bien');
+        else if(m.reputacion<=30) log('La marca <b>'+esc(m.nombre)+'</b> viene golpeada: '+Math.round(m.reputacion)+' de reputación.','mal');
+      }
+    });
+  }
+
+  /* ==========================================================================
+     #3 PRODUCCIÓN RURAL REAL — viñedo → vinícola
+     ========================================================================== */
+  function vinedosPropios50(){ return (S.bienes||[]).filter(b=>b.clase==='finca'&&b.tipo==='vinedo'); }
+  function escenaComprarVinedo50(){
+    const precio=1350*rnd(.85,1.2);
+    escena({rubro:'Tierra',titulo:'Comprar un viñedo',ancho:true,
+      cuerpo:'Un viñedo no da nada el primer año: hay que esperar a que la vid madure, unos tres años. Con paciencia y algo de inversión, después puede fundar su propia vinícola.',
+      opciones:[{t:'Comprar el viñedo',cat:'casa',
+        d:'Cerca de '+fmt(precio)+'. No produce nada hasta que madure.',
+        dis:S.efectivo<precio*.3?'Necesitas al menos '+fmt(precio*.3)+' de cuota inicial':null,
+        run:()=>{
+          const b=comprarBien({clase:'finca',tipo:'vinedo',nombre:'Viñedo en '+S.hogar.ciudad,valor:precio,mant:.045,renta:0,vol:.55,
+            ciudad:S.hogar.ciudad,cuotaInicial:S.efectivo>=precio?1:.4,anios:12});
+          if(!b) return;
+          b.plantado=S.anio; b.maduro=false;
+          log('Sembraste un <b>viñedo</b> por '+fmt(precio)+'. Falta que madure.','hito');
+          hito('Sembró un viñedo'); S.mov--;
+        }}],cerrable:true});
+  }
+  function escenaFundarVinicola50(b){
+    const costo=Math.round(b.valor*.65);
+    escena({rubro:'Vinícola',titulo:'Fundar una vinícola',ancho:true,
+      cuerpo:'Convertir la uva del viñedo en vino embotellado. Se constituye como una sociedad, con su propio gerente y utilidad anual, y puede llevar el nombre de una marca.',
+      html:'<label class="campo">Nombre de la vinícola<input type="text" id="viNom" maxlength="30" value="Vinícola '+esc(S.dinastia)+'"></label>',
+      opciones:[{t:'Fundar la vinícola',cat:'compania',cerrar:false,d:'Cuesta '+fmt(costo)+' en bodega y equipo.',
+        dis:S.efectivo<costo*.4?'Necesitas al menos '+fmt(costo*.4):null,
+        run:()=>{
+          const el=document.getElementById('viNom');
+          const nombre=(el&&el.value||'').trim()||('Vinícola '+S.dinastia);
+          const entrada=Math.min(costo,S.efectivo);
+          S.efectivo-=entrada;
+          const soc={sid:'s'+ri(1000,9999),nombre,ramo:'vinicola',capital:costo,capitalInicial:costo,gerente:null,anios:0,
+            metaUtilidad:.08,incumplimientos:0,ultimaUtilidad:0,ultimoObjetivo:costo*.08,alertaRendimiento:false};
+          sociedades().push(soc);
+          b.vinicola={sid:soc.sid,nombre:soc.nombre};
+          b.renta=.03;
+          log('Fundaste <b>'+esc(nombre)+'</b>, la vinícola de la familia.','hito');
+          hito('Fundó la vinícola '+nombre);
+          S.mov--; cerrarModal(); render();
+        }}],cerrable:true});
+  }
+  function accionesProduccionRural50(A){
+    const precioBase=1350*.85;
+    A.push({t:'Comprar un viñedo',d:'Tierra para vid: no produce de inmediato, pero puede fundar una vinícola propia en unos años.',mov:1,modal:true,
+      dis:S.efectivo<precioBase*.3?'Necesitas al menos '+fmt(precioBase*.3):null,
+      run:()=>escenaComprarVinedo50()});
+    vinedosPropios50().filter(b=>b.maduro&&!b.vinicola).forEach(b=>{
+      const costo=Math.round(b.valor*.65);
+      A.push({t:'Fundar una vinícola ('+b.nombre+')',d:'Ese viñedo ya maduró. Montar la vinícola cuesta '+fmt(costo)+'.',mov:1,modal:true,
+        dis:S.efectivo<costo*.4?'Necesitas al menos '+fmt(costo*.4):null,
+        run:()=>escenaFundarVinicola50(b)});
+    });
+  }
+  function correrProduccionRural50(){
+    vinedosPropios50().forEach(b=>{
+      if(!b.maduro && S.anio-(b.plantado||S.anio)>=3){
+        b.maduro=true; b.renta=.06;
+        log('El <b>'+esc(b.nombre)+'</b> maduró y ya empieza a dar cosecha.','bien');
+      }
+      if(b.maduro && b.vinicola && chance(.16)){
+        const buena=chance(.55);
+        const soc=(S.sociedades||[]).find(s=>s.sid===b.vinicola.sid);
+        if(soc){
+          soc.capital=Math.max(1,soc.capital*(buena?rnd(1.03,1.1):rnd(.9,.98)));
+          log(buena?'Buena vendimia para <b>'+esc(soc.nombre)+'</b>: la cosecha salió excelente.'
+                    :'Vendimia floja para <b>'+esc(soc.nombre)+'</b>: el clima no ayudó.',buena?'bien':'mal');
+        }
+      }
+    });
+  }
+
+  /* ==========================================================================
+     #4 HOTEL COMO ACTIVO OPERABLE
+     ========================================================================== */
+  function correrHoteles50(){
+    (S.bienes||[]).filter(b=>b.clase==='hotel'&&!b.enConstruccion).forEach(b=>{
+      if(!isFinite(b.rendBase)) b.rendBase=.22;
+      const ciclo=(S.macro&&S.macro.ciclo)||0;
+      b.ocupacion=clamp((b.ocupacion||50)+ciclo*20+rnd(-6,6),15,95);
+      b.rendBase=clamp(b.rendBase*(1+((S.macro&&S.macro.inflacion)||0)*.5+rnd(-.02,.03)),.1,.4);
+      const ingresos=b.valor*b.rendBase*(b.ocupacion/100);
+      const gastos=b.valor*(b.mant||.05);
+      const neto=ingresos-gastos;
+      S.efectivo+=neto;
+      b.tarifa=(b.habitaciones||0)>0?ingresos/(b.habitaciones*365):0;
+      if(chance(.1)){
+        if(b.ocupacion>=75) log('<b>'+esc(b.nombre)+'</b> tuvo una temporada excelente: '+Math.round(b.ocupacion)+'% de ocupación.','bien');
+        else if(b.ocupacion<=30) log('<b>'+esc(b.nombre)+'</b> viene flojo de turistas: apenas '+Math.round(b.ocupacion)+'% de ocupación.','mal');
+      }
+    });
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones50(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA50_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        accionPortafolio50(A);
+        accionesMarca50(A);
+        accionesProduccionRural50(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA50_LISTA=true;
+  }
+  function wrapPaso50(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA50_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar50(); correrProduccionRural50(); correrHoteles50(); correrMarcas50(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA50_PASO=true;
+  }
+  function init50(){ asegurar50(); wrapListaAcciones50(); wrapPaso50(); }
+  setTimeout(init50,40);
+  setTimeout(init50,220);
+  setTimeout(init50,650);
+  window.__SA50={version:V50,resumenPortafolio:resumenPortafolio50};
 })();
 </script>
 
