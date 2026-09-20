@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v50</div>
+<div class="version-badge" id="versionBadge">v50.1</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12183,6 +12183,180 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init50,220);
   setTimeout(init50,650);
   window.__SA50={version:V50,resumenPortafolio:resumenPortafolio50};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V501='v50.1';
+  function safe501(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  /* ==========================================================================
+     #1 LA SEDE DE LA COMPAÑÍA IMPORTA
+     ========================================================================== */
+  function asegurarSede501(){
+    if(typeof S==='undefined'||!S) return;
+    safe501(()=>companias(),[]).forEach(e=>{ if(!e.ciudad) e.ciudad=S.hogar.ciudad; });
+  }
+  function presideDeCerca501(e){ return !e||!e.ciudad||e.ciudad===S.hogar.ciudad; }
+  function costoMudanzaSede501(ciudad){
+    const g=ciudadGlobalDe(ciudad);
+    if(g) return costoMudanzaGlobal(g,S.hogar.nivel).total;
+    return arriendoActual()*.8;
+  }
+  function moverseASede501(ciudad){
+    const viv=viviendaPropia();
+    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
+    const antes=S.hogar.ciudad, g=ciudadGlobalDe(ciudad);
+    S.hogar.ciudad=ciudad; S.hogar.zona=g?0:1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=ciudad;
+    S.p.redes=clamp(S.p.redes*(g?.45:.62),0,100);
+    log('Te mudaste de <b>'+esc(antes)+'</b> a <b>'+esc(ciudad)+'</b> para dirigir de cerca la compañía.','hito');
+  }
+  function escenaAsumirADistancia501(x,runOriginal){
+    const costo=costoMudanzaSede501(x.ciudad);
+    escena({rubro:'Sede de la compañía',titulo:x.nombre+' — sede en '+x.ciudad,ancho:true,
+      cuerpo:'La sede de <b>'+esc(x.nombre)+'</b> está en '+esc(x.ciudad)+', y tú vives en '+esc(S.hogar.ciudad)+
+        '. No puedes presidirla de verdad sin estar ahí: mientras tanto, alguien más sigue tomando las decisiones del día a día.',
+      opciones:[
+        {t:'Mudarte a '+x.ciudad+' y asumir en persona',cat:'casa',cerrar:false,
+          d:'Cuesta '+fmt(costo)+' entre instalación y depósito.',
+          dis:S.efectivo<costo?'No tienes los '+fmt(costo)+' que cuesta instalarte allí':null,
+          run:()=>{
+            S.efectivo-=costo;
+            moverseASede501(x.ciudad);
+            cerrarModal();
+            runOriginal();
+            render();
+          }}
+      ],cerrable:true});
+  }
+  function wrapAccionesSede501(A){
+    asegurarSede501();
+    const e=S.emp, c=S.carrera;
+    if(e && c.ruta!=='fundador' && !presideDeCerca501(e)){
+      const idx=A.findIndex(a=>a.t==='Asumir la presidencia de '+e.nombre);
+      if(idx>=0){
+        const original=A[idx];
+        A[idx]=Object.assign({},original,{modal:true,
+          d:'La sede queda en '+e.ciudad+' y tú vives en '+S.hogar.ciudad+'. Para asumirla en persona, tendrías que mudarte.',
+          run:()=>escenaAsumirADistancia501(e,original.run)});
+      }
+    }
+    safe501(()=>companias(),[]).filter(x=>x!==e).forEach(x=>{
+      if(presideDeCerca501(x)) return;
+      const idx=A.findIndex(a=>a.t==='Sentarte en la presidencia de '+x.nombre);
+      if(idx>=0){
+        const original=A[idx];
+        A[idx]=Object.assign({},original,{modal:true,
+          d:'La sede queda en '+x.ciudad+' y tú vives en '+S.hogar.ciudad+'. Para dirigirla de cerca, tendrías que mudarte allí.',
+          run:()=>escenaAsumirADistancia501(x,original.run)});
+      }
+    });
+  }
+  function correrSede501(){
+    asegurarSede501();
+    const e=S.emp;
+    if(e && presides(e) && !presideDeCerca501(e)){
+      e.eficiencia=clamp((e.eficiencia||50)-rnd(1,3),0,100);
+      if(chance(.14)) log('Diriges <b>'+esc(e.nombre)+'</b> a la distancia, desde '+esc(S.hogar.ciudad)+': la operación en '+esc(e.ciudad)+' se resiente un poco sin la cabeza ahí.','mal');
+    }
+  }
+
+  /* ==========================================================================
+     #2 ACCIONISTAS MINORITARIOS PRESIONAN POR DIVIDENDOS
+     ========================================================================== */
+  function jefeDe501(x){ return x.presidente||null; }
+  function accionesPresionDividendos501(A){
+    safe501(()=>companias(),[]).filter(x=>!presides(x)&&miPct(x)>.001).forEach(x=>{
+      A.push({t:'Presionar por dividendos en '+x.nombre,
+        d:'Tienes '+pc(miPct(x))+' de esta compañía y no la diriges. Puedes exigirle a quien la maneja que reparta utilidad.',
+        mov:1,modal:true,
+        dis:x.caja<=50?'La compañía no tiene caja para repartir':(x._presionDividendos501===S.anio?'Ya la presionaste este año':null),
+        run:()=>escenaPresionDividendos501(x)});
+    });
+  }
+  function escenaPresionDividendos501(x){
+    const jefe=jefeDe501(x);
+    escena({rubro:'Asamblea de accionistas',titulo:'Presionar por dividendos en '+x.nombre,ancho:true,
+      cuerpo:'Tienes <b>'+pc(miPct(x))+'</b> de '+esc(x.nombre)+'. '
+        +(jefe?'La dirige '+esc(jefe.nombre)+(jefe.tipo==='familia'?', de la familia':', un profesional externo')+'.':'No tiene un presidente claro al frente.')
+        +' La caja disponible es de '+fmt(x.caja)+'.',
+      opciones:[
+        {t:'Pedirlo con buenos modos',cat:'capital',cerrar:false,
+          d:'Una carta formal para la próxima asamblea. Bajo perfil, pocas fricciones.',
+          run:()=>resolverPresionDividendos501(x,.35,.14,.24)},
+        {t:'Exigirlo con fuerza (amenaza legal)',cat:'capital',cerrar:false,
+          d:'Invocas tus derechos de accionista minoritario. Si funciona, sale más plata; si no, se resiente la relación.',
+          run:()=>resolverPresionDividendos501(x,.85,.28,.42)}
+      ],cerrable:true});
+  }
+  function resolverPresionDividendos501(x,dureza,fracMin,fracMax){
+    const jefe=jefeDe501(x);
+    const juntaProm=(x.junta&&x.junta.length)?x.junta.reduce((a,j)=>a+j.lealtad,0)/x.junta.length:100;
+    const honrado=jefe?jefe.honrado:6;
+    const exito=chance(clamp(.25+honrado*.045-juntaProm/230-dureza*.12+miPct(x)*.3,.08,.85));
+    x._presionDividendos501=S.anio;
+    if(exito){
+      const monto=x.caja*rnd(fracMin,fracMax);
+      x.caja-=monto;
+      const mio=monto*miPct(x);
+      S.efectivo+=mio;
+      log('La junta de <b>'+esc(x.nombre)+'</b> cedió: repartieron '+fmt(monto)+' en dividendos. A tu bolsillo entraron '+fmt(mio)+'.','bien');
+      if(dureza>.7&&x.junta) x.junta.forEach(j=>j.lealtad=clamp(j.lealtad-6,0,100));
+    } else {
+      log(dureza>.7
+        ? 'La exigencia no cayó bien: '+esc(x.nombre)+' no repartió nada y '+(jefe?esc(jefe.nombre)+' quedó resentido':'la junta quedó resentida')+'.'
+        : 'Por ahora '+esc(x.nombre)+' prefirió reinvertir la utilidad en vez de repartirla.','mal');
+      if(dureza>.7){
+        if(x.junta) x.junta.forEach(j=>j.lealtad=clamp(j.lealtad-10,0,100));
+        if(jefe&&jefe.pid){ const p=(S.parientes||[]).find(y=>y.pid===jefe.pid); if(p) p.afecto=clamp(p.afecto-12,0,100); }
+      }
+    }
+    S.mov--; cerrarModal(); render();
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapFundarEn501(){
+    const old=window.fundarEn; if(typeof old!=='function'||window.__SA501_FUNDAR) return;
+    window.fundarEn=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const g=companias();
+        if(g.length){ const e=g[g.length-1]; if(!e.ciudad) e.ciudad=S.hogar.ciudad; }
+      }catch(e){}
+      return r;
+    };
+    window.__SA501_FUNDAR=true;
+  }
+  function wrapListaAcciones501(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA501_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        wrapAccionesSede501(A);
+        accionesPresionDividendos501(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA501_LISTA=true;
+  }
+  function wrapPaso501(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA501_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurarSede501(); correrSede501(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA501_PASO=true;
+  }
+  function init501(){ asegurarSede501(); wrapFundarEn501(); wrapListaAcciones501(); wrapPaso501(); }
+  setTimeout(init501,40);
+  setTimeout(init501,220);
+  setTimeout(init501,650);
+  window.__SA501={version:V501,presideDeCerca:presideDeCerca501};
 })();
 </script>
 
