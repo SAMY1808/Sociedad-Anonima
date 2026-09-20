@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v46</div>
+<div class="version-badge" id="versionBadge">v47</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -11085,6 +11085,312 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init46,220);
   setTimeout(init46,650);
   window.__SA46={version:V46};
+})();
+
+/* ========================================================================
+   v47 · GENÉTICA LIGERA, POSGRADO Y BECAS, VIDA INTERNACIONAL COMO
+   SISTEMA, MERCADO FINANCIERO Y CALIDAD DE VIDA
+   Quinta entrega de "casas vivas".
+   ======================================================================== */
+(function(){
+  const V47='v47';
+  function safe47(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  function asegurar47(){
+    if(typeof S==='undefined'||!S) return;
+    if(!isFinite(S.p.estres)) S.p.estres=ri(20,40);
+    S._flags47=S._flags47&&typeof S._flags47==='object'?S._flags47:{};
+  }
+
+  // ---------- #7 genética familiar ligera ----------
+  function asegurarAtrPersona47(persona){
+    if(!persona) return persona;
+    if(!persona.atr||typeof persona.atr!=='object') persona.atr={intelecto:ri(3,8),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)};
+    return persona;
+  }
+  function wrapCrearHijoBiologico47(){
+    const old=window.crearHijoBiologico; if(typeof old!=='function'||window.__SA47_HIJO) return;
+    window.crearHijoBiologico=function(origen,otro){
+      const r=old.apply(this,arguments);
+      try{
+        const h=(S.familia.hijos||[])[S.familia.hijos.length-1];
+        if(h&&h.atr&&!h._gen47){
+          const otroPersona=asegurarAtrPersona47(otro||S.familia.pareja);
+          if(otroPersona&&otroPersona.atr){
+            h.atr.intelecto=clamp(h.atr.intelecto+Math.round((otroPersona.atr.intelecto-5)/3),1,10);
+            h.atr.carisma=clamp(h.atr.carisma+Math.round((otroPersona.atr.carisma-5)/3),1,10);
+            h.atr.disciplina=clamp(h.atr.disciplina+Math.round((S.p.atr.disciplina-5)/3)+Math.round((otroPersona.atr.disciplina-5)/3),1,10);
+            h.atr.suerte=clamp(h.atr.suerte+Math.round((otroPersona.atr.suerte-5)/4),1,10);
+          }
+          h._gen47=true;
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA47_HIJO=true;
+  }
+  function aplicarGeneticaDescendencia47(persona){
+    (persona.hijos||[]).forEach(hijo=>{
+      if(!hijo._gen47&&hijo.atr){
+        const base=persona.atr||{intelecto:5,carisma:5,disciplina:5,suerte:5};
+        hijo.atr.intelecto=clamp(hijo.atr.intelecto+Math.round((base.intelecto-5)/3),1,10);
+        hijo.atr.carisma=clamp(hijo.atr.carisma+Math.round((base.carisma-5)/3),1,10);
+        hijo.atr.disciplina=clamp(hijo.atr.disciplina+Math.round((base.disciplina-5)/3),1,10);
+        hijo.atr.suerte=clamp(hijo.atr.suerte+Math.round((base.suerte-5)/4),1,10);
+        hijo._gen47=true;
+      }
+      aplicarGeneticaDescendencia47(hijo);
+    });
+  }
+  function correrGenetica47(){
+    (S.familia.hijos||[]).forEach(h=>{ asegurarAtrPersona47(h); aplicarGeneticaDescendencia47(h); });
+  }
+  function chequearTradicionFamiliar47(){
+    if(S._flags47.tradicion) return;
+    const todos=[];
+    (function recoger(p){ if(p.atr) todos.push(p.atr); (p.hijos||[]).forEach(recoger); })({hijos:S.familia.hijos||[]});
+    if(todos.length<4) return;
+    const prom=k=>todos.reduce((a,x)=>a+(x[k]||5),0)/todos.length;
+    const pi=prom('intelecto'), pca=prom('carisma'), pd=prom('disciplina');
+    let texto=null;
+    if(pd>=7&&pi>=6.5) texto='La familia ha desarrollado una marcada tradición empresarial.';
+    else if(pi>=7.2) texto='Los descendientes muestran una fuerte inclinación académica.';
+    else if(pca>=7.2) texto='La familia se distingue por su carisma y sus contactos.';
+    else if(pd>=7.2) texto='La disciplina se volvió un rasgo de familia.';
+    if(texto){
+      S._flags47.tradicion=true;
+      log(texto,'hito'); hito(texto);
+      safe47(()=>{ if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('UN RASGO DE FAMILIA',texto,'hito'); },null);
+    }
+  }
+
+  // ---------- #8 sistema educativo: posgrado y becas ----------
+  const POSGRADOS_47=[
+    {id:'mba',n:'MBA',costo:260,form:14,prest:6},
+    {id:'maestria',n:'Maestría',costo:180,form:16,prest:4},
+    {id:'doctorado',n:'Doctorado',costo:340,form:22,prest:8}
+  ];
+  function escenaPosgrado47(h){
+    escena({rubro:'Posgrado',titulo:'Posgrado para '+esc(h.nombre),ancho:true,
+      cuerpo:esc(h.nombre)+' ya tiene pregrado. Un posgrado cuesta, pero profundiza la formación y el prestigio de la casa.',
+      opciones:POSGRADOS_47.map(pg=>({t:pg.n,cat:'formacion',d:'Cuesta '+fmt(pg.costo)+' en total.',dis:S.efectivo<pg.costo?'No te alcanza':null,run:()=>{
+        S.efectivo-=pg.costo; h.posgrado=pg.id; h.formacion=clamp(h.formacion+pg.form,0,100);
+        moverPrestigio(pg.prest*.4,'el posgrado de '+h.nombre);
+        log('<b>'+esc(h.nombre)+'</b> terminó '+pg.n+'.','hito'); S.mov--;
+      }})).concat([{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}]),cerrable:true});
+  }
+  function accionesPosgrado47(A){
+    (S.familia.hijos||[]).filter(h=>h.universidad&&h.edad>=23&&!h.posgrado).forEach(h=>{
+      A.push({t:'Posgrado para '+h.nombre,cat:'formacion',d:'Maestría, doctorado o MBA. Profundiza su formación.',mov:1,modal:true,run:()=>escenaPosgrado47(h)});
+    });
+  }
+  function escenaBeca47(h){
+    const intel=(h.atr&&h.atr.intelecto)||5;
+    const prob=clamp(.25+intel/20,.25,.75);
+    escena({rubro:'Beca de estudios',titulo:'Postular a '+esc(h.nombre)+' a una beca',ancho:true,
+      cuerpo:'Con su intelecto ('+intel+'/10) tiene una oportunidad real de una beca completa en el exterior.',
+      opciones:[{t:'Postularlo',cat:'formacion',run:()=>{
+        if(chance(prob)){
+          const u=UNIVERSIDADES.find(x=>x.id==='exterior');
+          h.universidad='exterior'; h.becado=true;
+          h.formacion=clamp(h.formacion+u.form+(intel>=7?6:0),0,100);
+          h.vinculo=clamp(h.vinculo+u.vinc,0,100);
+          if(u.prest) moverPrestigio(u.prest*.4,'');
+          S.p.redes=clamp(S.p.redes+u.prest,0,100);
+          log('<b>'+esc(h.nombre)+'</b> ganó una beca completa para estudiar afuera.','hito');
+        } else {
+          log('La beca de '+esc(h.nombre)+' no salió esta vez.','mal');
+        }
+        S.mov--;
+      }},{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}],cerrable:true});
+  }
+  function accionesBeca47(A){
+    (S.familia.hijos||[]).filter(h=>!h.universidad&&h.edad>=17&&h.edad<=20&&((h.atr&&h.atr.intelecto)||0)>=7).forEach(h=>{
+      A.push({t:'Postular a '+h.nombre+' a una beca',cat:'formacion',d:'Una beca completa en el exterior, si el intelecto acompaña.',mov:1,modal:true,run:()=>escenaBeca47(h)});
+    });
+  }
+
+  // ---------- #10 vida internacional como sistema ----------
+  function paisesDeCasas47(){
+    const set=new Set();
+    set.add(safe47(()=>{ const g=ciudadGlobalDe(S.p.ciudad); return g?g.pais:'Colombia'; },'Colombia'));
+    safe47(()=>{ (window.__SA43?window.__SA43.ramas():[]).forEach(d=>{
+      (d.casa43.ciudadesVividas||[]).forEach(ciudad=>{ const g=ciudadGlobalDe(ciudad); set.add(g?g.pais:'Colombia'); });
+    }); },null);
+    ((S.vida&&S.vida.viajes)||[]).forEach(v=>{ const g=safe47(()=>ciudadGlobalDe(v.ciudad),null); if(g) set.add(g.pais); });
+    return [...set];
+  }
+  function ciudadesVividasTotal47(){
+    const set=new Set(); set.add(S.p.ciudad);
+    safe47(()=>{ (window.__SA43?window.__SA43.ramas():[]).forEach(d=>{ (d.casa43.ciudadesVividas||[]).forEach(c=>set.add(c)); }); },null);
+    return [...set];
+  }
+  function propiedadesInternacionales47(){
+    const out=[];
+    const revisar=(bienes)=>(bienes||[]).forEach(b=>{ if(b.ciudad&&safe47(()=>esCiudadGlobal(b.ciudad),false)) out.push(b); });
+    revisar(S.bienes);
+    (S.familia.hijos||[]).forEach(h=>{ revisar(h.bienes); (h.hijos||[]).forEach(g=>revisar(g.bienes)); });
+    return out;
+  }
+  function escenaPasaporte47(){
+    const paises=paisesDeCasas47(), ciudades=ciudadesVividasTotal47(), props=propiedadesInternacionales47();
+    const viajes=(S.vida&&S.vida.viajes)||[];
+    escena({rubro:'Vida internacional',titulo:'Pasaporte de la Casa '+esc(S.dinastia),ancho:true,
+      cuerpo:'<b>'+paises.length+'</b> país'+(paises.length===1?'':'es')+' con presencia de la familia · <b>'+ciudades.length+'</b> ciudad'+(ciudades.length===1?'':'es')+' donde ha vivido alguna rama · <b>'+props.length+'</b> propiedad'+(props.length===1?'':'es')+' internacional'+(props.length===1?'':'es')+' · '+viajes.length+' viaje'+(viajes.length===1?'':'s')+' registrados.',
+      html:'<div class="apunte">Países: '+paises.map(esc).join(', ')+'<br>Ciudades: '+ciudades.map(esc).join(', ')+'</div>',
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}],cerrable:true});
+  }
+  function accionPasaporte47(A){
+    A.push({t:'Pasaporte de la familia',cat:'legado',d:'Países, ciudades y propiedades internacionales de toda la dinastía.',mov:0,modal:true,run:()=>escenaPasaporte47()});
+  }
+  function registrarViaje47(tipo,ciudad){
+    S.vida=S.vida&&typeof S.vida==='object'?S.vida:{};
+    S.vida.viajes=Array.isArray(S.vida.viajes)?S.vida.viajes:[];
+    S.vida.viajes.push({anio:S.anio,ciudad,tipo});
+    if(S.vida.viajes.length>80) S.vida.viajes.shift();
+  }
+  function escenaViajeNegocios47(){
+    const e=S.emp;
+    const costo=Math.max(15,patrimonio()*.01);
+    escena({rubro:'Vida internacional',titulo:'Viaje de negocios',ancho:true,
+      cuerpo:'Un viaje corto para cerrar contactos y ver de cerca a la competencia.',
+      opciones:[
+        {t:'Hacer el viaje ('+fmt(costo)+')',cat:'empleo',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+          S.efectivo-=costo; S.p.redes=clamp(S.p.redes+ri(3,7),0,100); S.p.reputacion=clamp(S.p.reputacion+ri(1,4),0,100);
+          S.p.estres=clamp((S.p.estres||30)+ri(3,8),0,100);
+          if(e) e.marca=clamp(e.marca+ri(1,3),0,100);
+          registrarViaje47('negocios',S.p.ciudad);
+          log('Volviste del viaje de negocios con contactos nuevos.','bien'); S.mov--;
+        }},
+        {t:'No es el momento',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionViajeNegocios47(A){
+    A.push({t:'Viaje de negocios',cat:'empleo',d:'Contactos y visibilidad, a cambio de tiempo y estrés.',mov:1,modal:true,run:()=>escenaViajeNegocios47()});
+  }
+
+  // ---------- #18 mercado financiero interno ----------
+  function escenaSplit47(){
+    const e=S.emp;
+    escena({rubro:'Mercado',titulo:'Split de acciones de '+esc(e.nombre),ancho:true,
+      cuerpo:'La acción vale '+fmt(precioAccion(e))+'. Un split duplica el número de acciones y divide el precio a la mitad: nadie gana ni pierde valor, pero se vuelve más fácil de comprar en la plaza.',
+      opciones:[
+        {t:'Hacer un split 2 por 1',cat:'capital',run:()=>{
+          e.holders.forEach(hh=>hh.n*=2);
+          moverPrestigio(1,'un split accionario bien recibido');
+          log('<b>'+esc(e.nombre)+'</b> hizo un split 2 por 1. El precio bajó a '+fmt(precioAccion(e))+'.','hito');
+          S.mov--;
+        }},
+        {t:'Dejarla como está',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionSplit47(A){
+    const e=S.emp;
+    if(e&&e.publica&&precioAccion(e)>.08){
+      A.push({t:'Split de acciones',cat:'capital',d:'La acción está cara ('+fmt(precioAccion(e))+'); un split la vuelve más accesible sin cambiar el valor total.',mov:1,modal:true,run:()=>escenaSplit47()});
+    }
+  }
+  function escenaDividendoExtra47(){
+    const e=S.emp;
+    const monto=Math.max(20,e.caja*.4);
+    escena({rubro:'Mercado',titulo:'Dividendo extraordinario',ancho:true,
+      cuerpo:'Además del dividendo regular, puedes repartir un pago extraordinario de una sola vez desde la caja acumulada ('+fmt(e.caja)+').',
+      opciones:[
+        {t:'Repartir '+fmt(monto)+' entre los accionistas',cat:'capital',dis:e.caja<monto?'No hay caja suficiente':null,run:()=>{
+          e.caja-=monto;
+          const tuyo=monto*miPct(e);
+          S.efectivo+=tuyo;
+          log('<b>'+esc(e.nombre)+'</b> repartió un dividendo extraordinario de '+fmt(monto)+'. Te tocaron '+fmt(tuyo)+'.','hito');
+          S.mov--;
+        }},
+        {t:'No repartirlo',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionDividendoExtra47(A){
+    const e=S.emp;
+    if(e&&e.caja>150&&S.carrera.ruta==='fundador'){
+      A.push({t:'Dividendo extraordinario',cat:'capital',d:'Un pago único desde la caja acumulada, aparte del dividendo regular.',mov:1,modal:true,run:()=>escenaDividendoExtra47()});
+    }
+  }
+  function escenaFondos47(){
+    asegurarTesoreria();
+    const max=Math.max(60,S.efectivo*.6);
+    escena({rubro:'Fondos de inversión',titulo:'Diversificar en un fondo',ancho:true,
+      cuerpo:'A diferencia de comprar una participación puntual, un fondo reparte el riesgo entre muchas apuestas.',
+      opciones:[
+        {t:'Fondo conservador',cat:'mercado',d:'Bajo riesgo, retorno modesto.',run:()=>crearInstrumento('Fondo conservador','fondo',max*.4,S.macro.tasa-.005,4,.02)},
+        {t:'Fondo balanceado',cat:'mercado',d:'Riesgo medio, retorno de mercado.',run:()=>crearInstrumento('Fondo balanceado','fondo',max*.35,S.macro.tasa+.01,4,.06)},
+        {t:'Fondo agresivo',cat:'mercado',d:'Más volátil, más retorno esperado.',run:()=>crearInstrumento('Fondo agresivo','fondo',max*.3,S.macro.tasa+.035,4,.14)},
+        {t:'No invertir por ahora',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionFondos47(A){
+    A.push({t:'Fondos de inversión',cat:'mercado',d:'Diversifica tu portafolio personal más allá de una sola apuesta.',mov:1,modal:true,run:()=>escenaFondos47()});
+  }
+
+  // ---------- #19 salud y calidad de vida ----------
+  function derivaEstres47(){
+    const c=S.carrera;
+    let delta=rnd(-2,2);
+    if(c.ruta==='fundador') delta+=1.4;
+    else if(c.ruta==='profesional'||c.ruta==='corporativo') delta+=.8;
+    if(c.politica&&c.politica.activo) delta+=1;
+    if((S.familia.hijos||[]).length) delta+=.3*Math.min(3,S.familia.hijos.length);
+    if(S.p.felicidad<40) delta+=1;
+    S.p.estres=clamp((S.p.estres||30)+delta,0,100);
+    if(S.p.estres>78) S.p.salud=clamp(S.p.salud-rnd(.5,1.6),0,100);
+    else if(S.p.estres<25) S.p.salud=clamp(S.p.salud+rnd(.2,.6),0,100);
+  }
+  function escenaRespiro47(){
+    const costo=Math.max(8,patrimonio()*.004);
+    escena({rubro:'Calidad de vida',titulo:'Tomarte un respiro',ancho:true,
+      cuerpo:'Tu estrés está en '+Math.round(S.p.estres||30)+'/100. Un descanso corto no resuelve la vida, pero ayuda.',
+      opciones:[
+        {t:'Un fin de semana desconectado',cat:'salud',d:fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+          S.efectivo-=costo; S.p.estres=clamp((S.p.estres||30)-ri(10,18),0,100); S.p.felicidad=clamp(S.p.felicidad+ri(4,8),0,100);
+          log('Te desconectaste un fin de semana. Se siente distinto.','bien'); S.mov--;
+        }},
+        {t:'No hay tiempo para eso',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionRespiro47(A){
+    A.push({t:'Tomarte un respiro',cat:'salud',d:'Estrés actual: '+Math.round(S.p.estres||30)+'/100.',mov:1,modal:true,run:()=>escenaRespiro47()});
+  }
+
+  function wrapListaAcciones47(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA47_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        accionesPosgrado47(A); accionesBeca47(A);
+        accionPasaporte47(A); accionViajeNegocios47(A);
+        accionSplit47(A); accionDividendoExtra47(A); accionFondos47(A);
+        accionRespiro47(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA47_LISTA=true;
+  }
+  function wrapPaso47(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA47_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar47(); derivaEstres47(); correrGenetica47(); chequearTradicionFamiliar47(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA47_PASO=true;
+  }
+  function wrapInit47(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA47_INIT) return;
+    window.iniciar=function(){ const r=old.apply(this,arguments); try{ asegurar47(); }catch(e){} return r; };
+    window.__SA47_INIT=true;
+  }
+  function init47(){ asegurar47(); wrapCrearHijoBiologico47(); wrapListaAcciones47(); wrapPaso47(); wrapInit47(); }
+  setTimeout(init47,40);
+  setTimeout(init47,220);
+  setTimeout(init47,650);
+  window.__SA47={version:V47};
 })();
 </script>
 
