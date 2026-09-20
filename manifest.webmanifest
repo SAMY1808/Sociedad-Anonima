@@ -1,19 +1,10 @@
 {
-  "name": "Sociedad Anónima — crónica de una dinastía",
-  "short_name": "Sociedad Anónima",
-  "description": "Simulador de vida corporativa y sucesión familiar en Colombia.",
-  "lang": "es-CO",
-  "dir": "ltr",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#14100C",
-  "theme_color": "#14100C",
-  "categories": ["games", "simulation"],
-  "icons": [
-    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+  "name":"Sociedad Anónima",
+  "short_name":"Sociedad Anónima",
+  "lang":"es-CO",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#14100C",
+  "theme_color":"#14100C",
+  "icons":[{"src":"./icon-180.png","sizes":"180x180","type":"image/png","purpose":"any maskable"}]
 }
