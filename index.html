@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v46</div>
+<div class="version-badge" id="versionBadge">v48</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2933,10 +2933,10 @@ function avatarSVG(nombre,op){
   const edad=op.edad===undefined?35:op.edad;
   const mujer=op.sexo==='m';
   const bebe=edad<7, nino=edad<15;
-  const piel=PIELES[d(PIELES.length)];
+  const piel=PIELES[op.pielIdx!==undefined?clamp(op.pielIdx,0,PIELES.length-1):d(PIELES.length)];
   const fondo=FONDOS_CARA[d(FONDOS_CARA.length)];
   const ropa=ROPAS[d(ROPAS.length)];
-  let pelo=PELOS[d(6)];
+  let pelo=op.peloIdx!==undefined?PELOS[clamp(op.peloIdx,0,PELOS.length-1)]:PELOS[d(6)];
   if(edad>58&&d(3)!==0) pelo=PELOS[6];
   if(edad>72) pelo=d(2)?PELOS[7]:PELOS[6];
   const calvo=!mujer&&edad>48&&d(3)===0;
@@ -3039,7 +3039,7 @@ const ICONOS_BIEN={
   oficina:'<rect x="9" y="6" width="30" height="38" rx="1" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><g fill="#B9DCE6"><rect x="13" y="10" width="6" height="7"/><rect x="21" y="10" width="6" height="7"/><rect x="29" y="10" width="6" height="7"/><rect x="13" y="20" width="6" height="7"/><rect x="21" y="20" width="6" height="7"/><rect x="29" y="20" width="6" height="7"/><rect x="13" y="30" width="6" height="7"/><rect x="21" y="30" width="6" height="7"/></g><path d="M9 44h30" stroke="#E4C66A" stroke-width="1.5"/>',
   mausoleo:'<path d="M9 43V21h30v22z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M6 21L24 7l18 14" fill="#8E887F" stroke="#E4C66A" stroke-width="1.5"/><path d="M16 43V27h16v16" fill="#6C665E"/><path d="M19 43V33h10v10" fill="#3B342E"/><path d="M20 23h8M13 27h22M13 32h7M28 32h7" stroke="#E6D7B0" stroke-width="1.2"/><path d="M4 43h40" stroke="#E4C66A" stroke-width="1.6"/><path d="M22 13h4v5h-4z" fill="#E8D38A"/>'
 };
-function iconoBien(tipo,clase,tam){
+function iconoBien(tipo,clase,tam,seed){
   let id=tipo;
   if(!ICONOS_BIEN[id]){
     if(clase==='finca') id= tipo==='cafe'?'cafe':(tipo==='ganaderia'||tipo==='ganado'?'ganado':'finca');
@@ -3047,7 +3047,8 @@ function iconoBien(tipo,clase,tam){
     else if(/mansion|mansión/.test(tipo||'')) id='mansion'; else if(/grande/.test(tipo||'')) id='casa_grande'; else if(/pequeña|pequena/.test(tipo||'')) id='casa_pequena'; else id= /casa/.test(tipo||'')?'casa':'apartamento';
   }
   const t=tam||40;
-  return '<svg class="icono-bien" viewBox="0 0 48 48" width="'+t+'" height="'+t+'" aria-hidden="true">'
+  const filtro=seed?(' style="filter:hue-rotate('+(semillaDe(String(seed))%360)+'deg) saturate('+(0.85+(semillaDe(String(seed)+'s')%30)/100).toFixed(2)+')"'):'';
+  return '<svg class="icono-bien"'+filtro+' viewBox="0 0 48 48" width="'+t+'" height="'+t+'" aria-hidden="true">'
     +'<defs><linearGradient id="gMansion" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2D2B5"/><stop offset="1" stop-color="#9E886A"/></linearGradient><linearGradient id="gWarm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C99769"/><stop offset="1" stop-color="#7D4D34"/></linearGradient><linearGradient id="gStone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D0C7B7"/><stop offset="1" stop-color="#77716A"/></linearGradient><linearGradient id="gSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#758391"/><stop offset="1" stop-color="#39444E"/></linearGradient><linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#658A58"/><stop offset="1" stop-color="#294A31"/></linearGradient></defs>'
     +'<rect x="1" y="1" width="46" height="46" rx="6" fill="#191309" stroke="#8C6B2C" stroke-width=".7"/>'
     +ICONOS_BIEN[id]+'</svg>';
@@ -7630,7 +7631,7 @@ function renderLienzo(){
     const fijos=compromisosAnuales(), renta=rentaAnualEstimada();
     const cg=ciudadGlobalDe(H.ciudad); h+='<div class="wrap"><div class="seccion"><h3>Dónde viven<em>'+esc(H.ciudad)+', '+esc(z.n)+(cg?' · '+esc(cg.pais):'')+'</em></h3>';
     h+='<div class="retrato propio"><div class="fila-r">'
-      +iconoBien(viv?viv.tipo:(H.conLosPadres?'casa_pequena':(H.nivel>=4?'mansion':H.nivel>=2?'casa_grande':'apartamento')),'vivienda',46)
+      +iconoBien(viv?viv.tipo:(H.conLosPadres?'casa_pequena':(H.nivel>=4?'mansion':H.nivel>=2?'casa_grande':'apartamento')),'vivienda',46,viv?viv.uid:H.ciudad)
       +'<div class="quien"><div class="nom">'
       +(H.conLosPadres?'En casa de tus papás':(viv?esc(viv.nombre):'Arrendando en '+esc(z.n)))+'</div>'
       +'<div class="rol">'+(cg?'Plaza global · ':'')+'Tren de vida '+nv.n+' · '+personasEnCasa()+' persona'+(personasEnCasa()===1?'':'s')+' en la casa'
@@ -7671,7 +7672,7 @@ function renderLienzo(){
           : b.clase==='finca'? (b.renta>0?'Produce cerca de '+fmt(b.valor*b.renta)+' al año, según clima y dólar':'No produce; cuesta mantenerla')
           : '';
         h+='<div class="retrato '+(esVivienda?'propio':(b.clase==='renta'&&!b.arrendado?'hostil':'leal'))+'"><div class="fila-r">'
-          +iconoBien(b.tipo,b.clase,46)
+          +iconoBien(b.tipo,b.clase,46,b.uid||b.nombre)
           +'<div class="quien"><div class="nom">'+esc(b.nombre)+'</div>'
           +'<div class="rol">'+fmt(b.valor)+(b.ciudad?' · '+esc(b.ciudad):'')
           +(b.hipoteca>0?' · debes '+fmt(b.hipoteca):' · sin deudas')+'</div>'
@@ -11085,6 +11086,471 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init46,220);
   setTimeout(init46,650);
   window.__SA46={version:V46};
+})();
+
+/* ========================================================================
+   v47 · GENÉTICA LIGERA, POSGRADO Y BECAS, VIDA INTERNACIONAL COMO
+   SISTEMA, MERCADO FINANCIERO Y CALIDAD DE VIDA
+   Quinta entrega de "casas vivas".
+   ======================================================================== */
+(function(){
+  const V47='v47';
+  function safe47(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  function asegurar47(){
+    if(typeof S==='undefined'||!S) return;
+    if(!isFinite(S.p.estres)) S.p.estres=ri(20,40);
+    S._flags47=S._flags47&&typeof S._flags47==='object'?S._flags47:{};
+  }
+
+  // ---------- #7 genética familiar ligera ----------
+  function asegurarAtrPersona47(persona){
+    if(!persona) return persona;
+    if(!persona.atr||typeof persona.atr!=='object') persona.atr={intelecto:ri(3,8),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)};
+    return persona;
+  }
+  function wrapCrearHijoBiologico47(){
+    const old=window.crearHijoBiologico; if(typeof old!=='function'||window.__SA47_HIJO) return;
+    window.crearHijoBiologico=function(origen,otro){
+      const r=old.apply(this,arguments);
+      try{
+        const h=(S.familia.hijos||[])[S.familia.hijos.length-1];
+        if(h&&h.atr&&!h._gen47){
+          const otroPersona=asegurarAtrPersona47(otro||S.familia.pareja);
+          if(otroPersona&&otroPersona.atr){
+            h.atr.intelecto=clamp(h.atr.intelecto+Math.round((otroPersona.atr.intelecto-5)/3),1,10);
+            h.atr.carisma=clamp(h.atr.carisma+Math.round((otroPersona.atr.carisma-5)/3),1,10);
+            h.atr.disciplina=clamp(h.atr.disciplina+Math.round((S.p.atr.disciplina-5)/3)+Math.round((otroPersona.atr.disciplina-5)/3),1,10);
+            h.atr.suerte=clamp(h.atr.suerte+Math.round((otroPersona.atr.suerte-5)/4),1,10);
+          }
+          h._gen47=true;
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA47_HIJO=true;
+  }
+  function aplicarGeneticaDescendencia47(persona){
+    (persona.hijos||[]).forEach(hijo=>{
+      if(!hijo._gen47&&hijo.atr){
+        const base=persona.atr||{intelecto:5,carisma:5,disciplina:5,suerte:5};
+        hijo.atr.intelecto=clamp(hijo.atr.intelecto+Math.round((base.intelecto-5)/3),1,10);
+        hijo.atr.carisma=clamp(hijo.atr.carisma+Math.round((base.carisma-5)/3),1,10);
+        hijo.atr.disciplina=clamp(hijo.atr.disciplina+Math.round((base.disciplina-5)/3),1,10);
+        hijo.atr.suerte=clamp(hijo.atr.suerte+Math.round((base.suerte-5)/4),1,10);
+        hijo._gen47=true;
+      }
+      aplicarGeneticaDescendencia47(hijo);
+    });
+  }
+  function correrGenetica47(){
+    (S.familia.hijos||[]).forEach(h=>{ asegurarAtrPersona47(h); aplicarGeneticaDescendencia47(h); });
+  }
+  function chequearTradicionFamiliar47(){
+    if(S._flags47.tradicion) return;
+    const todos=[];
+    (function recoger(p){ if(p.atr) todos.push(p.atr); (p.hijos||[]).forEach(recoger); })({hijos:S.familia.hijos||[]});
+    if(todos.length<4) return;
+    const prom=k=>todos.reduce((a,x)=>a+(x[k]||5),0)/todos.length;
+    const pi=prom('intelecto'), pca=prom('carisma'), pd=prom('disciplina');
+    let texto=null;
+    if(pd>=7&&pi>=6.5) texto='La familia ha desarrollado una marcada tradición empresarial.';
+    else if(pi>=7.2) texto='Los descendientes muestran una fuerte inclinación académica.';
+    else if(pca>=7.2) texto='La familia se distingue por su carisma y sus contactos.';
+    else if(pd>=7.2) texto='La disciplina se volvió un rasgo de familia.';
+    if(texto){
+      S._flags47.tradicion=true;
+      log(texto,'hito'); hito(texto);
+      safe47(()=>{ if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('UN RASGO DE FAMILIA',texto,'hito'); },null);
+    }
+  }
+
+  // ---------- #8 sistema educativo: posgrado y becas ----------
+  const POSGRADOS_47=[
+    {id:'mba',n:'MBA',costo:260,form:14,prest:6},
+    {id:'maestria',n:'Maestría',costo:180,form:16,prest:4},
+    {id:'doctorado',n:'Doctorado',costo:340,form:22,prest:8}
+  ];
+  function escenaPosgrado47(h){
+    escena({rubro:'Posgrado',titulo:'Posgrado para '+esc(h.nombre),ancho:true,
+      cuerpo:esc(h.nombre)+' ya tiene pregrado. Un posgrado cuesta, pero profundiza la formación y el prestigio de la casa.',
+      opciones:POSGRADOS_47.map(pg=>({t:pg.n,cat:'formacion',d:'Cuesta '+fmt(pg.costo)+' en total.',dis:S.efectivo<pg.costo?'No te alcanza':null,run:()=>{
+        S.efectivo-=pg.costo; h.posgrado=pg.id; h.formacion=clamp(h.formacion+pg.form,0,100);
+        moverPrestigio(pg.prest*.4,'el posgrado de '+h.nombre);
+        log('<b>'+esc(h.nombre)+'</b> terminó '+pg.n+'.','hito'); S.mov--;
+      }})).concat([{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}]),cerrable:true});
+  }
+  function accionesPosgrado47(A){
+    (S.familia.hijos||[]).filter(h=>h.universidad&&h.edad>=23&&!h.posgrado).forEach(h=>{
+      A.push({t:'Posgrado para '+h.nombre,cat:'formacion',d:'Maestría, doctorado o MBA. Profundiza su formación.',mov:1,modal:true,run:()=>escenaPosgrado47(h)});
+    });
+  }
+  function escenaBeca47(h){
+    const intel=(h.atr&&h.atr.intelecto)||5;
+    const prob=clamp(.25+intel/20,.25,.75);
+    escena({rubro:'Beca de estudios',titulo:'Postular a '+esc(h.nombre)+' a una beca',ancho:true,
+      cuerpo:'Con su intelecto ('+intel+'/10) tiene una oportunidad real de una beca completa en el exterior.',
+      opciones:[{t:'Postularlo',cat:'formacion',run:()=>{
+        if(chance(prob)){
+          const u=UNIVERSIDADES.find(x=>x.id==='exterior');
+          h.universidad='exterior'; h.becado=true;
+          h.formacion=clamp(h.formacion+u.form+(intel>=7?6:0),0,100);
+          h.vinculo=clamp(h.vinculo+u.vinc,0,100);
+          if(u.prest) moverPrestigio(u.prest*.4,'');
+          S.p.redes=clamp(S.p.redes+u.prest,0,100);
+          log('<b>'+esc(h.nombre)+'</b> ganó una beca completa para estudiar afuera.','hito');
+        } else {
+          log('La beca de '+esc(h.nombre)+' no salió esta vez.','mal');
+        }
+        S.mov--;
+      }},{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}],cerrable:true});
+  }
+  function accionesBeca47(A){
+    (S.familia.hijos||[]).filter(h=>!h.universidad&&h.edad>=17&&h.edad<=20&&((h.atr&&h.atr.intelecto)||0)>=7).forEach(h=>{
+      A.push({t:'Postular a '+h.nombre+' a una beca',cat:'formacion',d:'Una beca completa en el exterior, si el intelecto acompaña.',mov:1,modal:true,run:()=>escenaBeca47(h)});
+    });
+  }
+
+  // ---------- #10 vida internacional como sistema ----------
+  function paisesDeCasas47(){
+    const set=new Set();
+    set.add(safe47(()=>{ const g=ciudadGlobalDe(S.p.ciudad); return g?g.pais:'Colombia'; },'Colombia'));
+    safe47(()=>{ (window.__SA43?window.__SA43.ramas():[]).forEach(d=>{
+      (d.casa43.ciudadesVividas||[]).forEach(ciudad=>{ const g=ciudadGlobalDe(ciudad); set.add(g?g.pais:'Colombia'); });
+    }); },null);
+    ((S.vida&&S.vida.viajes)||[]).forEach(v=>{ const g=safe47(()=>ciudadGlobalDe(v.ciudad),null); if(g) set.add(g.pais); });
+    return [...set];
+  }
+  function ciudadesVividasTotal47(){
+    const set=new Set(); set.add(S.p.ciudad);
+    safe47(()=>{ (window.__SA43?window.__SA43.ramas():[]).forEach(d=>{ (d.casa43.ciudadesVividas||[]).forEach(c=>set.add(c)); }); },null);
+    return [...set];
+  }
+  function propiedadesInternacionales47(){
+    const out=[];
+    const revisar=(bienes)=>(bienes||[]).forEach(b=>{ if(b.ciudad&&safe47(()=>esCiudadGlobal(b.ciudad),false)) out.push(b); });
+    revisar(S.bienes);
+    (S.familia.hijos||[]).forEach(h=>{ revisar(h.bienes); (h.hijos||[]).forEach(g=>revisar(g.bienes)); });
+    return out;
+  }
+  function escenaPasaporte47(){
+    const paises=paisesDeCasas47(), ciudades=ciudadesVividasTotal47(), props=propiedadesInternacionales47();
+    const viajes=(S.vida&&S.vida.viajes)||[];
+    escena({rubro:'Vida internacional',titulo:'Pasaporte de la Casa '+esc(S.dinastia),ancho:true,
+      cuerpo:'<b>'+paises.length+'</b> país'+(paises.length===1?'':'es')+' con presencia de la familia · <b>'+ciudades.length+'</b> ciudad'+(ciudades.length===1?'':'es')+' donde ha vivido alguna rama · <b>'+props.length+'</b> propiedad'+(props.length===1?'':'es')+' internacional'+(props.length===1?'':'es')+' · '+viajes.length+' viaje'+(viajes.length===1?'':'s')+' registrados.',
+      html:'<div class="apunte">Países: '+paises.map(esc).join(', ')+'<br>Ciudades: '+ciudades.map(esc).join(', ')+'</div>',
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}],cerrable:true});
+  }
+  function accionPasaporte47(A){
+    A.push({t:'Pasaporte de la familia',cat:'legado',d:'Países, ciudades y propiedades internacionales de toda la dinastía.',mov:0,modal:true,run:()=>escenaPasaporte47()});
+  }
+  function registrarViaje47(tipo,ciudad){
+    S.vida=S.vida&&typeof S.vida==='object'?S.vida:{};
+    S.vida.viajes=Array.isArray(S.vida.viajes)?S.vida.viajes:[];
+    S.vida.viajes.push({anio:S.anio,ciudad,tipo});
+    if(S.vida.viajes.length>80) S.vida.viajes.shift();
+  }
+  function escenaViajeNegocios47(){
+    const e=S.emp;
+    const costo=Math.max(15,patrimonio()*.01);
+    escena({rubro:'Vida internacional',titulo:'Viaje de negocios',ancho:true,
+      cuerpo:'Un viaje corto para cerrar contactos y ver de cerca a la competencia.',
+      opciones:[
+        {t:'Hacer el viaje ('+fmt(costo)+')',cat:'empleo',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+          S.efectivo-=costo; S.p.redes=clamp(S.p.redes+ri(3,7),0,100); S.p.reputacion=clamp(S.p.reputacion+ri(1,4),0,100);
+          S.p.estres=clamp((S.p.estres||30)+ri(3,8),0,100);
+          if(e) e.marca=clamp(e.marca+ri(1,3),0,100);
+          registrarViaje47('negocios',S.p.ciudad);
+          log('Volviste del viaje de negocios con contactos nuevos.','bien'); S.mov--;
+        }},
+        {t:'No es el momento',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionViajeNegocios47(A){
+    A.push({t:'Viaje de negocios',cat:'empleo',d:'Contactos y visibilidad, a cambio de tiempo y estrés.',mov:1,modal:true,run:()=>escenaViajeNegocios47()});
+  }
+
+  // ---------- #18 mercado financiero interno ----------
+  function escenaSplit47(){
+    const e=S.emp;
+    escena({rubro:'Mercado',titulo:'Split de acciones de '+esc(e.nombre),ancho:true,
+      cuerpo:'La acción vale '+fmt(precioAccion(e))+'. Un split duplica el número de acciones y divide el precio a la mitad: nadie gana ni pierde valor, pero se vuelve más fácil de comprar en la plaza.',
+      opciones:[
+        {t:'Hacer un split 2 por 1',cat:'capital',run:()=>{
+          e.holders.forEach(hh=>hh.n*=2);
+          moverPrestigio(1,'un split accionario bien recibido');
+          log('<b>'+esc(e.nombre)+'</b> hizo un split 2 por 1. El precio bajó a '+fmt(precioAccion(e))+'.','hito');
+          S.mov--;
+        }},
+        {t:'Dejarla como está',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionSplit47(A){
+    const e=S.emp;
+    if(e&&e.publica&&precioAccion(e)>.08){
+      A.push({t:'Split de acciones',cat:'capital',d:'La acción está cara ('+fmt(precioAccion(e))+'); un split la vuelve más accesible sin cambiar el valor total.',mov:1,modal:true,run:()=>escenaSplit47()});
+    }
+  }
+  function escenaDividendoExtra47(){
+    const e=S.emp;
+    const monto=Math.max(20,e.caja*.4);
+    escena({rubro:'Mercado',titulo:'Dividendo extraordinario',ancho:true,
+      cuerpo:'Además del dividendo regular, puedes repartir un pago extraordinario de una sola vez desde la caja acumulada ('+fmt(e.caja)+').',
+      opciones:[
+        {t:'Repartir '+fmt(monto)+' entre los accionistas',cat:'capital',dis:e.caja<monto?'No hay caja suficiente':null,run:()=>{
+          e.caja-=monto;
+          const tuyo=monto*miPct(e);
+          S.efectivo+=tuyo;
+          log('<b>'+esc(e.nombre)+'</b> repartió un dividendo extraordinario de '+fmt(monto)+'. Te tocaron '+fmt(tuyo)+'.','hito');
+          S.mov--;
+        }},
+        {t:'No repartirlo',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionDividendoExtra47(A){
+    const e=S.emp;
+    if(e&&e.caja>150&&S.carrera.ruta==='fundador'){
+      A.push({t:'Dividendo extraordinario',cat:'capital',d:'Un pago único desde la caja acumulada, aparte del dividendo regular.',mov:1,modal:true,run:()=>escenaDividendoExtra47()});
+    }
+  }
+  function escenaFondos47(){
+    asegurarTesoreria();
+    const max=Math.max(60,S.efectivo*.6);
+    escena({rubro:'Fondos de inversión',titulo:'Diversificar en un fondo',ancho:true,
+      cuerpo:'A diferencia de comprar una participación puntual, un fondo reparte el riesgo entre muchas apuestas.',
+      opciones:[
+        {t:'Fondo conservador',cat:'mercado',d:'Bajo riesgo, retorno modesto.',run:()=>crearInstrumento('Fondo conservador','fondo',max*.4,S.macro.tasa-.005,4,.02)},
+        {t:'Fondo balanceado',cat:'mercado',d:'Riesgo medio, retorno de mercado.',run:()=>crearInstrumento('Fondo balanceado','fondo',max*.35,S.macro.tasa+.01,4,.06)},
+        {t:'Fondo agresivo',cat:'mercado',d:'Más volátil, más retorno esperado.',run:()=>crearInstrumento('Fondo agresivo','fondo',max*.3,S.macro.tasa+.035,4,.14)},
+        {t:'No invertir por ahora',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionFondos47(A){
+    A.push({t:'Fondos de inversión',cat:'mercado',d:'Diversifica tu portafolio personal más allá de una sola apuesta.',mov:1,modal:true,run:()=>escenaFondos47()});
+  }
+
+  // ---------- #19 salud y calidad de vida ----------
+  function derivaEstres47(){
+    const c=S.carrera;
+    let delta=rnd(-2,2);
+    if(c.ruta==='fundador') delta+=1.4;
+    else if(c.ruta==='profesional'||c.ruta==='corporativo') delta+=.8;
+    if(c.politica&&c.politica.activo) delta+=1;
+    if((S.familia.hijos||[]).length) delta+=.3*Math.min(3,S.familia.hijos.length);
+    if(S.p.felicidad<40) delta+=1;
+    S.p.estres=clamp((S.p.estres||30)+delta,0,100);
+    if(S.p.estres>78) S.p.salud=clamp(S.p.salud-rnd(.5,1.6),0,100);
+    else if(S.p.estres<25) S.p.salud=clamp(S.p.salud+rnd(.2,.6),0,100);
+  }
+  function escenaRespiro47(){
+    const costo=Math.max(8,patrimonio()*.004);
+    escena({rubro:'Calidad de vida',titulo:'Tomarte un respiro',ancho:true,
+      cuerpo:'Tu estrés está en '+Math.round(S.p.estres||30)+'/100. Un descanso corto no resuelve la vida, pero ayuda.',
+      opciones:[
+        {t:'Un fin de semana desconectado',cat:'salud',d:fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{
+          S.efectivo-=costo; S.p.estres=clamp((S.p.estres||30)-ri(10,18),0,100); S.p.felicidad=clamp(S.p.felicidad+ri(4,8),0,100);
+          log('Te desconectaste un fin de semana. Se siente distinto.','bien'); S.mov--;
+        }},
+        {t:'No hay tiempo para eso',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionRespiro47(A){
+    A.push({t:'Tomarte un respiro',cat:'salud',d:'Estrés actual: '+Math.round(S.p.estres||30)+'/100.',mov:1,modal:true,run:()=>escenaRespiro47()});
+  }
+
+  function wrapListaAcciones47(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA47_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        accionesPosgrado47(A); accionesBeca47(A);
+        accionPasaporte47(A); accionViajeNegocios47(A);
+        accionSplit47(A); accionDividendoExtra47(A); accionFondos47(A);
+        accionRespiro47(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA47_LISTA=true;
+  }
+  function wrapPaso47(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA47_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ asegurar47(); derivaEstres47(); correrGenetica47(); chequearTradicionFamiliar47(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA47_PASO=true;
+  }
+  function wrapInit47(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA47_INIT) return;
+    window.iniciar=function(){ const r=old.apply(this,arguments); try{ asegurar47(); }catch(e){} return r; };
+    window.__SA47_INIT=true;
+  }
+  function init47(){ asegurar47(); wrapCrearHijoBiologico47(); wrapListaAcciones47(); wrapPaso47(); wrapInit47(); }
+  setTimeout(init47,40);
+  setTimeout(init47,220);
+  setTimeout(init47,650);
+  window.__SA47={version:V47};
+})();
+
+/* ========================================================================
+   v48 · PENSIÓN Y RETIRO, APARIENCIA DEL PERSONAJE, ICONOS CON VARIACIÓN
+   Y QUÉ HACER CON LA VIVIENDA ANTERIOR AL MUDARSE
+   ======================================================================== */
+(function(){
+  const V48='v48';
+  function safe48(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  // ---------- pensión y retiro ----------
+  function calcularPension48(){
+    const c=S.carrera;
+    const anios=Math.max(c.anios||0,c.experienciaProf||0,(c.politica&&c.politica.anios)||0,(c.diplomacia&&c.diplomacia.anios)||0,(c.judicatura&&c.judicatura.anios)||0);
+    return Math.max(12,Math.round(anios*1.8+prestigio()*.5+patrimonio()*.002));
+  }
+  function escenaRetiro48(){
+    const pension=calcularPension48();
+    escena({rubro:'Retiro',titulo:'Retirarte de la vida activa',ancho:true,
+      cuerpo:'Dejar la vida activa no es lo mismo que entregar la casa: seguís siendo el mismo personaje, pero sin trabajo ni empresa que dirigir de forma activa. A cambio, una pensión te da '+fmt(pension)+' al año, quieto.',
+      opciones:[
+        {t:'Retirarte ahora',cat:'legado',run:()=>{
+          S.retirado=true; S.pension=pension;
+          S.carrera.ruta='desempleado'; S.carrera.empleador=null; S.carrera.nivel=-1;
+          if(S.carrera.politica) S.carrera.politica.activo=false;
+          if(S.carrera.diplomacia) S.carrera.diplomacia.activo=false;
+          if(S.carrera.judicatura) S.carrera.judicatura.activo=false;
+          log('Te retiraste de la vida activa. Ahora vives de una pensión de '+fmt(pension)+' al año.','hito');
+          hito('Se retiró de la vida activa'); S.mov--;
+        }},
+        {t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function escenaVolverActivo48(){
+    escena({rubro:'Retiro',titulo:'Volver a la vida activa',ancho:true,
+      cuerpo:'Dejas la pensión de '+fmt(S.pension||0)+' al año y vuelves a estar disponible para trabajar o dirigir una empresa.',
+      opciones:[
+        {t:'Volver a trabajar',cat:'empleo',run:()=>{
+          S.retirado=false; S.pension=0;
+          log('Volviste a la vida activa.','hito'); S.mov--;
+        }},
+        {t:'Seguir retirado',cat:'legado',run:()=>{S.mov--;}}
+      ],cerrable:true});
+  }
+  function accionRetiro48(A){
+    if(S.retirado){
+      A.push({t:'Volver a la vida activa',cat:'empleo',d:'Hoy vives de una pensión de '+fmt(S.pension||0)+' al año.',mov:1,modal:true,run:()=>escenaVolverActivo48()});
+    } else if(S.p.edad>=55){
+      A.push({t:'Retirarte de la vida activa',cat:'legado',d:'Dejas de trabajar y empiezas a recibir una pensión de '+fmt(calcularPension48())+' al año.',mov:1,modal:true,run:()=>escenaRetiro48()});
+    }
+  }
+  function pagarPension48(){
+    if(S.retirado&&S.pension>0){ S.efectivo+=S.pension; }
+  }
+
+  // ---------- apariencia del personaje ----------
+  function swatch48(color){ return '<span style="display:inline-flex;align-items:center;gap:8px"><span style="width:15px;height:15px;border-radius:50%;background:'+color+';display:inline-block;border:1px solid rgba(255,255,255,.35)"></span>'; }
+  function escenaTonoPiel48(){
+    escena({rubro:'Apariencia',titulo:'Elegir tu tono de piel',ancho:true,
+      cuerpo:'Elige cómo se ve tu personaje en los retratos de la casa.',
+      opciones:PIELES.map((color,i)=>({t:swatch48(color)+'Tono '+(i+1)+'</span>',cat:'salud',cerrar:false,run:()=>{
+        S.p.pielIdx=i; log('Cambiaste tu tono de piel.'); escenaApariencia48();
+      }})),cerrable:true,alCerrar:()=>escenaApariencia48()});
+  }
+  function escenaColorPelo48(){
+    escena({rubro:'Apariencia',titulo:'Elegir el color de tu cabello',ancho:true,
+      cuerpo:'Elige el color de cabello de tu personaje.',
+      opciones:PELOS.map((color,i)=>({t:swatch48(color)+'Color '+(i+1)+'</span>',cat:'salud',cerrar:false,run:()=>{
+        S.p.peloIdx=i; log('Cambiaste el color de tu cabello.'); escenaApariencia48();
+      }})),cerrable:true,alCerrar:()=>escenaApariencia48()});
+  }
+  function escenaApariencia48(){
+    escena({rubro:'Apariencia',titulo:'Cambiar tu apariencia',ancho:true,
+      cuerpo:'Es puramente estético: cambia cómo te ves en los retratos de la casa, no afecta el juego.',
+      opciones:[
+        {t:'Elegir tono de piel',cat:'salud',cerrar:false,run:()=>{ cerrarModal(); escenaTonoPiel48(); }},
+        {t:'Elegir color de cabello',cat:'salud',cerrar:false,run:()=>{ cerrarModal(); escenaColorPelo48(); }},
+        {t:'Dejarlo como está',cat:'legado',run:()=>{}}
+      ],cerrable:true});
+  }
+  function accionApariencia48(A){
+    A.push({t:'Cambiar tu apariencia',cat:'salud',d:'Tono de piel y color de cabello. Puramente estético.',mov:0,modal:true,run:()=>escenaApariencia48()});
+  }
+  function wrapAvatarSVG48(){
+    const old=window.avatarSVG; if(typeof old!=='function'||window.__SA48_AVATAR) return;
+    window.avatarSVG=function(nombre,op){
+      try{
+        if(typeof S!=='undefined'&&S&&S.p&&nombre===(S.p.nombre+' '+S.p.apellido)&&(isFinite(S.p.pielIdx)||isFinite(S.p.peloIdx))){
+          op=Object.assign({},op||{});
+          if(isFinite(S.p.pielIdx)) op.pielIdx=S.p.pielIdx;
+          if(isFinite(S.p.peloIdx)) op.peloIdx=S.p.peloIdx;
+        }
+      }catch(e){}
+      return old.call(this,nombre,op);
+    };
+    window.__SA48_AVATAR=true;
+  }
+
+  // ---------- vivienda anterior al mudarte ----------
+  function escenaQueHacerConViviendaVieja48(b){
+    escena({rubro:'La vivienda anterior',titulo:'¿Qué haces con '+esc(b.nombre||b.tipo||'tu antigua vivienda')+'?',ancho:true,
+      cuerpo:'Ya no vives ahí. Puedes venderla, ponerla en arriendo, o dejarla vacía por ahora.',
+      opciones:[
+        {t:'Venderla',cat:'casa',run:()=>{
+          const neto=venderBien(b,.03);
+          log('Vendiste <b>'+esc(b.nombre||b.tipo)+'</b>. Te entraron '+fmt(Math.max(0,neto))+'.','bien');
+        }},
+        {t:'Ponerla en arriendo',cat:'casa',run:()=>{
+          b.clase='renta';
+          b.renta=isFinite(b.renta)&&b.renta>0?b.renta:.062;
+          b.vac=isFinite(b.vac)&&b.vac>0?b.vac:.08;
+          b.mant=isFinite(b.mant)&&b.mant>0?b.mant:.018;
+          b.arrendado=true;
+          log('Pusiste <b>'+esc(b.nombre||b.tipo)+'</b> en arriendo. Ahora te genera renta cada año.','hito');
+        }},
+        {t:'Dejarla vacía por ahora',cat:'legado',run:()=>{}}
+      ],cerrable:true});
+  }
+  function wrapComprarBien48(){
+    const old=window.comprarBien; if(typeof old!=='function'||window.__SA48_COMPRAR) return;
+    window.comprarBien=function(cfg){
+      const esVivienda=cfg&&cfg.clase==='vivienda';
+      const anteriorUid=(esVivienda&&S.hogar)?S.hogar.vivienda:null;
+      const b=old.apply(this,arguments);
+      try{
+        if(b&&esVivienda&&anteriorUid&&anteriorUid!==b.uid){
+          const anterior=(S.bienes||[]).find(x=>x.uid===anteriorUid);
+          if(anterior&&anterior.clase==='vivienda') setTimeout(()=>escenaQueHacerConViviendaVieja48(anterior),30);
+        }
+      }catch(e){}
+      return b;
+    };
+    window.__SA48_COMPRAR=true;
+  }
+
+  function wrapListaAcciones48(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA48_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionRetiro48(A); accionApariencia48(A); }catch(e){}
+      return A;
+    };
+    window.__SA48_LISTA=true;
+  }
+  function wrapPaso48(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA48_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto) pagarPension48(); }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA48_PASO=true;
+  }
+  function init48(){ wrapAvatarSVG48(); wrapComprarBien48(); wrapListaAcciones48(); wrapPaso48(); }
+  setTimeout(init48,40);
+  setTimeout(init48,220);
+  setTimeout(init48,650);
+  window.__SA48={version:V48};
 })();
 </script>
 
