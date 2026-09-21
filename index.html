@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v50.1</div>
+<div class="version-badge" id="versionBadge">v51</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12020,9 +12020,30 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         cerrarModal(); escenaMarca50(m);
       }});
     });
+    if(!m.licencia||!m.licencia.activa){
+      const ingresoEstimado=Math.round(8+m.reputacion*.6);
+      opciones.push({t:'Licenciar la marca a un tercero',cat:'compania',cerrar:false,
+        d:'Alguien más la explota a cambio de una renta anual de '+fmt(ingresoEstimado)+'. Pierdes control sobre cómo la tratan.',
+        run:()=>{
+          const ingreso=Math.round(8+m.reputacion*.6);
+          m.licencia={activa:true,ingresoAnual:ingreso,desde:S.anio};
+          log('Licenciaste la marca <b>'+esc(m.nombre)+'</b>. Va a entrar '+fmt(ingreso)+' al año, pero perder el control le puede pasar factura a la reputación.','bien');
+          hito('Licenció la marca '+m.nombre);
+          cerrarModal(); escenaMarca50(m);
+        }});
+    } else {
+      opciones.push({t:'Terminar la licencia',cat:'compania',cerrar:false,
+        d:'Dejas de recibir '+fmt(m.licencia.ingresoAnual)+' al año, pero recuperas el control total sobre la marca.',
+        run:()=>{
+          m.licencia.activa=false;
+          log('Terminaste la licencia de <b>'+esc(m.nombre)+'</b>.','');
+          cerrarModal(); escenaMarca50(m);
+        }});
+    }
     escena({rubro:'Marca',titulo:m.nombre,ancho:true,
       cuerpo:'Reputación: <b>'+Math.round(m.reputacion)+'/100</b>. Fundada en '+m.creada+'. '
-        +(m.vinculos.length?'Vinculada a '+m.vinculos.length+' activo'+(m.vinculos.length===1?'':'s')+'.':'Todavía no está vinculada a ningún activo: no hace nada por sí sola.'),
+        +(m.vinculos.length?'Vinculada a '+m.vinculos.length+' activo'+(m.vinculos.length===1?'':'s')+'.':'Todavía no está vinculada a ningún activo: no hace nada por sí sola.')
+        +(m.licencia&&m.licencia.activa?' Licenciada desde '+m.licencia.desde+': entra '+fmt(m.licencia.ingresoAnual)+' al año.':''),
       opciones,cerrable:true});
   }
   function escenaVincularMarca50(m){
@@ -12357,6 +12378,148 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init501,220);
   setTimeout(init501,650);
   window.__SA501={version:V501,presideDeCerca:presideDeCerca501};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V51='v51';
+  function safe51(fn,ret){ try{ return fn(); }catch(e){ return ret; } }
+
+  /* ==========================================================================
+     #1 FUSIONES Y ADQUISICIONES — empresas en crisis
+     ========================================================================== */
+  function rivalesEnCrisis51(){ return safe51(()=>rivalesVivas().filter(r=>r.patrimonio<patrimonio()*.55),[]); }
+  function precioAdquisicion51(r){ return r.patrimonio*rnd(.6,.85); }
+  function absorberRival51(r,precio){
+    S.efectivo-=precio;
+    let destino=null;
+    if(S.emp){ S.emp.ingresos*=1.18; S.emp.empleados=Math.round(S.emp.empleados*1.2); destino=S.emp.nombre; }
+    else {
+      const compatibles=companias().filter(e=>e.sector===r.sector);
+      if(compatibles.length){ const e=compatibles[0]; e.ingresos*=1.15; e.empleados=Math.round(e.empleados*1.15); destino=e.nombre; }
+      else S.portafolio.push({nombre:'Negocio de los '+r.apellido,ticker:'ADQ',valor:precio*1.1,tipo:'participación'});
+    }
+    r.viva=false;
+    moverPrestigio(4,'te quedaste con la casa '+r.apellido);
+    log('Adquiriste el negocio de los <b>'+esc(r.apellido)+'</b> por '+fmt(precio)+(destino?', integrado a '+esc(destino)+'.':'. Quedó como una participación en tu portafolio.'),'hito');
+    hito('Absorbió a los '+r.apellido);
+  }
+  function escenaFusionesYAdquisiciones51(){
+    const objetivos=rivalesEnCrisis51();
+    escena({rubro:'Fusiones y adquisiciones',titulo:'Empresas en dificultades',ancho:true,
+      cuerpo:objetivos.length
+        ?'Estas casas están golpeadas y buscan quién les compre el negocio. Comprarlo sale barato, pero absorbes lo que traigan por dentro.'
+        :'Por ahora ninguna casa rival está lo bastante golpeada como para vender barato. Vuelve a mirar más adelante.',
+      opciones:objetivos.map(r=>{
+        const precio=Math.round(precioAdquisicion51(r));
+        return {t:'Adquirir a los '+r.apellido,cat:'compania',
+          d:'Patrimonio estimado '+fmt(r.patrimonio)+'. Piden '+fmt(precio)+' por todo.',
+          dis:S.efectivo<precio?'Necesitas al menos '+fmt(precio):null,
+          run:()=>{ absorberRival51(r,precio); S.mov--; }};
+      }),cerrable:true});
+  }
+  function accionesFusionesAdquisiciones51(A){
+    A.push({t:'Fusiones y adquisiciones',
+      d:rivalesEnCrisis51().length?rivalesEnCrisis51().length+' casa'+(rivalesEnCrisis51().length===1?'':'s')+' rival'+(rivalesEnCrisis51().length===1?'':'es')+' en dificultades ahora mismo.':'Ninguna casa rival está en dificultades ahora mismo.',
+      mov:0,modal:true,run:()=>escenaFusionesYAdquisiciones51()});
+  }
+
+  /* ==========================================================================
+     #2 INTEGRACIÓN VERTICAL
+     ========================================================================== */
+  const RAMOS_DISTRIBUCION_51=['comercializadora','importadora','transportadora'];
+  const FINCAS_PROCESABLES_51=['cafe','aguacate','ganado'];
+  function estaIntegrado51(x){ return !!x.integradoCon51; }
+  function idDeActivo51(x){ return x.sid||x.uid; }
+  function nombreDe51(x){ return x.nombre||x.tipo||'activo'; }
+  function valorDe51(x){ return isFinite(x.capital)?x.capital:(isFinite(x.valor)?x.valor:0); }
+  function candidatosIntegracion51(){
+    const pares=[];
+    const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s));
+    const distribuidoras=(S.sociedades||[]).filter(s=>RAMOS_DISTRIBUCION_51.includes(s.ramo)&&!estaIntegrado51(s));
+    vinicolas.forEach(v=>distribuidoras.forEach(d=>pares.push({a:v,b:d,tipo:'distribucion'})));
+    const fincas=(S.bienes||[]).filter(b=>b.clase==='finca'&&FINCAS_PROCESABLES_51.includes(b.tipo)&&!estaIntegrado51(b));
+    const agro=(S.sociedades||[]).filter(s=>s.ramo==='agroindustria'&&!estaIntegrado51(s));
+    fincas.forEach(f=>agro.forEach(a=>pares.push({a:f,b:a,tipo:'procesamiento'})));
+    return pares;
+  }
+  function escenaIntegracionVertical51(){
+    const pares=candidatosIntegracion51();
+    escena({rubro:'Integración vertical',titulo:'Encadenar el negocio',ancho:true,
+      cuerpo:pares.length
+        ?'Cuando la materia prima y quien la procesa o la distribuye son de la casa, el margen de los dos extremos se queda en la familia.'
+        :'Todavía no tienes con qué integrar: hace falta un extremo de la cadena y el otro (por ejemplo, una vinícola y una comercializadora, o una finca y una procesadora de alimentos).',
+      opciones:pares.map(p=>{
+        const costo=Math.round((valorDe51(p.a)+valorDe51(p.b))*.04);
+        return {t:'Integrar '+nombreDe51(p.a)+' con '+nombreDe51(p.b),cat:'compania',
+          d:(p.tipo==='distribucion'
+              ?'La vinícola queda con salida garantizada; la distribuidora, con producto propio.'
+              :'La finca ya no depende de vender la cosecha suelta; la procesadora asegura su materia prima.')
+            +' Cuesta '+fmt(costo)+' en integrar procesos.',
+          dis:S.efectivo<costo?'Necesitas al menos '+fmt(costo):null,
+          run:()=>{
+            S.efectivo-=costo;
+            p.a.integradoCon51={id:idDeActivo51(p.b)}; p.b.integradoCon51={id:idDeActivo51(p.a)};
+            if(isFinite(p.a.renta)) p.a.renta=Math.min(.3,p.a.renta+.02);
+            if(isFinite(p.b.renta)) p.b.renta=Math.min(.3,p.b.renta+.02);
+            log('Integraste <b>'+esc(nombreDe51(p.a))+'</b> con <b>'+esc(nombreDe51(p.b))+'</b>: ahora el margen de los dos se queda en la casa.','hito');
+            hito('Integró verticalmente '+nombreDe51(p.a)+' con '+nombreDe51(p.b));
+            S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function accionesIntegracionVertical51(A){
+    A.push({t:'Integración vertical',
+      d:'Encadena una vinícola con su distribución, o una finca con su procesadora.',
+      mov:0,modal:true,run:()=>escenaIntegracionVertical51()});
+  }
+  function correrIntegraciones51(){
+    (S.sociedades||[]).forEach(s=>{ if(estaIntegrado51(s)) s.capital=Math.max(1,s.capital*(1+rnd(.015,.03))); });
+  }
+
+  /* ==========================================================================
+     #3 MARCAS COMO ACTIVO DE M&A — licenciar a un tercero
+     ========================================================================== */
+  function correrLicenciasMarca51(){
+    (S.marcas||[]).forEach(m=>{
+      if(m.licencia&&m.licencia.activa){
+        S.efectivo+=m.licencia.ingresoAnual;
+        m.reputacion=clamp(m.reputacion-rnd(.5,2.5),5,100);
+        if(chance(.1)) log('La licencia de <b>'+esc(m.nombre)+'</b> pagó '+fmt(m.licencia.ingresoAnual)+', pero el tercero no siempre cuida el nombre como tú lo harías.','');
+      }
+    });
+  }
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones51(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA51_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        accionesFusionesAdquisiciones51(A);
+        accionesIntegracionVertical51(A);
+      }catch(e){}
+      return A;
+    };
+    window.__SA51_LISTA=true;
+  }
+  function wrapPaso51(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA51_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ correrIntegraciones51(); correrLicenciasMarca51(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA51_PASO=true;
+  }
+  function init51(){ wrapListaAcciones51(); wrapPaso51(); }
+  setTimeout(init51,40);
+  setTimeout(init51,220);
+  setTimeout(init51,650);
+  window.__SA51={version:V51,rivalesEnCrisis:rivalesEnCrisis51};
 })();
 </script>
 
