@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v51</div>
+<div class="version-badge" id="versionBadge">v52</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12520,6 +12520,167 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init51,220);
   setTimeout(init51,650);
   window.__SA51={version:V51,rivalesEnCrisis:rivalesEnCrisis51};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V52='v52';
+
+  /* ==========================================================================
+     #1 MENOS DISPERSIÓN — agrupar las listas largas de decisiones
+     ========================================================================== */
+  function subgrupoAccion52(t){
+    if(/dividendo|Ronda de capital|a bolsa|Vender la compañía|Mover capital|Fusionar dos compañías|rueda de la bolsa|Recompra|Toma hostil|enroque|Vender parte de tus acciones|Tomar deuda bancaria|Aportar capital personal|Gestionar tesorería|salario como presidente/.test(t)) return 'Capital y accionistas';
+    if(/presidencia|Nombrar presidente|silla en la junta/.test(t)) return 'Gobierno y presidencia';
+    if(/producto|Campaña de marca|Contratar talento|Recortar costos|maquinaria|planta nueva|Expandirte|especialización profesional|Fundar una compañía|Constituir una sociedad/.test(t)) return 'Producto y operación';
+    if(/Fusiones y adquisiciones|Integración vertical|Adquirir un competidor/.test(t)) return 'Fusiones y expansión';
+    if(/[Mm]arcas?\b|[Ll]icenci/.test(t)) return 'Marcas';
+    if(/terreno|[Dd]esarrollar|hotel|[Cc]ambio de uso|inmobiliaria|para arrendar|finca|viñedo|vinícola|hipoteca|Vender una propiedad/.test(t)) return 'Tierra e inmuebles';
+    if(/holding|family office|fideicomiso|fundación familiar|banca privada|club privado/.test(t)) return 'Instituciones patrimoniales';
+    if(/portafolio patrimonial|Invertir en el mercado|Reserva en moneda|Fondos de inversión/.test(t)) return 'Inversión y mercado';
+    if(/contrato de exportación|filial en el exterior|Pasaporte de la familia|Viaje de negocios|empresa conjunta afuera/.test(t)) return 'Negocios internacionales';
+    if(/situación penal|operación ilegal|Mover una ley|Aceitar a un funcionario|palancas por debajo/.test(t)) return 'Riesgo y bajo cuerda';
+    if(/matrimonio|[Aa]doptar|[Dd]ivorci|testamento|gremio|dentro de la familia|Casarse|Casar a/.test(t)) return 'Familia y sucesión';
+    if(/[Cc]omprar vivienda|[Mm]udarte|barrio o de ciudad|tren de vida|otro tipo de vivienda/.test(t)) return 'Hogar';
+    return 'Otras decisiones';
+  }
+  function barajaAgrupada52(acciones){
+    if(!acciones.length) return '<div class="vacio">No hay nada que decidir aquí este año.</div>';
+    acciones.forEach(a=>{ if(LISTA.indexOf(a)<0) LISTA.push(a); });
+    const grupos={};
+    acciones.forEach(a=>{ const g=subgrupoAccion52(a.t); (grupos[g]=grupos[g]||[]).push(a); });
+    const orden=Object.keys(grupos).sort((x,y)=>grupos[y].length-grupos[x].length);
+    let h='', abiertos=0, i=0;
+    const pinta=a=>{
+      const sinMov=(a.mov||0)>S.mov;
+      let dis=a.dis||(sinMov?'Te quedan '+S.mov+' movidas y esta cuesta '+(a.mov||1):null);
+      const cat=a.puerta?'legado':catDe(a.t);
+      if(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat)) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
+      const clave=/Fundar|a bolsa|Vender la compañía|Ronda|Retirarte|Asumir|Adquirir/.test(a.t);
+      const riesgo=/palancas|Recortar/.test(a.t);
+      let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov||1);k++) fichas+='<i></i>';
+      h+='<button class="carta'+(a.puerta?' puerta':'')+(riesgo?' riesgo':'')+(clave&&!riesgo?' clave':'')+'" data-i="'+LISTA.indexOf(a)+'"'
+        +(dis?' disabled':'')+' style="--d:'+Math.min(i*26,420)+'ms;--tilt:'+((i%3)-1)*.35+'deg">'
+        +'<span class="fichas">'+fichas+'</span>'
+        +'<div class="encabezado">'+sello(cat)+'<span class="nom">'+esc(a.t)+'</span></div>'
+        +'<div class="txt">'+esc(dis||a.d||'')+'</div></button>';
+      i++;
+    };
+    orden.forEach(g=>{
+      const del=grupos[g];
+      const abrir=abiertos<2;
+      if(abrir) abiertos++;
+      h+='<details class="grupo"'+(abrir?' open':'')+'><summary>'+esc(g)+'<span class="cuenta">'+del.length+'</span></summary><div class="baraja">';
+      del.forEach(pinta);
+      h+='</div></details>';
+    });
+    return h;
+  }
+  function wrapBaraja52(){
+    const old=window.baraja; if(typeof old!=='function'||window.__SA52_BARAJA) return;
+    window.baraja=function(acciones,conGrupos){
+      try{ if(!conGrupos&&acciones&&acciones.length>7) return barajaAgrupada52(acciones); }catch(e){}
+      return old.apply(this,arguments);
+    };
+    window.__SA52_BARAJA=true;
+  }
+
+  /* ==========================================================================
+     #2 CARAS MÁS AMIGABLES, ESTILO BITLIFE
+     ========================================================================== */
+  const IRIS_52=['#5B3A21','#3E2E23','#6B4226','#37516B','#3F5C43','#5A4A2E'];
+  function dibujarCara52(nombre,op){
+    op=op||{};
+    try{
+      if(typeof S!=='undefined'&&S&&S.p&&nombre===(S.p.nombre+' '+S.p.apellido)&&(isFinite(S.p.pielIdx)||isFinite(S.p.peloIdx))){
+        op=Object.assign({},op);
+        if(isFinite(S.p.pielIdx)) op.pielIdx=S.p.pielIdx;
+        if(isFinite(S.p.peloIdx)) op.peloIdx=S.p.peloIdx;
+      }
+    }catch(e){}
+    const d=dadoDe(semillaDe(nombre+'|'+(op.sexo||'h')));
+    const tam=op.tam||44;
+    const edad=op.edad===undefined?35:op.edad;
+    const mujer=op.sexo==='m';
+    const bebe=edad<7, nino=edad<15;
+    const piel=PIELES[op.pielIdx!==undefined?clamp(op.pielIdx,0,PIELES.length-1):d(PIELES.length)];
+    const fondo=FONDOS_CARA[d(FONDOS_CARA.length)];
+    const ropa=ROPAS[d(ROPAS.length)];
+    let pelo=op.peloIdx!==undefined?PELOS[clamp(op.peloIdx,0,PELOS.length-1)]:PELOS[d(6)];
+    if(edad>58&&d(3)!==0) pelo=PELOS[6];
+    if(edad>72) pelo=d(2)?PELOS[7]:PELOS[6];
+    const calvo=!mujer&&edad>48&&d(3)===0;
+    const estilo=mujer?d(5):3+d(2);
+    const gafas=d(5)===0;
+    const barba=!mujer&&edad>22&&!nino&&d(3)===0;
+    const sonrisa=d(3);
+    const iris=IRIS_52[d(IRIS_52.length)];
+    const P=[];
+
+    P.push('<circle cx="32" cy="32" r="31" fill="'+fondo+'"/>');
+    P.push('<path d="M8 64c2-11 11-16 24-16s22 5 24 16z" fill="'+ropa+'"/>');
+    if(!nino){
+      P.push('<path d="M26 49l6 7 6-7 3 1.6-9 10.4-9-10.4z" fill="#F0E7D5" opacity=".9"/>');
+      if(!mujer) P.push('<path d="M32 56l-2.6 8h5.2z" fill="'+(d(2)?'#B2413A':'#D6A648')+'"/>');
+    }
+    P.push('<rect x="28" y="40" width="8" height="10" rx="3.5" fill="'+piel+'"/>');
+    P.push('<ellipse cx="32" cy="46" rx="4.4" ry="2" fill="rgba(0,0,0,.12)"/>');
+    const rx=bebe?17:(mujer?16.2:16.6), ry=bebe?16.4:17.2;
+    P.push('<ellipse cx="32" cy="28" rx="'+rx+'" ry="'+ry+'" fill="'+piel+'"/>');
+    P.push('<ellipse cx="'+(32-rx+.6)+'" cy="30" rx="2.4" ry="3.2" fill="'+piel+'"/>');
+    P.push('<ellipse cx="'+(32+rx-.6)+'" cy="30" rx="2.4" ry="3.2" fill="'+piel+'"/>');
+    if(!calvo){
+      if(mujer&&estilo<3){
+        P.push('<path d="M15.6 30C14.4 17 21.6 9 32 9s17.6 8 16.4 21c-1.4-8-4-11.4-7-12.6-4.6-1.8-8 .8-13.4.4-3.8-.3-6.6 1.6-8 5.2-.8 2-1.2 4.4-1.4 7z" fill="'+pelo+'"/>');
+        if(estilo===0) P.push('<path d="M15.8 27c-2.6 8-2.4 17 .2 24 1.6-7 1.4-16-.2-24zM48.2 27c2.6 8 2.4 17-.2 24-1.6-7-1.4-16 .2-24z" fill="'+pelo+'"/>');
+        else if(estilo===1) P.push('<path d="M17 24c-3 5-3.4 11-1.6 15.6 1.6-4.6 2.2-10.4 1.6-15.6zM47 24c3 5 3.4 11 1.6 15.6-1.6-4.6-2.2-10.4-1.6-15.6z" fill="'+pelo+'"/>');
+        else P.push('<circle cx="17.4" cy="20" r="4.6" fill="'+pelo+'"/><circle cx="46.6" cy="20" r="4.6" fill="'+pelo+'"/>');
+      } else if(estilo===4){
+        P.push('<path d="M16.4 27c0-10 7-16 15.6-16s15.6 6 15.6 16c-1.6-6-5-8.6-8.6-9.2-4.8-.8-7.6 1.6-12 1-3.6-.5-6.4 1.4-8.2 4.6-1 1.8-1.8 2.8-2.4 3.6z" fill="'+pelo+'"/>');
+      } else {
+        P.push('<path d="M16.6 28c-.6-11 6-18 15.4-18s16 7 15.4 18c0-6.6-3.2-9.8-6.8-10.6-4.4-1-6.4 1.4-11 1-3.6-.4-6.6 1.2-8.6 4.4-1.4 2.2-2.2 3.8-2.4 5.2z" fill="'+pelo+'"/>');
+      }
+    } else if(edad>48){
+      P.push('<path d="M17 31c.4-4.6 1.6-8 3-10-.4 4-.4 7.2 0 10zM47 31c-.4-4.6-1.6-8-3-10 .4 4 .4 7.2 0 10z" fill="'+pelo+'"/>');
+    }
+    P.push('<path d="M22.8 23.2q3.2-3 6.4-.6M34.8 22.6q3.2-2.4 6.4-.6" stroke="'+pelo+'" stroke-width="2" fill="none" stroke-linecap="round"/>');
+    const oy=bebe?29:28.2;
+    [26.4,37.6].forEach(ox=>{
+      P.push('<ellipse cx="'+ox+'" cy="'+oy+'" rx="'+(bebe?4:3.6)+'" ry="'+(bebe?4.2:3.8)+'" fill="#FFFFFF"/>');
+      P.push('<circle cx="'+ox+'" cy="'+(oy+.3)+'" r="'+(bebe?2.2:2)+'" fill="'+iris+'"/>');
+      P.push('<circle cx="'+ox+'" cy="'+(oy+.3)+'" r="'+(bebe?1:.9)+'" fill="#160E08"/>');
+      P.push('<circle cx="'+(ox-.9)+'" cy="'+(oy-1)+'" r=".9" fill="#FFFFFF"/>');
+    });
+    P.push('<path d="M32 30q1.4 2.4-.6 3.1" stroke="rgba(110,66,36,.4)" stroke-width="1.2" fill="none" stroke-linecap="round"/>');
+    if(sonrisa===0) P.push('<path d="M26.8 37q5.2 4.6 10.4 0" fill="none" stroke="#7A3128" stroke-width="1.8" stroke-linecap="round"/>');
+    else if(sonrisa===1) P.push('<path d="M26.6 36.8q5.4 5 10.8 0" fill="#8C3F36"/><path d="M27.4 37.2q4.6 3 9.2 0" fill="#FFF6EC" opacity=".85"/>');
+    else P.push('<path d="M27.4 37.2q4.6 3.2 9.2 0" stroke="#7A3128" stroke-width="1.9" fill="none" stroke-linecap="round"/>');
+    if(nino||mujer||d(3)===0){
+      P.push('<ellipse cx="22.6" cy="34" rx="3" ry="1.9" fill="#E8897C" opacity=".28"/>');
+      P.push('<ellipse cx="41.4" cy="34" rx="3" ry="1.9" fill="#E8897C" opacity=".28"/>');
+    }
+    if(barba) P.push('<path d="M17.6 30.4c.6 9.4 6.1 14.2 14.4 14.2s13.8-4.8 14.4-14.2c-1.4 6.2-6.4 9.1-14.4 9.1s-13-2.9-14.4-9.1z" fill="'+pelo+'" opacity=".9"/>');
+    if(edad>62) P.push('<path d="M21 32q1.6 1.1 0 2.2M43 32q-1.6 1.1 0 2.2" stroke="rgba(90,56,30,.3)" stroke-width="1" fill="none"/>');
+    if(gafas&&!bebe) P.push('<g stroke="#2B1C10" stroke-width="1.4" fill="none" opacity=".8">'
+      +'<circle cx="26.4" cy="'+oy+'" r="5.2"/><circle cx="37.6" cy="'+oy+'" r="5.2"/>'
+      +'<path d="M31.6 '+oy+'h.8M21 '+(oy-1.6)+'l-3.8 .8M43 '+(oy-1.6)+'l3.8 .8"/></g>');
+    return '<svg class="cara" viewBox="0 0 64 64" width="'+tam+'" height="'+tam+'" aria-hidden="true">'+P.join('')+'</svg>';
+  }
+  function wrapAvatarSVG52(){
+    if(typeof window.avatarSVG!=='function'||window.__SA52_AVATAR) return;
+    window.avatarSVG=dibujarCara52;
+    window.__SA52_AVATAR=true;
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function init52(){ wrapBaraja52(); wrapAvatarSVG52(); }
+  setTimeout(init52,40);
+  setTimeout(init52,220);
+  setTimeout(init52,650);
+  window.__SA52={version:V52,subgrupoAccion:subgrupoAccion52};
 })();
 </script>
 
