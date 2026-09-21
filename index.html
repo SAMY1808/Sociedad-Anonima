@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v54</div>
+<div class="version-badge" id="versionBadge">v55</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12922,6 +12922,126 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init54,220);
   setTimeout(init54,650);
   window.__SA54={version:V54};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V55='v55';
+
+  /* ==========================================================================
+     INDUSTRIA DEL CONOCIMIENTO — investigación, patentes y su vencimiento
+     ========================================================================== */
+  const RD_CATALOGO_55={
+    salud:[
+      {id:'molecula',n:'Molécula nueva',d:'Un medicamento realmente propio, no un genérico más.',anios:5,costoFactor:1.8,exito:.35,vidaPatente:18,regalias:.52,escalaVentas:1.6},
+      {id:'biologico',n:'Terapia biológica',d:'Tratamiento de alta complejidad, con barreras de entrada altísimas si funciona.',anios:6,costoFactor:2.4,exito:.28,vidaPatente:20,regalias:.58,escalaVentas:2.0},
+      {id:'dispositivo',n:'Dispositivo médico patentado',d:'Menos espectacular que un medicamento, pero más rápido de sacar adelante.',anios:3,costoFactor:1.2,exito:.48,vidaPatente:14,regalias:.40,escalaVentas:1.1}
+    ],
+    tech:[
+      {id:'modelo_ia',n:'Modelo propietario de IA',d:'Un modelo entrenado que nadie más tiene, al menos por un tiempo.',anios:3,costoFactor:1.5,exito:.4,vidaPatente:12,regalias:.55,escalaVentas:1.8},
+      {id:'chip',n:'Chip especializado',d:'Diseño propio de silicio: caro de desarrollar, muy difícil de copiar.',anios:4,costoFactor:2.0,exito:.32,vidaPatente:16,regalias:.48,escalaVentas:1.5},
+      {id:'protocolo',n:'Protocolo propio de seguridad',d:'Una pieza de infraestructura que, si se vuelve estándar, cobra para siempre.',anios:2,costoFactor:1.0,exito:.5,vidaPatente:10,regalias:.44,escalaVentas:1.0}
+    ]
+  };
+  function catalogoRD55(e){ return RD_CATALOGO_55[e&&e.sector]||[]; }
+  function proyectosRDActivos55(e){ return compromisos().filter(c=>c._esRD55&&c._empresaNombre55===e.nombre); }
+  function resolverRD55(e,d){
+    if(!companias().includes(e)) return null;
+    const prob=clamp(d.exito+((e.innovacion||50)-50)/250,.08,.85);
+    if(chance(prob)){
+      const ventasBase=Math.max(20,e.ingresos*d.escalaVentas*rnd(.7,1.3));
+      const patente={id:'pat'+ri(100000,999999),nombre:d.n,concedida:S.anio,vidaAnios:d.vidaPatente,
+        expira:S.anio+d.vidaPatente,ventasAnuales:ventasBase,regalias:d.regalias,expirada:false};
+      e.patentes=Array.isArray(e.patentes)?e.patentes:[]; e.patentes.push(patente);
+      e.innovacion=clamp((e.innovacion||50)+10,0,100);
+      e.marca=clamp((e.marca||50)+4,0,100);
+      hito('Patentó '+d.n+' en '+e.nombre);
+      log('La investigación de <b>'+esc(d.n)+'</b> en '+esc(e.nombre)+' funcionó: quedó patentada por '+d.vidaPatente+' años, con regalías del '+pc(d.regalias)+'.','hito');
+    } else {
+      e.innovacion=clamp((e.innovacion||50)-4,0,100);
+      e.moral=clamp((e.moral||50)-3,0,100);
+      log('La investigación de <b>'+esc(d.n)+'</b> en '+esc(e.nombre)+' no funcionó. Años y plata invertidos sin resultado.','mal');
+    }
+    return null;
+  }
+  function escenaInvestigacion55(e){
+    const disponibles=catalogoRD55(e);
+    const patentes=(e.patentes||[]);
+    const enCurso=proyectosRDActivos55(e);
+    const filas=patentes.map(p=>'<div class="apunte">'+esc(p.nombre)+' — '+(p.expirada?'vencida en '+p.expira:'vigente hasta '+p.expira+' · regalías '+pc(p.regalias)+' sobre '+fmt(p.ventasAnuales)+' al año')+'</div>').join('');
+    escena({rubro:'Investigación y desarrollo',titulo:'Laboratorio de '+esc(e.nombre),ancho:true,
+      cuerpo:'Invertir en investigación es apostar varios años sin saber si el resultado va a funcionar. Si sale, la patente paga mucho más que un producto normal mientras dure la exclusividad; cuando vence, entran los genéricos y la renta se corta.'
+        +(enCurso.length?' Ahora mismo tienes '+enCurso.length+' proyecto'+(enCurso.length===1?'':'s')+' de investigación en curso.':''),
+      html: filas? '<div style="margin:8px 0 4px">'+filas+'</div>' : '',
+      opciones:disponibles.map(d=>{
+        const costo=Math.max(80,Math.round(e.ingresos*d.costoFactor));
+        return {t:'Investigar: '+d.n,cat:'compania',
+          d:d.d+' Dura '+d.anios+' años, cuesta '+fmt(costo)+' y tiene '+pc(d.exito)+' de probabilidad de éxito.',
+          dis:e.caja<costo?'Caja insuficiente':null,
+          run:()=>{
+            e.caja-=costo;
+            iniciarCompromiso({titulo:'Investigación: '+d.n+' ('+e.nombre+')',restan:d.anios,mov:1,
+              _esRD55:true,_empresaNombre55:e.nombre,
+              cerrar:()=>resolverRD55(e,d)});
+            log('Arrancó la investigación de <b>'+esc(d.n)+'</b> en '+esc(e.nombre)+'. Costó '+fmt(costo)+' y tardará '+d.anios+' años en dar resultado.','hito');
+            S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function accionesInvestigacion55(A){
+    const e=S.emp, c=S.carrera;
+    if(!e||c.ruta!=='fundador') return;
+    if(!catalogoRD55(e).length) return;
+    A.push({t:'Investigación y desarrollo',cat:'compania',
+      d:'Invertir en patentes propias: más riesgo que un producto normal, pero mucho más rendimiento si funciona.',
+      mov:0,modal:true,run:()=>escenaInvestigacion55(e)});
+  }
+  function correrPatentes55(){
+    companias().forEach(e=>{
+      if(!Array.isArray(e.patentes)||!e.patentes.length) return;
+      e.patentes.forEach(p=>{
+        if(p.expirada) return;
+        if(S.anio>=p.expira){
+          p.expirada=true;
+          log('La patente de <b>'+esc(p.nombre)+'</b> en '+esc(e.nombre)+' venció: entraron los genéricos y esa renta se acabó.','mal');
+          return;
+        }
+        p.ventasAnuales=Math.max(5,p.ventasAnuales*(1+rnd(-.05,.12)));
+        const utilidad=p.ventasAnuales*p.regalias;
+        e.caja=(e.caja||0)+utilidad;
+        if(chance(.08)) log('La patente de <b>'+esc(p.nombre)+'</b> en '+esc(e.nombre)+' sigue pagando bien: '+fmt(utilidad)+' este año.','bien');
+      });
+    });
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones55(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA55_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionesInvestigacion55(A); }catch(e){}
+      return A;
+    };
+    window.__SA55_LISTA=true;
+  }
+  function wrapPaso55(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA55_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto){ correrPatentes55(); } }catch(e){}
+      try{ render(); }catch(e){}
+      return r;
+    };
+    window.__SA55_PASO=true;
+  }
+  function init55(){ wrapListaAcciones55(); wrapPaso55(); }
+  setTimeout(init55,40);
+  setTimeout(init55,220);
+  setTimeout(init55,650);
+  window.__SA55={version:V55,catalogoRD:catalogoRD55};
 })();
 </script>
 
