@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v53</div>
+<div class="version-badge" id="versionBadge">v54</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12695,6 +12695,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const old=window.catDe; if(typeof old!=='function'||window.__SA53_CATDE) return;
     window.catDe=function(t){
       if(/Comprar un terreno|^Desarrollar |Cambiar el uso de|a una inmobiliaria|Comprar otro tipo de vivienda|Comprar un viñedo|Fundar una vinícola/.test(t)) return 'casa';
+      if(/Buscar intimidad/.test(t)) return 'familia';
+      if(/Facultades personales/.test(t)) return 'formacion';
       return old.apply(this,arguments);
     };
     window.__SA53_CATDE=true;
@@ -12786,6 +12788,140 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init53,220);
   setTimeout(init53,650);
   window.__SA53={version:V53};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V54='v54';
+
+  /* ==========================================================================
+     #1 BUSCAR INTIMIDAD — pareja, amante o alguien nuevo
+     ========================================================================== */
+  function escenaIntimidad54(){
+    const q=S.familia.pareja;
+    const amantes=(S.familia.amantes||[]).filter(a=>a.activo!==false);
+    const opciones=[];
+    if(q){
+      opciones.push({t:'Con tu pareja',cat:'familia',d:'Una noche tranquila con quien tienes al lado. Sube el ánimo de los dos.',cerrar:false,run:()=>{
+        S.p.felicidad=clamp(S.p.felicidad+ri(5,10),0,100);
+        q.paciencia=clamp((q.paciencia||60)+ri(3,7),0,100);
+        log('Pasaste la noche con <b>'+esc(q.nombre)+'</b>. El ánimo de los dos subió.','bien');
+        S.mov--; cerrarModal(); render();
+      }});
+    }
+    amantes.slice(0,3).forEach(a=>{
+      opciones.push({t:'Con '+a.nombre.split(' ')[0],cat:'familia',d:'Una relación paralela: sube el ánimo, pero hay riesgo si '+(q?esc(q.nombre)+' se entera':'se sabe')+'.',cerrar:false,run:()=>{
+        const riesgo=clamp((q?.12:.04)*(1-(a.discrecion||50)/140),.02,.2);
+        a.afecto=clamp(a.afecto+ri(5,11),0,100);
+        S.p.felicidad=clamp(S.p.felicidad+ri(6,12),0,100);
+        if(q&&chance(riesgo)){
+          q.paciencia=clamp((q.paciencia||60)-ri(6,14),0,100);
+          S.p.escandalos=clamp((S.p.escandalos||0)+ri(1,2),0,20);
+          log('Alguien notó algo raro. <b>'+esc(q.nombre)+'</b> quedó con la mosca detrás de la oreja.','mal');
+        } else {
+          log('Pasaste la noche con <b>'+esc(a.nombre)+'</b>.','bien');
+        }
+        S.mov--; cerrarModal(); render();
+      }});
+    });
+    if(S.p.edad>=18){
+      opciones.push({t:'Con alguien que acabas de conocer',cat:'familia',d:'Una noche sin compromiso. Sube el ánimo, pero el riesgo de escándalo (y de un embarazo que no esperabas) es más alto.',cerrar:false,run:()=>{
+        const sx=S.p.sexo==='h'?'m':'h';
+        const desconocido={id:'x'+Date.now().toString(36)+ri(100,999),
+          nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),sexo:sx,
+          edad:clamp(S.p.edad+ri(-6,6),18,Math.max(19,S.p.edad+10)),
+          fertilidad:fertilidadActual({sexo:sx,edad:S.p.edad,salud:ri(60,90),felicidad:ri(50,85)}),
+          afecto:ri(10,30),desde:S.anio,discrecion:ri(15,45),activo:false};
+        S.familia.amantes=S.familia.amantes||[]; S.familia.amantes.push(desconocido);
+        S.p.felicidad=clamp(S.p.felicidad+ri(3,8),0,100);
+        const riesgoEsc=q?.22:.1;
+        if(chance(riesgoEsc)){
+          S.p.escandalos=clamp((S.p.escandalos||0)+ri(1,3),0,20);
+          if(q) q.paciencia=clamp((q.paciencia||60)-ri(8,16),0,100);
+          log('La noche con <b>'+esc(desconocido.nombre)+'</b> se supo. No cayó nada bien.','mal');
+        } else {
+          log('Pasaste la noche con alguien que acabas de conocer. Nadie más se enteró.','');
+        }
+        const pr=probConcepcion(fertilidadActual(S.p),desconocido.fertilidad,.8)*.6;
+        if(S.familia.hijos.length<12 && !(S.familia.embarazos||[]).length && chance(pr)) registrarEmbarazo(desconocido,'amante');
+        S.mov--; cerrarModal(); render();
+      }});
+    }
+    escena({rubro:'Vida íntima',titulo:'Buscar intimidad',ancho:true,
+      cuerpo:'Con quién compartes esta noche es una decisión privada, con sus propias consecuencias.',
+      opciones,cerrable:true});
+  }
+  function accionIntimidad54(A){
+    if(S.p.edad>=18) A.push({t:'Buscar intimidad',cat:'familia',d:'Pareja, amante o alguien nuevo: cada opción tiene su propio riesgo.',mov:1,modal:true,run:()=>escenaIntimidad54()});
+  }
+
+  /* ==========================================================================
+     #2 FACULTADES PERSONALES
+     ========================================================================== */
+  const NOMBRE_ATR54={intelecto:'intelecto',carisma:'carisma',disciplina:'disciplina'};
+  function costoDeEntrenar54(v){ return Math.round(40+v*25); }
+  function escenaFacultades54(){
+    const p=S.p;
+    const filas=[
+      {n:'Intelecto',v:p.atr.intelecto,d:'Pesa en decisiones judiciales, en resultados de posgrado y en cómo negocias.'},
+      {n:'Carisma',v:p.atr.carisma,d:'Sube tu sueldo, tu opción de ascenso, tu lealtad de junta y tus negociaciones.'},
+      {n:'Disciplina',v:p.atr.disciplina,d:'Te da movidas extra por año si es alta, y pesa en la carrera pública y en cómo educas a tus hijos.'},
+      {n:'Suerte',v:p.atr.suerte,d:'No se entrena: es la que decide los golpes de fortuna y los reveses que no viste venir.'}
+    ];
+    const html='<div style="display:flex;flex-direction:column;gap:8px">'
+      +filas.map(f=>medida(f.n,f.v,10)+'<div class="apunte" style="margin-top:-4px">'+esc(f.d)+'</div>').join('')
+      +'<div style="border-top:1px solid rgba(255,255,255,.12);margin:6px 0 2px"></div>'
+      +medida('Salud',p.salud,100)+medida('Ánimo',p.felicidad,100)+medida('Redes',p.redes,100)
+      +medida('Reputación',p.reputacion,100)+medida('Fertilidad',fertilidadActual(p),100)
+      +'</div>';
+    const opcionDe=k=>{
+      const v=p.atr[k], costo=costoDeEntrenar54(v);
+      return {t:({intelecto:'Ejercitar tu intelecto',carisma:'Cultivar tu carisma',disciplina:'Trabajar tu disciplina'})[k],
+        cat:'formacion',
+        d:'Hoy: '+v+'/10. Cuesta '+fmt(costo)+' y no siempre funciona; entre más alto, más cuesta subirlo.',
+        dis:v>=10?'Ya está en el máximo':(S.efectivo<costo?'Necesitas al menos '+fmt(costo):null),
+        cerrar:false,
+        run:()=>{
+          const costo2=costoDeEntrenar54(v);
+          S.efectivo-=costo2;
+          const prob=clamp(.55-(v-5)*.05,.15,.8);
+          if(chance(prob)){
+            p.atr[k]=clamp(v+1,1,10);
+            S.p.felicidad=clamp(S.p.felicidad+3,0,100);
+            log('Le metiste empeño y se notó: tu '+NOMBRE_ATR54[k]+' subió a '+p.atr[k]+'/10.','bien');
+          } else {
+            S.p.felicidad=clamp(S.p.felicidad-1,0,100);
+            log('Le metiste tiempo y plata a tu '+NOMBRE_ATR54[k]+', pero este año no se notó el cambio.','mal');
+          }
+          S.mov--; cerrarModal(); render();
+        }};
+    };
+    escena({rubro:'Quién eres',titulo:'Facultades personales',ancho:true,
+      cuerpo:'Lo que traes por dentro: cuánto pesa en tu vida y qué tanto se puede seguir cultivando.',
+      html,opciones:[opcionDe('intelecto'),opcionDe('carisma'),opcionDe('disciplina')],cerrable:true});
+  }
+  function accionFacultades54(A){
+    A.push({t:'Facultades personales',cat:'formacion',d:'Quién eres por dentro: tus atributos, y qué tanto los puedes seguir cultivando.',mov:0,modal:true,run:()=>escenaFacultades54()});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones54(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA54_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionIntimidad54(A); accionFacultades54(A); }catch(e){}
+      return A;
+    };
+    window.__SA54_LISTA=true;
+  }
+  function init54(){ wrapListaAcciones54(); }
+  setTimeout(init54,40);
+  setTimeout(init54,220);
+  setTimeout(init54,650);
+  window.__SA54={version:V54};
 })();
 </script>
 
