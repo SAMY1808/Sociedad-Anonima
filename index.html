@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v52</div>
+<div class="version-badge" id="versionBadge">v53</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -12681,6 +12681,111 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init52,220);
   setTimeout(init52,650);
   window.__SA52={version:V52,subgrupoAccion:subgrupoAccion52};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V53='v53';
+
+  /* ==========================================================================
+     #1 QUE LO INMOBILIARIO VIVA EN HOGAR, NO EN NEGOCIOS
+     ========================================================================== */
+  function wrapCatDe53(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA53_CATDE) return;
+    window.catDe=function(t){
+      if(/Comprar un terreno|^Desarrollar |Cambiar el uso de|a una inmobiliaria|Comprar otro tipo de vivienda|Comprar un viñedo|Fundar una vinícola/.test(t)) return 'casa';
+      return old.apply(this,arguments);
+    };
+    window.__SA53_CATDE=true;
+  }
+
+  /* ==========================================================================
+     #2 MÁS TIPOS DE FINCA
+     ========================================================================== */
+  function asegurarFincas53(){
+    const nuevas=[
+      {id:'citricos',n:'Cultivo de cítricos',base:1400,mant:.05,renta:.095,vol:.55,fel:3,redes:3,
+       d:'Naranja y limón para el mercado interno y alguna exportación. Rinde según el clima y el precio de la fruta.'},
+      {id:'flores',n:'Cultivo de flores de exportación',base:1900,mant:.06,renta:.13,vol:.7,fel:2,redes:4,
+       d:'Claveles y rosas para el Día de la Madre y San Valentín en el exterior. Rinde fuerte en temporada, pero un vuelo perdido puede arruinar el año.'},
+      {id:'cacao',n:'Cultivo de cacao',base:1250,mant:.048,renta:.09,vol:.45,fel:4,redes:3,
+       d:'Un cultivo de largo aliento: tarda años en madurar del todo, pero después rinde sin mayor drama.'},
+      {id:'palma',n:'Cultivo de palma de aceite',base:2200,mant:.042,renta:.078,vol:.25,fel:2,redes:4,
+       d:'Palma africana a gran escala. Poco vistosa, pero de las tierras más estables que hay.'}
+    ];
+    nuevas.forEach(f=>{ if(!FINCAS.some(x=>x.id===f.id)) FINCAS.push(f); });
+  }
+
+  /* ==========================================================================
+     #3 MEJORAR UNA PROPIEDAD — aporte al sistema patrimonial
+     ========================================================================== */
+  function propiedadesMejorables53(){
+    return (S.bienes||[]).filter(b=>!b.enConstruccion&&(S.anio-(b.ultimaMejora53||0))>=3);
+  }
+  function tipoMejora53(b){
+    if(b.clase==='vivienda') return 'felicidad';
+    if(b.clase==='renta') return 'vacancia';
+    if(b.clase==='finca') return 'volatilidad';
+    if(b.clase==='hotel') return 'rendimiento';
+    return 'valor';
+  }
+  function descMejora53(b){
+    const t=tipoMejora53(b);
+    if(t==='felicidad') return 'Renovarla sube el valor y se siente mejor viviendo ahí.';
+    if(t==='vacancia') return 'Renovarla sube el valor y espanta menos arrendatarios.';
+    if(t==='volatilidad') return 'Meterle tecnología sube el valor y aguanta mejor los años malos.';
+    if(t==='rendimiento') return 'Mejorar las habitaciones sube el valor y el rendimiento por temporada.';
+    return 'Sube el valor de la propiedad.';
+  }
+  function escenaMejorarPropiedades53(){
+    const props=propiedadesMejorables53();
+    escena({rubro:'Patrimonio inmobiliario',titulo:'Mejorar una propiedad',ancho:true,
+      cuerpo:props.length
+        ?'Invertir en mejoras sube el valor de la propiedad y, según el tipo, le baja el riesgo o le sube el rendimiento. Cada propiedad solo aguanta una mejora cada tres años.'
+        :'No tienes propiedades listas para mejorar en este momento (o ya les toca esperar unos años más).',
+      opciones:props.map(b=>{
+        const costo=Math.max(2,Math.round(b.valor*.10));
+        return {t:'Mejorar '+(b.nombre||b.tipo||'propiedad'),cat:'casa',
+          d:descMejora53(b)+' Vale '+fmt(b.valor)+'. Cuesta '+fmt(costo)+'.',
+          dis:S.efectivo<costo?'Necesitas al menos '+fmt(costo):null,
+          run:()=>{
+            S.efectivo-=costo;
+            b.valor=Math.round(b.valor*1.10);
+            b.ultimaMejora53=S.anio;
+            const t=tipoMejora53(b);
+            if(t==='felicidad'&&b.uid===S.hogar.vivienda) S.p.felicidad=clamp(S.p.felicidad+6,0,100);
+            else if(t==='vacancia') b.vac=Math.max(.02,(b.vac||.1)*.8);
+            else if(t==='volatilidad') b.vol=Math.max(.1,(b.vol||.3)*.85);
+            else if(t==='rendimiento') b.rendBase=Math.min(.4,(b.rendBase||.22)+.02);
+            log('Invertiste en mejoras para <b>'+esc(b.nombre||b.tipo)+'</b>. Ahora vale '+fmt(b.valor)+'.','bien');
+            hito('Mejoró '+(b.nombre||b.tipo||'una propiedad'));
+            S.mov--;
+          }};
+      }),cerrable:true});
+  }
+  function accionMejorarPropiedades53(A){
+    A.push({t:'Mejorar una propiedad',cat:'casa',d:'Invertir en una propiedad para subirle el valor y bajarle el riesgo.',mov:1,modal:true,
+      dis:(S.bienes||[]).length?null:'Todavía no tienes propiedades',run:()=>escenaMejorarPropiedades53()});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones53(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA53_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionMejorarPropiedades53(A); }catch(e){}
+      return A;
+    };
+    window.__SA53_LISTA=true;
+  }
+  function init53(){ wrapCatDe53(); asegurarFincas53(); wrapListaAcciones53(); }
+  setTimeout(init53,40);
+  setTimeout(init53,220);
+  setTimeout(init53,650);
+  window.__SA53={version:V53};
 })();
 </script>
 
