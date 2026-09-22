@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v66</div>
+<div class="version-badge" id="versionBadge">v67</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8702,18 +8702,18 @@ function pantallaFinal(){
    ========================================================================== */
 const CLAVE='sociedad-anonima:partida';
 async function guardar(silencio){
-  try{ await window.storage.set(CLAVE,JSON.stringify(S)); if(!silencio) aviso('Partida guardada.'); }
+  try{ localStorage.setItem(CLAVE,JSON.stringify(S)); if(!silencio) aviso('Partida guardada en este navegador.'); }
   catch(err){
     if(silencio) return;
     escena({rubro:'Copia manual',titulo:'Guarda este código',
-      cuerpo:'Aquí no hay dónde guardar solo. Copia el código y guárdalo en una nota: con <b>Entrar con un código</b> vuelves a esta misma partida.',
+      cuerpo:'Este navegador no permite guardar solo (por ejemplo, en modo privado). Copia el código y guárdalo en una nota: con <b>Entrar con un código</b> vuelves a esta misma partida.',
       html:'<label class="campo">Código<input type="text" id="volcado" readonly></label>',
       opciones:[{t:'Listo',cat:'legado',run:()=>{}}]});
     const i=$('volcado'); if(i){ i.value=codigoPartida(); i.select(); }
   }
 }
-async function cargar(){ try{ const r=await window.storage.get(CLAVE); if(!r||!r.value) return null; return JSON.parse(r.value); }catch(e){ return null; } }
-async function localBorrar(){ try{ await window.storage.delete(CLAVE); }catch(e){} }
+async function cargar(){ try{ const raw=localStorage.getItem(CLAVE); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+async function localBorrar(){ try{ localStorage.removeItem(CLAVE); }catch(e){} }
 function codigoPartida(){ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }
 function aviso(t){
   if(typeof document==='undefined'||!document.body) return;
@@ -8797,13 +8797,7 @@ $('btnCodigo').onclick=modalCodigo;
 $('btnGuardar').onclick=()=>guardar(false);
 $('btnAnio').onclick=()=>{ if(!S||S.muerto) return; $('btnAnio').disabled=true; setTimeout(()=>{ pasarAnio(); $('btnAnio').disabled=false; },10); };
 (async()=>{
-  // el almacenamiento puede tardar en estar disponible: se reintenta un rato
-  let g=null;
-  for(let i=0;i<8&&!g;i++){
-    if(typeof window!=='undefined'&&window.storage){ g=await cargar(); break; }
-    await new Promise(r=>setTimeout(r,120));
-  }
-  if(!g&&typeof window!=='undefined'&&window.storage) g=await cargar();
+  const g=await cargar();
   if(g&&g.p){ const b=$('btnCargar'); b.classList.remove('oculto');
     b.onclick=()=>{ S=g; S.patrPintado=undefined; migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render(); }; }
 })();
