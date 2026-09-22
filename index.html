@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v62</div>
+<div class="version-badge" id="versionBadge">v63</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -14254,6 +14254,209 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init62,220);
   setTimeout(init62,650);
   window.__SA62={version:V62};
+})();
+</script>
+
+
+<script>
+/* ==========================================================================
+   v63 · UNIVERSIDAD SEGÚN LA CIUDAD Y UNA SOLA CARRERA DE PRINCIPIO A FIN
+   Tu propia formación (no la de tus hijos) ahora depende de dónde vives:
+   cada ciudad tiene sus propias universidades, públicas y privadas. Y desde
+   el pregrado en adelante (especialización, maestría, doctorado) todo queda
+   amarrado a la misma carrera que elegiste, en vez de subir "niveles" sueltos
+   sin relación entre sí. Cada nivel, además, se demora años reales: el
+   pregrado no se resuelve en un clic, toma un compromiso de varios años.
+   ========================================================================== */
+(function(){
+  const V63='v63';
+
+  const UNIVERSIDADES_CIUDAD_63={
+    'Bogotá':[
+      {id:'nacional',n:'Universidad Nacional',tier:'publica',calidad:6,prest:2,d:'Pública, exigente, la más grande del país.'},
+      {id:'javeriana',n:'Pontificia Universidad Javeriana',tier:'privada',calidad:7,prest:5,d:'Privada, tradición jesuita y buena red de egresados.'},
+      {id:'andes',n:'Universidad de los Andes',tier:'elite',calidad:9,prest:9,d:'La más cara y la de mayor prestigio del país.'}
+    ],
+    'Medellín':[
+      {id:'udea',n:'Universidad de Antioquia',tier:'publica',calidad:6,prest:2,d:'Pública, referencia académica de la región.'},
+      {id:'upb',n:'Universidad Pontificia Bolivariana',tier:'privada',calidad:6,prest:4,d:'Privada, tradición religiosa y buena reputación regional.'},
+      {id:'eafit',n:'EAFIT',tier:'elite',calidad:8,prest:7,d:'Privada, fuerte en negocios e ingeniería, la más cotizada de la ciudad.'}
+    ],
+    'La Estrella':[
+      {id:'udea',n:'Universidad de Antioquia',tier:'publica',calidad:6,prest:2,d:'A un salto del sur del Valle de Aburrá.'},
+      {id:'eafit',n:'EAFIT',tier:'elite',calidad:8,prest:7,d:'La opción privada de mayor prestigio del Valle de Aburrá.'}
+    ],
+    'Cali':[
+      {id:'univalle',n:'Universidad del Valle',tier:'publica',calidad:6,prest:2,d:'Pública, la referencia del suroccidente.'},
+      {id:'icesi',n:'Universidad Icesi',tier:'elite',calidad:7,prest:6,d:'Privada, fuerte en negocios y diseño.'}
+    ],
+    'Barranquilla':[
+      {id:'uatlantico',n:'Universidad del Atlántico',tier:'publica',calidad:5,prest:1,d:'Pública, la más antigua de la Costa.'},
+      {id:'uninorte',n:'Universidad del Norte',tier:'elite',calidad:8,prest:7,d:'Privada, la más fuerte del Caribe colombiano.'}
+    ],
+    'Bucaramanga':[
+      {id:'uis',n:'Universidad Industrial de Santander',tier:'publica',calidad:7,prest:3,d:'Pública, fuerte tradición en ingenierías.'},
+      {id:'unab',n:'Universidad Autónoma de Bucaramanga',tier:'privada',calidad:6,prest:3,d:'Privada, buena oferta regional.'}
+    ],
+    'Manizales':[
+      {id:'ucaldas',n:'Universidad de Caldas',tier:'publica',calidad:5,prest:1,d:'Pública, la universidad de la ciudad.'},
+      {id:'uam',n:'Universidad Autónoma de Manizales',tier:'privada',calidad:5,prest:2,d:'Privada, fuerte en salud y diseño.'}
+    ],
+    'Montería':[
+      {id:'unicordoba',n:'Universidad de Córdoba',tier:'publica',calidad:5,prest:1,d:'Pública, la única gran opción de la región.'}
+    ],
+    'Cartagena':[
+      {id:'unicartagena',n:'Universidad de Cartagena',tier:'publica',calidad:5,prest:1,d:'Pública, tradición colonial y buena reputación regional.'},
+      {id:'utb',n:'Universidad Tecnológica de Bolívar',tier:'privada',calidad:6,prest:3,d:'Privada, fuerte en ingeniería y negocios.'}
+    ]
+  };
+  const MULT_TIER_63={publica:.35,privada:1,elite:1.8};
+  const COSTO_NIVEL_63=[0,18,38,42,95,210]; // índice = nivel (EDU), referencia en universidad privada de gama media
+  const DURACION_NIVEL_63=[0,2,5,1,2,4];    // técnico, pregrado, especialización, maestría, doctorado/MBA
+
+  function universidadesDisponibles63(ciudad){
+    return UNIVERSIDADES_CIUDAD_63[ciudad]||UNIVERSIDADES_CIUDAD_63['Bogotá'];
+  }
+
+  function escenaUniversidadPropia63(nivel,anios,cr){
+    const ciudad=S.hogar.ciudad;
+    const unis=universidadesDisponibles63(ciudad);
+    const nombreNivel=EDU[nivel];
+    const base=COSTO_NIVEL_63[nivel]||0;
+    escena({rubro:'Formación',titulo:nombreNivel+' en '+cr.n,ancho:true,
+      cuerpo:'Elige dónde vas a cursar tu '+nombreNivel.toLowerCase()+' en '+cr.n+'. En '+esc(ciudad)+' tienes estas opciones. Dura '+anios+' año'+(anios===1?'':'s')+'.',
+      opciones:unis.map(u=>{
+        let costo;
+        if(nivel===2&&u.tier==='publica'&&S.p.atr.intelecto>=6) costo=0;
+        else costo=Math.round(base*(MULT_TIER_63[u.tier]||1));
+        return {t:u.n,cat:'formacion',
+          d:u.d+' '+(costo?fmt(costo)+' en total.':'Beca por tu intelecto: sin costo de matrícula.'),
+          dis:S.efectivo<costo?'No te alcanza':null,
+          run:()=>iniciarEstudioNivel63(nivel,anios,costo,cr,u)
+        };
+      }),
+      cerrable:true});
+  }
+
+  function iniciarEstudioNivel63(nivel,anios,costo,cr,uni){
+    const p=S.p;
+    S.efectivo-=costo;
+    const nombreNivel=EDU[nivel];
+    const detalle=' en '+cr.n+' · '+uni.n;
+    iniciarCompromiso({titulo:nombreNivel+detalle,restan:anios,mov:1,cerrar:()=>{
+      p.educacion=Math.max(p.educacion,nivel);
+      p.atr.intelecto=clamp(p.atr.intelecto+1,1,10);
+      p.redes=clamp(p.redes+(uni.tier==='elite'?12:uni.tier==='privada'?8:5),0,100);
+      p.felicidad+=2;
+      if(uni.prest) moverPrestigio(uni.prest*.3,'');
+      hito('Obtuvo '+nombreNivel.toLowerCase()+detalle);
+      return 'Terminaste '+nombreNivel.toLowerCase()+detalle+'.';
+    }});
+    log('Empezaste '+nombreNivel.toLowerCase()+detalle+': '+anios+' año'+(anios===1?'':'s')+' por delante.','bien');
+    S.mov--;
+  }
+
+  function accionEstudiar63(A){
+    const p=S.p, c=S.carrera;
+    const idx=A.findIndex(x=>/^Estudiar: /.test(x.t));
+    if(idx!==-1) A.splice(idx,1);
+    if(p.educacion>=5) return;
+    const activo=compromisos().find(cc=>EDU.some(nm=>nm&&cc.titulo.indexOf(nm)===0));
+    if(activo){
+      A.push({t:'Estudiando: '+activo.titulo,cat:'formacion',d:'Quedan '+activo.restan+' año'+(activo.restan===1?'':'s')+' para terminar.',dis:'Ya estás estudiando esto',mov:0,run:()=>{}});
+      return;
+    }
+    const nivel=p.educacion+1;
+    const anios=DURACION_NIVEL_63[nivel]||1;
+    const nombreNivel=EDU[nivel];
+    if(nivel===1){
+      const costo=COSTO_NIVEL_63[1];
+      A.push({t:'Estudiar: '+nombreNivel,cat:'formacion',
+        d:(costo?fmt(costo)+' y '+anios+' años de estudio':'Sin costo')+'. Sube intelecto y abre cargos.',
+        mov:1,
+        dis:S.efectivo<costo?'No te alcanza ('+fmt(costo)+')':(p.edad>58?'Ya no estás para eso':null),
+        run:()=>{
+          S.efectivo-=costo;
+          iniciarCompromiso({titulo:nombreNivel,restan:anios,mov:1,cerrar:()=>{
+            p.educacion=Math.max(p.educacion,1); p.atr.intelecto=clamp(p.atr.intelecto+1,1,10);
+            p.redes=clamp(p.redes+5,0,100); p.felicidad+=2;
+            hito('Obtuvo '+nombreNivel.toLowerCase());
+            return 'Terminaste '+nombreNivel.toLowerCase()+'.';
+          }});
+          log('Empezaste '+nombreNivel.toLowerCase()+': '+anios+' años por delante.','bien');
+        }});
+      return;
+    }
+    const cr=c.estudio?carreraProfesionalDe(c.estudio):null;
+    if(!cr) return; // hace falta elegir carrera antes (ver accionElegirCarrera63)
+    A.push({t:'Estudiar: '+nombreNivel+' en '+cr.n,cat:'formacion',
+      d:'Elige universidad en '+S.hogar.ciudad+'. Dura '+anios+' año'+(anios===1?'':'s')+'. Profundiza tu carrera de '+cr.n+'.',
+      mov:1, modal:true,
+      dis:p.edad>58?'Ya no estás para eso':null,
+      run:()=>escenaUniversidadPropia63(nivel,anios,cr)
+    });
+  }
+
+  function accionElegirCarrera63(A){
+    const p=S.p, c=S.carrera;
+    if(c.estudio||p.educacion<1||p.educacion>=5) return;
+    if(A.some(x=>x.t==='Elegir carrera universitaria')) return;
+    A.push({t:'Elegir carrera universitaria',cat:'formacion',d:'Antes del pregrado, elige el campo que vas a estudiar: Medicina, Derecho, Ingeniería, Economía, Sistemas y otras. El pregrado, la especialización, la maestría y el doctorado quedarán todos en esta misma carrera.',mov:1,modal:true,run:()=>escenaCarreraEstudio(S.carrera)});
+  }
+
+  /* Se reescribe solo el texto de presentación para que tenga sentido tanto si
+     ya tienes pregrado (partidas viejas) como si apenas vas a empezarlo. */
+  const escenaCarreraEstudioOriginal63=escenaCarreraEstudio;
+  escenaCarreraEstudio=function(obj){
+    const esHijo=!!(obj&&obj.fid); const elegido=esHijo?obj:(S.carrera||{});
+    if(esHijo && elegido.carreraEstudio){ log(esc(elegido.nombre)+' ya eligió '+esc(carreraProfesionalDe(elegido.carreraEstudio)?.n||'una carrera')+'.'); return; }
+    if(!esHijo && S.carrera.estudio){
+      const cr=carreraProfesionalDe(S.carrera.estudio);
+      const puedeCambiar=!S.carrera.profesion && !(S.carrera.experienciaProf>0);
+      escena({rubro:'Formación',titulo:'Tu carrera universitaria',ancho:true,cuerpo:'Elegiste '+esc(cr?cr.n:'una carrera')+'. Tu formación ahora puede convertirse en una profesión y, más adelante, en un negocio propio.',opciones:[
+        {t:'Cambiar carrera',cat:'formacion',d:puedeCambiar?'Todavía no has empezado a ejercer. Puedes elegir otra carrera, pero perderás un año del ritmo de vida.':'Solo tiene sentido antes de empezar a trabajar en la profesión.',dis:puedeCambiar?null:'Ya empezaste a ejercer o acumulas experiencia profesional',run:()=>{
+          if(!puedeCambiar) return;
+          S.carrera.estudio=null; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0;
+          if(S.carrera.ruta!=='fundador') S.carrera.ruta='desempleado';
+          S.mov--; cerrarModal(); escenaCarreraEstudio(S.carrera);
+        }}
+      ],cerrable:true});
+      return;
+    }
+    escena({rubro:'Formación',titulo:'Elegir carrera universitaria',ancho:true,
+      cuerpo:esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Elige el campo que quieres convertir en tu profesión. El pregrado, la especialización, la maestría y el doctorado que curses de ahora en adelante quedarán todos dentro de esta misma carrera.',
+      opciones:CARRERAS_PROFESIONALES.map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
+        if(esHijo){ elegido.carreraEstudio=cr.id; elegido.formacion=clamp((elegido.formacion||0)+8+cr.grado,0,100); elegido.atr.intelecto=clamp((elegido.atr.intelecto||5)+1,1,10); elegido.rumbo='estudia '+cr.n.toLowerCase(); elegido.independiente=true; log(esc(elegido.nombre)+' eligió estudiar <b>'+esc(cr.n)+'</b>.','hito'); }
+        else { S.carrera.estudio=cr.id; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0; S.carrera.ruta=S.carrera.ruta==='fundador'?'fundador':'desempleado'; log('Elegiste estudiar <b>'+esc(cr.n)+'</b>. Ya puedes construir una carrera profesional en '+cr.n+'.','hito'); }
+        S.mov--; cerrarModal(); render();
+      }})),cerrable:true});
+  };
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones63(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA63_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionElegirCarrera63(A); accionEstudiar63(A); }catch(e){}
+      return A;
+    };
+    window.__SA63_LISTA=true;
+  }
+  function wrapCatDe63(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA63_CATDE) return;
+    window.catDe=function(t){
+      if(/^Estudiando:/.test(t)) return 'formacion';
+      return old.apply(this,arguments);
+    };
+    window.__SA63_CATDE=true;
+  }
+  function init63(){ wrapListaAcciones63(); wrapCatDe63(); }
+  setTimeout(init63,40);
+  setTimeout(init63,220);
+  setTimeout(init63,650);
+  window.__SA63={version:V63,universidadesDisponibles:universidadesDisponibles63};
 })();
 </script>
 
