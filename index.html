@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v64</div>
+<div class="version-badge" id="versionBadge">v65</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -14520,15 +14520,39 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(v>=15) return 'tensa';
     return 'rival declarada';
   }
+  /* cuota de mercado: mide cada casa del sector con la misma vara que ya usa
+     el juego para comparar rivales (patrimonio) contra tu compañía (valuar). */
+  function sectorMarketShare64(sectorId){
+    const filas=rivalesVivas().filter(r=>r.sector===sectorId).map(r=>({nombre:'Los '+r.apellido,valor:Math.max(1,r.patrimonio),tuya:false,rid:r.rid}));
+    if(S.emp&&S.emp.sector===sectorId) filas.push({nombre:'Tu casa',valor:Math.max(1,valuar(S.emp)),tuya:true});
+    const total=filas.reduce((a,x)=>a+x.valor,0)||1;
+    filas.forEach(x=>x.pct=x.valor/total);
+    filas.sort((a,b)=>b.pct-a.pct);
+    return filas;
+  }
+  function cuotaDeRival64(r){
+    const fila=sectorMarketShare64(r.sector).find(x=>x.rid===r.rid);
+    return fila?fila.pct:0;
+  }
+  function escenaCuotaMercado64(sectorId){
+    const s=SECTORES.find(x=>x.id===sectorId);
+    const filas=sectorMarketShare64(sectorId);
+    escena({rubro:'El mercado',titulo:'Cuota de mercado · '+(s?s.n:sectorId),ancho:true,
+      cuerpo:filas.length?'Así se reparte hoy el sector entre las casas que compiten en él.':'Todavía nadie más compite en este sector.',
+      html:filas.length?'<div class="mesa-trato">'+filas.map(x=>'<div class="trato-fila"><span>'+(x.tuya?'<b>Tu casa</b>':esc(x.nombre))+'</span><span>'+pc(x.pct)+'</span></div>').join('')+'</div>':'',
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}],cerrable:true});
+  }
   function escenaRivalDetalle64(r){
     const s=SECTORES.find(x=>x.id===r.sector);
     const miSector=!!(S.emp&&S.emp.sector===r.sector);
     const costoAlianza=Math.max(15,patrimonio()*.01);
     escena({rubro:'Las otras casas',titulo:'Los '+esc(r.apellido),ancho:true,
       cuerpo:'Casa con base en <b>'+esc(r.ciudad||'Colombia')+'</b>, dedicada a '+(s?s.n.toLowerCase():esc(r.sector))+'. '
+        +'Domina el <b>'+pc(cuotaDeRival64(r))+'</b> del sector en el país. '
         +'Patrimonio estimado '+fmt(r.patrimonio)+' · prestigio '+Math.round(r.prestigio)+'/100. '
         +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':''),
       opciones:[
+        {t:'Ver el reparto del sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(r.sector)},
         {t:'Proponer una alianza comercial',cat:'compania',d:'Cuesta '+fmt(costoAlianza)+'. Mejora la relación entre las dos casas.',
          dis:S.efectivo<costoAlianza?'No te alcanza':null,cerrar:false,
          run:()=>{
@@ -14572,9 +14596,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       opciones:vivas.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{
         const s=SECTORES.find(x=>x.id===r.sector);
         return {t:'Los '+r.apellido,cat:'compania',
-          d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r),
+          d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+pc(cuotaDeRival64(r))+' del sector · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r),
           cerrar:false, run:()=>escenaRivalDetalle64(r)};
-      }).concat([{t:'Cerrar',cat:'legado',run:()=>{}}]),
+      }).concat(S.emp?[{t:'Cuota de mercado de tu sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(S.emp.sector)}]:[])
+        .concat([{t:'Cerrar',cat:'legado',run:()=>{}}]),
       cerrable:true});
   }
 
@@ -14677,6 +14702,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         if(dupIdx!==-1) A.splice(dupIdx,1);
         if(!A.some(x=>x.t==='Las casas rivales del país')){
           A.push({t:'Las casas rivales del país',cat:'compania',d:'Con quién compites, con quién te puedes aliar y con quién puedes chocar en los negocios.',mov:0,modal:true,run:()=>escenaCasasRivales64()});
+        }
+        if(S.emp && !A.some(x=>x.t==='Cuota de mercado de tu sector')){
+          const sNom=(SECTORES.find(x=>x.id===S.emp.sector)||{}).n||S.emp.sector;
+          A.push({t:'Cuota de mercado de tu sector',cat:'compania',d:'Qué tanto del sector de '+esc(sNom||'')+' controla tu casa frente a las demás.',mov:0,modal:true,run:()=>escenaCuotaMercado64(S.emp.sector)});
         }
       }catch(e){}
       return A;
