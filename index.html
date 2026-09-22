@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v63</div>
+<div class="version-badge" id="versionBadge">v65</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13482,6 +13482,14 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       plantas.forEach(p=>{ html+='<div class="retrato"><div class="quien"><div class="nom">Planta industrial</div><div class="rol">'+(p.restan>0?('en obra, faltan '+p.restan+' año'+(p.restan===1?'':'s')):('operando desde '+p.anio))+'</div></div></div>'; });
       html+='</div>';
     }
+    if(typeof rivalesVivas==='function'){
+      const rivalesAqui=rivalesVivas().filter(r=>r.ciudad===c.n);
+      if(rivalesAqui.length){
+        html+='<div class="seccion"><h3>Otras casas en esta ciudad</h3>';
+        rivalesAqui.forEach(r=>{ const s=(typeof SECTORES!=='undefined'&&SECTORES.find(x=>x.id===r.sector)); html+='<div class="retrato hostil"><div class="quien"><div class="nom">Casa '+esc(r.apellido)+'</div><div class="rol">'+esc(s?s.n:r.sector)+'</div></div></div>'; });
+        html+='</div>';
+      }
+    }
     const opciones=[
       {t:'Comprar un terreno aquí',cat:'casa',cerrar:false,run:()=>lanzarEnCiudad57(c.n,'Comprar un terreno')},
       {t:'Comprar finca aquí',cat:'casa',cerrar:false,run:()=>lanzarEnCiudad57(c.n,'Comprar finca')},
@@ -13672,6 +13680,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init57,220);
   setTimeout(init57,650);
   window.__SA57={version:V57};
+  window.escenaCiudad57=escenaCiudad57;
+  window.irAlMapa59=irAlMapa59;
 })();
 </script>
 <script>
@@ -14457,6 +14467,256 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init63,220);
   setTimeout(init63,650);
   window.__SA63={version:V63,universidadesDisponibles:universidadesDisponibles63};
+})();
+</script>
+
+
+<script>
+/* ==========================================================================
+   v64 · LAS CASAS RIVALES SE HACEN VISIBLES, Y UNA SOLA COMPRA DE VIVIENDA
+   El juego ya llevaba desde hace varias versiones un sistema completo de
+   casas rivales (S.rivales): crecen, compiten por sector, se pueden comprar,
+   fusionar en joint venture o sellar con matrimonio. Lo que le faltaba era
+   ser visible y estar en el mapa: esta entrega les da una ciudad propia,
+   las muestra en la ficha de cada ciudad, y abre una pantalla dedicada para
+   verlas todas, aliarte por la vía comercial o buscar la confrontación
+   directa en tu mismo sector — sin esperar a que la casualidad las saque.
+
+   Además, se unifica la compra de vivienda: "Comprar vivienda" y el viejo
+   "Comprar otro tipo de vivienda" (apartamento, dúplex, penthouse) eran dos
+   caminos separados y duplicados. Ahora es un solo flujo: eliges el tipo
+   primero y después el barrio, el tamaño y la financiación.
+   ========================================================================== */
+(function(){
+  const V64='v64';
+
+  /* ---------------- casas rivales: ciudad propia y relación con tu casa ---------------- */
+  function wrapCorrerRivales64(){
+    const old=window.correrRivales; if(typeof old!=='function'||window.__SA64_RIVALES) return;
+    window.correrRivales=function(){
+      const r=old.apply(this,arguments);
+      try{
+        (S.rivales||[]).forEach(x=>{
+          if(!x.ciudad) x.ciudad=pick(CIUDADES).n;
+          if(!isFinite(x.relacionCasa)) x.relacionCasa=50;
+        });
+      }catch(e){}
+      return r;
+    };
+    window.__SA64_RIVALES=true;
+  }
+  function asegurarRivales64(){
+    if(!S.rivales||!S.rivales.length) generarRivales();
+    (S.rivales||[]).forEach(x=>{
+      if(!x.ciudad) x.ciudad=pick(CIUDADES).n;
+      if(!isFinite(x.relacionCasa)) x.relacionCasa=50;
+    });
+  }
+  function relacionTexto64(r){
+    const v=isFinite(r.relacionCasa)?r.relacionCasa:50;
+    if(v>=75) return 'aliada por matrimonio o negocios';
+    if(v>=55) return 'cordial';
+    if(v>=35) return 'neutral';
+    if(v>=15) return 'tensa';
+    return 'rival declarada';
+  }
+  /* cuota de mercado: mide cada casa del sector con la misma vara que ya usa
+     el juego para comparar rivales (patrimonio) contra tu compañía (valuar). */
+  function sectorMarketShare64(sectorId){
+    const filas=rivalesVivas().filter(r=>r.sector===sectorId).map(r=>({nombre:'Los '+r.apellido,valor:Math.max(1,r.patrimonio),tuya:false,rid:r.rid}));
+    if(S.emp&&S.emp.sector===sectorId) filas.push({nombre:'Tu casa',valor:Math.max(1,valuar(S.emp)),tuya:true});
+    const total=filas.reduce((a,x)=>a+x.valor,0)||1;
+    filas.forEach(x=>x.pct=x.valor/total);
+    filas.sort((a,b)=>b.pct-a.pct);
+    return filas;
+  }
+  function cuotaDeRival64(r){
+    const fila=sectorMarketShare64(r.sector).find(x=>x.rid===r.rid);
+    return fila?fila.pct:0;
+  }
+  function escenaCuotaMercado64(sectorId){
+    const s=SECTORES.find(x=>x.id===sectorId);
+    const filas=sectorMarketShare64(sectorId);
+    escena({rubro:'El mercado',titulo:'Cuota de mercado · '+(s?s.n:sectorId),ancho:true,
+      cuerpo:filas.length?'Así se reparte hoy el sector entre las casas que compiten en él.':'Todavía nadie más compite en este sector.',
+      html:filas.length?'<div class="mesa-trato">'+filas.map(x=>'<div class="trato-fila"><span>'+(x.tuya?'<b>Tu casa</b>':esc(x.nombre))+'</span><span>'+pc(x.pct)+'</span></div>').join('')+'</div>':'',
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}],cerrable:true});
+  }
+  function escenaRivalDetalle64(r){
+    const s=SECTORES.find(x=>x.id===r.sector);
+    const miSector=!!(S.emp&&S.emp.sector===r.sector);
+    const costoAlianza=Math.max(15,patrimonio()*.01);
+    escena({rubro:'Las otras casas',titulo:'Los '+esc(r.apellido),ancho:true,
+      cuerpo:'Casa con base en <b>'+esc(r.ciudad||'Colombia')+'</b>, dedicada a '+(s?s.n.toLowerCase():esc(r.sector))+'. '
+        +'Domina el <b>'+pc(cuotaDeRival64(r))+'</b> del sector en el país. '
+        +'Patrimonio estimado '+fmt(r.patrimonio)+' · prestigio '+Math.round(r.prestigio)+'/100. '
+        +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':''),
+      opciones:[
+        {t:'Ver el reparto del sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(r.sector)},
+        {t:'Proponer una alianza comercial',cat:'compania',d:'Cuesta '+fmt(costoAlianza)+'. Mejora la relación entre las dos casas.',
+         dis:S.efectivo<costoAlianza?'No te alcanza':null,cerrar:false,
+         run:()=>{
+           S.efectivo-=costoAlianza; r.relacionCasa=clamp((r.relacionCasa||50)+12,0,100); moverPrestigio(1,'');
+           log('Propusiste una alianza comercial a los <b>'+esc(r.apellido)+'</b>. La relación entre las casas mejoró.','bien');
+           S.mov--; cerrarModal(); render();
+         }},
+        {t:'Buscar la confrontación',cat:'riesgo',
+         d:miSector?'Les disputas mercado en '+(s?s.n:r.sector)+'. Puede salir bien o mal.':'Solo tiene sentido si compites en su mismo sector.',
+         dis:!miSector?'No estás en el mismo negocio que ellos':null,cerrar:false,
+         run:()=>{
+           const miPoder=(S.emp.marca+S.emp.eficiencia)/2, suPoder=(r.capaz||5)*10;
+           const gana=chance(clamp(.4+(miPoder-suPoder)/300,.15,.85));
+           if(gana){
+             const robo=r.patrimonio*.05; r.patrimonio=Math.max(1,r.patrimonio-robo); S.emp.ingresos+=robo*.1;
+             log('Le ganaste terreno a los <b>'+esc(r.apellido)+'</b> en '+(s?s.n:r.sector)+': un golpe de '+fmt(robo)+' para ellos.','bien');
+             moverPrestigio(2,'');
+           } else {
+             const golpe=S.emp.ingresos*.05; S.emp.ingresos=Math.max(0,S.emp.ingresos-golpe);
+             log('Los <b>'+esc(r.apellido)+'</b> aguantaron la embestida: te costó '+fmt(golpe)+' en ingresos este año.','mal');
+             moverPrestigio(-1,'');
+           }
+           r.relacionCasa=clamp((r.relacionCasa||50)-20,0,100);
+           S.mov--; cerrarModal(); render();
+         }},
+        {t:'Ver su ciudad en el mapa',cat:'casa',cerrar:true,run:()=>{
+          const c=CIUDADES.find(x=>x.n===r.ciudad);
+          if(c&&typeof window.irAlMapa59==='function'&&typeof window.escenaCiudad57==='function'){
+            window.irAlMapa59(); setTimeout(()=>window.escenaCiudad57(c),60);
+          }
+        }},
+        {t:'Volver',cat:'legado',cerrar:false,run:()=>escenaCasasRivales64()}
+      ],cerrable:true});
+  }
+  window.escenaRivalDetalle64=escenaRivalDetalle64;
+  function escenaCasasRivales64(){
+    asegurarRivales64();
+    const vivas=rivalesVivas();
+    escena({rubro:'Las otras casas',titulo:'Las casas rivales del país',ancho:true,
+      cuerpo:vivas.length?'Cada una de estas casas compite por el mismo país que tú. Con algunas puedes aliarte; con otras, chocar de frente.':'Todavía no ha surgido ninguna casa rival digna de mención.',
+      opciones:vivas.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{
+        const s=SECTORES.find(x=>x.id===r.sector);
+        return {t:'Los '+r.apellido,cat:'compania',
+          d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+pc(cuotaDeRival64(r))+' del sector · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r),
+          cerrar:false, run:()=>escenaRivalDetalle64(r)};
+      }).concat(S.emp?[{t:'Cuota de mercado de tu sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(S.emp.sector)}]:[])
+        .concat([{t:'Cerrar',cat:'legado',run:()=>{}}]),
+      cerrable:true});
+  }
+
+  /* ---------------- una sola compra de vivienda, sin duplicidad ---------------- */
+  const TIPOS_VIVIENDA_64=[
+    {id:'apartamento',n:'Apartamento',tipo:'apartamento',base:.68,fel:5,d:'Compacto y práctico. La entrada más común y más barata a la propiedad.'},
+    {id:'casa',n:'Casa',tipo:'casa',base:.95,fel:7,d:'La casa clásica de una familia acomodada, con patio propio.'},
+    {id:'duplex',n:'Dúplex',tipo:'casa_grande',base:1.15,fel:8,d:'Dos plantas, más espacio para la familia y las visitas.'},
+    {id:'mansion',n:'Mansión',tipo:'mansion',base:1.55,fel:11,d:'La casa que sale en las revistas: servicio, jardín y espacio de sobra.'},
+    {id:'penthouse',n:'Penthouse',tipo:'mansion',base:1.70,fel:13,d:'El último piso del mejor edificio, con vista y nombre propio.'}
+  ];
+  const escenaComprarViviendaOriginal64=escenaComprarVivienda;
+  escenaComprarVivienda=function(){
+    const st={zona:S.hogar.zona, tipo:0, ajuste:1, inicial:.30, anios:15};
+    const pinta=()=>{
+      const z=zonasVivienda(S.hogar.ciudad);
+      const t=TIPOS_VIVIENDA_64[st.tipo];
+      const holgura=t.base*st.ajuste;
+      const valor=precioVivienda(S.hogar.ciudad,st.zona,holgura);
+      const r=resumenCuota(valor,st.inicial,st.anios);
+      const caja=escena({rubro:'Compra de vivienda',titulo:'Comprar '+t.n.toLowerCase()+' en '+esc(S.hogar.ciudad),ancho:true,
+        cuerpo:'Dejas de pagar arriendo y el inmueble se valoriza, pero la cuota inicial se lleva tu efectivo y la cuota queda amarrada muchos años.',
+        html:'<label class="campo">Tipo de vivienda</label><div class="fichas-sel" id="vTipo64">'
+          +TIPOS_VIVIENDA_64.map((tt,i)=>'<button class="opcion" data-v="'+i+'" aria-pressed="'+(i===st.tipo?'true':'false')+'">'+tt.n+'</button>').join('')+'</div>'
+          +'<div class="apunte" id="vTipoD64">'+t.d+'</div>'
+          +'<label class="campo">Barrio</label><div class="fichas-sel" id="vzona">'
+          +z.map((zz,i)=>'<button class="opcion" data-v="'+i+'" aria-pressed="'+(i===st.zona?'true':'false')+'">'+zz.n+'</button>').join('')+'</div>'
+          +'<label class="campo">Tamaño dentro del tipo: <b id="vTam">'+(st.ajuste<.95?'compacto':st.ajuste>1.1?'amplio':'normal')+'</b>'
+          +'<input type="range" id="vHol" min="85" max="120" value="'+Math.round(st.ajuste*100)+'"></label>'
+          +'<label class="campo">Cuota inicial: <b id="vIni">'+pc(st.inicial)+'</b>'
+          +'<input type="range" id="vIniR" min="20" max="100" value="'+Math.round(st.inicial*100)+'"></label>'
+          +'<label class="campo">Plazo del crédito: <b id="vAn">'+st.anios+' años</b>'
+          +'<input type="range" id="vAnR" min="5" max="20" value="'+st.anios+'"></label>'
+          +'<div class="mesa-trato">'
+          +'<div class="trato-fila"><span>Precio</span><span id="vPre">'+fmt(valor)+'</span></div>'
+          +'<div class="trato-fila"><span>Pagas de entrada</span><span id="vEnt">'+fmt(r.entrada)+'</span></div>'
+          +'<div class="trato-fila"><span>Crédito al '+pc(r.tasa)+'</span><span id="vSal">'+fmt(r.saldo)+'</span></div>'
+          +'<div class="trato-fila"><span>Cuota al año</span><span id="vCuo">'+fmt(r.cuota)+'</span></div>'
+          +'<div class="apunte" id="vNota"></div></div>',
+        opciones:[{t:'Firmar la escritura',cat:'casa',cerrar:false,run:()=>{}}],cerrable:true});
+      const q=s2=>caja.querySelector(s2);
+      const refrescar=()=>{
+        const tt=TIPOS_VIVIENDA_64[st.tipo];
+        const hh=tt.base*st.ajuste;
+        const vv=precioVivienda(S.hogar.ciudad,st.zona,hh);
+        const rr=resumenCuota(vv,st.inicial,st.anios);
+        q('#vPre').textContent=fmt(vv); q('#vEnt').textContent=fmt(rr.entrada);
+        q('#vSal').textContent=fmt(rr.saldo); q('#vCuo').textContent=fmt(rr.cuota);
+        q('#vIni').textContent=pc(st.inicial); q('#vAn').textContent=st.anios+' años';
+        q('#vTam').textContent=st.ajuste<.95?'compacto':st.ajuste>1.1?'amplio':'normal';
+        q('#vTipoD64').textContent=tt.d;
+        const arr=arriendoActual();
+        q('#vNota').textContent = S.efectivo<rr.entrada
+          ? 'No tienes los '+fmt(rr.entrada)+' de la cuota inicial.'
+          : 'Hoy pagas '+fmt(arr)+' al año de arriendo. La cuota es '+(rr.cuota>arr?'más cara, pero el inmueble queda tuyo.':'más barata que arrendar.');
+        botonEscena().disabled=S.efectivo<rr.entrada;
+      };
+      caja.querySelectorAll('#vTipo64 .opcion').forEach(b=>b.onclick=()=>{
+        caja.querySelectorAll('#vTipo64 .opcion').forEach(x=>x.setAttribute('aria-pressed','false'));
+        b.setAttribute('aria-pressed','true'); st.tipo=+b.dataset.v; refrescar();
+      });
+      caja.querySelectorAll('#vzona .opcion').forEach(b=>b.onclick=()=>{
+        caja.querySelectorAll('#vzona .opcion').forEach(x=>x.setAttribute('aria-pressed','false'));
+        b.setAttribute('aria-pressed','true'); st.zona=+b.dataset.v; refrescar();
+      });
+      q('#vHol').oninput=e=>{ st.ajuste=(+e.target.value)/100; refrescar(); };
+      q('#vIniR').oninput=e=>{ st.inicial=(+e.target.value)/100; refrescar(); };
+      q('#vAnR').oninput=e=>{ st.anios=+e.target.value; refrescar(); };
+      refrescar();
+      botonEscena().onclick=()=>{
+        const tt=TIPOS_VIVIENDA_64[st.tipo];
+        const hh=tt.base*st.ajuste;
+        const valorFinal=precioVivienda(S.hogar.ciudad,st.zona,hh);
+        const zz=zonasVivienda(S.hogar.ciudad)[st.zona];
+        const nombreCasa=tt.n+' en '+zz.n;
+        const b=comprarBien({clase:'vivienda',tipo:tt.tipo,nombre:nombreCasa,valor:valorFinal,
+          mant:.012,ciudad:S.hogar.ciudad,zona:st.zona,cuotaInicial:st.inicial,anios:st.anios});
+        if(!b){ refrescar(); return; }
+        S.hogar.vivienda=b.uid; S.hogar.zona=st.zona; S.hogar.conLosPadres=false;
+        S.p.felicidad=clamp(S.p.felicidad+tt.fel,0,100);
+        cerrarModal();
+        log('Compraste <b>'+esc(b.nombre)+'</b> por '+fmt(valorFinal)+(b.hipoteca>0?' con crédito de '+fmt(b.hipoteca):' de contado')+'.','hito');
+        hito('Compró '+tt.n.toLowerCase()+' en '+zz.n);
+        S.mov--; render();
+      };
+    };
+    pinta();
+  };
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones64(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA64_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        // ya no hace falta la vía separada de v49: queda todo en "Comprar vivienda"
+        const dupIdx=A.findIndex(x=>x.t==='Comprar otro tipo de vivienda');
+        if(dupIdx!==-1) A.splice(dupIdx,1);
+        if(!A.some(x=>x.t==='Las casas rivales del país')){
+          A.push({t:'Las casas rivales del país',cat:'compania',d:'Con quién compites, con quién te puedes aliar y con quién puedes chocar en los negocios.',mov:0,modal:true,run:()=>escenaCasasRivales64()});
+        }
+        if(S.emp && !A.some(x=>x.t==='Cuota de mercado de tu sector')){
+          const sNom=(SECTORES.find(x=>x.id===S.emp.sector)||{}).n||S.emp.sector;
+          A.push({t:'Cuota de mercado de tu sector',cat:'compania',d:'Qué tanto del sector de '+esc(sNom||'')+' controla tu casa frente a las demás.',mov:0,modal:true,run:()=>escenaCuotaMercado64(S.emp.sector)});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA64_LISTA=true;
+  }
+  function init64(){ wrapCorrerRivales64(); wrapListaAcciones64(); }
+  setTimeout(init64,40);
+  setTimeout(init64,220);
+  setTimeout(init64,650);
+  window.__SA64={version:V64};
 })();
 </script>
 
