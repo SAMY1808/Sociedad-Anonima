@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v65</div>
+<div class="version-badge" id="versionBadge">v66</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13569,7 +13569,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       const f=S.emp?filiales(S.emp).find(x=>x.pais===pz.id):null;
       pines+=pin59(pos.x,pos.y,pz.n,f?('filial desde '+f.desde+' · '+pc(f.ret)+'/año'):'sin filial',5,!!f,'data-pais58="'+esc(pz.id)+'"');
     });
-    return '<div id="mapaCont61" style="overflow:hidden;margin-top:8px;border:1px solid var(--ui-line);border-radius:10px;touch-action:none;cursor:grab"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:720px;height:auto;background:linear-gradient(180deg,#0c1712,#070c09);display:block">'
+    return '<div id="mapaCont61" style="overflow:hidden;margin-top:8px;border:1px solid var(--ui-line);border-radius:10px;touch-action:none;cursor:grab;max-width:100%"><svg viewBox="0 0 '+W+' '+H+'" style="display:block;width:100%;max-width:100%;height:auto;background:linear-gradient(180deg,#0c1712,#070c09)">'
       +'<path d="'+MUNDO_D_59+'" fill="#1c2c22" stroke="#33463a" stroke-width="0.4"/>'
       +paises+rutas+pines+'</svg></div>'
       +'<div class="apunte">Arrastra para moverte y usa la rueda (o pellizca) para acercar. El punto dorado grande es tu casa en Colombia; cada país resaltado es donde tu compañía puede tener presencia — encendido si ya tienes filial ahí. Toca cualquiera para ver el detalle.</div>';
