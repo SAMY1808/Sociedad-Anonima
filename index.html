@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v61</div>
+<div class="version-badge" id="versionBadge">v62</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13958,6 +13958,305 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   window.__SA61={version:V61,notaAfinidadCiudad:notaAfinidadCiudad61};
 })();
 </script>
+
+<script>
+/* ==========================================================================
+   v62 · UBICACIÓN DE LAS INSTITUCIONES DE LA CASA
+   El club privado, el family office y el mausoleo familiar quedan atados
+   a una ciudad concreta, igual que la sede de la compañía. El patrimonio
+   histórico ya vivía en una ciudad (la del bien que se conserva); esta
+   entrega solo la vuelve visible al declararlo. El mausoleo, además,
+   cambia de gráfica según su tamaño: nichos sencillos o mausoleo grande.
+   ========================================================================== */
+(function(){
+  const V62='v62';
+
+  /* ---- ícono propio para los nichos pequeños, distinto del mausoleo grande ---- */
+  if(typeof ICONOS_BIEN==='object' && !ICONOS_BIEN.nicho){
+    ICONOS_BIEN.nicho='<rect x="9" y="20" width="30" height="23" fill="url(#gStone)" stroke="#B9A96B" stroke-width="1"/><rect x="14" y="25" width="8" height="8" fill="#6C665E" stroke="#E6D7B0" stroke-width="1"/><rect x="26" y="25" width="8" height="8" fill="#6C665E" stroke="#E6D7B0" stroke-width="1"/><rect x="14" y="35" width="8" height="6" fill="#3B342E"/><rect x="26" y="35" width="8" height="6" fill="#3B342E"/><path d="M4 43h40" stroke="#E4C66A" stroke-width="1.6"/>';
+  }
+  function iconoInstitucion62(tipo){ return iconoBien(tipo==='nichos'?'nicho':'mausoleo','',56); }
+
+  /* ---- selector de ciudad reutilizable, mismo lenguaje visual que el resto del juego ---- */
+  function opcionesCiudad62(activa,idBase){
+    return '<div class="fichas-sel" id="'+idBase+'">'+CIUDADES.map(c=>'<button type="button" class="opcion" data-v="'+esc(c.n)+'" aria-pressed="'+(c.n===activa?'true':'false')+'">'+esc(c.n)+'</button>').join('')+'</div>';
+  }
+  function wireSelectorCiudad62(caja,idBase,inicial){
+    let sel=inicial;
+    const grupo=caja.querySelector('#'+idBase);
+    if(grupo) grupo.querySelectorAll('.opcion').forEach(b=>{
+      b.onclick=()=>{ grupo.querySelectorAll('.opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); sel=b.dataset.v; };
+    });
+    return ()=>sel;
+  }
+
+  /* ---- club privado familiar: ciudad de sede + traslado ---- */
+  function escenaReubicarClub62(c){
+    const costo=Math.max(40,patrimonio()*.008);
+    const caja=escena({rubro:'Vida social',titulo:'Trasladar el club',ancho:true,
+      cuerpo:'El <b>'+esc(c.nombre)+'</b> tiene su sede en <b>'+esc(c.ciudad)+'</b>. Mudarlo a otra ciudad cuesta '+fmt(costo)+' en adecuaciones y nuevas presentaciones.',
+      html:'<label class="campo">Nueva ciudad</label>'+opcionesCiudad62(c.ciudad,'cClubMove62'),
+      opciones:[{t:'Confirmar el traslado',cat:'casa',cerrar:false,run:()=>{}}],cerrable:true});
+    const leerCiudad=wireSelectorCiudad62(caja,'cClubMove62',c.ciudad);
+    botonEscena().onclick=()=>{
+      const destino=leerCiudad();
+      if(destino===c.ciudad){ cerrarModal(); render(); return; }
+      if(S.efectivo<costo){ cerrarModal(); log('No alcanza para trasladar el club.','mal'); render(); return; }
+      S.efectivo-=costo; c.ciudad=destino;
+      log('El '+esc(c.nombre)+' trasladó su sede a '+esc(destino)+'.','hito');
+      S.mov--; cerrarModal(); render();
+    };
+  }
+  const clubOriginal62=escenaClubFamilia;
+  escenaClubFamilia=function(){
+    const c=S.clubFamilia;
+    if(c){
+      if(!c.ciudad) c.ciudad=S.hogar.ciudad;
+      escena({rubro:'Vida social',titulo:c.nombre,ancho:true,
+        cuerpo:'Club privado de la familia, con sede en <b>'+esc(c.ciudad)+'</b>: membresías, cenas, contactos y reuniones discretas. Aumenta el costo de mantener el círculo, pero puede abrir relaciones comerciales.',
+        opciones:[
+          {t:'Organizar una recepción',cat:'casa',d:'Una noche cara para cultivar relaciones.',cerrar:false,run:()=>{const x=35;if(S.efectivo<x){log('No alcanza para la recepción.','mal');return;}S.efectivo-=x;moverPrestigio(3,'organizó una recepción del club');if(chance(.35)&&S.emp)S.emp.marca=clamp(S.emp.marca+2,0,100);log('La recepción reunió a la casa con nuevos contactos.','bien');cerrarModal();render();}},
+          {t:'Trasladar el club a otra ciudad',cat:'casa',d:'Mudar la sede social a otra ciudad del país.',run:()=>escenaReubicarClub62(c)}
+        ],cerrable:true});
+    } else {
+      const cst=Math.max(90,patrimonio()*.02);
+      const caja=escena({rubro:'Vida social',titulo:'Crear club privado de la familia',ancho:true,
+        cuerpo:'Un pequeño club o círculo privado para mantener relaciones empresariales, profesionales y sociales. Cuesta '+fmt(cst)+' de dotación inicial.',
+        html:'<label class="campo">Ciudad de la sede</label>'+opcionesCiudad62(S.hogar.ciudad,'cClub62'),
+        opciones:[{t:'Fundar el club',cat:'casa',cerrar:false,run:()=>{}}],cerrable:true});
+      const leerCiudad=wireSelectorCiudad62(caja,'cClub62',S.hogar.ciudad);
+      botonEscena().onclick=()=>{
+        if(S.efectivo<cst){cerrarModal();log('No alcanza para fundar el club.','mal');render();return;}
+        const ciudad=leerCiudad();
+        S.efectivo-=cst;
+        S.clubFamilia={nombre:'Club '+S.dinastia,desde:S.anio,nivel:1,ciudad};
+        moverPrestigio(3,'fundó un círculo privado de la familia');
+        log('Se fundó el <b>Club '+esc(S.dinastia)+'</b> en '+esc(ciudad)+'.','hito');
+        hito('Fundó un club privado familiar');
+        S.mov--;cerrarModal();render();
+      };
+    }
+  };
+
+  /* ---- family office: ciudad de sede + traslado, conservando toda la administración v29 ---- */
+  function escenaReubicarFamilyOffice62(fo){
+    const costo=Math.max(60,fo.activos*.01);
+    const caja=escena({rubro:'Casa patrimonial',titulo:'Trasladar el family office',ancho:true,
+      cuerpo:'La oficina tiene su sede en <b>'+esc(fo.ciudad)+'</b>. Mudar equipo, custodios y contratos a otra ciudad cuesta '+fmt(costo)+'.',
+      html:'<label class="campo">Nueva ciudad</label>'+opcionesCiudad62(fo.ciudad,'cFOMove62'),
+      opciones:[{t:'Confirmar el traslado',cat:'capital',cerrar:false,run:()=>{}}],cerrable:true});
+    const leerCiudad=wireSelectorCiudad62(caja,'cFOMove62',fo.ciudad);
+    botonEscena().onclick=()=>{
+      const destino=leerCiudad();
+      if(destino===fo.ciudad){ cerrarModal(); render(); return; }
+      if(S.efectivo<costo){ cerrarModal(); log('No alcanza para trasladar el family office.','mal'); render(); return; }
+      S.efectivo-=costo; fo.ciudad=destino;
+      log('El '+esc(fo.nombre)+' trasladó su sede a '+esc(destino)+'.','hito');
+      S.mov--; cerrarModal(); render();
+    };
+  }
+  const familyOfficeOriginal62=escenaFamilyOffice;
+  escenaFamilyOffice=function(){
+    asegurarInstitucionesCasa();
+    const fo=S.familyOffice;
+    if(fo){
+      if(!fo.ciudad) fo.ciudad=S.hogar.ciudad;
+      const director=fo.director;
+      const inversion=fo.inversiones||Math.max(0,fo.activos-fo.reserva);
+      const est={conservadora:'Conservadora',balanceada:'Balanceada',crecimiento:'Crecimiento'}[fo.estrategia]||'Balanceada';
+      escena({rubro:'Casa patrimonial',titulo:fo.nombre,ancho:true,
+        cuerpo:'La oficina pertenece a la <b>casa</b>, no a una sola vida, y tiene su sede en <b>'+esc(fo.ciudad)+'</b>. Administra '+fmt(fo.activos)+' y puede seguir funcionando cuando muera el personaje actual. '
+          +'Hoy tiene <b>'+fmt(inversion)+'</b> invertidos, <b>'+fmt(fo.reserva)+'</b> de reserva y está dirigida por <b>'+esc(director.nombre)+'</b> ('+director.capaz+'/10). '
+          +'Estrategia: <b>'+est+'</b>. Apoyo educativo actual: '+pc(fo.educacionPct||0)+'.',
+        opciones:[
+          {t:'Aportar patrimonio',cat:'capital',d:'Refuerza la base que la oficina puede invertir y hacer crecer.',cerrar:false,run:()=>{
+            const x=Math.min(Math.max(80,patrimonio()*.06),S.efectivo*.45);
+            if(x<80||S.efectivo<x){log('No hay efectivo suficiente para ampliar el family office.','mal');return;}
+            S.efectivo-=x; const nuevaReserva=x*.16; fo.reserva+=nuevaReserva; fo.inversiones+=x-nuevaReserva; fo.activos=fo.reserva+fo.inversiones;
+            fo.escala=Math.min(8,(fo.escala||1)+1); log('La casa aportó '+fmt(x)+' al family office. Ahora administra '+fmt(fo.activos)+'.','bien'); S.mov--; cerrarModal(); render();
+          }},
+          {t:'Reinvertir y rebalancear',cat:'capital',d:'Decide cuánto mantener líquido y vuelve a poner a trabajar la cartera.',cerrar:false,run:()=>{
+            const objetivo={conservadora:.24,balanceada:.16,crecimiento:.10}[fo.estrategia]||.16;
+            const nuevaRes=Math.max(20,fo.activos*objetivo);
+            const delta=nuevaRes-fo.reserva;
+            if(delta>0){ const mover=Math.min(delta,Math.max(0,fo.inversiones)); fo.inversiones-=mover; fo.reserva+=mover; }
+            else if(delta<0){const retiro=Math.min(-delta,Math.max(0,fo.reserva-20));fo.reserva-=retiro;fo.inversiones+=retiro;}
+            fo.activos=fo.reserva+fo.inversiones; log('Rebalanceaste el family office: reserva '+fmt(fo.reserva)+', inversiones '+fmt(fo.inversiones)+'.','bien'); S.mov--; cerrarModal(); render();
+          }},
+          {t:'Retirar parte del mandato',cat:'capital',d:'Recuperar parte del patrimonio administrado. La casa pierde ese capital y sus rendimientos futuros.',cerrar:false,dis:fo.activos<120?'El mandato es demasiado pequeño':null,run:()=>{
+            const x=Math.min(fo.activos*.12,Math.max(0,fo.activos-100));
+            if(x<=0){log('No hay suficiente patrimonio administrado para retirar sin desarmar la oficina.','mal');return;}
+            const desdeInv=Math.min(fo.inversiones,x); fo.inversiones-=desdeInv; fo.reserva=Math.max(0,fo.reserva-(x-desdeInv)); fo.activos=fo.reserva+fo.inversiones; S.efectivo+=x;
+            log('El family office devolvió '+fmt(x)+' a la caja de la familia.','bien'); S.mov--; cerrarModal(); render();
+          }},
+          {t:'Cambiar director',cat:'empleo',d:'La gestión patrimonial queda en manos de otra persona.',cerrar:false,run:()=>{
+            cerrarModal();
+            const cands=candidatosDirectorFamilyOffice();
+            escena({rubro:'Gobierno patrimonial',titulo:'Quién dirige la oficina',ancho:true,
+              cuerpo:'La persona que dirige define cuánto riesgo asume la casa, cuánto cuesta la administración y qué tan bien se invierte.',
+              opciones:cands.map(c=>({t:c.nombre,cat:'empleo',d:(c.tipo==='familia'?'Miembro de la familia. ':'Profesional externo. ')+c.oficio+'. Capacidad '+c.capaz+'/10. Honorarios '+fmt(c.sueldo)+' al año.',run:()=>{fo.director={nombre:c.nombre,pid:c.pid||null,tipo:c.tipo,capaz:c.capaz,sueldo:c.sueldo,anios:0};log('<b>'+esc(c.nombre)+'</b> asumió la dirección del family office.','hito');S.mov--;}})),cerrable:true});
+          }},
+          {t:'Decidir cuánto paga la casa por educación',cat:'familia',d:'La oficina puede cubrir parte del colegio/universidad de los hijos. Más apoyo reduce el golpe familiar, pero consume reserva.',cerrar:false,run:()=>{
+            const opciones=[.2,.35,.5,.65,.7];
+            escena({rubro:'Política familiar',titulo:'Ayuda educativa',cuerpo:'Elige qué parte del costo anual de colegios y formación cubre el family office.',opciones:opciones.map(v=>({t:'Cubrir '+pc(v),cat:'familia',d:'Aporta hasta '+fmt(costoColegios()*v)+' al año mientras haya reserva suficiente.',run:()=>{fo.educacionPct=v;log('El family office cubrirá '+pc(v)+' de los gastos educativos de los hijos.','hito');S.mov--;}})),cerrable:true});
+          }},
+          {t:'Cambiar estrategia de inversión',cat:'capital',d:'Conservadora, balanceada o crecimiento. Cambia el retorno esperado y la volatilidad.',cerrar:false,run:()=>{
+            escena({rubro:'Política de inversión',titulo:'Cómo se invierte la casa',cuerpo:'La oficina puede preservar patrimonio o aceptar más volatilidad para crecer.',opciones:[
+              {t:'Conservadora',cat:'capital',d:'Menos volatilidad, menor retorno esperado.',run:()=>{fo.estrategia='conservadora';log('La oficina adoptó una estrategia conservadora.');S.mov--; }},
+              {t:'Balanceada',cat:'capital',d:'Riesgo intermedio y crecimiento moderado.',run:()=>{fo.estrategia='balanceada';log('La oficina adoptó una estrategia balanceada.');S.mov--; }},
+              {t:'Crecimiento',cat:'capital',d:'Mayor volatilidad a cambio de una expectativa de crecimiento superior.',run:()=>{fo.estrategia='crecimiento';log('La oficina pasó a una estrategia de crecimiento.','hito');S.mov--; }}
+            ],cerrable:true});
+          }},
+          {t:'Trasladar la sede a otra ciudad',cat:'capital',d:'Mudar la oficina completa a otra ciudad del país.',run:()=>escenaReubicarFamilyOffice62(fo)},
+          {t:'Dejarlo como está',cat:'legado',run:()=>{S.mov--;}}
+        ]});
+    } else {
+      const aporte=Math.max(180,patrimonio()*.05);
+      const caja=escena({rubro:'Patrimonio familiar',titulo:'Crear un family office',ancho:true,
+        cuerpo:'Separar la administración del patrimonio de las compañías operativas. La oficina tendrá inversiones, reserva y un director; además podrá pagar parte de la educación de los hijos. Requiere '+fmt(aporte)+' de aporte inicial.',
+        html:'<div class="apunte">Al constituirlo, 84% del aporte se invertirá y 16% queda como reserva para gastos y apoyo familiar.</div><label class="campo">Ciudad de la sede</label>'+opcionesCiudad62(S.hogar.ciudad,'cFO62'),
+        opciones:[{t:'Constituir family office',cat:'capital',cerrar:false,run:()=>{}}],cerrable:true});
+      const leerCiudad=wireSelectorCiudad62(caja,'cFO62',S.hogar.ciudad);
+      botonEscena().onclick=()=>{
+        if(S.efectivo<aporte){cerrarModal();log('No alcanzaba para constituir el family office.','mal');render();return;}
+        const ciudad=leerCiudad();
+        S.efectivo-=aporte;
+        const reserva=aporte*.16;
+        S.familyOffice={nombre:'Family Office '+S.dinastia,activos:aporte,reserva,inversiones:aporte-reserva,escala:1,desde:S.anio,ciudad,educacionPct:.5,estrategia:'balanceada',ultimaRentabilidad:0,ultimoRetorno:0,ultimoGasto:0,ultimaAyudaEducacion:0,anios:0,continuidad:true,director:{nombre:'Dirección patrimonial externa',tipo:'profesional',capaz:7,anios:0,sueldo:Math.max(12,aporte*.003)}};
+        cerrarModal(); asegurarInstitucionesCasa(); moverPrestigio(4,'se organizó el patrimonio familiar'); log('Se constituyó el <b>'+esc(S.familyOffice.nombre)+'</b> en '+esc(ciudad)+': una parte ya está invertida y otra queda como reserva.','hito'); hito('Constituyó un family office'); S.mov--; render();
+      };
+    }
+  };
+  const asegurarInstitucionesCasaOriginal62=asegurarInstitucionesCasa;
+  asegurarInstitucionesCasa=function(){
+    asegurarInstitucionesCasaOriginal62();
+    if(S.familyOffice&&!S.familyOffice.ciudad) S.familyOffice.ciudad=S.hogar.ciudad;
+  };
+
+  /* ---- mausoleo familiar: ciudad de la sepultura + gráfica según el tamaño elegido ---- */
+  const escenaMausoleoOriginal62=escenaMausoleo;
+  escenaMausoleo=function(){
+    if(S.mausoleo){
+      const M=S.mausoleo;
+      if(!M.ciudad) M.ciudad=S.hogar.ciudad;
+      escena({rubro:'Cementerio',titulo:'El mausoleo de la casa',ancho:true,
+        html:'<div style="margin:10px 0">'+iconoInstitucion62(M.tipo)+'</div>',
+        cuerpo:'Construido en '+M.desde+' en <b>'+esc(M.ciudad)+'</b>. Quedan <b>'+M.cupos+'</b> cupos'
+          +((M.enterrados||[]).length?'. Reposan ahí: '+M.enterrados.map(esc).join(', ')+'.':' y todavía nadie adentro.'),
+        opciones:[
+          {t:'Ampliarlo',cat:'legado',d:'Cuatro cupos más por '+fmt(Math.max(90,patrimonio()*.02))+'.',
+           dis:S.efectivo<Math.max(90,patrimonio()*.02)?'No te alcanza':null,
+           run:()=>{ const x=Math.max(90,patrimonio()*.02); S.efectivo-=x; M.cupos+=4;
+             moverPrestigio(2,''); log('Ampliaste el mausoleo: quedan '+M.cupos+' cupos.'); S.mov--; }},
+          {t:'Dejarlo así',cat:'legado',run:()=>{ S.mov--; }}
+        ]});
+      return;
+    }
+    const nicho=Math.max(35,patrimonio()*.006), cripta=Math.max(180,patrimonio()*.035);
+    const caja=escena({rubro:'Cementerio',titulo:'Dónde van a quedar los tuyos',ancho:true,
+      cuerpo:'Tarde o temprano hay que resolverlo, y resolverlo antes sale más barato que resolverlo con el muerto en la casa. '
+        +'En esta ciudad, el mausoleo de una familia dice tanto como su casa.',
+      html:'<label class="campo">Ciudad de la sepultura</label>'+opcionesCiudad62(S.hogar.ciudad,'cMaus62'),
+      opciones:[
+        {t:'Comprar unos nichos',cat:'legado',d:'Dos cupos en el cementerio municipal por '+fmt(nicho)+'. Discreto y suficiente.',
+         dis:S.efectivo<nicho?'No te alcanza':null,
+         run:()=>{ const ciudad=leerCiudad(); S.efectivo-=nicho; S.mausoleo={desde:S.anio,cupos:2,tipo:'nichos',enterrados:[],ciudad};
+           log('Compraste dos nichos en '+esc(ciudad)+'.'); S.mov--; }},
+        {t:'Mandar a construir el mausoleo',cat:'legado',
+         d:'Ocho cupos, con el apellido en mármol, por '+fmt(cripta)+'.',
+         dis:S.efectivo<cripta?'No te alcanza':null,
+         run:()=>{ const ciudad=leerCiudad(); S.efectivo-=cripta; S.mausoleo={desde:S.anio,cupos:8,tipo:'mausoleo',enterrados:[],ciudad};
+           moverPrestigio(6,'el mausoleo de la casa '+S.dinastia);
+           log('Mandaste a construir el mausoleo de la casa '+esc(S.dinastia)+' en '+esc(ciudad)+'.','hito');
+           hito('Construyó el mausoleo de la casa'); S.mov--; }},
+        {t:'Eso se ve después',cat:'legado',run:()=>{ S.mov--; }}
+      ]});
+    const leerCiudad=wireSelectorCiudad62(caja,'cMaus62',S.hogar.ciudad);
+  };
+
+  /* ---- patrimonio histórico: mostrar la ciudad del bien al momento de conservarlo ---- */
+  function escenaConservarBienConCiudad62(){
+    const candidatas=(S.bienes||[]).filter(b=>b&&['vivienda','finca'].includes(b.clase)&&!b.historica);
+    escena({rubro:'Patrimonio',titulo:'Dar historia a un bien familiar',ancho:true,
+      cuerpo:'Puedes convertir una casa o finca en un activo de la memoria de la casa: restauración, archivo familiar y mantenimiento. Cuesta, pero protege el valor simbólico.',
+      opciones:candidatas.slice(0,8).map(b=>{
+        const costo=Math.max(12,(b.valor||80)*.035);
+        return {t:esc(b.nombre||b.tipo||'Propiedad'),cat:'casa',
+          d:esc(b.ciudad||S.hogar.ciudad)+' · Restauración y archivo · '+fmt(costo)+'.',
+          dis:S.efectivo<costo?'No te alcanza':null,
+          run:()=>{
+            S.efectivo-=costo; b.historica=true; b.historiaFamiliar=(b.historiaFamiliar||[]).concat([S.anio]);
+            if(S.vida&&Array.isArray(S.vida.propiedadesHistoricas)) S.vida.propiedadesHistoricas.push(b.uid||b.nombre);
+            moverPrestigio(4,'se conservó un bien familiar');
+            log('<b>'+esc(b.nombre||b.tipo)+'</b> en '+esc(b.ciudad||S.hogar.ciudad)+' pasó a formar parte de la memoria histórica de la casa.','hito');
+            hito('Conservó '+(b.nombre||b.tipo)+' como patrimonio familiar');
+            S.mov--;
+          }};
+      }),
+      cerrable:true});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones62(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA62_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        if(S.clubFamilia){
+          if(!S.clubFamilia.ciudad) S.clubFamilia.ciudad=S.hogar.ciudad;
+          const a=A.find(x=>/club privado/i.test(x.t));
+          if(a) a.d='Nivel '+S.clubFamilia.nivel+' · sede en '+S.clubFamilia.ciudad+'. Círculo social y empresarial de la casa.';
+        }
+        if(S.familyOffice){
+          if(!S.familyOffice.ciudad) S.familyOffice.ciudad=S.hogar.ciudad;
+          const a=A.find(x=>/family office/i.test(x.t));
+          if(a) a.d='Gestiona '+fmt(valorFamilyOffice())+' del patrimonio familiar desde '+S.familyOffice.ciudad+'.';
+        }
+        if(S.mausoleo){
+          if(!S.mausoleo.ciudad) S.mausoleo.ciudad=S.hogar.ciudad;
+          const a=A.find(x=>/mausoleo|nichos/i.test(x.t));
+          if(a) a.d='Quedan '+S.mausoleo.cupos+' cupos en '+S.mausoleo.ciudad+'.';
+        }
+        const bienAcc=A.find(x=>x.t==='Conservar un bien de la casa');
+        if(bienAcc) bienAcc.run=()=>escenaConservarBienConCiudad62();
+      }catch(e){}
+      return A;
+    };
+    window.__SA62_LISTA=true;
+  }
+  function inyectarUbicaciones62(){
+    if(typeof tab==='undefined'||tab!=='familia') return;
+    const cards=document.querySelectorAll('#lienzoJuego .family-house-card');
+    cards.forEach(card=>{
+      const label=card.querySelector('.fh-label'), meta=card.querySelector('.fh-meta');
+      if(!label||!meta) return;
+      if(label.textContent==='Family office'&&S.familyOffice&&S.familyOffice.ciudad){
+        meta.innerHTML='Sede en <b>'+esc(S.familyOffice.ciudad)+'</b> · '+meta.innerHTML;
+      }
+      if(label.textContent==='Memoria familiar'&&S.mausoleo&&S.mausoleo.ciudad){
+        meta.innerHTML='En <b>'+esc(S.mausoleo.ciudad)+'</b> · '+meta.innerHTML;
+      }
+    });
+  }
+  function wrapRenderUbicaciones62(){
+    const old=window.render; if(typeof old!=='function'||window.__SA62_RENDER) return;
+    window.render=function(){
+      const r=old.apply(this,arguments);
+      try{ inyectarUbicaciones62(); }catch(e){}
+      return r;
+    };
+    window.__SA62_RENDER=true;
+  }
+  function init62(){ wrapListaAcciones62(); wrapRenderUbicaciones62(); }
+  setTimeout(init62,40);
+  setTimeout(init62,220);
+  setTimeout(init62,650);
+  window.__SA62={version:V62};
+})();
+</script>
+
 
 </body>
 </html>
