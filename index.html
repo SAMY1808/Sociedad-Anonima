@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v72</div>
+<div class="version-badge" id="versionBadge">v73</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -15483,6 +15483,84 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init72,220);
   setTimeout(init72,650);
   window.__SA72={version:V72};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v73 · EL GOBERNADOR TAMBIÉN GOBIERNA
+   v71 le dio poder real al presidente (decretar leyes) y v72 se lo dio al
+   alcalde (favorecer sectores en su ciudad). El gobernador —cuyo propio
+   CARGOS_POLITICOS ya lo describe como "ejecutivo departamental"— se había
+   quedado con el título y el sueldo, pero sin ninguna palanca propia.
+   Esta entrega completa la escalera de poder real: alcalde (una ciudad) <
+   gobernador (todo el departamento) < presidente (todo el país), los tres
+   con la misma mecánica de fondo (la tabla de bonos ciudad-sector de v61)
+   para no inventar tres sistemas distintos.
+   ========================================================================== */
+(function(){
+  const V73='v73';
+
+  const DEPARTAMENTO_DE_CIUDAD_73={
+    'Medellín':'Antioquia','La Estrella':'Antioquia','Bogotá':'Bogotá D.C.','Cali':'Valle del Cauca',
+    'Barranquilla':'Atlántico','Bucaramanga':'Santander','Manizales':'Caldas','Montería':'Córdoba','Cartagena':'Bolívar'
+  };
+  function departamentoDe73(ciudad){ return DEPARTAMENTO_DE_CIUDAD_73[ciudad]||null; }
+  function ciudadesDelDepartamento73(dep){ return CIUDADES.filter(c=>DEPARTAMENTO_DE_CIUDAD_73[c.n]===dep).map(c=>c.n); }
+
+  function escenaGobernarGobernacion73(){
+    const q=S.carrera.politica;
+    const dep=departamentoDe73(q.ciudad)||departamentoDe73(S.hogar.ciudad);
+    const ciudades=dep?ciudadesDelDepartamento73(dep):[];
+    const tabla=(typeof window.BONOS_CIUDAD_SECTOR_61==='object'&&window.BONOS_CIUDAD_SECTOR_61)||null;
+    if(!tabla||!dep||!ciudades.length){
+      escena({rubro:'Gobernación',titulo:'Gobernar la gobernación',ancho:true,cuerpo:'Como gobernador manejas la agenda departamental, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{S.mov--;}}],cerrable:true});
+      return;
+    }
+    const sectoresEra=(epocaDe().sectores||SECTORES.map(s=>s.id));
+    const opciones=SECTORES.filter(s=>sectoresEra.includes(s.id)).map(s=>{
+      const actual=Math.min(...ciudades.map(c=>(tabla[c]&&tabla[c][s.id])||0));
+      return {t:'Impulsar '+s.n.toLowerCase()+' en el departamento',cat:'legado',
+        d:'Vías, contratos y trámites departamentales para '+s.n.toLowerCase()+' en todo <b>'+esc(dep)+'</b> ('+ciudades.join(', ')+'). Llega a varias ciudades a la vez, pero cuesta más capital político que una medida local.',
+        cerrar:false,run:()=>{
+          ciudades.forEach(c=>{ tabla[c]=tabla[c]||{}; tabla[c][s.id]=clamp((tabla[c][s.id]||0)+.010,-.06,.07); });
+          q.base=clamp((q.base||0)-ri(5,9),0,100);S.tension=clamp(S.tension+ri(1,3),0,100);S.p.reputacion=clamp(S.p.reputacion+3,0,100);
+          log('Como gobernador de '+esc(dep)+', impulsaste <b>'+esc(s.n.toLowerCase())+'</b> en todo el departamento.','hito');
+          S.mov--;cerrarModal();render();
+        }};
+    });
+    opciones.push({t:'Dejar quieta la agenda departamental',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Gobernación de '+dep,titulo:'Gobernar la gobernación',ancho:true,
+      cuerpo:'Como gobernador tienes autoridad sobre todo <b>'+esc(dep)+'</b>: '+ciudades.join(', ')+'. Tu capital político: '+Math.round(q.base||0)+'/100.',
+      opciones,cerrable:true});
+  }
+
+  function wrapListaAcciones73(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA73_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        const q=S.carrera.politica;
+        if(q&&q.activo&&q.cargo==='gobernador'&&!A.some(x=>x.t==='Gobernar la gobernación')){
+          A.push({t:'Gobernar la gobernación',cat:'legado',d:'Decisiones departamentales para '+esc(departamentoDe73(q.ciudad||S.hogar.ciudad)||'tu departamento')+': a qué sector le facilitas la vida en todo el territorio.',mov:1,modal:true,run:()=>escenaGobernarGobernacion73()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA73_LISTA=true;
+  }
+  function wrapCatDe73(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA73_CATDE) return;
+    window.catDe=function(t){
+      if(/^Gobernar la gobernación$/.test(t)) return 'legado';
+      return old.apply(this,arguments);
+    };
+    window.__SA73_CATDE=true;
+  }
+  function init73(){ wrapListaAcciones73(); wrapCatDe73(); }
+  setTimeout(init73,40);
+  setTimeout(init73,220);
+  setTimeout(init73,650);
+  window.__SA73={version:V73};
 })();
 </script>
 
