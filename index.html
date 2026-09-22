@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v71</div>
+<div class="version-badge" id="versionBadge">v72</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5485,6 +5485,9 @@ function listaAcciones(){
         run:()=>{
           const pr=clamp(.26+(c.desempeno-62)/95+p.atr.carisma/44+p.redes/480,.10,.88);
           if(chance(pr)){ c.nivel++; c.anios=0; p.redes=clamp(p.redes+7,0,100); p.reputacion=clamp(p.reputacion+5,0,100);
+            if(c.ruta==='publico'&&/^(Viceministro|Ministro)/.test(sig.n)&&/^(Alcaldía|Gobernación)/.test(c.empleador||'')){
+              c.empleador=pick(['Ministerio de Comercio','Ministerio de Hacienda','Ministerio del Interior','DNP','Cancillería']);
+            }
             log('Te ascendieron a <b>'+sig.n.toLowerCase()+'</b> en '+esc(c.empleador)+'.','bien');
             if(c.nivel>=r.niveles.length-1){ hito('Llegó a '+sig.n+' de '+c.empleador); moverPrestigio(8,'llegaste a '+sig.n.toLowerCase()); }
             else if(c.nivel>=4) moverPrestigio(2,'');
@@ -6302,7 +6305,7 @@ const EVENTOS=[
   o:[{t:'Dar la entrevista',f:()=>{if(chance(.6)){S.p.reputacion=clamp(S.p.reputacion+12,0,100);S.emp.marca=clamp(S.emp.marca+6,0,100);return 'Saliste bien librado: quedaste como el empresario que hizo las cosas bien.';}
      S.p.reputacion=clamp(S.p.reputacion-10,0,100);return 'El perfil se centró en los despidos y en un contrato incómodo.';}},
      {t:'No responder',f:()=>{S.p.reputacion=clamp(S.p.reputacion-4,0,100);return 'Salió igual, con la frase "no quiso responder".';}}]},
- {p:2,c:()=>!S.emp&&S.carrera.ruta&&S.carrera.ruta!=='desempleado',t:()=>'Un competidor de tu empleador te ofrece el mismo cargo con 35% más de sueldo.',
+ {p:2,c:()=>!S.emp&&S.carrera.ruta==='corporativo',t:()=>'Un competidor de tu empleador te ofrece el mismo cargo con 35% más de sueldo.',
   o:[{t:'Cambiarme',f:()=>{S.carrera.empleador=pick(EMPLEADORES.filter(x=>x!==S.carrera.empleador));S.carrera.anios=0;S.carrera.desempeno=clamp(S.carrera.desempeno-5,0,100);return 'Te pasaste a '+S.carrera.empleador+'. Empiezas de nuevo a construir confianza.';}},
      {t:'Quedarme y negociar',f:()=>{if(chance(.5)){S.carrera.desempeno=clamp(S.carrera.desempeno+10,0,100);return 'Te igualaron la oferta y te subieron el perfil interno.';}return 'No te igualaron nada y ahora saben que estás mirando.';}}]},
  {p:1.5,c:()=>S.emp&&S.emp.ingresos>6000,t:()=>'Llega una oferta para exportar a Estados Unidos y México.',
@@ -6807,7 +6810,7 @@ const EVENTOS_VIDA_EXTENDIDOS=[
    {t:'Abrir las cuentas',f:()=>{const a=S.familia.hijos.find(x=>x.nombre===S._ha),b=S.familia.hijos.find(x=>x.nombre===S._hb);if(a)a.vinculo=clamp(a.vinculo+6,0,100);if(b)b.vinculo=clamp(b.vinculo+6,0,100);return 'Mostraste las cuentas y trataste de quitarle misterio al favoritismo.';}},
    {t:'Decir que el que trabaja recibe más',f:()=>{const a=S.familia.hijos.find(x=>x.nombre===S._ha),b=S.familia.hijos.find(x=>x.nombre===S._hb);if(a)a.vinculo=clamp(a.vinculo+2,0,100);if(b)b.vinculo=clamp(b.vinculo-11,0,100);return 'La frase fue clara. También fue bastante incendiaria.';}}
  ]},
- {p:1.0,c:()=>S.carrera&&S.carrera.ruta&&S.carrera.ruta!=='desempleado'&&!S.emp,t:()=> 'Una firma rival quiere contratarte con más salario y un título mejor.',o:[
+ {p:1.0,c:()=>S.carrera&&S.carrera.ruta==='corporativo'&&!S.emp,t:()=> 'Una firma rival quiere contratarte con más salario y un título mejor.',o:[
    {t:'Aceptar la oferta',f:()=>{const viejo=S.carrera.empleador;S.carrera.empleador=pick((EMPLEADORES||[]).filter(x=>x!==viejo));S.carrera.salarioExtra=clamp((S.carrera.salarioExtra||0)+.10,0,.35);S.carrera.anios=0;return 'Cambiaste de empresa. Empiezas de nuevo, pero cobras mejor.';}},
    {t:'Quedarme donde estoy',f:()=>{S.carrera.desempeno=clamp(S.carrera.desempeno+5,0,100);return 'Preferiste la estabilidad y pediste una oportunidad interna.';}}
  ]},
@@ -13847,6 +13850,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const tabla=BONOS_CIUDAD_SECTOR_61[e&&e.ciudad]; if(!tabla) return 0;
     return tabla[sectorDe(e).id]||0;
   }
+  window.BONOS_CIUDAD_SECTOR_61=BONOS_CIUDAD_SECTOR_61;
   function wrapCorrerEmpresa61(){
     const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA61_EMPRESA) return;
     window.correrEmpresa=function(res,cual){
@@ -15304,6 +15308,181 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init71,220);
   setTimeout(init71,650);
   window.__SA71={version:V71};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v72 · ALCALDES DE VERDAD, PARTIDOS DE VERDAD
+   Colombia tuvo más de un siglo de bipartidismo estricto (liberales y
+   conservadores) y los alcaldes fueron designados por el gobernador —no
+   elegidos— hasta la reforma de 1988. El juego ya tenía su propio 1991
+   como año de "apertura" (la época de 1970 ya lo insinuaba), así que esta
+   entrega ata la carrera política del jugador a esa misma cronología:
+   afiliación Liberal/Conservador antes de 1991, alcaldías por designación
+   antes de 1988 (con la afinidad partidista pesando de verdad), un poder
+   local real para el alcalde en ejercicio, y una oferta de ministerio
+   cuando gana un gobierno que el jugador apoyó. De paso, corrige el bug
+   reportado de "ministro de textiles" / "ministro de la alcaldía de
+   Medellín": dos EVENTOS genéricos de cambio de empleo le pegaban a
+   CUALQUIER ruta profesional activa, incluida la del sector público.
+   ========================================================================== */
+(function(){
+  const V72='v72';
+
+  /* ==========================================================================
+     #1 designación de alcaldes antes de 1988 + bipartidismo antes de 1991
+     ========================================================================== */
+  function nombramientoAlcalde72(){
+    const x=cargoPolitico('alcalde'), q=S.carrera.politica; if(!x) return;
+    const g=gob();
+    const partido=q.partido||pick(['Partido Liberal','Partido Conservador']);
+    const afin=(partido==='Partido Liberal'&&g.id==='liberal')||(partido==='Partido Conservador'&&g.id==='conservador');
+    const apoyado=!!(S.gobierno&&S.gobierno.apoyado);
+    let base=.18+S.p.redes/220+S.p.reputacion/300+(q.base||0)/240;
+    if(afin) base+=.28;
+    if(afin&&apoyado) base+=.14;
+    if(!afin) base-=.12;
+    const prob=clamp(base,.08,.86);
+    if(chance(prob)){
+      q.activo=true;q.cargo='alcalde';q.anios=0;q.mandatos=(q.mandatos||0)+1;q.base=clamp((q.base||0)+ri(6,12),0,100);
+      q.partido=partido;q.ciudad=S.hogar.ciudad;q.designado=true;
+      S.p.reputacion=clamp(S.p.reputacion+7,0,100);S.p.redes=clamp(S.p.redes+8,0,100);moverPrestigio(4,'te designaron alcalde');
+      S.mov--;cerrarModal();
+      log('El gobernador te designó <b>alcalde de '+esc(q.ciudad)+'</b>'+(afin?', y ser del mismo '+partido+' del gobierno de turno ayudó bastante.':'.'),'hito');
+      hito('Fue designado/a alcalde de '+q.ciudad);
+    }else{
+      q.partido=q.partido||partido;q.base=clamp((q.base||0)+ri(1,5),0,100);S.p.felicidad=clamp(S.p.felicidad-3,0,100);
+      S.mov--;cerrarModal();
+      log('El gobernador designó a otra persona para la alcaldía'+(afin?'; ni ser del mismo partido del gobierno alcanzó esta vez.':'. Sin el partido del gobierno de turno detrás, no tenías muchas opciones.'),'mal');
+    }
+    render();
+  }
+
+  const resultadoEleccionPrevio72=resultadoEleccion;
+  resultadoEleccion=function(id){
+    if(id==='alcalde'&&S.anio<1988){ nombramientoAlcalde72(); return; }
+    const q=S.carrera.politica, partidoAntes=q&&q.partido;
+    resultadoEleccionPrevio72(id);
+    if(q&&!partidoAntes&&q.partido&&S.anio<1991){
+      q.partido=pick(['Partido Liberal','Partido Conservador']);
+    }
+  };
+
+  const escenaCarreraPoliticaPrevio72=escenaCarreraPolitica;
+  escenaCarreraPolitica=function(){
+    escenaCarreraPoliticaPrevio72();
+    if(S.anio<1988){
+      try{
+        Array.from(document.querySelectorAll('#escenaHost .carta')).forEach(b=>{
+          const nom=b.querySelector('.nom'); if(!nom) return;
+          if(/Alcalde$/.test(nom.textContent.trim())){
+            nom.textContent=nom.textContent.replace(/^Aspirar a /,'Buscar la designación como ');
+            const d=b.querySelector('.txt');
+            if(d) d.textContent='Antes de 1988 los alcaldes no se eligen por voto popular: los designa el gobernador de turno, casi siempre por afinidad política.';
+          }
+        });
+      }catch(e){}
+    }
+  };
+
+  /* ==========================================================================
+     #2 gobernar la alcaldía: el poder local del alcalde en ejercicio
+     ========================================================================== */
+  function escenaGobernarAlcaldia72(){
+    const q=S.carrera.politica, ciudad=q.ciudad||S.hogar.ciudad;
+    const tabla=(typeof window.BONOS_CIUDAD_SECTOR_61==='object'&&window.BONOS_CIUDAD_SECTOR_61)||null;
+    if(!tabla){ escena({rubro:'Alcaldía',titulo:'Gobernar la alcaldía',ancho:true,cuerpo:'Como alcalde de '+esc(ciudad)+' manejas la agenda local, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{S.mov--;}}],cerrable:true}); return; }
+    tabla[ciudad]=tabla[ciudad]||{};
+    const actuales=tabla[ciudad];
+    const sectoresEra=(epocaDe().sectores||SECTORES.map(s=>s.id));
+    const opciones=SECTORES.filter(s=>sectoresEra.includes(s.id)).map(s=>{
+      const actual=actuales[s.id]||0;
+      return {t:'Facilitarle la vida a '+s.n.toLowerCase(),cat:'legado',
+        d:'Trámites exprés y guiño municipal para '+s.n.toLowerCase()+' en '+esc(ciudad)+'. Bono actual: '+(Math.round(actual*1000)/10)+'%. Te cuesta capital político.',
+        cerrar:false,run:()=>{
+          actuales[s.id]=clamp(actual+.012,-.05,.06);
+          q.base=clamp((q.base||0)-ri(3,6),0,100);S.p.reputacion=clamp(S.p.reputacion+2,0,100);
+          log('Como alcalde de '+esc(ciudad)+', le facilitaste el camino a <b>'+esc(s.n.toLowerCase())+'</b>.','hito');
+          S.mov--;cerrarModal();render();
+        }};
+    });
+    opciones.push({t:'Dejar quieta la agenda económica',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Alcaldía de '+ciudad,titulo:'Gobernar la alcaldía',ancho:true,
+      cuerpo:'Como alcalde tienes margen para mover la economía local: licencias, trámites y contratos que favorecen a un sector u otro en <b>'+esc(ciudad)+'</b>. Tu capital político: '+Math.round(q.base||0)+'/100.',
+      opciones,cerrable:true});
+  }
+
+  /* ==========================================================================
+     #3 un gobierno afín te llama para el gabinete
+     ========================================================================== */
+  function escenaOfertaMinisterial72(){
+    const q=S.carrera.politica, g=gob(), r=RUTAS.publico;
+    q.ofertaMinisterialGobierno=S.gobierno.desde;
+    const viceIdx=r.niveles.findIndex(n=>n.n==='Viceministro'), minIdx=r.niveles.findIndex(n=>n.n==='Ministro');
+    const nombrarEn=()=>pick(['Ministerio de Comercio','Ministerio de Hacienda','Ministerio del Interior','DNP','Cancillería']);
+    escena({rubro:'Nueva administración',titulo:'Te llaman de la nueva administración',ancho:true,
+      cuerpo:'El '+g.n+' que apoyaste ganó, y tu nombre suena para el nuevo gabinete: tu carné de '+esc(q.partido||'partido')+' por fin cobra.',
+      opciones:[
+        {t:'Aceptar un viceministerio',cat:'empleo',d:'Entrada garantizada como viceministro/a.',cerrar:false,run:()=>{
+          S.carrera.ruta='publico';S.carrera.nivel=Math.max(0,viceIdx);S.carrera.anios=0;S.carrera.desempeno=60+S.p.atr.disciplina*2;S.carrera.empleador=nombrarEn();
+          S.p.reputacion=clamp(S.p.reputacion+8,0,100);moverPrestigio(5,'entraste al gobierno');
+          log('Entraste al gabinete como <b>viceministro/a</b> en '+esc(S.carrera.empleador)+'. La nueva administración cobra los favores políticos que le hiciste.','hito');
+          hito('Entró al gobierno como viceministro/a');
+          S.mov--;cerrarModal();render();
+        }},
+        {t:'Pedir directamente el ministerio',cat:'riesgo',d:'Apostar alto: si la cúpula del partido no te respalda del todo, te quedas por fuera de todo.',cerrar:false,run:()=>{
+          const prob=clamp(.30+(q.base||0)/220+S.p.reputacion/300+S.p.redes/380,.15,.75);
+          if(chance(prob)){
+            S.carrera.ruta='publico';S.carrera.nivel=Math.max(0,minIdx);S.carrera.anios=0;S.carrera.desempeno=60+S.p.atr.disciplina*2;S.carrera.empleador=nombrarEn();
+            S.p.reputacion=clamp(S.p.reputacion+14,0,100);moverPrestigio(9,'llegaste al gabinete como ministro/a');
+            log('Te dieron el <b>ministerio</b> completo en '+esc(S.carrera.empleador)+'. Cobraste cada favor que le hiciste al partido.','hito');
+            hito('Fue nombrado/a ministro/a');
+          }else{
+            S.p.felicidad=clamp(S.p.felicidad-4,0,100);
+            log('Pediste el ministerio completo y te lo negaron. La oferta de viceministerio ya no está sobre la mesa.','mal');
+          }
+          S.mov--;cerrarModal();render();
+        }},
+        {t:'Declinar por ahora',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();log('Declinaste la oferta de la nueva administración.');render();}}
+      ],cerrable:false});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones72(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA72_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        const q=S.carrera.politica;
+        if(q&&q.activo&&q.cargo==='alcalde'&&!A.some(x=>x.t==='Gobernar la alcaldía')){
+          A.push({t:'Gobernar la alcaldía',cat:'legado',d:'Decisiones locales para '+esc(q.ciudad||S.hogar.ciudad)+': a quién le facilitas la vida y a quién se la complicas.',mov:1,modal:true,run:()=>escenaGobernarAlcaldia72()});
+        }
+        if(q&&!q.activo&&q.partido&&S.gobierno&&S.gobierno.apoyado&&q.ofertaMinisterialGobierno!==S.gobierno.desde
+           &&(!S.carrera.ruta||S.carrera.ruta==='desempleado')
+           &&!(S.carrera.diplomacia&&S.carrera.diplomacia.activo)&&!(S.carrera.judicatura&&S.carrera.judicatura.activo)
+           &&!A.some(x=>x.t==='Te llaman de la nueva administración')){
+          A.unshift({t:'Te llaman de la nueva administración',cat:'empleo',d:'El gobierno que apoyaste te tiene en la mira para el gabinete.',mov:1,modal:true,run:()=>escenaOfertaMinisterial72()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA72_LISTA=true;
+  }
+  function wrapCatDe72(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA72_CATDE) return;
+    window.catDe=function(t){
+      if(/^Gobernar la alcaldía$|^Te llaman de la nueva administración$/.test(t)) return 'legado';
+      return old.apply(this,arguments);
+    };
+    window.__SA72_CATDE=true;
+  }
+  function init72(){ wrapListaAcciones72(); wrapCatDe72(); }
+  setTimeout(init72,40);
+  setTimeout(init72,220);
+  setTimeout(init72,650);
+  window.__SA72={version:V72};
 })();
 </script>
 
