@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v59</div>
+<div class="version-badge" id="versionBadge">v60</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13442,7 +13442,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(fincas) badges.push('🌾 '+fincas+' finca'+(fincas===1?'':'s'));
     if(rentas) badges.push('🏢 '+rentas+' renta'+(rentas===1?'':'s'));
     if(plantas.length) badges.push('🏭 '+plantas.length+' planta'+(plantas.length===1?'':'s')+(plantas.some(p=>p.restan>0)?' (en obra)':''));
-    const tieneAlgo=terrenos+fincas+rentas+plantas.length>0;
+    const sedes=companias().filter(x=>x.ciudad===c.n);
+    if(sedes.length) badges.push('🏛 sede de '+sedes.map(x=>x.nombre).join(', '));
+    const tieneAlgo=terrenos+fincas+rentas+plantas.length+sedes.length>0;
     return '<button type="button" class="family-house-card'+(tieneAlgo?' oro':'')+'" style="text-align:left;cursor:pointer" data-ciudad57="'+esc(c.n)+'">'
       +'<div class="fh-label">Colombia</div><div class="fh-title">'+esc(c.n)+'</div>'
       +'<div class="fh-meta">'+(badges.length?badges.join(' · '):'Sin presencia todavía')+'</div></button>';
@@ -13467,9 +13469,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function escenaCiudad57(c){
     const propios=(S.bienes||[]).filter(b=>b.ciudad===c.n);
     const plantas=((S.emp&&S.emp.plantas57)||[]).filter(p=>p.ciudad===c.n);
+    const sedes=companias().filter(x=>x.ciudad===c.n);
     let html='';
-    if(propios.length||plantas.length){
+    if(propios.length||plantas.length||sedes.length){
       html+='<div class="seccion"><h3>Lo que ya tienes aquí</h3>';
+      sedes.forEach(x=>{ html+='<div class="retrato"><div class="quien"><div class="nom">Sede de '+esc(x.nombre)+'</div><div class="rol">'+(presides(x)?'la presides tú':'compañía del grupo')+'</div></div></div>'; });
       propios.forEach(b=>{ html+='<div class="retrato"><div class="quien"><div class="nom">'+esc(b.nombre)+'</div><div class="rol">'+esc(b.clase)+' · valor '+fmt(b.valor)+'</div></div></div>'; });
       plantas.forEach(p=>{ html+='<div class="retrato"><div class="quien"><div class="nom">Planta industrial</div><div class="rol">'+(p.restan>0?('en obra, faltan '+p.restan+' año'+(p.restan===1?'':'s')):('operando desde '+p.anio))+'</div></div></div>'; });
       html+='</div>';
@@ -13634,6 +13638,148 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init57,220);
   setTimeout(init57,650);
   window.__SA57={version:V57};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V60='v60';
+
+  /* ==========================================================================
+     SEDE Y EDIFICIO CORPORATIVO — toda compañía tiene base y sede física;
+     presidirla de verdad exige estar en esa ciudad (ratifica y completa la
+     regla que ya existía para tomar la presidencia a distancia).
+     ========================================================================== */
+
+  const EDIFICIOS_60=[
+    {n:'Oficina arrendada',d:'Un piso alquilado. Funcional, sin más, sin nombre propio en la fachada.',costo:e=>0,marca:0,eficiencia:0},
+    {n:'Oficina propia',d:'Compraron el piso donde trabajan. Menos gasto fijo y algo de prestigio.',costo:e=>Math.max(180,e.ingresos*.22),marca:3,eficiencia:2},
+    {n:'Edificio corporativo',d:'Un edificio entero con el nombre de la compañía en la entrada.',costo:e=>Math.max(420,e.ingresos*.55),marca:7,eficiencia:4},
+    {n:'Torre insignia',d:'La sede que sale en las postales de la ciudad. Ya es parte del skyline.',costo:e=>Math.max(900,e.ingresos*1.1),marca:14,eficiencia:6}
+  ];
+  function asegurarEdificios60(){
+    companias().forEach(e=>{
+      if(!e.edificio||!isFinite(e.edificio.nivel)) e.edificio={nivel:0};
+      if(!e.ciudad) e.ciudad=S.hogar.ciudad;
+    });
+  }
+  function presideDeCerca60(e){ return !!e&&!!e.ciudad&&e.ciudad===S.hogar.ciudad; }
+
+  /* ---- mejorar el edificio: exige estar presidiendo de cerca ---- */
+  function accionMejorarSede60(A){
+    const e=S.emp; if(!e||!presides(e)) return;
+    asegurarEdificios60();
+    const niv=e.edificio.nivel;
+    if(niv>=EDIFICIOS_60.length-1) return;
+    const sig=EDIFICIOS_60[niv+1];
+    const costo=Math.round(sig.costo(e));
+    const deCerca=presideDeCerca60(e);
+    A.push({t:'Mejorar la sede corporativa',cat:'compania',
+      d:deCerca
+        ? ('De "'+EDIFICIOS_60[niv].n+'" a "'+sig.n+'" en '+e.ciudad+'. Cuesta '+fmt(costo)+' y sube marca y eficiencia.')
+        : ('La sede está en '+e.ciudad+' y tú vives en '+S.hogar.ciudad+'. Para dirigir la obra en persona, primero tendrías que mudarte allí.'),
+      mov:1,
+      dis: !deCerca ? ('Tienes que vivir en '+e.ciudad+' para hacer esto') : ((e.caja+capacidadDeudaDe(e))<costo?'La empresa no tiene con qué financiarlo':null),
+      run:()=>{
+        const pago=financiarEmpresa(e,costo,true);
+        if(!pago.ok){ log('No se pudo financiar la mejora de la sede. La caja personal no se toca automáticamente.','mal'); return; }
+        if(pago.deuda>0) log('La mejora de la sede tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien');
+        e.edificio.nivel++;
+        e.marca=clamp((e.marca||0)+sig.marca,0,100);
+        e.eficiencia=clamp((e.eficiencia||0)+sig.eficiencia,0,100);
+        log('<b>'+esc(e.nombre)+'</b> ahora opera desde: <b>'+esc(sig.n)+'</b>, en '+esc(e.ciudad)+'.','hito');
+        hito(e.nombre+' construyó su sede: '+sig.n);
+      }});
+  }
+
+  /* ---- trasladar la sede a otra ciudad colombiana ---- */
+  function escenaTrasladarSede60(){
+    const e=S.emp;
+    asegurarEdificios60();
+    const opciones=CIUDADES.filter(c=>c.n!==e.ciudad).map(c=>{
+      const costo=Math.round(Math.max(150,e.ingresos*.4*(1+(e.edificio.nivel||0)*.6)));
+      const quedariaDeCerca=S.hogar.ciudad===c.n;
+      return {t:c.n,cat:'compania',
+        d:c.d+' Trasladar la sede aquí cuesta '+fmt(costo)+' y baja un escalón el edificio corporativo (hay que reinstalarse). '
+          +(quedariaDeCerca?'Ya vives aquí: seguirías presidiéndola de cerca.':'No vives aquí: la dirigirías a distancia hasta que también te mudes.'),
+        dis:(e.caja+capacidadDeudaDe(e))<costo?'La empresa no tiene con qué financiar el traslado':null,
+        run:()=>{
+          const pago=financiarEmpresa(e,costo,true);
+          if(!pago.ok){ log('No se pudo financiar el traslado de la sede.','mal'); return; }
+          if(pago.deuda>0) log('El traslado de la sede tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien');
+          const antes=e.ciudad;
+          e.ciudad=c.n;
+          e.edificio.nivel=Math.max(0,(e.edificio.nivel||0)-1);
+          log('Trasladaste la sede de <b>'+esc(e.nombre)+'</b> de '+esc(antes)+' a <b>'+esc(c.n)+'</b>.'+(quedariaDeCerca?'':' Vives en '+esc(S.hogar.ciudad)+', así que por ahora la dirigirías a distancia.'),'hito');
+          hito(e.nombre+' trasladó su sede a '+c.n);
+          S.mov--;
+        }};
+    });
+    escena({rubro:'Sede corporativa',titulo:'Trasladar la sede de '+esc(e.nombre),ancho:true,
+      cuerpo:'La sede queda hoy en <b>'+esc(e.ciudad)+'</b>. Elige la nueva ciudad.',
+      opciones,cerrable:true});
+  }
+  function accionTrasladarSede60(A){
+    const e=S.emp; if(!e||!presides(e)) return;
+    A.push({t:'Trasladar la sede corporativa',cat:'compania',d:'Mudar la sede de '+e.ciudad+' a otra ciudad colombiana. Un edificio nuevo cuesta empezar de cero.',mov:1,modal:true,run:()=>escenaTrasladarSede60()});
+  }
+
+  /* ---- ficha visible en la pestaña Negocios ---- */
+  function fichaSedeEdificio60(e){
+    asegurarEdificios60();
+    const niv=e.edificio.nivel, deCerca=presideDeCerca60(e);
+    let h='<h3>Sede y edificio corporativo<em>'+esc(e.ciudad)+'</em></h3><div class="family-house-tools">';
+    EDIFICIOS_60.forEach((niv2,i)=>{
+      h+='<div class="family-house-card'+(i===niv?' oro':'')+'"><div class="fh-label">'+(i===niv?'Actual':i<niv?'Superado':'Siguiente escalón')+'</div><div class="fh-title">'+esc(niv2.n)+'</div><div class="fh-meta">'+esc(niv2.d)+'</div></div>';
+    });
+    h+='</div><div class="apunte">'+(deCerca
+      ? ('Vives en '+esc(e.ciudad)+', así que puedes dirigir la sede de cerca: mejorarla o presidir sin penalidad.')
+      : ('La sede está en '+esc(e.ciudad)+' y tú vives en '+esc(S.hogar.ciudad)+': mientras no te mudes ahí, la diriges a distancia y la operación se resiente un poco cada año.'))+'</div>';
+    return h;
+  }
+  function inyectarSedeEdificio60(){
+    if(typeof tab==='undefined'||tab!=='compania'||!S||!S.emp) return;
+    const wrap=document.querySelector('#lienzoJuego .wrap'); if(!wrap) return;
+    let host=document.getElementById('sedeEdificio60');
+    if(!host){ host=document.createElement('div'); host.id='sedeEdificio60'; host.className='seccion'; wrap.appendChild(host); }
+    host.innerHTML=fichaSedeEdificio60(S.emp);
+  }
+  function wrapRenderSedeEdificio60(){
+    const old=window.render; if(typeof old!=='function'||window.__SA60_RENDER) return;
+    window.render=function(){
+      const r=old.apply(this,arguments);
+      try{ inyectarSedeEdificio60(); }catch(e){}
+      return r;
+    };
+    window.__SA60_RENDER=true;
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones60(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA60_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ asegurarEdificios60(); accionMejorarSede60(A); accionTrasladarSede60(A); }catch(e){}
+      return A;
+    };
+    window.__SA60_LISTA=true;
+  }
+  function wrapPasarAnio60(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA60_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto) asegurarEdificios60(); }catch(e){}
+      return r;
+    };
+    window.__SA60_PASO=true;
+  }
+  function init60(){ wrapListaAcciones60(); wrapPasarAnio60(); wrapRenderSedeEdificio60(); }
+  setTimeout(init60,40);
+  setTimeout(init60,220);
+  setTimeout(init60,650);
+  window.__SA60={version:V60};
 })();
 </script>
 
