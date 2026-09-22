@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v57</div>
+<div class="version-badge" id="versionBadge">v58</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13509,16 +13509,70 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const accion=(listaAcciones()||[]).find(a=>a.t==='Abrir filial en el exterior');
     if(accion) accion.run(); else render();
   }
-  function escenaMapaImperio57(){
-    const html=tableroColombia57()+tableroInternacional57();
-    const caja=escena({rubro:'Expansión',titulo:'El mapa de la casa '+esc(S.dinastia),ancho:true,
-      cuerpo:'Toca una ciudad o un país para ver qué tienes ahí y qué puedes construir o comprar.',
-      html,opciones:[],cerrable:true});
+  function escenaTableroColombia58(){
+    const html=tableroColombia57();
+    const caja=escena({rubro:'Colombia',titulo:'Ciudades de la casa '+esc(S.dinastia),ancho:true,
+      cuerpo:'Toca una ciudad para ver qué tienes ahí y qué puedes construir o comprar.',
+      html,opciones:[{t:'Volver al mapa mundial',cat:'legado',run:()=>escenaMapaImperio57()}],cerrable:true});
     caja.querySelectorAll('[data-ciudad57]').forEach(el=>{
       el.onclick=()=>{ const c=CIUDADES.find(x=>x.n===el.dataset.ciudad57); if(c) escenaCiudad57(c); };
     });
-    caja.querySelectorAll('[data-pais57]').forEach(el=>{
-      el.onclick=()=>{ const p=PAISES.find(x=>x.id===el.dataset.pais57); if(p) escenaPaisTile57(p); };
+  }
+
+  /* ---- v58: el mismo tablero, ahora sobre un mapamundi con nodos ---- */
+  const CONTINENTES_58=[
+    [[100,58],[178,40],[258,54],[300,88],[292,138],[252,168],[232,198],[202,228],[162,220],[132,180],[112,140],[92,100]],
+    [[252,224],[300,234],[330,278],[336,328],[320,378],[300,418],[276,400],[262,350],[248,300],[242,260]],
+    [[430,88],[480,68],[540,78],[560,108],[540,138],[492,148],[452,128]],
+    [[460,158],[540,153],[590,188],[610,248],[600,318],[560,373],[512,378],[472,338],[452,268],[446,208]],
+    [[560,58],[650,38],[750,44],[850,58],[930,88],[950,138],[900,178],[820,198],[750,188],[680,168],[620,148],[580,108]],
+    [[820,338],[890,328],[930,348],[936,388],[890,408],[840,398],[810,373]]
+  ];
+  const PIN_COLOMBIA_58={x:294,y:237};
+  const PIN_PAISES_58={ecuador:{x:262,y:266},peru:{x:286,y:284},mexico:{x:225,y:196},eeuu:{x:277,y:178},espana:{x:490,y:138},chile:{x:304,y:343}};
+  function blobPath58(pts){
+    const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    let d='M'+mid(pts[pts.length-1],pts[0]).join(',');
+    pts.forEach((cur,i)=>{ const next=pts[(i+1)%pts.length]; d+=' Q'+cur.join(',')+' '+mid(cur,next).join(','); });
+    return d+' Z';
+  }
+  function pin58(x,y,titulo,sub,tam,activo,dataAttr){
+    const col=activo?'#D6A648':'#5C6B60';
+    return '<g style="cursor:pointer" '+dataAttr+'><title>'+esc(titulo+(sub?' — '+sub:''))+'</title>'
+      +'<circle cx="'+x+'" cy="'+y+'" r="'+tam+'" fill="'+col+'" stroke="#F0E7D5" stroke-width="1.2"/>'
+      +(activo?'<circle cx="'+x+'" cy="'+y+'" r="'+(tam+4)+'" fill="none" stroke="'+col+'" stroke-width="1" opacity="0.6"/>':'')
+      +'<text x="'+x+'" y="'+(y-tam-6)+'" text-anchor="middle" fill="#F0E7D5" font-size="'+(tam>7?12:10)+'" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(titulo)+'</text>'
+      +'<text x="'+x+'" y="'+(y-tam-6+11)+'" text-anchor="middle" fill="#9C8F7C" font-size="8" font-family="Optima,sans-serif">'+esc(String(sub||'').slice(0,26))+'</text>'
+      +'</g>';
+  }
+  function mapaMundialSVG58(){
+    const W=1000,H=460;
+    let tierra='', rutas='', pines='';
+    CONTINENTES_58.forEach(pts=>{ tierra+='<path d="'+blobPath58(pts)+'" fill="#20362a" stroke="#3c5744" stroke-width="1.3"/>'; });
+    const c=PIN_COLOMBIA_58;
+    PAISES.forEach(pz=>{
+      const pos=PIN_PAISES_58[pz.id]; if(!pos) return;
+      const f=S.emp?filiales(S.emp).find(x=>x.pais===pz.id):null;
+      if(f) rutas+='<path d="M'+c.x+','+c.y+' Q'+((c.x+pos.x)/2)+','+(Math.min(c.y,pos.y)-46)+' '+pos.x+','+pos.y+'" fill="none" stroke="#8A6D2E" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.65"/>';
+    });
+    const subColombia='Vives en '+S.hogar.ciudad+(S.emp?' · sede de '+S.emp.nombre:'');
+    pines+=pin58(c.x,c.y,S.dinastia,subColombia,9,true,'data-region58="colombia"');
+    PAISES.forEach(pz=>{
+      const pos=PIN_PAISES_58[pz.id]; if(!pos) return;
+      const f=S.emp?filiales(S.emp).find(x=>x.pais===pz.id):null;
+      pines+=pin58(pos.x,pos.y,pz.n,f?('filial desde '+f.desde+' · '+pc(f.ret)+'/año'):'sin filial',6,!!f,'data-pais58="'+esc(pz.id)+'"');
+    });
+    return '<div style="overflow-x:auto;margin-top:8px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:640px;height:auto;background:radial-gradient(circle at 30% 20%,rgba(28,46,36,.9),rgba(10,18,14,.98))">'
+      +tierra+rutas+pines+'</svg></div>'
+      +'<div class="apunte">Un mapa estilizado, no una cartografía exacta. El punto grande es tu casa en Colombia; cada punto pequeño es un país donde tu compañía puede tener presencia. Toca cualquiera para ver el detalle.</div>';
+  }
+  function escenaMapaImperio57(){
+    const caja=escena({rubro:'Expansión',titulo:'El mapa de la casa '+esc(S.dinastia),ancho:true,
+      cuerpo:'Toca Colombia para ver tus ciudades, o un país para ver o abrir tu presencia ahí.',
+      html:mapaMundialSVG58(),opciones:[],cerrable:true});
+    caja.querySelectorAll('[data-region58="colombia"]').forEach(el=>{ el.onclick=()=>escenaTableroColombia58(); });
+    caja.querySelectorAll('[data-pais58]').forEach(el=>{
+      el.onclick=()=>{ const p=PAISES.find(x=>x.id===el.dataset.pais58); if(p) escenaPaisTile57(p); };
     });
   }
   function accionesMapa57(A){
