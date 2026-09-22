@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v55</div>
+<div class="version-badge" id="versionBadge">v56</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13042,6 +13042,343 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init55,220);
   setTimeout(init55,650);
   window.__SA55={version:V55,catalogoRD:catalogoRD55};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V56='v56';
+
+  /* ==========================================================================
+     ÁRBOL GENEALÓGICO AMPLIADO — hijos de tíos y primos, ramas colaterales
+     ========================================================================== */
+
+  // qué relación tiene el hijo de cada tipo de pariente
+  const REL_HIJO_56={
+    'hermano':'sobrino','hermana':'sobrina',
+    'tío':'primo','tía':'prima',
+    'primo':'primo segundo','prima':'prima segunda',
+    'sobrino':'pariente lejano','sobrina':'pariente lejano',
+    'primo segundo':'pariente lejano','prima segunda':'pariente lejano',
+    'pariente lejano':'pariente lejano'
+  };
+  const MAX_HIJOS_COLATERALES_56=4;
+
+  function padreColateralDe56(p){
+    if(!p||!p.padrePid) return null;
+    return (S.parientes||[]).find(x=>x.pid===p.padrePid)||null;
+  }
+  function hijosColateralesDe56(pid){ return (S.parientes||[]).filter(x=>x.padrePid===pid); }
+  function esGenPrimo56(p){
+    if(!p.padrePid) return true;
+    const pa=padreColateralDe56(p);
+    return !pa||pa.rel==='tío'||pa.rel==='tía';
+  }
+  function ramaConsagradaDe56(p,visto){
+    visto=visto||new Set();
+    if(!p||visto.has(p.pid)) return null;
+    visto.add(p.pid);
+    if(p.ramaConsagrada) return p.ramaConsagrada;
+    const pa=padreColateralDe56(p);
+    return pa?ramaConsagradaDe56(pa,visto):null;
+  }
+
+  /* enlaza primos y primos segundos "sueltos" (de antes de v56) con un tío de su rama */
+  function asegurarDescendenciaColateral56(){
+    if(S.__desc56Ok) return;
+    const P=S.parientes||[];
+    const tiosPorRama={};
+    P.forEach(p=>{ if(p.rel==='tío'||p.rel==='tía') (tiosPorRama[p.rama]=tiosPorRama[p.rama]||[]).push(p); });
+    const cursor={};
+    P.forEach(p=>{
+      if(p.padrePid) return;
+      if(p.rel==='primo'||p.rel==='prima'||p.rel==='primo segundo'||p.rel==='prima segunda'){
+        const bolsa=tiosPorRama[p.rama]||[];
+        if(!bolsa.length) return;
+        const i=cursor[p.rama]=(cursor[p.rama]||0);
+        p.padrePid=bolsa[i%bolsa.length].pid;
+        cursor[p.rama]++;
+      }
+    });
+    S.__desc56Ok=true;
+  }
+
+  function nacimientoColateral56(padre){
+    const relBase=REL_HIJO_56[padre.rel];
+    if(!relBase) return null;
+    const sexo=chance(.5)?'h':'m';
+    const rel=relBase==='pariente lejano'?'pariente lejano':relacionPorSexo(relBase,sexo);
+    const h=nuevoPariente(rel,sexo,0,padre.rama);
+    h.padrePid=padre.pid;
+    h.caudal=caudalInicial(h.rel,(S.p&&S.p.origen)||'media',h.edad);
+    asignarVia(h);
+    return h;
+  }
+
+  function correrDescendenciaColateral56(){
+    asegurarDescendenciaColateral56();
+    const nacidos=[];
+    (S.parientes||[]).slice().forEach(p=>{
+      if(!p.vivo||p.edad<20||p.edad>46) return;
+      if(!REL_HIJO_56[p.rel]) return;
+      if(hijosColateralesDe56(p.pid).length>=MAX_HIJOS_COLATERALES_56) return;
+      const prob = (p.rel==='hermano'||p.rel==='hermana') ? .05
+        : (p.rel==='tío'||p.rel==='tía') ? .045
+        : (p.rel==='primo'||p.rel==='prima') ? .04 : .022;
+      if(chance(prob)){ const h=nacimientoColateral56(p); if(h) nacidos.push({padre:p,hijo:h}); }
+    });
+    nacidos.forEach(({hijo})=>S.parientes.push(hijo));
+    if(nacidos.length){
+      const {padre,hijo}=pick(nacidos);
+      log('Nació '+(hijo.sexo==='m'?'una niña':'un niño')+' en la rama de tu '+esc(padre.rel)+' <b>'+esc(nombrePariente(padre))+'</b>: será tu '+esc(hijo.rel)+'.','hito');
+    }
+  }
+
+  /* ---------------- consagrar una rama colateral ---------------- */
+  function contarDescendencia56(pid,visto){
+    visto=visto||new Set();
+    let n=0;
+    hijosColateralesDe56(pid).forEach(h=>{ if(!visto.has(h.pid)){ visto.add(h.pid); n++; n+=contarDescendencia56(h.pid,visto); } });
+    return n;
+  }
+  function raicesDeRamaElegibles56(){
+    asegurarDescendenciaColateral56();
+    const vivos=parientesVivos();
+    const tios=vivos.filter(p=>(p.rel==='tío'||p.rel==='tía')&&!p.ramaConsagrada);
+    const ramasConTio={}; vivos.forEach(p=>{ if(p.rel==='tío'||p.rel==='tía') ramasConTio[p.rama]=true; });
+    const porRama={};
+    vivos.filter(p=>(p.rel==='primo'||p.rel==='prima')&&!p.ramaConsagrada&&!ramasConTio[p.rama]).forEach(p=>{
+      if(!porRama[p.rama]||p.edad>porRama[p.rama].edad) porRama[p.rama]=p;
+    });
+    return tios.concat(Object.values(porRama));
+  }
+  function escenaConsagrarRama56(){
+    const cands=raicesDeRamaElegibles56();
+    if(!cands.length){
+      escena({rubro:'La casa '+esc(S.dinastia),titulo:'Consagrar una rama colateral',
+        cuerpo:'No queda ninguna rama de la familia lista para consagrar: o ya están todas reconocidas, o no hay cabeza de rama viva.',
+        opciones:[{t:'Volver',cat:'familia',run:()=>{}}]});
+      return;
+    }
+    const st={sel:cands[0].pid};
+    const caja=escena({rubro:'La casa '+esc(S.dinastia),titulo:'Consagrar una rama colateral',ancho:true,
+      cuerpo:'Formalizar una rama es reconocerla como parte oficial de la casa '+esc(S.dinastia)+': queda escrita en la crónica con nombre propio, y sus descendientes ganan un lugar reconocido en el árbol.',
+      html:'<label class="campo">Cabeza de la rama</label><div class="fichas-sel" id="cRaiz56">'
+        +cands.map(c=>'<button class="opcion" data-v="'+esc(c.pid)+'" aria-pressed="'+(c.pid===st.sel?'true':'false')+'">'+esc(nombrePariente(c))+' ('+esc(c.rel)+')</button>').join('')+'</div>'
+        +'<div class="apunte" id="cInfo56"></div>'
+        +'<label class="campo">Nombre de la rama<input type="text" id="cNom56" maxlength="40" value="'+esc('Rama de '+cands[0].nombre)+'"></label>',
+      opciones:[{t:'Consagrar la rama',cat:'familia',cerrar:false,run:()=>{}}],cerrable:true});
+    const info=caja.querySelector('#cInfo56'), nomIn=caja.querySelector('#cNom56');
+    const refrescar=()=>{
+      const c=cands.find(x=>x.pid===st.sel);
+      const nd=contarDescendencia56(c.pid);
+      info.textContent=esc(nombrePariente(c))+', '+c.edad+' años. '+(nd?('Ya tiene '+nd+' descendiente'+(nd===1?'':'s')+' propio'+(nd===1?'':'s')+' registrado'+(nd===1?'':'s')+'.'):'Todavía no tiene descendencia propia registrada.');
+    };
+    caja.querySelectorAll('#cRaiz56 .opcion').forEach(b=>{
+      b.onclick=()=>{ caja.querySelectorAll('#cRaiz56 .opcion').forEach(x=>x.setAttribute('aria-pressed','false'));
+        b.setAttribute('aria-pressed','true'); st.sel=b.dataset.v;
+        const c=cands.find(x=>x.pid===st.sel); nomIn.value='Rama de '+c.nombre; refrescar(); };
+    });
+    refrescar();
+    botonEscena().onclick=()=>{
+      const c=cands.find(x=>x.pid===st.sel);
+      const nombre=(nomIn.value||'').trim()||('Rama de '+c.nombre);
+      c.ramaConsagrada=nombre;
+      parientesVivos().forEach(x=>{ if(x.pid===c.pid||x.rama===c.rama) x.afecto=clamp(x.afecto+8,0,100); });
+      cerrarModal();
+      log('Consagraste la <b>'+esc(nombre)+'</b> dentro de la casa '+esc(S.dinastia)+'. Queda reconocida en la crónica familiar.','hito');
+      hito('Consagró la '+nombre);
+      S.mov--;
+      render();
+    };
+  }
+  function accionConsagrarRama56(A){
+    if(raicesDeRamaElegibles56().length){
+      A.push({t:'Consagrar una rama colateral',cat:'familia',
+        d:'Formaliza una de las ramas laterales de la casa: le da nombre propio y un lugar reconocido en el árbol y la crónica familiar.',
+        mov:1,modal:true,run:()=>escenaConsagrarRama56()});
+    }
+  }
+
+  /* ---------------- árbol ampliado, estilo abanico ---------------- */
+  function recorte56(arr,max){ return arr.length>max?arr.slice(0,max):arr; }
+  function arbolAmplioSVG56(){
+    asegurarDescendenciaColateral56();
+    const AN=88, ALTO=86, GAPY=54, CARA=40;
+    const LINEA='#4A3C28', LINEA2='#8A6D2E';
+    const tono={yo:'#D6A648',pareja:'#6CC08F',hijo:'#D6A648',padre:'#B8863F',ancestro:'#8A6D2E',lado:'#4A3C28'};
+    const vivos=parientesVivos();
+
+    const nodoDe=(persona,pie,tonoKey,ap)=>({
+      nom:persona.nombre, ap:ap!==undefined?ap:S.dinastia, pie, sexo:persona.sexo, edad:persona.edad,
+      tono:tonoKey, consagrada:!!(persona.pid&&ramaConsagradaDe56(persona))
+    });
+    const etiquetaColateral56=p=>{
+      const pa=padreColateralDe56(p);
+      return p.rel+(pa?(' · de '+String(pa.nombre).split(' ')[0]):'');
+    };
+
+    const anc=(S.legado.ancestros||[]).slice(-3).map(a=>({
+      nom:(a.nombre||'').split(' ')[0]||'—', ap:(a.nombre||'').split(' ').slice(1).join(' '),
+      pie:'gen. '+genLabel(a.gen), sexo:'h', edad:a.edad||70, tono:'ancestro', consagrada:false}));
+
+    const padres=vivos.filter(p=>p.rel==='padre'||p.rel==='madre')
+      .map(p=>nodoDe(p,p.rel,'padre'));
+    const tiosTodos=vivos.filter(p=>p.rel==='tío'||p.rel==='tía');
+    const tiosPat=recorte56(tiosTodos.filter(p=>p.rama==='paterna'),6).map(p=>nodoDe(p,p.rel,'lado'));
+    const tiosMat=recorte56(tiosTodos.filter(p=>p.rama!=='paterna'),6).map(p=>nodoDe(p,p.rel,'lado'));
+
+    const hermanos=recorte56(vivos.filter(p=>p.rel==='hermano'||p.rel==='hermana'),6).map(p=>nodoDe(p,p.rel,'lado'));
+    const primosTodos=vivos.filter(p=>(p.rel==='primo'||p.rel==='prima'||p.rel==='primo segundo'||p.rel==='prima segunda')&&esGenPrimo56(p));
+    const primosPat=recorte56(primosTodos.filter(p=>p.rama==='paterna'),8).map(p=>nodoDe(p,p.rel,'lado'));
+    const primosMat=recorte56(primosTodos.filter(p=>p.rama!=='paterna'),8).map(p=>nodoDe(p,p.rel,'lado'));
+    const yo={nom:S.p.nombre, ap:S.p.apellido, pie:S.p.edad+' años · tú', sexo:S.p.sexo, edad:S.p.edad, tono:'yo', consagrada:false};
+    const pareja=S.familia.pareja?{nom:S.familia.pareja.nombre.split(' ')[0],
+      ap:S.familia.pareja.nombre.split(' ').slice(1).join(' '),
+      pie:S.familia.pareja.casados?'cónyuge':'pareja', sexo:S.familia.pareja.sexo,
+      edad:S.familia.pareja.edad, tono:'pareja', consagrada:false}:null;
+
+    const hijos=S.familia.hijos.map(h=>({nom:h.nombre, ap:S.p.apellido,
+      pie:h.edad+' años'+(h.adoptado?' · adoptado':''), sexo:h.sexo, edad:h.edad, tono:'hijo', consagrada:false}));
+    const sobrinos=recorte56(vivos.filter(p=>p.rel==='sobrino'||p.rel==='sobrina'),8)
+      .map(p=>nodoDe(p,etiquetaColateral56(p),'lado'));
+    const familiaLejana=recorte56(vivos.filter(p=>(p.rel==='primo segundo'||p.rel==='prima segunda'||p.rel==='pariente lejano')&&!esGenPrimo56(p)),8)
+      .map(p=>nodoDe(p,etiquetaColateral56(p),'lado'));
+
+    const filas=[];
+    if(anc.length) filas.push({id:'anc', nodos:anc, et:'los que vinieron antes'});
+    const filaPadres=tiosPat.concat(padres).concat(tiosMat);
+    if(filaPadres.length) filas.push({id:'padres', nodos:filaPadres, et:'la generación de tus padres',
+      tronco:padres.length?filaPadres.indexOf(padres[0]):0, troncoFin:padres.length?filaPadres.indexOf(padres[padres.length-1]):0});
+    const filaYo=primosPat.concat(hermanos.slice(0,Math.ceil(hermanos.length/2))).concat([yo]).concat(pareja?[pareja]:[])
+      .concat(hermanos.slice(Math.ceil(hermanos.length/2))).concat(primosMat);
+    filas.push({id:'yo', nodos:filaYo, et:'tu generación (con primos y primos segundos)',
+      tronco:filaYo.indexOf(yo), troncoFin:pareja?filaYo.indexOf(pareja):filaYo.indexOf(yo),
+      hermanosYyo:[filaYo.indexOf(yo)].concat(hermanos.map(x=>filaYo.indexOf(x)).filter(i=>i>=0))});
+    const filaHijos=hijos.concat(sobrinos).concat(familiaLejana);
+    if(filaHijos.length) filas.push({id:'hijos', nodos:filaHijos, et:'los que siguen',
+      mios:hijos.map(h=>filaHijos.indexOf(h))});
+
+    const maxN=Math.max(...filas.map(f=>f.nodos.length));
+    const W=Math.max(360, maxN*AN+30);
+    const H=filas.length*(ALTO+GAPY)+36;
+    const xDe=(f,i)=>(W-f.nodos.length*AN)/2 + i*AN + AN/2;
+    const yDe=fi=>fi*(ALTO+GAPY)+50;
+
+    const P=[];
+    filas.forEach((f,fi)=>{
+      if(fi===0) return;
+      const prev=filas[fi-1], yTop=yDe(fi)-14, yPrev=yDe(fi-1)+ALTO-10;
+      let xOrigen=null;
+      if(prev.tronco!==undefined){
+        const a=xDe(prev,prev.tronco), b=xDe(prev,prev.troncoFin===undefined?prev.tronco:prev.troncoFin);
+        xOrigen=(a+b)/2;
+        if(b!==a) P.push('<line x1="'+a+'" y1="'+(yDe(fi-1)+CARA/2+4)+'" x2="'+b+'" y2="'+(yDe(fi-1)+CARA/2+4)+'" stroke="'+LINEA2+'" stroke-width="1.6"/>');
+        P.push('<line x1="'+xOrigen+'" y1="'+yPrev+'" x2="'+xOrigen+'" y2="'+(yTop-10)+'" stroke="'+LINEA2+'" stroke-width="1.6"/>');
+      } else if(prev.id==='anc'){
+        xOrigen=xDe(prev,Math.floor(prev.nodos.length/2));
+        P.push('<line x1="'+xOrigen+'" y1="'+yPrev+'" x2="'+xOrigen+'" y2="'+(yTop-10)+'" stroke="'+LINEA+'" stroke-width="1.4" stroke-dasharray="3 3"/>');
+      }
+      const descienden = f.id==='hijos' ? (f.mios||[]) :
+        (f.id==='yo' ? (f.hermanosYyo||[]) :
+         f.nodos.map((n,i)=>i).filter(i=>f.nodos[i].tono==='padre'||f.nodos[i].tono==='lado'));
+      if(descienden.length&&xOrigen!==null){
+        const xs=descienden.map(i=>xDe(f,i));
+        const x1=Math.min(...xs,xOrigen), x2=Math.max(...xs,xOrigen);
+        P.push('<line x1="'+x1+'" y1="'+(yTop-10)+'" x2="'+x2+'" y2="'+(yTop-10)+'" stroke="'+LINEA2+'" stroke-width="1.4"/>');
+        xs.forEach(x=>P.push('<line x1="'+x+'" y1="'+(yTop-10)+'" x2="'+x+'" y2="'+yTop+'" stroke="'+LINEA2+'" stroke-width="1.4"/>'));
+      }
+    });
+    filas.forEach((f,fi)=>{
+      const y=yDe(fi);
+      P.push('<text x="6" y="'+(y-33)+'" fill="#6E6456" font-size="9.5" font-family="Optima,sans-serif">'+esc(f.et)+'</text>');
+      f.nodos.forEach((n,i)=>{
+        const x=xDe(f,i), col=tono[n.tono]||LINEA;
+        const cara=avatarSVG(n.nom+' '+(n.ap||''),{sexo:n.sexo,edad:n.edad,tam:CARA}).replace('<svg class="cara"','<svg');
+        P.push('<g transform="translate('+(x-CARA/2)+','+y+')">'+cara+'</g>');
+        if(n.tono==='yo'||n.tono==='hijo')
+          P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+2)+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>');
+        if(n.consagrada)
+          P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+5)+'" fill="none" stroke="#E0B84A" stroke-width="1.4" stroke-dasharray="2 2"/>');
+        P.push('<text x="'+x+'" y="'+(y+CARA+13)+'" text-anchor="middle" fill="#F0E7D5" font-size="10.5" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(String(n.nom).slice(0,13))+'</text>');
+        P.push('<text x="'+x+'" y="'+(y+CARA+25)+'" text-anchor="middle" fill="#9C8F7C" font-size="8.5" font-family="Optima,sans-serif">'+esc(String(n.pie).slice(0,22))+'</text>');
+      });
+    });
+
+    let ficha='';
+    if(hijos.length){ ficha+='<div class="seccion" style="margin-top:14px"><h3>Descendencia directa<em>'+hijos.length+' hijo'+(hijos.length===1?'':'s')+'</em></h3>';
+      S.familia.hijos.forEach((hh,i)=>{const etapa=hh.edad<13?'Infancia':hh.edad<18?'Adolescencia':hh.edad<25?'Juventud':'Vida adulta';const origen=hh.origen==='adopcion'?'adoptivo':hh.origen==='acogida'?'acogido de la familia':'biológico';
+        ficha+='<div class="retrato clicable" data-per="hijo::'+esc(hh.nombre)+'"><div class="fila-r">'+avatarSVG(hh.nombre+' '+S.p.apellido,{sexo:hh.sexo,edad:hh.edad,tam:48})+'<div class="quien"><div class="nom">'+(i+1)+'. '+esc(hh.nombre)+' '+esc(apellidoCompletoDeHijo(hh))+'</div><div class="rol">'+etapa+' · '+origen+' · '+hh.edad+' años</div>'+medida('vínculo',hh.vinculo,100,hh.vinculo<35?'r':'v')+'<div class="det">'+(hh.rumbo?esc(hh.rumbo):'Todavía está formando su camino')
+          +(hh.carreraEstudio&&carreraProfesionalDe(hh.carreraEstudio)?' · estudia '+esc(carreraProfesionalDe(hh.carreraEstudio).n.toLowerCase()):'')
+          +(hh.carreraProf&&carreraProfesionalDe(hh.carreraProf)?' · trabaja como '+esc(carreraProfesionalDe(hh.carreraProf).tit):'')
+          +(hh.empresaProfesional?' · tiene empresa propia':'')
+          +'. Orden de nacimiento '+(hh.orden||i+1)+'.</div></div></div></div>';});
+      ficha+='</div>'; }
+    const ramasConsagradas=[];
+    (S.parientes||[]).forEach(p=>{ if(p.vivo&&p.ramaConsagrada) ramasConsagradas.push(p); });
+    if(ramasConsagradas.length){
+      ficha+='<div class="seccion" style="margin-top:14px"><h3>Ramas consagradas<em>'+ramasConsagradas.length+'</em></h3>';
+      ramasConsagradas.forEach(r=>{
+        ficha+='<div class="retrato"><div class="fila-r">'+avatarSVG(nombrePariente(r),{sexo:r.sexo,edad:r.edad,tam:44})
+          +'<div class="quien"><div class="nom">'+esc(r.ramaConsagrada)+'</div><div class="rol">Cabeza: '+esc(nombrePariente(r))+' ('+esc(r.rel)+')</div>'
+          +'<div class="det">'+contarDescendencia56(r.pid)+' descendiente'+(contarDescendencia56(r.pid)===1?'':'s')+' en la rama.</div></div></div></div>';
+      });
+      ficha+='</div>';
+    }
+    return '<div style="overflow-x:auto;margin-top:12px;padding-bottom:6px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:'+Math.min(W,600)+'px;height:auto">'+P.join('')+'</svg></div>'
+      +'<div class="apunte"><b>Casa '+esc(S.dinastia)+'</b>. El aro dorado marca tu tronco; el aro punteado, una rama consagrada. Toca "Consagrar una rama colateral" para reconocer formalmente a un tío o primo y su descendencia.</div>'+ficha;
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapArbolSVG56(){
+    const old=window.arbolSVG; if(typeof old!=='function'||window.__SA56_ARBOL) return;
+    window.arbolSVG=function(){
+      try{ return arbolAmplioSVG56(); }catch(e){ return old.apply(this,arguments); }
+    };
+    window.__SA56_ARBOL=true;
+  }
+  function wrapGenerarParentela56(){
+    const old=window.generarParentela; if(typeof old!=='function'||window.__SA56_GEN) return;
+    window.generarParentela=function(){
+      const r=old.apply(this,arguments);
+      try{ S.__desc56Ok=false; asegurarDescendenciaColateral56(); }catch(e){}
+      return r;
+    };
+    window.__SA56_GEN=true;
+  }
+  function wrapPasarAnio56(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA56_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto) correrDescendenciaColateral56(); }catch(e){}
+      return r;
+    };
+    window.__SA56_PASO=true;
+  }
+  function wrapListaAcciones56(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA56_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionConsagrarRama56(A); }catch(e){}
+      return A;
+    };
+    window.__SA56_LISTA=true;
+  }
+  function wrapCatDe56(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA56_CATDE) return;
+    window.catDe=function(t){
+      if(/Consagrar (una )?rama colateral/i.test(t)) return 'familia';
+      return old.apply(this,arguments);
+    };
+    window.__SA56_CATDE=true;
+  }
+  function init56(){ wrapGenerarParentela56(); wrapPasarAnio56(); wrapListaAcciones56(); wrapCatDe56(); wrapArbolSVG56(); }
+  setTimeout(init56,40);
+  setTimeout(init56,220);
+  setTimeout(init56,650);
+  window.__SA56={version:V56};
 })();
 </script>
 
