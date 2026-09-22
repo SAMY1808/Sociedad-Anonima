@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v69</div>
+<div class="version-badge" id="versionBadge">v70</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -14604,16 +14604,16 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':''),
       opciones:[
         {t:'Ver el reparto del sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(r.sector)},
-        {t:'Proponer una alianza comercial',cat:'compania',d:'Cuesta '+fmt(costoAlianza)+'. Mejora la relación entre las dos casas.',
-         dis:S.efectivo<costoAlianza?'No te alcanza':null,cerrar:false,
+        {t:'Proponer una alianza comercial',cat:'compania',d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'En guerra no se negocia así: propón una tregua desde el frente de guerra.':'Cuesta '+fmt(costoAlianza)+'. Mejora la relación entre las dos casas.',
+         dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Estás en guerra con ellos':(S.efectivo<costoAlianza?'No te alcanza':null),cerrar:false,
          run:()=>{
            S.efectivo-=costoAlianza; r.relacionCasa=clamp((r.relacionCasa||50)+12,0,100); moverPrestigio(1,'');
            log('Propusiste una alianza comercial a los <b>'+esc(r.apellido)+'</b>. La relación entre las casas mejoró.','bien');
            S.mov--; cerrarModal(); render();
          }},
         {t:'Buscar la confrontación',cat:'riesgo',
-         d:miSector?'Les disputas mercado en '+(s?s.n:r.sector)+'. Puede salir bien o mal.':'Solo tiene sentido si compites en su mismo sector.',
-         dis:!miSector?'No estás en el mismo negocio que ellos':null,cerrar:false,
+         d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra empresarial con ellos: usa el frente de guerra.':(miSector?'Les disputas mercado en '+(s?s.n:r.sector)+'. Puede salir bien o mal.':'Solo tiene sentido si compites en su mismo sector.'),
+         dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra con ellos':(!miSector?'No estás en el mismo negocio que ellos':null),cerrar:false,
          run:()=>{
            const miPoder=(S.emp.marca+S.emp.eficiencia)/2, suPoder=(r.capaz||5)*10;
            const gana=chance(clamp(.4+(miPoder-suPoder)/300,.15,.85));
@@ -14634,9 +14634,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           if(c&&typeof window.irAlMapa59==='function'&&typeof window.escenaCiudad57==='function'){
             window.irAlMapa59(); setTimeout(()=>window.escenaCiudad57(c),60);
           }
-        }},
-        {t:'Volver',cat:'legado',cerrar:false,run:()=>escenaCasasRivales64()}
-      ],cerrable:true});
+        }}
+      ].concat((typeof window.opcionGuerraEmpresarial70==='function')?window.opcionGuerraEmpresarial70(r):[])
+        .concat([{t:'Volver',cat:'legado',cerrar:false,run:()=>escenaCasasRivales64()}]),cerrable:true});
   }
   window.escenaRivalDetalle64=escenaRivalDetalle64;
   function escenaCasasRivales64(){
@@ -14646,8 +14646,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       cuerpo:vivas.length?'Cada una de estas casas compite por el mismo país que tú. Con algunas puedes aliarte; con otras, chocar de frente.':'Todavía no ha surgido ninguna casa rival digna de mención.',
       opciones:vivas.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{
         const s=SECTORES.find(x=>x.id===r.sector);
-        return {t:'Los '+r.apellido,cat:'compania',
-          d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+pc(cuotaDeRival64(r))+' del sector · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r),
+        const enGuerra=window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r);
+        return {t:(enGuerra?'⚔ ':'')+'Los '+r.apellido,cat:'compania',
+          d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+pc(cuotaDeRival64(r))+' del sector · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r)+(enGuerra?' · en guerra':''),
           cerrar:false, run:()=>escenaRivalDetalle64(r)};
       }).concat(S.emp?[{t:'Cuota de mercado de tu sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(S.emp.sector)}]:[])
         .concat([{t:'Cerrar',cat:'legado',run:()=>{}}]),
@@ -14913,6 +14914,223 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init69,220);
   setTimeout(init69,650);
   window.__SA69={version:V69};
+})();
+</script>
+
+
+<script>
+/* ==========================================================================
+   v70 · GUERRA EMPRESARIAL ENTRE CASAS
+   La relación con una casa rival dejaba de ser texto y pasaba a la acción
+   con "Proponer una alianza comercial" y "Buscar la confrontación" (v64),
+   pero ambas eran gestos sueltos, de un solo golpe. Esta entrega convierte
+   la rivalidad en una campaña real de varios años: declaras la guerra a una
+   casa y, mientras dure, puedes sabotearlos, hacerles la guerra de precios,
+   ficharles ejecutivos, atacarlos en la prensa y, si cotizan en bolsa,
+   rematar con una toma hostil (la que ya existía en el juego — no se
+   duplicó esa mecánica). Otras casas rivales toman partido según qué tan
+   bien o mal te llevas con ellas, y el enemigo también contraataca cada
+   año. La guerra termina si lo derrotas, si te absorbe la mitad de su
+   compañía, o si propones una tregua.
+   ========================================================================== */
+(function(){
+  const V70='v70';
+
+  function golpeGuerra70(texto,quien){
+    const g=S.guerraEmpresarial; if(!g) return;
+    g.golpes=(g.golpes||[]).concat([{anio:S.anio,texto,quien}]).slice(-10);
+  }
+  function bonoAliados70(g){
+    return clamp(((g.aliadosMios||[]).length-(g.aliadosRival||[]).length)*.04,-.2,.2);
+  }
+  function enGuerraCon70(r){ return !!(S.guerraEmpresarial && r && S.guerraEmpresarial.rid===r.rid); }
+
+  function iniciarGuerra70(r){
+    const aliadosMios=rivalesVivas().filter(x=>x.rid!==r.rid&&(x.relacionCasa||50)>=65).map(x=>x.apellido);
+    const aliadosRival=rivalesVivas().filter(x=>x.rid!==r.rid&&(x.relacionCasa||50)<=25).map(x=>x.apellido);
+    S.guerraEmpresarial={rid:r.rid,apellido:r.apellido,desde:S.anio,intensidad:15,aliadosMios,aliadosRival,golpes:[]};
+    r.relacionCasa=clamp((r.relacionCasa||50)-30,0,100);
+    log('Le declaraste la guerra empresarial a los <b>'+esc(r.apellido)+'</b>.','hito');
+    hito('Declaró la guerra empresarial a los '+r.apellido);
+  }
+  function escenaDeclararGuerra70(r){
+    const s=SECTORES.find(x=>x.id===r.sector);
+    escena({rubro:'Guerra empresarial',titulo:'¿Declarar la guerra a los '+esc(r.apellido)+'?',ancho:true,
+      cuerpo:'Mientras dure, no vas a poder declararle la guerra a otra casa. Vas a poder sabotearlos, hacerles la guerra de precios en '
+        +(s?s.n.toLowerCase():'su sector')+', ficharles ejecutivos, atacarlos en la prensa y, si cotizan en bolsa, intentar quedarte con su compañía. Ellos también van a responder, y otras casas pueden tomar partido según qué tan bien se lleven contigo.',
+      opciones:[
+        {t:'Declarar la guerra',cat:'riesgo',cerrar:false,run:()=>{
+          iniciarGuerra70(r); cerrarModal(); escenaGuerraEmpresarial70();
+        }},
+        {t:'Mejor no',cat:'legado',cerrar:false,run:()=>{}}
+      ],cerrable:true});
+  }
+  function opcionGuerraEmpresarial70(r){
+    const g=S.guerraEmpresarial;
+    if(enGuerraCon70(r)) return [{t:'⚔ Ir al frente de guerra',cat:'riesgo',cerrar:true,run:()=>escenaGuerraEmpresarial70()}];
+    if(g) return [{t:'Declarar la guerra empresarial',cat:'riesgo',dis:'Ya estás en guerra con los '+g.apellido,cerrar:false,run:()=>{}}];
+    return [{t:'Declarar la guerra empresarial',cat:'riesgo',
+      d:'Sabotaje, guerra de precios, campañas de prensa y, si cotizan en bolsa, una toma hostil. No hay vuelta atrás fácil.',
+      cerrar:true, run:()=>escenaDeclararGuerra70(r)}];
+  }
+  window.opcionGuerraEmpresarial70=opcionGuerraEmpresarial70;
+
+  function escenaGuerraEmpresarial70(){
+    const g=S.guerraEmpresarial;
+    if(!g){ render(); return; }
+    const r=(S.rivales||[]).find(x=>x.rid===g.rid);
+    if(!r||!r.viva){ revisarResolucionGuerra70(); render(); return; }
+    const s=SECTORES.find(x=>x.id===r.sector);
+    const miSector=!!(S.emp&&S.emp.sector===r.sector);
+    const bono=bonoAliados70(g);
+    const opciones=[];
+    opciones.push({t:'Guerra de precios',cat:'riesgo',
+      d:miSector?'Bajas precios para asfixiarlos en '+(s?s.n:r.sector)+'.':'Solo sirve si compites en su mismo sector.',
+      dis:!miSector?'No compites con ellos en el mismo sector':null,cerrar:false,
+      run:()=>{
+        const miPoder=(S.emp.marca+S.emp.eficiencia)/2*(1+bono), suPoder=(r.capaz||5)*10;
+        const gana=chance(clamp(.45+(miPoder-suPoder)/280,.15,.88));
+        if(gana){
+          const robo=r.patrimonio*rnd(.04,.08); r.patrimonio=Math.max(1,r.patrimonio-robo); S.emp.ingresos+=robo*.12;
+          golpeGuerra70('Ganaste terreno con una guerra de precios: '+fmt(robo)+' menos para ellos.','tu');
+          log('Le ganaste terreno a los <b>'+esc(r.apellido)+'</b> con una guerra de precios.','bien');
+        } else {
+          const golpe=S.emp.ingresos*rnd(.03,.06); S.emp.ingresos=Math.max(0,S.emp.ingresos-golpe);
+          golpeGuerra70('La guerra de precios te costó '+fmt(golpe)+' en ingresos.','rival');
+          log('Los <b>'+esc(r.apellido)+'</b> aguantaron: te costó '+fmt(golpe)+' en ingresos.','mal');
+        }
+        g.intensidad=clamp(g.intensidad+10,0,100);
+        S.mov--; cerrarModal(); revisarResolucionGuerra70(); render();
+      }});
+    const costoSabotaje=Math.max(20,patrimonio()*.01);
+    opciones.push({t:'Sabotaje',cat:'riesgo',d:'Cuesta '+fmt(costoSabotaje)+'. Si te descubren, te sale caro en prestigio.',
+      dis:S.efectivo<costoSabotaje?'No te alcanza':null,cerrar:false,
+      run:()=>{
+        S.efectivo-=costoSabotaje;
+        if(chance(clamp(.55+bono,.25,.85))){
+          const danio=r.patrimonio*rnd(.05,.11); r.patrimonio=Math.max(1,r.patrimonio-danio);
+          golpeGuerra70('Un sabotaje les costó '+fmt(danio)+'.','tu');
+          log('El sabotaje contra los <b>'+esc(r.apellido)+'</b> les costó '+fmt(danio)+'.','bien');
+        } else {
+          const multa=costoSabotaje*rnd(.8,1.6); S.efectivo=Math.max(0,S.efectivo-multa);
+          moverPrestigio(-ri(2,5),'un sabotaje que se supo');
+          golpeGuerra70('Te descubrieron intentando sabotear a los '+r.apellido+'.','rival');
+          log('Te descubrieron saboteando a los <b>'+esc(r.apellido)+'</b>: '+fmt(multa)+' más y golpe al prestigio.','mal');
+        }
+        g.intensidad=clamp(g.intensidad+16,0,100);
+        S.mov--; cerrarModal(); revisarResolucionGuerra70(); render();
+      }});
+    const costoFichar=Math.max(25,(r.patrimonio||500)*.012);
+    opciones.push({t:'Fichar a sus ejecutivos',cat:'empleo',d:'Cuesta '+fmt(costoFichar)+'. Les baja capacidad de respuesta; a ti te sube eficiencia.',
+      dis:S.efectivo<costoFichar?'No te alcanza':null,cerrar:false,
+      run:()=>{
+        S.efectivo-=costoFichar; r.capaz=Math.max(1,(r.capaz||5)-ri(1,2));
+        if(S.emp) S.emp.eficiencia=clamp(S.emp.eficiencia+ri(1,3),0,100);
+        golpeGuerra70('Les quitaste ejecutivos clave.','tu');
+        log('Le fichaste ejecutivos a los <b>'+esc(r.apellido)+'</b>.','bien');
+        g.intensidad=clamp(g.intensidad+8,0,100);
+        S.mov--; cerrarModal(); revisarResolucionGuerra70(); render();
+      }});
+    const costoPrensa=Math.max(15,patrimonio()*.008);
+    opciones.push({t:'Campaña de prensa',cat:'riesgo',d:'Cuesta '+fmt(costoPrensa)+'. Les pega en el prestigio si sale bien; a ti si sale mal.',
+      dis:S.efectivo<costoPrensa?'No te alcanza':null,cerrar:false,
+      run:()=>{
+        S.efectivo-=costoPrensa;
+        if(chance(clamp(.6+bono,.3,.88))){
+          r.prestigio=clamp(r.prestigio-ri(5,11),0,100);
+          golpeGuerra70('Una campaña de prensa les pegó en el prestigio.','tu');
+          log('La campaña de prensa contra los <b>'+esc(r.apellido)+'</b> les pegó en el prestigio.','bien');
+        } else {
+          moverPrestigio(-ri(2,4),'una campaña de prensa que se devolvió');
+          golpeGuerra70('La campaña de prensa se te devolvió.','rival');
+          log('La campaña de prensa contra los <b>'+esc(r.apellido)+'</b> se te devolvió.','mal');
+        }
+        g.intensidad=clamp(g.intensidad+9,0,100);
+        S.mov--; cerrarModal(); revisarResolucionGuerra70(); render();
+      }});
+    if(r.cotiza) opciones.push({t:'Lanzar una toma hostil',cat:'capital',d:'La jugada final: comprarles la compañía por encima del mercado.',cerrar:true,
+      run:()=>{ escenaOPA(r); }});
+    opciones.push({t:'Proponer una tregua',cat:'legado',cerrar:false,run:()=>{
+      r.relacionCasa=clamp((r.relacionCasa||10)+20,0,100);
+      log('Propusiste una tregua a los <b>'+esc(r.apellido)+'</b>. La guerra terminó sin vencedor claro.','hito');
+      hito('Hizo las paces con los '+r.apellido+' tras la guerra empresarial');
+      S.guerraEmpresarial=null;
+      S.mov--; cerrarModal(); render();
+    }});
+    opciones.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{}});
+
+    escena({rubro:'Guerra empresarial',titulo:'El frente contra los '+esc(r.apellido),ancho:true,
+      cuerpo:'En guerra desde '+g.desde+' ('+(S.anio-g.desde)+' año'+(S.anio-g.desde===1?'':'s')+'). Intensidad: '+Math.round(g.intensidad)+'/100.'
+        +(g.aliadosMios.length?' A tu lado: '+g.aliadosMios.map(a=>'los '+a).join(', ')+'.':'')
+        +(g.aliadosRival.length?' Con ellos: '+g.aliadosRival.map(a=>'los '+a).join(', ')+'.':''),
+      html:(g.golpes&&g.golpes.length)?'<div class="apunte"><b>Últimos golpes</b><br>'+g.golpes.slice(-5).reverse().map(x=>x.anio+' — '+esc(x.texto)).join('<br>')+'</div>':'',
+      opciones,cerrable:true});
+  }
+  window.escenaGuerraEmpresarial70=escenaGuerraEmpresarial70;
+
+  function revisarResolucionGuerra70(){
+    const g=S.guerraEmpresarial; if(!g) return;
+    const r=(S.rivales||[]).find(x=>x.rid===g.rid);
+    if(!r||!r.viva){
+      moverPrestigio(10,'ganaste la guerra empresarial contra los '+g.apellido);
+      log('<b>Ganaste la guerra empresarial contra los '+esc(g.apellido)+'</b>: la casa quedó desecha.','hito');
+      hito('Ganó la guerra empresarial contra los '+g.apellido);
+      S.guerraEmpresarial=null;
+      return;
+    }
+    if(miPctEn(r)>=.5){
+      log('La guerra empresarial contra los <b>'+esc(g.apellido)+'</b> terminó con la absorción de su compañía.','hito');
+      S.guerraEmpresarial=null;
+      return;
+    }
+  }
+  function contragolpeRival70(){
+    const g=S.guerraEmpresarial; if(!g) return;
+    const r=(S.rivales||[]).find(x=>x.rid===g.rid); if(!r||!r.viva) return;
+    const bono=bonoAliados70(g);
+    if(!chance(clamp(.28+(r.agresiva?.15:0)-bono,.1,.65))) return;
+    if(S.emp&&S.emp.sector===r.sector&&chance(.5)){
+      const golpe=S.emp.ingresos*rnd(.02,.05); S.emp.ingresos=Math.max(0,S.emp.ingresos-golpe);
+      golpeGuerra70('Los '+r.apellido+' te bajaron '+fmt(golpe)+' en ingresos con precios agresivos.','rival');
+      log('Los <b>'+esc(r.apellido)+'</b> te golpearon con precios agresivos: '+fmt(golpe)+' menos en ingresos.','mal');
+    } else {
+      const golpe=ri(2,6); moverPrestigio(-golpe,'un golpe de los '+r.apellido+' en la guerra empresarial');
+      golpeGuerra70('Los '+r.apellido+' lanzaron una campaña contra tu nombre.','rival');
+      log('Los <b>'+esc(r.apellido)+'</b> lanzaron una campaña contra tu nombre.','mal');
+    }
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones70(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA70_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        const g=S.guerraEmpresarial;
+        if(g && !A.some(x=>x.t==='La guerra con los '+g.apellido)){
+          A.unshift({t:'La guerra con los '+g.apellido,cat:'riesgo',d:'Intensidad '+Math.round(g.intensidad)+'/100. Elige tu próximo golpe.',mov:0,modal:true,run:()=>escenaGuerraEmpresarial70()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA70_LISTA=true;
+  }
+  function wrapPasarAnio70(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA70_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ contragolpeRival70(); revisarResolucionGuerra70(); }catch(e){}
+      return r;
+    };
+    window.__SA70_PASO=true;
+  }
+  function init70(){ wrapListaAcciones70(); wrapPasarAnio70(); }
+  setTimeout(init70,40);
+  setTimeout(init70,220);
+  setTimeout(init70,650);
+  window.__SA70={version:V70, enGuerraCon:enGuerraCon70};
 })();
 </script>
 
