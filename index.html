@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v56</div>
+<div class="version-badge" id="versionBadge">v57</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13379,6 +13379,188 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init56,220);
   setTimeout(init56,650);
   window.__SA56={version:V56};
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+  const V57='v57';
+
+  /* ==========================================================================
+     MAPA DE EXPANSIÓN — tablero de Colombia y presencia internacional
+     ========================================================================== */
+
+  /* ---- truco seguro para reusar "Comprar un terreno/finca/para arrendar"
+     en una ciudad distinta a S.hogar.ciudad, sin duplicar su lógica: se
+     sobreescribe S.hogar.ciudad justo antes de disparar la acción original,
+     y se restaura apenas el siguiente render() confirma que ya se usó. */
+  function lanzarEnCiudad57(ciudad,tituloAccion){
+    window.__SA57_CIUDAD_ORIG=S.hogar.ciudad;
+    window.__SA57_CIUDAD_ACTIVA=true;
+    S.hogar.ciudad=ciudad;
+    cerrarModal();
+    const accion=(listaAcciones()||[]).find(a=>a.t===tituloAccion);
+    if(accion) accion.run();
+    else { S.hogar.ciudad=window.__SA57_CIUDAD_ORIG; window.__SA57_CIUDAD_ACTIVA=false; render(); }
+  }
+  function wrapRenderRestaurarCiudad57(){
+    const old=window.render; if(typeof old!=='function'||window.__SA57_RENDER) return;
+    window.render=function(){
+      const r=old.apply(this,arguments);
+      try{
+        if(window.__SA57_CIUDAD_ACTIVA){ S.hogar.ciudad=window.__SA57_CIUDAD_ORIG; window.__SA57_CIUDAD_ACTIVA=false; }
+      }catch(e){}
+      return r;
+    };
+    window.__SA57_RENDER=true;
+  }
+
+  function construirPlantaEnCiudad57(ciudad){
+    cerrarModal();
+    const e=S.emp;
+    const accion=(listaAcciones()||[]).find(a=>a.t==='Construir una planta nueva');
+    if(!accion||!e){ render(); return; }
+    accion.run();
+    e.plantas57=e.plantas57||[];
+    e.plantas57.push({ciudad,anio:S.anio,restan:3});
+    render();
+  }
+  function correrPlantas57(){
+    companias().forEach(e=>{ (e.plantas57||[]).forEach(p=>{ if(p.restan>0) p.restan--; }); });
+  }
+
+  /* ---- el tablero de Colombia ---- */
+  function tarjetaCiudad57(c){
+    const propios=(S.bienes||[]).filter(b=>b.ciudad===c.n);
+    const terrenos=propios.filter(b=>b.clase==='terreno').length;
+    const fincas=propios.filter(b=>b.clase==='finca').length;
+    const rentas=propios.filter(b=>b.clase==='renta').length;
+    const plantas=((S.emp&&S.emp.plantas57)||[]).filter(p=>p.ciudad===c.n);
+    const badges=[];
+    if(S.hogar&&S.hogar.ciudad===c.n) badges.push('🏠 vives aquí');
+    if(terrenos) badges.push('🏗 '+terrenos+' terreno'+(terrenos===1?'':'s'));
+    if(fincas) badges.push('🌾 '+fincas+' finca'+(fincas===1?'':'s'));
+    if(rentas) badges.push('🏢 '+rentas+' renta'+(rentas===1?'':'s'));
+    if(plantas.length) badges.push('🏭 '+plantas.length+' planta'+(plantas.length===1?'':'s')+(plantas.some(p=>p.restan>0)?' (en obra)':''));
+    const tieneAlgo=terrenos+fincas+rentas+plantas.length>0;
+    return '<button type="button" class="family-house-card'+(tieneAlgo?' oro':'')+'" style="text-align:left;cursor:pointer" data-ciudad57="'+esc(c.n)+'">'
+      +'<div class="fh-label">Colombia</div><div class="fh-title">'+esc(c.n)+'</div>'
+      +'<div class="fh-meta">'+(badges.length?badges.join(' · '):'Sin presencia todavía')+'</div></button>';
+  }
+  function tableroColombia57(){
+    return '<div class="seccion"><h3>Colombia<em>'+CIUDADES.length+' ciudades</em></h3>'
+      +'<div class="family-house-tools">'+CIUDADES.map(tarjetaCiudad57).join('')+'</div></div>';
+  }
+  function tarjetaPais57(pz){
+    const e=S.emp;
+    const f=e?filiales(e).find(x=>x.pais===pz.id):null;
+    return '<button type="button" class="family-house-card'+(f?' oro':'')+'" style="text-align:left;cursor:pointer" data-pais57="'+esc(pz.id)+'">'
+      +'<div class="fh-label">Exterior</div><div class="fh-title">'+esc(pz.n)+'</div>'
+      +'<div class="fh-meta">'+(f?('🌍 filial desde '+f.desde+' · rinde '+pc(f.ret)+'/año'):'Sin filial todavía')+'</div></button>';
+  }
+  function tableroInternacional57(){
+    return '<div class="seccion" style="margin-top:14px"><h3>Presencia internacional<em>'+PAISES.length+' países</em></h3>'
+      +'<div class="family-house-tools">'+PAISES.map(tarjetaPais57).join('')+'</div>'
+      +'<div class="apunte">Estos países son los de expansión de la compañía. Para dónde vives o trabajas tú en el exterior, sigue en Hogar → residencia internacional.</div></div>';
+  }
+
+  function escenaCiudad57(c){
+    const propios=(S.bienes||[]).filter(b=>b.ciudad===c.n);
+    const plantas=((S.emp&&S.emp.plantas57)||[]).filter(p=>p.ciudad===c.n);
+    let html='';
+    if(propios.length||plantas.length){
+      html+='<div class="seccion"><h3>Lo que ya tienes aquí</h3>';
+      propios.forEach(b=>{ html+='<div class="retrato"><div class="quien"><div class="nom">'+esc(b.nombre)+'</div><div class="rol">'+esc(b.clase)+' · valor '+fmt(b.valor)+'</div></div></div>'; });
+      plantas.forEach(p=>{ html+='<div class="retrato"><div class="quien"><div class="nom">Planta industrial</div><div class="rol">'+(p.restan>0?('en obra, faltan '+p.restan+' año'+(p.restan===1?'':'s')):('operando desde '+p.anio))+'</div></div></div>'; });
+      html+='</div>';
+    }
+    const opciones=[
+      {t:'Comprar un terreno aquí',cat:'casa',cerrar:false,run:()=>lanzarEnCiudad57(c.n,'Comprar un terreno')},
+      {t:'Comprar finca aquí',cat:'casa',cerrar:false,run:()=>lanzarEnCiudad57(c.n,'Comprar finca')},
+      {t:'Comprar para arrendar aquí',cat:'casa',cerrar:false,run:()=>lanzarEnCiudad57(c.n,'Comprar para arrendar')}
+    ];
+    if(S.emp) opciones.push({t:'Construir una planta aquí',cat:'compania',cerrar:false,
+      dis:(S.emp.caja+capacidadDeudaDe(S.emp))<S.emp.ingresos*.35?'La empresa no tiene con qué financiarla':null,
+      run:()=>construirPlantaEnCiudad57(c.n)});
+    opciones.push({t:'Volver al mapa',cat:'legado',run:()=>escenaMapaImperio57()});
+    escena({rubro:'Ciudad',titulo:esc(c.n),ancho:true,
+      cuerpo:esc(c.d)+' '+(S.hogar&&S.hogar.ciudad===c.n?'Es donde vives hoy.':'No vives aquí, pero puedes construir o comprar de todas formas.'),
+      html,opciones,cerrable:true});
+  }
+  function escenaPaisTile57(pz){
+    const e=S.emp;
+    const f=e?filiales(e).find(x=>x.pais===pz.id):null;
+    if(f){
+      escena({rubro:'Presencia internacional',titulo:esc(pz.n),ancho:true,
+        cuerpo:esc(pz.d)+' Tienes una filial ahí desde '+f.desde+', que arrancó con '+fmt(f.base)+' y rinde cerca de '+pc(f.ret)+' al año en '+(f.div==='eur'?'euros':'dólares')+'.',
+        opciones:[{t:'Volver al mapa',cat:'legado',run:()=>escenaMapaImperio57()}],cerrable:true});
+      return;
+    }
+    const elegible=e&&S.carrera.ruta==='fundador'&&e.ingresos>2500;
+    if(!elegible){
+      escena({rubro:'Presencia internacional',titulo:esc(pz.n),ancho:true,
+        cuerpo:esc(pz.d)+' '+(!e?'Necesitas una compañía propia para abrir una filial aquí.'
+          :S.carrera.ruta!=='fundador'?'Solo quien está al frente de la compañía puede abrir filiales.'
+          :'La compañía todavía no factura lo suficiente para dar este paso.'),
+        opciones:[{t:'Volver al mapa',cat:'legado',run:()=>escenaMapaImperio57()}],cerrable:true});
+      return;
+    }
+    cerrarModal();
+    const accion=(listaAcciones()||[]).find(a=>a.t==='Abrir filial en el exterior');
+    if(accion) accion.run(); else render();
+  }
+  function escenaMapaImperio57(){
+    const html=tableroColombia57()+tableroInternacional57();
+    const caja=escena({rubro:'Expansión',titulo:'El mapa de la casa '+esc(S.dinastia),ancho:true,
+      cuerpo:'Toca una ciudad o un país para ver qué tienes ahí y qué puedes construir o comprar.',
+      html,opciones:[],cerrable:true});
+    caja.querySelectorAll('[data-ciudad57]').forEach(el=>{
+      el.onclick=()=>{ const c=CIUDADES.find(x=>x.n===el.dataset.ciudad57); if(c) escenaCiudad57(c); };
+    });
+    caja.querySelectorAll('[data-pais57]').forEach(el=>{
+      el.onclick=()=>{ const p=PAISES.find(x=>x.id===el.dataset.pais57); if(p) escenaPaisTile57(p); };
+    });
+  }
+  function accionesMapa57(A){
+    A.push({t:'Ver el mapa de expansión',cat:'casa',d:'Terrenos, fincas y rentas disponibles en cada ciudad del país, y tu presencia en el exterior.',mov:0,modal:true,run:()=>escenaMapaImperio57()});
+    if(S.emp) A.push({t:'Ver el mapa de la compañía',cat:'compania',d:'Dónde tienes plantas y filiales, y qué falta por construir.',mov:0,modal:true,run:()=>escenaMapaImperio57()});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones57(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA57_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{ accionesMapa57(A); }catch(e){}
+      return A;
+    };
+    window.__SA57_LISTA=true;
+  }
+  function wrapCatDe57(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA57_CATDE) return;
+    window.catDe=function(t){
+      if(/Ver el mapa de expansi[oó]n/i.test(t)) return 'casa';
+      if(/Ver el mapa de la compa[ñn][ií]a/i.test(t)) return 'compania';
+      return old.apply(this,arguments);
+    };
+    window.__SA57_CATDE=true;
+  }
+  function wrapPasarAnio57(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA57_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ if(typeof S!=='undefined'&&S&&!S.muerto) correrPlantas57(); }catch(e){}
+      return r;
+    };
+    window.__SA57_PASO=true;
+  }
+  function init57(){ wrapListaAcciones57(); wrapCatDe57(); wrapPasarAnio57(); wrapRenderRestaurarCiudad57(); }
+  setTimeout(init57,40);
+  setTimeout(init57,220);
+  setTimeout(init57,650);
+  window.__SA57={version:V57};
 })();
 </script>
 
