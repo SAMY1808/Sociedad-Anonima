@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v66</div>
+<div class="version-badge" id="versionBadge">v68</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8702,18 +8702,18 @@ function pantallaFinal(){
    ========================================================================== */
 const CLAVE='sociedad-anonima:partida';
 async function guardar(silencio){
-  try{ await window.storage.set(CLAVE,JSON.stringify(S)); if(!silencio) aviso('Partida guardada.'); }
+  try{ localStorage.setItem(CLAVE,JSON.stringify(S)); if(!silencio) aviso('Partida guardada en este navegador.'); }
   catch(err){
     if(silencio) return;
     escena({rubro:'Copia manual',titulo:'Guarda este código',
-      cuerpo:'Aquí no hay dónde guardar solo. Copia el código y guárdalo en una nota: con <b>Entrar con un código</b> vuelves a esta misma partida.',
+      cuerpo:'Este navegador no permite guardar solo (por ejemplo, en modo privado). Copia el código y guárdalo en una nota: con <b>Entrar con un código</b> vuelves a esta misma partida.',
       html:'<label class="campo">Código<input type="text" id="volcado" readonly></label>',
       opciones:[{t:'Listo',cat:'legado',run:()=>{}}]});
     const i=$('volcado'); if(i){ i.value=codigoPartida(); i.select(); }
   }
 }
-async function cargar(){ try{ const r=await window.storage.get(CLAVE); if(!r||!r.value) return null; return JSON.parse(r.value); }catch(e){ return null; } }
-async function localBorrar(){ try{ await window.storage.delete(CLAVE); }catch(e){} }
+async function cargar(){ try{ const raw=localStorage.getItem(CLAVE); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+async function localBorrar(){ try{ localStorage.removeItem(CLAVE); }catch(e){} }
 function codigoPartida(){ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }
 function aviso(t){
   if(typeof document==='undefined'||!document.body) return;
@@ -8797,13 +8797,7 @@ $('btnCodigo').onclick=modalCodigo;
 $('btnGuardar').onclick=()=>guardar(false);
 $('btnAnio').onclick=()=>{ if(!S||S.muerto) return; $('btnAnio').disabled=true; setTimeout(()=>{ pasarAnio(); $('btnAnio').disabled=false; },10); };
 (async()=>{
-  // el almacenamiento puede tardar en estar disponible: se reintenta un rato
-  let g=null;
-  for(let i=0;i<8&&!g;i++){
-    if(typeof window!=='undefined'&&window.storage){ g=await cargar(); break; }
-    await new Promise(r=>setTimeout(r,120));
-  }
-  if(!g&&typeof window!=='undefined'&&window.storage) g=await cargar();
+  const g=await cargar();
   if(g&&g.p){ const b=$('btnCargar'); b.classList.remove('oculto');
     b.onclick=()=>{ S=g; S.patrPintado=undefined; migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); render(); }; }
 })();
@@ -14318,14 +14312,71 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     'Cartagena':[
       {id:'unicartagena',n:'Universidad de Cartagena',tier:'publica',calidad:5,prest:1,d:'Pública, tradición colonial y buena reputación regional.'},
       {id:'utb',n:'Universidad Tecnológica de Bolívar',tier:'privada',calidad:6,prest:3,d:'Privada, fuerte en ingeniería y negocios.'}
+    ],
+    'Miami':[
+      {id:'fiu',n:'Florida International University',tier:'publica',calidad:6,prest:3,d:'Pública, la universidad de investigación más grande del sur de Florida.'},
+      {id:'miami',n:'University of Miami',tier:'elite',calidad:8,prest:7,d:'Privada, fuerte en negocios y derecho, con proyección hacia América Latina.'}
+    ],
+    'Nueva York':[
+      {id:'cuny',n:'CUNY (City University of New York)',tier:'publica',calidad:6,prest:3,d:'Pública, la gran universidad urbana de la ciudad.'},
+      {id:'nyu',n:'New York University',tier:'privada',calidad:8,prest:7,d:'Privada, en el corazón de Manhattan, fuerte en negocios y finanzas.'},
+      {id:'columbia',n:'Columbia University',tier:'elite',calidad:9,prest:9,d:'Ivy League: la más prestigiosa y la más cara de la ciudad.'}
+    ],
+    'Londres':[
+      {id:'londonmet',n:'London Metropolitan University',tier:'publica',calidad:5,prest:2,d:'Pública, accesible, en el centro de Londres.'},
+      {id:'kcl',n:'King’s College London',tier:'privada',calidad:8,prest:7,d:'Una de las universidades más antiguas e influyentes del Reino Unido.'},
+      {id:'lse',n:'London School of Economics',tier:'elite',calidad:9,prest:9,d:'La referencia mundial en economía, finanzas y ciencias sociales.'}
+    ],
+    'Dubái':[
+      {id:'ud',n:'University of Dubai',tier:'publica',calidad:5,prest:2,d:'Universidad local, ligada a la cámara de comercio de Dubái.'},
+      {id:'aud',n:'American University in Dubai',tier:'elite',calidad:7,prest:6,d:'Privada, currículo americano y una red de contactos regional fuerte.'}
+    ],
+    'Singapur':[
+      {id:'sim',n:'Singapore Institute of Management',tier:'privada',calidad:6,prest:4,d:'Privada, con programas ligados a universidades internacionales.'},
+      {id:'nus',n:'National University of Singapore',tier:'elite',calidad:9,prest:9,d:'La universidad mejor rankeada de Asia.'}
+    ],
+    'Hong Kong':[
+      {id:'cityu',n:'City University of Hong Kong',tier:'publica',calidad:7,prest:4,d:'Pública, fuerte en negocios y ciencias aplicadas.'},
+      {id:'hku',n:'University of Hong Kong',tier:'elite',calidad:9,prest:9,d:'La universidad más antigua y prestigiosa de Hong Kong.'}
+    ],
+    'Fráncfort':[
+      {id:'goethe',n:'Goethe University Frankfurt',tier:'publica',calidad:7,prest:4,d:'Pública, la universidad de referencia de la capital financiera alemana.'},
+      {id:'fs',n:'Frankfurt School of Finance & Management',tier:'elite',calidad:8,prest:7,d:'Privada, especializada en finanzas y banca.'}
+    ],
+    'París':[
+      {id:'sorbona',n:'Sorbonne Université',tier:'publica',calidad:8,prest:5,d:'Pública, una de las universidades más antiguas e influyentes de Europa.'},
+      {id:'sciencespo',n:'Sciences Po',tier:'privada',calidad:8,prest:7,d:'Referencia en ciencias políticas, economía y relaciones internacionales.'},
+      {id:'hec',n:'HEC Paris',tier:'elite',calidad:9,prest:9,d:'Una de las escuelas de negocios más prestigiosas de Europa.'}
+    ],
+    'Tokio':[
+      {id:'waseda',n:'Universidad de Waseda',tier:'privada',calidad:7,prest:5,d:'Privada, una de las más grandes e influyentes de Japón.'},
+      {id:'utokio',n:'Universidad de Tokio',tier:'elite',calidad:9,prest:9,d:'La universidad más prestigiosa de Japón.'}
+    ],
+    'Shanghái':[
+      {id:'nyush',n:'NYU Shanghai',tier:'privada',calidad:7,prest:5,d:'Campus internacional, currículo americano en el centro financiero de China.'},
+      {id:'jiaotong',n:'Universidad Jiao Tong de Shanghái',tier:'elite',calidad:9,prest:8,d:'Pública de élite, referencia en ingeniería y negocios.'}
+    ],
+    'São Paulo':[
+      {id:'usp',n:'Universidade de São Paulo (USP)',tier:'publica',calidad:8,prest:6,d:'Pública, la universidad más grande e influyente de Brasil.'},
+      {id:'fgv',n:'Fundação Getulio Vargas (FGV)',tier:'elite',calidad:8,prest:7,d:'Privada, la referencia en economía y administración de Brasil.'}
+    ],
+    'Ciudad de Panamá':[
+      {id:'up',n:'Universidad de Panamá',tier:'publica',calidad:5,prest:2,d:'Pública, la universidad más grande del país.'},
+      {id:'qlu',n:'Quality Leadership University',tier:'privada',calidad:6,prest:4,d:'Privada, con programas orientados a negocios internacionales.'}
+    ],
+    'Madrid':[
+      {id:'ucm',n:'Universidad Complutense de Madrid',tier:'publica',calidad:7,prest:4,d:'Pública, la más grande de España.'},
+      {id:'ie',n:'IE University',tier:'elite',calidad:8,prest:8,d:'Privada, referencia mundial en negocios y liderazgo.'}
     ]
   };
+  UNIVERSIDADES_CIUDAD_63['Panamá']=UNIVERSIDADES_CIUDAD_63['Ciudad de Panamá']; // alias: así aparece la ciudad en algunas ofertas de cargo
+  const UNIVERSIDAD_GENERICA_63=[{id:'generica',n:'Universidad local',tier:'privada',calidad:6,prest:3,d:'Una universidad de la zona, sin mayor tradición ni renombre fuera de ahí.'}];
   const MULT_TIER_63={publica:.35,privada:1,elite:1.8};
   const COSTO_NIVEL_63=[0,18,38,42,95,210]; // índice = nivel (EDU), referencia en universidad privada de gama media
   const DURACION_NIVEL_63=[0,2,5,1,2,4];    // técnico, pregrado, especialización, maestría, doctorado/MBA
 
   function universidadesDisponibles63(ciudad){
-    return UNIVERSIDADES_CIUDAD_63[ciudad]||UNIVERSIDADES_CIUDAD_63['Bogotá'];
+    return UNIVERSIDADES_CIUDAD_63[ciudad]||UNIVERSIDAD_GENERICA_63;
   }
 
   function escenaUniversidadPropia63(nivel,anios,cr){
