@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v68</div>
+<div class="version-badge" id="versionBadge">v69</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -14768,6 +14768,151 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init64,220);
   setTimeout(init64,650);
   window.__SA64={version:V64};
+})();
+</script>
+
+
+<script>
+/* ==========================================================================
+   v69 · LA ASIMETRÍA DE LAS UNIVERSIDADES: AHORA TAMBIÉN TUS HIJOS
+   v63/v68 le dieron al jugador universidades reales según la ciudad donde
+   vive. Los hijos seguían con el sistema viejo: cuatro niveles abstractos
+   ("Pública", "Privada del país", "Privada de las caras", "Afuera") sin
+   relación con dónde viven, y un posgrado que no tenía nada que ver con la
+   carrera que estudiaron. Esta entrega les da el mismo trato: universidad
+   real según su ciudad, con la opción explícita de mandarlos a estudiar
+   afuera (y a qué universidad real de qué país), y un posgrado que dice
+   "Maestría en Medicina" en vez de solo "Maestría".
+   ========================================================================== */
+(function(){
+  const V69='v69';
+
+  function universidadesDeCiudad69(ciudad){
+    return (window.__SA63 && window.__SA63.universidadesDisponibles) ? window.__SA63.universidadesDisponibles(ciudad) : [];
+  }
+  function tierAUniversidadVieja69(tier){
+    return UNIVERSIDADES.find(u=>u.id===tier) || UNIVERSIDADES[1];
+  }
+
+  /* ---- pregrado del heredero: universidad real de su ciudad, o mandarlo afuera ---- */
+  function escenaUniversidadExterior69(h){
+    const base=UNIVERSIDADES.find(u=>u.id==='exterior');
+    escena({rubro:'Matrícula',titulo:'Enviar a '+esc(h.nombre)+' a estudiar afuera',ancho:true,
+      cuerpo:'Un pregrado completo en el exterior. Cuesta '+fmt(base.costo)+' al año, unos cinco años, y '+esc(h.nombre)+' se instala allá mientras estudia.',
+      opciones:CIUDADES_GLOBALES.map(d=>{
+        const unis=universidadesDeCiudad69(d.n);
+        const uni=unis[unis.length-1]||unis[0];
+        return {t:d.n,cat:'formacion',d:(uni?uni.n+' · ':'')+esc(d.pais),
+          dis:S.efectivo<base.costo*2?'No te alcanza':null,
+          run:()=>{
+            const total=base.costo*rnd(4.2,5.4);
+            S.efectivo-=Math.min(S.efectivo,total);
+            h.ciudad=d.n; h.pais=d.pais; h.independiente=true;
+            h.universidad='exterior'; h.universidadNombre=uni?uni.n:'una universidad local'; h.universidadCiudad=d.n;
+            h.formacion=clamp(h.formacion+base.form+(h.atr.intelecto>=7?6:0),0,100);
+            h.vinculo=clamp(h.vinculo+base.vinc,0,100);
+            h.atr.intelecto=clamp(h.atr.intelecto+1,1,10);
+            if(base.prest) moverPrestigio(base.prest*.4,'');
+            S.p.redes=clamp(S.p.redes+base.prest,0,100);
+            log(esc(h.nombre)+' se fue a estudiar a '+esc(uni?uni.n:d.n)+' en '+esc(d.n)+' ('+fmt(total)+' en total).','hito');
+            setTimeout(()=>escenaCarreraEstudio(h),0);
+          }};
+      }).concat([{t:'Mejor aquí',cat:'legado',run:()=>escenaUniversidad(h)}]),
+      cerrable:true});
+  }
+  const escenaUniversidadOriginal69=escenaUniversidad;
+  escenaUniversidad=function(h){
+    const ciudad=h.ciudad||S.p.ciudad;
+    const unis=universidadesDeCiudad69(ciudad);
+    if(!unis.length){ escenaUniversidadOriginal69(h); return; }
+    escena({rubro:'Matrícula',titulo:'Dónde estudia '+esc(h.nombre),ancho:true,
+      cuerpo:esc(h.nombre)+' terminó el colegio en '+esc(ciudad)+'. Intelecto '+h.atr.intelecto+', disciplina '+h.atr.disciplina
+        +', formación '+Math.round(h.formacion)+'. Lo que decidas aquí es lo que va a tener el día que herede.',
+      opciones:unis.map(u=>{
+        const base=tierAUniversidadVieja69(u.tier);
+        return {t:u.n,cat:'formacion',
+          d:u.d+' '+(base.costo?'Cuesta '+fmt(base.costo)+' al año, unos cinco años.':'Sin costo.'),
+          dis:base.costo&&S.efectivo<base.costo*2?'No te alcanza':null,
+          run:()=>{
+            const total=base.costo*rnd(4.2,5.4);
+            S.efectivo-=Math.min(S.efectivo,total);
+            h.universidad=u.id; h.universidadNombre=u.n; h.universidadCiudad=ciudad;
+            h.formacion=clamp(h.formacion+base.form+(h.atr.intelecto>=7?6:0),0,100);
+            h.vinculo=clamp(h.vinculo+base.vinc,0,100);
+            h.atr.intelecto=clamp(h.atr.intelecto+(base.form>25?1:0),1,10);
+            if(base.prest) moverPrestigio(base.prest*.4,'');
+            S.p.redes=clamp(S.p.redes+base.prest,0,100);
+            log(esc(h.nombre)+' entró a '+esc(u.n)+(total>0?' ('+fmt(total)+' en total)':'')+'.',base.form>25?'hito':'');
+            setTimeout(()=>escenaCarreraEstudio(h),0);
+          }};
+      }).concat([{t:'Enviarlo/la a estudiar afuera',cat:'formacion',d:'Pregrado completo en el exterior. Más caro, pero abre mundo y contactos.',run:()=>escenaUniversidadExterior69(h)}]),
+      cerrable:true});
+  };
+
+  /* ---- posgrado del heredero: mismo campo que estudió, misma lógica de ciudad ---- */
+  const POSGRADOS_HEREDERO_69=[
+    {id:'mba',n:'MBA',costo:260,form:14,prest:6},
+    {id:'maestria',n:'Maestría',costo:180,form:16,prest:4},
+    {id:'doctorado',n:'Doctorado',costo:340,form:22,prest:8}
+  ];
+  function escenaUniversidadPosgrado69(h,pg,titulo,ciudad){
+    const unis=universidadesDeCiudad69(ciudad);
+    if(!unis.length){
+      S.efectivo-=pg.costo; h.posgrado=pg.id; h.formacion=clamp(h.formacion+pg.form,0,100);
+      moverPrestigio(pg.prest*.4,'el posgrado de '+h.nombre);
+      log('<b>'+esc(h.nombre)+'</b> terminó '+esc(titulo)+'.','hito'); S.mov--;
+      return;
+    }
+    escena({rubro:'Posgrado',titulo:titulo+' — elige universidad',ancho:true,
+      cuerpo:esc(h.nombre)+' va a cursar '+titulo.toLowerCase()+' en '+esc(ciudad)+'.',
+      opciones:unis.map(u=>{
+        const mult={publica:.6,privada:1,elite:1.6}[u.tier]||1;
+        const costo=Math.round(pg.costo*mult);
+        return {t:u.n,cat:'formacion',d:u.d+' '+fmt(costo)+' en total.',dis:S.efectivo<costo?'No te alcanza':null,cerrar:false,
+          run:()=>{
+            S.efectivo-=costo; h.posgrado=pg.id; h.posgradoNombre=titulo; h.universidadPosgrado=u.n;
+            h.formacion=clamp(h.formacion+pg.form,0,100);
+            moverPrestigio(pg.prest*.4,'el posgrado de '+h.nombre);
+            log('<b>'+esc(h.nombre)+'</b> terminó '+esc(titulo)+' en la '+esc(u.n)+'.','hito');
+            S.mov--; cerrarModal(); render();
+          }};
+      }),cerrable:true});
+  }
+  function escenaPosgradoHeredero69(h){
+    const cr=carreraProfesionalDe(h.carreraEstudio||h.carreraProf);
+    const ciudad=h.ciudad||S.p.ciudad;
+    escena({rubro:'Posgrado',titulo:'Posgrado para '+esc(h.nombre),ancho:true,
+      cuerpo:esc(h.nombre)+' ya tiene pregrado'+(cr?' en '+cr.n:'')+'. Un posgrado cuesta, pero profundiza la formación y el prestigio de la casa.',
+      opciones:POSGRADOS_HEREDERO_69.map(pg=>{
+        const titulo=(pg.id!=='mba'&&cr)?pg.n+' en '+cr.n:pg.n;
+        return {t:titulo,cat:'formacion',d:'Cuesta '+fmt(pg.costo)+' en total.',dis:S.efectivo<pg.costo?'No te alcanza':null,cerrar:false,
+          run:()=>{ cerrarModal(); escenaUniversidadPosgrado69(h,pg,titulo,ciudad); }};
+      }).concat([{t:'Todavía no',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}}]),cerrable:true});
+  }
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones69(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA69_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        (S.familia.hijos||[]).filter(h=>h.universidad&&h.edad>=23&&!h.posgrado).forEach(h=>{
+          const titulo='Posgrado para '+h.nombre;
+          const a=A.find(x=>x.t===titulo);
+          if(a) a.run=()=>escenaPosgradoHeredero69(h);
+        });
+      }catch(e){}
+      return A;
+    };
+    window.__SA69_LISTA=true;
+  }
+  function init69(){ wrapListaAcciones69(); }
+  setTimeout(init69,40);
+  setTimeout(init69,220);
+  setTimeout(init69,650);
+  window.__SA69={version:V69};
 })();
 </script>
 
