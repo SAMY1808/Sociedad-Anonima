@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v70</div>
+<div class="version-badge" id="versionBadge">v71</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -15050,6 +15050,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       }});
     if(r.cotiza) opciones.push({t:'Lanzar una toma hostil',cat:'capital',d:'La jugada final: comprarles la compañía por encima del mercado.',cerrar:true,
       run:()=>{ escenaOPA(r); }});
+    if(typeof window.opcionPoderPublico71==='function') opciones.push.apply(opciones,window.opcionPoderPublico71(r,g));
     opciones.push({t:'Proponer una tregua',cat:'legado',cerrar:false,run:()=>{
       r.relacionCasa=clamp((r.relacionCasa||10)+20,0,100);
       log('Propusiste una tregua a los <b>'+esc(r.apellido)+'</b>. La guerra terminó sin vencedor claro.','hito');
@@ -15131,6 +15132,178 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init70,220);
   setTimeout(init70,650);
   window.__SA70={version:V70, enGuerraCon:enGuerraCon70};
+  window.golpeGuerra70=golpeGuerra70;
+  window.revisarResolucionGuerra70=revisarResolucionGuerra70;
+})();
+</script>
+
+
+<script>
+/* ==========================================================================
+   v71 · EL PODER QUE YA TENÍAS — LA PRESIDENCIA GOBIERNA DE VERDAD
+   El juego ya dejaba llegar a la Presidencia (y a senador, representante,
+   gobernador o alcalde) como el techo de la carrera política, pero llegar
+   ahí no cambiaba nada: el gobierno real del país (S.gobierno, las
+   elecciones cada cuatro años, las leyes) corría por su cuenta, sin
+   enterarse de que el jugador era el presidente. Esta entrega conecta las
+   dos cosas: ganar la presidencia te deja elegir la orientación del
+   gobierno, gobernar de verdad (decretar las mismas leyes que antes solo
+   se conseguían por lobby, pero sin dado — al precio de la tensión del
+   país), y jugarte la reelección en vez de una elección genérica cada
+   cuatro años. Cualquier cargo público importante, además, se puede usar
+   como una táctica más en una guerra empresarial (v70).
+   ========================================================================== */
+(function(){
+  const V71='v71';
+  const CARGOS_CON_PESO_71=['presidente','senador','representante','gobernador','alcalde'];
+
+  function escenaElegirOrientacion71(alGanar){
+    escena({rubro:'Presidencia',titulo:alGanar?'Con qué orientación vas a gobernar':'Girar la política de gobierno',ancho:true,
+      cuerpo:alGanar
+        ?'Ya eres presidente. Decide el rumbo económico y social de tu gobierno: eso define impuestos, apertura y qué tanto se calienta el país.'
+        :'Cambiar de rumbo cuesta apoyo político y sube la tensión del país.',
+      opciones:GOBIERNOS.filter(g=>alGanar||g.id!==gob().id).map(g=>({
+        t:g.n.charAt(0).toUpperCase()+g.n.slice(1),cat:'legado',d:g.d,cerrar:false,
+        run:()=>{
+          if(alGanar){
+            S.gobierno={id:g.id,desde:S.anio,apoyado:true};
+            S.tension=clamp((S.tension||35)+(g.tension||0)*.5,0,100);
+            log('Asumiste la presidencia con una orientación <b>'+g.n+'</b>.','hito');
+          } else {
+            S.gobierno={id:g.id,desde:(S.gobierno&&S.gobierno.desde)||S.anio,apoyado:(S.gobierno&&S.gobierno.apoyado)||false};
+            S.tension=clamp(S.tension+8,0,100);
+            moverPrestigio(-1,'el giro de gobierno no cayó bien en todas partes');
+            log('Giraste tu gobierno hacia una orientación <b>'+g.n+'</b>.','hito');
+            S.mov--;
+          }
+          cerrarModal(); render();
+        }})).concat(alGanar?[]:[{t:'Mejor no',cat:'legado',cerrar:false,run:()=>{}}]),
+      cerrable:!alGanar});
+  }
+
+  function escenaGobernarPais71(){
+    S.gobierno=S.gobierno||{desde:S.anio,apoyado:false};
+    const g=gob();
+    const opciones=[];
+    opciones.push({t:'Cambiar la orientación del gobierno',cat:'legado',d:'Un giro de política cuesta apoyo y sube la tensión del país.',cerrar:true,
+      run:()=>escenaElegirOrientacion71(false)});
+    LEYES.forEach(L=>{
+      opciones.push({t:'Decretar '+L.n,cat:'legado',d:L.d+' Como presidente sale directo, sin lobby: sube la tensión del país.',cerrar:false,
+        run:()=>{
+          log(L.ef(),'hito');
+          S.tension=clamp(S.tension+ri(5,9),0,100);
+          moverPrestigio(3,'gobernaste con mano firme');
+          S.mov--; cerrarModal(); render();
+        }});
+    });
+    opciones.push({t:'Dejar las cosas como están',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Presidencia',titulo:'Gobernar el país',ancho:true,
+      cuerpo:'Orientación actual: <b>'+g.n+'</b>. Tensión del país: '+Math.round(S.tension)+'/100. Lo que decretes aquí no necesita que nadie te lo apruebe, pero se nota en toda la economía — y en cómo te ven.',
+      opciones,cerrable:true});
+  }
+
+  function escenaReeleccion71(){
+    const q=S.carrera.politica, g=gob();
+    escena({rubro:'Elecciones de '+S.anio,titulo:'Tu reelección',ancho:true,
+      cuerpo:'Van '+(q.mandatos||1)+' mandato'+(q.mandatos===1?'':'s')+' al frente del país, con una orientación '+g.n+'. '
+        +'Tensión del país: '+Math.round(S.tension)+'/100.'+(S.tension>62?' El ambiente está difícil para pedir otro periodo.':''),
+      opciones:[
+        {t:'Buscar la reelección',cat:'empleo',cerrar:false,run:()=>{
+          const prob=clamp(.30+prestigio()/300+S.p.redes/380+(q.base||0)/260-clamp((S.tension-45)/180,0,.25),.12,.82);
+          if(chance(prob)){
+            q.anios=0; q.mandatos=(q.mandatos||1)+1;
+            S.gobierno.desde=S.anio; S.gobierno.apoyado=true;
+            moverPrestigio(4,'te reeligieron');
+            log('Ganaste la reelección. Sigues al frente del país con la misma orientación.','hito');
+            hito('Fue reelegido presidente');
+          } else {
+            q.activo=false; q.cargo=null; q.anios=0;
+            const otro=pick(GOBIERNOS);
+            elegirGobierno(false,otro);
+            S.p.felicidad=clamp(S.p.felicidad-8,0,100);
+            log('Perdiste la reelección. Entra un '+otro.n+' y vuelves a la vida privada.','mal');
+          }
+          S.mov--; cerrarModal(); render();
+        }},
+        {t:'No presentarte otra vez',cat:'legado',cerrar:false,run:()=>{
+          q.activo=false; q.cargo=null; q.anios=0;
+          const otro=pick(GOBIERNOS);
+          elegirGobierno(false,otro);
+          log('Decidiste no buscar otro mandato. Entra un '+otro.n+'.','hito');
+          S.mov--; cerrarModal(); render();
+        }}
+      ],cerrable:false});
+  }
+
+  const escenaEleccionesOriginal71=escenaElecciones;
+  escenaElecciones=function(){
+    const q=S.carrera.politica;
+    if(q&&q.activo&&q.cargo==='presidente'){ escenaReeleccion71(); return; }
+    escenaEleccionesOriginal71();
+  };
+
+  const resultadoEleccionOriginal71=resultadoEleccion;
+  resultadoEleccion=function(id){
+    resultadoEleccionOriginal71(id);
+    const q=S.carrera.politica;
+    if(id==='presidente'&&q&&q.activo&&q.cargo==='presidente'){
+      setTimeout(()=>escenaElegirOrientacion71(true),0);
+    }
+  };
+
+  /* ---- una guerra empresarial también se puede pelear desde el poder ---- */
+  function tieneCargoConPeso71(){
+    const q=S.carrera&&S.carrera.politica;
+    return !!(q&&q.activo&&CARGOS_CON_PESO_71.includes(q.cargo));
+  }
+  function opcionPoderPublico71(r,g){
+    if(!tieneCargoConPeso71()) return [];
+    return [{t:'Usar tu cargo público',cat:'riesgo',d:'Una investigación o un permiso trabado, con el peso del cargo detrás. Cuesta apoyo político y sube la tensión del país.',cerrar:false,
+      run:()=>{
+        const danio=r.patrimonio*rnd(.06,.13); r.patrimonio=Math.max(1,r.patrimonio-danio);
+        r.prestigio=clamp(r.prestigio-ri(3,8),0,100);
+        S.carrera.politica.base=clamp((S.carrera.politica.base||50)-ri(4,9),0,100);
+        S.tension=clamp(S.tension+6,0,100);
+        if(typeof window.golpeGuerra70==='function') window.golpeGuerra70('Usaste tu cargo público contra ellos: '+fmt(danio)+' en patrimonio y un golpe a su prestigio.','tu');
+        log('Usaste el peso de tu cargo contra los <b>'+esc(r.apellido)+'</b>.','bien');
+        g.intensidad=clamp(g.intensidad+14,0,100);
+        S.mov--; cerrarModal();
+        if(typeof window.revisarResolucionGuerra70==='function') window.revisarResolucionGuerra70();
+        render();
+      }}];
+  }
+  window.opcionPoderPublico71=opcionPoderPublico71;
+
+  /* ==========================================================================
+     boilerplate
+     ========================================================================== */
+  function wrapListaAcciones71(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA71_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        const q=S.carrera.politica;
+        if(q&&q.activo&&q.cargo==='presidente'&&!A.some(x=>x.t==='Gobernar el país')){
+          A.unshift({t:'Gobernar el país',cat:'legado',d:'Tu orientación, tus leyes. Lo que decidas aquí mueve la economía de todos.',mov:1,modal:true,run:()=>escenaGobernarPais71()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA71_LISTA=true;
+  }
+  function wrapCatDe71(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA71_CATDE) return;
+    window.catDe=function(t){
+      if(/^Gobernar el país$|^Decretar /.test(t)) return 'legado';
+      return old.apply(this,arguments);
+    };
+    window.__SA71_CATDE=true;
+  }
+  function init71(){ wrapListaAcciones71(); wrapCatDe71(); }
+  setTimeout(init71,40);
+  setTimeout(init71,220);
+  setTimeout(init71,650);
+  window.__SA71={version:V71};
 })();
 </script>
 
