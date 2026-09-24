@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v73</div>
+<div class="version-badge" id="versionBadge">v74</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6957,7 +6957,8 @@ function heredar(h,frac,vivo,pleito){
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
-    funeralPendientes:S.funeralPendientes||[], sucesionesPendientes:S.sucesionesPendientes||[]
+    funeralPendientes:S.funeralPendientes||[], sucesionesPendientes:S.sucesionesPendientes||[],
+    guerraEmpresarial:S.guerraEmpresarial||null
   };
   if(S.emp){
     const e=S.emp, mio=e.holders.find(x=>x.id==='tu');
@@ -14605,7 +14606,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       cuerpo:'Casa con base en <b>'+esc(r.ciudad||'Colombia')+'</b>, dedicada a '+(s?s.n.toLowerCase():esc(r.sector))+'. '
         +'Domina el <b>'+pc(cuotaDeRival64(r))+'</b> del sector en el país. '
         +'Patrimonio estimado '+fmt(r.patrimonio)+' · prestigio '+Math.round(r.prestigio)+'/100. '
-        +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':''),
+        +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':'')
+        +(r.generacion>1?' Va en su <b>generación '+r.generacion+'</b>, hoy encabezada por '+esc(r.heredero||'un sucesor')+'.':''),
       opciones:[
         {t:'Ver el reparto del sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(r.sector)},
         {t:'Proponer una alianza comercial',cat:'compania',d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'En guerra no se negocia así: propón una tregua desde el frente de guerra.':'Cuesta '+fmt(costoAlianza)+'. Mejora la relación entre las dos casas.',
@@ -15561,6 +15563,139 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init73,220);
   setTimeout(init73,650);
   window.__SA73={version:V73};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v74 · CASAS VIVAS: SUCESIÓN, ALIANZAS QUE TE BUSCAN A TI, Y GUERRAS QUE
+   SOBREVIVEN A TU PROPIA MUERTE
+   Hasta ahora las casas rivales eran un marcador: patrimonio, prestigio y
+   una relación contigo que solo tú movías. El juego ya dejaba morir al
+   jugador y seguir con un heredero (heredar()/pantallaSucesion, con
+   S.rivales, S.gobierno y hasta la carrera política pasando de generación
+   en generación), y ya dejaba casar una rama de la familia con una casa
+   rival (v45, casarRama45/wrapDesposar45). Esta entrega cierra el círculo:
+   las casas rivales también viven y mueren de verdad (con heredero con
+   nombre propio, no solo un golpe de patrimonio anónimo), a veces se
+   alían o se pelean ENTRE ELLAS sin que tú muevas un dedo, a veces son
+   ELLAS las que te proponen un matrimonio en vez de esperar a que tú lo
+   pidas, y una guerra empresarial activa ya no se esfuma si te mueres en
+   medio de ella: la hereda quien te sucede, igual que el patrimonio.
+   ========================================================================== */
+(function(){
+  const V74='v74';
+
+  /* ==========================================================================
+     #1 sucesión real de las casas rivales + vida entre ellas
+     ========================================================================== */
+  function sucesionDeRivales74(){
+    rivalesVivas().forEach(r=>{
+      if(!chance(.022)) return;
+      r.generacion=(r.generacion||1)+1;
+      const sexo=chance(.5)?'h':'m';
+      const nombre=pick(sexo==='h'?NOM_H:NOM_M);
+      r.heredero=nombre; r.herederoSexo=sexo;
+      r.agresiva=chance(.45);
+      r.capaz=clamp((r.capaz||5)+ri(-2,3),2,10);
+      const tropieza=chance(.5);
+      r.patrimonio=Math.max(1,r.patrimonio*(tropieza?rnd(.68,.92):rnd(1.0,1.18)));
+      r.prestigio=clamp(r.prestigio+(tropieza?-ri(2,8):ri(1,6)),0,100);
+      log('Cambio de mando en los <b>'+esc(r.apellido)+'</b>: murió quien llevaba la casa y asume '
+        +(sexo==='h'?'su hijo ':'su hija ')+'<b>'+esc(nombre)+'</b>.'
+        +(tropieza?' El relevo empezó torpe y le costó patrimonio a la casa.':' El relevo entró fuerte.'),
+        tropieza?'mal':'bien');
+    });
+  }
+  function dramaEntreCasas74(){
+    const vivas=rivalesVivas(); if(vivas.length<2||!chance(.05)) return;
+    const a=pick(vivas), candidatasB=vivas.filter(x=>x!==a); if(!candidatasB.length) return;
+    const b=pick(candidatasB);
+    if(chance(.5)){
+      const ganancia=rnd(.03,.08);
+      a.patrimonio*=1+ganancia; b.patrimonio*=1+ganancia;
+      log('Los <b>'+esc(a.apellido)+'</b> y los <b>'+esc(b.apellido)+'</b> cerraron una alianza de negocios entre las dos casas.');
+    } else {
+      const debil=a.patrimonio<b.patrimonio?a:b, fuerte=debil===a?b:a;
+      debil.patrimonio=Math.max(1,debil.patrimonio*rnd(.85,.95)); fuerte.patrimonio*=rnd(.95,1.01);
+      debil.prestigio=clamp(debil.prestigio-ri(1,5),0,100);
+      log('Estalló una disputa entre los <b>'+esc(a.apellido)+'</b> y los <b>'+esc(b.apellido)+'</b> por un negocio en común. Salió peor librada la casa '+esc(debil.apellido)+'.');
+    }
+  }
+  function wrapCorrerRivales74(){
+    const old=window.correrRivales; if(typeof old!=='function'||window.__SA74_RIVALES) return;
+    window.correrRivales=function(){
+      const ret=old.apply(this,arguments);
+      try{ sucesionDeRivales74(); dramaEntreCasas74(); }catch(e){}
+      return ret;
+    };
+    window.__SA74_RIVALES=true;
+  }
+  /* ==========================================================================
+     #2 una casa rival te propone matrimonio a ti, no al revés
+     ========================================================================== */
+  function instalarEventoPropuesta74(){
+    if(window.__SA74_EVENTO) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    EVENTOS_LOCALES.push({
+      p:1.3,
+      c:()=>S.familia&&Array.isArray(S.familia.hijos)&&S.familia.hijos.some(h=>h.edad>=18&&h.edad<=45&&!h.pareja)
+          &&typeof rivalesVivas==='function'&&rivalesVivas().some(r=>(r.relacionCasa||50)>=58),
+      t:()=>{
+        const hijos=S.familia.hijos.filter(h=>h.edad>=18&&h.edad<=45&&!h.pareja);
+        const candidatas=rivalesVivas().filter(r=>(r.relacionCasa||50)>=58);
+        if(!hijos.length||!candidatas.length) return null;
+        const h=pick(hijos), r=pick(candidatas);
+        S._propCasaHijo=h.nombre; S._propCasaRid=r.rid;
+        return 'Los <b>'+esc(r.apellido)+'</b> proponen sellar la relación entre las dos casas con un matrimonio: alguien de su familia para '+esc(h.nombre)+'.';
+      },
+      o:[
+        {t:'Aceptar la alianza',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._propCasaHijo);
+          const r=(S.rivales||[]).find(x=>x.rid===S._propCasaRid);
+          if(!h||h.pareja||!r) return 'La propuesta ya no aplicaba: la situación cambió antes de decidir.';
+          const sexoBuscado=h.sexo==='h'?'m':'h';
+          h.pareja={nombre:nombreLocal(h.ciudad||S.p.ciudad,sexoBuscado)+' '+r.apellido,apellido:r.apellido,sexo:sexoBuscado,
+            edad:clamp(h.edad+ri(-4,4),18,65),casados:true,afecto:ri(55,90),paciencia:ri(55,85),
+            ciudad:h.ciudad||S.p.ciudad,casa:{apellido:r.apellido,prestigio:r.prestigio,patrimonio:r.patrimonio,pais:r.pais,rid:r.rid}};
+          h.vinculo=clamp((h.vinculo||60)+8,0,100);
+          r.relacionCasa=clamp((r.relacionCasa||50)+22,0,100);
+          if(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r)) S.guerraEmpresarial=null;
+          hito(esc(h.nombre)+' se casó con los '+r.apellido+', por una propuesta de ellos');
+          return 'Aceptaste: <b>'+esc(h.nombre)+'</b> se casó con alguien de los <b>'+esc(r.apellido)+'</b>. La relación entre las dos casas mejoró de verdad.';
+        }},
+        {t:'Rechazar la propuesta',f:()=>{
+          const r=(S.rivales||[]).find(x=>x.rid===S._propCasaRid);
+          if(r) r.relacionCasa=clamp((r.relacionCasa||50)-10,0,100);
+          return 'Rechazaste la propuesta. En la otra casa no cayó nada bien.';
+        }}
+      ]
+    });
+    window.__SA74_EVENTO=true;
+  }
+
+  /* ==========================================================================
+     #3 una guerra empresarial activa sobrevive a tu propia sucesión
+     ========================================================================== */
+  function wrapIniciarHerencia74(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA74_INICIAR) return;
+    window.iniciar=function(cfg,legado){
+      const ret=old.apply(this,arguments);
+      try{
+        if(legado&&legado.guerraEmpresarial&&(S.rivales||[]).some(r=>r.rid===legado.guerraEmpresarial.rid&&r.viva)){
+          S.guerraEmpresarial=legado.guerraEmpresarial;
+          log('Heredaste también el frente abierto contra los <b>'+esc(legado.guerraEmpresarial.apellido)+'</b>: la guerra empresarial sigue en pie.','hito');
+        }
+      }catch(e){}
+      return ret;
+    };
+    window.__SA74_INICIAR=true;
+  }
+
+  function init74(){ wrapCorrerRivales74(); instalarEventoPropuesta74(); wrapIniciarHerencia74(); }
+  setTimeout(init74,40);
+  setTimeout(init74,220);
+  setTimeout(init74,650);
+  window.__SA74={version:V74};
 })();
 </script>
 
