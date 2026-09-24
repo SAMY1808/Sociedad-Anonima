@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v74</div>
+<div class="version-badge" id="versionBadge">v75</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -15696,6 +15696,140 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init74,220);
   setTimeout(init74,650);
   window.__SA74={version:V74};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v75 · EL IMPERIO MEDIÁTICO
+   El juego ya tenía el sector "medios" (fundable desde cero como cualquier
+   otro, incluso vía la carrera de Comunicación y Periodismo) y ya usaba la
+   prensa como arma en la guerra empresarial ("Campaña de prensa", v70).
+   Pero ser dueño de un medio no daba ningún poder blando propio: no había
+   forma de usar tu propio periódico o canal para moverte la reputación a
+   ti, apagar un escándalo, atacar a una casa rival sin declarar una guerra
+   completa, o empujar tu propia carrera política. Esta entrega convierte
+   cualquier compañía del sector medios que ya tengas en un instrumento de
+   poder blando, reutilizando el patrimonio, prestigio y capital político
+   que el resto del juego ya lleva la cuenta.
+   ========================================================================== */
+(function(){
+  const V75='v75';
+
+  function companiasMedios75(){ return companias().filter(e=>e.sector==='medios'); }
+  function tieneMedios75(){ return companiasMedios75().length>0; }
+  function medioPrincipal75(){ return companiasMedios75().slice().sort((a,b)=>b.marca-a.marca)[0]; }
+
+  function escenaCampanaOpinion75(medio,audiencia,costoBase){
+    const vivas=rivalesVivas();
+    escena({rubro:'Imperio mediático',titulo:'Campaña de opinión',ancho:true,
+      cuerpo:'Un ciclo de noticias negativo, bien puesto, pesa en la reputación de cualquier casa.',
+      opciones:vivas.map(r=>({t:'Contra los '+esc(r.apellido),cat:'riesgo',
+        d:'Prestigio actual: '+Math.round(r.prestigio)+'/100. Cuesta '+fmt(costoBase)+' de la caja de '+esc(medio.nombre)+'.',
+        dis:medio.caja<costoBase?'No hay caja suficiente en '+medio.nombre:null,cerrar:false,
+        run:()=>{
+          medio.caja-=costoBase;
+          const golpe=ri(3,8)+Math.round(audiencia/25);
+          r.prestigio=clamp(r.prestigio-golpe,0,100);
+          log('<b>'+esc(medio.nombre)+'</b> lanzó una campaña de opinión contra los <b>'+esc(r.apellido)+'</b>: -'+golpe+' de prestigio.','bien');
+          if(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r)&&typeof window.golpeGuerra70==='function'){
+            window.golpeGuerra70('Tu medio, '+medio.nombre+', golpeó la imagen de los '+esc(r.apellido)+' en plena guerra.','tu');
+          }
+          S.mov--;cerrarModal();render();
+        }})).concat([{t:'Mejor no',cat:'legado',cerrar:false,run:()=>{}}]),cerrable:true});
+  }
+
+  function escenaImperioMediatico75(){
+    const medio=medioPrincipal75();
+    if(!medio){
+      escena({rubro:'Imperio mediático',titulo:'Tu imperio mediático',ancho:true,
+        cuerpo:'No tienes ningún medio de comunicación bajo tu control.',
+        opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
+      return;
+    }
+    const audiencia=clamp(Math.round((medio.marca+medio.eficiencia)/2),0,100);
+    const costoBase=Math.max(8,medio.ingresos*.06);
+    S.carrera.politica=S.carrera.politica||{activo:false,cargo:null,anios:0,mandatos:0,partido:null,ciudad:null,base:0};
+    const q=S.carrera.politica;
+    const opciones=[];
+    opciones.push({t:'Instalar un titular a tu favor',cat:'riesgo',
+      d:'Cuesta '+fmt(costoBase)+' de la caja de '+esc(medio.nombre)+'. Sube tu reputación; con poca audiencia puede sentirse forzado.',
+      dis:medio.caja<costoBase?'No hay caja en '+medio.nombre:null,cerrar:false,
+      run:()=>{
+        medio.caja-=costoBase;
+        if(chance(clamp(.5+audiencia/220,.35,.92))){
+          S.p.reputacion=clamp(S.p.reputacion+ri(4,9),0,100);
+          log('<b>'+esc(medio.nombre)+'</b> instaló un titular a tu favor. Tu reputación subió.','bien');
+        } else {
+          S.p.reputacion=clamp(S.p.reputacion-ri(1,4),0,100);
+          log('El titular de <b>'+esc(medio.nombre)+'</b> se sintió forzado. No cayó bien.','mal');
+        }
+        S.mov--;cerrarModal();render();
+      }});
+    if(S.p.escandalos>0){
+      const costoEscandalo=costoBase*1.4;
+      opciones.push({t:'Apagar un escándalo',cat:'riesgo',
+        d:'Cuesta '+fmt(costoEscandalo)+'. Tu propio medio ayuda a bajarle el ruido a un escándalo abierto.',
+        dis:medio.caja<costoEscandalo?'No hay caja suficiente en '+medio.nombre:null,cerrar:false,
+        run:()=>{
+          medio.caja-=costoEscandalo;
+          if(chance(clamp(.5+audiencia/260,.3,.85))){
+            S.p.escandalos--;
+            log('<b>'+esc(medio.nombre)+'</b> le bajó el ruido a uno de tus escándalos.','bien');
+          } else {
+            S.p.reputacion=clamp(S.p.reputacion-ri(2,6),0,100);
+            log('El intento de apagar el escándalo desde <b>'+esc(medio.nombre)+'</b> salió al revés.','mal');
+          }
+          S.mov--;cerrarModal();render();
+        }});
+    }
+    if(rivalesVivas().length){
+      opciones.push({t:'Campaña de opinión contra una casa rival',cat:'riesgo',
+        d:'Elige a quién le apunta '+esc(medio.nombre)+'. No necesitas estar en guerra empresarial con ellos.',
+        cerrar:false,run:()=>escenaCampanaOpinion75(medio,audiencia,costoBase)});
+    }
+    const costoPolitica=costoBase*1.2;
+    opciones.push({t:'Poner tu medio detrás de tu carrera política',cat:'legado',
+      d:'Cuesta '+fmt(costoPolitica)+'. Sube tu capital político de cara a la próxima elección o designación.',
+      dis:medio.caja<costoPolitica?'No hay caja suficiente en '+medio.nombre:null,cerrar:false,
+      run:()=>{
+        medio.caja-=costoPolitica;
+        q.base=clamp((q.base||0)+ri(6,12),0,100);
+        log('<b>'+esc(medio.nombre)+'</b> puso su cobertura detrás de tu carrera política.','bien');
+        S.mov--;cerrarModal();render();
+      }});
+    opciones.push({t:'Dejarlo así',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Imperio mediático',titulo:'Tu imperio mediático',ancho:true,
+      cuerpo:'<b>'+esc(medio.nombre)+'</b> — audiencia estimada '+audiencia+'/100, caja de '+fmt(medio.caja)+'. '
+        +'Un medio propio es la forma más barata de mover una narrativa a tu favor.',
+      opciones,cerrable:true});
+  }
+
+  function wrapListaAcciones75(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA75_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        if(tieneMedios75()&&!A.some(x=>x.t==='Tu imperio mediático')){
+          A.push({t:'Tu imperio mediático',cat:'riesgo',d:'Usa tu medio para mover una narrativa a tu favor.',mov:1,modal:true,run:()=>escenaImperioMediatico75()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA75_LISTA=true;
+  }
+  function wrapCatDe75(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA75_CATDE) return;
+    window.catDe=function(t){
+      if(/^Tu imperio mediático$|^Campaña de opinión$/.test(t)) return 'riesgo';
+      return old.apply(this,arguments);
+    };
+    window.__SA75_CATDE=true;
+  }
+  function init75(){ wrapListaAcciones75(); wrapCatDe75(); }
+  setTimeout(init75,40);
+  setTimeout(init75,220);
+  setTimeout(init75,650);
+  window.__SA75={version:V75};
 })();
 </script>
 
