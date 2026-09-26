@@ -26,7 +26,8 @@ El service worker v42 invalida las cachés anteriores cuando se activa.
 
 El JavaScript embebido en `index.html` y `sw.js` fue validado con `node --check`.
 
-## Nuevo juego: CURUL
+## Otro juego: CURUL
 
-En la carpeta [`curul/`](curul/) está **Curul**, un simulador de estrategia política de Colombia
-(independiente de Sociedad Anónima). Ver [`curul/README.md`](curul/README.md).
+**Curul**, un simulador de estrategia política de Colombia, vivió antes en la carpeta `curul/` de
+este repositorio; ahora es un proyecto totalmente independiente:
+**https://github.com/SAMY1808/CURUL-**
