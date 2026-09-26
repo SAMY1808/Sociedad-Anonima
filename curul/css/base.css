@@ -1,0 +1,35 @@
+/* ── Tokens de diseño: sala de situación política ── */
+:root{
+  --fondo:#0A111D; --fondo2:#0E1726; --panel:#121D30; --panel2:#17243B; --panel3:#1D2C47;
+  --borde:#263857; --borde2:#33496F;
+  --texto:#E8EDF5; --texto2:#B4C0D3; --tenue:#8392AA; --muy-tenue:#5D6C85;
+  --oro:#D9B45A; --oro2:#F0D48A; --oro-tenue:rgba(217,180,90,.14);
+  --amarillo:#FCD116; --azul:#2A5CC7; --rojo:#CE1126;
+  --si:#3FBF7A; --no:#E0504A; --abs:#E8C547; --aus:#6B7A92;
+  --bien:#3FBF7A; --mal:#E0504A; --alerta:#E8A33D;
+  --papel:#F3EEE2; --papel2:#E8E0CD; --tinta:#1F2430; --tinta2:#5A5F6B; --sello:#8E2A2A;
+  --radio:10px; --radio2:6px;
+  --sombra:0 8px 30px rgba(0,0,0,.35);
+  --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --ui:Inter,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{background:var(--fondo);color:var(--texto);font-family:var(--ui);font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%;
+  background-image:radial-gradient(1200px 600px at 70% -10%,rgba(42,92,199,.10),transparent 60%),radial-gradient(900px 500px at -10% 110%,rgba(217,180,90,.06),transparent 60%);
+  background-attachment:fixed}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:.01em}
+h1,h2{font-family:var(--display);font-weight:500}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--oro2)}
+.oculto{display:none!important}
+.num{font-variant-numeric:tabular-nums}
+.tenue{color:var(--tenue)} .texto2{color:var(--texto2)}
+.mono{font-family:var(--mono)}
+.bien{color:var(--bien)} .mal{color:var(--mal)} .alerta{color:var(--alerta)}
+::selection{background:rgba(217,180,90,.3)}
+:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+::-webkit-scrollbar{width:10px;height:10px} ::-webkit-scrollbar-thumb{background:#243452;border-radius:6px;border:2px solid var(--fondo)} ::-webkit-scrollbar-track{background:transparent}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
