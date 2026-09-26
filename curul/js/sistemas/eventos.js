@@ -17,6 +17,7 @@ window.CURUL = window.CURUL || {};
     },
     disparar(E, pl, ctx = {}) {
       if (pl.alcance === 'regional' && !ctx.depto) ctx.depto = U.pesado(Object.values(E.deptos), d => d.poblacion / 1000 + 1).id;
+      if (pl.ctxFn) Object.assign(ctx, pl.ctxFn(E) || {});
       if (/\{ministerio\}/.test(pl.titulo + pl.texto) && !ctx.ministerio) ctx.ministerio = U.pick(C.DATA.ministerios).id;
       if (/\{medio\}/.test(pl.titulo + pl.texto) && !ctx.medio) ctx.medio = U.pick(E.medios.lista.filter(m => m.credibilidad > 55)).id;
       const ev = { id: U.id('ev'), plantilla: pl.id, t: E.fecha.t, ctx, titulo: Ev.texto(E, pl.titulo, ctx), texto: Ev.texto(E, pl.texto, ctx), tipo: pl.tipo, icono: pl.icono };
@@ -62,6 +63,7 @@ window.CURUL = window.CURUL || {};
       if (op.partidoRel && E.partidos[J.partido]) { const pa = E.partidos[J.partido]; pa.relJ = U.clamp(pa.relJ + op.partidoRel, -100, 100); C.Partidos.dominante(pa).relJ += op.partidoRel; cambios.push(['partido', op.partidoRel]); }
       if (op.faccionMinor && E.partidos[J.partido]) { const fs = E.partidos[J.partido].facciones.slice().sort((a, b) => a.peso - b.peso); fs[0].relJ += op.faccionMinor; }
       if (op.medioRel && ev.ctx.medio) { const m = C.Medios.medio(E, ev.ctx.medio); m.relJ += op.medioRel; }
+      if (op.presupuestoEmergencia && ev.ctx.ministerio) { C.Presupuesto.reforzar(E, ev.ctx.ministerio, op.presupuestoEmergencia); cambios.push(['presupuesto:' + ev.ctx.ministerio, op.presupuestoEmergencia]); }
       if (op.costoAgenda) J.agenda.puntos = Math.max(0, J.agenda.puntos - op.costoAgenda);
       if (op.bienestar) J.bienestar = U.clamp((J.bienestar || 60) + op.bienestar, 0, 100);
       if (op.reconocimientoTxt) J.reconocimientos.push({ t: E.fecha.t, txt: op.reconocimientoTxt });

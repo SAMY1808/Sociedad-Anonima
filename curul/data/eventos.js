@@ -105,5 +105,24 @@ CURUL.DATA.eventos = [
     efecto:{ eco:{exportaciones:1.2, deficit:-0.2, inflacion:0.2} } },
   { id:'petroleobaja', tipo:'economía', icono:'🛢', alcance:'nacional', peso:2,
     titulo:'Se desploma el precio del petróleo', texto:'Caen las regalías y el peso se devalúa. Hacienda revisa el marco fiscal.',
-    efecto:{ eco:{exportaciones:-1.4, deficit:0.3, inflacion:0.3, crecimiento:-0.2} } }
+    efecto:{ eco:{exportaciones:-1.4, deficit:0.3, inflacion:0.3, crecimiento:-0.2} } },
+  { id:'crisissectorial', tipo:'gobierno', icono:'🏚', alcance:'nacional', peso:2,
+    req:(E)=> CURUL.DATA.ministerios.some(m=>CURUL.Presupuesto.underfunded(E,m.id)),
+    ctxFn:(E)=>({ ministerio: (CURUL.U.barajar(CURUL.DATA.ministerios.filter(m=>CURUL.Presupuesto.underfunded(E,m.id)))[0]||CURUL.DATA.ministerios[0]).id }),
+    titulo:'Alertan crisis en el sector de {ministerio} por falta de presupuesto',
+    texto:'Gremios y veedurías advierten que los recortes al Ministerio de {ministerio} ya afectan la prestación del servicio en varias regiones.',
+    efecto:{ aprob:-1 },
+    opciones:[
+      { t:'Exigir que el Gobierno refuerce el presupuesto del sector', jug:{reconocimiento:2}, relGob:-4 },
+      { t:'Pedir la renuncia del ministro', jug:{reconocimiento:3}, relGob:-6 },
+      { t:'Respaldar la gestión pese a las limitaciones', relGob:5 } ] },
+  { id:'crisispresupuestal', tipo:'gobierno', icono:'💸', alcance:'jugador', peso:2,
+    req:(E)=> E.gobierno.presidente==='J' && CURUL.DATA.ministerios.some(m=>CURUL.Presupuesto.underfunded(E,m.id)),
+    ctxFn:(E)=>({ ministerio: (CURUL.U.barajar(CURUL.DATA.ministerios.filter(m=>CURUL.Presupuesto.underfunded(E,m.id)))[0]||CURUL.DATA.ministerios[0]).id }),
+    titulo:'El Ministerio de {ministerio} pide una partida de emergencia',
+    texto:'La cartera quedó corta de presupuesto este año y el ministro advierte que no podrá cumplir sus metas sin recursos adicionales.',
+    opciones:[
+      { t:'Girar una partida de emergencia recortando otros sectores', jug:{rep:{competencia:2}}, presupuestoEmergencia:'recorte' },
+      { t:'Autorizar un crédito de emergencia (sube el déficit)', jug:{rep:{competencia:1}}, presupuestoEmergencia:'credito' },
+      { t:'No intervenir por ahora', jug:{} } ] }
 ];

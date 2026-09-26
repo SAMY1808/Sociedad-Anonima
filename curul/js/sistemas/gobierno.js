@@ -173,12 +173,8 @@ window.CURUL = window.CURUL || {};
       // Posesión el 7 de agosto
       if (g.electo && hoy.getUTCMonth() === 7 && hoy.getUTCDate() >= 7 && hoy.getUTCDate() < 14) G.posesionar(E, g.electo);
       if (!g.presidente) return;
-      // Presupuesto General de la Nación: se radica en la semana del 20 de julio
-      if (hoy.getUTCMonth() === 6 && hoy.getUTCDate() >= 20 && hoy.getUTCDate() < 27 && g.presidente !== 'J') {
-        const m = E.politicos[g.gabinete.hacienda];
-        const p = C.Legislacion.crear(E, { plantilla: 'presupuesto', autor: m ? m.id : null, gobierno: true, urgencia: true, origen: 'camara', titulo: 'Presupuesto General de la Nación ' + (U.anio() + 1) });
-        g.agenda.push(p.id);
-      }
+      // El Presupuesto General de la Nación lo radica el sistema de presupuesto (ver presupuesto.js);
+      // aquí sólo se agenda cuando aparece (el jugador puede formularlo antes si es presidente).
       // Agenda legislativa del gobierno (IA)
       if (g.presidente !== 'J' && C.Congreso.enSesion(E) && E.fecha.t - g.ultimoProyecto > U.ri(5, 9)) {
         const pres = E.politicos[g.presidente];
@@ -251,6 +247,15 @@ window.CURUL = window.CURUL || {};
           const libre = Object.keys(E.gobierno.gabinete).find(k => { const m = E.politicos[E.gobierno.gabinete[k]]; return m && m.partido === E.gobierno.partido; });
           if (libre) G.designar(E, libre, pa.id);
           return { ok: true, msg: `El ${pa.sigla} entra a la coalición de gobierno` };
+        } });
+      A.registrar({ id: 'consejoMinistros', nombre: 'Consejo de ministros', icono: '🗂', grupo: 'gobierno', costo: 1,
+        disponible: E => E.gobierno.presidente === 'J' || 'Sólo el Presidente',
+        ejecutar(E) {
+          const g = E.gobierno;
+          E.opinion.aprobacionPres = U.clamp(E.opinion.aprobacionPres + U.rf(0.15, 0.7), 3, 95);
+          for (const pid of g.coalicion) if (E.partidos[pid]) E.partidos[pid].relJ = U.clamp(E.partidos[pid].relJ + 1.5, -100, 100);
+          for (const id of Object.values(g.gabinete)) { const m = E.politicos[id]; if (m) m.aprob = U.clamp((m.aprob || 50) + U.rf(0.3, 1.4), 0, 100); }
+          return { ok: true, msg: 'El gabinete se reúne y alinea la agenda de gobierno para las próximas semanas' };
         } });
     }
   };

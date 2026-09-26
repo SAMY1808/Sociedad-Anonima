@@ -53,9 +53,9 @@ window.CURUL = window.CURUL || {};
       E.congreso.legislatura = 1; E.congreso.sesionAnterior = true;
       C.Partidos.asignarLideres(E);
       if (forzar) J.historialElectoral.push({ anio: 2026, cargo: forzar === 'senado' ? 'senado' : 'camara', depto: forzar === 'camara' ? J.residencia : null, partido: J.partido, votos: (resC.senado.electos.concat(...Object.values(resC.camara.porDepto).map(x => x.electos)).find(e => e.pol === 'J') || {}).votos || 0, electo: true });
-      // 7. Agenda inicial
-      const hac = E.politicos[E.gobierno.gabinete.hacienda];
-      E.gobierno.agenda.push(C.Legislacion.crear(E, { plantilla: 'presupuesto', autor: hac && hac.id, gobierno: true, urgencia: true, origen: 'camara', titulo: 'Presupuesto General de la Nación ' + (U.anio() + 1) }).id);
+      // 7. Agenda inicial: presupuesto del año siguiente y proyectos de bandera del Gobierno
+      C.Presupuesto.init(E);
+      C.Presupuesto.radicar(E);
       const pres = E.politicos[E.gobierno.presidente];
       const pls = C.DATA.plantillasProyectos.filter(x => !x.gobierno).sort((a, b) => U.distIdeo(pres, a) - U.distIdeo(pres, b)).slice(0, 3);
       for (const pl of pls) { const m = C.Gobierno.ministroDe(E, pl.sector); E.gobierno.agenda.push(C.Legislacion.crear(E, { plantilla: pl.id, autor: m && m.id, gobierno: true, eco: pl.eco * 0.6 + pres.eco * 0.4, soc: pl.soc * 0.6 + pres.soc * 0.4 }).id); }

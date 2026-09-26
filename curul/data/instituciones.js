@@ -33,18 +33,30 @@ CURUL.DATA.comisiones = [
   { n:7, nombre:'Séptima', tema:'Salud, trabajo, seguridad social, vivienda, mujer y familia', senado:13, camara:23 }
 ];
 
+/* pesoBase: participación de referencia en el presupuesto de inversión y funcionamiento
+   (no necesita sumar 100: el sistema de presupuesto la normaliza). programas: iniciativas
+   insignia del ministerio, sólo para dar contexto en la interfaz. */
 CURUL.DATA.ministerios = [
-  ['interior','Interior','politica'], ['exteriores','Relaciones Exteriores','exteriores'],
-  ['hacienda','Hacienda y Crédito Público','hacienda'], ['justicia','Justicia y del Derecho','justicia'],
-  ['defensa','Defensa Nacional','seguridad'], ['agricultura','Agricultura y Desarrollo Rural','agricultura'],
-  ['salud','Salud y Protección Social','salud'], ['trabajo','Trabajo','empleo'],
-  ['minas','Minas y Energía','energia'], ['comercio','Comercio, Industria y Turismo','comercio'],
-  ['educacion','Educación Nacional','educacion'], ['ambiente','Ambiente y Desarrollo Sostenible','ambiente'],
-  ['vivienda','Vivienda, Ciudad y Territorio','vivienda'], ['tic','Tecnologías de la Información','tecnologia'],
-  ['transporte','Transporte','infraestructura'], ['cultura','Culturas, Artes y Saberes','cultura'],
-  ['deporte','Deporte','cultura'], ['ciencia','Ciencia, Tecnología e Innovación','tecnologia'],
-  ['igualdad','Igualdad y Equidad','paz']
-].map(m => ({ id:m[0], nombre:m[1], sector:m[2] }));
+  ['interior','Interior','politica',3,['Diálogo con bancadas','Relación con gobernadores']],
+  ['exteriores','Relaciones Exteriores','exteriores',2,['Cuerpo diplomático','Cooperación internacional']],
+  ['hacienda','Hacienda y Crédito Público','hacienda',5,['Recaudo tributario','Manejo de la deuda']],
+  ['justicia','Justicia y del Derecho','justicia',4,['Descongestión judicial','Sistema penitenciario']],
+  ['defensa','Defensa Nacional','seguridad',13,['Pie de fuerza','Seguridad ciudadana']],
+  ['agricultura','Agricultura y Desarrollo Rural','agricultura',5,['Distritos de riego','Crédito agropecuario']],
+  ['salud','Salud y Protección Social','salud',19,['Atención primaria','Régimen subsidiado']],
+  ['trabajo','Trabajo','empleo',10,['Pilar solidario de pensiones','Formalización laboral']],
+  ['minas','Minas y Energía','energia',2,['Transición energética','Regalías']],
+  ['comercio','Comercio, Industria y Turismo','comercio',2,['Apoyo a pymes','Promoción de exportaciones']],
+  ['educacion','Educación Nacional','educacion',18,['Matrícula cero','Jornada única']],
+  ['ambiente','Ambiente y Desarrollo Sostenible','ambiente',2,['Freno a la deforestación','Páramos protegidos']],
+  ['vivienda','Vivienda, Ciudad y Territorio','vivienda',5,['Subsidios de vivienda','Agua potable rural']],
+  ['tic','Tecnologías de la Información','tecnologia',2,['Internet rural','Gobierno digital']],
+  ['transporte','Transporte','infraestructura',6,['Vías terciarias','Concesiones 5G']],
+  ['cultura','Culturas, Artes y Saberes','cultura',1,['Economía creativa','Bibliotecas públicas']],
+  ['deporte','Deporte','cultura',1,['Escenarios deportivos','Deporte escolar']],
+  ['ciencia','Ciencia, Tecnología e Innovación','tecnologia',2,['Becas doctorales','Innovación empresarial']],
+  ['igualdad','Igualdad y Equidad','paz',2,['Enfoque de género','Atención a víctimas']]
+].map(m => ({ id:m[0], nombre:m[1], sector:m[2], pesoBase:m[3], programas:m[4] }));
 
 /* Composición de cada cámara. `vigencia`: último año de elección en que existe esa circunscripción. */
 CURUL.DATA.camaras = {

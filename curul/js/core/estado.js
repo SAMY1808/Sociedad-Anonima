@@ -20,6 +20,7 @@ window.CURUL = window.CURUL || {};
         votaciones: [],
         gobierno: {},
         economia: {},
+        presupuesto: {},
         opinion: {},
         elecciones: { historico: [], campana: null, proxima: null },
         medios: { lista: [], noticias: [] },
@@ -34,6 +35,8 @@ window.CURUL = window.CURUL || {};
       if (!E.meta) throw new Error('Partida inválida');
       const base = C.Estado.vacio(E.meta.semilla || 1, E.meta.inicio);
       for (const k of Object.keys(base)) if (E[k] === undefined) E[k] = base[k];
+      // Partidas de la Fase 1 no traían presupuesto por sectores: se inicializa sobre la economía ya existente.
+      if (C.Presupuesto && (!E.presupuesto || !E.presupuesto.vigente)) { const prev = C.E; C.E = E; C.Presupuesto.init(E); C.E = prev; }
       // Futuras migraciones: if (E.meta.esquema < 2) { … }
       E.meta.esquema = ESQUEMA;
       E.meta.version = C.VERSION;

@@ -17,7 +17,7 @@ window.CURUL = window.CURUL || {};
           ${G.medidor(E.opinion.aprobacionPres, { tam: 130, etq: 'APROBACIÓN' })}</div>
           ${G.linea([{ nombre: 'Aprobación', color: '#D9B45A', datos: E.series.aprobacion || [] }], { alto: 130, min: 0, max: 100, ref: 50, unidad: '%', area: true })}</div>
         <div class="tarjeta"><h3>Consejo de ministros</h3><div class="gabinete">${C.DATA.ministerios.map(mi => { const m = E.politicos[g.gabinete[mi.id]]; if (!m) return ''; return `<div class="ministro clic" data-ficha="${m.id}"${UI.tt(`<b>${esc(m.nombre)}</b><br>Ministerio de ${esc(mi.nombre)}<br>${m.partido ? esc(E.partidos[m.partido].nombre) : 'Tecnócrata sin partido'}<br>Imagen: ${Math.round(m.aprob || 50)} %`)}>${Comp.avatar(E, m, 38)}<div><b>${esc(mi.nombre.split(',')[0].split(' y ')[0])}</b><span>${esc(C.Politicos.nombreCorto(m))}</span><span class="sigla" style="font-size:10.5px"><i class="pto" style="background:${m.partido ? E.partidos[m.partido].color : '#8C96A3'};width:8px;height:8px"></i>${m.partido ? esc(E.partidos[m.partido].sigla) : 'Técnico'}</span></div><i class="imagen-min" style="background:${(m.aprob || 50) > 50 ? 'var(--bien)' : (m.aprob || 50) > 35 ? 'var(--alerta)' : 'var(--mal)'}"></i></div>`; }).join('')}</div>
-          ${g.presidente === 'J' ? `<div class="fila accion-form" style="margin-top:10px"><select data-arg="ministerio">${C.DATA.ministerios.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('')}</select><select data-arg="partido"><option value="">Tecnócrata</option>${g.coalicion.map(p => `<option value="${p}">${esc(E.partidos[p].sigla)}</option>`).join('')}</select>${UI.botonAccion('cambiarMinistro', {})}</div>` : ''}</div>
+          ${g.presidente === 'J' ? `<div class="fila accion-form" style="margin-top:10px"><select data-arg="ministerio">${C.DATA.ministerios.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('')}</select><select data-arg="partido"><option value="">Tecnócrata</option>${g.coalicion.map(p => `<option value="${p}">${esc(E.partidos[p].sigla)}</option>`).join('')}</select>${UI.botonAccion('cambiarMinistro', {})}${UI.botonAccion('consejoMinistros', {})}</div>` : ''}</div>
       </div>
       <div class="col">
         <div class="tarjeta"><div class="t-cab"><h3>Coalición de gobierno</h3><span class="etq ${est.total > 60 ? 'verde' : est.total > 40 ? 'amar' : 'rojo'}">Estabilidad ${Math.round(est.total)}%</span></div>
@@ -82,19 +82,63 @@ window.CURUL = window.CURUL || {};
       </div>`;
   };
 
+  /* ── Presupuesto General de la Nación ── */
+  const bill = v => '$' + U.d1(v) + ' billones';
+  const presupuesto = (E) => {
+    const Pr = E.presupuesto, g = E.gobierno;
+    const editable = g.presidente === 'J' && !Pr.enTramite;
+    const pib = E.economia.pib, vig = Pr.vigente;
+    const shares = editable ? Pr.propuesta : vig.shares;
+    const gastoPct = editable ? Pr.gastoPct : vig.gastoPct;
+    const gastoBill = pib * gastoPct / 100, ingresosBill = pib * E.economia.recaudo / 100;
+    const deficitPct = gastoPct - E.economia.recaudo;
+    const tramiteProy = Pr.proyectoId ? E.proyectos[Pr.proyectoId] : null;
+    const nombreCorto = n => n.split(',')[0].split(' y ')[0];
+    const asignado = m => pib * gastoPct / 100 * (shares[m.id] || 0) / 100;
+    return `<div class="grid g4">
+        ${Comp.kpi('Gasto público', U.d1(gastoPct) + '% del PIB', bill(gastoBill))}
+        ${Comp.kpi('Ingresos (recaudo)', U.d1(E.economia.recaudo) + '% del PIB', bill(ingresosBill))}
+        ${Comp.kpi('Déficit resultante', U.signo(deficitPct, 1) + ' pp', deficitPct > 4 ? '<span class="mal">requiere financiación</span>' : '<span class="bien">manejable</span>')}
+        ${Comp.kpi('Estado', tramiteProy ? 'En trámite' : `Formulando ${Pr.anio}`, tramiteProy ? esc(tramiteProy.numero) : (editable ? 'puedes ajustarlo abajo' : 'lo define el Gobierno'))}</div>
+      ${editable ? `<div class="tarjeta" style="margin-top:14px"><div class="t-cab"><h3>Gasto público total</h3><button class="btn chico" id="pres-reset">↺ Restablecer al vigente</button></div>
+          <input type="range" id="pres-gasto" min="15" max="29" step="0.1" value="${gastoPct.toFixed(1)}">
+          <div class="fila" style="justify-content:space-between;font-size:12px;color:var(--tenue)"><span>15 % · austero</span><span><b style="color:var(--oro2);font-size:14px">${U.d1(gastoPct)} %</b> del PIB</span><span>29 % · expansivo</span></div>
+          <p class="tenue" style="font-size:12px;margin-bottom:0">Más gasto social reduce pobreza y desempleo, pero si supera el recaudo dispara el déficit. Se radica como proyecto de ley el 20 de julio y sigue el trámite normal en el Congreso; si no se aprueba a tiempo, rige igual por mandato constitucional.</p></div>`
+        : `<div class="tarjeta" style="margin-top:14px">${tramiteProy ? `<p style="margin:0">El Presupuesto ${Pr.anio > tramiteProy ? Pr.anio : vig.anio + 1} está en trámite (<b>${esc(tramiteProy.numero)}</b>) con la propuesta del Gobierno.</p><button class="btn chico" data-proy="${tramiteProy.id}" style="margin-top:8px">📜 Ver expediente</button>` : `<p class="tenue" style="margin:0">Sólo el Presidente formula el presupuesto. Esta es la propuesta que el Gobierno prepara según su ideología, lista para radicarse en julio.</p>`}</div>`}
+      <div class="tarjeta" style="margin-top:14px"><h3>Participación por ministerio${editable ? ' (tu propuesta)' : ' (vigente)'}</h3>
+        ${G.barrasH(C.DATA.ministerios.map(m => ({ etq: nombreCorto(m.nombre), v: shares[m.id] || 0, color: C.Presupuesto.underfunded(E, m.id) ? 'var(--mal)' : 'var(--oro)', tt: `<b>${esc(m.nombre)}</b>: ${U.d1(shares[m.id] || 0)} % · ${bill(asignado(m))}` })).sort((a, b) => b.v - a.v), { max: 22, fmt: v => U.d1(v) + '%', anchoEtq: '150px' })}</div>
+      <div class="grid g3" style="margin-top:14px">${C.DATA.ministerios.map(m => {
+        const under = C.Presupuesto.underfunded(E, m.id); const pol = E.politicos[g.gabinete[m.id]];
+        const pct = shares[m.id] || 0, base = Pr.pesoBase[m.id];
+        return `<div class="tarjeta min-presu ${under ? 'bajo' : ''}"><div class="t-cab"><h3>${esc(m.nombre)}</h3>${under ? '<span class="etq rojo">Subfinanciado</span>' : ''}</div>
+          <div class="kpi-fila"><div class="kpi"><span class="v">${U.d1(pct)}%</span><span class="l">del presupuesto</span></div><div class="kpi" style="text-align:right"><span class="v" style="font-size:18px">${bill(asignado(m))}</span><span class="l">al año</span></div></div>
+          ${editable ? `<input type="range" min="0.4" max="${Math.min(38, Math.max(8, base * 3))}" step="0.2" value="${pct.toFixed(1)}" data-share="${m.id}" style="margin-top:6px">` : `<div class="barra-h" style="margin-top:8px"><i style="width:${Math.min(100, pct / (base * 2) * 100)}%;background:${under ? 'var(--mal)' : 'var(--oro)'}"></i></div>`}
+          <div class="fila" style="gap:5px;margin-top:8px">${(m.programas || []).map(p => `<span class="etq">${esc(p)}</span>`).join('')}</div>
+          ${pol ? `<div class="fila" style="margin-top:8px;align-items:center;gap:6px"><span data-ficha="${pol.id}" style="cursor:pointer">${Comp.avatar(E, pol, 26)}</span><span class="tenue" style="font-size:11.5px">${esc(C.Politicos.nombreCorto(pol))} · imagen <b class="num" style="color:var(--texto)">${Math.round(pol.aprob || 50)}%</b></span></div>` : ''}
+        </div>`;
+      }).join('')}</div>
+      <div class="tarjeta" style="margin-top:14px"><h3>Historia del presupuesto</h3>${Pr.historial.length ? `<table class="tabla"><thead><tr><th>Año</th><th>Gasto</th><th>Ingresos</th><th>Déficit resultante</th></tr></thead><tbody>${Pr.historial.slice().reverse().map(h => `<tr><td>${h.anio}</td><td class="num">${U.d1(h.gastoPct)}%</td><td class="num">${U.d1(h.ingresosPct)}%</td><td class="num ${h.gastoPct - h.ingresosPct > 4 ? 'mal' : 'bien'}">${U.signo(h.gastoPct - h.ingresosPct, 1)} pp</td></tr>`).join('')}</tbody></table>` : '<div class="vacio">Aún no se ha cerrado un ciclo presupuestal completo.</div>'}</div>`;
+  };
+
   C.Pantallas.gobierno = {
     render(el, params) {
       const E = C.E;
       const tab = params.tab || E.ui.tabGob || 'centro';
       E.ui.tabGob = tab;
-      const tabs = [['centro', '🦅 Centro de Gobierno'], ['economia', '📈 Economía'], ['oposicion', '⚔ Centro de Oposición']];
-      el.innerHTML = `<div class="cab"><div><h1>${tab === 'oposicion' ? 'Centro de Oposición' : tab === 'economia' ? 'Economía nacional' : 'Centro de Gobierno'}</h1><div class="sub">Casa de Nariño · ${esc(E.partidos[E.gobierno.partido] ? E.partidos[E.gobierno.partido].nombre : '')}</div></div></div>
+      const tabs = [['centro', '🦅 Centro de Gobierno'], ['presupuesto', '💰 Presupuesto'], ['economia', '📈 Economía'], ['oposicion', '⚔ Centro de Oposición']];
+      const titulos = { oposicion: 'Centro de Oposición', economia: 'Economía nacional', presupuesto: 'Presupuesto General de la Nación', centro: 'Centro de Gobierno' };
+      el.innerHTML = `<div class="cab"><div><h1>${titulos[tab]}</h1><div class="sub">Casa de Nariño · ${esc(E.partidos[E.gobierno.partido] ? E.partidos[E.gobierno.partido].nombre : '')}</div></div></div>
         <div class="tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${k === tab ? 'activo' : ''}">${n}</button>`).join('')}</div>
-        ${tab === 'centro' ? centroGobierno(E) : tab === 'economia' ? economia(E) : oposicion(E)}`;
+        ${tab === 'centro' ? centroGobierno(E) : tab === 'presupuesto' ? presupuesto(E) : tab === 'economia' ? economia(E) : oposicion(E)}`;
       el.onclick = e => {
         const t = e.target.closest('.tabs [data-tab]'); if (t) return C.App.ir('gobierno', { tab: t.dataset.tab });
         const f = e.target.closest('[data-ficha]'); if (f) return Comp.fichaPolitico(E, f.dataset.ficha);
         const p = e.target.closest('[data-proy]'); if (p) return C.Pantallas.proyectos.expediente(p.dataset.proy);
+        if (e.target.closest('#pres-reset')) { C.Presupuesto.restablecer(E); return C.App.refrescar(); }
+      };
+      el.onchange = e => {
+        if (e.target.id === 'pres-gasto') { C.Presupuesto.setGastoPct(E, +e.target.value); return C.App.refrescar(); }
+        if (e.target.dataset.share) { C.Presupuesto.setShare(E, e.target.dataset.share, +e.target.value); return C.App.refrescar(); }
       };
     }
   };
