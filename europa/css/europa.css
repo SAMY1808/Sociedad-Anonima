@@ -45,7 +45,7 @@
 .pantalla-ancha{max-width:1280px}
 .cuadricula-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 @media (max-width:760px){.cuadricula-2{grid-template-columns:1fr}.voto-btns{grid-template-columns:1fr}}
-.noche .modal{width:min(1020px,100%)}
+.modal.noche{width:min(1020px,100%)}
 .boletin{font-family:var(--mono);font-size:12px;color:var(--tenue);display:flex;justify-content:space-between;margin-bottom:6px}
 .ranking-p{display:grid;grid-template-columns:34px 1fr 64px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(38,56,87,.55)}
 .inicio .mosaico{max-height:60vh}

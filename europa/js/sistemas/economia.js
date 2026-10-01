@@ -38,6 +38,10 @@ window.EUROPA = window.EUROPA || {};
         e.deficit += (tDef - e.deficit) * 0.04;
         e.deuda += ((e.deficit - e.deuda * (e.crec + e.infl) / 10000 * 100) / 52) + pol.deuda / 52;
         e.pib *= 1 + (e.crec + e.infl) / 100 / 52;
+        // Reacción fiscal: los Gobiernos corrigen déficits muy superiores a lo habitual en el país
+        const exceso = e.deficit - (b.deficit + 0.8);
+        if (exceso > 0) { pol.deficit -= exceso * 0.012; pol.crec -= exceso * 0.0012; }
+        else if (exceso < -1.5) { pol.deficit += 0.004; }
         // Los efectos de las políticas se diluyen con el tiempo (vida media de unos 3 años)
         for (const k in pol) pol[k] *= 0.9955;
         e.paro = U.clamp(e.paro, 1.5, 28); e.infl = U.clamp(e.infl, -1, 60); e.crec = U.clamp(e.crec, -9, 12); e.deuda = U.clamp(e.deuda, 5, 260);

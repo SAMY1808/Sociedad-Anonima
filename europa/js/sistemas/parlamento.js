@@ -296,8 +296,10 @@ window.EUROPA = window.EUROPA || {};
       }
       P.flags.leyes = P.flags.leyes || {}; P.flags.leyes[p.tpl] = E.fecha.t;
       if (tpl) {
-        C.Economia.aplicar(E, J.pais, Object.assign({}, tpl.ef, { aprob: (tpl.ef.aprob || 0) + (p.pop - 50) / 100 * 1.6 }));
-        if (tpl.costo) P.ec.pol.deficit += tpl.costo * 0.9;
+        const ef = {}; for (const k in tpl.ef) ef[k] = k === 'aprob' ? tpl.ef[k] : tpl.ef[k] * 0.5;
+        ef.aprob = (tpl.ef.aprob || 0) + (p.pop - 50) / 100 * 1.6;
+        C.Economia.aplicar(E, J.pais, ef);
+        if (tpl.costo) P.ec.pol.deficit += tpl.costo * 0.4;
         if (tpl.efecto) Pa.efectoEspecial(E, tpl.efecto, p);
       }
       const ap = p.autor.tipo === 'jugador' ? J.partido : p.autor.pid;
