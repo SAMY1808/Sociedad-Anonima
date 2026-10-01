@@ -211,6 +211,10 @@ window.EUROPA = window.EUROPA || {};
       const J = E.jugador; if (!J) return;
       const P = E.paises[J.pais], g = P.gob;
       const ab = Pa.abiertos(E);
+      if (E.fecha.t % 52 === 0) {
+        for (const id in E.proyectos) { const p = E.proyectos[id]; if (!ABIERTAS.includes(p.etapa) && E.fecha.t - p.tEtapa > 208) delete E.proyectos[id]; }
+        for (const id in E.proyectos) { const p = E.proyectos[id]; if (!p.votacion) continue; if (!E.votaciones.some(v => v.id === p.votacion)) p.votacion = null; }
+      }
       // Iniciativas del Gobierno
       const delGob = ab.filter(p => p.autor.tipo === 'gobierno').length;
       if (delGob < 3 && U.chance(0.2) && ab.length < 14 && !Pa.enRecesion(E)) {

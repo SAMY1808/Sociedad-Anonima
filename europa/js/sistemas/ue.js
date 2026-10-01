@@ -255,7 +255,7 @@ window.EUROPA = window.EUROPA || {};
       if (E.ue.cumbres.length > 12) E.ue.cumbres.length = 12;
       C.Noticias.poner(E, 'europa', `Cumbre del Consejo Europeo en Bruselas: ${lista.map(e => e.t).join('; ') || 'sin dosieres'}.`);
       lista.forEach(e => {
-        const juega = J && J.cargo === 'pm' && UE.esMiembro(E, J.pais);
+        const juega = J && C.Personaje.representaEnUE(E) && UE.esMiembro(E, J.pais);
         if (juega) E.ue.pendiente.push({ exp: e.id, rol: 'cumbre' }); else UE.cerrarCumbre(E, e, null);
       });
       UE.proximaCumbre(E);
@@ -329,7 +329,7 @@ window.EUROPA = window.EUROPA || {};
       // Votaciones de expedientes
       UE.abiertos(E).forEach(e => {
         if (E.fecha.t < e.tVoto) return;
-        const juegaCons = J && UE.esMiembro(E, J.pais) && (J.cargo === 'pm' || (J.cargo === 'ministro' && UE.ministroDelSector(E, e)));
+        const juegaCons = J && UE.esMiembro(E, J.pais) && (C.Personaje.representaEnUE(E) || (J.cargo === 'ministro' && UE.ministroDelSector(E, e)));
         const juegaPE = J && J.cargo === 'mep';
         if (juegaCons || juegaPE) { if (!ue.pendiente.some(x => x.exp === e.id)) { ue.pendiente.push({ exp: e.id, rol: juegaPE ? 'pe' : 'consejo' }); e.estado = 'pendiente'; } }
         else UE.resolver(E, e, null, null);
@@ -364,7 +364,7 @@ window.EUROPA = window.EUROPA || {};
 
     celebrarPE(E) {
       const J = E.jugador;
-      const anterior = E.ue.pe;
+      const anterior = E.ue.pe ? JSON.parse(JSON.stringify(E.ue.pe.escanos)) : {};
       const pe = UE.elecPE(E, false);
       E.ue.proxPE = E.fecha.t + 260;
       const g = Object.entries(pe.escanos).sort((a, b) => b[1] - a[1]);
@@ -384,6 +384,7 @@ window.EUROPA = window.EUROPA || {};
         if (pos > n) { J.cargo = 'activista'; J.cargoUE = null; J.meps = null; C.Personaje.log(E, 'Pierdes tu escaño en el Parlamento Europeo.'); C.Personaje.sincronizar(E); C.Eventos.info(E, '🇪🇺 Pierdes tu escaño europeo', 'No logras reelección en la Eurocámara. Regresas a la política nacional.'); }
         else { J.meps = { grupo: p.grupo, pais: J.pais }; C.Personaje.log(E, 'Eres reelegido/a eurodiputado/a.'); }
       }
+      if (J) E.elecciones.pePendiente = { t: E.fecha.t, antes: anterior, despues: JSON.parse(JSON.stringify(pe.escanos)), deleg: J && pe.porPais[J.pais] ? JSON.parse(JSON.stringify(pe.porPais[J.pais])) : null, presidente: E.ue.comision.presidente.n, pais: J.pais };
       C.Bus.emit('elecciones-europeas', {});
     },
 

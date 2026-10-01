@@ -61,6 +61,7 @@ Object.assign(EUROPA.DATA, {
     diputado:   { nombre: 'Diputado/a nacional', icono: '🪑', nivel: 2 },
     ministro:   { nombre: 'Ministro/a', icono: '💼', nivel: 4 },
     pm:         { nombre: 'Jefe/a de Gobierno', icono: '🏛️', nivel: 6 },
+    presidente: { nombre: 'Presidente/a de la República', icono: '🎖️', nivel: 7 },
     mep:        { nombre: 'Eurodiputado/a', icono: '🇪🇺', nivel: 3 },
     presPE:     { nombre: 'Presidente/a del Parlamento Europeo', icono: '🇪🇺', nivel: 5 },
     comisario:  { nombre: 'Comisario/a europeo/a', icono: '🇪🇺', nivel: 5 },

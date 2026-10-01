@@ -65,10 +65,12 @@ window.EUROPA = window.EUROPA || {};
           <button class="btn prim" id="b-sem"${UI.tt('Avanzar una semana (tecla N)')}>▶ Semana</button>
           <button class="btn" id="b-mes"${UI.tt('Avanzar cuatro semanas (se detiene ante decisiones y votaciones)')}>▶▶ Mes</button>
           <button class="btn" id="b-tri"${UI.tt('Avanzar trece semanas')}>⏩ Trimestre</button>
+          <button class="btn fant" id="b-ayuda"${UI.tt('Cómo se juega')}>?</button>
         </div>`;
       document.getElementById('b-sem').onclick = () => App.avanzar(1);
       document.getElementById('b-mes').onclick = () => App.avanzar(4);
       document.getElementById('b-tri').onclick = () => App.avanzar(13);
+      document.getElementById('b-ayuda').onclick = () => App.ayuda();
       UI.$$('[data-ir]', document.getElementById('barra')).forEach(b => b.onclick = () => App.ir(b.dataset.ir));
     },
 
@@ -99,9 +101,23 @@ window.EUROPA = window.EUROPA || {};
       const E = C.E; if (!E) return;
       if (UI.pila.length) return;
       if (E.elecciones.nochePendiente) { const n = E.elecciones.nochePendiente; E.elecciones.nochePendiente = null; C.Pantallas.elecciones.noche(n); return; }
+      if (E.elecciones.pePendiente) { const n = E.elecciones.pePendiente; E.elecciones.pePendiente = null; C.Pantallas.europa.nochePE(n); return; }
+      if (E.elecciones.presPendiente) { const n = E.elecciones.presPendiente; E.elecciones.presPendiente = null; C.Pantallas.elecciones.nochePres(n); return; }
       if (E.eventos.pendientes.length) { App.modalEvento(E.eventos.pendientes[0]); return; }
       if (E.parl.pendienteVoto.length) { C.Pantallas.leyes.modalVoto(E.parl.pendienteVoto[0]); return; }
       if (E.ue.pendiente.length) { C.Pantallas.europa.modalVoto(0); return; }
+    },
+
+    ayuda() {
+      const cuerpo = `<div class="col" style="gap:12px;font-size:13.5px;color:var(--texto2);line-height:1.55">
+        <div><b style="color:var(--texto)">🎯 Objetivo.</b> Construye una carrera política: de diputado/a a jefe/a de Gobierno, a Bruselas o a la Presidencia de la Comisión. No hay un final único: tú decides qué cargos buscas.</div>
+        <div><b style="color:var(--texto)">◆ Agenda.</b> Cada semana tienes 5–7 puntos. Gástalos en la pestaña <i>Agenda</i>: discursos, proyectos, cabildeo, partido, medios, campaña y Europa. Repetir la misma acción rinde cada vez menos.</div>
+        <div><b style="color:var(--texto)">🏛 Parlamento y leyes.</b> Cada ley pasa por registro → comisión → pleno. Abre un proyecto para ver la postura de cada grupo y cabildear. Votar contra tu partido cuesta prestigio.</div>
+        <div><b style="color:var(--texto)">🦅 Gobierno.</b> Los Ejecutivos se forman por coalición y pueden caer. Si lideras un partido participarás en la ronda de consultas tras las elecciones y podrás presentar una moción de censura.</div>
+        <div><b style="color:var(--texto)">🗳 Elecciones.</b> Tu puesto en la lista depende de tu prestigio, popularidad y campaña. Mira las encuestas y la proyección de escaños.</div>
+        <div><b style="color:var(--texto)">🇪🇺 Europa.</b> Los textos de la Comisión necesitan el Consejo (mayoría cualificada o unanimidad) y el Parlamento Europeo. Si eres jefe/a de Gobierno o ministro/a del sector, votas tú. Las directivas aprobadas llegan a tu parlamento para ser transpuestas. Los candidatos avanzan hacia la adhesión con reformas y votos unánimes.</div>
+        <div><b style="color:var(--texto)">💾 Guardado.</b> Se autoguarda cada cuatro semanas; usa <i>Partidas</i> para exportar un archivo. Atajo: <b>N</b> avanza una semana.</div></div>`;
+      UI.modal({ titulo: 'Cómo se juega', icono: '❓', cuerpo, clase: 'medio' });
     },
 
     modalEvento(ev) {

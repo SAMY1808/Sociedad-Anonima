@@ -23,6 +23,7 @@ Es una PWA: se puede instalar y jugar sin conexión.
 - **Gobiernos de coalición**: formación por afinidad ideológica con cordón sanitario donde procede, gabinete de
   12 ministerios, estabilidad, caídas de Gobierno, elecciones anticipadas, **ronda de consultas** (si lideras un
   partido) y **moción de censura**.
+- **Elecciones presidenciales** a dos vueltas en Francia, Rumanía, Polonia, Portugal, Lituania, Chipre, Turquía y Ucrania (con límite de mandatos, cohabitación y presidentes que encabezan el Gobierno en los regímenes presidencialistas); si ganas, designas Gobierno y representas al país en el Consejo Europeo cuando el sistema lo prevé.
 - **Elecciones** con campaña, encuestas, proyección de escaños, **noche electoral animada** y puesto en la lista
   del jugador. Todos los países celebran sus propias elecciones y forman gobierno aunque no los juegues.
 - **Unión Europea**:
@@ -34,8 +35,9 @@ Es una PWA: se puede instalar y jugar sin conexión.
     Reino Unido; referéndums de permanencia (¡un país puede salir de la UE!); reglas fiscales y procedimiento
     de déficit excesivo.
 - **Mapa de mosaicos** de Europa por capas (estatus, gobierno, aprobación, crecimiento y voto en el Consejo).
-- **Eventos** con decisiones (escándalos, huelgas, crisis migratorias, ofertas de carrera) y choques globales
-  (recesión, crisis energética, guerra de aranceles…).
+- **Eventos** con decisiones (escándalos, huelgas, crisis migratorias, ofertas de carrera), sucesos propios de
+  cada región (Irlanda del Norte, Cataluña, Egeo, Balcanes, Transnistria, Georgia, Ucrania, Báltico…) y choques
+  globales (recesión, crisis energética, guerra de aranceles…).
 - **Guardado** múltiple (IndexedDB), autoguardado, exportar/importar `.json`.
 
 ## Cómo se juega
@@ -77,5 +79,5 @@ node tools/nuevo.js NL 14      # crecimiento de un partido nuevo
 ## Simplificaciones conocidas
 
 Los datos (población, PIB, escaños, umbrales) son aproximados y los resultados electorales se simulan a partir
-de los apoyos nacionales sin circunscripciones. Los parlamentos son unicamerales; las elecciones presidenciales
-y los niveles regional/local no están modelados todavía (ver hoja de ruta en `docs/DISENO.md`).
+de los apoyos nacionales sin circunscripciones. Los parlamentos son unicamerales y los niveles regional y local
+no están modelados todavía (ver hoja de ruta en `docs/DISENO.md`).

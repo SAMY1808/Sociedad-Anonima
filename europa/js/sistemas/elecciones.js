@@ -83,17 +83,99 @@ window.EUROPA = window.EUROPA || {};
       E.elecciones.historico = [];
     },
 
+    /* Elecciones presidenciales iniciales (sólo países con jefe de Estado elegido). */
+    postInit(E) {
+      for (const id in E.paises) {
+        const d = D().paises[id]; if (!d.pres) continue;
+        const P = E.paises[id];
+        let t = U.turnoDe(U.domingo(d.pres.prox[0], d.pres.prox[1] - 1, 2));
+        while (t < 3) t += d.pres.mand * 52;
+        const r = El.presidenciales(E, id, {});
+        const pid = r.ganador, pa = E.partidos[pid];
+        P.pres = { pol: pa.lider, partido: pid, t0: t - d.pres.mand * 52, proxT: t, mandatos: 1 };
+        P.flags.cohab = d.reg === 'semi' && P.gob && !P.gob.coalicion.includes(pid);
+        if (d.reg === 'pres') C.Gobierno.formar(E, id, { inicial: true });
+      }
+    },
+
+    /* Presidenciales a dos vueltas: devuelve {r1:[{pid,v}], r2:[{pid,v}]|null, ganador}. */
+    presidenciales(E, id, opts) {
+      const P = E.paises[id], d = D().paises[id], J = E.jugador;
+      const lim = d.pres.lim, prev = P.pres;
+      const cands = P.partidos.map(k => E.partidos[k]).filter(p => p.pop >= 4.5 || (J && p.lider === 'J' && p.pop >= 2)).sort((a, b) => b.pop - a.pop).slice(0, 7);
+      const fuerza = {};
+      cands.forEach(p => {
+        const ld = E.politicos[p.lider]; const c = ld ? ld.c : 50;
+        // Un presidente que ya agotó mandatos no puede repetir: su partido presenta a otra persona
+        const bloqueado = prev && prev.pol === p.lider && lim && prev.mandatos >= lim;
+        fuerza[p.id] = p.pop * (0.75 + 0.5 * c / 100) * Math.exp(U.gauss(0, 0.14)) * (bloqueado ? 0.8 : 1) * (prev && prev.pol === p.lider && !bloqueado ? (1 + (P.gob && P.gob.aprob > 45 ? 0.08 : -0.08)) : 1);
+        if (J && p.lider === 'J') fuerza[p.id] *= 1 + J.pop / 400 + (J.campania ? J.campania.pts * 0.003 : 0);
+      });
+      const tot = U.suma(Object.values(fuerza));
+      const r1 = cands.map(p => ({ pid: p.id, v: fuerza[p.id] * 100 / tot })).sort((a, b) => b.v - a.v);
+      if (r1[0].v > 50) return { r1, r2: null, ganador: r1[0].pid };
+      const a = r1[0].pid, b = r1[1].pid, A = E.partidos[a], B = E.partidos[b];
+      let va = r1[0].v, vb = r1[1].v;
+      r1.slice(2).forEach(o => {
+        const q = E.partidos[o.pid], wa = Math.exp(-3.2 * U.distIdeo(q, A)), wb = Math.exp(-3.2 * U.distIdeo(q, B));
+        const abst = 0.18; va += o.v * (1 - abst) * wa / (wa + wb); vb += o.v * (1 - abst) * wb / (wa + wb);
+      });
+      va *= Math.exp(U.gauss(0, 0.05)); vb *= Math.exp(U.gauss(0, 0.05));
+      const t2 = va + vb;
+      const r2 = [{ pid: a, v: va * 100 / t2 }, { pid: b, v: vb * 100 / t2 }].sort((x, y) => y.v - x.v);
+      return { r1, r2, ganador: r2[0].pid };
+    },
+
+    celebrarPres(E, id) {
+      const P = E.paises[id], d = D().paises[id], J = E.jugador;
+      const prev = P.pres;
+      const res = El.presidenciales(E, id, {});
+      const nombres = {}; res.r1.forEach(c => { const l = E.politicos[E.partidos[c.pid].lider]; nombres[c.pid] = l ? l.n : E.partidos[c.pid].sigla; });
+      const pa = E.partidos[res.ganador];
+      let pol = pa.lider;
+      const mismo = prev && prev.pol === pol;
+      if (prev && mismo && d.pres.lim && prev.mandatos >= d.pres.lim) {       // no puede repetir: nuevo candidato
+        const n = C.Gobierno.nuevoLider(E, res.ganador, 'como candidato presidencial'); pol = n.id;
+      }
+      P.pres = { pol, partido: res.ganador, t0: E.fecha.t, proxT: E.fecha.t + d.pres.mand * 52 + U.ri(-3, 3), mandatos: mismo && pol === prev.pol ? prev.mandatos + 1 : 1 };
+      const persona = E.politicos[pol];
+      const propio = J && J.pais === id;
+      if (d.reg === 'pres') {
+        C.Gobierno.formar(E, id, { tras: true });
+        if (propio) C.Personaje.sincronizar(E);
+      } else {
+        P.flags.cohab = !P.gob.coalicion.includes(res.ganador);
+        if (P.flags.cohab && U.chance(0.35) && P.elec.proxT - E.fecha.t > 20) El.adelantar(E, id, U.ri(8, 12));
+      }
+      C.Noticias.poner(E, 'elecciones', `${d.nombre}: ${persona ? persona.n : 'un nuevo líder'} (${pa.sigla}) gana la presidencia${res.r2 ? ' en segunda vuelta (' + U.d1(res.r2[0].v) + ' %)' : ' en primera vuelta'}.`, id);
+      if (propio) {
+        const eraJ = pol === 'J';
+        if (eraJ) { C.Personaje.alPresidente(E); }
+        else if (J.cargo === 'presidente') { J.cargo = 'activista'; C.Personaje.sincronizar(E); }
+        E.elecciones.presPendiente = { pais: id, t: E.fecha.t, res, ganador: res.ganador, pol, propio: eraJ, nombres };
+      }
+      C.Bus.emit('presidenciales', { pais: id });
+    },
+
     turno(E) {
       const J = E.jugador;
       for (const id in E.paises) {
         const P = E.paises[id];
-        if (P.flags.leyMarcial) continue;
+        if (P.flags.leyMarcial) {
+          // Si nadie juega en Ucrania, la guerra puede acabar por sí sola
+          if (id === 'UA' && !(J && J.pais === 'UA') && E.fecha.t > 200 && U.chance(0.004)) {
+            P.flags.leyMarcial = false; El.adelantar(E, 'UA', 22);
+            C.Noticias.poner(E, 'mundo', 'Ucrania levanta la ley marcial tras un alto el fuego y convoca elecciones.', 'UA');
+          }
+          continue;
+        }
         const resto = P.elec.proxT - E.fecha.t;
         if (J && id === J.pais && resto === 8) {
           C.Noticias.poner(E, 'politica', `Arranca la precampaña en ${D().paises[id].nombre}: faltan ocho semanas para las elecciones.`, id);
           J.campania = { pts: 0, mitines: 0 }; P.flags.campana = true;
         }
         if (E.fecha.t >= P.elec.proxT) El.celebrar(E, id);
+        if (P.pres && E.fecha.t >= P.pres.proxT && !P.flags.leyMarcial) El.celebrarPres(E, id);
       }
     },
 

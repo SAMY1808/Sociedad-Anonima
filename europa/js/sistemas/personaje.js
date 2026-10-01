@@ -43,12 +43,13 @@ window.EUROPA = window.EUROPA || {};
 
     maxAgenda(E) {
       const J = E.jugador;
-      return 5 + (['ministro', 'pm', 'comisario', 'presCom', 'presCE', 'presPE'].includes(J.cargo) ? 1 : 0) + (J.rol === 'lider' ? 1 : 0);
+      return 5 + (['ministro', 'pm', 'presidente', 'comisario', 'presCom', 'presCE', 'presPE'].includes(J.cargo) ? 1 : 0) + (J.rol === 'lider' ? 1 : 0);
     },
 
     cargoTxt(E) {
       const J = E.jugador; if (!J) return '—';
       const d = D().paises[J.pais];
+      if (J.cargo === 'presidente') return d.pres ? d.pres.titulo : 'Presidente/a';
       if (J.cargo === 'pm') return d.jefe + ' de ' + d.nombre;
       if (J.cargo === 'ministro') { const m = D().ministerios.find(x => x.id === J.ministerio); return 'Ministro/a de ' + (m ? m.nombre : 'Gobierno'); }
       if (J.cargo === 'mep' && J.meps) return 'Eurodiputado/a (' + (D().grupos[J.meps.grupo] || {}).sigla + ')';
@@ -82,6 +83,7 @@ window.EUROPA = window.EUROPA || {};
       const P = E.paises[J.pais], g = P.gob;
       if (Pj.esUE(E)) { Pj.hito(E); Pj.syncPol(E); return; }
       const seat = E.parl.miembros.includes('J');
+      if (P.pres && P.pres.pol === 'J') { J.cargo = 'presidente'; J.ministerio = null; Pj.hito(E); Pj.syncPol(E); return; }
       let cargo = seat ? 'diputado' : 'activista', min = null;
       if (g) {
         if (g.pm === 'J') cargo = 'pm';
@@ -99,6 +101,27 @@ window.EUROPA = window.EUROPA || {};
       const J = E.jugador, p = E.politicos.J; if (!p) return;
       p.p = J.partido; p.eco = J.eco; p.soc = J.soc; p.eu = J.eu; p.e = J.edad; p.n = J.nombre;
       p.cargo = J.cargo === 'pm' ? 'pm' : J.cargo === 'ministro' ? 'min:' + J.ministerio : null;
+    },
+
+    /* Gana la presidencia del país: deja el escaño y (en sistemas semipresidenciales) el liderazgo del partido. */
+    alPresidente(E) {
+      const J = E.jugador, P = E.paises[J.pais], d = D().paises[J.pais];
+      E.parl.miembros = E.parl.miembros.filter(i => i !== 'J');
+      E.parl.miembros.push(C.Parlamento.nuevoDiputado(E, J.partido).id);
+      J.electo = false;
+      if (P.gob) for (const k in P.gob.ministros) if (P.gob.ministros[k] === 'J') P.gob.ministros[k] = null;
+      P.pres.pol = 'J';
+      if (d.reg === 'semi' && E.partidos[J.partido].lider === 'J') { C.Gobierno.nuevoLider(E, J.partido, 'tras la elección de ' + J.nombre + ' como presidente'); J.rol = 'direccion'; }
+      J.cargo = 'presidente'; J.ministerio = null; Pj.hito(E);
+      if (P.gob) C.Gobierno.cubrirVacantes(E);
+      Pj.log(E, 'Eres elegido/a ' + (d.pres ? d.pres.titulo : 'presidente/a') + '.');
+      Pj.cambiar(E, { prestigio: 15, pop: 10 }, true);
+    },
+
+    /* Representante del país en el Consejo Europeo: presidente (si lo decide el sistema) o jefe de Gobierno. */
+    representaEnUE(E) {
+      const J = E.jugador, d = D().paises[J.pais];
+      return d.pres && d.pres.eu ? J.cargo === 'presidente' : (J.cargo === 'pm' || (J.cargo === 'presidente' && d.reg === 'pres'));
     },
 
     /* Paso a un cargo europeo: deja el escaño, la cartera y el liderazgo del partido si los tuviera. */
@@ -301,19 +324,19 @@ window.EUROPA = window.EUROPA || {};
     disponible(E) { return enGob(E) ? true : 'Tu partido no está en el Gobierno'; },
     ejecutar(E) {
       const x = f(E, 'negociacion', 'gestion'), g = E.paises[E.jugador.pais].gob;
-      const mult = E.jugador.rol === 'lider' || E.jugador.cargo === 'pm' ? 1.6 : E.jugador.cargo === 'ministro' ? 1.2 : 0.6;
+      const mult = E.jugador.rol === 'lider' || E.jugador.cargo === 'pm' || E.jugador.cargo === 'presidente' ? 1.6 : E.jugador.cargo === 'ministro' ? 1.2 : 0.6;
       g.estab = clamp(g.estab + (1.5 + 3 * x) * mult, 0, 100); Pj.cambiar(E, { prestigio: 0.7 });
       return { ok: true, msg: 'Las aguas se calman en el Consejo de Ministros.' };
     }
   });
   A('plan_ministerio', {
     nombre: 'Impulsar un plan de tu ministerio', icono: '🗂️', costo: 2, grupo: 'gobierno', desc: 'Sólo ministros: mejora un indicador de tu sector.',
-    disponible(E) { return E.jugador.cargo === 'ministro' || E.jugador.cargo === 'pm' ? true : 'Debes ser ministro/a o jefe/a de Gobierno'; },
+    disponible(E) { return ['ministro', 'pm', 'presidente'].includes(E.jugador.cargo) ? true : 'Debes ser ministro/a, jefe/a de Gobierno o presidente/a'; },
     ejecutar(E) {
       const J = E.jugador, P = E.paises[J.pais], x = f(E, 'gestion', 'negociacion');
-      const m = J.cargo === 'pm' ? null : D().ministerios.find(k => k.id === J.ministerio);
+      const m = J.cargo === 'pm' || J.cargo === 'presidente' ? null : D().ministerios.find(k => k.id === J.ministerio);
       const efs = { eco: { deficit: -0.15 }, tra: { paro: -0.15 }, amb: { infl: -0.1, crec: 0.05 }, sal: { aprob: 1.5 }, edu: { crec: 0.05, aprob: 1 }, agr: { aprob: 1 }, ter: { crec: 0.06 }, int: { aprob: 1 }, jus: { aprob: 0.8 }, ext: { aprob: 0.6 }, def: { aprob: 0.6 }, eur: { aprob: 0.5 } };
-      const ef = J.cargo === 'pm' ? { crec: 0.05, aprob: 1.2 } : (efs[m.id] || { aprob: 0.8 });
+      const ef = !m ? { crec: 0.05, aprob: 1.2 } : (efs[m.id] || { aprob: 0.8 });
       const k = 0.6 + x;
       const e2 = {}; for (const kk in ef) e2[kk] = ef[kk] * k;
       C.Economia.aplicar(E, J.pais, e2);
@@ -327,8 +350,8 @@ window.EUROPA = window.EUROPA || {};
     ejecutar(E) { E.ui.abrir = { tipo: 'consultas', modo: 'censura' }; return { ok: true, msg: 'Preparas una moción de censura: negocia con los grupos.' }; }
   });
   A('elecciones_anticipadas', {
-    nombre: 'Convocar elecciones anticipadas', icono: '🗳️', costo: 2, grupo: 'gobierno', desc: 'Sólo jefe/a de Gobierno: disuelve el parlamento.',
-    disponible(E) { const P = E.paises[E.jugador.pais]; if (E.jugador.cargo !== 'pm') return 'Sólo el jefe/a de Gobierno puede hacerlo'; if (P.flags.anticipada || P.flags.leyMarcial) return 'No es posible ahora'; if (C.Elecciones.semanasHasta(E, E.jugador.pais) < 14) return 'Las elecciones están ya muy cerca'; return true; },
+    nombre: 'Convocar elecciones anticipadas', icono: '🗳️', costo: 2, grupo: 'gobierno', desc: 'Jefe/a de Gobierno o presidente/a: disuelve el parlamento.',
+    disponible(E) { const P = E.paises[E.jugador.pais], d = D().paises[E.jugador.pais]; if (!(E.jugador.cargo === 'pm' || (E.jugador.cargo === 'presidente' && d.reg === 'semi'))) return 'Sólo el jefe/a de Gobierno (o el presidente/a en regímenes semipresidenciales) puede hacerlo'; if (P.flags.anticipada || P.flags.leyMarcial) return 'No es posible ahora'; if (C.Elecciones.semanasHasta(E, E.jugador.pais) < 14) return 'Las elecciones están ya muy cerca'; return true; },
     ejecutar(E) { C.Elecciones.adelantar(E, E.jugador.pais, 7); return { ok: true, msg: 'Disuelves la cámara: elecciones en siete semanas.' }; }
   });
 

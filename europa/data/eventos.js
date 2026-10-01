@@ -195,7 +195,7 @@ EUROPA.DATA = EUROPA.DATA || {};
   });
   ev({
     id: 'visita_oficial', titulo: 'Visita de un líder europeo', icono: '🤝', peso: 0.6,
-    req: (E, J) => J.cargo === 'pm' || J.cargo === 'ministro' || J.rol === 'lider',
+    req: (E, J) => J.cargo === 'pm' || J.cargo === 'presidente' || J.cargo === 'ministro' || J.rol === 'lider',
     ctx: (E, J, P) => { const c = U().pick(Object.keys(E.paises).filter(x => x !== J.pais)); return { c }; },
     texto: (E, J, P, x) => `El gobierno de ${C.DATA.paises[x.c].nombre} propone una reunión bilateral para coordinar posiciones.`,
     opciones: [
@@ -228,6 +228,112 @@ EUROPA.DATA = EUROPA.DATA || {};
     opciones: [
       { t: 'Aceptar la propuesta', ef: (E, J, P) => { const ok = C.U.chance(0.7); if (!ok) { Pj().cambiar(E, { prestigio: -3 }, true); return 'La candidatura naufraga en el Parlamento Europeo.'; } Pj().alUE(E, 'presCom'); E.ue.comision.presidente = { n: J.nombre, g: J.g, pais: J.pais, grupo: E.partidos[J.partido].grupo, jugador: true }; Pj().cambiar(E, { prestigio: 15 }, true); Pj().log(E, 'Eres elegido/a presidente/a de la Comisión Europea.'); return '¡Presides la Comisión Europea!'; } },
       { t: 'Declinar', ef: () => 'Dejas pasar la ocasión.' }
+    ]
+  });
+
+  /* ── Específicos de cada país ── */
+  const en = (...ids) => (E, J) => ids.includes(J.pais);
+  ev({
+    id: 'esp_consulta', titulo: 'Reclamación territorial', icono: '🗺️', peso: 1.1, cd: 90, req: en('ES'),
+    texto: () => 'Los partidos regionalistas exigen una consulta de autodeterminación y una nueva financiación autonómica a cambio de sus votos.',
+    opciones: [
+      { t: 'Abrir una mesa de negociación', ef: (E, J, P) => { P.gob.estab = clamp(P.gob.estab + 3, 0, 100); Pj().cambiar(E, { prestigio: 1 }); return 'La negociación calma los ánimos a corto plazo.'; } },
+      { t: 'Rechazar frontalmente cualquier consulta', ef: (E, J, P) => { P.gob.estab = clamp(P.gob.estab - 4, 0, 100); Pj().cambiar(E, { pop: J.soc > 10 ? 2 : -1 }); return 'Tu firmeza se aplaude en un lado y se critica en el otro.'; } },
+      { t: 'Proponer una reforma federal pactada', ef: (E, J) => { Pj().cambiar(E, { prestigio: 2, capEU: 1 }); return 'Tu propuesta federal abre un debate serio.'; } }
+    ]
+  });
+  ev({
+    id: 'uk_irlanda', titulo: 'Tensión en la frontera irlandesa', icono: '🍀', peso: 1.0, cd: 90, req: en('UK'),
+    texto: () => 'Las fricciones comerciales en el mar de Irlanda y la frontera norte amenazan el equilibrio político en Irlanda del Norte.',
+    opciones: [
+      { t: 'Pedir un acuerdo reforzado con Bruselas', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel + 3, 0, 100); Pj().cambiar(E, { capEU: 3 }); return 'Londres y Bruselas reabren el diálogo.'; } },
+      { t: 'Defender la soberanía británica', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel - 3, 0, 100); Pj().cambiar(E, { pop: 1.5 }); return 'Tu discurso agrada a los más soberanistas.'; } }
+    ]
+  });
+  ev({
+    id: 'fondos_bloqueados', titulo: 'Fondos europeos congelados', icono: '🔒', peso: 1.0, cd: 120, req: en('HU', 'PL', 'RO', 'SK', 'BG'),
+    texto: () => 'La Comisión congela miles de millones de euros por dudas sobre la independencia judicial y la gestión de los fondos.',
+    opciones: [
+      { t: 'Reclamar que se levante la sanción', ef: (E, J, P) => { Pj().cambiar(E, { pop: 1.5, capEU: -2 }); P.ue.rel = clamp(P.ue.rel - 2, 0, 100); return 'Tu protesta cuaja entre los votantes soberanistas.'; } },
+      { t: 'Exigir reformas judiciales', ef: (E, J, P) => { Pj().cambiar(E, { prestigio: 2, capEU: 3 }); return 'Reclamas cumplir las condiciones de Bruselas.'; } },
+      { t: 'Culpar al Gobierno de la pérdida de fondos', ef: (E, J, P) => { aprob(P, -1.2); Pj().cambiar(E, { pop: enGob(E, J, P) ? -1 : 1.5 }); return 'El asunto domina la semana política.'; } }
+    ]
+  });
+  ev({
+    id: 'fr_calle', titulo: 'La calle se moviliza', icono: '🔥', peso: 1.1, cd: 80, req: en('FR', 'BE', 'EL', 'IT', 'PT'),
+    texto: () => 'Una reforma impopular desata manifestaciones multitudinarias, bloqueos y huelgas en transportes y refinerías.',
+    opciones: [
+      { t: 'Apoyar las movilizaciones', ef: (E, J, P) => { const gob = enGob(E, J, P); Pj().cambiar(E, { pop: gob ? -2 : 2.5, prestigio: gob ? -2 : 1 }); aprob(P, -1); return gob ? 'Tu apoyo a la protesta incomoda a tu Gobierno.' : 'La calle te aplaude.'; } },
+      { t: 'Reclamar orden y diálogo social', ef: (E, J) => { Pj().cambiar(E, { prestigio: 1.5 }); return 'Tu llamada a la moderación es bien recibida.'; } },
+      { t: 'Exigir retirar la reforma', ef: (E, J, P) => { aprob(P, -1.5); P.gob.estab = clamp(P.gob.estab - 3, 0, 100); Pj().cambiar(E, { pop: 1.5 }); return 'El Gobierno vacila ante la presión.'; } }
+    ]
+  });
+  ev({
+    id: 'crisis_industrial', titulo: 'Cierres industriales', icono: '🏭', peso: 1.0, cd: 100, req: en('DE', 'CZ', 'SK', 'HU', 'AT', 'IT', 'PL', 'RO'),
+    texto: () => 'Un gran fabricante anuncia el cierre de varias plantas por los costes energéticos y la competencia exterior. Miles de empleos están en juego.',
+    opciones: [
+      { t: 'Reclamar ayudas públicas y aranceles', ef: (E, J) => { Pj().cambiar(E, { pop: 1.5, capEU: -1 }); return 'Conectas con los trabajadores afectados.'; } },
+      { t: 'Proponer una política industrial europea', ef: (E, J) => { Pj().cambiar(E, { prestigio: 2, capEU: 2 }); return 'Tu propuesta gana eco en Bruselas.'; } },
+      { t: 'Pedir menos regulación y energía barata', ef: (E, J) => { Pj().cambiar(E, { prestigio: 1, pop: J.eco > 20 ? 1.5 : -0.5 }); return 'Tu receta divide al Parlamento.'; } }
+    ]
+  });
+  ev({
+    id: 'tension_egeo', titulo: 'Tensión en el Egeo y Chipre', icono: '⚓', peso: 1.0, cd: 100, req: en('EL', 'CY', 'TR'),
+    texto: () => 'Un incidente naval y las prospecciones energéticas reavivan la disputa marítima entre Atenas, Nicosia y Ankara.',
+    opciones: [
+      { t: 'Pedir respaldo diplomático de la UE', ef: (E, J) => { Pj().cambiar(E, { capEU: 3, pop: 1 }); return 'Bruselas se pronuncia a tu favor.'; } },
+      { t: 'Llamar a la desescalada y al diálogo', ef: (E, J) => { Pj().cambiar(E, { prestigio: 2 }); return 'Tu moderación contrasta con la tensión del momento.'; } },
+      { t: 'Reforzar la presencia militar', ef: (E, J) => { Pj().cambiar(E, { pop: 2, capEU: -1 }); return 'Tu firmeza agrada a los más nacionalistas.'; } }
+    ]
+  });
+  ev({
+    id: 'balcanes_kosovo', titulo: 'Tensión en los Balcanes', icono: '🏔️', peso: 1.0, cd: 100, req: en('RS', 'AL', 'MK', 'ME', 'BA'),
+    texto: () => 'Un incidente en el norte de Kosovo y la retórica nacionalista ponen a prueba la estabilidad regional y el diálogo con Bruselas.',
+    opciones: [
+      { t: 'Apoyar la mediación europea', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel + 3, 0, 100); Pj().cambiar(E, { capEU: 3, prestigio: 1 }); return 'Tu apoyo se anota en el expediente de adhesión.'; } },
+      { t: 'Endurecer el discurso nacional', ef: (E, J, P) => { Pj().cambiar(E, { pop: 2.5, capEU: -3 }); P.ue.rel = clamp(P.ue.rel - 3, 0, 100); return 'Ganas aplausos en casa y recelo en Bruselas.'; } }
+    ]
+  });
+  ev({
+    id: 'md_transnistria', titulo: 'Presión desde Transnistria', icono: '🛢️', peso: 1.2, cd: 90, req: en('MD'),
+    texto: () => 'Cortes de gas y campañas de desinformación atribuidas a Moscú sacuden Moldavia en plena discusión sobre la adhesión.',
+    opciones: [
+      { t: 'Pedir ayuda energética a la UE', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel + 4, 0, 100); Pj().cambiar(E, { capEU: 3 }); return 'Bruselas moviliza ayuda de emergencia.'; } },
+      { t: 'Negociar un acuerdo energético con Moscú', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel - 3, 0, 100); Pj().cambiar(E, { pop: 1.5, capEU: -2 }); return 'El acuerdo alivia la factura pero irrita a Bruselas.'; } }
+    ]
+  });
+  ev({
+    id: 'ge_protestas', titulo: 'Protestas en Tiflis', icono: '🇬🇪', peso: 1.2, cd: 90, req: en('GE'),
+    texto: () => 'Decenas de miles de personas protestan frente al Parlamento contra la congelación de la adhesión a la UE y la ley de agentes extranjeros.',
+    opciones: [
+      { t: 'Unirte a la manifestación', ef: (E, J, P) => { Pj().cambiar(E, { pop: enGob(E, J, P) ? -2 : 3, capEU: 3 }); return 'Tu presencia se hace notar en las cámaras.'; } },
+      { t: 'Llamar al orden y al diálogo', ef: (E, J) => { Pj().cambiar(E, { prestigio: 1 }); return 'Tu llamada a la calma pasa desapercibida.'; } },
+      { t: 'Acusar a la oposición de alentar el caos', ef: (E, J, P) => { Pj().cambiar(E, { pop: enGob(E, J, P) ? 1 : -2, capEU: -2 }); return 'Alineas tu discurso con el oficialismo.'; } }
+    ]
+  });
+  ev({
+    id: 'ua_ofensiva', titulo: 'Nueva ofensiva en el frente', icono: '🛡️', peso: 1.4, cd: 70, req: en('UA'),
+    texto: () => 'Una gran ofensiva rusa golpea ciudades e infraestructuras energéticas. La opinión pública exige más ayuda militar y garantías de seguridad.',
+    opciones: [
+      { t: 'Pedir más armas y la adhesión rápida a la UE', ef: (E, J, P) => { P.ue.rel = clamp(P.ue.rel + 3, 0, 100); Pj().cambiar(E, { capEU: 3, pop: 1.5 }); return 'Tu discurso resuena en las capitales europeas.'; } },
+      { t: 'Impulsar una movilización nacional', ef: (E, J) => { Pj().cambiar(E, { pop: 2, prestigio: 1 }); return 'Respaldas el esfuerzo de guerra.'; } },
+      { t: 'Explorar una vía diplomática', ef: (E, J) => { Pj().cambiar(E, { pop: -1.5, prestigio: 1.5, capEU: 1 }); return 'Tu propuesta de diálogo genera controversia.'; } }
+    ]
+  });
+  ev({
+    id: 'baltico_sabotaje', titulo: 'Sabotaje en el mar Báltico', icono: '🌊', peso: 1.1, cd: 100, req: en('FI', 'EE', 'LV', 'LT', 'SE', 'DK', 'PL'),
+    texto: () => 'Se rompen cables submarinos y gasoductos en el Báltico y las sospechas apuntan a una flota fantasma.',
+    opciones: [
+      { t: 'Exigir una respuesta conjunta de la OTAN y la UE', ef: (E, J) => { Pj().cambiar(E, { capEU: 3, prestigio: 1 }); return 'Tu llamada a la unidad tiene eco.'; } },
+      { t: 'Reclamar más gasto en defensa', ef: (E, J) => { Pj().cambiar(E, { pop: 1.5 }); return 'Conectas con la preocupación ciudadana.'; } }
+    ]
+  });
+  ev({
+    id: 'ba_bloqueo', titulo: 'Bloqueo institucional', icono: '🧱', peso: 1.3, cd: 90, req: en('BA'),
+    texto: () => 'Un bloque étnico paraliza las votaciones del Parlamento y retrasa las reformas exigidas por Bruselas.',
+    opciones: [
+      { t: 'Negociar un paquete de compromisos', ef: (E, J, P) => { Pj().cambiar(E, { prestigio: 2, capEU: 2 }); P.ue.rel = clamp(P.ue.rel + 2, 0, 100); return 'El pacto abre una ventana de reformas.'; } },
+      { t: 'Acusar al bloque rival', ef: (E, J) => { Pj().cambiar(E, { pop: 1.5, prestigio: -1 }); return 'Ganas puntos entre los tuyos.'; } }
     ]
   });
 

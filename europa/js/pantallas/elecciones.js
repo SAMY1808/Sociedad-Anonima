@@ -22,7 +22,7 @@ window.EUROPA = window.EUROPA || {};
       const sist = Object.assign({}, d, P.sist || {});
       const sem = C.Elecciones.semanasHasta(E, J.pais);
       const maj = Math.floor(d.esc / 2) + 1;
-      el.innerHTML = `<div class="cab"><div><h1>Elecciones</h1><div class="sub">${d.bandera} ${esc(d.nombre)} · ${P.flags.leyMarcial ? 'aplazadas por la ley marcial' : 'próxima cita el ' + U.fmtT(P.elec.proxT) + ' (' + Comp.semanasA(E, P.elec.proxT) + ')'}${P.flags.anticipada ? ' · <span class="alerta">anticipadas</span>' : ''}</div></div></div>
+      el.innerHTML = `<div class="cab"><div><h1>Elecciones</h1><div class="sub">${d.bandera} ${esc(d.nombre)} · ${P.flags.leyMarcial ? 'aplazadas por la ley marcial' : 'próxima cita el ' + U.fmtT(P.elec.proxT) + ' (' + Comp.semanasA(E, P.elec.proxT) + ')'}${P.flags.anticipada ? ' · <span class="alerta">anticipadas</span>' : ''}${P.pres ? ' · presidenciales ' + Comp.semanasA(E, P.pres.proxT) : ''}</div></div></div>
         ${J.campania ? `<div class="tarjeta" style="border-color:var(--oro);margin-bottom:14px"><div class="t-cab"><h3>📣 Campaña en marcha</h3><span class="etq oro">${Math.round(J.campania.pts)} puntos de campaña · ${J.campania.mitines} mítines</span></div><p class="tenue" style="margin:0 0 10px;font-size:13px">Cada punto de campaña suma votos a tu partido y mejora tu puesto en la lista. Faltan ${sem} semanas.</p><div class="fila">${UI.botonAccion('mitin', {}, '📣 Mitin de campaña', 'prim')}${UI.botonAccion('entrevista', {}, '📺 Entrevista', '')}${UI.botonAccion('redes', {}, '📱 Redes', '')}</div></div>` : ''}
         <div class="grid g-dash"><div class="col"><div class="tarjeta"><h3>Evolución de las encuestas (%)</h3>${G.linea(series, { alto: 210, unidad: ' %' })}</div>
           <div class="tarjeta"><h3>Última elección${ult ? ' · ' + U.fmtT(ult.t, true) : ''}</h3>${ult ? `<div class="tenue" style="font-size:12px;margin-bottom:6px">Participación ${ult.part} %</div>${G.barrasH(P.partidos.slice().sort((a, b) => ult.votos[b] - ult.votos[a]).map(k => ({ etq: Comp.partido(E, k), v: ult.votos[k], color: E.partidos[k].color, sub: ult.escanos[k] })), { max: Math.max(...Object.values(ult.votos)) * 1.1, fmt: v => U.d1(v) + ' %', anchoEtq: '70px' })}` : '<div class="vacio">Sin datos</div>'}</div></div>
@@ -31,6 +31,30 @@ window.EUROPA = window.EUROPA || {};
           <div class="tarjeta"><h3>Sistema electoral</h3><div class="lista" style="font-size:13px"><div class="it"><span class="tenue" style="width:130px">Tipo</span><b>${SIS[sist.sis]}</b></div><div class="it"><span class="tenue" style="width:130px">Umbral</span><b>${sist.um ? U.d1(sist.um) + ' %' : 'Sin umbral'}</b></div><div class="it"><span class="tenue" style="width:130px">Fórmula</span><b>${sist.form === 'sl' ? 'Sainte-Laguë' : "D'Hondt"}${sist.k > 1.05 ? ' · circunscripciones pequeñas (favorece a los grandes)' : ''}</b></div><div class="it"><span class="tenue" style="width:130px">Legislatura</span><b>${d.mand} años</b></div></div>
           <p class="tenue" style="font-size:12px;margin:8px 0 0">${J.cargo === 'pm' ? 'Como jefe/a de Gobierno puedes convocar elecciones anticipadas:' : ''}</p>${J.cargo === 'pm' ? UI.botonAccion('elecciones_anticipadas', {}, '🗳 Convocar elecciones', 'chico') : ''}</div></div></div>
         ${E.elecciones.historico.length ? `<div class="tarjeta" style="margin-top:14px"><h3>Historial de elecciones en tu partida</h3><div class="lista" style="font-size:13px">${E.elecciones.historico.map(h => `<div class="it"><span class="tenue" style="width:96px">${U.fmtT(h.t, true)}</span><div class="cuerpo"><b>${P.partidos.slice().sort((a, b) => h.votos[b] - h.votos[a]).slice(0, 3).map(k => E.partidos[k].sigla + ' ' + U.d1(h.votos[k]) + ' %').join(' · ')}</b><span>Participación ${h.part} %</span></div></div>`).join('')}</div></div>` : ''}`;
+    },
+
+    /* Resultado de unas elecciones presidenciales. */
+    nochePres(n) {
+      const E = C.E, d = D().paises[n.pais], res = n.res;
+      const nombre = k => esc((n.nombres && n.nombres[k]) || E.partidos[k].sigla) + ' <span class="tenue">(' + esc(E.partidos[k].sigla) + ')</span>';
+      const barras = (lista, ganadorPid) => G.barrasH(lista.map(c => ({ etq: nombre(c.pid), v: c.v, color: E.partidos[c.pid].color, tt: `<b>${esc(E.partidos[c.pid].nombre)}</b><br>${U.d1(c.v)} %` })), { max: 100, fmt: v => U.d1(v) + ' %', anchoEtq: '190px' });
+      const gan = E.partidos[n.ganador], gl = E.politicos[n.pol];
+      const cuerpo = `<h3 style="font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase;margin:0 0 8px">Primera vuelta</h3>${barras(res.r1)}
+        ${res.r2 ? `<h3 style="font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase;margin:16px 0 8px">Segunda vuelta</h3>${barras(res.r2)}` : ''}
+        <div class="nota" style="margin-top:14px"><b>${n.propio ? '🎉 ¡Has ganado la Presidencia!' : 'Nuevo presidente: ' + (gl ? esc(gl.n) : '')}</b><br>${esc(gan.nombre)}${n.propio ? '' : ' · ' + C.Comp.ideoTxt(gan)}.${D().paises[n.pais].reg === 'pres' ? ' El presidente encabeza también el Gobierno.' : (E.paises[n.pais].flags.cohab ? ' <span class="alerta">Cohabitación:</span> el presidente y el Gobierno son de signo distinto.' : '')}</div>`;
+      const m = UI.modal({ titulo: `Elecciones presidenciales · ${d.bandera} ${d.nombre}`, icono: '🎖️', cuerpo, clase: 'medio', sinCerrar: true, pie: '<button class="btn prim" id="np-ok">Continuar</button>' });
+      UI.$('#np-ok', m.el).onclick = () => { m.cerrar(); C.App.refrescar(); C.App.revisarPendientes(); };
+    },
+
+    /* El presidente (jugador) elige qué fuerza encabeza el Gobierno tras las elecciones (regímenes semipresidenciales). */
+    designarPM() {
+      const E = C.E, J = E.jugador, id = J.pais, P = E.paises[id];
+      const op = C.Gobierno.opciones(E, id, {});
+      const lista = op.resultados.filter(r => r.coalicion.length);
+      const cuerpo = `<p style="margin-top:0;font-size:13.5px">Como presidente/a designas quién encabeza el Gobierno. Las coaliciones muestran el apoyo parlamentario que obtendrían.</p><div class="lista">${lista.map((r, i) => { const pa = E.partidos[r.formateur], l = E.politicos[pa.lider]; return `<div class="it clic" data-o="${i}"><span class="pto" style="background:${pa.color}"></span><div class="cuerpo"><b>${esc(l ? l.n : pa.sigla)} (${esc(pa.sigla)})</b><span>${r.coalicion.map(k => esc(E.partidos[k].sigla)).join(' + ')} · ${r.escanos} de ${op.total} escaños · ${r.tipo === 'minoria' ? 'minoría' : 'mayoría'}</span></div><span class="etq ${r.tipo === 'minoria' ? 'rojo' : 'verde'}">${r.tipo === 'minoria' ? 'Inestable' : 'Estable'}</span></div>`; }).join('')}</div>`;
+      const m = UI.modal({ titulo: '🎖️ Designación del Gobierno', cuerpo, clase: 'medio', pie: '<button class="btn" id="d-no">Mantener el resultado actual</button>' });
+      UI.$$('[data-o]', m.el).forEach(it => it.onclick = () => { const r = lista[+it.dataset.o]; C.Gobierno.formar(E, id, { coalicion: r.coalicion, apoyoExterno: r.apoyoExterno }); C.Personaje.sincronizar(E); m.cerrar(); C.App.refrescar(); C.App.revisarPendientes(); });
+      UI.$('#d-no', m.el).onclick = () => { m.cerrar(); C.App.revisarPendientes(); };
     },
 
     /* Ronda de consultas (tras las elecciones) o moción de censura: el jugador elige socios. */
@@ -91,7 +115,7 @@ window.EUROPA = window.EUROPA || {};
       };
       const h = setInterval(() => { paso++; if (paso >= N) fin(); else pintar(paso / N); }, 170);
       $('#n-saltar').onclick = fin;
-      $('#n-cerrar').onclick = () => { m.cerrar(); C.App.refrescar(); if (J.rol === 'lider' && !C.Personaje.esUE(E) && (P.escanos[J.partido] || 0) > 0 && P.gob.pm !== 'J') El.consultas('post'); else C.App.revisarPendientes(); };
+      $('#n-cerrar').onclick = () => { m.cerrar(); C.App.refrescar(); if (J.cargo === 'presidente' && d.reg === 'semi') El.designarPM(); else if (J.rol === 'lider' && !C.Personaje.esUE(E) && (P.escanos[J.partido] || 0) > 0 && P.gob.pm !== 'J') El.consultas('post'); else C.App.revisarPendientes(); };
       pintar(0);
     }
   };

@@ -98,6 +98,16 @@ E = {
 - **Ampliación**: cada candidato acumula progreso por ritmo propio, reformas (leyes de armonización) y capítulos
   abiertos en cumbres (unanimidad). Al 100 % se une a la Unión. Un Gobierno euroescéptico congela el proceso.
 
+### Presidencias
+- Francia, Rumanía, Polonia, Portugal, Lituania, Ucrania (semipresidencialistas) y Chipre y Turquía (presidencialistas)
+  celebran presidenciales cada cinco años. Candidatos: líderes de los partidos con ≥ 4,5 % (fuerza = apoyo · (0,75 + 0,5·carisma)
+  · ruido). Si nadie supera el 50 %, balotaje con transferencia de votos por cercanía ideológica y 18 % de abstención.
+- **Presidencialismo** (Chipre, Turquía): el presidente es también jefe de Gobierno; tras cada legislativa su partido
+  es el formateur obligado. **Semipresidencialismo**: el presidente da prioridad a su partido en la formación del
+  Gobierno (+14 de puntuación) y puede surgir **cohabitación** (35 % de probabilidad de disolución anticipada).
+- Si el jugador gana, deja su escaño, designa al jefe de Gobierno (semipresidencialismo) y, en Francia, Rumanía, Lituania,
+  Chipre y Ucrania, ocupa el asiento del Consejo Europeo.
+
 ### Carrera
 - Las acciones corrientes dan ganancias **pequeñas y decrecientes** de prestigio, popularidad y capital europeo;
   los hitos (ascensos, leyes propias, cargos) usan incrementos fijos. El prestigio deriva hacia el nivel natural
@@ -120,7 +130,7 @@ Nueva carrera → país → partido (o nuevo) → personaje → mundo (semilla) 
 | Fase | Contenido | Estado |
 |---|---|---|
 | **1** | 37 países, parlamentos, coaliciones, leyes, elecciones, UE (Consejo, PE, Comisión, cumbres), ampliación, carrera hasta la Presidencia de la Comisión | **esta entrega** |
-| 2 | Elecciones presidenciales (Francia, Rumanía, Polonia, Turquía…), cohabitación, segundas cámaras, vetos presidenciales | pendiente |
+| 2 | Elecciones presidenciales a dos vueltas, cohabitación, presidente-jefe de Gobierno (hecho); segundas cámaras y vetos presidenciales sobre leyes (pendiente) | parcial |
 | 3 | Circunscripciones regionales con mapas reales, niveles regional y local | pendiente |
 | 4 | Presupuestos nacionales y europeos (MFF) con partidas, fondos Next Generation, deuda común | pendiente |
 | 5 | Política exterior: OTAN, guerra de Ucrania, sanciones, comercio, migración con rutas | pendiente |

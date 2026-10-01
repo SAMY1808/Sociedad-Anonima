@@ -29,7 +29,7 @@ window.EUROPA = window.EUROPA || {};
     return `<h1>Elige tu país</h1>
     <p class="tenue" style="margin-top:-8px">27 Estados miembros de la UE, el Reino Unido y los 9 candidatos oficiales a la adhesión.</p>
     <div class="seg" style="margin-bottom:10px">${filtros.map(f => `<button data-filtro="${f[0]}" class="${S.filtro === f[0] ? 'activo' : ''}">${f[1]}</button>`).join('')}</div>
-    <div class="grid" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:start">
+    <div class="c-dos">
       <div class="tarjeta" id="c-mapa">${C.Mosaico.seleccion(S.pais, S.filtro)}</div>
       <div class="tarjeta">
         <div class="fila" style="gap:12px"><span class="rotulo-pais">${d.bandera}</span><div><h2 style="font-size:24px">${esc(d.nombre)}</h2><div class="tenue">${esc(d.cap)} · ${U.mill(d.pob)} hab. · PIB ${U.eur(d.pib)}</div></div></div>
@@ -60,7 +60,7 @@ window.EUROPA = window.EUROPA || {};
     const sel = nuevoSel ? null : E.partidos[lista[S.partido]];
     return `<h1>Elige tu partido</h1>
     <p class="tenue" style="margin-top:-8px">${d.bandera} ${esc(d.nombre)} · ${esc(d.cam)} · ${d.esc} escaños. Gobierna ${C.Comp.partido(E, g.partido, true)}${g.coalicion.length > 1 ? ' con ' + g.coalicion.filter(k => k !== g.partido).map(k => E.partidos[k].sigla).join(', ') : ''}.</p>
-    <div class="grid" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start">
+    <div class="c-dos">
       <div class="col">${filas}
         <div class="fila-sel ${nuevoSel ? 'sel' : ''}" data-partido="nuevo"><span style="font-size:22px">✦</span><div style="flex:1"><b>Fundar un partido nuevo</b><div class="tenue" style="font-size:12px">Nivel difícil: empiezas con ~2 % de apoyo y como líder.</div></div></div>
         ${nuevoSel ? `<div class="tarjeta"><div class="campo"><label>Nombre</label><input id="n-nombre" value="${esc(S.nuevo.nombre)}" maxlength="42"></div><div class="campo"><label>Siglas</label><input id="n-sigla" value="${esc(S.nuevo.sigla)}" maxlength="6" style="max-width:120px"></div>
@@ -79,7 +79,7 @@ window.EUROPA = window.EUROPA || {};
     const nuevo = S.partido === 'nuevo';
     const peque = pa.pop < 12;
     return `<h1>Tu personaje</h1>
-    <div class="grid" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start">
+    <div class="c-dos par">
       <div class="col">
         <div class="tarjeta"><div class="fila"><div class="campo" style="flex:1;margin:0"><label>Nombre</label><input id="p-nombre" value="${esc(S.nombre)}" maxlength="40" placeholder="Nombre y apellidos"></div><button class="btn" id="p-azar" style="margin-top:18px">🎲</button></div>
           <div class="fila" style="margin-top:10px"><div class="seg" id="p-gen"><button data-g="f" class="${S.genero === 'f' ? 'activo' : ''}">Mujer</button><button data-g="m" class="${S.genero === 'm' ? 'activo' : ''}">Hombre</button></div>

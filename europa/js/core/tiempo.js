@@ -32,6 +32,8 @@ window.EUROPA = window.EUROPA || {};
       if (E.parl && E.parl.pendienteVoto && E.parl.pendienteVoto.length) return 'voto';
       if (E.ue && E.ue.pendiente && E.ue.pendiente.length) return 'ue';
       if (E.elecciones.nochePendiente) return 'noche';
+      if (E.elecciones.presPendiente) return 'noche';
+      if (E.elecciones.pePendiente) return 'noche';
       return null;
     }
   };

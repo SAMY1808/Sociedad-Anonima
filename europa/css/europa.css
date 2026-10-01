@@ -56,3 +56,9 @@
 .logros{display:flex;flex-wrap:wrap;gap:8px}
 .logro{padding:6px 10px;border:1px solid var(--borde);border-radius:8px;background:var(--panel);font-size:12px}
 .logro.on{border-color:var(--oro);color:var(--oro2)}
+
+.c-dos{display:grid;gap:14px;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:start}
+.c-dos.par{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.c-dos.amplio{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+@media (max-width:900px){.c-dos,.c-dos.par,.c-dos.amplio{grid-template-columns:1fr}}
+@media (max-width:760px){.fila-sel{flex-wrap:wrap}.atrib-fila{grid-template-columns:90px auto 1fr 26px auto}.slider-fila{grid-template-columns:1fr 1fr 34px}.inicio h1{font-size:40px}.barra .tiempo{flex-wrap:wrap}}

@@ -23,7 +23,10 @@ window.EUROPA = window.EUROPA || {};
       const con = Object.keys(esc).filter(k => esc[k] > 0).sort((a, b) => esc[b] - esc[a]);
       const posibles = con.filter(k => !G.vetado(E, id, k) && !(opts.excluir && opts.excluir.includes(k)));
       const resultados = [];
-      const formateurs = opts.formateur ? [opts.formateur] : posibles.slice(0, 3);
+      let formateurs = opts.formateur ? [opts.formateur] : posibles.slice(0, 3);
+      const dd = D().paises[id];
+      if (dd.reg === 'pres' && P.pres && !opts.formateur) formateurs = [P.pres.partido];          // el presidente encabeza el Gobierno
+      else if (dd.reg === 'semi' && P.pres && !opts.formateur && !formateurs.includes(P.pres.partido) && posibles.includes(P.pres.partido) && esc[P.pres.partido] >= total * 0.18) formateurs = formateurs.concat([P.pres.partido]);
       for (const f of formateurs) {
         const coal = [f]; let suma = esc[f];
         const centro = () => C.Mundo.centroide(E, coal, esc);
@@ -51,7 +54,7 @@ window.EUROPA = window.EUROPA || {};
           for (const k of fuera) { if (s2 >= mayoria) break; if (U.distIdeo(cen, E.partidos[k]) < 0.72) { ext.push(k); s2 += esc[k]; } }
           if (s2 < mayoria) ext = ext.slice(0, 1);
         }
-        const score = (tipo !== 'minoria' ? 100 : 40) + (esc[f] / total) * 45 - spread * 70 - (coal.length - 1) * 4;
+        const score = (tipo !== 'minoria' ? 100 : 40) + (esc[f] / total) * 45 - spread * 70 - (coal.length - 1) * 4 + (dd.reg === 'semi' && P.pres && P.pres.partido === f ? 14 : 0);
         resultados.push({ formateur: f, coalicion: coal, apoyoExterno: ext, tipo, escanos: suma, mayoria, spread, score });
       }
       resultados.sort((a, b) => b.score - a.score);
@@ -73,7 +76,8 @@ window.EUROPA = window.EUROPA || {};
         r = (lista.length > 1 && U.chance(0.16) && lista[1].score > 70) ? lista[1] : lista[0];
         if (!r) { const f = Object.keys(P.escanos).sort((a, b) => P.escanos[b] - P.escanos[a])[0]; r = { formateur: f, coalicion: [f], apoyoExterno: [], tipo: 'minoria', escanos: P.escanos[f], spread: 0 }; }
       }
-      const lider = E.politicos[E.partidos[r.formateur].lider];
+      let lider = E.politicos[E.partidos[r.formateur].lider];
+      if (d.reg === 'pres' && P.pres && P.pres.partido === r.formateur) lider = E.politicos[P.pres.pol] || lider;
       const g = {
         pm: lider ? lider.id : null, partido: r.formateur, coalicion: r.coalicion, apoyoExterno: r.apoyoExterno || [], tipo: r.tipo,
         aprob: opts.inicial ? U.clamp(40 + U.gauss(0, 8), 26, 60) : 47 + U.gauss(0, 5), formado: opts.inicial ? P.elec.ultima.t : E.fecha.t,

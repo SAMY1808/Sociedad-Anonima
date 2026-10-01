@@ -82,7 +82,7 @@ window.EUROPA = window.EUROPA || {};
       const costo = typeof a.costo === 'function' ? a.costo(E, args) : a.costo;
       const puede = C.Acciones.puede(id, args);
       const tt = puede === true ? '' : UI.tt(puede);
-      return `<button class="btn ${clase || ''}" data-accion="${id}" data-args='${U.esc(JSON.stringify(args || {}))}' ${puede === true ? '' : 'disabled'}${tt}>${a.icono || ''} ${texto || a.nombre}${costo ? ` <span class="coste">${costo} ◆</span>` : ''}</button>`;
+      return `<button class="btn ${clase || ''}" data-accion="${id}" data-args='${U.esc(JSON.stringify(args || {}))}' ${puede === true ? '' : 'disabled'}${tt}>${texto ? '' : (a.icono || '')} ${texto || a.nombre}${costo ? ` <span class="coste">${costo} ◆</span>` : ''}</button>`;
     },
     /* Delegación global para [data-accion] */
     initAcciones() {

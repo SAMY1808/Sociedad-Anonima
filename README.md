@@ -26,7 +26,13 @@ El service worker v42 invalida las cachés anteriores cuando se activa.
 
 El JavaScript embebido en `index.html` y `sw.js` fue validado con `node --check`.
 
-## Nuevo juego: CURUL
+## Nuevo: CURUL EUROPA
+
+En la carpeta [`europa/`](europa/) está **Curul Europa**: el mismo estilo de simulación política, pero jugando con un
+partido de cualquiera de los 27 Estados de la UE, el Reino Unido o los 9 candidatos a la adhesión, con Consejo,
+Parlamento Europeo y Comisión. Ver [`europa/README.md`](europa/README.md).
+
+## CURUL (Colombia)
 
 En la carpeta [`curul/`](curul/) está **Curul**, un simulador de estrategia política de Colombia
 (independiente de Sociedad Anónima). Ver [`curul/README.md`](curul/README.md).

@@ -14,7 +14,7 @@ C.Parlamento.resolver = function (E, p, v) {
 };
 for (let w = 0; w < 52 * 4; w++) {
   for (let g = 0; g < 20 && C.Tiempo.bloqueo(); g++) { const b = C.Tiempo.bloqueo();
-    if (b === 'evento') C.Eventos.resolver(E, 0, 0); else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(); C.Parlamento.resolver(E, E.proyectos[id], null); } else if (b === 'ue') C.UE.decidir(E, 0, 'si'); else if (b === 'noche') E.elecciones.nochePendiente = null; }
+    if (b === 'evento') C.Eventos.resolver(E, 0, 0); else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(); C.Parlamento.resolver(E, E.proyectos[id], null); } else if (b === 'ue') C.UE.decidir(E, 0, 'si'); else if (b === 'noche') E.elecciones.nochePendiente = null; E.elecciones.presPendiente = null; E.elecciones.pePendiente = null; }
   C.Tiempo.avanzar();
 }
 console.log(E.paises[pais].partidos.map(k => E.partidos[k].sigla + ':' + E.paises[pais].escanos[k]).join(' '), 'gob', E.paises[pais].gob.coalicion);

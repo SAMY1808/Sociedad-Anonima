@@ -13,7 +13,7 @@ for (let w = 0; w < 52 * anios; w++) {
     if (b === 'evento') C.Eventos.resolver(E, 0, 0);
     else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(); C.Parlamento.resolver(E, E.proyectos[id], null); }
     else if (b === 'ue') C.UE.decidir(E, 0, E.ue.pendiente[0] ? 'si' : 'si');
-    else if (b === 'noche') E.elecciones.nochePendiente = null;
+    else if (b === 'noche') E.elecciones.nochePendiente = null; E.elecciones.presPendiente = null; E.elecciones.pePendiente = null;
   }
   let guard = 0;
   while (J.agenda.puntos > 0 && guard++ < 12) {
