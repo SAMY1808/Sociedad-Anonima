@@ -1,0 +1,28 @@
+/* ── Portada ── */
+.inicio{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:24px 16px}
+.inicio-fondo{position:absolute;inset:auto 0 -40px 0;display:flex;justify-content:center;opacity:.28;pointer-events:none}
+.portada-hemi{width:min(1100px,140vw)}
+.portada-hemi circle{animation:encender 2.4s ease-in-out infinite alternate;opacity:.35}
+@keyframes encender{to{opacity:1}}
+.inicio-caja{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center}
+.inicio-escudo{width:74px;height:74px;border-radius:50%;border:2px solid var(--oro);display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--oro2);box-shadow:0 0 40px rgba(217,180,90,.25)}
+.inicio h1{font-size:64px;letter-spacing:.3em;margin:14px 0 0 .3em;color:var(--oro2)}
+.inicio-lema{color:var(--texto2);letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin:4px 0 0}
+.franja{display:flex;width:180px;height:4px;margin-top:16px;border-radius:2px;overflow:hidden}
+
+.cargando{width:46px;height:46px;border-radius:50%;border:3px solid var(--borde2);border-top-color:var(--oro);animation:gira 1s linear infinite;margin-bottom:16px}
+@keyframes gira{to{transform:rotate(360deg)}}
+/* ── Creación ── */
+.creacion{max-width:1100px;margin:0 auto;padding:18px 16px 30px;min-height:100vh;display:flex;flex-direction:column}
+.crea-cab{display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--borde);padding-bottom:12px}
+.pasos{display:flex;gap:6px;flex-wrap:wrap}
+.pasos span{font-size:12px;padding:4px 10px;border-radius:14px;background:var(--panel);color:var(--tenue)}
+.pasos span.act{background:var(--oro-tenue);color:var(--oro2)} .pasos span.ok{color:var(--bien)}
+.crea-cuerpo{flex:1;padding:18px 0}
+.crea-cuerpo>h1{font-size:30px;margin-bottom:14px}
+.crea-pie{display:flex;gap:10px;border-top:1px solid var(--borde);padding-top:12px;position:sticky;bottom:0;background:var(--fondo)}
+.atrib{display:grid;grid-template-columns:100px auto 1fr 30px auto;gap:8px;align-items:center;margin-bottom:8px;font-size:13px}
+.sub-h{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);margin:16px 0 8px}
+.origen{display:flex;flex-direction:column;gap:4px}
+.origen.sel,.plantilla.sel,.cargos-elec .sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro) inset;background:linear-gradient(180deg,#221d10,#15120b)}
+.plantilla.interes{border-color:#3b5a3f}
