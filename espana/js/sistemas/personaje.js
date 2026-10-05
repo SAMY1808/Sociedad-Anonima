@@ -63,6 +63,17 @@ window.ESP = window.ESP || {};
       C.Noticias.poner(E, 'europa', `Presidencia de la Comisión Europea: ${E.ue.comision.presidente.n}. El Parlamento Europeo cuenta con ${E.ue.pe.total} escaños.`);
     },
 
+    /* Provincias donde tu partido tiene escaños, con su peso y la probabilidad de que la dirección acepte el cambio. */
+    opcionesProvincia(E) {
+      const J = E.jugador, pa = E.partidos[J.partido], actual = J.circNueva || J.circ || Pj.mejorProvincia(E, J.partido, J.region);
+      const rolB = ({ direccion: 0.12, portavoz: 0.06, lider: 0.25 })[J.rol] || 0, ccAct = D().provincias[actual][1];
+      return Object.keys(D().provincias).filter(k => pa.amb !== 'reg' || pa.region === D().provincias[k][1]).map(k => {
+        const d = D().provincias[k], esc = E.esp.prov[k].escanos[J.partido] || 0, total = U.suma(Object.values(E.esp.prov[k].escanos));
+        const p = clamp(0.32 + (J.prestigio - 35) / 110 + rolB + f(E, 'negociacion', 'carisma') * 0.2 + (d[1] === ccAct ? 0.1 : -0.14) + (esc >= 3 ? -0.08 : 0.04), 0.08, 0.9);
+        return { prov: k, nombre: d[0], ccaa: d[1], esc, total, p, actual: k === actual };
+      }).filter(o => o.esc > 0).sort((a, b) => b.esc - a.esc);
+    },
+
     mejorProvincia(E, pid, region) {
       let mx = -1, mj = null;
       const provs = region ? C.Es.provinciasDe(region) : Object.keys(E.esp.prov);
@@ -329,6 +340,7 @@ window.ESP = window.ESP || {};
 
     tras_generales(E, previo, res) {
       const J = E.jugador;
+      if (J && J.circNueva) { J.circ = J.circNueva; J.circNueva = null; }
       if (Pj.esUE(E)) { J.electo = false; return { electo: false, ue: true }; }
       const aspira = J.aspira && J.aspira.nivel === 'nacional';
       if (J.nivel !== 'nacional' && !aspira) { J.campania = null; return null; }
@@ -837,6 +849,30 @@ window.ESP = window.ESP || {};
     ejecutar(E) { const m = muJ(E), x = f(E, 'negociacion', 'carisma'); m.aprob = clamp(m.aprob + 0.6 + x, 10, 90); Pj.cambiar(E, { prestigio: 0.8 }); return { ok: true, msg: 'Los presupuestos municipales salen adelante.' }; }
   });
   /* — Ascenso entre niveles — */
+  A('cambiar_provincia', {
+    nombre: 'Cambiar de provincia', icono: '🧭', costo: 2, grupo: 'carrera',
+    desc: 'Pide a tu partido ir en la lista de otra provincia: más escaños, un feudo más seguro o dar el salto a otra comunidad. Si ya eres diputado/a, el cambio vale desde las próximas generales.',
+    disponible(E) {
+      const J = E.jugador;
+      if (Pj.esUE(E)) return 'Vuelve primero a la política española';
+      if (J.prestigio < 30) return 'Necesitas prestigio 30+';
+      if (J.circT != null && E.fecha.t - J.circT < 26) return 'Acabas de pedir un cambio de provincia: espera unas semanas';
+      return true;
+    },
+    ejecutar(E, a) {
+      const J = E.jugador, prov = a.prov, d = D().provincias[prov]; if (!d) return { ok: false, msg: 'Provincia desconocida' };
+      const pa = E.partidos[J.partido];
+      if (pa.amb === 'reg' && pa.region !== d[1]) return { ok: false, msg: 'Tu partido sólo se presenta en ' + D().ccaa[pa.region].nombre };
+      if ((J.circNueva || J.circ) === prov) return { ok: false, msg: 'Ya vas por esa provincia' };
+      const o = Pj.opcionesProvincia(E).find(x => x.prov === prov); if (!o) return { ok: false, msg: 'Tu partido no tiene escaños allí' };
+      J.circT = E.fecha.t;
+      if (!U.chance(o.p)) { Pj.cambiar(E, { prestigio: -1 }, true); Pj.log(E, `La dirección rechaza que cambies a la lista de ${d[0]}.`); return { ok: true, exito: false, msg: 'La dirección del partido prefiere dejarte donde estás.' }; }
+      const sentado = J.electo && J.nivel === 'nacional';
+      if (sentado) { J.circNueva = prov; Pj.log(E, `Tu partido acepta que encabeces o integres la lista por ${d[0]} en las próximas generales.`); return { ok: true, msg: `Irás en la lista por ${d[0]} en las próximas generales (conservas tu escaño actual).` }; }
+      J.circ = prov; J.circNueva = null; if (J.aspira && J.aspira.nivel === 'nacional') J.aspira.circ = prov;
+      Pj.log(E, `Pasas a la lista de ${d[0]}.`); return { ok: true, msg: `Ahora vas por ${d[0]}.` };
+    }
+  });
   A('aspirar_lista', {
     nombre: 'Pedir un puesto en las listas', icono: '🪜', costo: 2, grupo: 'carrera', desc: 'Aspira a dar el salto a las Cortes: un puesto en la lista de tu partido por una provincia (para la lista autonómica usa «Candidatura autonómica»).',
     disponible(E) {
