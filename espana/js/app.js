@@ -48,8 +48,9 @@ window.ESP = window.ESP || {};
     ir(pantalla, params) {
       const E = C.E;
       if (!C.Pantallas[pantalla]) pantalla = 'dashboard';
+      const igual = E.ui.pantalla === pantalla;
       E.ui.pantalla = pantalla; E.ui.params = params || null;
-      App.refrescar(true);
+      App.refrescar(!igual);
     },
 
     refrescar(nuevo) {
@@ -59,6 +60,8 @@ window.ESP = window.ESP || {};
       try { C.Pantallas[E.ui.pantalla].render(v, E.ui.params || {}); }
       catch (e) { console.error(e); v.innerHTML = `<div class="tarjeta"><h3>Error de interfaz</h3><pre class="mono" style="white-space:pre-wrap">${esc(e.stack || e.message)}</pre></div>`; }
       v.scrollTop = nuevo ? 0 : scroll;
+      // Los ajustes posteriores (tablas, pestañas) pueden cambiar la altura: se recoloca el desplazamiento para que la página no salte
+      if (!nuevo) requestAnimationFrame(() => requestAnimationFrame(() => { if (Math.abs(v.scrollTop - scroll) > 2) v.scrollTop = scroll; }));
     },
 
     barra() {
