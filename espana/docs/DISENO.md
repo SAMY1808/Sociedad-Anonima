@@ -98,7 +98,7 @@ tocar. `tools/movil-es.js` captura todas las pantallas a 390×844 y detecta desb
 
 ## Leyes e impacto (impacto.js · data/impactos.js)
 
-**Datos.** `DATA.indicadores` (12, 0-100, más es mejor), `DATA.colectivos` (11 grupos sociales con ideología, peso electoral
+**Datos.** `DATA.indicadores` (14, 0-100, más es mejor), `DATA.colectivos` (11 grupos sociales con ideología, peso electoral
 y lo que les importa), `DATA.impactos[ley]` (efecto a pleno rendimiento sobre indicadores `ind` y colectivos `gr`,
 enfoques alternativos `enf`, efectos no deseados `sec`, implantación `r` e incertidumbre `u`), `DATA.alcances` y
 `DATA.financiaciones` (comunes a todas las leyes).

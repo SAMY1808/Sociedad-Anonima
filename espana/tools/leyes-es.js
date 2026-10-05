@@ -64,7 +64,7 @@ const movil = process.argv[2] === 'movil';
   const pg2 = await pg.evaluate(() => { const p = Object.values(ESP.E.proyectos).find(p => p.tpl === 'renovables'); return p && p.dis && p.dis.grad; });
   ok(pg2 === true, 'el proyecto enviado a las Cortes conserva el diseño gradual');
   await pg.evaluate(() => ESP.App.ir('leyes', { tab: 'pais' })); await pg.waitForTimeout(250);
-  ok(await pg.evaluate(() => document.querySelectorAll('.imp-ind').length === 12), 'la pestaña País muestra 12 indicadores');
+  ok(await pg.evaluate(() => document.querySelectorAll('.imp-ind').length === 14), 'la pestaña País muestra 14 indicadores');
   await pg.screenshot({ path: `/tmp/${movil ? 'lm' : 'ld'}-pais.png` });
   console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);
   await b.close(); srv.close();

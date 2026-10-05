@@ -65,3 +65,9 @@
   .imp-grupo .imp-sat{grid-column:1 / 3;grid-row:2}
   .imp-grupo>.tenue{grid-column:1 / 3;grid-row:3}
 }
+.imp-fiscal{margin:0 0 12px;padding:10px 12px;border:1px solid var(--borde);border-radius:9px;background:var(--panel)}
+.fis-barra{position:relative;height:12px;background:var(--panel3);border-radius:6px;overflow:hidden}
+.fis-barra>i{position:absolute;top:0;bottom:0}
+.fis-barra>i.base{left:0;background:var(--oro)} .fis-barra>i.mal{background:var(--mal)} .fis-barra>i.bien{background:var(--bien)}
+.fis-barra>b.lim{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff}
+.imp-resumen{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;margin:0 0 10px}

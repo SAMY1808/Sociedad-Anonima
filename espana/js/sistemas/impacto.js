@@ -7,7 +7,7 @@ window.ESP = window.ESP || {};
   const U = C.U, D = () => C.DATA, clamp = U.clamp;
   const MULT = [0.6, 1, 1.5], MCOST = [0.65, 1, 1.45];
   /* Qué indicadores empuja el rendimiento de cada ministerio (puntos de indicador por punto de rendimiento sobre 55). */
-  const MIN_IND = { sal: ['sal'], edu: ['edu'], int: ['seg'], jus: ['lib'], viv: ['viv'], amb: ['amb', 'ener'], agr: ['rur'], tpt: ['rur'], tra: ['prot', 'igual'], inc: ['prot'], dso: ['igual'], cie: ['comp'], ind: ['comp'], eco: ['comp'], dig: ['comp'], ter: ['coh'], pre: ['lib'], igu: ['lib'], def: ['seg'] };
+  const MIN_IND = { sal: ['sal'], edu: ['edu'], int: ['seg'], jus: ['lib', 'inst'], hac: ['inst'], viv: ['viv'], amb: ['amb', 'ener'], agr: ['rur'], tpt: ['rur'], tra: ['prot', 'igual'], inc: ['prot'], dso: ['igual'], cie: ['comp'], ind: ['comp'], eco: ['comp'], dig: ['comp'], ter: ['coh'], pre: ['lib', 'inst'], igu: ['lib'], def: ['seg'] };
   const NOMBRES_G = k => (D().colectivos[k] || { nombre: k }).nombre;
 
   const Im = {

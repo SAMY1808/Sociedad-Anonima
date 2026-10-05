@@ -22,6 +22,31 @@ window.ESP = window.ESP || {};
       return ch.join('');
     },
 
+    /* Panel presupuestario (como en Geopolitical Simulator): coste, déficit hoy y previsto frente al límite europeo. */
+    fiscalHTML(E, inf) {
+      const ec = E.paises.ES.ec, par = inf.par, dd = inf.ec.deficit || 0, hoy = ec.deficit, prev = hoy + dd, lim = 3, max = 6;
+      const w = v => Math.max(0, Math.min(100, v / max * 100));
+      const lo = Math.min(hoy, prev), hi = Math.max(hoy, prev), peor = dd > 0.005, mejor = dd < -0.005;
+      const costoTxt = par.costoTotal > 0.005 ? `Cuesta ${U.d1(par.costoTotal)} % del PIB (≈ ${U.n(inf.anual)} mil millones al año)` : par.costoTotal < -0.005 ? `Ingresa ${U.d1(-par.costoTotal)} % del PIB (≈ ${U.n(-inf.anual)} mil millones al año)` : 'Sin impacto presupuestario directo';
+      const deuda = par.costo * 1; // % PIB/año que se suma a la deuda (sólo si se paga con deuda)
+      return `<div class="imp-fiscal"><div class="fila" style="justify-content:space-between"><b>💶 Presupuesto</b><span class="etq ${peor ? 'rojo' : mejor ? 'verde' : ''}">${peor ? 'Empeora el déficit' : mejor ? 'Mejora el déficit' : 'Déficit sin cambios'}</span></div>
+        <div class="tenue" style="font-size:12.5px;margin:4px 0 6px">${costoTxt}${par.dis.fin !== 'deficit' && par.costoTotal > 0.04 ? ' · compensado ' + (par.dis.fin === 'impuestos' ? 'con impuestos' : 'con recortes') : ''}.</div>
+        <div class="fis-barra"><i class="base" style="width:${w(lo)}%"></i><i class="${peor ? 'mal' : 'bien'}" style="left:${w(lo)}%;width:${w(hi) - w(lo)}%"></i><b class="lim" style="left:${w(lim)}%"${UI.tt('Límite europeo del 3 % del PIB')}></b></div>
+        <div class="fila" style="justify-content:space-between;font-size:12px;margin-top:4px"><span>Déficit hoy <b class="num">${U.d1(hoy)} %</b></span><span>Previsto <b class="num ${prev > lim ? 'mal' : ''}">${U.d1(prev)} %</b></span><span class="tenue">Límite UE 3 %</span></div>
+        ${prev > lim && hoy <= lim ? '<div class="nota" style="margin-top:6px;border-color:var(--no);font-size:12.5px">⚠ Superarías el 3 %: Bruselas podría abrir un procedimiento de déficit excesivo.</div>' : ''}
+        ${deuda > 0.01 ? `<div class="tenue" style="font-size:12px;margin-top:4px">Deuda: +${U.d1(deuda)} puntos de PIB al año mientras esté en vigor (hoy ${U.n(ec.deuda)} %).</div>` : ''}</div>`;
+    },
+
+    /* Resumen en palabras de los efectos (mejora / empeora). */
+    resumenHTML(E, inf) {
+      const L = [];
+      const dd = inf.ec.deficit || 0; if (Math.abs(dd) >= 0.03) L.push([dd < 0, '💶 Déficit público', dd < 0 ? 'mejora' : 'empeora']);
+      for (const k of ['crec', 'paro', 'infl']) { const x = inf.ec[k] || 0; if (Math.abs(x) >= 0.04) { const bien = k === 'crec' ? x > 0 : x < 0; L.push([bien, ({ crec: '📈 Crecimiento', paro: '👷 Paro', infl: '🛒 Inflación' })[k], (k === 'crec' ? x > 0 : x < 0) ? 'mejora' : 'empeora']); } }
+      inf.ind.filter(x => Math.abs(x.d) >= 0.8).slice(0, 6).forEach(x => { const dat = D().indicadores[x.k]; L.push([x.d > 0, dat.icono + ' ' + dat.nombre, x.d > 0 ? 'mejora' : 'empeora']); });
+      if (!L.length) return '';
+      return `<div class="imp-resumen">${L.map(([b, n, v]) => `<span class="${b ? 'bien' : 'mal'}">${b ? '▲' : '▼'} ${n}: <b>${v}</b></span>`).join('')}</div>`;
+    },
+
     /* Informe de impacto: indicadores, colectivos, economía, riesgos y votos. */
     informeHTML(E, inf, pr) {
       const par = inf.par, ec = inf.ec, D_ = D();
@@ -31,7 +56,8 @@ window.ESP = window.ESP || {};
       const fiscal = inf.anual ? `<div class="etq ${inf.anual > 0 ? 'rojo' : 'verde'}">${inf.anual > 0 ? 'Coste bruto' : 'Ingreso'} ${U.d1(Math.abs(par.costoTotal))} % del PIB · ≈ ${U.n(Math.abs(inf.anual))} mil millones al año</div>` : '';
       const riesgos = inf.riesgos.length ? `<div class="chips" style="margin-top:6px">${inf.riesgos.map(r => `<span class="etq ${r.nivel === 'probable' ? 'rojo' : r.nivel === 'posible' ? 'amar' : ''}"${UI.tt(`Riesgo ${r.nivel}`)}>⚠ ${esc(r.t)}</span>`).join('')}</div>` : '<div class="tenue" style="font-size:12.5px;margin-top:6px">Sin riesgos identificados.</div>';
       const votos = pr ? `<div style="margin-top:10px">${G.apilada([{ etq: 'A favor', v: pr.si, color: 'var(--si)' }, { etq: 'Abstención', v: pr.abs, color: 'var(--abs)' }, { etq: 'En contra', v: pr.no, color: 'var(--no)' }], { total: pr.total, mayoria: pr.need, alto: 16 })}<div class="tenue" style="font-size:12px;margin-top:4px">Proyección en el Congreso: ${pr.si} a favor, ${pr.no} en contra · se necesitan ${pr.need}. ${pr.dist >= 0 ? '<b class="bien">Margen +' + pr.dist + '</b>' : '<b class="mal">Faltan ' + Math.abs(pr.dist) + '</b>'}</div></div>` : '';
-      return `<div class="fila" style="gap:6px;margin-bottom:8px"><span class="etq">Apoyo ciudadano ${par.pop} %</span><span class="etq">Plena eficacia en ${par.r >= 52 ? U.d1(par.r / 52) + ' años' : par.r + ' semanas'}</span><span class="etq"${UI.tt('El informe del Gobierno puede equivocarse: el efecto real será el previsto multiplicado por un factor que depende de la incertidumbre, de la ejecución del ministerio y del azar.')}>Incertidumbre ±${Math.round(inf.u * 100)} %</span>${fiscal}</div>
+      const fisc = Imp.fiscalHTML(E, inf), resumen = Imp.resumenHTML(E, inf);
+      return `${resumen}${fisc}<div class="fila" style="gap:6px;margin-bottom:8px"><span class="etq">Apoyo ciudadano ${par.pop} %</span><span class="etq">Plena eficacia en ${par.r >= 52 ? U.d1(par.r / 52) + ' años' : par.r + ' semanas'}</span><span class="etq"${UI.tt('El informe del Gobierno puede equivocarse: el efecto real será el previsto multiplicado por un factor que depende de la incertidumbre, de la ejecución del ministerio y del azar.')}>Incertidumbre ±${Math.round(inf.u * 100)} %</span>${fiscal}</div>
         <h4 class="imp-h">Indicadores del país <span class="tenue">(puntos sobre 100)</span></h4>${filasI}
         <h4 class="imp-h">Colectivos sociales <span class="tenue">(satisfacción)</span></h4>${filasG}
         ${ecs ? `<h4 class="imp-h">Economía</h4><div class="chips">${ecs}</div>` : ''}

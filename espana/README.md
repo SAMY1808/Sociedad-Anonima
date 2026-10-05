@@ -77,7 +77,7 @@ Es una PWA: se puede instalar y jugar sin conexión.
   comisario/a. Campañas autonómicas, municipales y generales; **noche electoral** animada.
 - **Leyes con diseño e impacto** (inspirado en *Lawgivers II* y *Geopolitical Simulator 6*): cada ley se **diseña**
   (alcance limitado/estándar/ambicioso, enfoque alternativo, financiación con deuda/impuestos/recortes, entrada en
-  vigor inmediata o gradual) y tiene un **informe de impacto** previo: efectos sobre **12 indicadores del país**
+  vigor inmediata o gradual) y tiene un **informe de impacto** previo: efectos sobre **14 indicadores del país**
   (igualdad, vivienda, sanidad, educación, seguridad, medio ambiente, energía, cohesión territorial, libertades,
   competitividad, protección social, España rural), sobre la satisfacción de **11 colectivos sociales**, sobre la
   economía y sobre el presupuesto, con **riesgos de efectos no deseados** y una incertidumbre que hace que el efecto
