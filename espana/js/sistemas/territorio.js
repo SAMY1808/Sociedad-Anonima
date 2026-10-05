@@ -14,7 +14,7 @@ window.ESP = window.ESP || {};
     /* ── Inicio ── */
     init(E) {
       const tc = E.esp;
-      tc.um = null; tc.proces = { fase: 'distension', t: 0, historia: [] };
+      tc.um = null; tc.procesos = {}; for (const pc in D().procesos) tc.procesos[pc] = { fase: 'distension', t: 0, historia: [] }; tc.proces = tc.procesos.CAT;
       tc.tc = { sesgo: 0.25, recursos: [] };
       tc.jornada = {}; tc.confPres = { ultima: U.turnoDe(new Date(Date.UTC(2026, 5, 1))) };
       tc.flags = tc.flags || {};
@@ -38,6 +38,7 @@ window.ESP = window.ESP || {};
         rc.relM = T.relObjetivo(E, c);
         rc.gob.aprob = U.clamp(46 + U.gauss(0, 7), 25, 70);
       }
+      if (T.initAut) T.initAut(E);
       C.Generales.senado(E);
     },
 
@@ -79,35 +80,48 @@ window.ESP = window.ESP || {};
     },
 
     /* Formación del gobierno autonómico tras unas elecciones o una crisis. */
-    formarGobierno(E, c, inicial) {
+    /* Mejor bloque de investidura de un candidato en el parlamento de la comunidad. */
+    bloque(E, c, cand) {
       const rc = E.esp.ccaa[c], esc = rc.parl.escanos, Ej = C.Ejecutivo;
       const tot = U.suma(Object.values(esc)), may = Math.floor(tot / 2) + 1;
       const partidos = Object.keys(esc).sort((a, b) => esc[b] - esc[a]);
+      const bloque = [cand]; let s = esc[cand] || 0;
+      const otros = partidos.filter(p => p !== cand).map(p => ({ p, aff: Ej.afinidad(E, cand, p) })).sort((a, b) => b.aff - a.aff);
+      for (const x of otros) {
+        if (s >= may) break;
+        if (bloque.some(q => Ej.vetaA(E, x.p, q) || Ej.vetaA(E, q, x.p))) continue;
+        if (x.aff < 0.3) continue;
+        bloque.push(x.p); s += esc[x.p];
+      }
+      let si = s, no = 0;
+      for (const p of partidos) { if (bloque.includes(p)) continue; const aff = Ej.afinidad(E, cand, p), veta = bloque.some(q => Ej.vetaA(E, p, q)); if (!veta && aff >= 0.6) si += esc[p]; else if (!veta && aff >= 0.3) { /* abstención */ } else no += esc[p]; }
+      const ext = partidos.filter(p => !bloque.includes(p) && Ej.afinidad(E, cand, p) >= 0.6 && !bloque.some(q => Ej.vetaA(E, p, q)));
+      return { cand, bloque, s, si, no, may, exito: s >= may || si > no, ext: s >= may ? [] : ext };
+    },
+
+    /* Instala un gobierno autonómico a partir de un bloque. */
+    instalar(E, c, b, inicial, motivo) {
+      const rc = E.esp.ccaa[c];
+      const cab = T.cabeza(E, c, b.cand);
+      rc.gob = { pres: cab.id, partido: b.cand, coalicion: b.bloque, apoyoExterno: b.ext, formado: E.fecha.t, aprob: U.clamp(48 + U.gauss(0, 5), 30, 65), estab: U.clamp(78 - (b.bloque.length - 1) * 4 - (b.s < b.may ? 14 : 0) + U.gauss(0, 5), 25, 92), tipo: b.s >= b.may ? 'mayoria' : 'minoria', consej: {} };
+      cab.cargo = 'presauto'; cab.reg = c;
+      if (T.repartirConsejerias) T.repartirConsejerias(E, c);
+      if (!inicial) C.Noticias.poner(E, 'politica', `${cab.n} (${E.partidos[b.cand].sigla}) ${motivo || 'es investido/a'} presidente/a de ${D().ccaa[c].nombre}${b.bloque.length > 1 ? ' con ' + b.bloque.filter(k => k !== b.cand).map(k => E.partidos[k].sigla).join(', ') : ''}.`, 'ES');
+      return rc.gob;
+    },
+
+    /* Formación del gobierno autonómico tras unas elecciones o una crisis. */
+    formarGobierno(E, c, inicial) {
+      const rc = E.esp.ccaa[c], esc = rc.parl.escanos;
+      const partidos = Object.keys(esc).sort((a, b) => esc[b] - esc[a]);
       let mejor = null;
       for (const cand of partidos.slice(0, 3)) {
-        const bloque = [cand]; let s = esc[cand];
-        const otros = partidos.filter(p => p !== cand).map(p => ({ p, aff: Ej.afinidad(E, cand, p) })).sort((a, b) => b.aff - a.aff);
-        for (const x of otros) {
-          if (s >= may) break;
-          if (bloque.some(q => Ej.vetaA(E, x.p, q) || Ej.vetaA(E, q, x.p))) continue;
-          if (x.aff < 0.3) continue;
-          bloque.push(x.p); s += esc[x.p];
-        }
-        // Apoyos y abstenciones
-        let si = s, no = 0;
-        for (const p of partidos) { if (bloque.includes(p)) continue; const aff = Ej.afinidad(E, cand, p), veta = bloque.some(q => Ej.vetaA(E, p, q)); if (!veta && aff >= 0.6) si += esc[p]; else if (!veta && aff >= 0.3) { /* abstención */ } else no += esc[p]; }
-        const exito = s >= may || si > no;
-        const score = (exito ? 1000 : 0) + (s >= may ? 200 : 0) - bloque.length * 10 + esc[cand] * 0.3;
-        if (!mejor || score > mejor.score) mejor = { cand, bloque, s, si, no, exito, score };
+        const b = T.bloque(E, c, cand);
+        b.score = (b.exito ? 1000 : 0) + (b.s >= b.may ? 200 : 0) - b.bloque.length * 10 + esc[cand] * 0.3;
+        if (!mejor || b.score > mejor.score) mejor = b;
       }
       if (!mejor) return null;
-      const cab = T.cabeza(E, c, mejor.cand);
-      const ext = partidos.filter(p => !mejor.bloque.includes(p) && Ej.afinidad(E, mejor.cand, p) >= 0.6 && !mejor.bloque.some(q => Ej.vetaA(E, p, q)));
-      rc.gob = { pres: cab.id, partido: mejor.cand, coalicion: mejor.bloque, apoyoExterno: s2(mejor.s >= may ? [] : ext), formado: E.fecha.t, aprob: U.clamp(48 + U.gauss(0, 5), 30, 65), estab: U.clamp(78 - (mejor.bloque.length - 1) * 4 - (mejor.s < may ? 14 : 0) + U.gauss(0, 5), 25, 92), tipo: mejor.s >= may ? 'mayoria' : 'minoria' };
-      cab.cargo = 'presauto'; cab.reg = c;
-      if (!inicial) C.Noticias.poner(E, 'politica', `${cab.n} (${E.partidos[mejor.cand].sigla}) es investido/a presidente/a de ${D().ccaa[c].nombre}${mejor.bloque.length > 1 ? ' con ' + mejor.bloque.filter(k => k !== mejor.cand).map(k => E.partidos[k].sigla).join(', ') : ''}.`, 'ES');
-      return rc.gob;
-      function s2(a) { return a; }
+      return T.instalar(E, c, mejor, inicial);
     },
 
     /* ── Relación con Moncloa y estado de ánimo territorial ── */
@@ -121,6 +135,7 @@ window.ESP = window.ESP || {};
 
     turno(E) {
       for (const c of T.ids()) T.turnoRegion(E, c);
+      if (T.turnoAut) T.turnoAut(E);
       T.procesTurno(E);
       if (E.fecha.t % 2 === 0) U.serie('indepCat', E.esp.ccaa.CAT.indep, 300);
       T.tcTurno(E);
@@ -156,6 +171,7 @@ window.ESP = window.ESP || {};
       rc.pend = rc.pend.filter(p => {
         if (t < p.t) return true;
         if (p.tipo === 'refer_estatuto') T.referendumEstatuto(E, c, p);
+        else if (p.tipo === 'traspaso') T.aplicarTraspaso(E, c, p.comp);
         return false;
       });
       // Elecciones
@@ -212,19 +228,19 @@ window.ESP = window.ESP || {};
           cc.CAT.relM = Math.min(100, cc.CAT.relM + 12); add('CAT', -3.5, 'Amnistía'); cc.PVA.relM = Math.min(100, cc.PVA.relM + 3);
           T.marea(E, 'amnistia');
           T.recurso(E, p, 'amnistia');
-          if (E.esp.proces.fase !== 'distension') T.procesFase(E, 'distension', 'La amnistía abre una etapa de distensión');
+          if (E.esp.procesos.CAT.fase !== 'distension') T.procesFase(E, 'CAT', 'distension', 'La amnistía abre una etapa de distensión');
           break;
         }
         case 'indultos': E.esp.flags.indultos = t; cc.CAT.relM = Math.min(100, cc.CAT.relM + 6); add('CAT', -1.5, 'Indultos'); T.marea(E, 'indultos'); break;
         case 'financiacion_singular': {
-          cc.CAT.fiscal += 2.2; cc.CAT.relM = Math.min(100, cc.CAT.relM + 12); add('CAT', -3, 'Financiación singular');
-          for (const c of T.ids()) if (c !== 'CAT') { cc[c].agravio += c === 'MAD' || c === 'AND' || c === 'VAL' ? 7 : 3; cc[c].fiscal -= 0.15; }
+          const rg = p.region || 'CAT'; T.aplicarFinSingular(E, rg); cc[rg].relM = Math.min(100, cc[rg].relM + 12); add(rg, -3, 'Financiación singular');
           T.marea(E, 'financiacion');
           T.recurso(E, p, 'financiacion_singular');
           break;
         }
         case 'financiacion': for (const c of T.ids()) { cc[c].relM = Math.min(100, cc[c].relM + 3); cc[c].fiscal += (25 - D().ccaa[c].pibpc) * 0.03; } break;
-        case 'transferencias': regP.forEach(c => { cc[c].aut = Math.min(100, cc[c].aut + 4); cc[c].relM = Math.min(100, cc[c].relM + 5); add(c, -1.2, 'Traspasos'); }); break;
+        case 'transferencias': regP.forEach(c => { let n = 0; for (const k of cc[c].reclama) { if (n >= 2) break; if (cc[c].comp[k] < 2) { T.aplicarTraspaso(E, c, k); n++; } } cc[c].relM = Math.min(100, cc[c].relM + 3); add(c, -1.2, 'Traspasos'); }); break;
+        case 'transfer_comp': if (p.region && p.comp) T.aplicarTraspaso(E, p.region, p.comp); break;
         case 'quita_deuda': for (const c of T.ids()) { cc[c].deuda = Math.max(4, cc[c].deuda * 0.78); cc[c].relM = Math.min(100, cc[c].relM + 3); } E.paises.ES.ec.pol.deuda += 1.8; add('CAT', -1, 'Quita de deuda'); T.marea(E, 'deuda'); break;
         case 'escudo_social': break;
         case 'estatuto': {
@@ -234,7 +250,7 @@ window.ESP = window.ESP || {};
           C.Noticias.poner(E, 'politica', `Las Cortes aprueban la reforma del Estatuto de ${D().ccaa[c].nombre}: referéndum autonómico en ocho semanas.`, 'ES');
           break;
         }
-        case 'recentralizar': for (const c of T.ids()) { cc[c].aut = Math.max(20, cc[c].aut - 5); if (cc[c].indep0 > 5) add(c, 2.2, 'Recentralización'); cc[c].relM = Math.max(0, cc[c].relM - (cc[c].gob && cc[c].gob.coalicion.some(k => E.partidos[k].amb === 'reg') ? 10 : 2)); } T.marea(E, 'recentralizacion'); T.recurso(E, p, 'recentralizar'); break;
+        case 'recentralizar': T.recentralizarComp(E); for (const c of T.ids()) { if (cc[c].indep0 > 5) add(c, 2.2, 'Recentralización'); cc[c].relM = Math.max(0, cc[c].relM - (cc[c].gob && cc[c].gob.coalicion.some(k => E.partidos[k].amb === 'reg') ? 10 : 2)); } T.marea(E, 'recentralizacion'); T.recurso(E, p, 'recentralizar'); break;
         case 'reforma_electoral': {
           const a = E.partidos[p.autor.pid || (E.jugador && E.jugador.partido)];
           E.esp.um = a && a.ter < -10 ? 5 : 1;
@@ -257,7 +273,7 @@ window.ESP = window.ESP || {};
       const apoyo = U.clamp(52 + (rc.relM - 50) * 0.2 + (rc.gob && rc.gob.aprob - 45) * 0.15 + U.gauss(0, 9), 20, 90), part = U.clamp(55 + U.gauss(0, 6), 35, 75);
       rc.estatuto.proceso = null;
       if (apoyo >= 50) {
-        rc.aut = Math.min(100, rc.aut + pend.aut); rc.aut0 = Math.max(rc.aut0, rc.aut); rc.estatuto.ano = U.anio();
+        let n = 0; for (const k of rc.reclama) { if (n >= 2) break; if (rc.comp[k] < 2) { T.aplicarTraspaso(E, c, k); n++; } } T.calcAut(E, c); rc.aut0 = Math.max(rc.aut0, rc.aut); rc.estatuto.ano = U.anio();
         rc.relM = Math.min(100, rc.relM + 4);
         rc.concesiones.push({ t: E.fecha.t, v: -1.5, d: 'Nuevo estatuto' });
         C.Noticias.poner(E, 'politica', `El nuevo Estatuto de ${d.nombre} es ratificado en referéndum con un ${U.d1(apoyo)} % de síes (participación ${U.d1(part)} %).`, 'ES');
@@ -284,39 +300,42 @@ window.ESP = window.ESP || {};
       return true;
     },
 
-    /* ── Procés y artículo 155 ── */
-    procesFase(E, fase, txt) {
-      const pr = E.esp.proces; pr.fase = fase; pr.t = E.fecha.t; pr.historia.unshift({ t: E.fecha.t, fase, txt });
+    /* ── Procesos soberanistas y artículo 155 (Cataluña, País Vasco, Galicia, Navarra, Canarias, Baleares, Valencia) ── */
+    procesFase(E, c, fase, txt) {
+      const pr = E.esp.procesos[c]; pr.fase = fase; pr.t = E.fecha.t; pr.historia.unshift({ t: E.fecha.t, fase, txt });
       if (txt) C.Noticias.poner(E, 'politica', txt, 'ES');
     },
 
     procesTurno(E) {
-      const pr = E.esp.proces, rc = E.esp.ccaa.CAT, g = E.paises.ES.gob, J = E.jugador, t = E.fecha.t; if (!rc || !g) return;
-      const indepGob = rc.gob && rc.gob.coalicion.some(k => E.partidos[k].indep >= 0.8);
-      if (pr.fase === 'distension' && indepGob && rc.indep >= 40 && rc.relM < 28 && !rc.suspendida && t - pr.t > 26 && U.chance(0.012)) T.procesFase(E, 'tension', 'La Generalitat anuncia una hoja de ruta hacia la autodeterminación: crece la tensión con Moncloa.');
-      else if (pr.fase === 'tension') {
-        if (rc.relM > 45) T.procesFase(E, 'distension', 'La Generalitat y el Gobierno retoman el diálogo: baja la tensión.');
-        else if (indepGob && U.chance(0.04) && t - pr.t > 8) {
-          if (E.esp.flags.refPactado) T.procesFase(E, 'distension', 'Se pacta una vía legal para la consulta.');
-          else { T.procesFase(E, 'unilateral', 'El Parlament aprueba convocar un referéndum unilateral de independencia.'); pr.limite = t + 6; pr.decidir = true; }
-        }
-      } else if (pr.fase === 'unilateral') {
-        if (pr.decidir && g.pm === (J && J.cargo === 'pm' ? 'J' : null)) { E.esp.consejo = E.esp.consejo || {}; }   // el jugador decide en el Consejo
-        if (pr.decidir && t >= pr.limite) T.procesResolver(E, null);
-      } else if (pr.fase === '155' && !rc.suspendida) T.procesFase(E, 'distension', 'Tras la intervención se abre una etapa de reconstrucción institucional.');
+      const g = E.paises.ES.gob, t = E.fecha.t; if (!g) return;
+      for (const c in D().procesos) {
+        const conf = D().procesos[c], pr = E.esp.procesos[c], rc = E.esp.ccaa[c], d = D().ccaa[c];
+        const indepGob = rc.gob && rc.gob.coalicion.some(k => E.partidos[k].indep >= conf.indepMin);
+        const f = c === 'CAT' ? 1 : 0.45;
+        if (pr.fase === 'distension' && indepGob && rc.indep >= conf.umbral && rc.relM < 30 && !rc.suspendida && t - pr.t > 26 && U.chance(0.012 * f)) T.procesFase(E, c, 'tension', `${conf.gobierno} anuncia una hoja de ruta hacia ${conf.lema}: crece la tensión con Moncloa.`);
+        else if (pr.fase === 'tension') {
+          if (rc.relM > 45) T.procesFase(E, c, 'distension', `${conf.gobierno} y el Gobierno central retoman el diálogo: baja la tensión.`);
+          else if (indepGob && U.chance(0.04) && t - pr.t > 8) {
+            if (E.esp.flags.refPactado) T.procesFase(E, c, 'distension', 'Se pacta una vía legal para la consulta.');
+            else { T.procesFase(E, c, 'unilateral', `El ${conf.organo} aprueba convocar unilateralmente una ${conf.lema}.`); pr.limite = t + 6; pr.decidir = true; }
+          }
+        } else if (pr.fase === 'unilateral') {
+          if (pr.decidir && t >= pr.limite) T.procesResolver(E, c, null);
+        } else if (pr.fase === '155' && !rc.suspendida) T.procesFase(E, c, 'distension', 'Tras la intervención se abre una etapa de reconstrucción institucional.');
+      }
     },
 
     /* Respuesta del Gobierno a un desafío unilateral: '155' | 'dialogo' | 'nada'. */
-    procesResolver(E, resp) {
-      const pr = E.esp.proces, rc = E.esp.ccaa.CAT, g = E.paises.ES.gob;
+    procesResolver(E, c, resp) {
+      const pr = E.esp.procesos[c], rc = E.esp.ccaa[c], g = E.paises.ES.gob, conf = D().procesos[c];
       pr.decidir = false;
       if (!resp) { const pm = E.politicos[g.pm]; resp = pm && pm.ter < -20 ? '155' : pm && pm.ter > 5 ? 'dialogo' : (U.chance(0.55) ? '155' : 'nada'); }
-      if (resp === 'dialogo') { rc.relM = Math.min(100, rc.relM + 15); rc.concesiones.push({ t: E.fecha.t, v: -2, d: 'Mesa de diálogo' }); T.procesFase(E, 'distension', 'El Gobierno abre una mesa de diálogo y el Parlament suspende el referéndum.'); g.aprob -= 1; return 'dialogo'; }
+      if (resp === 'dialogo') { rc.relM = Math.min(100, rc.relM + 15); rc.concesiones.push({ t: E.fecha.t, v: -2, d: 'Mesa de diálogo' }); T.procesFase(E, c, 'distension', `El Gobierno abre una mesa de diálogo y el ${conf.organo} suspende la consulta.`); g.aprob -= 1; return 'dialogo'; }
       if (resp === 'nada') {
-        rc.indep += 4; T.procesFase(E, 'dui', 'La Generalitat celebra el referéndum y proclama la independencia: crisis constitucional.');
-        const r = T.aplicar155(E, true); return r.ok ? '155' : 'nada';
+        rc.indep += 4; T.procesFase(E, c, 'dui', `${conf.gobierno} celebra la consulta y proclama la soberanía: crisis constitucional.`);
+        const r = T.aplicar155(E, c, true); return r.ok ? '155' : 'nada';
       }
-      return T.aplicar155(E).ok ? '155' : 'nada';
+      return T.aplicar155(E, c).ok ? '155' : 'nada';
     },
 
     senado155(E) {
@@ -330,14 +349,14 @@ window.ESP = window.ESP || {};
       return { si, mayoria: S.mayoria, ok: si >= S.mayoria };
     },
 
-    aplicar155(E, forzado) {
-      const rc = E.esp.ccaa.CAT, d = D().ccaa.CAT, g = E.paises.ES.gob;
+    aplicar155(E, c, forzado) {
+      const rc = E.esp.ccaa[c], d = D().ccaa[c], g = E.paises.ES.gob;
       const s = T.senado155(E);
       if (!s.ok && !forzado) return { ok: false, si: s.si, mayoria: s.mayoria };
       if (!s.ok) return { ok: false, si: s.si, mayoria: s.mayoria };
       rc.suspendida = { t: E.fecha.t, hasta: E.fecha.t + 26 }; rc.parl.proxT = E.fecha.t + 6; rc.relM = 4;
       rc.concesiones.push({ t: E.fecha.t, v: 5, d: 'Artículo 155' });
-      T.procesFase(E, '155', `El Senado autoriza el artículo 155: el Gobierno interviene ${d.nombre}, disuelve el Parlament y convoca elecciones.`);
+      T.procesFase(E, c, '155', `El Senado autoriza el artículo 155: el Gobierno interviene ${d.nombre}, disuelve su parlamento y convoca elecciones.`);
       g.aprob += 1.5; g.estab += 4;
       for (const k of ['ES_UPC', 'ES_VAP']) E.partidos[k].pop += 0.25; C.Opinion.normalizarES(E);
       return { ok: true, si: s.si, mayoria: s.mayoria };

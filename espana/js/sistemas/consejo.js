@@ -6,6 +6,8 @@ window.ESP = window.ESP || {};
   const D = () => C.DATA;
   const MAX_AGENDA = 6;
 
+  const T_ = () => C.Territorio;
+
   const Cn = {
     init(E) {
       const P = E.paises.ES, g = P.gob;
@@ -56,17 +58,18 @@ window.ESP = window.ESP || {};
       const c = U.pesado(ids, x => 60 - E.esp.ccaa[x].relM + E.esp.ccaa[x].indep), rc = E.esp.ccaa[c], d = D().ccaa[c];
       const tipos = [
         { k: 'fondos', t: `${d.nombre} reclama fondos y un plan de infraestructuras`, d: 'La comunidad pide al Gobierno un plan específico de inversiones y la ejecución de las obras pendientes.' },
-        { k: 'transf', t: `${d.nombre} pide el traspaso de competencias pendientes`, d: 'Reclama la transferencia de varias competencias recogidas en su Estatuto.' },
         { k: 'bilat', t: `Comisión bilateral Estado–${d.nombre}`, d: 'El Gobierno autonómico solicita reunir la comisión bilateral para tratar financiación y competencias.' }
       ];
       if (rc.deuda > 28) tipos.push({ k: 'deuda', t: `${d.nombre} exige un alivio de su deuda`, d: 'Pide al Estado asumir parte de la deuda autonómica.' });
       if (c === 'CAT' || c === 'PVA') tipos.push({ k: 'estatus', t: `${d.nombre} reclama el reconocimiento de su singularidad`, d: 'Su Gobierno pide un nuevo marco político: financiación singular y reconocimiento nacional.' });
+      const kc = rc.reclama && rc.reclama.find(k => rc.comp[k] < 2);
+      if (kc && U.chance(0.55)) { T.pedirComp(E, c, kc); return; }
       const x = U.pick(tipos);
       Cn.nuevo(E, { tipo: 'territorial', titulo: x.t, desc: x.d, region: c, sub: x.k, sector: 'ter', quien: { tipo: 'ccaa', nombre: d.nombre, pid: rc.gob && rc.gob.partido } });
     },
 
     genDecreto(E) {
-      const dec = U.pick(D().decretos);
+      const dec = U.pick(D().decretos.filter(x => x.id !== 'rd_conferencia' || E.fecha.t - E.esp.confPres.ultima > 52));
       if (E.esp.consejo.agenda.some(i => i.dec === dec.id)) return;
       Cn.nuevo(E, { tipo: 'rd', titulo: dec.t, desc: dec.texto, dec: dec.id, sector: dec.sector, quien: { tipo: 'ministro', nombre: 'Consejo' } });
     },
@@ -77,10 +80,13 @@ window.ESP = window.ESP || {};
       if (it.tipo === 'ley') { o.push({ k: 'enviar', t: 'Aprobar y remitir a las Cortes', d: 'Proyecto de ley: tramitación ordinaria (semanas o meses).' }); }
       if (it.tipo === 'rdl') { o.push({ k: 'rdl', t: 'Aprobar por decreto-ley', d: 'Entra en vigor ya; el Congreso debe convalidarlo en 30 días. Si cae, se deroga.' }); o.push({ k: 'enviar', t: 'Remitir como proyecto de ley', d: 'Tramitación ordinaria, sin urgencia.' }); }
       if (it.tipo === 'territorial') { o.push({ k: 'conceder', t: 'Acceder a la petición', d: 'Mejora la relación con la comunidad, pero genera agravio comparativo.' }); o.push({ k: 'negociar', t: 'Abrir una mesa de negociación', d: 'Gana tiempo y algo de confianza.' }); }
+      if (it.tipo === 'competencia') { const cp = D().competencias[it.comp]; o.push({ k: 'conceder', t: cp.ley ? 'Proponer la ley orgánica de transferencia' : 'Acordar el traspaso (comisión mixta y real decreto)', d: cp.ley ? 'Necesita 176 votos en el Congreso y el paso por el Senado.' : 'Se hace efectivo en unas semanas.' }); o.push({ k: 'negociar', t: 'Abrir una negociación', d: 'Gana tiempo y sube la probabilidad de acuerdo futuro.' }); }
+      if (it.tipo === 'cupo') { o.push({ k: 'subir', t: 'Cupo alto (favorable al Estado)', d: 'Más ingresos para el Estado; enfado en el gobierno foral.' }); o.push({ k: 'pactar', t: 'Cupo pactado', d: 'Un acuerdo equilibrado.' }); o.push({ k: 'bajar', t: 'Cupo bajo (favorable a la comunidad)', d: 'Contenta a la comunidad foral; agravio en el resto.' }); }
+      if (it.tipo === 'cpff') { o.push({ k: 'mas', t: 'Más recursos para las comunidades', d: 'Sube la financiación y la relación; aumenta el déficit.' }); o.push({ k: 'mantener', t: 'Mantener el modelo', d: 'Sin cambios.' }); o.push({ k: 'recortar', t: 'Ajuste fiscal', d: 'Reduce el déficit; tensión con las comunidades.' }); }
       if (it.tipo === 'rd') o.push({ k: 'aprobar', t: 'Aprobar el real decreto', d: 'Se ejecuta de inmediato.' });
       if (it.tipo === 'pge') { o.push({ k: 'presentar', t: 'Presentar el proyecto de Presupuestos', d: 'Se tramita en las Cortes; si pierde la enmienda a la totalidad, se prorrogan.' }); o.push({ k: 'prorrogar', t: 'Prorrogar los Presupuestos', d: 'Evita el riesgo de una derrota, a costa de los socios.' }); }
       if (it.tipo === 'proces') { o.push({ k: '155', t: 'Pedir la aplicación del artículo 155', d: 'Requiere mayoría absoluta del Senado. Intervención de la Generalitat y elecciones.' }); o.push({ k: 'dialogo', t: 'Abrir un diálogo político', d: 'Evita la ruptura, pero te expone a la oposición.' }); o.push({ k: 'nada', t: 'No hacer nada', d: 'Dejar que los hechos se consuman.' }); }
-      if (it.tipo !== 'pge' && it.tipo !== 'proces') { o.push({ k: 'aplazar', t: 'Aplazar', d: 'Lo retiras del orden del día.' }); o.push({ k: 'rechazar', t: 'Rechazar', d: 'Tensión con quien lo propone.' }); }
+      if (!['pge', 'proces', 'cupo', 'cpff'].includes(it.tipo)) { o.push({ k: 'aplazar', t: 'Aplazar', d: 'Lo retiras del orden del día.' }); o.push({ k: 'rechazar', t: 'Rechazar', d: 'Tensión con quien lo propone.' }); }
       return o;
     },
 
@@ -116,11 +122,23 @@ window.ESP = window.ESP || {};
         Cn.sat(E, satP, 5); if (aut.tipo === 'ministro') Cn.sat(E, g.partido, 0.5);
         return 'Proyecto remitido a las Cortes';
       }
+      if (it.tipo === 'competencia') return Cn.competencia(E, it, k);
+      if (it.tipo === 'cupo') return T_().aplicarCupo(E, it.region, k);
+      if (it.tipo === 'cpff') return T_().aplicarCpff(E, k);
       if (it.tipo === 'territorial') return Cn.territorial(E, it, k);
       if (it.tipo === 'rd') return Cn.decreto(E, it);
       if (it.tipo === 'pge') return Cn.pge(E, it, k);
-      if (it.tipo === 'proces') { const r = C.Territorio.procesResolver(E, k); return 'Respuesta al desafío: ' + r; }
+      if (it.tipo === 'proces') { const r = C.Territorio.procesResolver(E, it.region, k); return 'Respuesta al desafío: ' + r; }
       return '';
+    },
+
+    competencia(E, it, k) {
+      const rc = E.esp.ccaa[it.region], cp = D().competencias[it.comp], d = D().ccaa[it.region];
+      if (k === 'negociar') { rc.relM = Math.min(100, rc.relM + 3); rc.presion[it.comp] = Math.min(0.3, (rc.presion[it.comp] || 0) + 0.1); return `Negociación abierta con ${d.nombre} sobre ${cp.nombre.toLowerCase()}`; }
+      if (k === 'conceder') { const r = T_().concederComp(E, it.region, it.comp); return r === 'ley' ? `Proyecto de ley orgánica de transferencia remitido a las Cortes (${cp.nombre})` : `Traspaso de ${cp.nombre.toLowerCase()} a ${d.nombre} en marcha`; }
+      if (k === 'rechazar') { rc.relM = Math.max(0, rc.relM - 5); if (d.indep0 > 3) rc.concesiones.push({ t: E.fecha.t, v: 0.6, d: 'Competencia denegada' }); }
+      if (E.jugador && E.jugador.region === it.region && ['presauto', 'consejero'].includes(E.jugador.cargo)) C.Personaje.log(E, `El Gobierno ${k === 'rechazar' ? 'rechaza' : 'aplaza'} tu petición sobre ${cp.nombre.toLowerCase()}.`);
+      return k === 'rechazar' ? 'Competencia denegada' : 'Aplazado';
     },
 
     territorial(E, it, k) {
@@ -165,6 +183,10 @@ window.ESP = window.ESP || {};
         const sos = (g.apoyoExterno || []).includes(rc.gob && rc.gob.partido) || (g.coalicion.includes(rc.gob && rc.gob.partido));
         const x = afin * 1.5 + (sos ? 0.5 : 0) + (pm.ter - (-20)) / 100;
         k = x > 0.45 ? 'conceder' : x > -0.1 ? 'negociar' : 'rechazar';
+      } else if (it.tipo === 'competencia') {
+        const pb = T_().probComp(E, it.region, it.comp); k = U.chance(pb) ? 'conceder' : U.chance(0.55) ? 'negociar' : 'rechazar';
+      } else if (it.tipo === 'cupo') { k = pm.ter > 10 ? 'bajar' : pm.ter < -30 ? 'subir' : 'pactar';
+      } else if (it.tipo === 'cpff') { const dd = E.paises.ES.ec.deficit; k = dd > 3.4 ? 'recortar' : pm.eco < -20 ? 'mas' : 'mantener';
       } else if (it.tipo === 'rd') k = 'aprobar';
       else if (it.tipo === 'pge') {
         const pr = Cn.proyeccionPGE(E);
@@ -252,9 +274,10 @@ window.ESP = window.ESP || {};
       // Puntos del día
       Cn.generar(E);
       // Desafío soberanista: decisión del presidente
-      const pr = E.esp.proces;
-      if (pr.fase === 'unilateral' && pr.decidir && !cs.agenda.some(i => i.tipo === 'proces')) {
-        Cn.nuevo(E, { tipo: 'proces', titulo: 'Desafío unilateral en Cataluña', desc: 'El Parlament ha convocado un referéndum de independencia sin acuerdo. El Consejo de Ministros debe decidir su respuesta.', urgente: true, limite: pr.limite, region: 'CAT', quien: { tipo: 'pm' } });
+      for (const pc in E.esp.procesos) {
+        const pr = E.esp.procesos[pc], conf = D().procesos[pc];
+        if (pr.fase === 'unilateral' && pr.decidir && !cs.agenda.some(i => i.tipo === 'proces' && i.region === pc))
+          Cn.nuevo(E, { tipo: 'proces', titulo: 'Desafío unilateral: ' + D().ccaa[pc].nombre, desc: `${conf.gobierno} ha convocado una ${conf.lema} sin acuerdo. El Consejo de Ministros debe decidir su respuesta.`, urgente: true, limite: pr.limite, region: pc, quien: { tipo: 'pm' } });
       }
       // Presupuestos: primera semana de octubre
       const f = U.hoy();

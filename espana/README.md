@@ -36,6 +36,19 @@ Es una PWA: se puede instalar y jugar sin conexión.
 - **Comunidades autónomas** (17 + 2 ciudades autónomas): parlamento regional por D'Hondt con su umbral, gobierno
   y coaliciones, elecciones autonómicas con su calendario (mayo de 2027, Cataluña, País Vasco, Galicia…), **relación con
   Moncloa**, grado de autogobierno, deuda y balanza fiscal, régimen foral (País Vasco y Navarra).
+- **Competencias que significan algo**: 16 competencias (educación, sanidad, policía, tráfico, prisiones, cercanías,
+  puertos, agua, tributos, Seguridad Social, lengua…) con tres niveles (Estado / compartida / transferida) y una matriz por
+  comunidad. Se **negocian**: la comunidad las reclama, el Consejo de Ministros decide (decreto tras comisión mixta o ley
+  orgánica del art. 150.2) según la relación con Moncloa, la afinidad política y la presión. El autogobierno de cada
+  comunidad sale de lo que gestiona; lo que no gestiona, se le achaca al Estado cuando falla.
+- **Consejerías con peso**: cada gobierno autonómico reparte 9 consejerías entre sus socios; su peso depende de las
+  competencias del área. Si te nombran consejero/a, gestionas tu departamento y puedes reclamar traspasos.
+- **Financiación**: régimen común, foral (Concierto vasco y Convenio navarro, con **cupo** cada cinco años), canario y
+  singular. Puedes negociar más cesión de impuestos, un fondo de nivelación o una financiación singular, y existe el
+  Consejo de Política Fiscal y Financiera anual.
+- **Dinámica autonómica**: adelantos electorales por conveniencia o por falta de apoyos, **mociones de censura
+  autonómicas** (la IA o tú) y procesos soberanistas en **Cataluña, País Vasco, Galicia, Navarra, Canarias, Baleares y
+  Valencia**, cada uno con su umbral y su respuesta del Estado (155, diálogo o nada).
 - **Estatutos de autonomía**: propuesta del parlamento regional (3/5) → ley orgánica en las Cortes →
   **referéndum autonómico**.
 - **Independentismo**: apoyo soberanista por comunidad que reacciona a concesiones (amnistía, indultos, financiación

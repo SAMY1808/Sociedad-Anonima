@@ -266,10 +266,10 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'oferta_consejeria', titulo: 'Una consejería en el gobierno autonómico', icono: '💼', peso: 0, auto: true, cd: 100,
-    req: (E, J) => J.nivel !== 'nacional' && !!J.region && J.cargo !== 'presauto' && J.cargo !== 'consejero' && !!E.esp.ccaa[J.region].gob && E.esp.ccaa[J.region].gob.coalicion.includes(J.partido) && J.prestigio >= 34 && J.rol !== 'base' && E.fecha.t % 3 === 0,
+    req: (E, J) => J.nivel !== 'nacional' && !!J.region && J.cargo !== 'presauto' && J.cargo !== 'consejero' && !!E.esp.ccaa[J.region].gob && E.esp.ccaa[J.region].gob.coalicion.includes(J.partido) && C.Territorio.areasDe(E, J.region, J.partido).length > 0 && J.prestigio >= 34 && J.rol !== 'base' && E.fecha.t % 3 === 0,
     texto: (E, J) => `El presidente de ${regNom(J.region)} te ofrece entrar en su Gobierno como consejero/a. Tendrías competencias y presupuesto propios.`,
     opciones: [
-      { t: 'Aceptar la consejería', ef: (E, J) => { J.consejeria = J.region; if (J.nivel === 'local') { Pj().dejar(E, 'local'); J.nivel = 'autonomico'; } Pj().cambiar(E, { prestigio: 5, pop: 2 }, true); Pj().sincronizar(E); return 'Tomas posesión como consejero/a.'; } },
+      { t: 'Aceptar la consejería', ef: (E, J) => { const libres = C.Territorio.areasDe(E, J.region, J.partido); const area = libres.sort((a, b) => C.Territorio.nivelArea(E, J.region, b) - C.Territorio.nivelArea(E, J.region, a))[0]; if (area) C.Territorio.tomarConsejeria(E, J.region, area); else J.consejeria = J.region; if (J.nivel === 'local') { Pj().dejar(E, 'local'); J.nivel = 'autonomico'; } Pj().cambiar(E, { prestigio: 5, pop: 2 }, true); Pj().sincronizar(E); return 'Tomas posesión como consejero/a.'; } },
       { t: 'Seguir donde estás', ef: () => 'Declinas la oferta.' }
     ]
   });
@@ -345,6 +345,45 @@ ESP.DATA = ESP.DATA || {};
     opciones: [
       { t: 'Respetar la independencia judicial', ef: (E, J) => { Pj().cambiar(E, { prestigio: 1.5 }); return 'Tu posición institucional es bien valorada.'; } },
       { t: 'Hablar de «lawfare» y persecución', ef: (E, J) => { Pj().cambiar(E, { pop: 1, prestigio: -1.5 }); pa(E).cohesion = clamp(pa(E).cohesion + 1, 20, 99); return 'Tu base se moviliza.'; } }
+    ]
+  });
+
+  /* ── Gobierno autonómico: consejerías con competencias ── */
+  const area = (a) => (E, J) => ['consejero', 'presauto'].includes(J.cargo) && (J.cargo === 'presauto' || J.area === a) && !!J.region;
+  const gestion = (E, J, a, d) => { const rc = E.esp.ccaa[J.region]; rc.gestion[a] = clamp(rc.gestion[a] + d, 5, 98); rc.gob.aprob = clamp(rc.gob.aprob + d * 0.12, 5, 90); };
+  ev({
+    id: 'crisis_sanitaria', titulo: 'Colapso en la sanidad autonómica', icono: '🏥', peso: 1.0, cd: 90, req: (E, J, P) => area('sal')(E, J) && E.esp.ccaa[J.region].comp.sal >= 1,
+    texto: (E, J) => `Las urgencias de ${regNom(J.region)} se desbordan y los sanitarios amenazan con movilizaciones por las listas de espera.`,
+    opciones: [
+      { t: 'Plan de choque con más contrataciones', ef: (E, J) => { gestion(E, J, 'sal', 7); E.esp.ccaa[J.region].deuda += 0.8; Pj().cambiar(E, { prestigio: 2, pop: 1.5 }); return 'Las listas de espera bajan, la deuda sube.'; } },
+      { t: 'Derivar pacientes a la sanidad privada', ef: (E, J) => { gestion(E, J, 'sal', 2); Pj().cambiar(E, { pop: J.eco > 15 ? 1 : -2 }); return 'Alivias la presión pero el modelo se discute.'; } },
+      { t: 'Pedir fondos extraordinarios al Estado', ef: (E, J) => { E.esp.ccaa[J.region].relM = clamp(E.esp.ccaa[J.region].relM - 1, 0, 100); E.esp.ccaa[J.region].fin.nivel += 0.6; Pj().cambiar(E, { prestigio: 0.8 }); return 'Hacienda aporta una parte; la polémica política sigue.'; } }
+    ]
+  });
+  ev({
+    id: 'huelga_docentes', titulo: 'Huelga de docentes', icono: '📚', peso: 0.9, cd: 90, req: (E, J, P) => area('edu')(E, J) && E.esp.ccaa[J.region].comp.edu >= 1,
+    texto: (E, J) => `Los sindicatos educativos convocan huelga en ${regNom(J.region)} por ratios, salarios y la nueva ley educativa.`,
+    opciones: [
+      { t: 'Negociar un acuerdo salarial', ef: (E, J) => { gestion(E, J, 'edu', 6); E.esp.ccaa[J.region].deuda += 0.5; Pj().cambiar(E, { prestigio: 1.5 }); return 'Acuerdo con los sindicatos: fin de la huelga.'; } },
+      { t: 'Mantener el plan y garantizar servicios mínimos', ef: (E, J) => { gestion(E, J, 'edu', -3); Pj().cambiar(E, { pop: J.eco > 20 ? 1 : -1.5 }); return 'La huelga sigue varias semanas.'; } }
+    ]
+  });
+  ev({
+    id: 'incendio_forestal', titulo: 'Grandes incendios forestales', icono: '🔥', peso: 0.9, cd: 100, req: (E, J, P) => area('amb')(E, J),
+    texto: (E, J) => `Varios incendios arrasan miles de hectáreas en ${regNom(J.region)}. Se discuten los medios de extinción y el reparto de responsabilidades con el Estado.`,
+    opciones: [
+      { t: 'Movilizar todos los medios autonómicos', ef: (E, J) => { gestion(E, J, 'amb', 5); Pj().cambiar(E, { pop: 2, prestigio: 1 }); return 'La emergencia se controla y se te reconoce.'; } },
+      { t: 'Pedir la UME y fondos europeos', ef: (E, J) => { E.esp.ccaa[J.region].relM = clamp(E.esp.ccaa[J.region].relM + 1, 0, 100); Pj().cambiar(E, { capEU: 2, prestigio: 1 }); return 'Llega ayuda estatal y europea.'; } }
+    ]
+  });
+  ev({
+    id: 'tension_competencias', titulo: 'Conflicto de competencias con el Estado', icono: '⚖️', peso: 0.8, cd: 100, req: (E, J, P) => ['presauto', 'consejero'].includes(J.cargo) && !!J.region,
+    ctx: (E, J) => { const rc = E.esp.ccaa[J.region]; return { k: U().pick(Object.keys(C.DATA.competencias).filter(x => rc.comp[x] >= 1).concat(['edu'])) }; },
+    texto: (E, J, P, x) => `El Gobierno central aprueba una norma que, según tu comunidad, invade su competencia de ${C.DATA.competencias[x.k].nombre.toLowerCase()}.`,
+    opciones: [
+      { t: 'Plantear un conflicto de competencia ante el Tribunal Constitucional', ef: (E, J) => { const rc = E.esp.ccaa[J.region]; rc.relM = clamp(rc.relM - 3, 0, 100); Pj().cambiar(E, { prestigio: 1.5, pop: 1 }); return 'Llevas el caso al TC: se espera sentencia.'; } },
+      { t: 'Negociar en la comisión bilateral', ef: (E, J) => { const rc = E.esp.ccaa[J.region]; rc.relM = clamp(rc.relM + 2, 0, 100); Pj().cambiar(E, { prestigio: 1 }); return 'Se desbloquea con un acuerdo.'; } },
+      { t: 'Aceptar la norma', ef: (E, J) => { Pj().cambiar(E, { prestigio: -1.5, pop: -1 }); return 'Cedes terreno; tus socios no lo entienden.'; } }
     ]
   });
 

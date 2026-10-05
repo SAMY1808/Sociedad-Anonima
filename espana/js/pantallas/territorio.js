@@ -15,15 +15,18 @@ window.ESP = window.ESP || {};
       let cuerpo = '';
       if (tab === 'mapa') cuerpo = T.mapa(E);
       else if (tab === 'ccaa') cuerpo = T.tabla(E);
+      else if (tab === 'competencias') cuerpo = T.competencias(E);
       else if (tab === 'proces') cuerpo = T.proces(E);
       else if (tab === 'estatutos') cuerpo = T.estatutos(E);
       else if (tab === 'financiacion') cuerpo = T.financiacion(E);
       else cuerpo = T.municipios(E);
       el.innerHTML = `<div class="cab"><div><h1>🗺 Territorio</h1><div class="sub">17 comunidades y 2 ciudades autónomas · 52 circunscripciones · 67 grandes ayuntamientos · relación media con Moncloa ${Math.round(U.prom(C.Territorio.ids().map(c => E.esp.ccaa[c].relM)))}</div></div></div>
-        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['munis', 'Municipios']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
+        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['munis', 'Municipios']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('territorio', { tab: b.dataset.tab }));
       UI.$$('[data-capa]', el).forEach(b => b.onclick = () => { E.ui.capaEs = b.dataset.capa; C.App.refrescar(); });
       UI.$$('[data-ccaa]', el).forEach(b => b.onclick = e => { if (e.target.closest('[data-accion]')) return; T.verCcaa(b.dataset.ccaa); });
+      UI.$$('[data-comp]', el).forEach(b => b.onclick = () => T.verComp(b.dataset.c, b.dataset.comp));
+      UI.$$('[data-r]', el).forEach(b => b.onclick = () => C.Pantallas.leyes.ver(b.dataset.r));
       UI.$$('[data-muni]', el).forEach(b => b.onclick = () => T.verMuni(b.dataset.muni));
       const sel = UI.$('#t-orden', el); if (sel) sel.onchange = () => { E.ui.ordenCcaa = sel.value; C.App.refrescar(); };
       const fm = UI.$('#t-fm', el); if (fm) fm.onchange = () => { E.ui.filtroMuni = fm.value; C.App.refrescar(); };
@@ -46,18 +49,34 @@ window.ESP = window.ESP || {};
     },
 
     proces(E) {
-      const pr = E.esp.proces, cat = E.esp.ccaa.CAT, f = FASE[pr.fase];
-      const indeps = C.Territorio.ids().filter(c => D().ccaa[c].indep0 >= 4).sort((a, b) => E.esp.ccaa[b].indep - E.esp.ccaa[a].indep);
-      const serie = G.barrasH(indeps.map(c => ({ etq: esc(D().ccaa[c].nombre), v: E.esp.ccaa[c].indep, color: c === 'CAT' ? '#E8B100' : c === 'PVA' ? '#2E8B3E' : '#7D8799', tt: `Relación con Moncloa: ${Math.round(E.esp.ccaa[c].relM)}` })), { max: 50, fmt: v => U.d1(v) + ' %', anchoEtq: '120px' });
-      const part = ['RCU', 'FUC', 'CPC', 'UVN', 'EHU', 'FGA'].map(s => 'ES_' + s).filter(k => E.partidos[k]);
-      return `<div class="grid g-dash"><div class="col"><div class="tarjeta"><div class="t-cab"><h3>Estado del procés</h3><span class="etq ${f[1]}">${f[0]}</span></div>
-          <div class="kpi-fila">${Comp.kpi('Apoyo a la independencia en Cataluña', U.d1(cat.indep) + ' %', Comp.delta(E.series.indepCat || [], 8))}${Comp.kpi('Relación con Moncloa', Math.round(cat.relM), '')}</div>
-          <div style="margin:8px 0">${G.medidor(cat.relM, { tam: 130, etq: 'RELACIÓN' })}</div>
-          <p class="tenue" style="font-size:12.5px;margin:6px 0">${E.esp.flags.amnistia ? '✔ Amnistía aprobada. ' : ''}${E.esp.flags.indultos ? '✔ Indultos concedidos. ' : ''}${E.esp.flags.refPactado ? '✔ La Constitución permite referéndums pactados. ' : ''}${cat.suspendida ? '⚠ Autogobierno intervenido por el 155. ' : ''}</p>
-          <div class="lista" style="font-size:12.5px">${pr.historia.slice(0, 8).map(h => `<div class="it"><span class="tenue" style="width:86px">${U.fmtT(h.t, true)}</span><span>${esc(h.txt || h.fase)}</span></div>`).join('') || '<div class="vacio">Sin episodios en la partida.</div>'}</div></div>
-          <div class="tarjeta"><h3>Partidos soberanistas</h3><table class="tabla"><thead><tr><th>Partido</th><th>Región</th><th class="num">Apoyo</th><th class="num">Escaños Congreso</th></tr></thead><tbody>${part.map(k => { const p = E.partidos[k]; return `<tr><td>${Comp.partido(E, k)}</td><td>${esc(D().ccaa[p.region].nombre)}</td><td class="num">${U.d1(p.rp[p.region])} %</td><td class="num">${E.paises.ES.escanos[k] || 0}</td></tr>`; }).join('')}</tbody></table></div></div>
-        <div class="col"><div class="tarjeta"><h3>Soberanismo por comunidad</h3>${serie}</div>
-          <div class="tarjeta"><h3>Palancas del Estado</h3><div class="lista" style="font-size:12.5px"><div class="it"><span>🕊️</span><span><b>Amnistía</b> y <b>financiación singular</b> bajan el apoyo independentista y mejoran la relación, a costa de la oposición.</span></div><div class="it"><span>⚖️</span><span>El <b>Tribunal Constitucional</b> puede anular parcialmente leyes territoriales (${E.esp.tc.recursos.length} recursos pendientes).</span></div><div class="it"><span>🚨</span><span>Ante un desafío unilateral, el Gobierno elige entre el <b>artículo 155</b> (autorizado por el Senado), el <b>diálogo</b> o no hacer nada.</span></div></div></div></div></div>`;
+      const ids = Object.keys(D().procesos).sort((a, b) => E.esp.ccaa[b].indep - E.esp.ccaa[a].indep);
+      const tarjeta = c => { const conf = D().procesos[c], pr = E.esp.procesos[c], rc = E.esp.ccaa[c], f = FASE[pr.fase], gobSov = rc.gob && rc.gob.coalicion.some(k => E.partidos[k].indep >= conf.indepMin);
+        return `<div class="tarjeta"><div class="t-cab"><h3>${esc(D().ccaa[c].nombre)} · ${esc(conf.nombre)}</h3><span class="etq ${f[1]}">${f[0]}</span></div>
+          <div class="fila" style="gap:16px;flex-wrap:nowrap;align-items:center">${G.medidor(Math.min(100, rc.indep / conf.umbral * 60), { tam: 110, etq: 'APOYO', texto: U.d1(rc.indep) + ' %', tt: 'Apoyo social: ' + U.d1(rc.indep) + ' % · se activa el desafío con ' + conf.umbral + ' %+' })}
+            <div style="font-size:12.5px;flex:1"><div>Relación con Moncloa <b class="num">${Math.round(rc.relM)}</b></div><div>Gobierno ${gobSov ? '<b class="alerta">soberanista</b>' : 'no soberanista'} · umbral de desafío ${conf.umbral} %</div>${rc.suspendida ? '<div class="mal">⚠ Intervenida por el 155</div>' : ''}<div class="tenue" style="margin-top:4px">${pr.historia[0] ? U.fmtT(pr.historia[0].t, true) + ': ' + esc(pr.historia[0].txt) : 'Sin episodios.'}</div></div></div></div>`; };
+      const part = ['RCU', 'FUC', 'CPC', 'UVN', 'EHU', 'FGA', 'ACI', 'IPL', 'VUN'].map(s => 'ES_' + s).filter(k => E.partidos[k]);
+      return `<div class="grid g-dash"><div class="col">${ids.map(tarjeta).join('')}</div>
+        <div class="col"><div class="tarjeta"><h3>Soberanismo por comunidad</h3>${G.barrasH(ids.map(c => ({ etq: esc(D().ccaa[c].nombre), v: E.esp.ccaa[c].indep, color: c === 'CAT' ? '#E8B100' : c === 'PVA' ? '#2E8B3E' : c === 'GAL' ? '#5DADE2' : '#7D8799', tt: `Relación con Moncloa: ${Math.round(E.esp.ccaa[c].relM)}` })), { max: 50, fmt: v => U.d1(v) + ' %', anchoEtq: '120px' })}</div>
+          <div class="tarjeta"><h3>Partidos soberanistas y regionalistas</h3><table class="tabla"><thead><tr><th>Partido</th><th>Región</th><th class="num">Apoyo</th><th class="num">Congreso</th></tr></thead><tbody>${part.map(k => { const p = E.partidos[k]; return `<tr><td>${Comp.partido(E, k)}</td><td>${esc(D().ccaa[p.region].nombre)}</td><td class="num">${U.d1(p.rp[p.region])} %</td><td class="num">${E.paises.ES.escanos[k] || 0}</td></tr>`; }).join('')}</tbody></table></div>
+          <div class="tarjeta"><h3>Palancas del Estado</h3><div class="lista" style="font-size:12.5px"><div class="it"><span>🕊️</span><span>${E.esp.flags.amnistia ? '✔ <b>Amnistía</b> aprobada. ' : '<b>Amnistía</b>, '}<b>indultos</b> y <b>financiación singular</b> bajan el soberanismo catalán y mejoran la relación.</span></div><div class="it"><span>🏛</span><span>Cada <b>competencia</b> transferida y cada <b>estatuto</b> reducen el agravio; los <b>fallos del Estado</b> en lo que no se cede lo alimentan.</span></div><div class="it"><span>⚖️</span><span><b>Tribunal Constitucional</b>: ${E.esp.tc.recursos.length} recursos pendientes.</span></div><div class="it"><span>🚨</span><span>Ante un desafío unilateral: <b>artículo 155</b> (Senado), <b>diálogo</b> o no hacer nada.</span></div></div></div></div></div>`;
+    },
+
+    /* Matriz de competencias por comunidad. */
+    competencias(E) {
+      const ids = C.Territorio.ids(), cp = D().competencias, col = ['#3a465f', '#C99A2B', '#2FA36B'], txt = ['—', '½', '✔'];
+      return `<div class="tarjeta"><h3>Competencias transferidas a cada comunidad</h3><p class="tenue" style="font-size:12.5px;margin:0 0 8px">✔ transferida (gestión plena) · ½ compartida o delegada · — del Estado. Pulsa una celda para ver la negociación. <b>Autogobierno</b> = media ponderada de las competencias.</p>
+        <div style="overflow:auto"><table class="tabla" style="font-size:12px"><thead><tr><th>Competencia</th>${ids.map(c => `<th class="num" title="${esc(D().ccaa[c].nombre)}">${c}</th>`).join('')}</tr></thead><tbody>${Object.keys(cp).map(k => `<tr><td>${cp[k].icono} ${esc(cp[k].nombre)}${cp[k].ley ? ' <span class="tenue" title="Exige ley orgánica">⚖</span>' : ''}</td>${ids.map(c => { const n = E.esp.ccaa[c].comp[k]; return `<td class="num clic" data-comp="${k}" data-c="${c}" style="background:${col[n]}33;color:${n === 2 ? '#7be0b0' : n === 1 ? '#E0B54A' : '#6b7894'};font-weight:700;cursor:pointer">${txt[n]}</td>`; }).join('')}</tr>`).join('')}
+          <tr><td><b>Autogobierno</b></td>${ids.map(c => `<td class="num"><b>${E.esp.ccaa[c].aut}</b></td>`).join('')}</tr></tbody></table></div></div>`;
+    },
+
+    verComp(c, k) {
+      const E = C.E, rc = E.esp.ccaa[c], cp = D().competencias[k], d = D().ccaa[c], J = E.jugador, Tr = C.Territorio;
+      const p = Tr.probComp(E, c, k), propia = J.region === c && ['presauto', 'consejero'].includes(J.cargo);
+      const cuerpo = `<p style="margin:0 0 8px;font-size:13px;color:var(--texto2)">${cp.nombre} · ${esc(d.nombre)}</p>
+        <div class="lista" style="font-size:13px"><div class="it"><span class="tenue" style="width:170px">Nivel actual</span><b>${Tr.NIV[rc.comp[k]]}</b></div><div class="it"><span class="tenue" style="width:170px">Vía de traspaso</span><b>${cp.ley ? 'Ley orgánica (176 votos + Senado)' : 'Comisión mixta + real decreto'}</b></div><div class="it"><span class="tenue" style="width:170px">Dificultad</span><b>${Math.round(cp.dif * 100)} %</b></div><div class="it"><span class="tenue" style="width:170px">Gestión en esta área</span><b>${Math.round(rc.gestion[cp.area])} / 100</b></div>
+        ${rc.comp[k] < 2 ? `<div class="it"><span class="tenue" style="width:170px">Probabilidad de acuerdo</span><b class="${p > 0.5 ? 'bien' : p > 0.28 ? 'alerta' : 'mal'}">${Math.round(p * 100)} %</b></div>` : ''}</div>`;
+      const pie = rc.comp[k] >= 2 ? '' : (propia ? UI.botonAccion('reclamar_competencia', { comp: k }, '🏛 Reclamarla', 'prim') : '') + (J.cargo === 'pm' ? UI.botonAccion('ofrecer_comp', { region: c, comp: k }, '🤲 Ofrecer el traspaso', 'prim') : '');
+      UI.modal({ titulo: cp.icono + ' ' + cp.nombre, cuerpo, clase: 'medio', pie: pie || null });
     },
 
     estatutos(E) {
@@ -69,11 +88,13 @@ window.ESP = window.ESP || {};
     },
 
     financiacion(E) {
-      const ids = C.Territorio.ids().filter(c => !['CEU', 'MEL'].includes(c));
-      const items = ids.sort((a, b) => E.esp.ccaa[b].fiscal - E.esp.ccaa[a].fiscal).map(c => ({ etq: esc(D().ccaa[c].nombre), v: E.esp.ccaa[c].fiscal, color: E.esp.ccaa[c].fiscal >= 0 ? '#E0B54A' : '#6CC4F5', tt: `Deuda autonómica: ${Math.round(E.esp.ccaa[c].deuda)} % del PIB regional` }));
-      return `<div class="grid g2"><div class="tarjeta"><h3>Balanza fiscal aproximada (% del PIB regional)</h3><div class="tenue" style="font-size:12px;margin-bottom:6px">Positivo: aporta más de lo que recibe.</div>${G.barrasV(items.map(i => ({ etq: i.etq.slice(0, 3).toUpperCase(), v: i.v, color: i.color, tt: i.tt })), { alto: 190, valores: false })}</div>
-        <div class="tarjeta"><h3>Deuda autonómica (% PIB regional)</h3>${G.barrasH(ids.sort((a, b) => E.esp.ccaa[b].deuda - E.esp.ccaa[a].deuda).slice(0, 12).map(c => ({ etq: esc(D().ccaa[c].nombre), v: E.esp.ccaa[c].deuda, color: '#9AA7C0' })), { max: 50, fmt: v => Math.round(v) + ' %', anchoEtq: '130px' })}</div></div>
-        <div class="tarjeta" style="margin-top:14px"><h3>Financiación autonómica</h3><p style="margin:0;font-size:13px;color:var(--texto2)">Las comunidades de régimen común reciben su financiación del Estado; País Vasco y Navarra se financian por Concierto y Convenio Económico. El PGE y la <b>reforma del modelo</b> (ley orgánica) o la <b>financiación singular</b> redistribuyen recursos: quien gana, genera agravio en el resto. La <b>quita de deuda</b> mejora la relación con las comunidades, pero cuesta al Estado.</p></div>`;
+      const ids = C.Territorio.ids().filter(c => !['CEU', 'MEL'].includes(c)), cu = E.esp.cupo;
+      const rg = k => ids.filter(c => E.esp.ccaa[c].fin.regimen === k).length;
+      const items = ids.slice().sort((a, b) => E.esp.ccaa[b].fin.nivel - E.esp.ccaa[a].fin.nivel).map(c => ({ etq: esc(D().ccaa[c].nombre), v: E.esp.ccaa[c].fin.nivel, color: { foral: '#2E8B3E', canario: '#5DADE2', singular: '#E8B100', comun: '#7D8799' }[E.esp.ccaa[c].fin.regimen], tt: `${esc(D().regimenes[E.esp.ccaa[c].fin.regimen].nombre)} · cesión ${E.esp.ccaa[c].fin.cesion} % · deuda ${Math.round(E.esp.ccaa[c].deuda)} %` }));
+      return `<div class="grid g2"><div class="tarjeta"><h3>Financiación por habitante (media = 100)</h3>${G.barrasH(items, { max: 150, fmt: v => Math.round(v), anchoEtq: '130px' })}<div class="leyenda"><span><i style="background:#2E8B3E"></i>Foral</span><span><i style="background:#5DADE2"></i>Canario</span><span><i style="background:#E8B100"></i>Singular</span><span><i style="background:#7D8799"></i>Común</span></div></div>
+        <div class="col"><div class="tarjeta"><h3>Regímenes</h3><div class="lista" style="font-size:13px">${Object.keys(D().regimenes).map(k => `<div class="it" style="align-items:flex-start"><div class="cuerpo"><b>${esc(D().regimenes[k].nombre)} <span class="etq">${rg(k)}</span></b><span style="white-space:normal">${esc(D().regimenes[k].desc)}</span></div></div>`).join('')}</div></div>
+          <div class="tarjeta"><h3>Concierto y Convenio</h3><p style="margin:0;font-size:13px;color:var(--texto2)">País Vasco (Concierto) y Navarra (Convenio) recaudan casi todos sus impuestos y pagan un <b>cupo</b> al Estado, que se renegocia cada cinco años en el Consejo de Ministros. Próxima renovación: <b>${U.fmtT(cu.proxT)}</b> (${Comp.semanasA(E, cu.proxT)}). Un cupo alto favorece al Estado; uno bajo al gobierno foral, con agravio en el resto.</p></div>
+          <div class="tarjeta"><h3>Cómo se negocia</h3><ul style="margin:0;padding-left:18px;font-size:13px;color:var(--texto2);line-height:1.6"><li><b>Más cesión</b> de impuestos o <b>fondo de nivelación</b>: acuerdos con Hacienda según tu relación con Moncloa.</li><li><b>Financiación singular</b>: ley orgánica con 176 votos; difícil y con un gran agravio comparativo.</li><li>El <b>Consejo de Política Fiscal y Financiera</b> (anual) fija el reparto general.</li><li>Deuda y aprobación regional dependen de tu nivel de financiación.</li></ul></div></div></div>`;
     },
 
     municipios(E) {
@@ -97,6 +118,11 @@ window.ESP = window.ESP || {};
             <div class="it"><span class="tenue" style="width:150px">Próximas elecciones</span><b>${U.fmtT(rc.parl.proxT)} (${Comp.semanasA(E, rc.parl.proxT)})</b></div><div class="it"><span class="tenue" style="width:150px">Régimen</span><b>${esc(d.regimen)}</b></div><div class="it"><span class="tenue" style="width:150px">Senadores designados</span><b>${d.sen}</b></div><div class="it"><span class="tenue" style="width:150px">Estatuto</span><b>${rc.estatuto.ano}${d.policia ? ' · policía propia' : ''}${d.lengua ? ' · lengua: ' + esc(d.lengua) : ''}</b></div></div></div></div>
         <div class="grid g4" style="margin-top:12px">${[['Relación con Moncloa', rc.relM, rc.relM > 55 ? 'var(--bien)' : rc.relM > 30 ? 'var(--alerta)' : 'var(--mal)'], ['Independentismo', rc.indep * 1.6, '#E8B100'], ['Autogobierno', rc.aut, '#6CC4F5'], ['Deuda', rc.deuda * 2, '#9AA7C0']].map(([n, v, col], i) => `<div><div class="tenue" style="font-size:11.5px">${n}</div><div style="font-size:19px" class="num">${i === 1 ? U.d1(rc.indep) + ' %' : i === 3 ? Math.round(rc.deuda) + ' %' : Math.round(i === 0 ? rc.relM : rc.aut)}</div>${Comp.barraRango(v, col)}</div>`).join('')}</div>
         ${rc.suspendida ? '<div class="nota" style="margin-top:10px;border-color:var(--no)">⚠ Autogobierno intervenido por el artículo 155.</div>' : ''}
+        <h3 style="margin:14px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">Competencias</h3>
+        <div class="chips">${Object.keys(D().competencias).map(k => `<span class="etq ${rc.comp[k] === 2 ? 'verde' : rc.comp[k] === 1 ? 'amar' : ''}" ${UI.tt(D().competencias[k].nombre + ': ' + C.Territorio.NIV[rc.comp[k]])}>${D().competencias[k].icono} ${rc.comp[k] === 2 ? '✔' : rc.comp[k] === 1 ? '½' : '—'}</span>`).join('')}</div>
+        <h3 style="margin:14px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">Consejerías y financiación</h3>
+        <div class="fila" style="font-size:12.5px;margin-bottom:6px;gap:14px"><span>Régimen: <b>${esc(D().regimenes[rc.fin.regimen].nombre)}</b></span><span>Financiación por habitante: <b class="num">${Math.round(rc.fin.nivel)}</b></span><span>Cesión: <b class="num">${rc.fin.cesion} %</b></span></div>
+        ${g && g.consej ? `<table class="tabla" style="font-size:12.5px"><tbody>${Object.keys(D().consejerias).map(a => { const h = g.consej[a]; return `<tr><td>${D().consejerias[a].icono} ${esc(D().consejerias[a].nombre)}</td><td>${h === 'J' ? esc(J.nombre) + ' <span class="etq oro">Tú</span>' : h ? esc(h.n) : '—'}</td><td>${h && h !== 'J' ? Comp.partido(E, h.p) : h === 'J' ? Comp.partido(E, J.partido) : ''}</td><td class="num tenue">gestión ${Math.round(rc.gestion[a])}</td></tr>`; }).join('')}</tbody></table>` : ''}
         <h3 style="margin:14px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">Ayuntamientos principales</h3>
         <div class="chips">${C.Municipios.porCcaa(E, c).map(m => `<span class="etq">${esc(m.nombre)} · ${Comp.partido(E, m.alcalde)}</span>`).join('') || '<span class="tenue">Sin grandes ayuntamientos en la muestra.</span>'}</div>`;
       const pie = (['pm', 'ministro'].includes(J.cargo) ? UI.botonAccion('visita_ccaa', { region: c }, '🚄 Visitar', '') : '') + (J.cargo === 'presauto' && J.region === c ? UI.botonAccion('pedir_moncloa', {}, '📞 Negociar con Moncloa', '') : '');

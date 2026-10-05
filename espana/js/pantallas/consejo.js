@@ -3,7 +3,7 @@ window.ESP = window.ESP || {};
 (function (C) {
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, G = C.Graf, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
-  const TIPO = { ley: ['📜', 'Proyecto de ley'], rdl: ['⚡', 'Real decreto-ley'], rd: ['📋', 'Real decreto'], territorial: ['🗺', 'Petición territorial'], pge: ['💶', 'Presupuestos'], proces: ['🚨', 'Crisis territorial'] };
+  const TIPO = { ley: ['📜', 'Proyecto de ley'], rdl: ['⚡', 'Real decreto-ley'], rd: ['📋', 'Real decreto'], territorial: ['🗺', 'Petición territorial'], pge: ['💶', 'Presupuestos'], proces: ['🚨', 'Crisis territorial'], competencia: ['🏛', 'Competencias'], cupo: ['🧾', 'Concierto / Convenio'], cpff: ['💶', 'Política fiscal'] };
 
   const Cn = C.Pantallas.consejo = {
     render(el, params) {
@@ -50,8 +50,7 @@ window.ESP = window.ESP || {};
         ${!esPM ? '<div class="tarjeta"><p class="tenue" style="margin:0;font-size:13px">No presides el Consejo: tus puntos de agenda te permiten <b>proponer iniciativas</b> (como ministro/a), <b>presionar a tu socio</b> o <b>engrasar la coalición</b>.</p></div>' : ''}</div>
         <div class="col"><div class="tarjeta"><h3>Estado del Gobierno</h3>${G.medidor(g.aprob, { tam: 150, etq: 'APROBACIÓN' })}
           <div class="lista" style="font-size:13px;margin-top:6px"><div class="it"><span class="tenue" style="width:150px">Presupuestos</span><b>${pg.estado === 'aprobado' ? 'Aprobados' : 'Prorrogados'}${pg.tramite ? ' · en trámite' : ''}</b></div><div class="it"><span class="tenue" style="width:150px">Autoridad del presidente</span><b>${Math.round(cs.autoridad)}</b></div><div class="it"><span class="tenue" style="width:150px">Tensión en la coalición</span><b class="${cs.tension > 50 ? 'mal' : cs.tension > 30 ? 'alerta' : 'bien'}">${Math.round(cs.tension)} %</b></div></div></div>
-          <div class="tarjeta"><h3>Procés</h3><div class="tenue" style="font-size:13px">${({ distension: 'Distensión: sin desafío abierto.', tension: 'Tensión: la Generalitat prepara una hoja de ruta soberanista.', unilateral: 'Desafío unilateral en marcha: el Estado debe responder.', dui: 'Declaración unilateral: crisis constitucional.', '155': 'Artículo 155 en aplicación.' })[E.esp.proces.fase]}</div>
-            <div class="fila" style="margin-top:6px;gap:12px;font-size:12.5px"><span>Apoyo independentista <b class="num">${U.d1(E.esp.ccaa.CAT.indep)} %</b></span><span>Relación <b class="num">${Math.round(E.esp.ccaa.CAT.relM)}</b></span></div></div></div></div>`;
+          <div class="tarjeta"><h3>Procesos soberanistas</h3><div class="lista" style="font-size:12.5px">${Object.keys(E.esp.procesos).sort((x, y) => E.esp.ccaa[y].indep - E.esp.ccaa[x].indep).slice(0, 4).map(c => { const pr = E.esp.procesos[c]; return `<div class="it"><b style="width:110px">${esc(D().ccaa[c].nombre)}</b><span class="etq ${pr.fase === 'distension' ? 'verde' : pr.fase === 'tension' ? 'amar' : 'rojo'}">${({ distension: 'Distensión', tension: 'Tensión', unilateral: 'Desafío', dui: 'Crisis', '155': '155' })[pr.fase]}</span><span class="tenue" style="margin-left:auto">${U.d1(E.esp.ccaa[c].indep)} % · rel. ${Math.round(E.esp.ccaa[c].relM)}</span></div>`; }).join('')}</div></div></div></div>`;
     },
 
     modalUrgente(it) {

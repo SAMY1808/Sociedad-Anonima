@@ -106,7 +106,7 @@ window.ESP = window.ESP || {};
         case 'pm': return 'Presidente/a del Gobierno de España';
         case 'ministro': { const mi = D().ministerios.find(x => x.id === J.ministerio); return 'Ministro/a de ' + (mi ? mi.nombre : 'Gobierno'); }
         case 'presauto': return 'Presidente/a de ' + (rc ? D().ccaa[J.region].nombre : 'la comunidad');
-        case 'consejero': return 'Consejero/a de ' + (rc ? D().ccaa[J.region].nombre : '');
+        case 'consejero': return 'Consejero/a de ' + (J.area && D().consejerias[J.area] ? D().consejerias[J.area].nombre : 'Gobierno') + ' (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'dipauto': return 'Diputado/a autonómico/a (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'alcalde': return 'Alcalde/sa de ' + (m ? m.nombre : '');
         case 'concejal': return 'Concejal/a de ' + (m ? m.nombre : '');
@@ -504,9 +504,73 @@ window.ESP = window.ESP || {};
     ejecutar(E) { C.Territorio.adelantar(E, E.jugador.region, 'a petición del presidente'); return { ok: true, msg: 'Disuelves el Parlamento: elecciones autonómicas en siete semanas.' }; }
   });
   A('consulta', {
-    nombre: 'Convocar una consulta de autodeterminación', icono: '🗳️', costo: 3, grupo: 'autonomico', desc: 'Sólo en Cataluña con un Gobierno soberanista y apoyo social ≥ 40 %: desafío al Estado (unilateral).',
-    disponible(E) { const r = presAut(E); if (r !== true) return r; const rc = rcJ(E); if (rc.id !== 'CAT') return 'Sólo disponible en Cataluña'; if (!rc.gob.coalicion.some(k => E.partidos[k].indep >= 0.8)) return 'Tu Gobierno no es soberanista'; if (rc.indep < 40) return 'Apoyo social insuficiente (40 %+)'; if (E.esp.proces.fase !== 'distension' && E.esp.proces.fase !== 'tension') return 'Ya hay un proceso en curso'; return true; },
-    ejecutar(E) { C.Territorio.procesFase(E, 'unilateral', 'El Parlament aprueba convocar un referéndum unilateral de independencia.'); E.esp.proces.limite = E.fecha.t + 6; E.esp.proces.decidir = true; Pj.cambiar(E, { pop: 3, prestigio: 2 }, true); return { ok: true, msg: 'Lanzas el desafío: el Estado deberá responder.' }; }
+    nombre: 'Convocar una consulta de autodeterminación', icono: '🗳️', costo: 3, grupo: 'autonomico', desc: 'Con un Gobierno soberanista y apoyo social suficiente (varía por comunidad): desafío unilateral al Estado.',
+    disponible(E) { const r = presAut(E); if (r !== true) return r; const rc = rcJ(E), conf = D().procesos[rc.id]; if (!conf) return 'Tu comunidad no tiene un movimiento soberanista relevante'; if (!rc.gob.coalicion.some(k => E.partidos[k].indep >= conf.indepMin)) return 'Tu Gobierno no es soberanista'; if (rc.indep < conf.umbral) return `Apoyo social insuficiente (${conf.umbral} %+)`; const pr = E.esp.procesos[rc.id]; if (pr.fase !== 'distension' && pr.fase !== 'tension') return 'Ya hay un proceso en curso'; return true; },
+    ejecutar(E) { const c = E.jugador.region, conf = D().procesos[c]; C.Territorio.procesFase(E, c, 'unilateral', `El ${conf.organo} aprueba convocar unilateralmente una ${conf.lema}.`); const pr = E.esp.procesos[c]; pr.limite = E.fecha.t + 6; pr.decidir = true; Pj.cambiar(E, { pop: 3, prestigio: 2 }, true); return { ok: true, msg: 'Lanzas el desafío: el Estado deberá responder.' }; }
+  });
+  A('reclamar_competencia', {
+    nombre: 'Reclamar una competencia al Estado', icono: '🏛️', costo: 2, grupo: 'autonomico', desc: 'Presidente/a o consejero/a: pide un escalón más de autogobierno (educación, policía, cercanías, puertos…). El Consejo de Ministros decide.',
+    disponible(E) { const J = E.jugador; if (!['presauto', 'consejero'].includes(J.cargo)) return 'Necesitas un cargo de gobierno autonómico'; return true; },
+    ejecutar(E, a) {
+      const J = E.jugador, rc = rcJ(E), k = a.comp; if (!k || !D().competencias[k]) return { ok: false, msg: 'Elige una competencia' };
+      const x = f(E, 'negociacion', 'carisma');
+      const r = C.Territorio.pedirComp(E, J.region, k, { tipo: 'ccaa', nombre: D().ccaa[J.region].nombre, pid: J.partido, jugador: true });
+      if (r !== true) return { ok: false, msg: r };
+      rc.presion[k] = Math.min(0.3, (rc.presion[k] || 0) + 0.05 + 0.08 * x);
+      Pj.cambiar(E, { prestigio: 1.2, pop: 0.8 });
+      return { ok: true, msg: 'Tu petición llega al orden del día del Consejo de Ministros.' };
+    }
+  });
+  A('ofrecer_comp', {
+    nombre: 'Ofrecer un traspaso a una comunidad', icono: '🤲', costo: 2, grupo: 'nacional', desc: 'Presidente/a del Gobierno: cedes una competencia a una comunidad (decreto o ley orgánica) a cambio de apoyos y paz territorial.',
+    disponible(E) { return esPM(E) ? true : 'Sólo el presidente/a del Gobierno'; },
+    ejecutar(E, a) {
+      const c = a.region, k = a.comp; if (!c || !k) return { ok: false, msg: 'Elige comunidad y competencia' };
+      const rc = E.esp.ccaa[c]; if (rc.comp[k] >= 2) return { ok: false, msg: 'Ya la tiene transferida' };
+      const r = C.Territorio.concederComp(E, c, k);
+      Pj.cambiar(E, { prestigio: 1 });
+      return { ok: true, msg: r === 'ley' ? 'Remites a las Cortes la ley orgánica de transferencia.' : 'La comisión mixta preparará el traspaso.' };
+    }
+  });
+  A('negociar_financiacion', {
+    nombre: 'Negociar la financiación autonómica', icono: '💶', costo: 2, grupo: 'autonomico', desc: 'Presidente/a autonómico/a: pide más cesión de impuestos, un fondo de nivelación o una financiación singular. En régimen foral se negocia el cupo cada cinco años.',
+    disponible: presAut,
+    ejecutar(E, a) {
+      const r = C.Territorio.pedirFin(E, E.jugador.region, a.tipo || 'cesion');
+      if (r.ok) { Pj.cambiar(E, { prestigio: r.exito === false ? 0.2 : 1.6, pop: r.exito === false ? 0 : 1 }); }
+      return r;
+    }
+  });
+  A('politica_fiscal', {
+    nombre: 'Política fiscal propia', icono: '🧾', costo: 1, grupo: 'autonomico', desc: 'Presidente/a autonómico/a: baja o sube tus impuestos. Bajarlos agrada a los votantes pero resta recursos y genera quejas por dumping fiscal.',
+    disponible: presAut,
+    ejecutar(E, a) {
+      const rc = rcJ(E), baja = a.dir !== 'subir';
+      if (baja) { rc.gob.aprob = clamp(rc.gob.aprob + 2.2, 5, 90); rc.fin.nivel -= 1.2; rc.relM = clamp(rc.relM - 1, 0, 100); for (const x of Object.keys(E.esp.ccaa)) if (x !== rc.id) E.esp.ccaa[x].agravio += 0.1; Pj.cambiar(E, { pop: 1.5 }); return { ok: true, msg: 'Bajas impuestos: los votantes lo notan, la caja también.' }; }
+      rc.gob.aprob = clamp(rc.gob.aprob - 1.6, 5, 90); rc.fin.nivel += 1.6; rc.relM = clamp(rc.relM + 1, 0, 100); Pj.cambiar(E, { prestigio: 0.5 });
+      return { ok: true, msg: 'Subes impuestos para financiar tus servicios: protestas, pero más recursos.' };
+    }
+  });
+  A('gestion_consejeria', {
+    nombre: 'Gestionar tu consejería', icono: '💼', costo: 2, grupo: 'autonomico', desc: 'Consejero/a: impulsa tu departamento. Cuanto más competencias haya transferido tu área, más margen tienes.',
+    disponible(E) { const J = E.jugador; return J.cargo === 'consejero' && J.area ? true : 'Sólo consejeros/as autonómicos/as'; },
+    ejecutar(E) {
+      const J = E.jugador, rc = rcJ(E), x = f(E, 'gestion', 'negociacion'), niv = C.Territorio.nivelArea(E, J.region, J.area);
+      const mult = 0.25 + 0.4 * niv;
+      rc.gestion[J.area] = clamp(rc.gestion[J.area] + (4 + 7 * x) * mult, 5, 98); rc.gob.aprob = clamp(rc.gob.aprob + 0.25 * mult, 5, 90);
+      Pj.cambiar(E, { prestigio: 0.8 + 1.4 * x * mult, pop: 0.6 });
+      return { ok: true, msg: niv < 0.6 ? 'Tu consejería tiene pocas competencias: apenas puedes hacer más que coordinar. Reclama traspasos.' : 'Tu departamento mejora y el Gobierno autonómico lo nota.' };
+    }
+  });
+  A('estabilizar_aut', {
+    nombre: 'Atar la mayoría del gobierno autonómico', icono: '🧩', costo: 1, grupo: 'autonomico', desc: 'Presidente/a o consejero/a: negocia con tus socios del Gobierno regional y evita una moción de censura.',
+    disponible(E) { return ['presauto', 'consejero'].includes(E.jugador.cargo) ? true : 'Necesitas un cargo de gobierno autonómico'; },
+    ejecutar(E) { const rc = rcJ(E), x = f(E, 'negociacion', 'carisma'); rc.gob.estab = clamp(rc.gob.estab + 3 + 5 * x, 0, 100); Pj.cambiar(E, { prestigio: 0.6 }); return { ok: true, msg: 'La mayoría del Gobierno regional queda más sólida.' }; }
+  });
+  A('mocion_aut', {
+    nombre: 'Moción de censura en tu comunidad', icono: '⚡', costo: 3, grupo: 'autonomico', desc: 'Líder de la oposición regional: intenta derribar al gobierno autonómico con una mayoría alternativa (constructiva).',
+    disponible(E) { const J = E.jugador; if (!J.region || !(J.escReg || J.lidReg === J.region)) return 'Necesitas escaño en el parlamento autonómico'; if (J.rol !== 'lider' && J.lidReg !== J.region && !(E.partidos[J.partido].amb === 'reg' && E.partidos[J.partido].lider === 'J')) return 'Sólo el líder del partido en la comunidad'; const rc = rcJ(E); if (rc.gob.coalicion.includes(J.partido)) return 'Tu partido gobierna'; if (rc.suspendida) return 'La comunidad está intervenida'; if (E.fecha.t - (rc.ultMocion || -99) < 52) return 'Ya hubo una moción reciente'; return true; },
+    ejecutar(E) { const J = E.jugador, c = J.region, b = C.Territorio.bloque(E, c, J.partido); const ok = C.Territorio.mocionJugador(E, c); if (ok) { Pj.cambiar(E, { prestigio: 10, pop: 5 }, true); return { ok: true, msg: `¡La moción prospera! Eres presidente/a de ${D().ccaa[c].nombre}.` }; } Pj.cambiar(E, { prestigio: -5, pop: -1 }, true); return { ok: true, exito: false, msg: `La moción fracasa: sólo reúnes ${b.s} de ${b.may} escaños.` }; }
   });
   /* — Ayuntamiento — */
   A('pleno_municipal', {
@@ -554,9 +618,15 @@ window.ESP = window.ESP || {};
     }
   });
   A('consejeria', {
-    nombre: 'Aspirar a una consejería autonómica', icono: '💼', costo: 2, grupo: 'carrera', desc: 'Si tu partido gobierna en tu comunidad (o está en el Gobierno regional), puedes entrar como consejero/a.',
-    disponible(E) { const J = E.jugador, rc = J.region && E.esp.ccaa[J.region]; if (!rc || !rc.gob) return 'Sin gobierno autonómico'; if (!rc.gob.coalicion.includes(J.partido)) return 'Tu partido no está en el Gobierno autonómico'; if (J.consejeria === J.region) return 'Ya eres consejero/a'; if (J.nivel === 'nacional') return 'Ya estás en el nivel nacional'; return J.prestigio >= 35 ? true : 'Necesitas prestigio 35+'; },
-    ejecutar(E) { const J = E.jugador; if (U.chance(0.55 + f(E, 'negociacion', 'gestion') * 0.3)) { J.consejeria = J.region; if (J.nivel === 'local') { Pj.dejar(E, 'local'); J.nivel = 'autonomico'; } Pj.sincronizar(E); return { ok: true, msg: 'Entras en el Gobierno autonómico.' }; } return { ok: true, exito: false, msg: 'El presidente prefiere otro nombre.' }; }
+    nombre: 'Aspirar a una consejería autonómica', icono: '💼', costo: 2, grupo: 'carrera', desc: 'Si tu partido está en el Gobierno de tu comunidad, puedes entrar como consejero/a de un área (sanidad, educación, interior…). Su peso depende de las competencias transferidas.',
+    disponible(E) { const J = E.jugador, rc = J.region && E.esp.ccaa[J.region]; if (!rc || !rc.gob) return 'Sin gobierno autonómico'; if (!rc.gob.coalicion.includes(J.partido)) return 'Tu partido no está en el Gobierno autonómico'; if (J.nivel === 'nacional') return 'Ya estás en el nivel nacional'; if (!C.Territorio.areasDe(E, J.region, J.partido).length && J.consejeria !== J.region) return 'Tu partido no tiene consejerías libres'; return J.prestigio >= 35 ? true : 'Necesitas prestigio 35+'; },
+    ejecutar(E, a) {
+      const J = E.jugador, T = C.Territorio, libres = T.areasDe(E, J.region, J.partido), area = a.area || libres[0];
+      if (!area || !D().consejerias[area]) return { ok: false, msg: 'Elige una consejería' };
+      if (!libres.includes(area) && !(J.consejeria === J.region && J.area !== area)) return { ok: false, msg: 'Esa consejería no es de tu partido' };
+      if (U.chance(0.5 + f(E, 'negociacion', 'gestion') * 0.3 + (area === 'pre' ? -0.3 : 0))) { T.tomarConsejeria(E, J.region, area); if (J.nivel === 'local') { Pj.dejar(E, 'local'); J.nivel = 'autonomico'; } Pj.sincronizar(E); return { ok: true, msg: `Entras en el Gobierno autonómico como consejero/a de ${D().consejerias[area].nombre}.` }; }
+      return { ok: true, exito: false, msg: 'El presidente prefiere otro nombre.' };
+    }
   });
   /* — Partido — */
   A('recorrer_bases', {

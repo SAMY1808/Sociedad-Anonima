@@ -80,6 +80,13 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
   }
   await visitar();
   if (tag) { await pg.click('#nav [data-p="dashboard"]'); await pg.screenshot({ path: `/tmp/ui-${tag}-1.png` }); for (const p of ['cortes', 'consejo', 'territorio', 'elecciones']) { await pg.click(`#nav [data-p="${p}"]`); await pg.waitForTimeout(100); await pg.screenshot({ path: `/tmp/ui-${tag}-${p}.png`, fullPage: false }); } }
+  if (process.env.EXTRA) {
+    await pg.evaluate(() => ESP.App.ir('territorio', { tab: 'competencias' })); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-comp.png' });
+    await pg.evaluate(() => ESP.Pantallas.territorio.verCcaa(ESP.E.jugador.region || 'CAT')); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-ficha.png' }); await resolver();
+    for (const m of ['reclamar_competencia', 'negociar_financiacion', 'consejeria', 'politica_fiscal']) { await pg.evaluate(m2 => ESP.Pantallas.agenda.abrir(m2), m); await pg.waitForTimeout(120); if (m === 'reclamar_competencia') await pg.screenshot({ path: '/tmp/ui-reclamar.png' }); if (m === 'negociar_financiacion') await pg.screenshot({ path: '/tmp/ui-fin.png' }); await pg.evaluate(() => ESP.UI.cerrarModales()); }
+    await pg.evaluate(() => ESP.App.ir('territorio', { tab: 'proces' })); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-proces.png' });
+    await pg.evaluate(() => ESP.App.ir('territorio', { tab: 'financiacion' })); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-finan.png' });
+  }
   const info = await pg.evaluate(() => { const E = ESP.E; return { fecha: ESP.U.fmtT(E.fecha.t), cargo: ESP.Personaje.cargoTxt(E), estado: E.esp.cortes.estado }; });
   console.log('estado final', JSON.stringify(info));
   console.log('modales:', JSON.stringify(titulos));

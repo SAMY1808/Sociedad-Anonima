@@ -1,8 +1,8 @@
 /* Prueba del jugador en España: crea una partida con un perfil y simula, ejecutando acciones y resolviendo eventos al azar. */
 const mini = require('./mini');
-const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/ue.js','data/eventos.js',
+const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
   'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
-  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/territorio.js','js/sistemas/municipios.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
 const perfil = { semilla: +arg[0] || 11, partido: arg[1] || 'ES_ASD', nivel: arg[2] || 'nacional', rol: arg[3] || 'base', region: arg[4] || null, muni: arg[5] || null, nombre: 'Prueba', trayectoria: 'abogado', pais: 'ES' };
@@ -32,6 +32,10 @@ for (let i = 0; i < sem; i++) {
     const id = U.pick(acciones); const a = C.Acciones.get(id); const args = {};
     if (id === 'proponer_ley' || id === 'propuesta_consejo') args.tpl = U.pick(C.DATA.leyes.filter(l => !l.manual && !l.rdlSolo)).id;
     if (id === 'cabildear_ley') { const ab = C.Congreso.abiertos(E); if (ab.length) { args.proy = U.pick(ab).id; args.pid = U.pick(P.partidos); } }
+    if (id === 'reclamar_competencia') args.comp = U.pick(Object.keys(C.DATA.competencias));
+    if (id === 'ofrecer_comp') { args.region = U.pick(C.Territorio.ids()); args.comp = U.pick(Object.keys(C.DATA.competencias)); }
+    if (id === 'negociar_financiacion') args.tipo = U.pick(['cesion', 'nivelacion', 'singular']);
+    if (id === 'politica_fiscal') args.dir = U.pick(['bajar', 'subir']);
     if (id === 'visita_ccaa') args.region = U.pick(C.Territorio.ids());
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }

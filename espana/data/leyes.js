@@ -89,6 +89,8 @@ ESP.DATA.leyes.push({ id: 'estatuto_gen', t: 'Reforma del Estatuto de Autonomía
 
 ESP.DATA.leyes.push({ id: 'pge', t: 'Presupuestos Generales del Estado', s: 'eco', eco: 0, soc: 0, eu: 10, ter: 0, costo: 0.2, pop: 50, may: 'simple', manual: true, ef: {}, d: 'Cuentas públicas del año: ingresos, gasto y financiación autonómica.' });
 
+ESP.DATA.leyes.push({ id: 'transferencia_comp', t: 'Ley orgánica de transferencia de competencias', s: 'ter', eco: 0, soc: 0, eu: 0, ter: 60, costo: 0.05, pop: 38, may: 'organica', manual: true, efecto: 'transfer_comp', ef: {}, d: 'Transfiere o delega a una comunidad una competencia exclusiva del Estado (art. 150.2 de la Constitución).' });
+
 /* Decretos y acuerdos del Consejo de Ministros que no pasan por las Cortes. */
 ESP.DATA.decretos = [
   { id: 'rd_fondos_europeos', t: 'Distribución de fondos europeos', sector: 'eco', ter: 15, eco: -10, soc: -5, pop: 62, texto: 'Reparto de una nueva tranche de fondos Next Generation entre comunidades.' },
