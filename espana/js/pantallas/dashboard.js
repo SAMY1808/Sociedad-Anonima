@@ -48,10 +48,10 @@ window.ESP = window.ESP || {};
               ${E.parl.pendienteVoto.length ? `<div class="it clic" data-ir="leyes"><span>🗳</span><div class="cuerpo"><b>${E.parl.pendienteVoto.length} votación(es) en el pleno</b><span>Requiere tu decisión</span></div></div>` : ''}
               ${C.Consejo.pmEsJ(E) && E.esp.consejo.agenda.length ? `<div class="it clic" data-ir="consejo"><span>🦅</span><div class="cuerpo"><b>${E.esp.consejo.agenda.length} punto(s) en el Consejo de Ministros</b><span>Decides como presidente/a</span></div></div>` : ''}
               ${mios.map(p => `<div class="it clic" data-ir="leyes"><span>📜</span><div class="cuerpo"><b>${esc(p.t)}</b><span>Tu proyecto · ${Comp.etapa(p.etapa)}</span></div></div>`).join('')}
-              ${J.campania ? '<div class="it clic" data-ir="elecciones"><span>📣</span><div class="cuerpo"><b>Estás en campaña electoral</b><span>Los mítines mueven votos</span></div></div>' : ''}
+              ${C.Campana.activa(E) ? C.Pantallas.campana.resumen(E) : J.campania ? '<div class="it clic" data-ir="elecciones"><span>📣</span><div class="cuerpo"><b>Estás en campaña electoral</b><span>Los mítines mueven votos</span></div></div>' : ''}
               ${cs.estado === 'disueltas' ? `<div class="it clic" data-ir="elecciones"><span>🗳</span><div class="cuerpo"><b>Generales el ${U.fmtT(cs.proxT)}</b><span>Cortes disueltas</span></div></div>` : ''}
               <div class="it clic" data-ir="europa"><span>🇪🇺</span><div class="cuerpo"><b>Consejo Europeo en ${Comp.semanasA(E, ue.proxCumbre)}</b><span>${abiertos.length} expedientes abiertos en Bruselas</span></div></div>
-              ${!E.parl.pendienteVoto.length && !mios.length && !J.campania ? '<div class="it"><span class="tenue">Sin urgencias. Dedica tus puntos a ganar prestigio y apoyos.</span></div>' : ''}</div></div>
+              ${!E.parl.pendienteVoto.length && !mios.length && !J.campania && !C.Campana.activa(E) ? '<div class="it"><span class="tenue">Sin urgencias. Dedica tus puntos a ganar prestigio y apoyos.</span></div>' : ''}</div></div>
           <div class="tarjeta"><div class="t-cab"><h3>Encuesta estatal</h3><button class="btn chico fant" data-ir="elecciones">Más →</button></div>
             ${G.barrasH(orden.map(k => ({ etq: Comp.partido(E, k), v: encuesta[k], color: E.partidos[k].color })), { max: Math.max(...orden.map(k => encuesta[k])) * 1.1, fmt: v => U.d1(v) + ' %', anchoEtq: '70px' })}</div>
         </div></div>

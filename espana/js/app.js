@@ -104,7 +104,7 @@ window.ESP = window.ESP || {};
     },
 
     badges(E, mios) {
-      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
+      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
     },
 
     /* Hoja «Más» del móvil: el resto de secciones del juego. */

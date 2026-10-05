@@ -54,7 +54,7 @@ window.ESP = window.ESP || {};
         for (const k in v) v[k] *= swing[k];
         if (C.Campana && o.campana !== false) v = C.Campana.ajustarProv(E, id, v);
         const s = U.suma(Object.values(v)); for (const k in v) v[k] = v[k] * 100 / s;
-        const vf = Object.assign({}, v), fus = C.Campana && o.campana !== false ? C.Campana.fusionar(E, vf) : null;
+        const vf = Object.assign({}, v), fus = C.Campana && o.campana !== false ? C.Campana.fusionar(E, vf, E.esp.camp) : null;
         const e = Gen.repartoProv(vf, d[2], E.esp.um);
         if (fus) C.Campana.desfusionar(e, fus);
         const ganador = Object.keys(v).sort((a, b) => v[b] - v[a])[0];

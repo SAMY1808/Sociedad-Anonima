@@ -1095,7 +1095,12 @@ window.ESP = window.ESP || {};
     }
   });
   /* ── Campaña de las generales ── */
-  const enCamp = E => { const J = E.jugador; if (Pj.esUE(E)) return 'Vuelve primero a la política española'; return C.Campana.activa(E) ? true : 'Sólo durante la campaña de unas generales'; };
+  const enCamp = E => { if (Pj.esUE(E)) return 'Vuelve primero a la política española'; return C.Campana.activa(E) ? true : 'Sólo durante la campaña de unas elecciones generales o autonómicas'; };
+  A('campana_auto', {
+    nombre: 'Campaña automática', icono: '⚡', costo: 1, grupo: 'campana', desc: 'Reparte el presupuesto libre entre lo más rentable: encuesta propia, televisión, aparato local en las provincias clave y movilización.',
+    disponible: enCamp,
+    ejecutar(E) { return C.Campana.auto(E); }
+  });
   A('mitin_prov', {
     nombre: 'Mitin en una provincia', icono: '📣', costo: 1, grupo: 'campana', desc: 'Campaña de las generales: un acto en una provincia concreta. Funciona mejor donde se juega el último escaño.',
     disponible: enCamp,

@@ -146,3 +146,5 @@ Acciones: `cabildear_ley_aut`, `intervenir_ley_aut`, `negociar_bloque_aut`, `pro
 `Generales.simular` llama a `Campana.ajustarProv` (momentum, movilización, finanzas, esfuerzo del jugador y voto útil) y fusiona/desfusiona la coalición antes y después del reparto D'Hondt.
 `provInfo` calcula para tu partido cuánto voto falta para el siguiente escaño y cuánto puedes perder antes de perder uno (ruido ±7 %, ±3 % con encuesta propia).
 `encuesta(tipo)` simula con la campaña y añade ruido (CIS 1,7 pp con sesgo hacia el Gobierno, prensa con sesgo del medio, propia 0,6). `cierre` genera el pie de urna, los escaños al límite y las cuentas (multa por superar 90 M€).
+
+La campaña autonómica reutiliza el módulo: `E.esp.campA[ccaa]` (`ambito:'aut'`, tope y gasto escalados al tamaño de la comunidad). `Territorio.simular` llama a `ajustarReg` y fusiona coaliciones; los territorios son las provincias de la comunidad (esfuerzo ponderado por población) y el voto útil actúa por debajo de 2,2 veces el umbral. `Campana.cur(E)` devuelve la campaña activa (la elegida en el selector o la primera); `consejos` es el asesor y `auto` reparte el presupuesto.

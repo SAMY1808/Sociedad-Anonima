@@ -14,11 +14,11 @@ ESP.DATA = ESP.DATA || {};
   const ev = o => eventos.push(Object.assign({ peso: 1, cd: 40, req: () => true }, o));
 
   /* ── Sucesos de campaña electoral (generales) ── */
-  const enCamp = (E, J) => J.pais === 'ES' && !!(E.esp.camp && E.esp.camp.activa) && E.esp.camp.tVoto - E.fecha.t >= 1;
+  const enCamp = (E, J) => { const cp = J.pais === 'ES' && C.Campana.cur(E); return !!cp && cp.tVoto - E.fecha.t >= 1; };
   const mover = (E, J, dv, txt) => C.Campana.mover(E, J.partido, dv, txt);
   ev({
     id: 'camp_filtracion', titulo: 'Filtración en plena campaña', icono: '📰', peso: 2.2, cd: 10, req: enCamp,
-    texto: (E, J) => `Un medio publica documentos internos sobre la financiación de ${pa(E).sigla}. Faltan ${E.esp.camp.tVoto - E.fecha.t} semanas para las urnas.`,
+    texto: (E, J) => `Un medio publica documentos internos sobre la financiación de ${pa(E).sigla}. Faltan ${C.Campana.cur(E).tVoto - E.fecha.t} semanas para las urnas.`,
     opciones: [
       { t: 'Negarlo todo y denunciar una campaña sucia', ef: (E, J) => { if (U().chance(0.55)) { mover(E, J, 0.3, `${pa(E).sigla} desmonta la filtración.`); return 'La estrategia funciona: la filtración se diluye.'; } mover(E, J, -1.4, `${pa(E).sigla} sufre por la filtración.`); Pj().cambiar(E, { prestigio: -2 }); return 'La documentación aparece completa y tu negativa se vuelve en tu contra.'; } },
       { t: 'Pedir perdón y abrir una auditoría', ef: (E, J) => { mover(E, J, -0.5, `${pa(E).sigla} abre una auditoría interna.`); Pj().cambiar(E, { prestigio: 2, pop: 0.5 }); return 'Pierdes algo de ritmo, pero ganas credibilidad.'; } },
@@ -35,7 +35,7 @@ ESP.DATA = ESP.DATA || {};
     ]
   });
   ev({
-    id: 'camp_encuesta_mala', titulo: 'Una encuesta demoledora', icono: '📉', peso: 1.8, cd: 12, req: (E, J) => enCamp(E, J) && C.Campana.ultimaEncuesta(E, 'cis') && C.Campana.ultimaEncuesta(E, 'cis').votos[J.partido] < (E.partidos[J.partido].popN || 0) - 0.5,
+    id: 'camp_encuesta_mala', titulo: 'Una encuesta demoledora', icono: '📉', peso: 1.8, cd: 12, req: (E, J) => enCamp(E, J) && C.Campana.ultimaEncuesta(E, 'cis') && C.Campana.cur(E).base0 && C.Campana.ultimaEncuesta(E, 'cis').votos[J.partido] < (C.Campana.cur(E).base0[J.partido] || 0) - 0.5,
     texto: (E, J) => `La última encuesta te da ${U().d1(C.Campana.ultimaEncuesta(E, 'cis').votos[J.partido])} %, por debajo de tu media. La militancia se desmoviliza.`,
     opciones: [
       { t: 'Llamar a la movilización (lanzar un acto de partido)', ef: (E, J) => { C.Campana.movilizar(E); mover(E, J, 0.2); return 'Reúnes a la militancia: el ánimo remonta.'; } },
@@ -54,7 +54,7 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'camp_oferta_pacto', titulo: 'Ofrecen una coalición de última hora', icono: '🤝', peso: 1.0, cd: 20,
-    req: (E, J) => enCamp(E, J) && C.Campana.listasAbiertas(E) && !E.esp.camp.coal && C.Campana.peso(E) && C.Campana.socios(E).some(x => x.p > 0.45),
+    req: (E, J) => enCamp(E, J) && C.Campana.listasAbiertas(E) && !C.Campana.cur(E).coal && C.Campana.peso(E) && C.Campana.socios(E).some(x => x.p > 0.45),
     ctx: (E, J) => { const s = C.Campana.socios(E).filter(x => x.p > 0.45)[0]; return { k: s ? s.k : null }; },
     texto: (E, J, P, x) => x.k ? `${E.partidos[x.k].nombre} propone concurrir en coalición contigo. Sumaríais votos, con una fuga del 7 %, y los escaños se repartirían según el voto de cada uno.` : 'Nadie ofrece una coalición.',
     opciones: [

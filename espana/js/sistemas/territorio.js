@@ -60,8 +60,12 @@ window.ESP = window.ESP || {};
     simular(E, c, o = {}) {
       const d = D().ccaa[c], v = T.votosReg(E, c, o.ruido != null ? o.ruido : 0.05);
       const um = d.um;
+      const cA = C.Campana && o.campana !== false && E.esp.campA && E.esp.campA[c] && E.esp.campA[c].activa ? E.esp.campA[c] : null;
+      if (cA) { C.Campana.ajustarReg(E, c, v); const s0 = U.suma(Object.values(v)); for (const k in v) v[k] = v[k] * 100 / s0; }
       const w = {}; for (const k in v) if (v[k] >= um) w[k] = v[k];
+      const fus = cA ? C.Campana.fusionar(E, w, cA) : null;
       const e = C.Elecciones.divisores(Object.keys(w).length ? w : v, d.esc, false);
+      if (fus) C.Campana.desfusionar(e, fus);
       const escanos = {}; for (const k in e) if (e[k]) escanos[k] = e[k];
       return { votos: v, escanos, part: Math.round(U.clamp(64 + U.gauss(0, 4), 50, 78)) };
     },
@@ -209,6 +213,7 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c], d = D().ccaa[c], t = E.fecha.t;
       const previo = { votos: rc.parl.votos, escanos: rc.parl.escanos, gob: rc.gob };
       const res = T.simular(E, c, {});
+      const cierre = C.Campana ? C.Campana.cierreAut(E, c, res) : null;
       rc.parl.votos = res.votos; rc.parl.escanos = res.escanos; rc.parl.part = res.part; rc.parl.ult = t; rc.parl.proxT = t + SEM_LEG;
       if (extra) { rc.suspendida = null; rc.relM = Math.max(rc.relM, 20); }
       // La opinión regional se acerca al resultado
@@ -222,7 +227,7 @@ window.ESP = window.ESP || {};
       const J = E.jugador;
       const personal = J && J.pais === 'ES' && C.Personaje.tras_autonomicas ? C.Personaje.tras_autonomicas(E, c, previo, res) : null;
       const jo = E.esp.jornada[t] = E.esp.jornada[t] || { t, aut: [], mun: null };
-      jo.aut.push({ c, votos: res.votos, escanos: res.escanos, previo: previo.votos, escPrevio: previo.escanos, part: res.part, gob: { partido: g.partido, coalicion: g.coalicion }, personal });
+      jo.aut.push({ c, votos: res.votos, escanos: res.escanos, previo: previo.votos, escPrevio: previo.escanos, part: res.part, gob: { partido: g.partido, coalicion: g.coalicion }, personal, camp: cierre });
       E.elecciones.historico.unshift({ t, tipo: 'autonomicas', region: c, votos: res.votos, escanos: res.escanos });
       C.Bus.emit('elecciones', { tipo: 'autonomicas', region: c });
     },
