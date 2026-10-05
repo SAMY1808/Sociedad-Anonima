@@ -15,15 +15,16 @@ window.ESP = window.ESP || {};
       let cuerpo = '';
       if (tab === 'generales') cuerpo = El.generales(E);
       else if (tab === 'autonomicas') cuerpo = El.autonomicas(E);
+      else if (tab === 'campana') cuerpo = C.Pantallas.campana.render(E);
       else if (tab === 'investidura') cuerpo = C.Pantallas.invest.calendario(E);
       else if (tab === 'municipales') cuerpo = El.municipales(E);
       else cuerpo = El.europeas(E);
       el.innerHTML = `<div class="cab"><div><h1>🗳 Elecciones</h1><div class="sub">Generales ${E.esp.cortes.estado === 'disueltas' ? '<span class="alerta">convocadas el ' + U.fmtT(E.esp.cortes.proxT) + '</span>' : 'como tarde el ' + U.fmtT(E.esp.cortes.finMax)} · municipales ${U.fmtT(E.esp.muni.proxT, true)} · europeas ${U.fmtT(E.ue.proxPE, true)}</div></div></div>
         ${J.campania ? `<div class="tarjeta" style="border-color:var(--oro);margin-bottom:14px"><div class="t-cab"><h3>📣 Campaña en marcha ${J.campania.tipo === 'aut' ? '(autonómicas)' : J.campania.tipo === 'mun' ? '(municipales)' : '(generales)'}</h3><span class="etq oro">${Math.round(J.campania.pts)} puntos de campaña · ${J.campania.mitines} mítines</span></div><p class="tenue" style="margin:0 0 10px;font-size:13px">Cada punto de campaña suma votos a tu partido y mejora tu puesto en la lista.</p><div class="fila">${UI.botonAccion('mitin', {}, '📣 Mitin de campaña', 'prim')}${UI.botonAccion('entrevista', {}, '📺 Entrevista', '')}${UI.botonAccion('redes', {}, '📱 Redes', '')}</div></div>` : ''}
-        <div class="tabs">${[['generales', 'Generales'], ['autonomicas', 'Autonómicas'], ['investidura', 'Investidura'], ['municipales', 'Municipales'], ['europeas', 'Europeas']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
+        <div class="tabs">${[['generales', 'Generales'], ['campana', 'Campaña'], ['autonomicas', 'Autonómicas'], ['investidura', 'Investidura'], ['municipales', 'Municipales'], ['europeas', 'Europeas']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('elecciones', { tab: b.dataset.tab }));
       const sr = UI.$('#el-reg', el); if (sr) sr.onchange = () => { E.ui.regEl = sr.value; C.App.refrescar(); };
-      C.Pantallas.invest.enlazar(el);
+      C.Pantallas.invest.enlazar(el); C.Pantallas.campana.enlazar(el);
       UI.$$('[data-ccaa]', el).forEach(b => b.onclick = () => C.Pantallas.territorio.verCcaa(b.dataset.ccaa));
     },
 
@@ -98,7 +99,7 @@ window.ESP = window.ESP || {};
         const bl = U.suma(Object.keys(n.escanos).filter(k => E.partidos[k].ter != null && E.partidos[k].postura === 'gobierno').map(k => n.escanos[k]));
         $('#n-final').innerHTML = `<div class="grid g2" style="margin-top:14px"><div class="nota"><b>Tu resultado</b><br>${!pers ? 'Tu escaño no estaba en juego en estas elecciones.' : pers.ue ? 'Estás en la política europea; tu escaño nacional no está en juego.' : pers.electo ? `<span class="bien">✔ Diputado/a</span> con el puesto ${pers.pos} en tu circunscripción (${pers.circ} escaños de tu partido ahí, ${pers.escanos} en total).` : `<span class="mal">✘ Sin escaño</span>: puesto ${pers.pos} y ${pers.circ} escaños de tu partido en la circunscripción.`}</div>
           <div class="nota"><b>Y ahora…</b><br>Se constituyen las Cortes, el Rey inicia las consultas y se abre el plazo de investidura. Si pasan <b>dos meses</b> desde la primera votación sin presidente, se disuelven de nuevo las Cortes.</div></div>
-          <div class="tarjeta" style="margin-top:10px"><h3>Mapa de provincias</h3>${C.Mosaico.provincias(E, 'voto', { altoMax: 300 })}${C.Mosaico.leyendaEs(E, 'voto')}</div>`;
+          <div class="tarjeta" style="margin-top:10px"><h3>Mapa de provincias</h3>${C.Mosaico.provincias(E, 'voto', { altoMax: 300 })}${C.Mosaico.leyendaEs(E, 'voto')}</div>${C.Pantallas.campana.nocheHTML(E, n)}`;
         $('#n-cerrar').disabled = false; $('#n-saltar').disabled = true;
       };
       $('#n-saltar').onclick = fin;

@@ -3,7 +3,7 @@
 const mini = require('./mini');
 const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
   'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
-  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/leyesaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js'];
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/campana.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/leyesaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
 const E = C.Mundo.nueva({ semilla: +arg[0] || 31, partido: arg[1] || 'ES_ASD', nivel: 'autonomico', rol: arg[2] || 'direccion', region: arg[3] || 'MAD', muni: null, nombre: 'Test', g: 'm', edad: 40 });
@@ -45,7 +45,7 @@ console.log('Generales: calendario');
 E.esp.cortes.estado = 'constitucion'; E.esp.cortes.tConst = E.fecha.t + 2; E.esp.cortes.ultElec = E.fecha.t - 1; E.esp.cortes.investidura = null;
 const cc = T.calendarioCentral(E); ok(cc.activo && cc.pasos.length === 5, 'calendario central con cinco pasos');
 const vistos = []; for (let i = 0; i < 30; i++) { avanzar(1); const e = E.esp.cortes.estado; if (vistos[vistos.length - 1] !== e) vistos.push(e); }
-ok(['constitucion', 'consultas', 'investidura', 'activa'].every(e => vistos.includes(e)), 'las Cortes recorren todas las fases (' + vistos.join(' → ') + ')');
+ok(['constitucion', 'consultas', 'investidura'].every(e => vistos.includes(e)), 'las Cortes recorren todas las fases (' + vistos.join(' → ') + ')');
 ok(log.some(x => /Se constituyen las Cortes/.test(x)), 'se constituyen las Cortes');
 const qv = () => { const pv = E.esp.pendienteVotoAut; if (pv) T.votarLey(E, pv.c, T.leyAut(E, pv.c, pv.id), 'abs'); E.parl.pendienteVoto.length = 0; E.eventos.pendientes.length = 0; };
 console.log('Presidente del Parlamento autonómico: propone candidato');

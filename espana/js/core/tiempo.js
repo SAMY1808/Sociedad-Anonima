@@ -31,6 +31,7 @@ window.ESP = window.ESP || {};
       if (E.eventos.pendientes.length) return 'evento';
       if (E.parl && E.parl.pendienteVoto && E.parl.pendienteVoto.length) return 'voto';
       if (E.esp && E.esp.pendienteVotoAut) return 'voto';
+      if (E.esp && E.esp.pendienteDebate) return 'evento';
       if (E.ue && E.ue.pendiente && E.ue.pendiente.length) return 'ue';
       if (E.esp && (E.esp.pendienteInvestidura || E.esp.pendienteSocio || E.esp.pendienteInvAut)) return 'investidura';
       if (E.esp && E.esp.pendienteGabinete) return 'gabinete';

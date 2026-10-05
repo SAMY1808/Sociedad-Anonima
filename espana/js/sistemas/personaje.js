@@ -391,10 +391,10 @@ window.ESP = window.ESP || {};
       const circ = J.circ, nProv = (res.prov[circ] && res.prov[circ].escanos[J.partido]) || 0;
       let pos = Pj.posicion(E, J, antes, nuevos, aspira ? -6 : 0);
       // En su circunscripción: la posición se compara con los escaños de su partido ahí
-      const posProv = J.rol === 'lider' ? 1 : 1 + Math.floor((1 - clamp(J.prestigio * 0.6 + J.pop * 0.4 + ({ base: 0, portavoz: 8, direccion: 16 }[J.rol] || 0), 0, 100) / 100) * (nProv + 2));
+      const posProv = J.rol === 'lider' || J.cabezaLista === circ ? 1 : 1 + Math.floor((1 - clamp(J.prestigio * 0.6 + J.pop * 0.4 + ({ base: 0, portavoz: 8, direccion: 16 }[J.rol] || 0), 0, 100) / 100) * (nProv + 2));
       const electo = nProv > 0 && posProv <= nProv || (J.rol === 'lider' && nuevos > 0);
       const r = { electo, pos: posProv, escanos: nuevos, antes, circ: nProv };
-      J.campania = null; J.aspira = null;
+      J.campania = null; J.aspira = null; J.cabezaLista = null;
       if (electo) {
         if (J.nivel !== 'nacional') { Pj.dejar(E, 'local'); Pj.dejar(E, 'autonomico'); J.nivel = 'nacional'; }
         J.electo = true; Pj.log(E, `${aspira ? 'Das el salto al Congreso: ' : 'Eres reelegido/a: '}puesto ${posProv} en ${D().provincias[circ][0]} (${nProv} escaños de tu partido ahí, ${nuevos} en total).`);
@@ -1092,6 +1092,62 @@ window.ESP = window.ESP || {};
       const x = f(E, 'carisma', 'gestion');
       Pj.cambiar(E, { pop: 0.7 + 1.3 * x }); if (U.chance(0.15)) { pa(E).cohesion = clamp(pa(E).cohesion - 0.8, 20, 99); return { ok: true, msg: 'Tu hilo se hace viral, pero a tus compañeros no les gusta el tono.' }; }
       return { ok: true, msg: 'Tu mensaje gana tracción en redes.' };
+    }
+  });
+  /* ── Campaña de las generales ── */
+  const enCamp = E => { const J = E.jugador; if (Pj.esUE(E)) return 'Vuelve primero a la política española'; return C.Campana.activa(E) ? true : 'Sólo durante la campaña de unas generales'; };
+  A('mitin_prov', {
+    nombre: 'Mitin en una provincia', icono: '📣', costo: 1, grupo: 'campana', desc: 'Campaña de las generales: un acto en una provincia concreta. Funciona mejor donde se juega el último escaño.',
+    disponible: enCamp,
+    ejecutar(E, a) { const r = C.Campana.mitinProv(E, a.prov); if (r.ok) Pj.empuje(E, 0.03, 0.1, true); return r; }
+  });
+  A('gasto_campana', {
+    nombre: 'Gastar en campaña', icono: '💶', costo: 1, grupo: 'campana', desc: 'Campaña de las generales: televisión, redes, carteles o aparato local con el presupuesto del partido (tope legal de 90 M€).',
+    disponible: enCamp,
+    ejecutar(E, a) { return C.Campana.gastar(E, a.canal, a.prov); }
+  });
+  A('encargar_encuesta', {
+    nombre: 'Encargar una encuesta', icono: '📊', costo: 1, grupo: 'campana', desc: 'Una encuesta propia (la más fiable, con detalle por provincias) o el sondeo de un medio.',
+    disponible: enCamp,
+    ejecutar(E, a) { return C.Campana.encargar(E, a.tipo); }
+  });
+  A('movilizar_votantes', {
+    nombre: 'Campaña de movilización', icono: '🗳️', costo: 1, grupo: 'campana', desc: 'Gasta 4 M€ en que tus votantes acudan a votar (más participación de los tuyos).',
+    disponible: enCamp,
+    ejecutar(E) { return C.Campana.movilizar(E); }
+  });
+  A('apelar_voto_util', {
+    nombre: 'Apelar al voto útil', icono: '🎯', costo: 1, grupo: 'campana', desc: 'Pide a los votantes de partidos pequeños que concentren el voto en ti. Sólo rinde si eres de los dos primeros.',
+    disponible: enCamp,
+    ejecutar(E) { return C.Campana.votoUtil(E); }
+  });
+  A('coalicion_pre', {
+    nombre: 'Coalición preelectoral', icono: '🤝', costo: 2, grupo: 'campana', desc: 'Concurrir juntos con otro partido (listas conjuntas): se suman votos con una fuga del 7 %. Hay que cerrarla antes de que se cierren las listas.',
+    disponible(E) { const r = enCamp(E); if (r !== true) return r; return C.Campana.listasAbiertas(E) ? true : 'Las listas ya están cerradas'; },
+    ejecutar(E, a) { return C.Campana.pactarCoalicion(E, a.pid); }
+  });
+  A('credito_campana', {
+    nombre: 'Pedir un crédito de campaña', icono: '🏦', costo: 0, grupo: 'campana', desc: 'Suma 30 M€ al presupuesto; lo pagarás con las finanzas del partido.',
+    disponible: enCamp,
+    ejecutar(E) { return C.Campana.credito(E); }
+  });
+  A('primarias_lista', {
+    nombre: 'Primarias: disputar la cabeza de lista', icono: '🗳️', costo: 2, grupo: 'carrera', desc: 'Compite en las primarias de tu partido por encabezar la lista de tu provincia en las próximas generales.',
+    disponible(E) {
+      const J = E.jugador; if (Pj.esUE(E)) return 'Vuelve primero a la política española';
+      if (J.rol === 'lider') return 'Ya eres el cabeza de lista nacional';
+      if (!C.Campana.listasAbiertas(E)) return 'Las listas ya están cerradas';
+      if (J.prestigio < 35) return 'Necesitas prestigio 35+';
+      if (J.primT != null && E.fecha.t - J.primT < 40) return 'Ya concurriste a unas primarias hace poco';
+      if (E.partidos[J.partido].amb === 'reg' && D().provincias[J.circ || Pj.mejorProvincia(E, J.partido, J.region)][1] !== E.partidos[J.partido].region) return 'Tu partido sólo presenta listas en su territorio';
+      return true;
+    },
+    ejecutar(E) {
+      const J = E.jugador, circ = J.circ || Pj.mejorProvincia(E, J.partido, J.region), pa = E.partidos[J.partido];
+      const p = clamp(0.2 + (J.prestigio - 35) / 120 + f(E, 'carisma', 'negociacion') * 0.3 + (({ direccion: 0.15, portavoz: 0.08 })[J.rol] || 0), 0.07, 0.8) - (pa.cohesion < 45 ? 0 : 0.03);
+      J.primT = E.fecha.t;
+      if (U.chance(p)) { J.cabezaLista = circ; Pj.cambiar(E, { prestigio: 3, pop: 1.5 }, true); Pj.log(E, `Ganas las primarias: serás cabeza de lista por ${D().provincias[circ][0]}.`); return { ok: true, msg: `Ganas las primarias: encabezarás la lista por ${D().provincias[circ][0]}.` }; }
+      Pj.cambiar(E, { prestigio: -2 }, true); Pj.log(E, 'Pierdes las primarias de tu provincia.'); return { ok: true, exito: false, msg: 'Pierdes las primarias: la militancia prefiere a otro candidato.' };
     }
   });
   A('mitin', {

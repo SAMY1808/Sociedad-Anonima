@@ -139,3 +139,10 @@ postura y calcula el margen de votos que ganaría el autor; la acción `aceptar_
 (afinidad con el autor, gobierno/oposición, cabildeo, negociación, debate, línea propia); `proyectarAut` suma escaños (mayoría simple). `leyesTurno` avanza
 etapas (1+2+1 semanas) y abre `E.esp.pendienteVotoAut` si el jugador es diputado/a. Las leyes de los programas de consejería usan el mismo circuito.
 Acciones: `cabildear_ley_aut`, `intervenir_ley_aut`, `negociar_bloque_aut`, `proponer_ley_aut`.
+
+## Campaña electoral (`sistemas/campana.js`)
+
+`E.esp.camp` (activa entre la disolución y las urnas): `presup`, `focus[prov]`, `nac`, `mom[pid]` (momentum en pp), `movil`, `util`, `coal`, `enc[]`, `debate`, `sucesos`.
+`Generales.simular` llama a `Campana.ajustarProv` (momentum, movilización, finanzas, esfuerzo del jugador y voto útil) y fusiona/desfusiona la coalición antes y después del reparto D'Hondt.
+`provInfo` calcula para tu partido cuánto voto falta para el siguiente escaño y cuánto puedes perder antes de perder uno (ruido ±7 %, ±3 % con encuesta propia).
+`encuesta(tipo)` simula con la campaña y añade ruido (CIS 1,7 pp con sesgo hacia el Gobierno, prensa con sesgo del medio, propia 0,6). `cierre` genera el pie de urna, los escaños al límite y las cuentas (multa por superar 90 M€).

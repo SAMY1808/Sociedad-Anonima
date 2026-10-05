@@ -52,8 +52,11 @@ window.ESP = window.ESP || {};
         const d = D().provincias[id];
         let v = C.Es.votosProv(E, id, o.ruido != null ? o.ruido : 0.05);
         for (const k in v) v[k] *= swing[k];
+        if (C.Campana && o.campana !== false) v = C.Campana.ajustarProv(E, id, v);
         const s = U.suma(Object.values(v)); for (const k in v) v[k] = v[k] * 100 / s;
-        const e = Gen.repartoProv(v, d[2], E.esp.um);
+        const vf = Object.assign({}, v), fus = C.Campana && o.campana !== false ? C.Campana.fusionar(E, vf) : null;
+        const e = Gen.repartoProv(vf, d[2], E.esp.um);
+        if (fus) C.Campana.desfusionar(e, fus);
         const ganador = Object.keys(v).sort((a, b) => v[b] - v[a])[0];
         prov[id] = { votos: v, escanos: e, ganador };
         pobTot += d[3];
@@ -130,6 +133,7 @@ window.ESP = window.ESP || {};
       C.Noticias.poner(E, 'politica', `Real decreto de disolución de las Cortes: elecciones generales el ${U.fmtT(c.proxT)}${motivo ? ' (' + motivo + ')' : ''}.`, 'ES');
       const J = E.jugador;
       if (J && J.pais === 'ES') { J.campania = { pts: 0, mitines: 0 }; P.flags.campana = true; }
+      if (C.Campana) C.Campana.iniciar(E);
       C.Bus.emit('disolucion', {});
       return true;
     },
@@ -147,6 +151,7 @@ window.ESP = window.ESP || {};
       const previo = P.elec.ultima;
       const antes = Object.assign({}, P.escanos);
       const res = Gen.simular(E, {});
+      const cierre = C.Campana ? C.Campana.cierre(E, res, previo) : null;
       Gen.aplicar(E, res, E.fecha.t);
       c.legislatura++; c.ultElec = E.fecha.t; c.estado = 'constitucion'; c.tConst = E.fecha.t + 4; c.proxT = E.fecha.t + 4 * 52; c.finMax = c.proxT; c.enFunciones = true; c.investidura = null;
       P.elec.proxT = c.proxT; P.flags.campana = false;
@@ -163,7 +168,7 @@ window.ESP = window.ESP || {};
       const personal = J && J.pais === 'ES' ? C.Personaje.tras_generales(E, previo, res) : null;
       C.Congreso.recomponer(E, antes);
       E.elecciones.historico.unshift({ t: E.fecha.t, tipo: 'generales', votos: res.nat, escanos: P.escanos, part: res.part });
-      E.elecciones.nochePendiente = { tipo: 'generales', pais: 'ES', t: E.fecha.t, votos: res.nat, escanos: Object.assign({}, P.escanos), antes, part: res.part, previo: previo ? previo.votos : null, personal, prov: res.prov };
+      E.elecciones.nochePendiente = { tipo: 'generales', pais: 'ES', t: E.fecha.t, votos: res.nat, escanos: Object.assign({}, P.escanos), antes, part: res.part, previo: previo ? previo.votos : null, personal, prov: res.prov, camp: cierre };
       C.Bus.emit('elecciones', { tipo: 'generales' });
       return res;
     },

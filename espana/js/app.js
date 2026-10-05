@@ -167,6 +167,7 @@ window.ESP = window.ESP || {};
       if (E.esp.pendienteGabinete) { C.Pantallas.gabinete.formacion(E.esp.pendienteGabinete); return; }
       if (E.esp.gab && E.esp.gab.escandalo) { C.Pantallas.gabinete.escandalo(E.esp.gab.escandalo); return; }
       if (E.esp.pendienteSocio) { C.Pantallas.elecciones.socio(); return; }
+      if (E.esp.pendienteDebate) { C.Pantallas.campana.modalDebate(); return; }
       if (E.esp.pendienteVotoAut) { C.Pantallas.leyesNiv.modalVotoAut(); return; }
       if (E.esp.pendienteInvAut) { C.Pantallas.invest.modal(); return; }
       if (E.esp.pendienteInvestidura) { C.Pantallas.elecciones.investidura(); return; }
