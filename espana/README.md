@@ -1,0 +1,95 @@
+# CURUL ESPAÑA — Simulador político de España
+
+Juegas una carrera política en **España**: empiezas de **concejal/a o alcaldable**, de **diputado/a autonómico/a**
+o de **diputado/a del Congreso**, con uno de los 19 partidos (o fundando uno nuevo), y puedes llegar a presidir una
+comunidad, a ser ministro/a o a presidir el Gobierno… o dar el salto a Bruselas. Los partidos, líderes y políticos
+son **ficticios**, inspirados en el panorama político real; las instituciones (Cortes Generales, Consejo de
+Ministros, comunidades autónomas, ayuntamientos, Unión Europea) funcionan con reglas parecidas a las reales.
+
+**Jugar:** abre `index.html` (funciona desde el disco, en GitHub Pages o con cualquier servidor estático).
+Es una PWA: se puede instalar y jugar sin conexión.
+
+> La versión anterior, que cubría los 27 países de la UE, el Reino Unido y los candidatos, vive en la rama
+> [`europa-v1`](https://github.com/SAMY1808/Curul-Europa/tree/europa-v1). Esta versión se concentra en España.
+
+## Qué hay
+
+- **Elecciones generales** por 52 circunscripciones (50 provincias + Ceuta y Melilla), D'Hondt con umbral del 3 %
+  por circunscripción: el voto de cada provincia combina el apoyo nacional de cada partido con su fuerza regional
+  (calibrado a las generales de 2023). **Generales anticipadas**: el presidente puede disolver las Cortes (una vez al año,
+  sin moción de censura pendiente) y se abre una campaña de ocho semanas.
+- **Cortes Generales**: Congreso de 350 diputados individuales (ideología, disciplina, circunscripción), y **Senado**
+  (elegido por provincias + 57 senadores designados por los parlamentos autonómicos) con **veto por mayoría absoluta**
+  que el Congreso supera con 176 votos o, pasados dos meses, por mayoría simple. Trámite: registro → ponencia →
+  pleno → Senado → vuelta. **Leyes orgánicas** (176 «síes»), **reformas constitucionales** (3/5) y
+  **decretos-ley** que deben convalidarse en 30 días.
+- **Investidura y pactos**: constitución de las Cortes, **ronda de consultas del Rey**, primera votación (176) y
+  segunda (mayoría simple); si pasan dos meses sin presidente, nuevas elecciones. Cada partido exige
+  **contrapartidas** (amnistía, financiación singular, traspasos, quita de deuda, referéndum…), tiene **vetos** y
+  tabúes del candidato. Si diriges un partido, **construyes tu bloque** a mano; si diriges un partido bisagra,
+  decides tu voto y qué exiges. **Mociones de censura** constructivas, cuestiones de confianza y rupturas de coalición.
+- **Consejo de Ministros** como centro del Gobierno: orden del día semanal (proyectos de ley, **decretos-ley**,
+  reales decretos, peticiones de las comunidades, crisis territoriales), 23 ministerios con titulares individuales,
+  **satisfacción de los socios** y tensión de coalición, **Presupuestos** (presentar o prorrogar), remodelaciones,
+  Conferencia de Presidentes y catálogo de más de 60 iniciativas con proyección de votos. Si eres presidente/a decides tú;
+  si no, influyes como ministro/a, socio o líder de la oposición.
+- **Comunidades autónomas** (17 + 2 ciudades autónomas): parlamento regional por D'Hondt con su umbral, gobierno
+  y coaliciones, elecciones autonómicas con su calendario (mayo de 2027, Cataluña, País Vasco, Galicia…), **relación con
+  Moncloa**, grado de autogobierno, deuda y balanza fiscal, régimen foral (País Vasco y Navarra).
+- **Estatutos de autonomía**: propuesta del parlamento regional (3/5) → ley orgánica en las Cortes →
+  **referéndum autonómico**.
+- **Independentismo**: apoyo soberanista por comunidad que reacciona a concesiones (amnistía, indultos, financiación
+  singular, traspasos) y a la dureza; **procés** por fases (distensión, tensión, desafío unilateral, declaración),
+  **artículo 155** autorizado por el Senado, mesa de diálogo, referéndum pactado y **Tribunal Constitucional** que puede
+  anular leyes territoriales.
+- **Municipios**: 67 grandes ayuntamientos con concejales (D'Hondt, umbral del 5 %), pactos de alcaldía, aprobación
+  municipal, y las ~8.100 alcaldías agregadas por comunidad; municipales en mayo de 2027.
+- **Unión Europea**: Consejo (mayoría cualificada o unanimidad), Parlamento Europeo (España: circunscripción única),
+  Comisión, cumbres, directivas que llegan al Congreso para su transposición, fondos europeos y reglas fiscales.
+  Los otros 26 Estados miembros se simulan en segundo plano.
+- **Personaje**: nivel de partida (local / autonómico / nacional), partido, trayectoria, atributos, ideología en
+  **cuatro ejes** (economía, valores, Europa, territorio). Escalera: concejal → alcalde/sa → diputado/a autonómico/a →
+  consejero/a → presidente/a autonómico/a → diputado/a → ministro/a → presidente/a del Gobierno → eurodiputado/a →
+  comisario/a. Campañas autonómicas, municipales y generales; **noche electoral** animada.
+- **Eventos** con decisiones (DANA, crisis migratoria, apagón, corrupción, vivienda, turismo masivo, Diada,
+  financiación, moción de censura municipal…) y choques globales.
+- **Guardado** múltiple (IndexedDB), autoguardado, exportar/importar `.json`.
+
+## Cómo se juega
+
+Cada turno es una **semana**. Dispones de 5–7 **puntos de agenda**: discursos, leyes, cabildeo, partido, medios,
+campaña, gestión del Consejo, de tu comunidad o de tu ayuntamiento… Avanza (`N`, o ▶ Semana / Mes / Trimestre); el
+tiempo se detiene cuando hay una votación, una investidura, una decisión del Consejo de Ministros o una noche
+electoral.
+
+## Arquitectura
+
+Mismo planteamiento que el Curul de Colombia (`../curul/`): estado único serializable (`ESP.E`), sistemas
+registrados en un motor de turnos, sin compilación ni dependencias. Ver [`docs/DISENO.md`](docs/DISENO.md).
+
+```
+index.html · manifest.webmanifest · sw.js
+css/        base · layout · componentes · pantallas · europa
+data/       territorio · partidos-es · pactos · leyes · instituciones · paises · partidos (UE) · nombres · ue · eventos
+js/core/    util · bus · estado · tiempo · acciones
+js/sistemas/ economia · opinion · mundo · elecciones · gobierno (resto de la UE) ·
+            espana · generales · ejecutivo · congreso · consejo · territorio · municipios · ue · eventos · personaje · guardado
+js/ui/      dom · graficos · hemiciclo · mosaico (mapa de provincias) · componentes
+js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio · partido · europa · elecciones · personaje · partidas
+tools/      mini · prueba-es · jugador-es · ui-es
+```
+
+## Pruebas (Node)
+
+```
+node tools/prueba-es.js 520 3        # 10 años de España con una semilla: gobiernos, disoluciones, investiduras
+node tools/jugador-es.js 11 ES_ASD nacional base "" "" 260   # agente aleatorio: semilla partido nivel rol región municipio semanas
+node tools/ui-es.js nacional ES_ASD lider 60                 # Playwright: crea partida, recorre pantallas y juega
+```
+
+## Simplificaciones conocidas
+
+Los datos (población, escaños, umbrales) son aproximados. Los parlamentos autonómicos se reparten en una
+circunscripción única; sólo 67 municipios se simulan individualmente. Los otros 26 países de la UE funcionan de forma
+agregada. La partida arranca en octubre de 2026 con unas Cortes calibradas a 2023: derecha primera en escaños, pero
+con un Gobierno de izquierdas apoyado por regionalistas.

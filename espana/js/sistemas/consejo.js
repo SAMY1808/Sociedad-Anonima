@@ -1,0 +1,312 @@
+/* Consejo de Ministros: agenda semanal de proyectos de ley, decretos-ley, reales decretos, peticiones territoriales y crisis.
+   Si el jugador es presidente decide cada punto; si no, decide la IA. Fricción de coalición, Presupuestos, cuestión de confianza y remodelaciones. */
+window.ESP = window.ESP || {};
+(function (C) {
+  const U = C.U;
+  const D = () => C.DATA;
+  const MAX_AGENDA = 6;
+
+  const Cn = {
+    init(E) {
+      const P = E.paises.ES, g = P.gob;
+      E.esp.consejo = { agenda: [], hist: [], tension: 0, autoridad: 62, sat: {}, ultimo: 0, remodelado: 0 };
+      E.esp.pge = { ano: 2026, estado: U.chance(0.5) ? 'prorrogado' : 'aprobado', tramite: null, intentos: 0 };
+      if (g) g.coalicion.concat(g.apoyoExterno || []).forEach(k => E.esp.consejo.sat[k] = U.clamp(U.gauss(62, 8), 40, 80));
+    },
+
+    pmEsJ(E) { const g = E.paises.ES.gob; return !!(E.jugador && g && g.pm === 'J'); },
+    pm(E) { return E.politicos[E.paises.ES.gob.pm]; },
+    enFunciones(E) { const c = E.esp.cortes; return c.estado !== 'activa'; },
+
+    nuevo(E, o) {
+      const it = Object.assign({ id: U.id('c'), t: E.fecha.t, limite: E.fecha.t + 2, urgente: false, quien: { tipo: 'ministro' } }, o);
+      E.esp.consejo.agenda.push(it);
+      return it;
+    },
+
+    /* ── Generación de puntos del orden del día ── */
+    generar(E) {
+      const P = E.paises.ES, g = P.gob, cs = E.esp.consejo, t = E.fecha.t;
+      if (cs.agenda.length >= MAX_AGENDA) return;
+      const r = U.r();
+      if (r < 0.46) Cn.genMinisterio(E);
+      else if (r < 0.62) Cn.genSocio(E);
+      else if (r < 0.76) Cn.genTerritorial(E);
+      else if (r < 0.9) Cn.genDecreto(E);
+    },
+
+    genMinisterio(E) {
+      const g = E.paises.ES.gob, mins = D().ministerios;
+      const m = U.pesado(mins, x => x.peso), mid = g.ministros[m.id], pol = E.politicos[mid]; if (!pol) return;
+      const tpl = C.Congreso.elegirPlantilla(E, pol, m.sector); if (!tpl) return;
+      const rdl = tpl.rdl && U.chance(0.35);
+      Cn.nuevo(E, { tipo: rdl ? 'rdl' : 'ley', titulo: tpl.t, desc: tpl.d, tpl: tpl.id, sector: tpl.s, quien: { tipo: 'ministro', min: m.id, pid: pol.p, nombre: pol.n } });
+    },
+
+    genSocio(E) {
+      const g = E.paises.ES.gob, socios = g.coalicion.filter(k => k !== g.partido); if (!socios.length) return;
+      const pid = U.pick(socios), pa = E.partidos[pid];
+      const tpl = C.Congreso.elegirPlantilla(E, pa, null, l => !l.manual && l.ter != null && Math.abs(l.ter - pa.ter) < 90); if (!tpl) return;
+      Cn.nuevo(E, { tipo: tpl.rdl && U.chance(0.3) ? 'rdl' : 'ley', titulo: tpl.t, desc: tpl.d, tpl: tpl.id, sector: tpl.s, quien: { tipo: 'socio', pid, nombre: pa.sigla } });
+    },
+
+    genTerritorial(E) {
+      const T = C.Territorio, ids = T.ids().filter(c => { const rc = E.esp.ccaa[c]; return rc.relM < 50 || rc.indep > 10 || U.chance(0.2); });
+      if (!ids.length) return;
+      const c = U.pesado(ids, x => 60 - E.esp.ccaa[x].relM + E.esp.ccaa[x].indep), rc = E.esp.ccaa[c], d = D().ccaa[c];
+      const tipos = [
+        { k: 'fondos', t: `${d.nombre} reclama fondos y un plan de infraestructuras`, d: 'La comunidad pide al Gobierno un plan específico de inversiones y la ejecución de las obras pendientes.' },
+        { k: 'transf', t: `${d.nombre} pide el traspaso de competencias pendientes`, d: 'Reclama la transferencia de varias competencias recogidas en su Estatuto.' },
+        { k: 'bilat', t: `Comisión bilateral Estado–${d.nombre}`, d: 'El Gobierno autonómico solicita reunir la comisión bilateral para tratar financiación y competencias.' }
+      ];
+      if (rc.deuda > 28) tipos.push({ k: 'deuda', t: `${d.nombre} exige un alivio de su deuda`, d: 'Pide al Estado asumir parte de la deuda autonómica.' });
+      if (c === 'CAT' || c === 'PVA') tipos.push({ k: 'estatus', t: `${d.nombre} reclama el reconocimiento de su singularidad`, d: 'Su Gobierno pide un nuevo marco político: financiación singular y reconocimiento nacional.' });
+      const x = U.pick(tipos);
+      Cn.nuevo(E, { tipo: 'territorial', titulo: x.t, desc: x.d, region: c, sub: x.k, sector: 'ter', quien: { tipo: 'ccaa', nombre: d.nombre, pid: rc.gob && rc.gob.partido } });
+    },
+
+    genDecreto(E) {
+      const dec = U.pick(D().decretos);
+      if (E.esp.consejo.agenda.some(i => i.dec === dec.id)) return;
+      Cn.nuevo(E, { tipo: 'rd', titulo: dec.t, desc: dec.texto, dec: dec.id, sector: dec.sector, quien: { tipo: 'ministro', nombre: 'Consejo' } });
+    },
+
+    /* ── Opciones disponibles de cada punto ── */
+    opciones(E, it) {
+      const o = [];
+      if (it.tipo === 'ley') { o.push({ k: 'enviar', t: 'Aprobar y remitir a las Cortes', d: 'Proyecto de ley: tramitación ordinaria (semanas o meses).' }); }
+      if (it.tipo === 'rdl') { o.push({ k: 'rdl', t: 'Aprobar por decreto-ley', d: 'Entra en vigor ya; el Congreso debe convalidarlo en 30 días. Si cae, se deroga.' }); o.push({ k: 'enviar', t: 'Remitir como proyecto de ley', d: 'Tramitación ordinaria, sin urgencia.' }); }
+      if (it.tipo === 'territorial') { o.push({ k: 'conceder', t: 'Acceder a la petición', d: 'Mejora la relación con la comunidad, pero genera agravio comparativo.' }); o.push({ k: 'negociar', t: 'Abrir una mesa de negociación', d: 'Gana tiempo y algo de confianza.' }); }
+      if (it.tipo === 'rd') o.push({ k: 'aprobar', t: 'Aprobar el real decreto', d: 'Se ejecuta de inmediato.' });
+      if (it.tipo === 'pge') { o.push({ k: 'presentar', t: 'Presentar el proyecto de Presupuestos', d: 'Se tramita en las Cortes; si pierde la enmienda a la totalidad, se prorrogan.' }); o.push({ k: 'prorrogar', t: 'Prorrogar los Presupuestos', d: 'Evita el riesgo de una derrota, a costa de los socios.' }); }
+      if (it.tipo === 'proces') { o.push({ k: '155', t: 'Pedir la aplicación del artículo 155', d: 'Requiere mayoría absoluta del Senado. Intervención de la Generalitat y elecciones.' }); o.push({ k: 'dialogo', t: 'Abrir un diálogo político', d: 'Evita la ruptura, pero te expone a la oposición.' }); o.push({ k: 'nada', t: 'No hacer nada', d: 'Dejar que los hechos se consuman.' }); }
+      if (it.tipo !== 'pge' && it.tipo !== 'proces') { o.push({ k: 'aplazar', t: 'Aplazar', d: 'Lo retiras del orden del día.' }); o.push({ k: 'rechazar', t: 'Rechazar', d: 'Tensión con quien lo propone.' }); }
+      return o;
+    },
+
+    /* Resolución de un punto (jugador o IA). */
+    resolver(E, id, k, porIA) {
+      const cs = E.esp.consejo, i = cs.agenda.findIndex(x => x.id === id); if (i < 0) return null;
+      const it = cs.agenda[i]; cs.agenda.splice(i, 1);
+      const txt = Cn.ejecutar(E, it, k);
+      cs.hist.unshift({ t: E.fecha.t, titulo: it.titulo, k, quien: it.quien, tipo: it.tipo, txt });
+      if (cs.hist.length > 60) cs.hist.length = 60;
+      cs.ultimo = E.fecha.t;
+      return txt;
+    },
+
+    sat(E, pid, d) { const cs = E.esp.consejo; if (pid == null || cs.sat[pid] == null) return; cs.sat[pid] = U.clamp(cs.sat[pid] + d, 0, 100); },
+
+    ejecutar(E, it, k) {
+      const P = E.paises.ES, g = P.gob, cs = E.esp.consejo;
+      const aut = it.quien || {};
+      const tpl = it.tpl ? C.Congreso.plantilla(it.tpl) : null;
+      const satP = aut.pid && aut.pid !== g.partido ? aut.pid : null;
+      if (k === 'aplazar') { Cn.sat(E, satP, -2.5); return 'Aplazado'; }
+      if (k === 'rechazar') { Cn.sat(E, satP, -6); if (aut.tipo === 'ccaa') { const rc = E.esp.ccaa[it.region]; rc.relM = Math.max(0, rc.relM - 5); } return 'Rechazado'; }
+      if (it.tipo === 'ley' || it.tipo === 'rdl') {
+        const autor = { tipo: 'gobierno', pid: g.partido, ministerio: aut.min || null, socio: aut.tipo === 'socio' ? aut.pid : null };
+        if (k === 'rdl') {
+          const pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
+          const p = C.Congreso.registrarRDL(E, tpl.id, autor, { pacto: null });
+          if (p) { C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el real decreto-ley «${tpl.t}».`, 'ES'); Cn.sat(E, satP, 6); if (pr.dist < 0) g.estab -= 0.6; return 'Decreto-ley aprobado (convalidación en el Congreso)'; }
+        }
+        const p = C.Congreso.proponer(E, tpl.id, autor); if (!p) return 'Sin efecto';
+        C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley «${tpl.t}» y lo remite a las Cortes.`, 'ES');
+        Cn.sat(E, satP, 5); if (aut.tipo === 'ministro') Cn.sat(E, g.partido, 0.5);
+        return 'Proyecto remitido a las Cortes';
+      }
+      if (it.tipo === 'territorial') return Cn.territorial(E, it, k);
+      if (it.tipo === 'rd') return Cn.decreto(E, it);
+      if (it.tipo === 'pge') return Cn.pge(E, it, k);
+      if (it.tipo === 'proces') { const r = C.Territorio.procesResolver(E, k); return 'Respuesta al desafío: ' + r; }
+      return '';
+    },
+
+    territorial(E, it, k) {
+      const c = it.region, rc = E.esp.ccaa[c], d = D().ccaa[c], T = C.Territorio, g = E.paises.ES.gob;
+      if (k === 'negociar') { rc.relM = Math.min(100, rc.relM + 3.5); return `Mesa de negociación con ${d.nombre}`; }
+      if (k !== 'conceder') return '';
+      const dem = { fondos: () => { rc.relM = Math.min(100, rc.relM + 6); g.aprob -= 0.1; C.Economia.aplicar(E, 'ES', { deficit: 0.05 }); }, transf: () => { rc.aut = Math.min(100, rc.aut + 3); rc.relM = Math.min(100, rc.relM + 7); }, bilat: () => { rc.relM = Math.min(100, rc.relM + 5); },
+                    deuda: () => { rc.deuda = Math.max(3, rc.deuda * 0.85); rc.relM = Math.min(100, rc.relM + 6); C.Economia.aplicar(E, 'ES', { deficit: 0.05 }); }, estatus: () => { rc.relM = Math.min(100, rc.relM + 9); rc.concesiones.push({ t: E.fecha.t, v: -1, d: 'Reconocimiento' }); } }[it.sub];
+      if (dem) dem();
+      // Agravio comparativo en el resto
+      for (const x of T.ids()) if (x !== c) E.esp.ccaa[x].agravio += (it.sub === 'estatus' ? 2 : 0.6) * (E.esp.ccaa[x].gob && !g.coalicion.includes(E.esp.ccaa[x].gob.partido) ? 1.4 : 1);
+      if (it.sub === 'estatus') { const q = C.Territorio; q.marea(E, 'financiacion'); }
+      Cn.sat(E, rc.gob && rc.gob.partido, 3);
+      C.Noticias.poner(E, 'politica', `El Gobierno accede a la petición de ${d.nombre} («${it.titulo}»).`, 'ES');
+      return `Concedido a ${d.nombre}`;
+    },
+
+    decreto(E, it) {
+      const g = E.paises.ES.gob, T = C.Territorio;
+      if (it.dec === 'rd_fondos_europeos') { for (const c of T.ids()) E.esp.ccaa[c].relM = Math.min(100, E.esp.ccaa[c].relM + 1.2); if (C.UE && C.UE.fondos) C.UE.fondos(E); g.aprob += 0.3; }
+      else if (it.dec === 'rd_conferencia') T.conferenciaPresidentes(E);
+      else if (it.dec === 'rd_seguridad_nacional') { g.aprob += 0.2; C.Economia.aplicar(E, 'ES', { deficit: 0.05 }); }
+      else g.aprob += 0;
+      C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba: ${it.titulo}.`, 'ES');
+      return 'Real decreto aprobado';
+    },
+
+    /* ── IA: decide como presidente del Gobierno ── */
+    decidirIA(E, it) {
+      const g = E.paises.ES.gob, pm = E.politicos[g.pm]; if (!pm) return;
+      let k = 'aplazar';
+      if (it.tipo === 'ley' || it.tipo === 'rdl') {
+        const tpl = C.Congreso.plantilla(it.tpl);
+        const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
+        let s = 0.9 - 2.0 * dist + (it.quien.tipo === 'socio' ? 0.3 : 0) + pr.dist / 175 * 0.9;
+        if (pr.dist < -20) s -= 0.6;
+        if (pr.dist < -4 && (tpl.may === 'organica' || tpl.may === 'cons')) s = -0.1;
+        if (pr.dist < -14) s = Math.min(s, -0.1);
+        if (s > 0.15) k = it.tipo === 'rdl' && pr.dist > -8 ? 'rdl' : 'enviar'; else if (s < -0.35) k = 'rechazar';
+      } else if (it.tipo === 'territorial') {
+        const rc = E.esp.ccaa[it.region], afin = 0.4 - U.distIdeo(pm, E.partidos[rc.gob ? rc.gob.partido : g.partido]);
+        const sos = (g.apoyoExterno || []).includes(rc.gob && rc.gob.partido) || (g.coalicion.includes(rc.gob && rc.gob.partido));
+        const x = afin * 1.5 + (sos ? 0.5 : 0) + (pm.ter - (-20)) / 100;
+        k = x > 0.45 ? 'conceder' : x > -0.1 ? 'negociar' : 'rechazar';
+      } else if (it.tipo === 'rd') k = 'aprobar';
+      else if (it.tipo === 'pge') {
+        const pr = Cn.proyeccionPGE(E);
+        k = pr.dist >= -4 ? 'presentar' : 'prorrogar';
+      }
+      else if (it.tipo === 'proces') return;
+      Cn.resolver(E, it.id, k, true);
+    },
+
+    proyeccionPGE(E) {
+      const g = E.paises.ES.gob, pm = E.politicos[g.pm];
+      return C.Congreso.proyectar(E, { may: 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: 50, eco: pm.eco, soc: pm.soc, eu: pm.eu, ter: pm.ter, costo: 0.4, apoyo: {}, t: 'PGE' });
+    },
+
+    /* ── Presupuestos ── */
+    pge(E, it, k) {
+      const g = E.paises.ES.gob, pg = E.esp.pge;
+      if (k === 'prorrogar') { pg.estado = 'prorrogado'; pg.ano = U.anio(); g.estab -= 1; for (const p of g.coalicion.concat(g.apoyoExterno || [])) Cn.sat(E, p, -3); C.Noticias.poner(E, 'economia', 'El Gobierno renuncia a presentar Presupuestos y los prorroga.', 'ES'); return 'Presupuestos prorrogados'; }
+      const pm = E.politicos[g.pm];
+      const p = C.Congreso.proponer(E, 'pge', { tipo: 'gobierno', pid: g.partido }, { eco: pm.eco, soc: pm.soc, eu: pm.eu, ter: pm.ter, pge: true });
+      pg.tramite = p.id; pg.intentos++;
+      C.Noticias.poner(E, 'economia', 'El Gobierno presenta el proyecto de Presupuestos Generales del Estado.', 'ES');
+      return 'Presupuestos presentados en el Congreso';
+    },
+
+    alFinalizar(E, p, ok) {
+      if (!p.pge) return;
+      const g = E.paises.ES.gob, pg = E.esp.pge; pg.tramite = null;
+      if (ok) { pg.estado = 'aprobado'; pg.ano = U.anio(); g.estab = Math.min(100, g.estab + 6); g.aprob += 0.5; C.Noticias.poner(E, 'economia', 'Las Cortes aprueban los Presupuestos Generales del Estado.', 'ES'); }
+      else { pg.estado = 'prorrogado'; g.estab -= 4; C.Noticias.poner(E, 'economia', 'Los Presupuestos fracasan en las Cortes y se prorrogan.', 'ES'); }
+    },
+
+    /* ── Iniciativas del presidente y de los ministros ── */
+    catalogo(E) {
+      const g = E.paises.ES.gob, ab = C.Congreso.abiertos(E).map(p => p.tpl);
+      return D().leyes.filter(l => !l.manual && !l.rdlSolo || l.id === 'indultos').filter(l => !ab.includes(l.id)).map(l => {
+        const pr = C.Congreso.proyectar(E, { may: l.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: l.pop, t: l.t, eco: l.eco, soc: l.soc, eu: l.eu, ter: l.ter, costo: l.costo, apoyo: {}, region: l.region });
+        return { tpl: l, pr };
+      });
+    },
+
+    /* El presidente del Gobierno lleva una iniciativa al Consejo. */
+    iniciativaPM(E, tplId, via) {
+      const g = E.paises.ES.gob, tpl = C.Congreso.plantilla(tplId); if (!tpl) return 'No existe';
+      if (Cn.enFunciones(E)) return 'El Gobierno está en funciones';
+      const autor = { tipo: 'gobierno', pid: g.partido };
+      if (via === 'rdl') {
+        if (!tpl.rdl && !tpl.rdlSolo) return 'Esta materia no puede regularse por decreto-ley (ley orgánica o reforma constitucional)';
+        const p = C.Congreso.registrarRDL(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el real decreto-ley «${tpl.t}».`, 'ES'); return true;
+      }
+      if (tpl.rdlSolo) return 'Sólo puede aprobarse por decreto';
+      C.Congreso.proponer(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley «${tpl.t}».`, 'ES'); return true;
+    },
+
+    /* Un ministro (jugador) propone algo de su sector al presidente. */
+    propuestaMinistro(E, tplId) {
+      const J = E.jugador, g = E.paises.ES.gob, pm = E.politicos[g.pm], tpl = C.Congreso.plantilla(tplId);
+      if (!tpl) return 'No existe';
+      const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
+      const s = 0.85 - 2.0 * dist + pr.dist / 175 * 0.8 + (J.partido !== g.partido ? -0.1 : 0.15) + J.prestigio / 400;
+      if (s > 0.1) { const autor = { tipo: 'gobierno', pid: g.partido, ministerio: J.ministerio, jugador: true }; C.Congreso.proponer(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba «${tpl.t}», impulsado por ${J.nombre}.`, 'ES'); return true; }
+      return s > -0.25 ? 'El presidente la deja «sobre la mesa»: faltan apoyos' : 'El presidente la veta: no encaja con la línea del Gobierno';
+    },
+
+    /* ── Turno ── */
+    turno(E) {
+      const P = E.paises.ES, g = P.gob, cs = E.esp.consejo, t = E.fecha.t, c = E.esp.cortes; if (!g) return;
+      // Satisfacción de los socios
+      for (const k of g.coalicion.concat(g.apoyoExterno || [])) {
+        if (cs.sat[k] == null) cs.sat[k] = 60;
+        cs.sat[k] = U.clamp(cs.sat[k] + (60 - cs.sat[k]) * 0.012 + U.gauss(0, 0.5), 0, 100);
+      }
+      Object.keys(cs.sat).forEach(k => { if (!g.coalicion.includes(k) && !(g.apoyoExterno || []).includes(k)) delete cs.sat[k]; });
+      const socios = g.coalicion.filter(k => k !== g.partido);
+      cs.tension = socios.length ? U.clamp(100 - U.prom(socios.map(k => cs.sat[k] || 60)), 0, 100) : 0;
+      cs.autoridad = U.clamp(cs.autoridad + (60 - cs.autoridad) * 0.01, 10, 100);
+      if (cs.tension > 40) g.estab -= (cs.tension - 40) * 0.002;
+      // Ruptura de socio
+      for (const k of socios) if (cs.sat[k] < 14 && U.chance(0.04) && !(E.jugador && E.jugador.partido === k && E.jugador.rol === 'lider')) { Cn.rompe(E, k); break; }
+      if (Cn.enFunciones(E)) {
+        // Sólo despacho ordinario: se pueden aplicar fondos y poco más
+        cs.agenda = cs.agenda.filter(i => i.urgente);
+        return;
+      }
+      // Puntos del día
+      Cn.generar(E);
+      // Desafío soberanista: decisión del presidente
+      const pr = E.esp.proces;
+      if (pr.fase === 'unilateral' && pr.decidir && !cs.agenda.some(i => i.tipo === 'proces')) {
+        Cn.nuevo(E, { tipo: 'proces', titulo: 'Desafío unilateral en Cataluña', desc: 'El Parlament ha convocado un referéndum de independencia sin acuerdo. El Consejo de Ministros debe decidir su respuesta.', urgente: true, limite: pr.limite, region: 'CAT', quien: { tipo: 'pm' } });
+      }
+      // Presupuestos: primera semana de octubre
+      const f = U.hoy();
+      if (f.getUTCMonth() === 9 && f.getUTCDate() <= 7 && E.esp.pge.ano < f.getUTCFullYear() && !E.esp.pge.tramite && !cs.agenda.some(i => i.tipo === 'pge') && c.estado === 'activa')
+        Cn.nuevo(E, { tipo: 'pge', titulo: 'Presupuestos Generales del Estado', desc: `Plazo para presentar los Presupuestos de ${f.getUTCFullYear() + 1}. Los socios exigen compromisos.`, urgente: false, limite: t + 4, quien: { tipo: 'pm' } });
+      // IA decide o caduca
+      const pmJ = Cn.pmEsJ(E);
+      for (const it of cs.agenda.slice()) {
+        if (!pmJ) Cn.decidirIA(E, it);
+        else if (t > it.limite) { if (it.tipo === 'proces') continue; cs.agenda.splice(cs.agenda.indexOf(it), 1); Cn.sat(E, it.quien.pid && it.quien.pid !== g.partido ? it.quien.pid : null, -3); }
+      }
+      // Seguimiento de los Presupuestos en tramitación
+      const pg = E.esp.pge;
+      if (pg.tramite) { const p = E.proyectos[pg.tramite]; if (!p || p.etapa === 'archivada' || p.etapa === 'rechazada') Cn.alFinalizar(E, Object.assign({ pge: true }, p || {}), false); }
+    },
+
+    /* Un socio abandona el Gobierno. */
+    rompe(E, pid) {
+      const g = E.paises.ES.gob, cs = E.esp.consejo, J = E.jugador;
+      g.coalicion = g.coalicion.filter(k => k !== pid);
+      const sp = E.partidos[pid];
+      if (U.chance(0.5)) { g.apoyoExterno = (g.apoyoExterno || []).concat(pid); cs.sat[pid] = 45; sp.postura = 'apoyo'; } else { delete cs.sat[pid]; sp.postura = 'oposicion'; }
+      g.estab = Math.max(0, g.estab - 14); g.tipo = 'minoria';
+      C.Ejecutivo.repartirMinisterios(E);
+      C.Noticias.poner(E, 'politica', `${sp.sigla} abandona el Gobierno de coalición: los ministros dimiten y se reparten sus carteras.`, 'ES');
+      if (J && J.pais === 'ES') C.Eventos.info(E, '💥 Crisis de Gobierno', `${sp.nombre} rompe la coalición. El Gobierno queda en minoría y la estabilidad cae.`);
+    },
+
+    /* Remodelación del Gobierno (acción del presidente). */
+    remodelar(E) {
+      const g = E.paises.ES.gob, cs = E.esp.consejo;
+      if (E.fecha.t - cs.remodelado < 26) return 'Acabas de remodelar el Gobierno';
+      cs.remodelado = E.fecha.t;
+      C.Ejecutivo.repartirMinisterios(E); g.aprob += 1.2; cs.autoridad = Math.min(100, cs.autoridad + 4);
+      C.Noticias.poner(E, 'gobierno', 'El presidente remodela el Gobierno y renueva siete carteras.', 'ES');
+      return true;
+    },
+
+    /* Cuestión de confianza. */
+    cuestionConfianza(E) {
+      const g = E.paises.ES.gob, c = E.esp.cortes, Ej = C.Ejecutivo;
+      if (c.estado !== 'activa') return 'No es posible ahora';
+      const plan = { cand: g.partido, bloque: g.coalicion.concat(g.apoyoExterno || []), aceptadas: {} }, ev = Ej.evaluar(E, g.partido, plan);
+      if (ev.si > ev.no) { g.estab = Math.min(100, g.estab + 10); C.Noticias.poner(E, 'politica', `El presidente supera la cuestión de confianza (${ev.si} votos a favor).`, 'ES'); return true; }
+      C.Noticias.poner(E, 'politica', `El Congreso niega la confianza al Gobierno (${ev.si} a favor, ${ev.no} en contra).`, 'ES');
+      c.estado = 'consultas'; c.tConsulta = E.fecha.t + 1; c.fallidos = []; c.t1 = null; c.investidura = null; g.enFunciones = true;
+      return 'derrota';
+    },
+
+    pendientesJugador(E) { return Cn.pmEsJ(E) ? E.esp.consejo.agenda.filter(i => i.urgente) : []; }
+  };
+
+  C.Consejo = Cn;
+  C.Tiempo.registrar('consejo', Cn, 30);
+})(window.ESP);

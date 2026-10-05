@@ -1,9 +1,0 @@
-/* Service worker de Curul Europa: funciona sin conexión (caché primero, red como respaldo). */
-const CACHE = 'curul-europa-v2';
-const ARCHIVOS = ["./", "index.html", "css/base.css", "css/layout.css", "css/componentes.css", "css/pantallas.css", "css/europa.css", "data/paises.js", "data/partidos.js", "data/nombres.js", "data/instituciones.js", "data/leyes.js", "data/ue.js", "data/eventos.js", "js/core/util.js", "js/core/bus.js", "js/core/estado.js", "js/core/tiempo.js", "js/core/acciones.js", "js/sistemas/economia.js", "js/sistemas/opinion.js", "js/sistemas/mundo.js", "js/sistemas/elecciones.js", "js/sistemas/gobierno.js", "js/sistemas/parlamento.js", "js/sistemas/ue.js", "js/sistemas/eventos.js", "js/sistemas/personaje.js", "js/sistemas/guardado.js", "js/ui/dom.js", "js/ui/graficos.js", "js/ui/hemiciclo.js", "js/ui/mosaico.js", "js/ui/componentes.js", "js/pantallas/inicio.js", "js/pantallas/creacion.js", "js/pantallas/dashboard.js", "js/pantallas/agenda.js", "js/pantallas/parlamento.js", "js/pantallas/leyes.js", "js/pantallas/gobierno.js", "js/pantallas/partido.js", "js/pantallas/europa.js", "js/pantallas/elecciones.js", "js/pantallas/pais.js", "js/pantallas/personaje.js", "js/pantallas/partidas.js", "js/app.js"];
-self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting())); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('curul-europa-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => { const copia = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copia)); return res; }).catch(() => caches.match('index.html'))));
-});

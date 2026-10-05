@@ -26,11 +26,12 @@ El service worker v42 invalida las cachés anteriores cuando se activa.
 
 El JavaScript embebido en `index.html` y `sw.js` fue validado con `node --check`.
 
-## Nuevo: CURUL EUROPA
+## Nuevo: CURUL ESPAÑA
 
-En la carpeta [`europa/`](europa/) está **Curul Europa**: el mismo estilo de simulación política, pero jugando con un
-partido de cualquiera de los 27 Estados de la UE, el Reino Unido o los 9 candidatos a la adhesión, con Consejo,
-Parlamento Europeo y Comisión. Ver [`europa/README.md`](europa/README.md).
+En la carpeta [`espana/`](espana/) está **Curul España**: el mismo estilo de simulación política que Curul, pero centrado
+en España: comunidades autónomas, municipios, generales anticipadas, Cortes con Senado y veto, investiduras con pactos,
+**Consejo de Ministros**, estatutos de autonomía, independentismo (procés, 155, Tribunal Constitucional) y Unión Europea.
+Ver [`espana/README.md`](espana/README.md).
 
 ## CURUL (Colombia)
 
