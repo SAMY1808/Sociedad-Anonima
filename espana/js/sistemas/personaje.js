@@ -324,11 +324,22 @@ window.ESP = window.ESP || {};
     },
 
     /* Hasta que cambie el territorio: cambia de comunidad al ser elegido/a por otra. */
-    mudarRegion(E, c) {
+    mudarRegion(E, c, conservaEscano) {
       const J = E.jugador;
       if (J.region && J.region !== c) { Pj.dejar(E, 'local'); Pj.dejar(E, 'autonomico'); J.muni = null; J.areaMuni = null; }
-      if (J.nivel === 'nacional' || J.electo) Pj.dejarNacional(E, 'a la política autonómica', true);
-      J.region = c; J.circ = Pj.mejorProvincia(E, J.partido, c); J.consejeria = null;
+      if (!conservaEscano && (J.nivel === 'nacional' || J.electo)) Pj.dejarNacional(E, 'a la política autonómica', true);
+      J.region = c; J.consejeria = null;
+      if (conservaEscano) J.circNueva = Pj.mejorProvincia(E, J.partido, c); else { J.circ = Pj.mejorProvincia(E, J.partido, c); J.circNueva = null; }
+    },
+
+    /* Comunidades donde tu partido está presente, con la probabilidad de que la dirección acepte tu traslado. */
+    opcionesComunidad(E) {
+      const J = E.jugador, T = C.Territorio, rolB = ({ direccion: 0.12, portavoz: 0.06, lider: 0.25 })[J.rol] || 0;
+      return T.ids().filter(c => c !== J.region).map(c => {
+        const rc = E.esp.ccaa[c], esc = rc.parl.escanos[J.partido] || 0, total = U.suma(Object.values(rc.parl.escanos));
+        const p = clamp(0.28 + (J.prestigio - 35) / 110 + rolB + f(E, 'negociacion', 'carisma') * 0.2 + (esc >= 10 ? 0.08 : 0), 0.08, 0.85);
+        return { c, nombre: D().ccaa[c].nombre, esc, total, p, t: rc.parl.proxT, gob: rc.gob ? rc.gob.partido : null };
+      }).filter(o => o.esc > 0 && !rc0(E, o.c)).sort((a, b) => b.esc - a.esc);
     },
 
     /* Antes de formar gobierno tras unas autonómicas: la cabeza de lista del jugador es quien se presenta a la investidura. */
@@ -448,6 +459,7 @@ window.ESP = window.ESP || {};
   };
 
   /* ── Acciones del jugador ── */
+  const rc0 = (E, c) => !!E.esp.ccaa[c].suspendida;
   const A = (id, o) => C.Acciones.registrar(Object.assign({ id, costo: 1 }, o));
   const enParl = E => Pj.enParlamento(E) || 'Necesitas un escaño en el Congreso';
   const f = (E, ...ks) => U.suma(ks.map(k => E.jugador.atrib[k])) / (10 * ks.length);   // 0..1
@@ -849,6 +861,31 @@ window.ESP = window.ESP || {};
     ejecutar(E) { const m = muJ(E), x = f(E, 'negociacion', 'carisma'); m.aprob = clamp(m.aprob + 0.6 + x, 10, 90); Pj.cambiar(E, { prestigio: 0.8 }); return { ok: true, msg: 'Los presupuestos municipales salen adelante.' }; }
   });
   /* — Ascenso entre niveles — */
+  A('cambiar_comunidad', {
+    nombre: 'Cambiar de comunidad', icono: '🚚', costo: 3, grupo: 'carrera',
+    desc: 'Traslada tu carrera a otra comunidad autónoma donde tu partido tenga presencia. Dejas tus cargos locales o autonómicos actuales; si eres diputado/a conservas el escaño hasta las próximas generales.',
+    disponible(E) {
+      const J = E.jugador, pa = E.partidos[J.partido];
+      if (Pj.esUE(E)) return 'Vuelve primero a la política española';
+      if (pa.amb === 'reg') return 'Tu partido sólo se presenta en ' + D().ccaa[pa.region].nombre;
+      if (['pm', 'ministro', 'presauto', 'alcalde'].includes(J.cargo)) return 'Debes dejar tu cargo ejecutivo antes de trasladarte';
+      if (J.regT != null && E.fecha.t - J.regT < 52) return 'Te trasladaste hace poco: espera unos meses';
+      if (J.prestigio < 35) return 'Necesitas prestigio 35+';
+      return true;
+    },
+    ejecutar(E, a) {
+      const J = E.jugador, c = a.c, d = D().ccaa[c]; if (!d || c === J.region) return { ok: false, msg: 'Comunidad no válida' };
+      const o = Pj.opcionesComunidad(E).find(x => x.c === c); if (!o) return { ok: false, msg: 'Tu partido no tiene presencia allí' };
+      J.regT = E.fecha.t;
+      if (!U.chance(o.p)) { Pj.cambiar(E, { prestigio: -2 }, true); Pj.log(E, `La dirección regional de ${d.nombre} no te quiere en sus filas.`); return { ok: true, exito: false, msg: 'La dirección de ' + d.nombre + ' rechaza tu llegada.' }; }
+      const sentado = J.nivel === 'nacional' && J.electo;
+      Pj.mudarRegion(E, c, sentado);
+      if (J.aspira && J.aspira.nivel !== 'nacional') J.aspira = null;
+      Pj.sincronizar(E);
+      Pj.log(E, `Te trasladas a ${d.nombre}${sentado ? ': conservas tu escaño en el Congreso y en las próximas generales irás por ' + D().provincias[J.circNueva][0] : ''}.`);
+      return { ok: true, msg: 'Ahora tu carrera está en ' + d.nombre + '.' };
+    }
+  });
   A('cambiar_provincia', {
     nombre: 'Cambiar de provincia', icono: '🧭', costo: 2, grupo: 'carrera',
     desc: 'Pide a tu partido ir en la lista de otra provincia: más escaños, un feudo más seguro o dar el salto a otra comunidad. Si ya eres diputado/a, el cambio vale desde las próximas generales.',
