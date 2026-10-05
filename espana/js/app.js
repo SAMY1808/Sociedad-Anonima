@@ -90,7 +90,8 @@ window.ESP = window.ESP || {};
       const E = C.E;
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = App.badges(E, mios);
-      const items = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni]));
+      const aut = E.jugador.nivel === 'autonomico' && E.jugador.region && E.esp.ccaa[E.jugador.region].gob;
+      const items = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', 1] : n && n[0] === 'ayuntamiento' && E.jugador.nivel === 'local' ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
       const enBarra = items.some(n => n && n[4] && n[0] === E.ui.pantalla);
       const masN = items.reduce((a, n) => a + (n && !n[4] ? (+badges[n[0]] || 0) : 0), 0);
       document.getElementById('nav').innerHTML = items.map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}${n[4] ? ' princ' : ''}"><span class="ic">${n[1]}</span><span class="largo">${n[2]}</span><span class="corto">${n[3]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('')

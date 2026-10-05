@@ -122,7 +122,7 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c]; if (!rc.comp) return;
       for (const k in D().competencias) if (rc.comp[k] == null) rc.comp[k] = (D().compEspecial[c] && D().compEspecial[c][k] != null) ? D().compEspecial[c][k] : D().compBase[k];
       rc.gestion = rc.gestion || {}; for (const a in D().consejerias) if (rc.gestion[a] == null) rc.gestion[a] = U.clamp(U.gauss(50, 9), 28, 74);
-      rc.obras = rc.obras || []; if (rc.gob && !rc.pres && rc.gob.estr) T.presInit(E, c);
+      rc.obras = rc.obras || []; rc.agenda = rc.agenda || []; rc.hist = rc.hist || []; if (rc.gob && !rc.pres && rc.gob.estr) T.presInit(E, c);
       if (rc.gob && !rc.gob.estr) T.repartirConsejerias(E, c);
     },
 
@@ -163,6 +163,7 @@ window.ESP = window.ESP || {};
         const def = T.presDefault(E, c); p.off = {};
         Object.keys(p.alloc).forEach(k => { p.cred[k] = p.alloc[k] / 100 * p.total * 0.22; p.gastado[k] = 0; p.off[k] = U.clamp((p.alloc[k] / (def[k] || 1) - 1) * 12 + tr.def * 1.5, -10, 12); });
         g.estab = U.clamp(g.estab + 4, 0, 100);
+        T.acuerdo(E, c, `Se aprueban los presupuestos de ${p.ano + 1}.`);
         C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba los presupuestos de ${p.ano + 1} (${U.d1(p.total)} mil millones).`, 'ES');
         if (suyo) C.Personaje.log(E, `Se aprueban los presupuestos autonómicos de ${nom} (${U.d1(p.total)} mil millones).`);
       } else {
@@ -186,6 +187,31 @@ window.ESP = window.ESP || {};
       if (p.def) rc.deuda = U.clamp(rc.deuda + p.def * 0.012, 3, 120);
     },
 
+    /* ── Consejo de Gobierno autonómico ── */
+    acuerdo(E, c, txt) { const rc = E.esp.ccaa[c]; rc.hist = rc.hist || []; rc.hist.unshift({ t: E.fecha.t, txt }); if (rc.hist.length > 40) rc.hist.length = 40; },
+    consejoGenerar(E, c) {
+      const rc = E.esp.ccaa[c], g = rc.gob, J = E.jugador; if (!g || !J || J.region !== c || J.cargo !== 'presauto') return;
+      rc.agenda = (rc.agenda || []).filter(i => E.fecha.t - i.t <= 4);
+      if (rc.agenda.length >= 4 || !U.chance(0.22)) return;
+      const gr = U.pesado(T.grupos(E, c).filter(x => x.id !== 'pre'), x => x.peso), pr = U.pick(T.programasDe(E, c, gr.id)), h = g.consej && g.consej[gr.id];
+      if (!pr || rc.agenda.some(i => i.prog === pr.id) || rc.pend.some(p => p.tipo === 'prog' && p.prog === pr.id)) return;
+      rc.agenda.push({ id: U.id('cg'), t: E.fecha.t, prog: pr.id, area: gr.id, quien: h && h !== 'J' ? h.n : 'La consejería' });
+    },
+    resolverItemGob(E, c, id, k) {
+      const rc = E.esp.ccaa[c], i = (rc.agenda || []).findIndex(x => x.id === id); if (i < 0) return { ok: false, msg: 'El punto ya no está en el orden del día' };
+      const it = rc.agenda.splice(i, 1)[0], pr = T.programa(it.prog);
+      if (k === 'rechazar') { T.acuerdo(E, c, `Se rechaza «${pr.n}».`); return { ok: true, msg: 'Rechazado' }; }
+      if (k === 'aplazar') return { ok: true, msg: 'Aplazado' };
+      const r = T.iniciarPrograma(E, c, it.prog, false); if (!r.ok) T.acuerdo(E, c, `No se puede aprobar «${pr.n}»: ${r.msg}`); return r;
+    },
+    /* Un consejero (jugador) lleva un programa al Consejo de Gobierno: el presidente decide. */
+    llevarAlConsejo(E, c, progId) {
+      const J = E.jugador, g = E.esp.ccaa[c].gob, pr = T.programa(progId);
+      const p = U.clamp(0.62 + (J.prestigio - 40) / 200 + (J.partido === g.partido ? 0.12 : -0.05) + (pr.tipo === 'accion' ? 0.1 : 0), 0.3, 0.93);
+      if (!U.chance(p)) { T.acuerdo(E, c, `El presidente aplaza «${pr.n}», propuesta de ${J.nombre}.`); return { ok: true, exito: false, msg: `El Consejo de Gobierno aplaza «${pr.n}»: el presidente prefiere esperar.` }; }
+      return T.iniciarPrograma(E, c, progId, false);
+    },
+
     /* ── Programas de consejería: obras, leyes autonómicas y planes ── */
     programa(id) { for (const a in D().programas) { const p = D().programas[a].find(x => x.id === id); if (p) return p; } return null; },
     programasDe(E, c, head) { return T.infoGrupo(E, c, head).atoms.flatMap(a => D().programas[a] || []); },
@@ -200,6 +226,7 @@ window.ESP = window.ESP || {};
       const pres = T.presInit(E, c), head = T.cabezaDe(E, c, prog.area), coste = Math.max(0.05, Math.round(Math.abs(prog.deuda) * 80) / 100);
       if ((pres.cred[head] || 0) < coste) return { ok: false, msg: `Sin crédito: tu consejería tiene ${U.d1(pres.cred[head] || 0)} mil millones y el programa cuesta ${U.d1(coste)}. Pide más presupuesto o espera al próximo ejercicio.` };
       pres.cred[head] -= coste; pres.gastado[head] = (pres.gastado[head] || 0) + coste;
+      T.acuerdo(E, c, `Se pone en marcha «${prog.n}».`);
       if (prog.tipo === 'accion') { T.aplicarPrograma(E, c, prog, eff, ia); return { ok: true, msg: `${prog.n}: aplicado.` }; }
       if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.22, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
       const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
@@ -319,7 +346,7 @@ window.ESP = window.ESP || {};
       const t = E.fecha.t, cs = E.esp.consejo;
       for (const c of T.ids()) {
         const rc = E.esp.ccaa[c], d = D().ccaa[c], g = rc.gob; if (!g || !rc.comp) continue;
-        T.asegurarAut(E, c); T.presTurno(E, c);
+        T.asegurarAut(E, c); T.presTurno(E, c); T.consejoGenerar(E, c);
         // Los gobiernos de la IA impulsan de vez en cuando obras, leyes y planes
         if (U.chance(0.012) && !(E.jugador && E.jugador.region === c && ['consejero', 'presauto'].includes(E.jugador.cargo))) { const gr = U.pesado(T.grupos(E, c), x => x.peso), pr = U.pick(T.programasDe(E, c, gr.id)); if (pr) T.iniciarPrograma(E, c, pr.id, true); }
         // Gestión de cada consejería y su efecto en la aprobación

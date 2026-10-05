@@ -8,6 +8,7 @@ window.ESP = window.ESP || {};
   const Cn = C.Pantallas.consejo = {
     render(el, params) {
       const E = C.E, J = E.jugador, P = E.paises.ES, g = P.gob, cs = E.esp.consejo;
+      if (J.nivel === 'autonomico' && J.region && E.esp.ccaa[J.region].gob) return C.Pantallas.consejoGob.render(el, params);
       const tab = (params && params.tab) || E.ui.tabCons || 'consejo';
       E.ui.tabCons = tab;
       const pm = E.politicos[g.pm], esPM = C.Consejo.pmEsJ(E);
@@ -62,6 +63,7 @@ window.ESP = window.ESP || {};
       return `<div class="grid g-dash"><div class="col">
         ${en ? '<div class="nota">El Gobierno está <b>en funciones</b>: sólo despacha asuntos ordinarios hasta que se forme un nuevo Ejecutivo.</div>' : ''}
         ${cs.agenda.length ? cs.agenda.map(it => Cn.itemHTML(E, it, esPM)).join('') : `<div class="tarjeta"><div class="vacio">${esPM ? 'El orden del día está vacío esta semana. Puedes llevar tus propias iniciativas en la pestaña <b>Iniciativas</b>.' : 'El presidente despacha cada martes el orden del día. Lee los acuerdos recientes en la pestaña <b>Acuerdos</b>.'}</div></div>`}
+        ${!esPM && E.jugador.cargo !== 'ministro' ? '<div class="nota">ℹ️ <b>Sólo recibes información</b>: no formas parte del Consejo de Ministros. Aquí ves el orden del día y los acuerdos, pero no participas en las decisiones.</div>' : ''}
         ${!esPM ? '<div class="tarjeta"><p class="tenue" style="margin:0;font-size:13px">No presides el Consejo: tus puntos de agenda te permiten <b>proponer iniciativas</b> (como ministro/a), <b>presionar a tu socio</b> o <b>engrasar la coalición</b>.</p></div>' : ''}</div>
         <div class="col"><div class="tarjeta"><h3>Estado del Gobierno</h3>${G.medidor(g.aprob, { tam: 150, etq: 'APROBACIÓN' })}
           <div class="lista" style="font-size:13px;margin-top:6px"><div class="it"><span class="tenue" style="width:150px">Presupuestos</span><b>${pg.estado === 'aprobado' ? 'Aprobados' : 'Prorrogados'}${pg.tramite ? ' · en trámite' : ''}</b></div><div class="it"><span class="tenue" style="width:150px">Autoridad del presidente</span><b>${Math.round(cs.autoridad)}</b></div><div class="it"><span class="tenue" style="width:150px">Tensión en la coalición</span><b class="${cs.tension > 50 ? 'mal' : cs.tension > 30 ? 'alerta' : 'bien'}">${Math.round(cs.tension)} %</b></div></div></div>

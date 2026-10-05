@@ -733,7 +733,7 @@ window.ESP = window.ESP || {};
     }
   });
   A('programa_consejeria', {
-    nombre: 'Impulsar un programa de tu consejería', icono: '🏗️', costo: (E, a) => { const pr = a && a.prog && C.Territorio.programa(a.prog); return pr ? pr.pts : 2; }, grupo: 'autonomico',
+    nombre: 'Llevar un programa al Consejo de Gobierno', icono: '🏗️', costo: (E, a) => { const pr = a && a.prog && C.Territorio.programa(a.prog); return pr ? pr.pts : 2; }, grupo: 'autonomico',
     desc: 'Construye un hospital o un colegio, refuerza un servicio o propón una ley autonómica de tu área. Necesitas competencias transferidas.',
     disponible(E, a) {
       const J = E.jugador; if (!['consejero', 'presauto'].includes(J.cargo)) return 'Sólo consejeros/as y presidentes/as autonómicos/as';
@@ -742,7 +742,7 @@ window.ESP = window.ESP || {};
       if (J.cargo === 'consejero' && !C.Territorio.infoGrupo(E, J.region, J.area).atoms.includes(pr.area)) return 'Ese programa no es de tu consejería';
       return true;
     },
-    ejecutar(E, a) { const J = E.jugador, r = C.Territorio.iniciarPrograma(E, J.region, a.prog, false); if (r.ok) Pj.cambiar(E, { prestigio: 0.8, pop: 0.4 }); return r; }
+    ejecutar(E, a) { const J = E.jugador, r = J.cargo === 'consejero' ? C.Territorio.llevarAlConsejo(E, J.region, a.prog) : C.Territorio.iniciarPrograma(E, J.region, a.prog, false); if (r.ok && r.exito !== false) Pj.cambiar(E, { prestigio: 0.8, pop: 0.4 }); return r; }
   });
   A('reorganizar_gobierno', {
     nombre: 'Reorganizar el Gobierno (número de consejerías)', icono: '🧩', costo: 2, grupo: 'autonomico', desc: 'Presidente/a: decide cuántas consejerías tiene tu Gobierno (de 7 a 15) y cómo se agrupan las competencias. Tendrás que volver a repartir las carteras.',
