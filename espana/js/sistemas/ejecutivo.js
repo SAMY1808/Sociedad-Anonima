@@ -129,6 +129,12 @@ window.ESP = window.ESP || {};
       }
       if (!o.inicial) { const coste = U.suma(Object.values(aceptadas).flat().map(d => D().demandas[d] ? D().demandas[d].coste : 0)); P.gob.aprob = U.clamp(P.gob.aprob - coste * 0.35, 25, 70); }
       if (E.parl && E.parl.miembros && E.parl.miembros.length) Ej.repartirMinisterios(E);
+      if (!o.inicial && E.jugador && E.jugador.pais === 'ES') {
+        const J = E.jugador;
+        if (P.gob.pm === 'J') E.esp.pendienteGabinete = { key: 'central', formacion: true };
+        else if (P.gob.coalicion.includes(J.partido) && J.rol === 'lider') E.esp.pendienteGabinete = { key: 'central', formacion: true, solo: J.partido };
+        if (E.esp.gab) E.esp.gab.pool = {};
+      }
       if (!o.inicial) {
         C.Noticias.poner(E, 'politica', `${lider ? lider.n : 'Un nuevo líder'} (${Ej.sig(E, cand)}) ${o.censura ? 'es investido presidente/a tras una moción de censura' : 'es investido presidente/a del Gobierno'} con ${plan.ev.si} votos${coal.length > 1 ? ', en coalición con ' + coal.filter(k => k !== cand).map(k => Ej.sig(E, k)).join(', ') : ''}.`, 'ES');
         if (E.jugador && E.jugador.pais === 'ES' && C.Personaje.sincronizar) C.Personaje.sincronizar(E);

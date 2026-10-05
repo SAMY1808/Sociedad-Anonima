@@ -42,6 +42,9 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
       if (await clic('.modal-fondo #nl-ok')) continue;
       if (await clic('.modal-fondo #pe-ok')) continue;
       if (await clic('.modal-fondo #np-ok')) continue;
+      if (await clic('.modal-fondo #gf-ok')) continue;
+      if (await clic('.modal-fondo [data-o="respaldar"]')) continue;
+      if (await clic('.modal-fondo [data-nom]')) continue;
       if (await clic('.modal-fondo [data-op]')) continue;
       if (await clic('.modal-fondo [data-v]')) continue;
       if (await clic('.modal-fondo #b-ok')) continue;
@@ -51,7 +54,7 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
       const f2 = await pg.$('.modal-fondo'); if (f2) { await pg.evaluate(() => ESP.UI.cerrarModales()); }
     }
   };
-  const pantallas = ['dashboard', 'agenda', 'cortes', 'leyes', 'consejo', 'territorio', 'partido', 'europa', 'elecciones', 'personaje', 'partidas'];
+  const pantallas = ['dashboard', 'agenda', 'cortes', 'leyes', 'consejo', 'gabinete', 'ayuntamiento', 'territorio', 'partido', 'europa', 'elecciones', 'personaje', 'partidas'];
   const visitar = async () => {
     for (const p of pantallas) {
       await pg.click(`#nav [data-p="${p}"]`).catch(() => {}); await pg.waitForTimeout(60);
@@ -61,6 +64,14 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
       await resolver();
     }
   };
+  if (process.env.GAB) {
+    await pg.evaluate(() => { const E = ESP.E; E.esp.pendienteGabinete = { key: 'central', formacion: true }; ESP.App.revisarPendientes(); }); await pg.waitForTimeout(200); await pg.screenshot({ path: '/tmp/ui-formacion.png' });
+    await pg.click('.modal-fondo [data-c]'); await pg.waitForTimeout(200); await pg.screenshot({ path: '/tmp/ui-pool.png' });
+    await pg.click('.modal-fondo [data-nom]'); await pg.waitForTimeout(150);
+    await pg.click('#gf-ok'); await pg.waitForTimeout(150);
+    await pg.evaluate(() => ESP.App.ir('gabinete', { key: 'central' })); await pg.waitForTimeout(200); await pg.screenshot({ path: '/tmp/ui-gabinete.png' });
+    await pg.evaluate(() => { const E = ESP.E; E.esp.gab = E.esp.gab || { pool: {} }; E.esp.gab.escandalo = { cid: 'hac', id: E.paises.ES.gob.ministros.hac, t: 0 }; ESP.App.revisarPendientes(); }); await pg.waitForTimeout(200); await pg.screenshot({ path: '/tmp/ui-escandalo.png' }); await resolver();
+  }
   if (process.env.CENSURA) await pg.evaluate(() => ESP.Pantallas.elecciones.bloqueModal('censura'));
   if (process.env.DISOLVER) await pg.evaluate(() => { const E = ESP.E; E.fecha.t += 60; E.esp.cortes.ultDisolucion = -100; ESP.Generales.disolver(E, 'prueba', true); });
   await visitar();
@@ -79,7 +90,7 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
     if (i % 24 === 0) await visitar();
   }
   await visitar();
-  if (tag) { await pg.click('#nav [data-p="dashboard"]'); await pg.screenshot({ path: `/tmp/ui-${tag}-1.png` }); for (const p of ['cortes', 'consejo', 'territorio', 'elecciones']) { await pg.click(`#nav [data-p="${p}"]`); await pg.waitForTimeout(100); await pg.screenshot({ path: `/tmp/ui-${tag}-${p}.png`, fullPage: false }); } }
+  if (tag) { await pg.click('#nav [data-p="dashboard"]'); await pg.screenshot({ path: `/tmp/ui-${tag}-1.png` }); for (const p of ['cortes', 'consejo', 'territorio', 'elecciones', 'ayuntamiento']) { await pg.click(`#nav [data-p="${p}"]`); await pg.waitForTimeout(100); await pg.screenshot({ path: `/tmp/ui-${tag}-${p}.png`, fullPage: false }); } }
   if (process.env.EXTRA) {
     await pg.evaluate(() => ESP.App.ir('territorio', { tab: 'competencias' })); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-comp.png' });
     await pg.evaluate(() => ESP.Pantallas.territorio.verCcaa(ESP.E.jugador.region || 'CAT')); await pg.waitForTimeout(150); await pg.screenshot({ path: '/tmp/ui-ficha.png' }); await resolver();

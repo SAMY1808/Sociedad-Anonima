@@ -2,7 +2,7 @@
 const mini = require('./mini');
 const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
   'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
-  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
 const perfil = { semilla: +arg[0] || 11, partido: arg[1] || 'ES_ASD', nivel: arg[2] || 'nacional', rol: arg[3] || 'base', region: arg[4] || null, muni: arg[5] || null, nombre: 'Prueba', trayectoria: 'abogado', pais: 'ES' };
@@ -24,6 +24,8 @@ for (let i = 0; i < sem; i++) {
     else if (b === 'ue') { C.UE.decidir(E, 0, U.pick(['si', 'no', 'abs'])); }
     else if (b === 'noche') { E.elecciones.nochePendiente = null; E.elecciones.pePendiente = null; E.elecciones.presPendiente = null; }
     else if (b === 'investidura') { if (E.esp.pendienteSocio) C.Ejecutivo.socioJugador(E, U.pick(['si', 'abs', 'no']), []); else { const inv = E.esp.cortes.investidura; if (inv) C.Ejecutivo.investidurJugador(E, inv.plan); else E.esp.pendienteInvestidura = false; } }
+    else if (b === 'gabinete') { C.Gabinete.confirmar(E, E.esp.pendienteGabinete.key); E.esp.pendienteGabinete = null; }
+    else if (b === 'escandalo') { E.esp.gab.escandalo = null; }
     else if (b === 'consejo') { const it = E.esp.consejo.agenda.find(x => x.urgente); const ops = C.Consejo.opciones(E, it); C.Consejo.resolver(E, it.id, U.pick(ops).k); }
     else break;
   }
@@ -36,6 +38,10 @@ for (let i = 0; i < sem; i++) {
     if (id === 'ofrecer_comp') { args.region = U.pick(C.Territorio.ids()); args.comp = U.pick(Object.keys(C.DATA.competencias)); }
     if (id === 'negociar_financiacion') args.tipo = U.pick(['cesion', 'nivelacion', 'singular']);
     if (id === 'politica_fiscal') args.dir = U.pick(['bajar', 'subir']);
+    if (id === 'proyecto_urbano') args.proy = U.pick(Object.keys(C.Municipios.PROYECTOS));
+    if (id === 'politica_gasto') { args.area = U.pick(C.Municipios.AREAS); args.nivel = U.ri(0, 2); }
+    if (id === 'politica_ibi') args.dir = U.pick(['subir', 'bajar']);
+    if (id === 'fondos_municipales') args.quien = U.pick(['ccaa', 'estado', 'ue']);
     if (id === 'visita_ccaa') args.region = U.pick(C.Territorio.ids());
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }

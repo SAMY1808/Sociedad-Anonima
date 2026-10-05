@@ -25,7 +25,9 @@
 | 20 | `congreso` | 350 diputados, trámite legislativo, Senado, decretos-ley |
 | 25 | `ejecutivo` | investidura, pactos, vetos, mociones, ministerios, estabilidad |
 | 30 | `consejo` | Consejo de Ministros, socios, Presupuestos, 155 |
+| 31 | `gabinete` | ministros, consejeros y concejales como personas: rendimiento, escándalos, choques, cuotas de los socios |
 | 32 | `congreso_turno` | semana parlamentaria |
+| 12 | `ayuntamientos` | indicadores urbanos, presupuesto, pleno, proyectos, mociones locales |
 | 36–37 | `territorio_turno`, `municipios_turno` | elecciones autonómicas y municipales, procés, TC |
 | 40 | `ue` | Consejo, Parlamento Europeo, Comisión, directivas |
 | 60 | `personaje_init` | crea al jugador (tras los parlamentos) |

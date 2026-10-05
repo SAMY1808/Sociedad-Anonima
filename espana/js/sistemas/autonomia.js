@@ -103,10 +103,10 @@ window.ESP = window.ESP || {};
       areas.forEach(a => {
         const k = coal.slice().sort((x, y) => cuota[y] - cuota[x])[0]; cuota[k] -= 1;
         // El presidente se queda la Presidencia
-        const pers = C.Mundo.persona(c);
-        g.consej[a] = { n: pers.n, g: pers.g, p: k };
+        g.consej[a] = C.Gabinete.nueva(E, { region: c, partido: k, esp: C.Gabinete.cargos(E, 'aut:' + c).find(x => x.id === a).esp });
       });
-      g.consej.pre = { n: (E.politicos[g.pres] || {}).n || '—', g: (E.politicos[g.pres] || {}).g || 'm', p: g.partido, pres: true };
+      g.consej.pre = Object.assign(C.Gabinete.nueva(E, { region: c, partido: g.partido, esp: 'ins', perfil: 'politico' }), { n: (E.politicos[g.pres] || {}).n || '—', g: (E.politicos[g.pres] || {}).g || 'm', pres: true });
+      if (E.jugador && g.pres === 'J' && !E.meta.presim) E.esp.pendienteGabinete = { key: 'aut:' + c, formacion: true };
       if (keep && coal.includes(J.partido)) g.consej[keep] = 'J';
       else if (J && J.consejeria === c) { J.consejeria = null; J.area = null; }
     },
@@ -116,7 +116,7 @@ window.ESP = window.ESP || {};
     areasDe(E, c, pid) { const g = E.esp.ccaa[c].gob; if (!g || !g.consej) return []; return Object.keys(g.consej).filter(a => { const h = g.consej[a]; return h !== 'J' && h && h.p === pid && !h.pres; }); },
     tomarConsejeria(E, c, area) {
       const J = E.jugador, g = E.esp.ccaa[c].gob; if (!g || !g.consej) return false;
-      if (J.consejeria === c && J.area && g.consej[J.area] === 'J') { const pers = C.Mundo.persona(c); g.consej[J.area] = { n: pers.n, g: pers.g, p: J.partido }; }
+      if (J.consejeria === c && J.area && g.consej[J.area] === 'J') { g.consej[J.area] = C.Gabinete.nueva(E, { region: c, partido: J.partido, esp: C.Gabinete.cargos(E, 'aut:' + c).find(x => x.id === J.area).esp }); }
       g.consej[area] = 'J'; J.consejeria = c; J.area = area; return true;
     },
 

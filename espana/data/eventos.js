@@ -387,6 +387,45 @@ ESP.DATA = ESP.DATA || {};
     ]
   });
 
+  /* ── Alcaldía ── */
+  const alc = (E, J) => J.cargo === 'alcalde' && !!E.esp.muni.m[J.muni];
+  const sh = (m, k, d) => { m.shock[k] = (m.shock[k] || 0) + d; };
+  ev({
+    id: 'okupacion_barrio', titulo: 'Conflicto por una vivienda ocupada', icono: '🏚️', peso: 0.9, cd: 80, req: alc,
+    texto: (E, J) => `Vecinos de un barrio de ${mJ(E).nombre} reclaman al ayuntamiento que actúe contra una ocupación que ha degenerado en peleas y denuncias.`,
+    opciones: [
+      { t: 'Reforzar la policía local y coordinarte con la judicial', ef: (E, J) => { sh(mJ(E), 'seguridad', 6); mJ(E).tension = clamp(mJ(E).tension - 4, 0, 100); Pj().cambiar(E, { pop: J.soc > 10 ? 2 : -0.5 }); return 'La situación se encauza.'; } },
+      { t: 'Mediación social y realojo', ef: (E, J) => { sh(mJ(E), 'empleo', 2); sh(mJ(E), 'vivienda', 3); mJ(E).deuda += 0.8; Pj().cambiar(E, { pop: J.soc < 0 ? 2 : -0.5, prestigio: 1 }); return 'Se logra un acuerdo, a un coste.'; } },
+      { t: 'Dejarlo en manos de los juzgados', ef: (E, J) => { mJ(E).tension = clamp(mJ(E).tension + 5, 0, 100); mJ(E).aprob = clamp(mJ(E).aprob - 1.2, 10, 90); return 'Los vecinos se sienten abandonados.'; } }
+    ]
+  });
+  ev({
+    id: 'obras_caoticas', titulo: 'Obras caóticas en el centro', icono: '🚧', peso: 0.9, cd: 90, req: alc,
+    texto: (E, J) => `Las obras de un gran proyecto en ${mJ(E).nombre} se retrasan y los comerciantes, hartos, anuncian movilizaciones.`,
+    opciones: [
+      { t: 'Compensar a los comercios afectados', ef: (E, J) => { mJ(E).deuda += 1; mJ(E).aprob = clamp(mJ(E).aprob + 0.8, 10, 90); Pj().cambiar(E, { prestigio: 1 }); return 'Calmas los ánimos.'; } },
+      { t: 'Acelerar las obras con turnos de noche', ef: (E, J) => { mJ(E).deuda += 0.6; sh(mJ(E), 'movilidad', 3); return 'Terminan antes de lo previsto.'; } },
+      { t: 'Culpar a la contrata', ef: (E, J) => { mJ(E).aprob = clamp(mJ(E).aprob - 0.6, 10, 90); Pj().cambiar(E, { prestigio: -0.5 }); return 'Tu explicación convence a pocos.'; } }
+    ]
+  });
+  ev({
+    id: 'macroevento', titulo: 'Oportunidad de un gran evento', icono: '🎡', peso: 0.7, cd: 120, req: alc,
+    texto: (E, J) => `Una federación internacional propone a ${mJ(E).nombre} acoger un gran evento deportivo-cultural. Atraería turismo y prestigio, pero exigiría inversiones.`,
+    opciones: [
+      { t: 'Presentar la candidatura', ef: (E, J) => { const m = mJ(E), ok = U().chance(0.4 + J.atrib.negociacion * 0.04); if (ok) { sh(m, 'cultura', 14); sh(m, 'empleo', 5); m.deuda += 6; m.aprob = clamp(m.aprob + 3, 10, 90); Pj().cambiar(E, { prestigio: 4, pop: 3 }); return '¡Ganas la candidatura! La ciudad entra en el mapa.'; } m.deuda += 1.5; Pj().cambiar(E, { prestigio: -1 }); return 'Pierdes la candidatura y el gasto de la propuesta.'; } },
+      { t: 'Declinar y centrarte en los servicios', ef: (E, J) => { sh(mJ(E), 'limpieza', 3); Pj().cambiar(E, { prestigio: 0.5 }); return 'Prefieres no endeudarte.'; } }
+    ]
+  });
+  ev({
+    id: 'inseguridad_barrio', titulo: 'Oleada de robos', icono: '🚨', peso: 0.8, cd: 90, req: alc,
+    texto: (E, J) => `Una oleada de robos en varios barrios de ${mJ(E).nombre} dispara la alarma y la oposición pide medidas.`,
+    opciones: [
+      { t: 'Más patrullas y cámaras', ef: (E, J) => { const m = mJ(E); sh(m, 'seguridad', 7); m.deuda += 0.6; Pj().cambiar(E, { pop: J.soc > 0 ? 2 : 0 }); return 'Los robos bajan.'; } },
+      { t: 'Prevención y trabajo social en los barrios', ef: (E, J) => { const m = mJ(E); sh(m, 'seguridad', 3); sh(m, 'empleo', 3); Pj().cambiar(E, { pop: J.soc < 0 ? 2 : -0.5, prestigio: 1 }); return 'La respuesta tarda más, pero cala.'; } },
+      { t: 'Pedir más efectivos a la Delegación del Gobierno', ef: (E, J) => { const m = mJ(E), g = E.paises.ES.gob; if (g.coalicion.includes(J.partido) || U().chance(0.4)) { sh(m, 'seguridad', 5); return 'Llegan refuerzos de la Policía Nacional.'; } m.aprob = clamp(m.aprob - 0.5, 10, 90); return 'Madrid no responde.'; } }
+    ]
+  });
+
   ev({
     id: 'jubilacion', titulo: '¿Es hora de retirarse?', icono: '🏁', peso: 0, auto: true, cd: 150,
     req: (E, J) => J.edad >= 68 && !J.retirado,

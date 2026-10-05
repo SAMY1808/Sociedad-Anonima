@@ -26,6 +26,7 @@ window.ESP = window.ESP || {};
         E.esp.muni.m[id] = { id, nombre: d.nombre, prov: d.prov, ccaa: d.ccaa, pob: d.pob, n: concejales(d.pob), loc, esc: {}, votos: {}, alcalde: null, pm: null, coal: [], aprob: U.clamp(50 + U.gauss(0, 8), 25, 75), deuda: Math.round(U.rf(15, 70)), tension: U.rf(20, 60) };
       }
       Mu.elecciones(E, true);
+      if (Mu.initAyto) Mu.initAyto(E);
     },
 
     votos(E, id, ruido) {
@@ -50,6 +51,7 @@ window.ESP = window.ESP || {};
         const e = C.Elecciones.divisores(w, m.n, false); const esc = {}; for (const k in e) if (e[k]) esc[k] = e[k];
         m.votos = v; m.esc = esc;
         Mu.elegirAlcalde(E, id, inicial);
+        if (!inicial && Mu.repartirConc) Mu.repartirConc(E, id);
         for (const k in esc) res.conc[k] = (res.conc[k] || 0) + esc[k];
         res.alc[m.alcalde] = (res.alc[m.alcalde] || 0) + 1;
         if (!inicial && m.pob >= 190) res.ciudades.push({ id, nombre: m.nombre, votos: v, esc, alcalde: m.alcalde, coal: m.coal });
@@ -123,11 +125,7 @@ window.ESP = window.ESP || {};
       const mm = E.esp.muni, t = E.fecha.t, g = E.paises.ES.gob;
       for (const id of Mu.ids()) {
         const m = mm.m[id], clima = C.Economia.clima(E, 'ES');
-        m.aprob += (50 + 3 * clima - m.aprob) * 0.02 + U.gauss(0, 0.35);
-        if (m.tension != null) m.tension += U.gauss(0, 0.8) + (clima < 0 ? 0.1 : -0.05);
-        m.aprob = U.clamp(m.aprob, 10, 90); m.tension = U.clamp(m.tension, 0, 100);
-        // Choques locales
-        if (U.chance(0.0015)) { const d = U.pick([-6, -4, 3, 5]); m.aprob = U.clamp(m.aprob + d, 10, 90); if (m.pob >= 190) C.Noticias.poner(E, 'local', `${m.nombre}: ${d < 0 ? 'polémica municipal' : 'buena gestión'} del alcalde ${E.politicos[m.pm] ? E.politicos[m.pm].n : ''}.`, 'ES'); }
+        Mu.dinamica(E, m);
       }
       if (t >= mm.proxT) Mu.elecciones(E, false);
     },

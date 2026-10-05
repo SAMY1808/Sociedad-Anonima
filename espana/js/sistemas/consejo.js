@@ -257,7 +257,7 @@ window.ESP = window.ESP || {};
       // Satisfacción de los socios
       for (const k of g.coalicion.concat(g.apoyoExterno || [])) {
         if (cs.sat[k] == null) cs.sat[k] = 60;
-        cs.sat[k] = U.clamp(cs.sat[k] + (60 - cs.sat[k]) * 0.012 + U.gauss(0, 0.5), 0, 100);
+        cs.sat[k] = U.clamp(cs.sat[k] + (g.coalicion.includes(k) && k !== g.partido ? 0 : (60 - cs.sat[k]) * 0.012) + U.gauss(0, 0.5), 0, 100);
       }
       Object.keys(cs.sat).forEach(k => { if (!g.coalicion.includes(k) && !(g.apoyoExterno || []).includes(k)) delete cs.sat[k]; });
       const socios = g.coalicion.filter(k => k !== g.partido);
@@ -289,6 +289,7 @@ window.ESP = window.ESP || {};
         if (!pmJ) Cn.decidirIA(E, it);
         else if (t > it.limite) { if (it.tipo === 'proces') continue; cs.agenda.splice(cs.agenda.indexOf(it), 1); Cn.sat(E, it.quien.pid && it.quien.pid !== g.partido ? it.quien.pid : null, -3); }
       }
+      if (!pmJ && U.chance(0.0015) && t - cs.remodelado > 52) Cn.remodelar(E);
       // Seguimiento de los Presupuestos en tramitación
       const pg = E.esp.pge;
       if (pg.tramite) { const p = E.proyectos[pg.tramite]; if (!p || p.etapa === 'archivada' || p.etapa === 'rechazada') Cn.alFinalizar(E, Object.assign({ pge: true }, p || {}), false); }
@@ -306,13 +307,17 @@ window.ESP = window.ESP || {};
       if (J && J.pais === 'ES') C.Eventos.info(E, '💥 Crisis de Gobierno', `${sp.nombre} rompe la coalición. El Gobierno queda en minoría y la estabilidad cae.`);
     },
 
-    /* Remodelación del Gobierno (acción del presidente). */
+    /* Remodelación del Gobierno: el presidente (jugador) abre el Gabinete; la IA cambia a los peor valorados. */
     remodelar(E) {
       const g = E.paises.ES.gob, cs = E.esp.consejo;
       if (E.fecha.t - cs.remodelado < 26) return 'Acabas de remodelar el Gobierno';
       cs.remodelado = E.fecha.t;
-      C.Ejecutivo.repartirMinisterios(E); g.aprob += 1.2; cs.autoridad = Math.min(100, cs.autoridad + 4);
-      C.Noticias.poner(E, 'gobierno', 'El presidente remodela el Gobierno y renueva siete carteras.', 'ES');
+      if (g.pm === 'J') { E.ui.abrir = { tipo: 'gabinete', key: 'central' }; return true; }
+      const G = C.Gabinete, cargos = G.cargos(E, 'central');
+      const peores = cargos.map(c => ({ c, r: G.rendDe(E, 'central', c.id) })).sort((a, b) => a.r - b.r).slice(0, 3);
+      peores.forEach(x => G.sustituirIA(E, 'central', x.c.id));
+      g.aprob += 1.2; cs.autoridad = Math.min(100, cs.autoridad + 4);
+      C.Noticias.poner(E, 'gobierno', 'El presidente remodela el Gobierno y sustituye a tres ministros.', 'ES');
       return true;
     },
 

@@ -4,7 +4,7 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const GRUPOS = [['parlamento', '🏛', 'Congreso'], ['nacional', '🦅', 'Gobierno y Cortes'], ['autonomico', '🗺', 'Comunidad autónoma'], ['local', '🏘', 'Ayuntamiento'], ['carrera', '🪜', 'Carrera'], ['partido', '🎗', 'Partido'], ['medios', '📺', 'Medios'], ['campana', '📣', 'Campaña'], ['europa', '🇪🇺', 'Europa']];
-  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', ordenanza: 'ordenanza', propuesta_consejo: 'consejo', aspirar_lista: 'lista', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
+  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
 
   const A = C.Pantallas.agenda = {
     render(el) {
@@ -48,9 +48,20 @@ window.ESP = window.ESP || {};
         UI.modal({ titulo: 'Elegir consejería', icono: '💼', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0">Las consejerías con más competencias transferidas tienen más peso político.</p><div class="lista">${libres.map(a => { const ca = D().consejerias[a], niv = T.nivelArea(E, J.region, a); return `<div class="it"><span style="font-size:20px">${ca.icono}</span><div class="cuerpo"><b>${esc(ca.nombre)}</b><span>Competencias: ${niv >= 1.5 ? 'amplias' : niv >= 0.7 ? 'medias' : 'escasas'} · titular actual: ${esc(T.consejeroNombre(E, J.region, a))}</span></div>${UI.botonAccion(id, { area: a }, 'Aspirar', 'chico')}</div>`; }).join('') || '<div class="vacio">Tu partido no tiene consejerías libres.</div>'}</div>` });
       } else if (k === 'region') {
         UI.modal({ titulo: 'Visitar una comunidad', icono: '🚄', clase: 'medio', cuerpo: `<div class="lista">${C.Territorio.ids().map(c => { const rc = E.esp.ccaa[c]; return `<div class="it"><div class="cuerpo"><b>${esc(D().ccaa[c].nombre)}</b><span>Gobierno ${rc.gob ? E.partidos[rc.gob.partido].sigla : '—'} · relación ${Math.round(rc.relM)}</span></div>${UI.botonAccion(id, { region: c }, 'Visitar', 'chico')}</div>`; }).join('')}</div>` });
-      } else if (k === 'ordenanza') {
-        const tipos = [['vivienda', '🏠 Vivienda asequible'], ['movilidad', '🚌 Movilidad y transporte'], ['seguridad', '🚓 Seguridad ciudadana'], ['turismo', '🧳 Regulación turística'], ['limpieza', '🧹 Limpieza y servicios'], ['obras', '🏗 Plan de obras'], ['cultura', '🎭 Cultura y fiestas']];
-        UI.modal({ titulo: 'Ordenanza o plan municipal', icono: '🏙', clase: 'medio', cuerpo: `<div class="lista">${tipos.map(([t, n]) => `<div class="it"><div class="cuerpo"><b>${n}</b></div>${UI.botonAccion(id, { tipo: t }, 'Aprobar', 'chico')}</div>`).join('')}</div>` });
+      } else if (k === 'proyecto') {
+        const m = E.esp.muni.m[E.jugador.muni], P = C.Municipios.PROYECTOS;
+        UI.modal({ titulo: 'Proyecto urbano', icono: '🏗', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0">Deuda actual ${Math.round(m.deuda)} % · hasta dos obras a la vez. Los fondos conseguidos reducen el coste.</p><div class="lista">${Object.keys(P).map(k2 => { const p = P[k2], en = m.proyectos.some(x => x.id === k2); return `<div class="it"><span style="font-size:22px">${p.icono}</span><div class="cuerpo"><b>${esc(p.nombre)}</b><span style="white-space:normal">${esc(p.desc)} · ${esc(D().indicadoresUrbanos[p.ind])} +${p.ef} · ${p.sem} sem. · ${p.coste >= 0 ? 'coste' : 'ingreso'} ${Math.abs(p.coste)} pts de deuda</span></div>${en ? '<span class="etq amar">En marcha</span>' : UI.botonAccion(id, { proy: k2 }, 'Lanzar', 'chico')}</div>`; }).join('')}</div>` });
+      } else if (k === 'gasto') {
+        const m = E.esp.muni.m[E.jugador.muni], A_ = C.Municipios.AREAS;
+        UI.modal({ titulo: 'Presupuesto por áreas', icono: '📊', clase: 'medio', cuerpo: `<div class="lista">${A_.map(a => `<div class="it"><span style="font-size:20px">${D().concejalias[a].icono}</span><div class="cuerpo"><b>${esc(D().concejalias[a].nombre)}</b><span>Ahora: ${C.Municipios.NOM_G[m.gasto[a]]}</span></div>${[0, 1, 2].map(n => n === m.gasto[a] ? `<span class="etq oro">${C.Municipios.NOM_G[n]}</span>` : UI.botonAccion(id, { area: a, nivel: n }, C.Municipios.NOM_G[n], 'chico')).join(' ')}</div>`).join('')}</div>` });
+      } else if (k === 'ibi') {
+        const m = E.esp.muni.m[E.jugador.muni];
+        UI.modal({ titulo: 'IBI y tasas', icono: '🧾', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0">Nivel actual: <b>${m.ibi > 0 ? '+' + m.ibi : m.ibi}</b> (−2 a +2).</p><div class="fila">${UI.botonAccion(id, { dir: 'bajar' }, '⬇️ Bajar', '')}${UI.botonAccion(id, { dir: 'subir' }, '⬆️ Subir', '')}</div>` });
+      } else if (k === 'fondosm') {
+        UI.modal({ titulo: 'Pedir fondos', icono: '🤲', clase: 'medio', cuerpo: `<div class="lista">${[['ccaa', '🗺 A la comunidad autónoma'], ['estado', '🏛 Al Gobierno de España'], ['ue', '🇪🇺 A la UE (fondos urbanos)']].map(([q, n]) => `<div class="it"><div class="cuerpo"><b>${n}</b></div>${UI.botonAccion(id, { quien: q }, 'Pedir', 'chico')}</div>`).join('')}</div>` });
+      } else if (k === 'conc') {
+        const J = E.jugador, m = E.esp.muni.m[J.muni], libres = Object.keys(m.conc).filter(a => m.conc[a] && m.conc[a] !== 'J' && m.conc[a].p === J.partido && a !== 'hac');
+        UI.modal({ titulo: 'Pedir una concejalía', icono: '💼', clase: 'medio', cuerpo: `<div class="lista">${libres.map(a => `<div class="it"><span style="font-size:20px">${D().concejalias[a].icono}</span><div class="cuerpo"><b>${esc(D().concejalias[a].nombre)}</b><span>Titular: ${esc(m.conc[a].n)}</span></div>${UI.botonAccion(id, { area: a }, 'Pedir', 'chico')}</div>`).join('') || '<div class="vacio">Tu partido no tiene concejalías libres.</div>'}</div>` });
       } else if (k === 'consejo') {
         const J = E.jugador, m = D().ministerios.find(x => x.id === J.ministerio), sector = m ? m.sector : null;
         const g = E.paises.ES.gob, ab = C.Congreso.abiertos(E).map(p => p.tpl);

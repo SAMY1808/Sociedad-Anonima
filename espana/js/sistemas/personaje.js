@@ -31,6 +31,8 @@ window.ESP = window.ESP || {};
         cumple: E.meta.inicio.slice(5), hitos: {}, region: op.region || null, muni: op.muni || null, circ: op.circ || null
       };
       if (op.nuevo) pa.lider = 'J';
+      // En lo local o autonómico, «líder» de un partido estatal es cabeza de lista, no líder nacional
+      if (nivel !== 'nacional' && pa.amb === 'nac' && !op.nuevo && rol === 'lider') { J.rol = 'direccion'; J.cabeza = true; }
       // Territorio de partida
       if (nivel === 'local') {
         if (!J.muni) J.muni = 'm_mad';
@@ -47,7 +49,7 @@ window.ESP = window.ESP || {};
       if (nivel === 'nacional' && !J.electo && rol !== 'lider') J.cargo = 'activista';
       // Presidente del Gobierno: líder del partido que gobierna
       const g = P.gob;
-      if (rol === 'lider' && P.gob && P.gob.partido === pid) { g.pm = 'J'; }
+      if (J.rol === 'lider' && P.gob && P.gob.partido === pid) { g.pm = 'J'; }
       if (nivel === 'autonomico') Pj.colocarAutonomico(E);
       if (nivel === 'local') Pj.colocarLocal(E);
       if (rol === 'lider' && pa.amb === 'nac' && nivel !== 'nacional' && !J.lidReg && J.region) { E.esp.ccaa[J.region].cab[pid] = 'J'; J.lidReg = J.region; }
@@ -72,20 +74,21 @@ window.ESP = window.ESP || {};
       const J = E.jugador, rc = E.esp.ccaa[J.region], n = rc.parl.escanos[J.partido] || 0;
       if (J.rol === 'lider' && E.partidos[J.partido].amb === 'reg' && E.partidos[J.partido].region !== J.region) J.region = E.partidos[J.partido].region;
       J.escReg = n > 0 && (J.rol !== 'base' || U.chance(0.7));
-      if (J.rol === 'lider' && n > 0) { J.escReg = true; if (E.partidos[J.partido].amb === 'nac') { rc.cab[J.partido] = 'J'; J.lidReg = J.region; } if (rc.gob && rc.gob.partido === J.partido) rc.gob.pres = 'J'; }
+      if ((J.rol === 'lider' || J.cabeza) && n > 0) { J.escReg = true; if (E.partidos[J.partido].amb === 'nac') { rc.cab[J.partido] = 'J'; J.lidReg = J.region; } if (rc.gob && rc.gob.partido === J.partido) rc.gob.pres = 'J'; }
       if (J.rol === 'lider' && E.partidos[J.partido].amb === 'reg' && rc.gob && rc.gob.partido === J.partido) rc.gob.pres = 'J';
     },
 
     colocarLocal(E) {
       const J = E.jugador, m = E.esp.muni.m[J.muni], n = m.esc[J.partido] || 0;
-      if (J.rol === 'lider' && m.alcalde === J.partido) { if (m.pm && m.pm !== 'J') delete E.politicos[m.pm]; m.pm = 'J'; E.politicos.J.cargo = 'alcalde'; J.concejal = true; }
-      else J.concejal = n > 0 && (J.rol === 'lider' || J.rol !== 'base' || U.chance(0.75));
+      if ((J.rol === 'lider' || J.cabeza) && m.alcalde === J.partido) { if (m.pm && m.pm !== 'J') delete E.politicos[m.pm]; m.pm = 'J'; E.politicos.J.cargo = 'alcalde'; J.concejal = true; }
+      else J.concejal = n > 0 && (J.rol === 'lider' || J.cabeza || J.rol !== 'base' || U.chance(0.75));
     },
 
     /* Si el partido del jugador está en la coalición, le toca una cartera. */
     ministroSiProcede(E) {
       const J = E.jugador, g = E.paises.ES.gob; if (!g || g.pm === 'J' || !g.coalicion.includes(J.partido)) return;
       if (J.rol !== 'lider' && J.rol !== 'direccion') return;
+      if (J.nivel !== 'nacional' || J.cabeza) return;
       if (Object.values(g.ministros).includes('J')) return;
       const mine = Object.keys(g.ministros).filter(m => { const q = E.politicos[g.ministros[m]]; return q && q.p === J.partido; });
       if (!mine.length) return;
@@ -109,7 +112,7 @@ window.ESP = window.ESP || {};
         case 'consejero': return 'Consejero/a de ' + (J.area && D().consejerias[J.area] ? D().consejerias[J.area].nombre : 'Gobierno') + ' (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'dipauto': return 'Diputado/a autonómico/a (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'alcalde': return 'Alcalde/sa de ' + (m ? m.nombre : '');
-        case 'concejal': return 'Concejal/a de ' + (m ? m.nombre : '');
+        case 'concejal': return 'Concejal/a' + (J.areaMuni && D().concejalias[J.areaMuni] ? ' de ' + D().concejalias[J.areaMuni].nombre : '') + ' (' + (m ? m.nombre : '') + ')';
         case 'diputado': return 'Diputado/a por ' + (J.circ ? D().provincias[J.circ][0] : 'España');
         case 'mep': return 'Eurodiputado/a' + (J.meps && D().grupos[J.meps.grupo] ? ' (' + D().grupos[J.meps.grupo].sigla + ')' : '');
         default: return D().cargos[J.cargo].nombre;
@@ -172,7 +175,7 @@ window.ESP = window.ESP || {};
       if (nivel === 'local') {
         const m = J.muni && E.esp.muni.m[J.muni];
         if (m && m.pm === 'J') { m.pm = null; C.Municipios.elegirAlcalde(E, J.muni, false); }
-        J.concejal = false;
+        J.concejal = false; J.areaMuni = null;
       }
       if (nivel === 'autonomico') {
         const rc = J.region && E.esp.ccaa[J.region];
@@ -249,7 +252,7 @@ window.ESP = window.ESP || {};
       const aspira = J.aspira && J.aspira.nivel === 'autonomico';
       if (!(J.nivel === 'autonomico' || aspira || J.lidReg === c)) return null;
       const nuevos = res.escanos[J.partido] || 0, antes = previo.escanos[J.partido] || 0;
-      const pos = J.lidReg === c || (J.rol === 'lider' && E.partidos[J.partido].amb === 'reg') ? 1 : Pj.posicion(E, J, antes, nuevos, aspira ? -6 : 8);
+      const pos = J.lidReg === c || J.cabeza || (J.rol === 'lider' && E.partidos[J.partido].amb === 'reg') ? 1 : Pj.posicion(E, J, antes, nuevos, aspira ? -6 : 8);
       const electo = pos <= nuevos;
       const r = { electo, pos, escanos: nuevos, antes };
       J.campania = null;
@@ -272,13 +275,13 @@ window.ESP = window.ESP || {};
       const aspira = J.aspira && J.aspira.nivel === 'local';
       if (J.nivel !== 'local' && !aspira) { return null; }
       const m = E.esp.muni.m[J.muni], n = m.esc[J.partido] || 0;
-      const pos = J.rol === 'lider' ? 1 : Pj.posicion(E, J, n, n, 4);
+      const pos = J.rol === 'lider' || J.cabeza ? 1 : Pj.posicion(E, J, n, n, 4);
       const electo = n > 0 && pos <= n, r = { electo, pos, escanos: n, muni: J.muni, alcalde: false };
       J.campania = null;
       if (m.pm === 'J' && m.alcalde !== J.partido) m.pm = null;
-      if (electo && J.rol === 'lider' && m.alcalde === J.partido) { if (m.pm && m.pm !== 'J') delete E.politicos[m.pm]; m.pm = 'J'; r.alcalde = true; Pj.log(E, `Eres investido/a alcalde/sa de ${m.nombre}.`); }
+      if (electo && (J.rol === 'lider' || J.cabeza) && m.alcalde === J.partido) { if (m.pm && m.pm !== 'J') delete E.politicos[m.pm]; m.pm = 'J'; r.alcalde = true; Pj.log(E, `Eres investido/a alcalde/sa de ${m.nombre}.`); }
       else if (electo) { J.concejal = true; Pj.log(E, `Eres ${J.rol === 'lider' ? 'cabeza de lista y ' : ''}concejal/a en ${m.nombre} (${n} ediles de tu partido).`); }
-      else { J.concejal = false; if (m.pm === 'J') m.pm = null; Pj.log(E, `No logras acta de concejal/a en ${m.nombre}.`); }
+      else { J.concejal = false; J.areaMuni = null; if (m.pm === 'J') m.pm = null; Pj.log(E, `No logras acta de concejal/a en ${m.nombre}.`); }
       J.aspira = aspira ? null : J.aspira;
       Pj.sincronizar(E);
       return r;
@@ -582,16 +585,45 @@ window.ESP = window.ESP || {};
       Pj.cambiar(E, { pop: -0.2 }); return { ok: true, exito: false, msg: 'Pasa desapercibida.' };
     }
   });
-  A('ordenanza', {
-    nombre: 'Aprobar una ordenanza o plan municipal', icono: '🏙️', costo: 2, grupo: 'local', desc: 'Alcalde/sa: vivienda, movilidad, seguridad, turismo… Mejora la aprobación municipal.',
+  A('proyecto_urbano', {
+    nombre: 'Lanzar un proyecto urbano', icono: '🏗️', costo: 2, grupo: 'local', desc: 'Alcalde/sa: vivienda pública, peatonalización, tranvía, policía local, congresos… Exige pleno, cuesta deuda y tarda semanas en dar frutos.',
     disponible: alcalde,
+    ejecutar(E, a) { const r = C.Municipios.lanzarProyecto(E, E.jugador.muni, a.proy); if (r.ok && r.exito !== false) Pj.cambiar(E, { prestigio: 1.2, pop: 1 }); return r; }
+  });
+  A('politica_gasto', {
+    nombre: 'Fijar el presupuesto de un área', icono: '📊', costo: 1, grupo: 'local', desc: 'Alcalde/sa: gasto mínimo, normal o alto en una concejalía. Más gasto mejora el indicador y sube la deuda.',
+    disponible: alcalde,
+    ejecutar(E, a) { const r = C.Municipios.setGasto(E, E.jugador.muni, a.area, +a.nivel); if (r.ok && r.exito !== false) Pj.cambiar(E, { prestigio: 0.4 }); return r; }
+  });
+  A('politica_ibi', {
+    nombre: 'Subir o bajar el IBI y las tasas', icono: '🧾', costo: 1, grupo: 'local', desc: 'Alcalde/sa: más recaudación y menos deuda, o más aprobación a corto plazo.',
+    disponible: alcalde,
+    ejecutar(E, a) { const r = C.Municipios.setIbi(E, E.jugador.muni, a.dir === 'subir' ? 1 : -1); if (r.ok && r.exito !== false) Pj.cambiar(E, { pop: a.dir === 'subir' ? -0.8 : 1 }); return r; }
+  });
+  A('fondos_municipales', {
+    nombre: 'Pedir fondos a otra administración', icono: '🤲', costo: 2, grupo: 'local', desc: 'Alcalde/sa: pide una subvención a la comunidad, al Estado o a la UE. Depende de si gobierna tu partido allí.',
+    disponible: alcalde,
+    ejecutar(E, a) { const r = C.Municipios.pedirFondos(E, E.jugador.muni, a.quien || 'ccaa'); if (r.ok && r.exito !== false) { Pj.cambiar(E, { prestigio: 1 }); if (a.quien === 'ue') Pj.cambiar(E, { capEU: 1.5 }); } return r; }
+  });
+  A('mocion_local', {
+    nombre: 'Moción de censura en el ayuntamiento', icono: '⚡', costo: 3, grupo: 'local', desc: 'Cabeza de lista de la oposición: intenta quitar la alcaldía con una mayoría alternativa de concejales.',
+    disponible(E) { const J = E.jugador, m = J.muni && E.esp.muni.m[J.muni]; if (!m) return 'Sin ayuntamiento'; if (J.cargo !== 'concejal') return 'Necesitas ser concejal/a en la oposición'; if (J.rol !== 'lider' && !J.cabeza) return 'Sólo el cabeza de lista'; if (m.coal.includes(J.partido)) return 'Tu partido gobierna'; if (E.fecha.t - (m.ultMocion || -99) < 60) return 'Ya hubo una moción reciente'; return true; },
+    ejecutar(E) { const r = C.Municipios.mocionJugador(E, E.jugador.muni); if (r.ok) { Pj.cambiar(E, { prestigio: 8, pop: 4 }, true); return { ok: true, msg: '¡Eres el nuevo alcalde/sa!' }; } Pj.cambiar(E, { prestigio: -4 }, true); return { ok: true, exito: false, msg: `La moción fracasa: reúnes ${r.s} de ${r.may} concejales.` }; }
+  });
+  A('concejalia', {
+    nombre: 'Pedir una concejalía de gobierno', icono: '💼', costo: 2, grupo: 'carrera', desc: 'Si tu partido gobierna tu ayuntamiento, pide una concejalía (urbanismo, movilidad, seguridad…) para gestionar con peso.',
+    disponible(E) { const J = E.jugador, m = J.muni && E.esp.muni.m[J.muni]; if (!m) return 'Sin ayuntamiento'; if (J.cargo !== 'concejal') return 'Necesitas ser concejal/a'; if (!m.coal.includes(J.partido)) return 'Tu partido no gobierna aquí'; if (J.areaMuni) return 'Ya tienes concejalía'; return true; },
     ejecutar(E, a) {
-      const m = muJ(E), x = f(E, 'gestion', 'negociacion'), tipo = a.tipo || 'obras';
-      const d = { vivienda: [2.2, 0.8], movilidad: [1.6, 0.4], seguridad: [1.6, 0.2], turismo: [1.2, -0.4], limpieza: [1.4, 0.2], obras: [1.8, 1.2], cultura: [1.0, 0.3] }[tipo] || [1.2, 0.5];
-      m.aprob = clamp(m.aprob + d[0] * (0.6 + x), 10, 90); m.deuda = clamp(m.deuda + d[1], 5, 150); m.tension = clamp(m.tension - d[0], 0, 100);
-      Pj.empuje(E, 0.03 + x * 0.04); Pj.cambiar(E, { prestigio: 1 + x, pop: 1.2 });
-      return { ok: true, msg: `Tu ${tipo === 'obras' ? 'plan de obras' : 'ordenanza de ' + tipo} gusta en ${m.nombre}.` };
+      const J = E.jugador, m = muJ(E), libres = Object.keys(m.conc).filter(k => m.conc[k] && m.conc[k] !== 'J' && m.conc[k].p === J.partido && k !== 'hac');
+      const area = a.area && libres.includes(a.area) ? a.area : libres[0]; if (!area) return { ok: false, msg: 'Tu partido no tiene concejalías libres' };
+      if (U.chance(0.5 + f(E, 'negociacion', 'gestion') * 0.3 + J.prestigio / 400)) { m.conc[area] = 'J'; J.areaMuni = area; Pj.log(E, `Eres nombrado/a concejal/a de ${D().concejalias[area].nombre}.`); return { ok: true, msg: `Gestionas ${D().concejalias[area].nombre}.` }; }
+      return { ok: true, exito: false, msg: 'El alcalde prefiere otro nombre.' };
     }
+  });
+  A('gestion_concejalia', {
+    nombre: 'Gestionar tu concejalía', icono: '🛠️', costo: 2, grupo: 'local', desc: 'Concejal/a con cartera: mueve el indicador de tu área de la ciudad.',
+    disponible(E) { return E.jugador.areaMuni && muJ(E) && muJ(E).conc[E.jugador.areaMuni] === 'J' ? true : 'Necesitas una concejalía de gobierno'; },
+    ejecutar(E) { const J = E.jugador, m = muJ(E), x = f(E, 'gestion', 'negociacion'), ind = D().concejalias[J.areaMuni].ind; if (ind !== 'deuda') m.shock[ind] = (m.shock[ind] || 0) + 2 + 3 * x; m.aprob = clamp(m.aprob + 0.3 + 0.5 * x, 10, 90); Pj.cambiar(E, { prestigio: 1 + x, pop: 0.8 }); return { ok: true, msg: 'Tu departamento saca adelante un buen paquete de medidas.' }; }
   });
   A('pacto_municipal', {
     nombre: 'Atar el pacto de gobierno municipal', icono: '🤝', grupo: 'local', desc: 'Alcalde/sa o cabeza de lista: aprueba presupuestos con tus socios y evita una moción.',

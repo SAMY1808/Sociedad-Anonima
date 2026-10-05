@@ -33,6 +33,17 @@ Es una PWA: se puede instalar y jugar sin conexión.
   **satisfacción de los socios** y tensión de coalición, **Presupuestos** (presentar o prorrogar), remodelaciones,
   Conferencia de Presidentes y catálogo de más de 60 iniciativas con proyección de votos. Si eres presidente/a decides tú;
   si no, influyes como ministro/a, socio o líder de la oposición.
+- **El gabinete es central**: ministros (23), consejeros autonómicos (9 por comunidad) y concejales de gobierno son
+  **personas con atributos** (gestión, carisma, integridad, lealtad, ambición y especialidad). Tras una investidura, si
+  eres presidente/a **formas tu Gobierno cartera a cartera** eligiendo entre candidatos del partido, de los socios o
+  independientes. El rendimiento de cada titular (y si encaja con la cartera) mueve la economía, la aprobación, la relación con
+  las comunidades y la UE; los poco íntegros provocan **escándalos** que decides tú; los ambiciosos y desleales, **choques** y
+  dimisiones. Los socios exigen **cuota** (con el peso real de cada cartera): si les das menos de lo que les corresponde,
+  se enfadan y pueden romper. Remodelaciones, ceses y nombramientos en cualquier momento.
+- **Ayuntamientos con profundidad**: seis indicadores urbanos (vivienda, movilidad, seguridad, limpieza, empleo,
+  cultura), presupuesto por áreas, IBI y deuda, **pleno** con mayorías y pactos, **proyectos urbanos** (vivienda pública,
+  tranvía, peatonalización, ecotasa, congresos…), petición de fondos a la comunidad, al Estado o a la UE, **mociones de
+  censura locales** y un gobierno municipal con concejalías. Pantalla propia «Ayuntamiento» si juegas en lo local.
 - **Comunidades autónomas** (17 + 2 ciudades autónomas): parlamento regional por D'Hondt con su umbral, gobierno
   y coaliciones, elecciones autonómicas con su calendario (mayo de 2027, Cataluña, País Vasco, Galicia…), **relación con
   Moncloa**, grado de autogobierno, deuda y balanza fiscal, régimen foral (País Vasco y Navarra).

@@ -5,7 +5,7 @@ window.ESP = window.ESP || {};
   C.Pantallas = C.Pantallas || {};
   const NAV = [
     ['dashboard', '🧭', 'Centro de mando'], ['agenda', '🎯', 'Agenda'], ['cortes', '🏛', 'Cortes Generales'], ['leyes', '📜', 'Leyes'],
-    ['consejo', '🦅', 'Consejo de Ministros'], ['territorio', '🗺', 'Territorio'], ['partido', '🎗', 'Mi partido'], ['europa', '🇪🇺', 'Europa'], ['elecciones', '🗳', 'Elecciones'],
+    ['consejo', '🦅', 'Consejo de Ministros'], ['gabinete', '🧑‍💼', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento'], ['territorio', '🗺', 'Territorio'], ['partido', '🎗', 'Mi partido'], ['europa', '🇪🇺', 'Europa'], ['elecciones', '🗳', 'Elecciones'],
     ['personaje', '👤', 'Mi carrera'], null, ['partidas', '💾', 'Partidas']
   ];
 
@@ -79,7 +79,7 @@ window.ESP = window.ESP || {};
       const E = C.E;
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
-      document.getElementById('nav').innerHTML = NAV.map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('');
+      document.getElementById('nav').innerHTML = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('');
       UI.$$('#nav button').forEach(b => b.onclick = () => App.ir(b.dataset.p));
     },
 
@@ -101,6 +101,8 @@ window.ESP = window.ESP || {};
     revisarPendientes() {
       const E = C.E; if (!E) return;
       if (UI.pila.length) return;
+      if (E.esp.pendienteGabinete) { C.Pantallas.gabinete.formacion(E.esp.pendienteGabinete); return; }
+      if (E.esp.gab && E.esp.gab.escandalo) { C.Pantallas.gabinete.escandalo(E.esp.gab.escandalo); return; }
       if (E.esp.pendienteSocio) { C.Pantallas.elecciones.socio(); return; }
       if (E.esp.pendienteInvestidura) { C.Pantallas.elecciones.investidura(); return; }
       if (E.elecciones.nochePendiente) { const n = E.elecciones.nochePendiente; E.elecciones.nochePendiente = null; if (n.tipo === 'locales') C.Pantallas.elecciones.nocheLocales(n); else C.Pantallas.elecciones.noche(n); return; }

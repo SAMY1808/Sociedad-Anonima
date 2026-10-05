@@ -72,7 +72,7 @@ window.ESP = window.ESP || {};
       const cambios = dd ? Object.keys(dd).filter(k => Math.abs(dd[k]) >= 0.005).map(k => `${nom[k]} ${dd[k] > 0 ? '+' : '−'}${Math.abs(dd[k]) < 0.1 ? '<0,1' : U.d1(Math.abs(dd[k]))}`).join(' · ') : '';
       if (!opts.silencio) UI.toast((r.ok === false ? '⚠ ' : '') + U.esc(r.msg || 'Hecho') + (cambios && r.ok !== false ? `<div class="tenue" style="font-size:11.5px;margin-top:2px">${cambios}</div>` : ''), r.ok === false ? 'mal' : r.exito === false ? '' : 'bien');
       if (!opts.sinRefresco) C.App.refrescar();
-      if (C.E && C.E.ui && C.E.ui.abrir) { const a = C.E.ui.abrir; C.E.ui.abrir = null; setTimeout(() => C.Pantallas.elecciones.consultas(a.modo), 50); }
+      if (C.E && C.E.ui && C.E.ui.abrir) { const a = C.E.ui.abrir; C.E.ui.abrir = null; setTimeout(() => a.tipo === 'gabinete' ? C.App.ir('gabinete', { key: a.key }) : C.Pantallas.elecciones.consultas(a.modo), 50); }
       return r;
     },
     /* Botón de acción con su costo y disponibilidad */

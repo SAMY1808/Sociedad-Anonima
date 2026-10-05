@@ -81,3 +81,17 @@ ESP.DATA.procesos = {
 
 /* Índice de financiación por habitante (100 = media) */
 ESP.DATA.finNivel = { AND: 93, ARA: 104, AST: 105, BAL: 90, CAN: 104, CNT: 108, CLM: 98, CYL: 105, CAT: 97, VAL: 88, EXT: 106, GAL: 104, MAD: 94, MUR: 89, NAV: 140, PVA: 135, RIO: 108, CEU: 100, MEL: 100 };
+
+/* Concejalías de un ayuntamiento y el indicador urbano que mueve cada una */
+ESP.DATA.concejalias = {
+  urb: { nombre: 'Urbanismo y Vivienda', icono: '🏗️', peso: 9, ind: 'vivienda' },
+  mov: { nombre: 'Movilidad y Transporte', icono: '🚌', peso: 7, ind: 'movilidad' },
+  seg: { nombre: 'Seguridad Ciudadana', icono: '🚓', peso: 7, ind: 'seguridad' },
+  ser: { nombre: 'Servicios Urbanos y Limpieza', icono: '🧹', peso: 6, ind: 'limpieza' },
+  soc: { nombre: 'Servicios Sociales y Empleo', icono: '🤝', peso: 7, ind: 'empleo' },
+  cul: { nombre: 'Cultura, Turismo y Fiestas', icono: '🎭', peso: 4, ind: 'cultura' },
+  hac: { nombre: 'Hacienda y Presidencia', icono: '💶', peso: 8, ind: 'deuda' }
+};
+ESP.DATA.indicadoresUrbanos = {
+  vivienda: 'Vivienda asequible', movilidad: 'Movilidad', seguridad: 'Seguridad', limpieza: 'Limpieza y servicios', empleo: 'Empleo local', cultura: 'Cultura y turismo'
+};
