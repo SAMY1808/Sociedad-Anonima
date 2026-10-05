@@ -132,3 +132,10 @@ Una versión nueva de una ley sustituye a la vigente; `derogar` deshace sus efec
 
 **Enmiendas.** `Impacto.enmiendas(E, p)` busca, para cada grupo que no apoya el texto, el cambio de diseño que más mejora su
 postura y calcula el margen de votos que ganaría el autor; la acción `aceptar_enmienda` lo aplica (máx. 3).
+
+## Leyes autonómicas (`sistemas/leyesaut.js`)
+
+`rc.leyes` guarda las leyes del Parlamento regional: `{etapa: registro|comision|pleno|fin, cab, neg, enm, interv, ruido, hist, v}`. `posturaAut` puntúa cada grupo
+(afinidad con el autor, gobierno/oposición, cabildeo, negociación, debate, línea propia); `proyectarAut` suma escaños (mayoría simple). `leyesTurno` avanza
+etapas (1+2+1 semanas) y abre `E.esp.pendienteVotoAut` si el jugador es diputado/a. Las leyes de los programas de consejería usan el mismo circuito.
+Acciones: `cabildear_ley_aut`, `intervenir_ley_aut`, `negociar_bloque_aut`, `proponer_ley_aut`.

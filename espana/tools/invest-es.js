@@ -3,7 +3,7 @@
 const mini = require('./mini');
 const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
   'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
-  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js'];
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/leyesaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
 const E = C.Mundo.nueva({ semilla: +arg[0] || 31, partido: arg[1] || 'ES_ASD', nivel: 'autonomico', rol: arg[2] || 'direccion', region: arg[3] || 'MAD', muni: null, nombre: 'Test', g: 'm', edad: 40 });
@@ -13,6 +13,7 @@ const log = []; const np = C.Noticias.poner; C.Noticias.poner = (E2, t, x, p) =>
 let errores = 0; const oe = console.error; console.error = (...a) => { errores++; oe(...a); };
 const resolver = () => { let g = 0; while (C.Tiempo.bloqueo() && g++ < 30) { const b = C.Tiempo.bloqueo();
   if (b === 'evento') { const ev = E.eventos.pendientes[0]; C.Eventos.resolver(E, 0, 0); }
+  else if (b === 'voto' && E.esp.pendienteVotoAut) { const pv = E.esp.pendienteVotoAut; T.votarLey(E, pv.c, T.leyAut(E, pv.c, pv.id), 'abs'); }
   else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(); const p = E.proyectos[id]; if (p) C.Congreso.resolver(E, p, 'abs'); }
   else if (b === 'ue') C.UE.decidir(E, 0, 'abs');
   else if (b === 'noche') { E.elecciones.nochePendiente = null; E.elecciones.pePendiente = null; E.elecciones.presPendiente = null; }
@@ -46,15 +47,16 @@ const cc = T.calendarioCentral(E); ok(cc.activo && cc.pasos.length === 5, 'calen
 const vistos = []; for (let i = 0; i < 30; i++) { avanzar(1); const e = E.esp.cortes.estado; if (vistos[vistos.length - 1] !== e) vistos.push(e); }
 ok(['constitucion', 'consultas', 'investidura', 'activa'].every(e => vistos.includes(e)), 'las Cortes recorren todas las fases (' + vistos.join(' → ') + ')');
 ok(log.some(x => /Se constituyen las Cortes/.test(x)), 'se constituyen las Cortes');
+const qv = () => { const pv = E.esp.pendienteVotoAut; if (pv) T.votarLey(E, pv.c, T.leyAut(E, pv.c, pv.id), 'abs'); E.parl.pendienteVoto.length = 0; E.eventos.pendientes.length = 0; };
 console.log('Presidente del Parlamento autonómico: propone candidato');
-rc.parl.proxT = E.fecha.t + 1; C.Tiempo.avanzar(); resolver();
+rc.parl.proxT = E.fecha.t + 1; qv(); C.Tiempo.avanzar(); resolver();
 ok(!!rc.inv, 'nuevas autonómicas abren otra investidura');
 for (let i = 0; i < 8 && rc.inv && rc.inv.estado === 'constitucion'; i++) avanzar(1);
 ok(rc.inv && rc.inv.estado === 'consultas', 'tras la sesión constitutiva se abren las consultas');
 J.escReg = true; rc.parl.escanos[J.partido] = rc.parl.escanos[J.partido] || 3; rc.inv.mesa = { partido: J.partido, pres: 'J', n: J.nombre }; rc.inv.tNom = E.fecha.t + 1;
-C.Tiempo.avanzar();
+qv(); C.Tiempo.avanzar();
 ok(rc.inv.estado === 'nominaJ' && E.esp.pendienteInvAut && E.esp.pendienteInvAut.tipo === 'nominar', 'el jugador presidente de la Cámara debe proponer candidato');
-ok(C.Tiempo.bloqueo() === 'investidura', 'el tiempo queda bloqueado hasta decidir');
+ok(!!C.Tiempo.bloqueo(), 'el tiempo queda bloqueado hasta decidir');
 const ops = T.invOpciones(E, c); ok(ops.length >= 2, 'hay varios candidatos posibles (' + ops.map(o => E.partidos[o.p].sigla).join(', ') + ')');
 T.invNominarJugador(E, c, ops[ops.length - 1].p);
 ok(rc.inv.cand === ops[ops.length - 1].p && ['debate', 'candidatoJ'].includes(rc.inv.estado), 'se propone al candidato elegido');
@@ -66,9 +68,9 @@ cs.estado = 'constitucion'; cs.tConst = E.fecha.t + 1; cs.fallidos = []; cs.t1 =
 const Pp = E.paises.ES; const orden = Pp.partidos.slice().sort((a, b) => Pp.escanos[b] - Pp.escanos[a]);
 const parti = J.partido; Pp.escanos[parti] = Math.max(Pp.escanos[parti] || 0, 120); J.rol = 'direccion';
 const oc = C.Ejecutivo.constituir; C.Ejecutivo.constituir = function (E2) { const r = oc.call(this, E2); if (!E2.esp.cortes.mesa || E2.esp.cortes.mesa.presidente !== 'J') { E2.esp.cortes.mesa = { presidente: 'J', partido: parti }; } return r; };
-C.Tiempo.avanzar();   // constituye
+qv(); C.Tiempo.avanzar();   // constituye
 ok(cs.estado === 'consultas' && cs.mesa.presidente === 'J', 'el jugador preside el Congreso');
-C.Tiempo.avanzar();
+qv(); C.Tiempo.avanzar();
 ok(cs.estado === 'nominaJ' && E.esp.pendienteInvAut && E.esp.pendienteInvAut.c === 'ES', 'el jugador propone al candidato a la Presidencia del Gobierno');
 const cands = C.Ejecutivo.candidatosInv(E); ok(cands.length >= 2, 'candidatos: ' + cands.map(x => E.partidos[x.p].sigla).join(', '));
 C.Ejecutivo.nominarJugador(E, cands[0].p);

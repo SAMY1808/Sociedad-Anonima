@@ -192,6 +192,7 @@ window.ESP = window.ESP || {};
         return false;
       });
       if (rc.inv && T.invTurno) T.invTurno(E, c);
+      if (T.leyesTurno) T.leyesTurno(E, c);
       // Elecciones
       if (t >= rc.parl.proxT && !rc.suspendida) T.celebrar(E, c);
       else if (rc.suspendida && t >= rc.parl.proxT) T.celebrar(E, c, true);

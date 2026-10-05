@@ -230,6 +230,7 @@ window.ESP = window.ESP || {};
       if (prog.tipo === 'accion') { T.aplicarPrograma(E, c, prog, eff, ia); return { ok: true, msg: `${prog.n}: aplicado.` }; }
       if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.22, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
       const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
+      if (T.nuevaLeyAut) { const b = T.nuevaLeyAut(E, c, { prog: id, pid: g.partido, quien: 'Gobierno autonómico', jugador: false, eff }), v = T.proyectarAut(E, c, b); return { ok: true, msg: `Remites al Parlamento el proyecto «${prog.n}»: pasará por comisión y pleno (apoyo previsto ${v.si} sí · ${v.no} no). Puedes cabildear desde Leyes.`, p: v.p }; }
       const p = seats >= may ? 0.88 : seats + ext >= may ? 0.7 : 0.35;
       rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'ley', ok: U.chance(p), eff, p });
       T.registrarLey(E, c, { id: 'G' + E.fecha.t + id, prog: id, pid: g.partido, quien: 'Gobierno autonómico', jugador: false, estado: 'tramite', t0: E.fecha.t, v: { p } });
