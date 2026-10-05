@@ -376,12 +376,23 @@ window.ESP = window.ESP || {};
       }
       if (asp) J.aspira = null;
       // Presidente del Gobierno autonómico si su partido forma gobierno y encabeza la lista
+      if (rc.inv) { J.posReg = pos; J.cabezaReg = cabeza && electo; Pj.sincronizar(E); r.invPendiente = true; return r; }   // el gobierno se decide en la investidura
       const gob = rc.gob;
       if (electo && gob && gob.partido === J.partido && cabeza) { gob.pres = 'J'; r.presidente = true; }
       else if (J.consejeria === c && !(gob && gob.coalicion.includes(J.partido))) J.consejeria = null;
       Pj.sincronizar(E);
       if (electo && !cabeza && J.region === c) r.oferta = Pj.ofertaConsejeria(E, c, pos);
       return r;
+    },
+
+    /* Tras la investidura autonómica: el jugador puede quedar como presidente, recibir una consejería o pasar a la oposición. */
+    tras_investidura(E, c) {
+      const J = E.jugador, rc = E.esp.ccaa[c], gob = rc.gob; if (!J || J.pais !== 'ES' || !gob) return;
+      const cabeza = !!J.cabezaReg && rc.cab[J.partido] === 'J' && J.region === c;
+      if (J.region === c && J.escReg && gob.partido === J.partido && cabeza) { gob.pres = 'J'; Pj.log(E, `Eres investido/a presidente/a de ${D().ccaa[c].nombre}.`); }
+      else if (J.consejeria === c && !gob.coalicion.includes(J.partido)) { J.consejeria = null; J.area = null; }
+      Pj.sincronizar(E);
+      if (J.region === c && J.escReg && !cabeza && gob.pres !== 'J') Pj.ofertaConsejeria(E, c, J.posReg || null);
     },
 
     tras_municipales(E, res) {

@@ -124,7 +124,7 @@ window.ESP = window.ESP || {};
     disolver(E, motivo, auto) {
       const c = E.esp.cortes, P = E.paises.ES;
       if (!auto) { const p = Gen.puedeDisolver(E); if (p !== true) return p; }
-      E.esp.pendienteSocio = false; E.esp.pendienteInvestidura = false; E.esp.votoJ = null;
+      E.esp.pendienteSocio = false; E.esp.pendienteInvestidura = false; if (E.esp.pendienteInvAut && E.esp.pendienteInvAut.c === 'ES') E.esp.pendienteInvAut = null; E.esp.votoJ = null;
       c.estado = 'disueltas'; c.ultDisolucion = E.fecha.t; c.proxT = E.fecha.t + SEMANAS_CAMPANA; c.mocion = null; c.investidura = null;
       P.elec.proxT = c.proxT;
       C.Noticias.poner(E, 'politica', `Real decreto de disolución de las Cortes: elecciones generales el ${U.fmtT(c.proxT)}${motivo ? ' (' + motivo + ')' : ''}.`, 'ES');

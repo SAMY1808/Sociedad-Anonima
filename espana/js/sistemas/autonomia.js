@@ -369,9 +369,9 @@ window.ESP = window.ESP || {};
         if (cs && U.chance(0.004) && !(E.jugador && E.jugador.cargo === 'presauto' && E.jugador.region === c)) { const k = rc.reclama.find(x => rc.comp[x] < 2); if (k && C.Consejo.pmEsJ(E)) T.pedirComp(E, c, k); }
         // Elecciones anticipadas por conveniencia
         const esJ = E.jugador && E.jugador.cargo === 'presauto' && E.jugador.region === c;
-        if (!esJ && !rc.suspendida && t - rc.parl.ult > 78 && rc.parl.proxT - t > 26 && g.aprob >= 57 && g.estab > 55 && U.chance(0.0035)) T.adelantar(E, c, 'por conveniencia electoral');
+        if (!esJ && !rc.inv && !rc.suspendida && t - rc.parl.ult > 78 && rc.parl.proxT - t > 26 && g.aprob >= 57 && g.estab > 55 && U.chance(0.0035)) T.adelantar(E, c, 'por conveniencia electoral');
         // Moción de censura autonómica
-        if (!esJ && g.estab < 42 && !rc.suspendida && t - (rc.ultMocion || -99) > 52 && U.chance(0.012)) T.mocionIA(E, c);
+        if (!esJ && !rc.inv && g.estab < 42 && !rc.suspendida && t - (rc.ultMocion || -99) > 52 && U.chance(0.012)) T.mocionIA(E, c);
       }
       // Cupo y Consejo de Política Fiscal
       const cu = E.esp.cupo;

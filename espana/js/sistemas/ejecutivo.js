@@ -227,10 +227,13 @@ window.ESP = window.ESP || {};
       let mesa = null;
       for (const cand of orden.slice(0, 3)) { const pl = Ej.mejorPlan(E, cand); if (pl.ev.exito2) { mesa = { partido: cand, plan: pl }; break; } }
       if (!mesa) mesa = { partido: orden[0] };
-      const pres = C.Mundo.politico(E, { pais: 'ES', partido: mesa.partido, eco: E.partidos[mesa.partido].eco, soc: E.partidos[mesa.partido].soc, eu: E.partidos[mesa.partido].eu, a: 60 });
-      c.mesa = { presidente: pres.id, partido: mesa.partido };
+      const J = E.jugador;
+      const jPres = !!(J && J.pais === 'ES' && J.electo && J.nivel === 'nacional' && J.rol !== 'lider' && mesa.partido === J.partido && (J.rol === 'direccion' || J.rol === 'portavoz' || J.prestigio >= 50));
+      const pres = jPres ? null : C.Mundo.politico(E, { pais: 'ES', partido: mesa.partido, eco: E.partidos[mesa.partido].eco, soc: E.partidos[mesa.partido].soc, eu: E.partidos[mesa.partido].eu, a: 60 });
+      c.mesa = { presidente: jPres ? 'J' : pres.id, partido: mesa.partido };
       c.estado = 'consultas'; c.tConsulta = E.fecha.t + 1; c.fallidos = []; c.t1 = null;
-      C.Noticias.poner(E, 'politica', `Se constituyen las Cortes. ${pres.n} (${Ej.sig(E, mesa.partido)}) preside el Congreso.`, 'ES');
+      C.Noticias.poner(E, 'politica', `Se constituyen las Cortes. ${jPres ? J.nombre : pres.n} (${Ej.sig(E, mesa.partido)}) preside el Congreso.`, 'ES');
+      if (jPres) C.Eventos.info(E, '🏛 Presides el Congreso', 'La Cámara te elige presidente/a del Congreso de los Diputados. Tras las consultas con los grupos propondrás al Rey el candidato a la investidura.');
     },
 
     /* Ronda de consultas del Rey: propone un candidato. */
@@ -239,12 +242,30 @@ window.ESP = window.ESP || {};
       if (c.t1 != null && E.fecha.t > c.t1 + 9) { C.Generales.disolver(E, 'sin investidura en dos meses', true); return; }
       const orden = P.partidos.filter(k => (P.escanos[k] || 0) >= 20 && !(c.fallidos || []).includes(k)).sort((a, b) => P.escanos[b] - P.escanos[a]);
       if (!orden.length) { C.Generales.disolver(E, 'ningún candidato logra la investidura', true); return; }
+      if (c.mesa && c.mesa.presidente === 'J' && J && J.electo) { c.estado = 'nominaJ'; E.esp.pendienteInvAut = { c: 'ES', tipo: 'nominar' }; return; }
       let cand = null, plan = null;
       for (const k of orden) { const pl = Ej.mejorPlan(E, k); if (pl.ev.exito2) { cand = k; plan = pl; break; } }
       if (!cand) { cand = orden[0]; plan = Ej.mejorPlan(E, cand); }
+      Ej.proponer(E, cand, plan);
+    },
+
+    /* Candidatos que la Presidencia del Congreso puede proponer, con su mejor bloque previsto. */
+    candidatosInv(E) {
+      const c = E.esp.cortes, P = Ej.P(E);
+      return P.partidos.filter(k => (P.escanos[k] || 0) >= 20 && !(c.fallidos || []).includes(k)).sort((a, b) => P.escanos[b] - P.escanos[a]).map(k => ({ p: k, plan: Ej.mejorPlan(E, k) }));
+    },
+    /* El jugador, presidente del Congreso, propone al candidato (refrendo al Rey). */
+    nominarJugador(E, cand) {
+      const c = E.esp.cortes; if (c.estado !== 'nominaJ') return false;
+      E.esp.pendienteInvAut = null; Ej.proponer(E, cand, Ej.mejorPlan(E, cand), true);
+      C.Personaje.cambiar(E, { prestigio: 2, pop: 1 }, true); return true;
+    },
+
+    proponer(E, cand, plan, porJ) {
+      const c = E.esp.cortes, P = Ej.P(E), J = E.jugador;
       const lider = E.politicos[E.partidos[cand].lider];
       c.estado = 'investidura';
-      C.Noticias.poner(E, 'politica', `El Rey propone a ${lider ? lider.n : Ej.sig(E, cand)} (${Ej.sig(E, cand)}) como candidato a la investidura.`, 'ES');
+      C.Noticias.poner(E, 'politica', `${porJ ? 'A propuesta del presidente del Congreso, el' : 'El'} Rey propone a ${lider ? lider.n : Ej.sig(E, cand)} (${Ej.sig(E, cand)}) como candidato a la investidura.`, 'ES');
       c.investidura = { cand, plan, tVoto: E.fecha.t + 1, negociaJ: false };
       if (J && J.pais === 'ES' && E.partidos[cand].lider === 'J') { c.investidura.negociaJ = true; E.esp.pendienteInvestidura = true; }
       else if (J && J.pais === 'ES' && J.rol === 'lider' && (P.escanos[J.partido] || 0) >= 1 && !plan.bloque.includes(J.partido)) { c.investidura.socioJ = true; c.investidura.tVoto = E.fecha.t + 1; E.esp.pendienteSocio = true; }

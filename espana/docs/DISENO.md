@@ -53,7 +53,16 @@
 Estados de las Cortes: `activa | disueltas | constitucion | consultas | investidura`. El Rey propone al candidato
 de mayor peso con una mayoría posible; la IA arma el **bloque más barato** (aliados naturales → socios con
 contrapartidas → completar). Cada partido evalúa: vetos del bloque, afinidad (≥ 0,62 sí; contrapartidas cumplidas → sí;
-≥ 0,33 abstención). Primera votación 176; segunda mayoría simple; dos meses sin presidente disuelven las Cortes.
+≥ 0,33 abstención). Primera votación 176; segunda mayoría simple; dos meses sin presidente disuelven las Cortes. Si el jugador preside el Congreso (`cortes.mesa.presidente==='J'`) el estado
+`nominaJ` espera su propuesta (`pendienteInvAut`).
+
+### Investidura autonómica (`sistemas/invaut.js`)
+
+`Territorio.celebrar` abre `rc.inv` (`constitucion → consultas → debate`, más `nominaJ`/`candidatoJ` cuando decide el jugador) en vez de
+formar gobierno al instante; `rc.gob` sigue en funciones. Sesión constitutiva a +4 semanas, consultas +2, votación +1
+(absoluta, `evalBloque`), segunda +1 (simple), plazo `t1 + 9` y disolución con `T.adelantar`. Al instalar se llama a
+`Personaje.tras_investidura` (presidencia/consejería del jugador). La IA tiene pactos de última hora (abstenciones); el jugador no.
+Pantalla: `pantallas/invest.js` (calendario + modales). Bloqueo del tiempo: `E.esp.pendienteInvAut`.
 
 ## Consejo de Ministros
 

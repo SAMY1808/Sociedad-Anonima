@@ -1,0 +1,54 @@
+/* Prueba de interfaz de la investidura (Playwright): calendario, proponer candidato como presidente del Parlamento y negociar el bloque como candidato.
+   Uso: node tools/invest-ui.js [movil] */
+const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const http = require('http'), fs = require('fs'), path = require('path');
+const raiz = path.join(__dirname, '..');
+const tipos = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webmanifest': 'application/json' };
+const srv = http.createServer((q, r) => { let f = path.join(raiz, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'Content-Type': tipos[path.extname(f)] || 'text/plain' }); r.end(d); } }); });
+const movil = process.argv[2] === 'movil';
+(async () => {
+  await new Promise(r => srv.listen(8129, r));
+  const b = await chromium.launch({ args: ['--no-sandbox'] });
+  const ctx = await b.newContext(movil ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 860 } });
+  const pg = await ctx.newPage();
+  const err = []; pg.on('pageerror', e => err.push('PAGE ' + e.message)); pg.on('console', m => { if (m.type() === 'error') err.push('CON ' + m.text()); });
+  const clic = async s => { const el = await pg.waitForSelector(s, { timeout: 8000 }); await el.scrollIntoViewIfNeeded(); return movil ? pg.tap(s) : pg.click(s); };
+  let fallos = 0; const ok = (c, m) => { if (!c) { fallos++; console.log('  ✗', m); } else console.log('  ✓', m); };
+  await pg.goto('http://localhost:8129/index.html');
+  await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
+  await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
+  const cerrar = async () => { for (let i = 0; i < 6; i++) { if (!(await pg.$('.modal-fondo'))) break; await pg.evaluate(() => ESP.UI.cerrarModales()); } };
+  await cerrar();
+  await pg.evaluate(() => { const E = ESP.E, g = E.paises.ES.gob; E.parl.auto = true;
+    ['salario_minimo', 'control_alquileres', 'sanidad_publica'].forEach(id => { const tpl = ESP.Congreso.plantilla(id); ESP.Impacto.promulgar(E, { tpl: id, t: tpl.t, autor: { tipo: 'jugador', pid: g.partido }, dis: ESP.Impacto.norm(tpl, {}), region: null }); }); });
+  const T = 'ESP.Territorio';
+  console.log('Calendario de investidura');
+  await pg.evaluate(() => { const E = ESP.E, J = E.jugador, c = 'MAD', rc = E.esp.ccaa[c]; J.region = c; J.escReg = true; J.prestigio = 60; rc.parl.escanos[J.partido] = rc.parl.escanos[J.partido] || 6; rc.cab[J.partido] = 'J'; ESP.Territorio.abrirInvestidura(E, c); E.ui.regInv = c; ESP.App.ir('elecciones', { tab: 'investidura' }); });
+  await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => document.querySelectorAll('#vista .tarjeta').length >= 2 && /Sesión constitutiva/.test(document.querySelector('#vista').innerText)), 'el calendario muestra los pasos de la investidura');
+  ok(await pg.$('[data-inv-pres]') !== null, 'se ofrece presentar la candidatura');
+  await clic('[data-inv-pres]'); await pg.waitForTimeout(250);
+  ok(await pg.evaluate(() => ESP.E.esp.ccaa.MAD.inv.voluntario === true), 'la candidatura queda anunciada');
+  await pg.screenshot({ path: `/tmp/${movil ? 'im' : 'id'}-calendario.png`, fullPage: true });
+  console.log('Proponer candidato (presidente del Parlamento)');
+  await pg.evaluate(() => { const E = ESP.E, rc = E.esp.ccaa.MAD; rc.inv.estado = 'nominaJ'; rc.inv.mesa = { partido: E.jugador.partido, pres: 'J', n: E.jugador.nombre }; E.esp.pendienteInvAut = { c: 'MAD', tipo: 'nominar' }; ESP.App.revisarPendientes(); });
+  await pg.waitForSelector('[data-nom]');
+  await pg.screenshot({ path: `/tmp/${movil ? 'im' : 'id'}-nominar.png` });
+  const opt = await pg.evaluate(() => Array.from(document.querySelectorAll('[data-nom]')).map(b => b.dataset.nom));
+  ok(opt.length >= 2, 'el modal lista candidatos (' + opt.length + ')');
+  const mio = await pg.evaluate(() => ESP.E.jugador.partido);
+  await clic(`[data-nom="${mio}"]`); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => ESP.E.esp.ccaa.MAD.inv.estado === 'candidatoJ'), 'proponerme a mí mismo abre la negociación del bloque');
+  console.log('Candidato: forma tu bloque');
+  await pg.waitForSelector('#ci-ok');
+  ok(await pg.evaluate(() => /Voto previsto/.test(document.querySelector('.modal-fondo').innerText)), 'se muestra el voto previsto');
+  await pg.screenshot({ path: `/tmp/${movil ? 'im' : 'id'}-bloque.png` });
+  const cb = await pg.$('[data-incl]:not([disabled])'); if (cb) { await pg.evaluate(() => document.querySelector('[data-incl]:not([disabled])').click()); await pg.waitForTimeout(120); }
+  await clic('#ci-ok'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => ESP.E.esp.ccaa.MAD.inv.estado === 'debate' && !ESP.E.esp.pendienteInvAut), 'te sometes a la votación');
+  await pg.evaluate(() => ESP.App.ir('elecciones', { tab: 'investidura' })); await pg.waitForTimeout(250);
+  ok(await pg.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2), 'sin desbordamiento horizontal');
+  console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);
+  await b.close(); srv.close();
+  process.exit(fallos || err.length ? 1 : 0);
+})().catch(e => { console.error('FALLO', e); process.exit(1); });

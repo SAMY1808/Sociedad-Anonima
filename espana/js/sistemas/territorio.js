@@ -93,6 +93,15 @@ window.ESP = window.ESP || {};
         if (x.aff < 0.3) continue;
         bloque.push(x.p); s += esc[x.p];
       }
+      return T.evalBloque(E, c, cand, bloque);
+    },
+
+    /* Resultado previsto de la investidura de un candidato con un bloque dado (sí, no y abstenciones). */
+    evalBloque(E, c, cand, bloque) {
+      const rc = E.esp.ccaa[c], esc = rc.parl.escanos, Ej = C.Ejecutivo;
+      const tot = U.suma(Object.values(esc)), may = Math.floor(tot / 2) + 1;
+      const partidos = Object.keys(esc).sort((a, b) => esc[b] - esc[a]);
+      const s = U.suma(bloque.map(p => esc[p] || 0));
       let si = s, no = 0;
       for (const p of partidos) { if (bloque.includes(p)) continue; const aff = Ej.afinidad(E, cand, p), veta = bloque.some(q => Ej.vetaA(E, p, q)); if (!veta && aff >= 0.6) si += esc[p]; else if (!veta && aff >= 0.3) { /* abstención */ } else no += esc[p]; }
       const ext = partidos.filter(p => !bloque.includes(p) && Ej.afinidad(E, cand, p) >= 0.6 && !bloque.some(q => Ej.vetaA(E, p, q)));
@@ -111,15 +120,21 @@ window.ESP = window.ESP || {};
     },
 
     /* Formación del gobierno autonómico tras unas elecciones o una crisis. */
-    formarGobierno(E, c, inicial) {
+    /* Mejor candidato y bloque entre los tres partidos más votados (sin los que ya fracasaron). */
+    mejorBloque(E, c, excluir) {
       const rc = E.esp.ccaa[c], esc = rc.parl.escanos;
-      const partidos = Object.keys(esc).sort((a, b) => esc[b] - esc[a]);
+      const partidos = Object.keys(esc).sort((a, b) => esc[b] - esc[a]).filter(k => !(excluir || []).includes(k));
       let mejor = null;
       for (const cand of partidos.slice(0, 3)) {
         const b = T.bloque(E, c, cand);
         b.score = (b.exito ? 1000 : 0) + (b.s >= b.may ? 200 : 0) - b.bloque.length * 10 + esc[cand] * 0.3;
         if (!mejor || b.score > mejor.score) mejor = b;
       }
+      return mejor;
+    },
+
+    formarGobierno(E, c, inicial) {
+      const mejor = T.mejorBloque(E, c);
       if (!mejor) return null;
       return T.instalar(E, c, mejor, inicial);
     },
@@ -175,10 +190,11 @@ window.ESP = window.ESP || {};
         else if (p.tipo === 'prog') T.resolverPrograma(E, c, p);
         return false;
       });
+      if (rc.inv && T.invTurno) T.invTurno(E, c);
       // Elecciones
       if (t >= rc.parl.proxT && !rc.suspendida) T.celebrar(E, c);
       else if (rc.suspendida && t >= rc.parl.proxT) T.celebrar(E, c, true);
-      else if (rc.gob && rc.gob.estab < 12 && t - rc.parl.ult > 52 && rc.parl.proxT - t > 12 && U.chance(0.01) && !(E.jugador && E.jugador.region === c && E.jugador.cargo === 'presauto')) T.adelantar(E, c, 'por falta de apoyos');
+      else if (rc.gob && !rc.inv && rc.gob.estab < 12 && t - rc.parl.ult > 52 && rc.parl.proxT - t > 12 && U.chance(0.01) && !(E.jugador && E.jugador.region === c && E.jugador.cargo === 'presauto')) T.adelantar(E, c, 'por falta de apoyos');
     },
 
     adelantar(E, c, motivo) {
@@ -197,11 +213,10 @@ window.ESP = window.ESP || {};
       for (const k of E.esp.regionales) { const p = E.partidos[k]; if (p.rp && p.rp[c] && res.votos[k] != null) p.rp[c] = U.clamp(p.rp[c] * 0.5 + res.votos[k] * 0.5, 0.3, 60); }
       C.Es.agregar(E);
       if (E.jugador && C.Personaje.antes_autonomicas) C.Personaje.antes_autonomicas(E, c);
-      T.formarGobierno(E, c);
+      const proy = T.abrirInvestidura(E, c), g = { partido: proy.cand, coalicion: proy.bloque };
       C.Generales.senado(E);
-      const g = rc.gob;
       const gan = Object.keys(res.votos).sort((a, b) => res.votos[b] - res.votos[a])[0];
-      C.Noticias.poner(E, 'elecciones', `Elecciones en ${d.nombre}: ${E.partidos[gan].sigla} gana con el ${U.d1(res.votos[gan])} %; gobierna ${E.partidos[g.partido].sigla}${g.coalicion.length > 1 ? ' en coalición' : ''}.`, 'ES');
+      C.Noticias.poner(E, 'elecciones', `Elecciones en ${d.nombre}: ${E.partidos[gan].sigla} gana con el ${U.d1(res.votos[gan])} %. Sesión constitutiva del Parlamento el ${U.fmtT(t + 4, true)}; ${E.partidos[g.partido].sigla} parte como favorito/a a la investidura${g.coalicion.length > 1 ? ' con ' + g.coalicion.filter(k => k !== g.partido).map(k => E.partidos[k].sigla).join(', ') : ''}.`, 'ES');
       const J = E.jugador;
       const personal = J && J.pais === 'ES' && C.Personaje.tras_autonomicas ? C.Personaje.tras_autonomicas(E, c, previo, res) : null;
       const jo = E.esp.jornada[t] = E.esp.jornada[t] || { t, aut: [], mun: null };

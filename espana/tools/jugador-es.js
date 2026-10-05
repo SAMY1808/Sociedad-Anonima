@@ -2,7 +2,7 @@
 const mini = require('./mini');
 const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
   'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
-  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
 const perfil = { semilla: +arg[0] || 11, partido: arg[1] || 'ES_ASD', nivel: arg[2] || 'nacional', rol: arg[3] || 'base', region: arg[4] || null, muni: arg[5] || null, nombre: 'Prueba', trayectoria: 'abogado', pais: 'ES' };
@@ -23,7 +23,7 @@ for (let i = 0; i < sem; i++) {
     else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(); const p = E.proyectos[id]; if (p) C.Congreso.resolver(E, p, U.pick(['si', 'no', 'abs'])); }
     else if (b === 'ue') { C.UE.decidir(E, 0, U.pick(['si', 'no', 'abs'])); }
     else if (b === 'noche') { E.elecciones.nochePendiente = null; E.elecciones.pePendiente = null; E.elecciones.presPendiente = null; }
-    else if (b === 'investidura') { if (E.esp.pendienteSocio) C.Ejecutivo.socioJugador(E, U.pick(['si', 'abs', 'no']), []); else { const inv = E.esp.cortes.investidura; if (inv) C.Ejecutivo.investidurJugador(E, inv.plan); else E.esp.pendienteInvestidura = false; } }
+    else if (b === 'investidura') { const pa = E.esp.pendienteInvAut; if (pa && pa.c === 'ES') { const cs = C.Ejecutivo.candidatosInv(E); C.Ejecutivo.nominarJugador(E, U.pick(cs).p); } else if (pa) { const T = C.Territorio, v = E.esp.ccaa[pa.c].inv; if (pa.tipo === 'nominar') T.invNominarJugador(E, pa.c, U.pick(T.invOpciones(E, pa.c)).p); else if (U.chance(0.2)) T.invRenunciaJugador(E, pa.c); else T.invCandidatoJugador(E, pa.c, T.bloque(E, pa.c, v.cand).bloque); } else if (E.esp.pendienteSocio) C.Ejecutivo.socioJugador(E, U.pick(['si', 'abs', 'no']), []); else { const inv = E.esp.cortes.investidura; if (inv) C.Ejecutivo.investidurJugador(E, inv.plan); else E.esp.pendienteInvestidura = false; } }
     else if (b === 'gabinete') { C.Gabinete.confirmar(E, E.esp.pendienteGabinete.key); E.esp.pendienteGabinete = null; }
     else if (b === 'escandalo') { E.esp.gab.escandalo = null; }
     else if (b === 'consejo') { const it = E.esp.consejo.agenda.find(x => x.urgente); const ops = C.Consejo.opciones(E, it); C.Consejo.resolver(E, it.id, U.pick(ops).k); }
