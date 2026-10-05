@@ -15,6 +15,8 @@ window.ESP = window.ESP || {};
       if (a.disponible) { const r = a.disponible(E, args || {}); if (r !== true) return r || 'No disponible'; }
       return true;
     },
+    /* Motivo por el que una acción no corresponde a tu situación, sin contar los puntos de agenda (true si corresponde). */
+    razon(id, args) { const a = reg[id]; if (!a) return 'Acción desconocida'; if (a.disponible) { const r = a.disponible(C.E, args || {}); if (r !== true) return r || 'No disponible'; } return true; },
     ejecutar(id, args) {
       const E = C.E, a = reg[id];
       const p = C.Acciones.puede(id, args);
