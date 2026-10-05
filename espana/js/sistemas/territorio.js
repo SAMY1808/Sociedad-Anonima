@@ -172,6 +172,7 @@ window.ESP = window.ESP || {};
         if (t < p.t) return true;
         if (p.tipo === 'refer_estatuto') T.referendumEstatuto(E, c, p);
         else if (p.tipo === 'traspaso') T.aplicarTraspaso(E, c, p.comp);
+        else if (p.tipo === 'prog') T.resolverPrograma(E, c, p);
         return false;
       });
       // Elecciones

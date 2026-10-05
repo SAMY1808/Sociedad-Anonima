@@ -8,7 +8,7 @@ window.ESP = window.ESP || {};
 
   /* Sector de cada cargo → especialidad universal */
   const ESP_CENTRAL = { ins: 'ins', eco: 'eco', ext: 'ext', seg: 'seg', ter: 'ter', soc: 'soc', amb: 'amb', agr: 'agr', sal: 'sal', edu: 'edu', dig: 'dig' };
-  const ESP_AUT = { pre: 'ins', eco: 'eco', edu: 'edu', sal: 'sal', int: 'seg', ter: 'ter', amb: 'amb', emp: 'soc', cul: 'edu' };
+  const ESP_AUT = { pre: 'ins', eco: 'eco', edu: 'edu', sal: 'sal', int: 'seg', ter: 'ter', amb: 'amb', emp: 'soc', cul: 'edu', uni: 'edu', soc: 'soc', jus: 'seg', ind: 'eco', agr: 'agr', mov: 'ter' };
   const ESP_MUNI = { urb: 'ter', mov: 'ter', seg: 'seg', ser: 'amb', soc: 'soc', cul: 'edu', hac: 'eco' };
   const TODAS = ['eco', 'soc', 'seg', 'ext', 'amb', 'agr', 'sal', 'edu', 'ter', 'ins', 'dig'];
   const NOM_ESP = { eco: 'Economía', soc: 'Social y empleo', seg: 'Seguridad y justicia', ext: 'Exteriores', amb: 'Medio ambiente y energía', agr: 'Agricultura', sal: 'Sanidad', edu: 'Educación y cultura', ter: 'Territorio y vivienda', ins: 'Instituciones', dig: 'Digital' };
@@ -26,7 +26,7 @@ window.ESP = window.ESP || {};
     /* ── Ámbitos: 'central' | 'aut:CAT' | 'muni:m_mad' ── */
     cargos(E, key) {
       if (key === 'central') return D().ministerios.map(m => ({ id: m.id, nombre: m.nombre, icono: m.icono, peso: m.peso, esp: ESP_CENTRAL[m.sector] || 'ins', vp: m.vp }));
-      if (key.startsWith('aut:')) return Object.keys(D().consejerias).map(a => ({ id: a, nombre: D().consejerias[a].nombre, icono: D().consejerias[a].icono, peso: D().consejerias[a].peso, esp: ESP_AUT[a], pres: a === 'pre' }));
+      if (key.startsWith('aut:')) return C.Territorio.grupos(E, key.slice(4)).map(g => ({ id: g.id, nombre: g.nombre, icono: g.icono, peso: g.peso, esp: ESP_AUT[g.id], pres: g.id === 'pre', atoms: g.atoms }));
       return Object.keys(D().concejalias).map(a => ({ id: a, nombre: D().concejalias[a].nombre, icono: D().concejalias[a].icono, peso: D().concejalias[a].peso, esp: ESP_MUNI[a] }));
     },
     gobierno(E, key) {
@@ -291,7 +291,7 @@ window.ESP = window.ESP || {};
           const per = g.consej[cg.id]; if (!per || cg.pres) continue;
           const pr = Gab.persona(E, key, cg.id); if (!pr) continue;
           const r = Gab.rend(E, cg, pr);
-          rc.gestion[cg.id] = clamp(rc.gestion[cg.id] + (r - 50) * 0.0035, 5, 98);
+          (cg.atoms || [cg.id]).forEach(a => { rc.gestion[a] = clamp(rc.gestion[a] + (r - 50) * 0.0035, 5, 98); });
           if (pr.id !== 'J' && U.chance(0.00012 + (100 - Gab.integ(pr)) * 0.000004)) { pr.esc = (pr.esc || 0) + 1; g.aprob = clamp(g.aprob - 1.2, 5, 90); C.Noticias.poner(E, 'politica', `${D().ccaa[c].nombre}: polémica en torno a ${pr.n}, consejero/a de ${cg.nombre}.`, 'ES'); if (!(E.jugador && E.jugador.cargo === 'presauto' && E.jugador.region === c) && pr.esc >= 1 && U.chance(0.5)) Gab.sustituirIA(E, key, cg.id); }
         }
       }

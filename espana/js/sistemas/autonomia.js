@@ -101,13 +101,72 @@ window.ESP = window.ESP || {};
       for (const c of T.ids()) { const rc = E.esp.ccaa[c]; for (const k of ['edu', 'sal', 'len', 'uni']) if (rc.comp[k] === 2 && U.chance(0.5)) rc.comp[k] = 1; T.calcAut(E, c); }
     },
 
+    /* ── Estructura del Gobierno: de 7 a 15 consejerías, agrupando áreas ── */
+    estructura(n) {
+      n = U.clamp(Math.round(n), D().nConsMin, D().nConsMax);
+      const head = {}; Object.keys(D().consejerias).forEach(a => head[a] = a);
+      const res = a => { while (head[a] !== a) a = head[a]; return a; };
+      for (const [x, y] of D().fusiones.slice(0, D().nConsMax - n)) head[res(x)] = res(y);
+      const gr = {};
+      Object.keys(D().consejerias).forEach(a => { const h = res(a); (gr[h] = gr[h] || []).push(a); });
+      return Object.keys(gr).map(h => { const atoms = [h].concat(gr[h].filter(a => a !== h)), nom = atoms.length === 1 ? D().consejerias[h].nombre : atoms.map(a => D().consejerias[a].corto).reduce((s, x, i, l) => s + (i === 0 ? '' : i === l.length - 1 ? ' y ' : ', ') + x, '');
+        return { id: h, atoms, nombre: nom, icono: D().consejerias[h].icono, peso: U.suma(atoms.map(a => D().consejerias[a].peso)) }; });
+    },
+    grupos(E, c) { const g = E.esp.ccaa[c].gob; return g && g.estr ? g.estr : T.estructura(D().nCons[c] || 10); },
+    infoGrupo(E, c, id) { return T.grupos(E, c).find(x => x.id === id) || (D().consejerias[id] ? { id, atoms: [id], nombre: D().consejerias[id].nombre, icono: D().consejerias[id].icono, peso: D().consejerias[id].peso } : { id, atoms: [id], nombre: id, icono: '💼', peso: 1 }); },
+    cabezaDe(E, c, atom) { const g = T.grupos(E, c).find(x => x.atoms.includes(atom)); return g ? g.id : atom; },
+    nivelGrupo(E, c, id) { const gr = T.infoGrupo(E, c, id); let n = 0, w = 0; gr.atoms.forEach(a => { const p = D().consejerias[a].peso; n += T.nivelArea(E, c, a) * p; w += p; }); return w ? n / w : 1; },
+
+    /* Rellena lo que falte en partidas antiguas (competencias, gestión y estructura nuevas). */
+    asegurarAut(E, c) {
+      const rc = E.esp.ccaa[c]; if (!rc.comp) return;
+      for (const k in D().competencias) if (rc.comp[k] == null) rc.comp[k] = (D().compEspecial[c] && D().compEspecial[c][k] != null) ? D().compEspecial[c][k] : D().compBase[k];
+      rc.gestion = rc.gestion || {}; for (const a in D().consejerias) if (rc.gestion[a] == null) rc.gestion[a] = U.clamp(U.gauss(50, 9), 28, 74);
+      rc.obras = rc.obras || [];
+      if (rc.gob && !rc.gob.estr) T.repartirConsejerias(E, c);
+    },
+
+    /* ── Programas de consejería: obras, leyes autonómicas y planes ── */
+    programa(id) { for (const a in D().programas) { const p = D().programas[a].find(x => x.id === id); if (p) return p; } return null; },
+    programasDe(E, c, head) { return T.infoGrupo(E, c, head).atoms.flatMap(a => D().programas[a] || []); },
+    iniciarPrograma(E, c, id, ia) {
+      const rc = E.esp.ccaa[c], g = rc.gob, prog = T.programa(id); if (!prog || !g) return { ok: false, msg: 'Programa desconocido' };
+      T.asegurarAut(E, c);
+      const niv = T.nivelArea(E, c, prog.area);
+      if (niv < 0.45 && !['pre', 'eco'].includes(prog.area)) return { ok: false, msg: `Tu comunidad apenas tiene competencias en ${D().consejerias[prog.area].corto.toLowerCase()}: reclama el traspaso al Estado.` };
+      if (rc.obras.filter(o => o.area === prog.area && !o.fin).length >= 2) return { ok: false, msg: 'Ya hay dos proyectos en marcha en esta área.' };
+      if (rc.pend.some(p => p.tipo === 'prog' && p.prog === id)) return { ok: false, msg: 'Ese programa ya está en marcha.' };
+      const eff = 0.5 + 0.5 * Math.min(1, niv / 1.5);
+      if (prog.tipo === 'accion') { T.aplicarPrograma(E, c, prog, eff, ia); return { ok: true, msg: `${prog.n}: aplicado.` }; }
+      if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.5, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
+      const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
+      const p = seats >= may ? 0.88 : seats + ext >= may ? 0.7 : 0.35;
+      rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'ley', ok: U.chance(p), eff, p });
+      return { ok: true, msg: `Remites al Parlamento el proyecto «${prog.n}» (probabilidad de aprobación ≈ ${Math.round(p * 100)} %).`, p };
+    },
+    aplicarPrograma(E, c, prog, eff, ia) {
+      const rc = E.esp.ccaa[c], g = rc.gob, IND = { sal: 'sal', edu: 'edu', uni: 'edu', soc: 'prot', int: 'seg', ter: 'viv', mov: 'rur', amb: 'amb', agr: 'rur', emp: 'igual', cul: 'lib', pre: 'inst', jus: 'inst', eco: 'comp', ind: 'comp' };
+      rc.gestion[prog.area] = U.clamp(rc.gestion[prog.area] + prog.gest * eff, 5, 98);
+      if (g) g.aprob = U.clamp(g.aprob + prog.aprob * eff, 5, 90);
+      rc.deuda = U.clamp(rc.deuda + (prog.tipo === 'obra' ? prog.deuda * 0.5 : prog.deuda), 3, 120);
+      const S = C.Impacto && C.Impacto.asegurar(E); if (S && IND[prog.area]) S.off[IND[prog.area]] = (S.off[IND[prog.area]] || 0) + prog.gest * eff * 0.05;
+    },
+    resolverPrograma(E, c, p) {
+      const rc = E.esp.ccaa[c], prog = T.programa(p.prog), J = E.jugador; if (!prog) return;
+      const nom = D().ccaa[c].nombre, suyo = J && J.region === c && ['consejero', 'presauto'].includes(J.cargo);
+      if (p.res === 'obra') { const o = rc.obras.find(x => x.id === p.prog && !x.fin); if (o) o.fin = true; T.aplicarPrograma(E, c, prog, p.eff); C.Noticias.poner(E, 'politica', `${nom}: se inaugura «${prog.n}».`, 'ES'); if (suyo) { C.Personaje.log(E, `Se inaugura «${prog.n}».`); C.Personaje.cambiar(E, { prestigio: 2.5, pop: 1.5 }, true); } return; }
+      if (p.ok) { T.aplicarPrograma(E, c, prog, p.eff); C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba: ${prog.n}.`, 'ES'); if (suyo) { C.Personaje.log(E, `Aprobada: ${prog.n}.`); C.Personaje.cambiar(E, { prestigio: 2, pop: 1 }, true); } }
+      else { if (rc.gob) rc.gob.estab = U.clamp(rc.gob.estab - 2, 0, 100); C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} rechaza el proyecto: ${prog.n}.`, 'ES'); if (suyo) { C.Personaje.log(E, `El Parlamento rechaza: ${prog.n}.`); C.Personaje.cambiar(E, { prestigio: -1.5 }, true); } }
+    },
+
     /* ── Consejerías ── */
     repartirConsejerias(E, c) {
       const rc = E.esp.ccaa[c], g = rc.gob, J = E.jugador; if (!g) return;
-      const keep = J && J.consejeria === c && J.area ? J.area : null;
+      g.n = U.clamp(g.n || D().nCons[c] || 10, D().nConsMin, D().nConsMax); g.estr = T.estructura(g.n);
+      const keep = J && J.consejeria === c && J.area ? T.cabezaDe(E, c, J.area) : null;
       const coal = g.coalicion, P = rc.parl.escanos;
       const peso = {}, cuota = {}; let tp = 0; coal.forEach(k => { peso[k] = Math.pow(P[k] || 1, 0.75); tp += peso[k]; });
-      const areas = Object.keys(D().consejerias).sort((a, b) => D().consejerias[b].peso - D().consejerias[a].peso), N = areas.length;
+      const areas = g.estr.map(x => x.id).sort((a, b) => T.infoGrupo(E, c, b).peso - T.infoGrupo(E, c, a).peso), N = areas.length;
       coal.forEach(k => cuota[k] = peso[k] / tp * N);
       g.consej = {};
       areas.forEach(a => {
@@ -117,7 +176,7 @@ window.ESP = window.ESP || {};
       });
       g.consej.pre = Object.assign(C.Gabinete.nueva(E, { region: c, partido: g.partido, esp: 'ins', perfil: 'politico' }), { n: (E.politicos[g.pres] || {}).n || '—', g: (E.politicos[g.pres] || {}).g || 'm', pres: true });
       if (E.jugador && g.pres === 'J' && !E.meta.presim) E.esp.pendienteGabinete = { key: 'aut:' + c, formacion: true };
-      if (keep && coal.includes(J.partido)) g.consej[keep] = 'J';
+      if (keep && coal.includes(J.partido)) { g.consej[keep] = 'J'; J.area = keep; }
       else if (J && J.consejeria === c) { J.consejeria = null; J.area = null; }
     },
     consejeroNombre(E, c, a) { const h = E.esp.ccaa[c].gob && E.esp.ccaa[c].gob.consej && E.esp.ccaa[c].gob.consej[a]; return h === 'J' ? E.jugador.nombre : h ? h.n : '—'; },
@@ -197,6 +256,9 @@ window.ESP = window.ESP || {};
       const t = E.fecha.t, cs = E.esp.consejo;
       for (const c of T.ids()) {
         const rc = E.esp.ccaa[c], d = D().ccaa[c], g = rc.gob; if (!g || !rc.comp) continue;
+        T.asegurarAut(E, c);
+        // Los gobiernos de la IA impulsan de vez en cuando obras, leyes y planes
+        if (U.chance(0.012) && !(E.jugador && E.jugador.region === c && ['consejero', 'presauto'].includes(E.jugador.cargo))) { const gr = U.pesado(T.grupos(E, c), x => x.peso), pr = U.pick(T.programasDe(E, c, gr.id)); if (pr) T.iniciarPrograma(E, c, pr.id, true); }
         // Gestión de cada consejería y su efecto en la aprobación
         let perf = 0, w = 0;
         for (const a in D().consejerias) {

@@ -109,7 +109,7 @@ window.ESP = window.ESP || {};
         case 'pm': return 'Presidente/a del Gobierno de España';
         case 'ministro': { const mi = D().ministerios.find(x => x.id === J.ministerio); return 'Ministro/a de ' + (mi ? mi.nombre : 'Gobierno'); }
         case 'presauto': return 'Presidente/a de ' + (rc ? D().ccaa[J.region].nombre : 'la comunidad');
-        case 'consejero': return 'Consejero/a de ' + (J.area && D().consejerias[J.area] ? D().consejerias[J.area].nombre : 'Gobierno') + ' (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
+        case 'consejero': return 'Consejero/a de ' + (J.area && rc ? C.Territorio.infoGrupo(E, J.region, J.area).nombre : 'Gobierno') + ' (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'dipauto': return 'Diputado/a autonómico/a (' + (rc ? D().ccaa[J.region].nombre : '') + ')';
         case 'alcalde': return 'Alcalde/sa de ' + (m ? m.nombre : '');
         case 'concejal': return 'Concejal/a' + (J.areaMuni && D().concejalias[J.areaMuni] ? ' de ' + D().concejalias[J.areaMuni].nombre : '') + ' (' + (m ? m.nombre : '') + ')';
@@ -251,7 +251,7 @@ window.ESP = window.ESP || {};
       const bono = ({ direccion: 0.12, portavoz: 0.06, lider: 0.25 })[J.rol] || 0;
       const pr = clamp(0.28 + (J.prestigio - 30) / 100 + (pos && pos <= 3 ? 0.3 : pos && pos <= 8 ? 0.12 : 0) + bono + f(E, 'negociacion', 'gestion') * 0.15, 0.1, 0.95);
       if (!U.chance(pr)) { Pj.log(E, `El presidente de ${D().ccaa[c].nombre} no cuenta contigo para el Consejo de Gobierno.`); return false; }
-      const por = libres.slice().sort((a, b) => D().consejerias[b].peso - D().consejerias[a].peso);
+      const por = libres.slice().sort((a, b) => T.infoGrupo(E, c, b).peso - T.infoGrupo(E, c, a).peso);
       const area = por[Math.min(por.length - 1, Math.floor(por.length / 2))], area2 = por[0] !== area ? por[0] : null;
       C.Eventos.disparar(E, C.Eventos.def('consejeria_lista'), { c, area, area2, pos: pos || null });
       return true;
@@ -261,7 +261,7 @@ window.ESP = window.ESP || {};
       C.Territorio.tomarConsejeria(E, c, area);
       if (J.nivel === 'local') { Pj.dejar(E, 'local'); J.nivel = 'autonomico'; }
       Pj.cambiar(E, { prestigio: 5, pop: 2 }, true); Pj.sincronizar(E);
-      Pj.log(E, `Tomas posesión como consejero/a de ${D().consejerias[area].nombre} en ${D().ccaa[c].nombre}.`);
+      Pj.log(E, `Tomas posesión como consejero/a de ${C.Territorio.infoGrupo(E, c, area).nombre} en ${D().ccaa[c].nombre}.`);
     },
 
     /* ── Candidaturas a las listas autonómicas ── */
@@ -711,13 +711,30 @@ window.ESP = window.ESP || {};
       return { ok: true, msg: 'Subes impuestos para financiar tus servicios: protestas, pero más recursos.' };
     }
   });
+  A('programa_consejeria', {
+    nombre: 'Impulsar un programa de tu consejería', icono: '🏗️', costo: (E, a) => { const pr = a && a.prog && C.Territorio.programa(a.prog); return pr ? pr.pts : 2; }, grupo: 'autonomico',
+    desc: 'Construye un hospital o un colegio, refuerza un servicio o propón una ley autonómica de tu área. Necesitas competencias transferidas.',
+    disponible(E, a) {
+      const J = E.jugador; if (!['consejero', 'presauto'].includes(J.cargo)) return 'Sólo consejeros/as y presidentes/as autonómicos/as';
+      if (!(a && a.prog)) return true;
+      const pr = C.Territorio.programa(a.prog); if (!pr) return 'Programa desconocido';
+      if (J.cargo === 'consejero' && !C.Territorio.infoGrupo(E, J.region, J.area).atoms.includes(pr.area)) return 'Ese programa no es de tu consejería';
+      return true;
+    },
+    ejecutar(E, a) { const J = E.jugador, r = C.Territorio.iniciarPrograma(E, J.region, a.prog, false); if (r.ok) Pj.cambiar(E, { prestigio: 0.8, pop: 0.4 }); return r; }
+  });
+  A('reorganizar_gobierno', {
+    nombre: 'Reorganizar el Gobierno (número de consejerías)', icono: '🧩', costo: 2, grupo: 'autonomico', desc: 'Presidente/a: decide cuántas consejerías tiene tu Gobierno (de 7 a 15) y cómo se agrupan las competencias. Tendrás que volver a repartir las carteras.',
+    disponible(E) { const r = presAut(E); if (r !== true) return r; const rc = rcJ(E); return E.fecha.t - (rc.reorg || -99) < 52 ? 'Ya reorganizaste el Gobierno hace menos de un año' : true; },
+    ejecutar(E, a) { const rc = rcJ(E), n = clamp(Math.round(+a.n || 10), 7, 15); rc.gob.n = n; rc.reorg = E.fecha.t; C.Territorio.repartirConsejerias(E, E.jugador.region); Pj.log(E, `Reorganizas el Gobierno de ${D().ccaa[E.jugador.region].nombre}: ${n} consejerías.`); return { ok: true, msg: `Tu Gobierno pasa a tener ${n} consejerías.` }; }
+  });
   A('gestion_consejeria', {
     nombre: 'Gestionar tu consejería', icono: '💼', costo: 2, grupo: 'autonomico', desc: 'Consejero/a: impulsa tu departamento. Cuanto más competencias haya transferido tu área, más margen tienes.',
     disponible(E) { const J = E.jugador; return J.cargo === 'consejero' && J.area ? true : 'Sólo consejeros/as autonómicos/as'; },
     ejecutar(E) {
-      const J = E.jugador, rc = rcJ(E), x = f(E, 'gestion', 'negociacion'), niv = C.Territorio.nivelArea(E, J.region, J.area);
+      const J = E.jugador, rc = rcJ(E), x = f(E, 'gestion', 'negociacion'), niv = C.Territorio.nivelGrupo(E, J.region, J.area);
       const mult = 0.25 + 0.4 * niv;
-      rc.gestion[J.area] = clamp(rc.gestion[J.area] + (4 + 7 * x) * mult, 5, 98); rc.gob.aprob = clamp(rc.gob.aprob + 0.25 * mult, 5, 90);
+      C.Territorio.infoGrupo(E, J.region, J.area).atoms.forEach(a => { rc.gestion[a] = clamp(rc.gestion[a] + (4 + 7 * x) * mult, 5, 98); }); rc.gob.aprob = clamp(rc.gob.aprob + 0.25 * mult, 5, 90);
       Pj.cambiar(E, { prestigio: 0.8 + 1.4 * x * mult, pop: 0.6 });
       return { ok: true, msg: niv < 0.6 ? 'Tu consejería tiene pocas competencias: apenas puedes hacer más que coordinar. Reclama traspasos.' : 'Tu departamento mejora y el Gobierno autonómico lo nota.' };
     }

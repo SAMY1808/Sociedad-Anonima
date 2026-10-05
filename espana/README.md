@@ -86,6 +86,7 @@ Es una PWA: se puede instalar y jugar sin conexión.
   deshacen) y los colectivos descontentos castigan al Gobierno y se acercan a los partidos que sienten próximos.
   Los grupos del Congreso piden **enmiendas** (más o menos alcance, otro enfoque, otra financiación…) a cambio de su
   voto. Pestañas *En vigor* e *Impacto en el país* en **Leyes**, y tarjeta *Estado del país* en el Centro de mando.
+- **Estructura del Gobierno autonómico**: cada comunidad tiene entre **7 consejerías** (como La Rioja) y **15** (como Cataluña); las competencias se agrupan según el tamaño (Sanidad y Servicios Sociales, Educación y Universidades…) y el presidente puede **reorganizar el Gobierno** eligiendo cuántas. Una consejería tiene **programas propios**: obras (hospitales, colegios, vivienda pública, metro…), planes de efecto inmediato y **leyes autonómicas** que debe aprobar el Parlamento regional; su efecto depende de las competencias transferidas.
 - **Consejerías y disolución autonómica**: si entras en el Parlamento regional en la lista de un partido que
   gobierna (sin ser cabeza), el presidente puede ofrecerte una consejería (y puedes pedir otra de más peso); el
   presidente/a autonómico/a puede **disolver el Parlamento** tras ver la proyección de escaños.

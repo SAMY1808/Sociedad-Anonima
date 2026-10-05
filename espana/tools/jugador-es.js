@@ -45,6 +45,8 @@ for (let i = 0; i < sem; i++) {
     if (id === 'visita_ccaa') args.region = U.pick(C.Territorio.ids());
     if (id === 'proponer_cambio_ley') { const v = (E.esp.vigor || []).filter(x => x.estado === 'activa'); if (v.length) { args.vigor = U.pick(v).id; args.tipo = U.pick(['derogar', 'reformar']); } }
     if (id === 'aceptar_enmienda') { const ps = C.Congreso.abiertos(E).filter(p => p.autor.tipo === 'jugador' || p.autor.tipo === 'gobierno'); if (ps.length) { const p = U.pick(ps), en = C.Impacto.enmiendas(E, p); if (en.length) { args.proy = p.id; args.k = en[0].cambio.k; args.v = en[0].cambio.v; args.pid = en[0].pid; } } }
+    if (id === 'programa_consejeria') { const T = C.Territorio, Jx = E.jugador; if (Jx.region && E.esp.ccaa[Jx.region]) { const ps = Jx.cargo === 'presauto' ? Object.values(C.DATA.programas).flat() : (Jx.area ? T.programasDe(E, Jx.region, Jx.area) : []); if (ps.length) args.prog = U.pick(ps).id; } }
+    if (id === 'reorganizar_gobierno') args.n = U.ri(7, 15);
     if (id === 'candidatura_aut') { const o = U.pick(C.Personaje.opcionesLista(E)); args.region = o.c; args.cabeza = U.chance(0.5); }
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }
