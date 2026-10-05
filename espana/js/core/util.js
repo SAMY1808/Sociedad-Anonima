@@ -51,6 +51,7 @@ window.ESP = window.ESP || {};
   const nf = new Intl.NumberFormat('es-ES');
   U.n = x => nf.format(Math.round(x));
   U.d1 = x => (Math.round(x * 10) / 10).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  U.d2 = x => (Math.round(x * 100) / 100).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   U.pct = (x, d = 1) => (d ? U.d1(x) : U.n(x)) + ' %';
   U.signo = (x, d = 1) => (x > 0 ? '+' : x < 0 ? '−' : '±') + (d ? U.d1(Math.abs(x)) : U.n(Math.abs(x)));
   U.eur = mm => {                     // cantidades en miles de millones de euros

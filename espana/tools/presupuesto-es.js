@@ -50,4 +50,9 @@ ok(T.presPresentar(E2, c, null, 2, false) === false || (p.tramite && p.tramite.d
 rc.deuda = 60; rc.fla = false; T.reglaFiscal(E2, c); ok(rc.fla === true, 'con deuda desbocada entra el fondo de liquidez del Estado');
 rc.deuda = 30; T.reglaFiscal(E2, c); ok(!rc.pef && !rc.fla, 'al bajar la deuda se levantan las restricciones');
 p.tramite = null; const l0 = (p.hist || []).length; T.presCierre(E2, c); ok(p.hist.length === l0 + 1, 'cierre de ejercicio registrado');
+const gS = T.grupos(E2, c).find(x => x.id === 'sal') || T.grupos(E2, c)[1], pS = T.programasDe(E2, c, gS.id).find(x => x.tipo === 'obra');
+p.cred[gS.id] = 0.001; J2.agenda.puntos = 20;
+const rs = T.iniciarPrograma(E2, c, pS.id, false, false); ok(rs.ok === false && rs.deuda, 'sin crédito se ofrece financiar con deuda');
+const dd0 = rc.deuda; rc.pef = false; rc.fla = false; const rd = T.iniciarPrograma(E2, c, pS.id, false, true); ok(rd.ok && rc.deuda > dd0, 'financiar con deuda sube la deuda (' + dd0.toFixed(2) + ' → ' + rc.deuda.toFixed(2) + ')');
+ok(T.progCoste(E2, c, pS) < p.total * 0.3, 'el coste de un programa es proporcional al presupuesto de la comunidad (' + T.progCoste(E2, c, pS).toFixed(3) + ' de ' + p.total.toFixed(1) + ')');
 console.log('errores', errores, '| fallos', fallos); process.exit(fallos || errores ? 1 : 0);

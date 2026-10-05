@@ -4,7 +4,6 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const TIPO = { obra: ['🏗️ Obra', 'amar'], ley: ['📜 Ley autonómica', 'oro'], accion: ['⚡ Plan', 'verde'] };
-  const coste = p => Math.max(0.05, Math.round(Math.abs(p.deuda) * 80) / 100);
 
   const CG = C.Pantallas.consejoGob = {
     render(el, params) {
@@ -30,15 +29,23 @@ window.ESP = window.ESP || {};
       UI.$$('[data-gab]', el).forEach(b => b.onclick = () => C.App.ir('gabinete', { key: 'aut:' + c }));
     },
 
+    /* Botón de un programa: con crédito de la consejería o, si no alcanza, financiando lo que falta con deuda. */
+    botonesProg(E, c, p) {
+      const T = C.Territorio, rc = E.esp.ccaa[c], head = T.cabezaDe(E, c, p.area), cred = (rc.pres && rc.pres.cred[head]) || 0, coste = T.progCoste(E, c, p), cons = E.jugador.cargo === 'consejero';
+      const txt = cons ? 'Llevar al Consejo' : 'Aprobar';
+      if (cred >= coste) return UI.botonAccion('programa_consejeria', { prog: p.id }, txt, 'chico');
+      return `<div class="fila" style="gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="etq rojo" ${UI.tt('Crédito de la consejería: ' + U.d2(cred) + ' mil M€')}>Faltan ${U.d2(coste - cred)}</span>${UI.botonAccion('programa_consejeria', { prog: p.id, deuda: true }, txt + ' con deuda', 'chico')}</div>`;
+    },
+
     progFila(E, c, p) {
       const rc = E.esp.ccaa[c], t = TIPO[p.tipo], enMarcha = rc.pend.some(x => x.tipo === 'prog' && x.prog === p.id);
-      return `<div class="it" style="align-items:flex-start;flex-wrap:wrap"><div class="cuerpo" style="min-width:220px"><b style="white-space:normal">${esc(p.n)}</b><span>${esc(p.d)}</span><div class="chips" style="margin-top:4px"><span class="etq ${t[1]}">${t[0]}${p.sem ? ' · ' + (p.sem >= 52 ? U.d1(p.sem / 52) + ' años' : p.sem + ' sem') : ''}</span><span class="etq">Coste ${U.d1(coste(p))} mil M€</span><span class="etq verde">Gestión +${p.gest}</span></div></div>${enMarcha ? '<span class="etq amar">En marcha</span>' : UI.botonAccion('programa_consejeria', { prog: p.id }, C.E.jugador.cargo === 'consejero' ? 'Llevar al Consejo' : 'Aprobar', 'chico')}</div>`;
+      return `<div class="it" style="align-items:flex-start;flex-wrap:wrap"><div class="cuerpo" style="min-width:220px"><b style="white-space:normal">${esc(p.n)}</b><span>${esc(p.d)}</span><div class="chips" style="margin-top:4px"><span class="etq ${t[1]}">${t[0]}${p.sem ? ' · ' + (p.sem >= 52 ? U.d1(p.sem / 52) + ' años' : p.sem + ' sem') : ''}</span><span class="etq">Coste ${U.d2(C.Territorio.progCoste(C.E, c, p))} mil M€</span><span class="etq verde">Gestión +${p.gest}</span></div></div>${enMarcha ? '<span class="etq amar">En marcha</span>' : CG.botonesProg(C.E, c, p)}</div>`;
     },
 
     orden(E, c, presJ) {
       const T = C.Territorio, rc = E.esp.ccaa[c];
       if (!presJ) return `<div class="tarjeta"><h3>Orden del día</h3><div class="vacio">El presidente despacha el orden del día cada semana. ${E.jugador.cargo === 'consejero' ? 'Como consejero/a, lleva tus propuestas desde <b>Mi consejería</b>.' : 'Consulta los acuerdos en la pestaña <b>Acuerdos</b>.'}</div></div>`;
-      const it = rc.agenda.map(i => { const p = T.programa(i.prog), t = TIPO[p.tipo], ci = T.infoGrupo(E, c, i.area); return `<div class="tarjeta"><div class="fila" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap;gap:10px"><div><div class="fila" style="gap:6px"><span style="font-size:18px">${ci.icono}</span><b style="font-size:15px">${esc(p.n)}</b></div><div class="tenue" style="font-size:12.5px;margin-top:2px">${esc(ci.nombre)} · propone: ${esc(i.quien)} · hasta ${U.fmtT(i.t + 4, true)}</div></div><span class="etq ${t[1]}">${t[0]}</span></div><p style="margin:8px 0 4px;font-size:13px;color:var(--texto2)">${esc(p.d)}</p><div class="chips"><span class="etq">Coste ${U.d1(coste(p))} mil M€</span><span class="etq">Crédito de la consejería ${U.d1(rc.pres.cred[i.area] || 0)}</span></div>
+      const it = rc.agenda.map(i => { const p = T.programa(i.prog), t = TIPO[p.tipo], ci = T.infoGrupo(E, c, i.area); return `<div class="tarjeta"><div class="fila" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap;gap:10px"><div><div class="fila" style="gap:6px"><span style="font-size:18px">${ci.icono}</span><b style="font-size:15px">${esc(p.n)}</b></div><div class="tenue" style="font-size:12.5px;margin-top:2px">${esc(ci.nombre)} · propone: ${esc(i.quien)} · hasta ${U.fmtT(i.t + 4, true)}</div></div><span class="etq ${t[1]}">${t[0]}</span></div><p style="margin:8px 0 4px;font-size:13px;color:var(--texto2)">${esc(p.d)}</p><div class="chips"><span class="etq">Coste ${U.d2(C.Territorio.progCoste(E, c, p))} mil M€</span><span class="etq">Crédito de la consejería ${U.d2(rc.pres.cred[i.area] || 0)}</span></div>
         <div class="fila" style="margin-top:10px;gap:6px"><button class="btn chico prim" data-id="${i.id}" data-gob-res="aprobar">Aprobar</button><button class="btn chico" data-id="${i.id}" data-gob-res="aplazar">Aplazar</button><button class="btn chico" data-id="${i.id}" data-gob-res="rechazar">Rechazar</button></div></div>`; }).join('');
       return `<div class="col">${it || '<div class="tarjeta"><div class="vacio">El orden del día está vacío esta semana. Puedes impulsar tú mismo programas en la pestaña <b>Consejerías</b>.</div></div>'}</div>`;
     },
@@ -51,7 +58,7 @@ window.ESP = window.ESP || {};
       return `${marcha.length ? `<div class="nota" style="margin-bottom:10px">En construcción: ${marcha.map(o => esc(o.nombre) + ' (' + U.fmtT(o.t1, true) + ')').join(' · ')}</div>` : ''}
         ${grupos.map(gr => { const niv = T.nivelGrupo(E, c, gr.id), gest = U.prom(gr.atoms.map(a => rc.gestion[a] || 50)), cred = rc.pres.cred[gr.id] || 0;
           return `<div class="tarjeta" style="margin-bottom:12px"><div class="t-cab"><h3>${gr.icono} ${esc(gr.nombre)}</h3><span class="etq">Gestión ${Math.round(gest)}</span></div>
-          <div class="fila" style="gap:8px;font-size:12.5px;margin-bottom:6px"><span class="etq ${niv >= 1.5 ? 'verde' : niv >= 0.7 ? 'amar' : 'rojo'}">Competencias ${niv >= 1.5 ? 'amplias' : niv >= 0.7 ? 'medias' : 'escasas'}</span><span class="etq">Presupuesto ${U.d1(rc.pres.alloc[gr.id] || 0)} % · crédito ${U.d1(cred)} mil M€</span></div>
+          <div class="fila" style="gap:8px;font-size:12.5px;margin-bottom:6px"><span class="etq ${niv >= 1.5 ? 'verde' : niv >= 0.7 ? 'amar' : 'rojo'}">Competencias ${niv >= 1.5 ? 'amplias' : niv >= 0.7 ? 'medias' : 'escasas'}</span><span class="etq">Presupuesto ${U.d1(rc.pres.alloc[gr.id] || 0)} % · crédito ${U.d2(cred)} mil M€</span></div>
           <div class="lista">${T.programasDe(E, c, gr.id).map(p => CG.progFila(E, c, p)).join('')}</div></div>`; }).join('')}
         <p class="tenue" style="font-size:12.5px">Los programas se pagan con el crédito de la consejería. ${consJ ? 'Como consejero/a los llevas al Consejo de Gobierno y el presidente decide si los aprueba.' : 'Como presidente/a los apruebas directamente.'}</p>`;
     },

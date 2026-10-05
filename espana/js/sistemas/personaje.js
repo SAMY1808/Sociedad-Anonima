@@ -809,7 +809,7 @@ window.ESP = window.ESP || {};
       if (J.cargo === 'consejero' && !C.Territorio.infoGrupo(E, J.region, J.area).atoms.includes(pr.area)) return 'Ese programa no es de tu consejería';
       return true;
     },
-    ejecutar(E, a) { const J = E.jugador, r = J.cargo === 'consejero' ? C.Territorio.llevarAlConsejo(E, J.region, a.prog) : C.Territorio.iniciarPrograma(E, J.region, a.prog, false); if (r.ok && r.exito !== false) Pj.cambiar(E, { prestigio: 0.8, pop: 0.4 }); return r; }
+    ejecutar(E, a) { const J = E.jugador, r = J.cargo === 'consejero' ? C.Territorio.llevarAlConsejo(E, J.region, a.prog, a.deuda) : C.Territorio.iniciarPrograma(E, J.region, a.prog, false, a.deuda); if (r.ok && r.exito !== false) Pj.cambiar(E, { prestigio: 0.8, pop: 0.4 }); return r; }
   });
   A('reorganizar_gobierno', {
     nombre: 'Reorganizar el Gobierno (número de consejerías)', icono: '🧩', costo: 2, grupo: 'autonomico', desc: 'Presidente/a: decide cuántas consejerías tiene tu Gobierno (de 7 a 15) y cómo se agrupan las competencias. Tendrás que volver a repartir las carteras.',

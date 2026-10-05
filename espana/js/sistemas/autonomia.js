@@ -236,17 +236,19 @@ window.ESP = window.ESP || {};
       const r = T.iniciarPrograma(E, c, it.prog, false); if (!r.ok) T.acuerdo(E, c, `No se puede aprobar «${pr.n}»: ${r.msg}`); return r;
     },
     /* Un consejero (jugador) lleva un programa al Consejo de Gobierno: el presidente decide. */
-    llevarAlConsejo(E, c, progId) {
+    llevarAlConsejo(E, c, progId, endeudar) {
       const J = E.jugador, g = E.esp.ccaa[c].gob, pr = T.programa(progId);
       const p = U.clamp(0.62 + (J.prestigio - 40) / 200 + (J.partido === g.partido ? 0.12 : -0.05) + (pr.tipo === 'accion' ? 0.1 : 0), 0.3, 0.93);
       if (!U.chance(p)) { T.acuerdo(E, c, `El presidente aplaza «${pr.n}», propuesta de ${J.nombre}.`); return { ok: true, exito: false, msg: `El Consejo de Gobierno aplaza «${pr.n}»: el presidente prefiere esperar.` }; }
-      return T.iniciarPrograma(E, c, progId, false);
+      return T.iniciarPrograma(E, c, progId, false, endeudar);
     },
 
     /* ── Programas de consejería: obras, leyes autonómicas y planes ── */
     programa(id) { if (id === '__pres') return { id: '__pres', area: 'eco', tipo: 'ley', n: 'Presupuestos de la comunidad', d: 'Reparto del dinero entre las consejerías, impuestos propios y déficit autorizado del próximo ejercicio.', pts: 0, sem: 0, gest: 0, aprob: 0, deuda: 0 }; for (const a in D().programas) { const p = D().programas[a].find(x => x.id === id); if (p) return p; } return null; },
     programasDe(E, c, head) { return T.infoGrupo(E, c, head).atoms.flatMap(a => D().programas[a] || []); },
-    iniciarPrograma(E, c, id, ia) {
+    /* Coste de un programa en mil millones: proporcional al tamaño del presupuesto de la comunidad (un hospital en La Rioja no cuesta lo que en Madrid). */
+    progCoste(E, c, prog) { const tot = T.presInit(E, c).total; return Math.max(0.03, Math.round(Math.abs(prog.deuda) * 0.02 * tot * 1000) / 1000); },
+    iniciarPrograma(E, c, id, ia, endeudar) {
       const rc = E.esp.ccaa[c], g = rc.gob, prog = T.programa(id); if (!prog || !g) return { ok: false, msg: 'Programa desconocido' };
       T.asegurarAut(E, c);
       const niv = T.nivelArea(E, c, prog.area);
@@ -254,9 +256,15 @@ window.ESP = window.ESP || {};
       if (rc.obras.filter(o => o.area === prog.area && !o.fin).length >= 2) return { ok: false, msg: 'Ya hay dos proyectos en marcha en esta área.' };
       if (rc.pend.some(p => p.tipo === 'prog' && p.prog === id)) return { ok: false, msg: 'Ese programa ya está en marcha.' };
       const eff = 0.5 + 0.5 * Math.min(1, niv / 1.5);
-      const pres = T.presInit(E, c), head = T.cabezaDe(E, c, prog.area), coste = Math.max(0.05, Math.round(Math.abs(prog.deuda) * 80) / 100);
-      if ((pres.cred[head] || 0) < coste) return { ok: false, msg: `Sin crédito: tu consejería tiene ${U.d1(pres.cred[head] || 0)} mil millones y el programa cuesta ${U.d1(coste)}. Pide más presupuesto o espera al próximo ejercicio.` };
-      pres.cred[head] -= coste; pres.gastado[head] = (pres.gastado[head] || 0) + coste;
+      const pres = T.presInit(E, c), head = T.cabezaDe(E, c, prog.area), coste = T.progCoste(E, c, prog), cred = pres.cred[head] || 0;
+      if (cred < coste) {
+        const falta = coste - cred;
+        if (!endeudar) return { ok: false, msg: `Sin crédito: tu consejería tiene ${U.d2(cred)} mil millones y el programa cuesta ${U.d2(coste)}. Puedes financiar lo que falta con deuda, pedir más presupuesto o esperar al próximo ejercicio.`, deuda: true };
+        if (rc.pef || rc.fla) return { ok: false, msg: 'Estás bajo un plan económico-financiero: no puedes endeudarte para pagar programas.' };
+        const d = D().ccaa[c]; rc.deuda = U.clamp(rc.deuda + falta / Math.max(1, d.pob * d.pibpc) * 100, 3, 120);
+        pres.cred[head] = 0; pres.gastado[head] = (pres.gastado[head] || 0) + cred + falta;
+        T.acuerdo(E, c, `Se financian con deuda ${U.d2(falta)} mil millones de «${prog.n}».`);
+      } else { pres.cred[head] -= coste; pres.gastado[head] = (pres.gastado[head] || 0) + coste; }
       T.acuerdo(E, c, `Se pone en marcha «${prog.n}».`);
       if (prog.tipo === 'accion') { T.aplicarPrograma(E, c, prog, eff, ia); return { ok: true, msg: `${prog.n}: aplicado.` }; }
       if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.22, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
