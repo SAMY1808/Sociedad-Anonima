@@ -122,8 +122,68 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c]; if (!rc.comp) return;
       for (const k in D().competencias) if (rc.comp[k] == null) rc.comp[k] = (D().compEspecial[c] && D().compEspecial[c][k] != null) ? D().compEspecial[c][k] : D().compBase[k];
       rc.gestion = rc.gestion || {}; for (const a in D().consejerias) if (rc.gestion[a] == null) rc.gestion[a] = U.clamp(U.gauss(50, 9), 28, 74);
-      rc.obras = rc.obras || [];
+      rc.obras = rc.obras || []; if (rc.gob && !rc.pres && rc.gob.estr) T.presInit(E, c);
       if (rc.gob && !rc.gob.estr) T.repartirConsejerias(E, c);
+    },
+
+    /* ── Presupuesto autonómico: se aprueba cada año y se asigna a cada consejería ── */
+    presTotal(E, c) { const d = D().ccaa[c], rc = E.esp.ccaa[c]; return d.pob * d.pibpc * 0.14 * (rc.fin.nivel / 100); },
+    presDefault(E, c) { const gr = T.grupos(E, c), tp = U.suma(gr.map(g => g.peso)), a = {}; gr.forEach(g => a[g.id] = Math.round(g.peso / tp * 1000) / 10); return a; },
+    presNormal(alloc, ids) { const a = {}; let s = 0; ids.forEach(k => { a[k] = Math.max(1, +alloc[k] || 1); s += a[k]; }); ids.forEach(k => a[k] = Math.round(a[k] / s * 1000) / 10); return a; },
+    presInit(E, c) {
+      const rc = E.esp.ccaa[c]; if (rc.pres) return rc.pres;
+      const alloc = T.presDefault(E, c), total = T.presTotal(E, c), cred = {}, gastado = {};
+      Object.keys(alloc).forEach(k => { cred[k] = alloc[k] / 100 * total * 0.22; gastado[k] = 0; });
+      return rc.pres = { ano: U.anio(), estado: 'aprobado', total, alloc, def: 0, cred, gastado, tramite: null, pendiente: false, off: {} };
+    },
+    /* Si cambia la estructura del Gobierno, reparte el presupuesto entre las nuevas consejerías. */
+    presAjustar(E, c) {
+      const p = T.presInit(E, c), ids = T.grupos(E, c).map(g => g.id), ok = ids.length === Object.keys(p.alloc).length && ids.every(k => p.alloc[k] != null);
+      if (ok) return;
+      const nuevo = {}, cred = {}, gastado = {}; T.grupos(E, c).forEach(g => { nuevo[g.id] = U.suma(Object.keys(p.alloc).filter(k => g.atoms.includes(k) || k === g.id).map(k => p.alloc[k])) || T.presDefault(E, c)[g.id]; });
+      p.alloc = T.presNormal(nuevo, ids); ids.forEach(k => { cred[k] = p.alloc[k] / 100 * p.total * 0.22; gastado[k] = 0; }); p.cred = cred; p.gastado = gastado;
+    },
+    /* Se presenta el proyecto de presupuesto: lo vota el Parlamento autonómico. */
+    presPresentar(E, c, alloc, def, ia) {
+      const rc = E.esp.ccaa[c], p = T.presInit(E, c), g = rc.gob; if (!g || p.tramite) return false;
+      const ids = T.grupos(E, c).map(x => x.id);
+      p.tramite = { alloc: T.presNormal(alloc || T.presDefault(E, c), ids), def: def || 0, t: E.fecha.t + 5 };
+      p.pendiente = false;
+      C.Noticias.poner(E, 'politica', `El Gobierno de ${D().ccaa[c].nombre} presenta el proyecto de presupuestos${p.tramite.def ? ' con déficit' : ''}.`, 'ES');
+      return true;
+    },
+    presVotar(E, c) {
+      const rc = E.esp.ccaa[c], p = rc.pres, g = rc.gob, tr = p.tramite, J = E.jugador; p.tramite = null; if (!g) return;
+      const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
+      const pr = seats >= may ? 0.93 : seats + ext >= may ? 0.8 : 0.55;
+      const nom = D().ccaa[c].nombre, suyo = J && J.region === c && ['presauto', 'consejero'].includes(J.cargo);
+      p.ano = U.anio();
+      if (U.chance(pr)) {
+        p.estado = 'aprobado'; p.alloc = tr.alloc; p.def = tr.def; p.total = T.presTotal(E, c) * (1 + 0.04 * tr.def);
+        const def = T.presDefault(E, c); p.off = {};
+        Object.keys(p.alloc).forEach(k => { p.cred[k] = p.alloc[k] / 100 * p.total * 0.22; p.gastado[k] = 0; p.off[k] = U.clamp((p.alloc[k] / (def[k] || 1) - 1) * 12 + tr.def * 1.5, -10, 12); });
+        g.estab = U.clamp(g.estab + 4, 0, 100);
+        C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba los presupuestos de ${p.ano + 1} (${U.d1(p.total)} mil millones).`, 'ES');
+        if (suyo) C.Personaje.log(E, `Se aprueban los presupuestos autonómicos de ${nom} (${U.d1(p.total)} mil millones).`);
+      } else {
+        p.estado = 'prorrogado'; Object.keys(p.cred).forEach(k => { p.cred[k] = p.alloc[k] / 100 * p.total * 0.22 * 0.8; p.gastado[k] = 0; }); Object.keys(p.off).forEach(k => p.off[k] = (p.off[k] || 0) - 3);
+        g.estab = U.clamp(g.estab - 4, 0, 100); g.aprob = U.clamp(g.aprob - 1, 5, 90);
+        C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} rechaza los presupuestos: se prorrogan los anteriores.`, 'ES');
+        if (suyo) C.Personaje.log(E, `Los presupuestos de ${nom} fracasan en el Parlamento: se prorrogan.`);
+      }
+    },
+    presTurno(E, c) {
+      const rc = E.esp.ccaa[c], g = rc.gob, f = U.hoy(), J = E.jugador; if (!g || rc.suspendida) return;
+      const p = T.presInit(E, c); T.presAjustar(E, c);
+      const presJ = J && J.region === c && J.cargo === 'presauto';
+      if (f.getUTCMonth() === 9 && f.getUTCDate() <= 7 && p.ano < f.getUTCFullYear() && !p.tramite && !p.pendiente) {
+        if (presJ) { p.pendiente = E.fecha.t + 5; C.Eventos.info(E, '💶 Presupuestos autonómicos', `Es el momento de elaborar los presupuestos de ${D().ccaa[c].nombre}: reparte el dinero entre las consejerías (Agenda → Elaborar los presupuestos). Si no lo haces, se presentará el reparto por defecto.`); }
+        else T.presPresentar(E, c, null, g.aprob > 50 ? 1 : 0, true);
+      }
+      if (p.pendiente && E.fecha.t >= p.pendiente) T.presPresentar(E, c, null, 0, true);
+      if (p.tramite && E.fecha.t >= p.tramite.t) T.presVotar(E, c);
+      // Déficit autorizado: la deuda autonómica sube o baja
+      if (p.def) rc.deuda = U.clamp(rc.deuda + p.def * 0.012, 3, 120);
     },
 
     /* ── Programas de consejería: obras, leyes autonómicas y planes ── */
@@ -137,8 +197,11 @@ window.ESP = window.ESP || {};
       if (rc.obras.filter(o => o.area === prog.area && !o.fin).length >= 2) return { ok: false, msg: 'Ya hay dos proyectos en marcha en esta área.' };
       if (rc.pend.some(p => p.tipo === 'prog' && p.prog === id)) return { ok: false, msg: 'Ese programa ya está en marcha.' };
       const eff = 0.5 + 0.5 * Math.min(1, niv / 1.5);
+      const pres = T.presInit(E, c), head = T.cabezaDe(E, c, prog.area), coste = Math.max(0.05, Math.round(Math.abs(prog.deuda) * 80) / 100);
+      if ((pres.cred[head] || 0) < coste) return { ok: false, msg: `Sin crédito: tu consejería tiene ${U.d1(pres.cred[head] || 0)} mil millones y el programa cuesta ${U.d1(coste)}. Pide más presupuesto o espera al próximo ejercicio.` };
+      pres.cred[head] -= coste; pres.gastado[head] = (pres.gastado[head] || 0) + coste;
       if (prog.tipo === 'accion') { T.aplicarPrograma(E, c, prog, eff, ia); return { ok: true, msg: `${prog.n}: aplicado.` }; }
-      if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.5, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
+      if (prog.tipo === 'obra') { rc.deuda = U.clamp(rc.deuda + prog.deuda * 0.22, 3, 120); rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'obra', eff }); rc.obras.push({ id, area: prog.area, nombre: prog.n, t0: E.fecha.t, t1: E.fecha.t + prog.sem, fin: false }); return { ok: true, msg: `Arranca el proyecto «${prog.n}» (${prog.sem >= 52 ? U.d1(prog.sem / 52) + ' años' : prog.sem + ' semanas'}).` }; }
       const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
       const p = seats >= may ? 0.88 : seats + ext >= may ? 0.7 : 0.35;
       rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'ley', ok: U.chance(p), eff, p });
@@ -148,7 +211,7 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c], g = rc.gob, IND = { sal: 'sal', edu: 'edu', uni: 'edu', soc: 'prot', int: 'seg', ter: 'viv', mov: 'rur', amb: 'amb', agr: 'rur', emp: 'igual', cul: 'lib', pre: 'inst', jus: 'inst', eco: 'comp', ind: 'comp' };
       rc.gestion[prog.area] = U.clamp(rc.gestion[prog.area] + prog.gest * eff, 5, 98);
       if (g) g.aprob = U.clamp(g.aprob + prog.aprob * eff, 5, 90);
-      rc.deuda = U.clamp(rc.deuda + (prog.tipo === 'obra' ? prog.deuda * 0.5 : prog.deuda), 3, 120);
+      rc.deuda = U.clamp(rc.deuda + (prog.tipo === 'obra' ? prog.deuda * 0.22 : prog.deuda * 0.3), 3, 120);
       const S = C.Impacto && C.Impacto.asegurar(E); if (S && IND[prog.area]) S.off[IND[prog.area]] = (S.off[IND[prog.area]] || 0) + prog.gest * eff * 0.05;
     },
     resolverPrograma(E, c, p) {
@@ -162,7 +225,7 @@ window.ESP = window.ESP || {};
     /* ── Consejerías ── */
     repartirConsejerias(E, c) {
       const rc = E.esp.ccaa[c], g = rc.gob, J = E.jugador; if (!g) return;
-      g.n = U.clamp(g.n || D().nCons[c] || 10, D().nConsMin, D().nConsMax); g.estr = T.estructura(g.n);
+      g.n = U.clamp(g.n || D().nCons[c] || 10, D().nConsMin, D().nConsMax); g.estr = T.estructura(g.n); if (rc.pres) T.presAjustar(E, c);
       const keep = J && J.consejeria === c && J.area ? T.cabezaDe(E, c, J.area) : null;
       const coal = g.coalicion, P = rc.parl.escanos;
       const peso = {}, cuota = {}; let tp = 0; coal.forEach(k => { peso[k] = Math.pow(P[k] || 1, 0.75); tp += peso[k]; });
@@ -256,14 +319,14 @@ window.ESP = window.ESP || {};
       const t = E.fecha.t, cs = E.esp.consejo;
       for (const c of T.ids()) {
         const rc = E.esp.ccaa[c], d = D().ccaa[c], g = rc.gob; if (!g || !rc.comp) continue;
-        T.asegurarAut(E, c);
+        T.asegurarAut(E, c); T.presTurno(E, c);
         // Los gobiernos de la IA impulsan de vez en cuando obras, leyes y planes
         if (U.chance(0.012) && !(E.jugador && E.jugador.region === c && ['consejero', 'presauto'].includes(E.jugador.cargo))) { const gr = U.pesado(T.grupos(E, c), x => x.peso), pr = U.pick(T.programasDe(E, c, gr.id)); if (pr) T.iniciarPrograma(E, c, pr.id, true); }
         // Gestión de cada consejería y su efecto en la aprobación
         let perf = 0, w = 0;
         for (const a in D().consejerias) {
           const mj = rc.gestion[a], niv = T.nivelArea(E, c, a);
-          rc.gestion[a] = U.clamp(mj + (50 - mj) * 0.015 + U.gauss(0, 0.8) + (rc.fin.nivel - 100) * 0.004, 10, 95);
+          rc.gestion[a] = U.clamp(mj + (50 + ((rc.pres && rc.pres.off && rc.pres.off[T.cabezaDe(E, c, a)]) || 0) - mj) * 0.015 + U.gauss(0, 0.8) + (rc.fin.nivel - 100) * 0.004, 10, 95);
           perf += (rc.gestion[a] - 50) * niv * D().consejerias[a].peso; w += 2 * D().consejerias[a].peso;
         }
         g.aprob = U.clamp(g.aprob + perf / w * 0.05, 8, 88);

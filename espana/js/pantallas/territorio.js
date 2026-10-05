@@ -19,9 +19,10 @@ window.ESP = window.ESP || {};
       else if (tab === 'proces') cuerpo = T.proces(E);
       else if (tab === 'estatutos') cuerpo = T.estatutos(E);
       else if (tab === 'financiacion') cuerpo = T.financiacion(E);
+      else if (tab === 'presupuesto') cuerpo = T.presupuesto(E);
       else cuerpo = T.municipios(E);
       el.innerHTML = `<div class="cab"><div><h1>🗺 Territorio</h1><div class="sub">17 comunidades y 2 ciudades autónomas · 52 circunscripciones · 67 grandes ayuntamientos · relación media con Moncloa ${Math.round(U.prom(C.Territorio.ids().map(c => E.esp.ccaa[c].relM)))}</div></div></div>
-        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['munis', 'Municipios']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
+        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['presupuesto', 'Presupuesto autonómico'], ['munis', 'Municipios']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('territorio', { tab: b.dataset.tab }));
       UI.$$('[data-capa]', el).forEach(b => b.onclick = () => { E.ui.capaEs = b.dataset.capa; C.App.refrescar(); });
       UI.$$('[data-ccaa]', el).forEach(b => b.onclick = e => { if (e.target.closest('[data-accion]')) return; T.verCcaa(b.dataset.ccaa); });
@@ -29,6 +30,7 @@ window.ESP = window.ESP || {};
       UI.$$('[data-r]', el).forEach(b => b.onclick = () => C.Pantallas.leyes.ver(b.dataset.r));
       UI.$$('[data-muni]', el).forEach(b => b.onclick = () => T.verMuni(b.dataset.muni));
       const sel = UI.$('#t-orden', el); if (sel) sel.onchange = () => { E.ui.ordenCcaa = sel.value; C.App.refrescar(); };
+      const pr = UI.$('#t-pres', el); if (pr) pr.onchange = () => { E.ui.regPres = pr.value; C.App.refrescar(); };
       const fm = UI.$('#t-fm', el); if (fm) fm.onchange = () => { E.ui.filtroMuni = fm.value; C.App.refrescar(); };
     },
 
@@ -85,6 +87,21 @@ window.ESP = window.ESP || {};
       return `<div class="grid g-dash"><div class="tarjeta"><h3>Estatutos de autonomía</h3><table class="tabla apila"><thead><tr><th>Comunidad</th><th class="num">Vigente desde</th><th class="num">Autogobierno</th><th>Reforma</th></tr></thead><tbody>${ids.map(c => { const rc = E.esp.ccaa[c], pr = rc.estatuto.proceso; return `<tr class="clic" data-ccaa="${c}"><td><b>${esc(D().ccaa[c].nombre)}</b></td><td class="num">${rc.estatuto.ano}</td><td class="num">${Math.round(rc.aut)}</td><td>${pr ? `<span class="etq amar">${pr.fase === 'cortes' ? 'En las Cortes' : 'Referéndum autonómico'}</span>` : rc.estatuto.rechazos ? `<span class="etq rojo">Rechazada ×${rc.estatuto.rechazos}</span>` : '<span class="tenue">—</span>'}</td></tr>`; }).join('')}</tbody></table></div>
         <div class="col"><div class="tarjeta"><h3>Cómo se reforma un estatuto</h3><ol style="margin:0;padding-left:18px;font-size:13px;color:var(--texto2);line-height:1.6"><li>El Parlamento autonómico aprueba la propuesta por <b>tres quintos</b>.</li><li>Las Cortes la tramitan como <b>ley orgánica</b> (176 votos en el Congreso; el Senado puede vetarla).</li><li>La comunidad la ratifica en <b>referéndum</b>.</li><li>Si prospera, sube el autogobierno y mejora la relación con Moncloa; si falla, queda como derrota política.</li></ol></div>
           <div class="tarjeta"><h3>En trámite en las Cortes</h3>${enCortes.length ? `<div class="lista" style="font-size:13px">${enCortes.map(p => `<div class="it clic" data-r="${p.id}"><span>📖</span><div class="cuerpo"><b>${esc(p.t)}</b><span>${Comp.etapa(p.etapa)}</span></div></div>`).join('')}</div>` : '<div class="vacio">Ninguna reforma estatutaria en las Cortes.</div>'}</div></div></div>`;
+    },
+
+    /* Presupuesto autonómico de una comunidad: estado, reparto por consejerías y crédito disponible. */
+    presupuesto(E) {
+      const Tt = C.Territorio, J = E.jugador, c = E.ui.regPres && E.esp.ccaa[E.ui.regPres] ? E.ui.regPres : (J.region || 'MAD'), rc = E.esp.ccaa[c];
+      if (!rc.gob) return '<div class="vacio">Sin gobierno autonómico.</div>';
+      Tt.asegurarAut(E, c); const p = Tt.presInit(E, c), gr = Tt.grupos(E, c), def = Tt.presDefault(E, c);
+      const est = p.tramite ? ['En el Parlamento', 'amar'] : p.estado === 'prorrogado' ? ['Prorrogado', 'rojo'] : ['Aprobado', 'verde'];
+      const filas = gr.map(g => { const a = p.alloc[g.id] || 0, eur = a / 100 * p.total, cred = p.cred[g.id] || 0, d = a - (def[g.id] || a); return `<tr><td>${g.icono} ${esc(g.nombre)}</td><td class="num">${U.d1(a)} %</td><td class="num">${U.d1(eur)}</td><td class="num ${d > 0.4 ? 'bien' : d < -0.4 ? 'mal' : 'tenue'}">${d >= 0 ? '+' : ''}${U.d1(d)}</td><td class="num">${U.d1(cred)}</td></tr>`; }).join('');
+      const esMia = J.region === c, puedeElab = esMia && J.cargo === 'presauto' && p.pendiente, puedeRec = esMia && J.cargo === 'consejero';
+      return `<div class="fila" style="margin-bottom:10px;gap:10px"><label class="tenue">Comunidad <select id="t-pres">${Tt.ids().map(x => `<option value="${x}" ${x === c ? 'selected' : ''}>${esc(D().ccaa[x].nombre)}</option>`).join('')}</select></label></div>
+        <div class="grid g3" style="margin-bottom:14px"><div class="tarjeta">${Comp.kpi('Presupuesto', U.d1(p.total) + ' mil M€', 'Ejercicio ' + (p.ano + 1))}</div><div class="tarjeta">${Comp.kpi('Estado', `<span class="etq ${est[1]}" style="font-size:15px">${est[0]}</span>`, p.def ? 'Déficit autorizado ' + (p.def === 2 ? 'alto' : 'moderado') : 'Equilibrado')}</div><div class="tarjeta">${Comp.kpi('Deuda autonómica', U.d1(rc.deuda) + ' % PIB', 'Se vota cada otoño')}</div></div>
+        <div class="tarjeta"><h3>Reparto por consejerías</h3><table class="tabla"><thead><tr><th>Consejería</th><th class="num">Peso</th><th class="num">Mil M€</th><th class="num">vs. media</th><th class="num">Crédito para programas</th></tr></thead><tbody>${filas}</tbody></table>
+          <p class="tenue" style="font-size:12.5px;margin:8px 0 0">Más presupuesto que la media mejora la gestión de esa consejería; menos, la empeora. El <b>crédito</b> es el 22 % de cada partida: con él se pagan obras, planes y leyes de cada consejería. Cada octubre el Gobierno presenta los presupuestos y el Parlamento los vota; si fracasan se prorrogan (con un 20 % menos de crédito).</p>
+          <div class="fila" style="margin-top:8px;gap:8px">${puedeElab ? UI.botonAccion('presupuesto_aut', {}, '💶 Elaborar los presupuestos', 'prim') : ''}${puedeRec ? UI.botonAccion('reclamar_fondos', {}, '💰 Reclamar más fondos', '') : ''}</div></div>`;
     },
 
     financiacion(E) {

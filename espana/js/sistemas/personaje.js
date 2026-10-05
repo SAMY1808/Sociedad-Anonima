@@ -249,7 +249,7 @@ window.ESP = window.ESP || {};
       const libres = T.areasDe(E, c, J.partido); if (!libres.length) return false;
       J.ofertaT = E.fecha.t;
       const bono = ({ direccion: 0.12, portavoz: 0.06, lider: 0.25 })[J.rol] || 0;
-      const pr = clamp(0.28 + (J.prestigio - 30) / 100 + (pos && pos <= 3 ? 0.3 : pos && pos <= 8 ? 0.12 : 0) + bono + f(E, 'negociacion', 'gestion') * 0.15, 0.1, 0.95);
+      const pr = clamp(0.28 + (J.prestigio - 30) / 100 + (pos && pos <= 3 ? 0.3 : pos && pos <= 8 ? 0.12 : 0) + bono + f(E, 'negociacion', 'gestion') * 0.22, 0.1, 0.95);
       if (!U.chance(pr)) { Pj.log(E, `El presidente de ${D().ccaa[c].nombre} no cuenta contigo para el Consejo de Gobierno.`); return false; }
       const por = libres.slice().sort((a, b) => T.infoGrupo(E, c, b).peso - T.infoGrupo(E, c, a).peso);
       const area = por[Math.min(por.length - 1, Math.floor(por.length / 2))], area2 = por[0] !== area ? por[0] : null;
@@ -709,6 +709,27 @@ window.ESP = window.ESP || {};
       if (baja) { rc.gob.aprob = clamp(rc.gob.aprob + 2.2, 5, 90); rc.fin.nivel -= 1.2; rc.relM = clamp(rc.relM - 1, 0, 100); for (const x of Object.keys(E.esp.ccaa)) if (x !== rc.id) E.esp.ccaa[x].agravio += 0.1; Pj.cambiar(E, { pop: 1.5 }); return { ok: true, msg: 'Bajas impuestos: los votantes lo notan, la caja también.' }; }
       rc.gob.aprob = clamp(rc.gob.aprob - 1.6, 5, 90); rc.fin.nivel += 1.6; rc.relM = clamp(rc.relM + 1, 0, 100); Pj.cambiar(E, { prestigio: 0.5 });
       return { ok: true, msg: 'Subes impuestos para financiar tus servicios: protestas, pero más recursos.' };
+    }
+  });
+  A('presupuesto_aut', {
+    nombre: 'Elaborar los presupuestos autonómicos', icono: '💶', costo: 2, grupo: 'autonomico', desc: 'Presidente/a: reparte el presupuesto entre las consejerías y decide el déficit. Lo vota el Parlamento regional.',
+    disponible(E) { const r = presAut(E); if (r !== true) return r; const p = C.Territorio.presInit(E, E.jugador.region); return p.pendiente ? true : p.tramite ? 'Los presupuestos ya están en el Parlamento' : 'Sólo en octubre, cuando se abre el plazo de presupuestos'; },
+    ejecutar(E, a) { const ok = C.Territorio.presPresentar(E, E.jugador.region, a.alloc, +a.def || 0, false); if (!ok) return { ok: false, msg: 'No se pudo presentar' }; Pj.cambiar(E, { prestigio: 1 }); return { ok: true, msg: 'Presentas los presupuestos en el Parlamento autonómico.' }; }
+  });
+  A('reclamar_fondos', {
+    nombre: 'Reclamar más presupuesto para tu consejería', icono: '💰', costo: 2, grupo: 'autonomico', desc: 'Consejero/a: pide al presidente más dinero para tu área (a costa de las demás). Depende de tu prestigio y del peso de tu partido.',
+    disponible(E) { const J = E.jugador; if (J.cargo !== 'consejero' || !J.area) return 'Sólo consejeros/as autonómicos/as'; const p = C.Territorio.presInit(E, J.region); return E.fecha.t - ((p.reclamo || {})[J.area] || -99) < 52 ? 'Ya reclamaste fondos este año' : true; },
+    ejecutar(E) {
+      const J = E.jugador, T = C.Territorio, p = T.presInit(E, J.region), rc = rcJ(E), k = J.area;
+      p.reclamo = p.reclamo || {}; p.reclamo[k] = E.fecha.t;
+      const peso = (rc.parl.escanos[J.partido] || 0) / D().ccaa[J.region].esc;
+      if (U.chance(clamp(0.2 + (J.prestigio - 30) / 150 + peso * 0.5 + f(E, 'negociacion', 'carisma') * 0.2, 0.1, 0.8))) {
+        const d = Math.min(3, 1.5 + f(E, 'negociacion', 'carisma') * 2), otros = Object.keys(p.alloc).filter(x => x !== k);
+        p.alloc[k] += d; otros.forEach(x => p.alloc[x] -= d / otros.length);
+        p.cred[k] += d / 100 * p.total * 0.22; p.off[k] = (p.off[k] || 0) + d * 0.8;
+        Pj.cambiar(E, { prestigio: 1.5 }); return { ok: true, msg: `El presidente te concede ${U.d1(d)} puntos más del presupuesto.` };
+      }
+      Pj.cambiar(E, { prestigio: -0.8 }); return { ok: true, exito: false, msg: 'El presidente no cede: las cuentas están ajustadas.' };
     }
   });
   A('programa_consejeria', {
