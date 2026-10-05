@@ -35,6 +35,7 @@ window.ESP = window.ESP || {};
       const base = a * 1.5 - 0.85; fac.push(['Afinidad con el autor', base]);
       let ctx = 0; if (gob && autorGob) ctx = 0.12; else if (gob && !autorGob) ctx = -0.02; else if (!gob && autorGob) ctx = -0.1; else ctx = 0.03;
       if (ctx) fac.push([gob ? 'Grupo del Gobierno' : 'Oposición', ctx]);
+      if (b.pres) fac.push(['Responsabilidad institucional (presupuestos)', 0.16]);
       const cab = (b.cab && b.cab[k]) || 0; if (cab) fac.push(['Cabildeo', cab]);
       const neg = (b.neg && b.neg[k]) || 0; if (neg) fac.push(['Negociación', neg]);
       const iv = (b.interv || 0) * 0.04; if (iv) fac.push(['Debate', iv]);
@@ -51,6 +52,7 @@ window.ESP = window.ESP || {};
     /* Estimación previa a presentar una ley un partido. */
     votoLeyAut(E, c, prog, pid) { return T.proyectarAut(E, c, { pid, cab: {}, neg: {}, ruido: {}, interv: 0 }); },
 
+    presLey: true,
     nuevaLeyAut(E, c, o) {
       const rc = E.esp.ccaa[c], t = E.fecha.t, ruido = {};
       for (const k in rc.parl.escanos) ruido[k] = Math.round(U.gauss(0, 0.1) * 100) / 100;
@@ -112,6 +114,7 @@ window.ESP = window.ESP || {};
       }
       const ok = si > no, nm = nom(c);
       b.v = { si, no, abs, ok, det, t: E.fecha.t, mi };
+      if (b.pres) { b.estado = ok ? 'aprobada' : 'rechazada'; b.etapa = 'fin'; b.t1 = E.fecha.t; b.tEtapa = E.fecha.t; b.hist.push({ t: E.fecha.t, txt: `Pleno: ${si} a favor, ${no} en contra, ${abs} abstenciones. ${ok ? 'APROBADOS' : 'RECHAZADOS'}` }); T.presResultado(E, c, ok, rc.pres.tramite || { alloc: rc.pres.alloc, def: rc.pres.def, fisc: rc.fisc }); if (E.esp.pendienteVotoAut && E.esp.pendienteVotoAut.id === b.id) E.esp.pendienteVotoAut = null; return b.v; }
       b.estado = ok ? 'aprobada' : 'rechazada'; b.etapa = 'fin'; b.t1 = E.fecha.t; b.tEtapa = E.fecha.t;
       b.hist.push({ t: E.fecha.t, txt: `Pleno: ${si} a favor, ${no} en contra, ${abs} abstenciones. ${ok ? 'APROBADA' : 'RECHAZADA'}` });
       const sg = E.partidos[b.pid].sigla;

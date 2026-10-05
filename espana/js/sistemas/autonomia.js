@@ -127,51 +127,81 @@ window.ESP = window.ESP || {};
     },
 
     /* ── Presupuesto autonómico: se aprueba cada año y se asigna a cada consejería ── */
-    presTotal(E, c) { const d = D().ccaa[c], rc = E.esp.ccaa[c]; return d.pob * d.pibpc * 0.14 * (rc.fin.nivel / 100); },
+    presTotal(E, c) { const d = D().ccaa[c], rc = E.esp.ccaa[c]; return d.pob * d.pibpc * 0.14 * (rc.fin.nivel / 100) * (1 + T.fiscDelta(rc)); },
+    /* Impuestos propios y tramos autonómicos (−10…+10): efecto en los ingresos. */
+    fiscDelta(rc, f) { f = f || rc.fisc || {}; return (f.irpf || 0) * 0.006 + (f.patr || 0) * 0.002 + (f.suc || 0) * 0.002 + (f.tasas || 0) * 0.003; },
+    presIntereses(E, c) { const d = D().ccaa[c], rc = E.esp.ccaa[c]; return d.pob * d.pibpc * rc.deuda / 100 * 0.022; },
+    presPool(E, c, total) { return Math.max(0.1, total - T.presIntereses(E, c)); },
     presDefault(E, c) { const gr = T.grupos(E, c), tp = U.suma(gr.map(g => g.peso)), a = {}; gr.forEach(g => a[g.id] = Math.round(g.peso / tp * 1000) / 10); return a; },
     presNormal(alloc, ids) { const a = {}; let s = 0; ids.forEach(k => { a[k] = Math.max(1, +alloc[k] || 1); s += a[k]; }); ids.forEach(k => a[k] = Math.round(a[k] / s * 1000) / 10); return a; },
     presInit(E, c) {
       const rc = E.esp.ccaa[c]; if (rc.pres) return rc.pres;
       const alloc = T.presDefault(E, c), total = T.presTotal(E, c), cred = {}, gastado = {};
-      Object.keys(alloc).forEach(k => { cred[k] = alloc[k] / 100 * total * 0.22; gastado[k] = 0; });
-      return rc.pres = { ano: U.anio(), estado: 'aprobado', total, alloc, def: 0, cred, gastado, tramite: null, pendiente: false, off: {} };
+      Object.keys(alloc).forEach(k => { cred[k] = alloc[k] / 100 * T.presPool(E, c, total) * 0.22; gastado[k] = 0; });
+      rc.fisc = rc.fisc || { irpf: 0, patr: 0, suc: 0, tasas: 0 };
+      return rc.pres = { ano: U.anio(), estado: 'aprobado', total, alloc, def: 0, cred, gastado, tramite: null, pendiente: false, off: {}, hist: [], defAnt: 0 };
     },
     /* Si cambia la estructura del Gobierno, reparte el presupuesto entre las nuevas consejerías. */
     presAjustar(E, c) {
       const p = T.presInit(E, c), ids = T.grupos(E, c).map(g => g.id), ok = ids.length === Object.keys(p.alloc).length && ids.every(k => p.alloc[k] != null);
       if (ok) return;
       const nuevo = {}, cred = {}, gastado = {}; T.grupos(E, c).forEach(g => { nuevo[g.id] = U.suma(Object.keys(p.alloc).filter(k => g.atoms.includes(k) || k === g.id).map(k => p.alloc[k])) || T.presDefault(E, c)[g.id]; });
-      p.alloc = T.presNormal(nuevo, ids); ids.forEach(k => { cred[k] = p.alloc[k] / 100 * p.total * 0.22; gastado[k] = 0; }); p.cred = cred; p.gastado = gastado;
+      p.alloc = T.presNormal(nuevo, ids); ids.forEach(k => { cred[k] = p.alloc[k] / 100 * T.presPool(E, c, p.total) * 0.22; gastado[k] = 0; }); p.cred = cred; p.gastado = gastado;
     },
     /* Se presenta el proyecto de presupuesto: lo vota el Parlamento autonómico. */
-    presPresentar(E, c, alloc, def, ia) {
+    presPresentar(E, c, alloc, def, ia, fisc) {
       const rc = E.esp.ccaa[c], p = T.presInit(E, c), g = rc.gob; if (!g || p.tramite) return false;
       const ids = T.grupos(E, c).map(x => x.id);
-      p.tramite = { alloc: T.presNormal(alloc || T.presDefault(E, c), ids), def: def || 0, t: E.fecha.t + 5 };
+      if (rc.pef) def = 0;   // plan económico-financiero: sin déficit autorizado
+      p.tramite = { alloc: T.presNormal(alloc || T.presDefault(E, c), ids), def: def || 0, fisc: Object.assign({ irpf: 0, patr: 0, suc: 0, tasas: 0 }, fisc || rc.fisc || {}), t: E.fecha.t + 5 };
+      if (T.nuevaLeyAut && T.presLey) { const b = T.nuevaLeyAut(E, c, { prog: '__pres', pid: g.partido, quien: 'Gobierno autonómico', jugador: false, eff: 1 }); b.pres = true; p.tramite.bill = b.id; p.tramite.t = E.fecha.t + 99; }
       p.pendiente = false;
       C.Noticias.poner(E, 'politica', `El Gobierno de ${D().ccaa[c].nombre} presenta el proyecto de presupuestos${p.tramite.def ? ' con déficit' : ''}.`, 'ES');
       return true;
     },
     presVotar(E, c) {
-      const rc = E.esp.ccaa[c], p = rc.pres, g = rc.gob, tr = p.tramite, J = E.jugador; p.tramite = null; if (!g) return;
+      const rc = E.esp.ccaa[c], p = rc.pres, g = rc.gob, tr = p.tramite; p.tramite = null; if (!g || !tr) return;
       const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
-      const pr = seats >= may ? 0.93 : seats + ext >= may ? 0.8 : 0.55;
+      T.presResultado(E, c, U.chance(seats >= may ? 0.93 : seats + ext >= may ? 0.8 : 0.55), tr);
+    },
+    /* Resultado de la votación de los presupuestos autonómicos (por probabilidad o por el pleno). */
+    presResultado(E, c, ok, tr) {
+      const rc = E.esp.ccaa[c], p = rc.pres, g = rc.gob, J = E.jugador; p.tramite = null; if (!g || !tr) return;
       const nom = D().ccaa[c].nombre, suyo = J && J.region === c && ['presauto', 'consejero'].includes(J.cargo);
       p.ano = U.anio();
-      if (U.chance(pr)) {
-        p.estado = 'aprobado'; p.alloc = tr.alloc; p.def = tr.def; p.total = T.presTotal(E, c) * (1 + 0.04 * tr.def);
+      if (ok) {
+        const fiscAnt = Object.assign({}, rc.fisc || {}); rc.fisc = Object.assign({ irpf: 0, patr: 0, suc: 0, tasas: 0 }, tr.fisc || {});
+        p.estado = 'aprobado'; p.alloc = tr.alloc; p.def = tr.def; p.total = T.presTotal(E, c) * (1 + 0.04 * tr.def); p.intereses = T.presIntereses(E, c);
         const def = T.presDefault(E, c); p.off = {};
-        Object.keys(p.alloc).forEach(k => { p.cred[k] = p.alloc[k] / 100 * p.total * 0.22; p.gastado[k] = 0; p.off[k] = U.clamp((p.alloc[k] / (def[k] || 1) - 1) * 12 + tr.def * 1.5, -10, 12); });
-        g.estab = U.clamp(g.estab + 4, 0, 100);
+        Object.keys(p.alloc).forEach(k => { p.cred[k] = p.alloc[k] / 100 * T.presPool(E, c, p.total) * 0.22; p.gastado[k] = 0; p.off[k] = U.clamp((p.alloc[k] / (def[k] || 1) - 1) * 12 + tr.def * 1.5, -10, 12); });
+        const dF = (rc.fisc.irpf - (fiscAnt.irpf || 0)) * 0.06 + (rc.fisc.tasas - (fiscAnt.tasas || 0)) * 0.04 - ((rc.fisc.patr - (fiscAnt.patr || 0)) + (rc.fisc.suc - (fiscAnt.suc || 0))) * 0.015;
+        g.aprob = U.clamp(g.aprob - dF, 5, 90); g.estab = U.clamp(g.estab + 4, 0, 100);
+        p.defPrev = p.defAnt; p.defAnt = tr.def;
         T.acuerdo(E, c, `Se aprueban los presupuestos de ${p.ano + 1}.`);
-        C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba los presupuestos de ${p.ano + 1} (${U.d1(p.total)} mil millones).`, 'ES');
+        C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba los presupuestos de ${p.ano + 1} (${U.d1(p.total)} mil millones${tr.def ? ', con déficit autorizado' : ''}).`, 'ES');
         if (suyo) C.Personaje.log(E, `Se aprueban los presupuestos autonómicos de ${nom} (${U.d1(p.total)} mil millones).`);
       } else {
-        p.estado = 'prorrogado'; Object.keys(p.cred).forEach(k => { p.cred[k] = p.alloc[k] / 100 * p.total * 0.22 * 0.8; p.gastado[k] = 0; }); Object.keys(p.off).forEach(k => p.off[k] = (p.off[k] || 0) - 3);
+        p.estado = 'prorrogado'; Object.keys(p.cred).forEach(k => { p.cred[k] = p.alloc[k] / 100 * T.presPool(E, c, p.total) * 0.22 * 0.8; p.gastado[k] = 0; }); Object.keys(p.off).forEach(k => p.off[k] = (p.off[k] || 0) - 3);
         g.estab = U.clamp(g.estab - 4, 0, 100); g.aprob = U.clamp(g.aprob - 1, 5, 90);
         C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} rechaza los presupuestos: se prorrogan los anteriores.`, 'ES');
         if (suyo) C.Personaje.log(E, `Los presupuestos de ${nom} fracasan en el Parlamento: se prorrogan.`);
       }
+    },
+    /* Regla de gasto y estabilidad: un plan económico-financiero si la deuda se dispara; rescate del Estado si se desboca. */
+    reglaFiscal(E, c) {
+      const rc = E.esp.ccaa[c], g = rc.gob, p = rc.pres, nom = D().ccaa[c].nombre; if (!g) return;
+      if (!rc.pef && (rc.deuda > 42 || (p.defAnt === 2 && p.defPrev === 2))) { rc.pef = true; g.aprob = U.clamp(g.aprob - 1.5, 5, 90); C.Noticias.poner(E, 'politica', `Hacienda exige a ${nom} un plan económico-financiero por incumplir la estabilidad presupuestaria: no podrá autorizar déficit.`, 'ES'); }
+      else if (rc.pef && rc.deuda < 37) { rc.pef = false; C.Noticias.poner(E, 'politica', `${nom} cumple la regla fiscal: se levanta el plan económico-financiero.`, 'ES'); }
+      if (rc.deuda > 58 && !rc.fla) { rc.fla = true; rc.relM = U.clamp(rc.relM - 10, 0, 100); g.estab = U.clamp(g.estab - 6, 0, 100); C.Noticias.poner(E, 'politica', `${nom} recurre al fondo de liquidez del Estado con condiciones: el Gobierno tutela sus cuentas.`, 'ES'); }
+      else if (rc.fla && rc.deuda < 50) { rc.fla = false; C.Noticias.poner(E, 'politica', `${nom} deja de depender del fondo de liquidez.`, 'ES'); }
+    },
+    /* Cierre del ejercicio: lo no gastado reduce la deuda. */
+    presCierre(E, c) {
+      const rc = E.esp.ccaa[c], p = rc.pres, d = D().ccaa[c]; if (!p || !p.cred) return;
+      const libre = U.suma(Object.values(p.cred)), gast = U.suma(Object.values(p.gastado)), tot = libre + gast;
+      rc.deuda = U.clamp(rc.deuda - libre / Math.max(1, d.pob * d.pibpc) * 100 * 0.35, 3, 120);
+      p.hist = p.hist || []; p.hist.unshift({ ano: p.ano + 1, total: p.total, def: p.def, deuda: rc.deuda, ejec: tot ? gast / tot : 0, estado: p.estado }); if (p.hist.length > 10) p.hist.length = 10;
+      T.reglaFiscal(E, c);
     },
     presTurno(E, c) {
       const rc = E.esp.ccaa[c], g = rc.gob, f = U.hoy(), J = E.jugador; if (!g || rc.suspendida) return;
@@ -182,7 +212,8 @@ window.ESP = window.ESP || {};
         else T.presPresentar(E, c, null, g.aprob > 50 ? 1 : 0, true);
       }
       if (p.pendiente && E.fecha.t >= p.pendiente) T.presPresentar(E, c, null, 0, true);
-      if (p.tramite && E.fecha.t >= p.tramite.t) T.presVotar(E, c);
+      if (p.tramite && !p.tramite.bill && E.fecha.t >= p.tramite.t) T.presVotar(E, c);
+      if (f.getUTCMonth() === 11 && f.getUTCDate() <= 7 && p.cierre !== f.getUTCFullYear()) { p.cierre = f.getUTCFullYear(); T.presCierre(E, c); }
       // Déficit autorizado: la deuda autonómica sube o baja
       if (p.def) rc.deuda = U.clamp(rc.deuda + p.def * 0.012, 3, 120);
     },
@@ -213,7 +244,7 @@ window.ESP = window.ESP || {};
     },
 
     /* ── Programas de consejería: obras, leyes autonómicas y planes ── */
-    programa(id) { for (const a in D().programas) { const p = D().programas[a].find(x => x.id === id); if (p) return p; } return null; },
+    programa(id) { if (id === '__pres') return { id: '__pres', area: 'eco', tipo: 'ley', n: 'Presupuestos de la comunidad', d: 'Reparto del dinero entre las consejerías, impuestos propios y déficit autorizado del próximo ejercicio.', pts: 0, sem: 0, gest: 0, aprob: 0, deuda: 0 }; for (const a in D().programas) { const p = D().programas[a].find(x => x.id === id); if (p) return p; } return null; },
     programasDe(E, c, head) { return T.infoGrupo(E, c, head).atoms.flatMap(a => D().programas[a] || []); },
     iniciarPrograma(E, c, id, ia) {
       const rc = E.esp.ccaa[c], g = rc.gob, prog = T.programa(id); if (!prog || !g) return { ok: false, msg: 'Programa desconocido' };

@@ -148,3 +148,9 @@ Acciones: `cabildear_ley_aut`, `intervenir_ley_aut`, `negociar_bloque_aut`, `pro
 `encuesta(tipo)` simula con la campaña y añade ruido (CIS 1,7 pp con sesgo hacia el Gobierno, prensa con sesgo del medio, propia 0,6). `cierre` genera el pie de urna, los escaños al límite y las cuentas (multa por superar 90 M€).
 
 La campaña autonómica reutiliza el módulo: `E.esp.campA[ccaa]` (`ambito:'aut'`, tope y gasto escalados al tamaño de la comunidad). `Territorio.simular` llama a `ajustarReg` y fusiona coaliciones; los territorios son las provincias de la comunidad (esfuerzo ponderado por población) y el voto útil actúa por debajo de 2,2 veces el umbral. `Campana.cur(E)` devuelve la campaña activa (la elegida en el selector o la primera); `consejos` es el asesor y `auto` reparte el presupuesto.
+
+## Presupuestos (`sistemas/presupuesto.js`)
+
+`E.esp.pge` guarda `lev` (palancas acumuladas: `gas[área]` en %, `ing[impuesto]` en %, `gran` 0–100), `inv[ccaa]`, `borrador`, `pactos[pid]`, `ejec` e `hist`. `Presupuesto.cuentas(E, lev)` devuelve ingresos y gasto en % del PIB (a calibración: ingresos 38,5 %, gasto de base según `ec.base.deficit`), déficit, deuda a tres años, impulso fiscal y aviso de la regla del 3 %.
+`presentar` crea el proyecto `pge` del Congreso (con apoyo por pactos); `aprobar` aplica el impulso a `ec.pol` (crecimiento, déficit, paro, inflación), a los indicadores por política (`Impacto.off`), a la popularidad por impuestos y a la relación con cada comunidad por inversión; `prorrogar` erosiona servicios. `turno` cierra el ejercicio en diciembre y abre una desviación si el déficit real supera al previsto en 0,6 pp.
+Comunidades: `rc.fisc` (impuestos propios −10…+10), `presIntereses` y `presPool` (intereses descontados antes de repartir), `presLey` (el presupuesto es una ley `__pres` de `leyesaut`), `presResultado`, `reglaFiscal` (PEF y fondo de liquidez) y `presCierre`.

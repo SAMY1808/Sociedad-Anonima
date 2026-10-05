@@ -101,13 +101,18 @@ window.ESP = window.ESP || {};
         const m = UI.modal({ titulo: 'Presupuestos de ' + esc(D().ccaa[c].nombre), icono: '💶', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0;font-size:13px">Reparte el presupuesto (${U.d1(tot)} mil millones). Una consejería con más dinero que la media mejora su gestión; con menos, empeora. Con déficit autorizado hay más gasto, pero sube la deuda.</p>
           <div class="col" style="gap:6px">${gr.map(g => `<div class="fila" style="gap:8px;flex-wrap:nowrap"><span style="width:200px;font-size:13px">${g.icono} ${esc(g.nombre)}</span><input type="range" data-k="${g.id}" min="1" max="45" step="0.5" value="${p.alloc[g.id] || def[g.id]}" style="flex:1"><b class="num" data-v="${g.id}" style="width:48px;text-align:right"></b></div>`).join('')}</div>
           <div class="fila" style="margin-top:12px;gap:10px"><span class="tenue">Déficit autorizado</span><div class="seg">${[[0, 'Equilibrado'], [1, 'Moderado'], [2, 'Alto']].map(([v, n]) => `<button data-def="${v}" class="${v === 0 ? 'activo' : ''}">${n}</button>`).join('')}</div></div>
+          <h3 class="imp-sec" style="margin-top:12px">Impuestos propios</h3>${[['irpf', '🧾 Tramo autonómico del IRPF'], ['patr', '💎 Impuesto de patrimonio'], ['suc', '🏡 Sucesiones y donaciones'], ['tasas', '📑 Tasas y precios públicos']].map(([k, n]) => `<div class="fila" style="gap:8px;flex-wrap:nowrap;margin:2px 0"><span style="width:210px;font-size:12.5px">${n}</span><input type="range" data-fisc="${k}" min="-10" max="10" step="1" value="${(C.E.esp.ccaa[c].fisc || {})[k] || 0}" style="flex:1"><b class="num" style="width:54px;text-align:right" data-vf="${k}"></b></div>`).join('')}
+          ${C.E.esp.ccaa[c].pef ? '<div class="nota" style="margin-top:8px;border-color:var(--no)">⚠ Estás bajo un plan económico-financiero: no puedes autorizar déficit.</div>' : ''}
           <div id="pr-info" class="tenue" style="font-size:12.5px;margin-top:8px"></div>`, pie: '<span id="pr-b"></span>' });
         let defv = 0;
         const pintar = () => { const alloc = {}; UI.$$('input[data-k]', m.cuerpo).forEach(i => alloc[i.dataset.k] = +i.value); const n = Tt.presNormal(alloc, gr.map(g => g.id));
           gr.forEach(g => { const el = m.cuerpo.querySelector(`[data-v="${g.id}"]`); const d = n[g.id] - (def[g.id] || 0); el.innerHTML = U.d1(n[g.id]) + ' %'; el.title = (d >= 0 ? '+' : '') + U.d1(d) + ' vs. media'; });
           UI.$$('[data-def]', m.cuerpo).forEach(b => b.classList.toggle('activo', +b.dataset.def === defv));
-          m.cuerpo.querySelector('#pr-info').textContent = `Total: ${U.d1(tot * (1 + 0.04 * defv))} mil millones.${defv ? ' La deuda autonómica subirá cada año.' : ''}`;
-          m.pie.querySelector('#pr-b').innerHTML = UI.botonAccion(id, { alloc: n, def: defv }, '💶 Presentar en el Parlamento', 'prim'); };
+          const fisc = {}; UI.$$('input[data-fisc]', m.cuerpo).forEach(i => { fisc[i.dataset.fisc] = +i.value; m.cuerpo.querySelector(`[data-vf="${i.dataset.fisc}"]`).textContent = (+i.value > 0 ? '+' : '') + i.value + ' pts'; });
+          if (C.E.esp.ccaa[c].pef) defv = 0;
+          const dTot = tot * (1 + Tt.fiscDelta(C.E.esp.ccaa[c], fisc)) / (1 + Tt.fiscDelta(C.E.esp.ccaa[c])) * (1 + 0.04 * defv);
+          m.cuerpo.querySelector('#pr-info').textContent = `Total: ${U.d1(dTot)} mil millones (intereses de la deuda: ${U.d1(Tt.presIntereses(C.E, c))}).${defv ? ' La deuda autonómica subirá cada año.' : ''}`;
+          m.pie.querySelector('#pr-b').innerHTML = UI.botonAccion(id, { alloc: n, def: defv, fisc }, '💶 Presentar en el Parlamento', 'prim'); };
         m.cuerpo.addEventListener('input', pintar); m.cuerpo.addEventListener('click', e => { const b = e.target.closest('[data-def]'); if (b) { defv = +b.dataset.def; pintar(); } });
         pintar();
       } else if (k === 'reorg') {

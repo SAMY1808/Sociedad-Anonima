@@ -30,6 +30,7 @@ window.ESP = window.ESP || {};
       UI.$$('[data-r]', el).forEach(b => b.onclick = () => C.Pantallas.leyes.ver(b.dataset.r));
       UI.$$('[data-muni]', el).forEach(b => b.onclick = () => T.verMuni(b.dataset.muni));
       const sel = UI.$('#t-orden', el); if (sel) sel.onchange = () => { E.ui.ordenCcaa = sel.value; C.App.refrescar(); };
+      C.Pantallas.presupuestos.enlazarRegional(el, E.ui.regPres && E.esp.ccaa[E.ui.regPres] ? E.ui.regPres : (E.jugador.region || 'MAD'));
       const pr = UI.$('#t-pres', el); if (pr) pr.onchange = () => { E.ui.regPres = pr.value; C.App.refrescar(); };
       const fm = UI.$('#t-fm', el); if (fm) fm.onchange = () => { E.ui.filtroMuni = fm.value; C.App.refrescar(); };
     },
@@ -91,17 +92,9 @@ window.ESP = window.ESP || {};
 
     /* Presupuesto autonómico de una comunidad: estado, reparto por consejerías y crédito disponible. */
     presupuesto(E) {
-      const Tt = C.Territorio, J = E.jugador, c = E.ui.regPres && E.esp.ccaa[E.ui.regPres] ? E.ui.regPres : (J.region || 'MAD'), rc = E.esp.ccaa[c];
-      if (!rc.gob) return '<div class="vacio">Sin gobierno autonómico.</div>';
-      Tt.asegurarAut(E, c); const p = Tt.presInit(E, c), gr = Tt.grupos(E, c), def = Tt.presDefault(E, c);
-      const est = p.tramite ? ['En el Parlamento', 'amar'] : p.estado === 'prorrogado' ? ['Prorrogado', 'rojo'] : ['Aprobado', 'verde'];
-      const filas = gr.map(g => { const a = p.alloc[g.id] || 0, eur = a / 100 * p.total, cred = p.cred[g.id] || 0, d = a - (def[g.id] || a); return `<tr><td>${g.icono} ${esc(g.nombre)}</td><td class="num">${U.d1(a)} %</td><td class="num">${U.d1(eur)}</td><td class="num ${d > 0.4 ? 'bien' : d < -0.4 ? 'mal' : 'tenue'}">${d >= 0 ? '+' : ''}${U.d1(d)}</td><td class="num">${U.d1(cred)}</td></tr>`; }).join('');
-      const esMia = J.region === c, puedeElab = esMia && J.cargo === 'presauto' && p.pendiente, puedeRec = esMia && J.cargo === 'consejero';
-      return `<div class="fila" style="margin-bottom:10px;gap:10px"><label class="tenue">Comunidad <select id="t-pres">${Tt.ids().map(x => `<option value="${x}" ${x === c ? 'selected' : ''}>${esc(D().ccaa[x].nombre)}</option>`).join('')}</select></label></div>
-        <div class="grid g3" style="margin-bottom:14px"><div class="tarjeta">${Comp.kpi('Presupuesto', U.d1(p.total) + ' mil M€', 'Ejercicio ' + (p.ano + 1))}</div><div class="tarjeta">${Comp.kpi('Estado', `<span class="etq ${est[1]}" style="font-size:15px">${est[0]}</span>`, p.def ? 'Déficit autorizado ' + (p.def === 2 ? 'alto' : 'moderado') : 'Equilibrado')}</div><div class="tarjeta">${Comp.kpi('Deuda autonómica', U.d1(rc.deuda) + ' % PIB', 'Se vota cada otoño')}</div></div>
-        <div class="tarjeta"><h3>Reparto por consejerías</h3><table class="tabla"><thead><tr><th>Consejería</th><th class="num">Peso</th><th class="num">Mil M€</th><th class="num">vs. media</th><th class="num">Crédito para programas</th></tr></thead><tbody>${filas}</tbody></table>
-          <p class="tenue" style="font-size:12.5px;margin:8px 0 0">Más presupuesto que la media mejora la gestión de esa consejería; menos, la empeora. El <b>crédito</b> es el 22 % de cada partida: con él se pagan obras, planes y leyes de cada consejería. Cada octubre el Gobierno presenta los presupuestos y el Parlamento los vota; si fracasan se prorrogan (con un 20 % menos de crédito).</p>
-          <div class="fila" style="margin-top:8px;gap:8px">${puedeElab ? UI.botonAccion('presupuesto_aut', {}, '💶 Elaborar los presupuestos', 'prim') : ''}${puedeRec ? UI.botonAccion('reclamar_fondos', {}, '💰 Reclamar más fondos', '') : ''}</div></div>`;
+      const J = E.jugador, c = E.ui.regPres && E.esp.ccaa[E.ui.regPres] ? E.ui.regPres : (J.region || 'MAD');
+      if (!E.esp.ccaa[c].gob) return '<div class="vacio">Sin gobierno autonómico.</div>';
+      return C.Pantallas.presupuestos.regional(E, c);
     },
 
     financiacion(E) {

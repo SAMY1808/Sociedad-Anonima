@@ -95,7 +95,7 @@ window.ESP = window.ESP || {};
       if (it.tipo === 'cupo') { o.push({ k: 'subir', t: 'Cupo alto (favorable al Estado)', d: 'Más ingresos para el Estado; enfado en el gobierno foral.' }); o.push({ k: 'pactar', t: 'Cupo pactado', d: 'Un acuerdo equilibrado.' }); o.push({ k: 'bajar', t: 'Cupo bajo (favorable a la comunidad)', d: 'Contenta a la comunidad foral; agravio en el resto.' }); }
       if (it.tipo === 'cpff') { o.push({ k: 'mas', t: 'Más recursos para las comunidades', d: 'Sube la financiación y la relación; aumenta el déficit.' }); o.push({ k: 'mantener', t: 'Mantener el modelo', d: 'Sin cambios.' }); o.push({ k: 'recortar', t: 'Ajuste fiscal', d: 'Reduce el déficit; tensión con las comunidades.' }); }
       if (it.tipo === 'rd') o.push({ k: 'aprobar', t: 'Aprobar el real decreto', d: 'Se ejecuta de inmediato.' });
-      if (it.tipo === 'pge') { o.push({ k: 'presentar', t: 'Presentar el proyecto de Presupuestos', d: 'Se tramita en las Cortes; si pierde la enmienda a la totalidad, se prorrogan.' }); o.push({ k: 'prorrogar', t: 'Prorrogar los Presupuestos', d: 'Evita el riesgo de una derrota, a costa de los socios.' }); }
+      if (it.tipo === 'pge') { o.push({ k: 'elaborar', t: 'Elaborar los Presupuestos…', d: 'Decide impuestos, gasto por políticas, inversión territorial y negocia con los socios antes de presentarlos.' }); o.push({ k: 'presentar', t: 'Presentar el proyecto tal cual', d: 'Se tramita en las Cortes con el borrador actual; si pierde la enmienda a la totalidad, se prorrogan.' }); o.push({ k: 'prorrogar', t: 'Prorrogar los Presupuestos', d: 'Evita el riesgo de una derrota, a costa de los socios.' }); }
       if (it.tipo === 'proces') { o.push({ k: '155', t: 'Pedir la aplicación del artículo 155', d: 'Requiere mayoría absoluta del Senado. Intervención de la Generalitat y elecciones.' }); o.push({ k: 'dialogo', t: 'Abrir un diálogo político', d: 'Evita la ruptura, pero te expone a la oposición.' }); o.push({ k: 'nada', t: 'No hacer nada', d: 'Dejar que los hechos se consuman.' }); }
       if (!['pge', 'proces', 'cupo', 'cpff'].includes(it.tipo)) { o.push({ k: 'aplazar', t: 'Aplazar', d: 'Lo retiras del orden del día.' }); o.push({ k: 'rechazar', t: 'Rechazar', d: 'Tensión con quien lo propone.' }); }
       return o;
@@ -222,20 +222,17 @@ window.ESP = window.ESP || {};
 
     /* ── Presupuestos ── */
     pge(E, it, k) {
-      const g = E.paises.ES.gob, pg = E.esp.pge;
-      if (k === 'prorrogar') { pg.estado = 'prorrogado'; pg.ano = U.anio(); g.estab -= 1; for (const p of g.coalicion.concat(g.apoyoExterno || [])) Cn.sat(E, p, -3); C.Noticias.poner(E, 'economia', 'El Gobierno renuncia a presentar Presupuestos y los prorroga.', 'ES'); return 'Presupuestos prorrogados'; }
-      const pm = E.politicos[g.pm];
-      const p = C.Congreso.proponer(E, 'pge', { tipo: 'gobierno', pid: g.partido }, { eco: pm.eco, soc: pm.soc, eu: pm.eu, ter: pm.ter, pge: true });
-      pg.tramite = p.id; pg.intentos++;
-      C.Noticias.poner(E, 'economia', 'El Gobierno presenta el proyecto de Presupuestos Generales del Estado.', 'ES');
-      return 'Presupuestos presentados en el Congreso';
+      const g = E.paises.ES.gob, pg = E.esp.pge, Pr = C.Presupuesto;
+      if (k === 'prorrogar') { g.estab -= 1; for (const p of g.coalicion.concat(g.apoyoExterno || [])) Cn.sat(E, p, -3); Pr.prorrogar(E, 'El Gobierno renuncia a presentar Presupuestos y los prorroga.'); return 'Presupuestos prorrogados'; }
+      const p = Pr.presentar(E);
+      return p ? 'Presupuestos presentados en el Congreso' : 'Ya hay un proyecto en tramitación';
     },
 
     alFinalizar(E, p, ok) {
       if (!p.pge) return;
       const g = E.paises.ES.gob, pg = E.esp.pge; pg.tramite = null;
-      if (ok) { pg.estado = 'aprobado'; pg.ano = U.anio(); g.estab = Math.min(100, g.estab + 6); g.aprob += 0.5; C.Noticias.poner(E, 'economia', 'Las Cortes aprueban los Presupuestos Generales del Estado.', 'ES'); }
-      else { pg.estado = 'prorrogado'; g.estab -= 4; C.Noticias.poner(E, 'economia', 'Los Presupuestos fracasan en las Cortes y se prorrogan.', 'ES'); }
+      if (ok) C.Presupuesto.aprobar(E);
+      else { g.estab -= 4; C.Presupuesto.prorrogar(E, 'Los Presupuestos fracasan en las Cortes y se prorrogan.'); }
     },
 
     /* ── Iniciativas del presidente y de los ministros ── */

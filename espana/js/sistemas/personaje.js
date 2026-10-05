@@ -781,7 +781,7 @@ window.ESP = window.ESP || {};
   A('presupuesto_aut', {
     nombre: 'Elaborar los presupuestos autonómicos', icono: '💶', costo: 2, grupo: 'autonomico', desc: 'Presidente/a: reparte el presupuesto entre las consejerías y decide el déficit. Lo vota el Parlamento regional.',
     disponible(E) { const r = presAut(E); if (r !== true) return r; const p = C.Territorio.presInit(E, E.jugador.region); return p.pendiente ? true : p.tramite ? 'Los presupuestos ya están en el Parlamento' : 'Sólo en octubre, cuando se abre el plazo de presupuestos'; },
-    ejecutar(E, a) { const ok = C.Territorio.presPresentar(E, E.jugador.region, a.alloc, +a.def || 0, false); if (!ok) return { ok: false, msg: 'No se pudo presentar' }; Pj.cambiar(E, { prestigio: 1 }); return { ok: true, msg: 'Presentas los presupuestos en el Parlamento autonómico.' }; }
+    ejecutar(E, a) { const ok = C.Territorio.presPresentar(E, E.jugador.region, a.alloc, +a.def || 0, false, a.fisc); if (!ok) return { ok: false, msg: 'No se pudo presentar' }; Pj.cambiar(E, { prestigio: 1 }); return { ok: true, msg: 'Presentas los presupuestos en el Parlamento autonómico.' }; }
   });
   A('reclamar_fondos', {
     nombre: 'Reclamar más presupuesto para tu consejería', icono: '💰', costo: 2, grupo: 'autonomico', desc: 'Consejero/a: pide al presidente más dinero para tu área (a costa de las demás). Depende de tu prestigio y del peso de tu partido.',
@@ -1100,6 +1100,11 @@ window.ESP = window.ESP || {};
     nombre: 'Campaña automática', icono: '⚡', costo: 1, grupo: 'campana', desc: 'Reparte el presupuesto libre entre lo más rentable: encuesta propia, televisión, aparato local en las provincias clave y movilización.',
     disponible: enCamp,
     ejecutar(E) { return C.Campana.auto(E); }
+  });
+  A('negociar_pge', {
+    nombre: 'Negociar los Presupuestos', icono: '🤝', costo: 1, grupo: 'nacional', desc: 'Presidente o ministro de Hacienda: concede a un grupo una de sus demandas (gasto, impuestos o inversión) a cambio de su voto en los Presupuestos.',
+    disponible(E) { const P = C.Presupuesto; if (!P.puedeNegociar(E)) return 'Sólo el presidente o el ministro de Hacienda negocian los Presupuestos'; const pg = P.asegurar(E); return pg.borrador || pg.tramite || E.esp.consejo.agenda.some(i => i.tipo === 'pge') ? true : 'No hay Presupuestos en elaboración (se abre el plazo en octubre)'; },
+    ejecutar(E, a) { const r = C.Presupuesto.conceder(E, a.pid, a.k); if (r.ok) Pj.cambiar(E, { prestigio: 0.6 }); return r; }
   });
   A('mitin_prov', {
     nombre: 'Mitin en una provincia', icono: '📣', costo: 1, grupo: 'campana', desc: 'Campaña de las generales: un acto en una provincia concreta. Funciona mejor donde se juega el último escaño.',

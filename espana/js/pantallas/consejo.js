@@ -15,14 +15,16 @@ window.ESP = window.ESP || {};
       let cuerpo = '';
       if (tab === 'consejo') cuerpo = Cn.orden(E, esPM);
       else if (tab === 'ministros') cuerpo = Cn.ministros(E);
+      else if (tab === 'presupuestos') cuerpo = C.Pantallas.presupuestos.nacional(E);
       else if (tab === 'economia') cuerpo = Cn.economia(E);
       else if (tab === 'iniciativas') cuerpo = Cn.iniciativas(E, esPM);
       else cuerpo = Cn.historial(E);
       el.innerHTML = `<div class="cab"><div><h1>🦅 Consejo de Ministros</h1><div class="sub">${esc(pm ? pm.n : '—')} (${esc(E.partidos[g.partido].sigla)}) · ${g.tipo === 'mayoria' ? 'mayoría' : g.tipo === 'mono' ? 'gobierno en solitario' : 'minoría'} · aprobación ${Math.round(g.aprob)} % · estabilidad ${Math.round(g.estab)} % · ${E.esp.cortes.estado !== 'activa' ? '<span class="alerta">Gobierno en funciones</span>' : 'tensión de coalición ' + Math.round(cs.tension) + ' %'}</div></div>
         <div class="fila">${esPM ? UI.botonAccion('remodelar', {}, '🔄 Remodelar', '') + UI.botonAccion('conferencia', {}, '🏛 Conferencia de Presidentes', '') + UI.botonAccion('cuestion_confianza', {}, '🤞 Confianza', '') : ''}</div></div>
-        <div class="tabs">${[['consejo', 'Orden del día' + (cs.agenda.length ? ' (' + cs.agenda.length + ')' : '')], ['iniciativas', 'Iniciativas'], ['ministros', 'Ministros y socios'], ['economia', 'Economía y Presupuestos'], ['historial', 'Acuerdos']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
+        <div class="tabs">${[['consejo', 'Orden del día' + (cs.agenda.length ? ' (' + cs.agenda.length + ')' : '')], ['iniciativas', 'Iniciativas'], ['ministros', 'Ministros y socios'], ['presupuestos', 'Presupuestos'], ['economia', 'Economía'], ['historial', 'Acuerdos']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('consejo', { tab: b.dataset.tab }));
-      UI.$$('[data-res]', el).forEach(b => b.onclick = () => { const r = C.Consejo.resolver(E, b.dataset.id, b.dataset.res); UI.toast(esc(r || 'Hecho'), 'bien'); C.App.refrescar(); });
+      C.Pantallas.presupuestos.enlazarNacional(el);
+      UI.$$('[data-res]', el).forEach(b => b.onclick = () => { if (b.dataset.res === 'elaborar') return C.Pantallas.presupuestos.disenar(); const r = C.Consejo.resolver(E, b.dataset.id, b.dataset.res); UI.toast(esc(r || 'Hecho'), 'bien'); C.App.refrescar(); });
       UI.$$('[data-ini]', el).forEach(b => b.onclick = () => Cn.disenarIni(b.dataset.ini, b.dataset.via));
       UI.$$('[data-dis-item]', el).forEach(b => b.onclick = () => Cn.disenarItem(b.dataset.disItem));
       UI.$$('[data-ver-ley]', el).forEach(b => b.onclick = () => Cn.verIniciativa(b.dataset.verLey));
@@ -73,7 +75,7 @@ window.ESP = window.ESP || {};
     modalUrgente(it) {
       const E = C.E;
       const m = UI.modal({ titulo: '🚨 Decisión del Consejo de Ministros', cuerpo: Cn.itemHTML(E, it, true), clase: 'medio', sinCerrar: true });
-      UI.$$('[data-res]', m.el).forEach(b => b.onclick = () => { const r = C.Consejo.resolver(E, b.dataset.id, b.dataset.res); m.cerrar(); UI.toast(esc(r || 'Hecho'), 'bien'); C.App.refrescar(); C.App.revisarPendientes(); });
+      UI.$$('[data-res]', m.el).forEach(b => b.onclick = () => { if (b.dataset.res === 'elaborar') { m.cerrar(); return C.Pantallas.presupuestos.disenar(); } const r = C.Consejo.resolver(E, b.dataset.id, b.dataset.res); m.cerrar(); UI.toast(esc(r || 'Hecho'), 'bien'); C.App.refrescar(); C.App.revisarPendientes(); });
     },
 
     ministros(E) {
