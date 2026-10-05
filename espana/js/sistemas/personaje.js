@@ -323,6 +323,38 @@ window.ESP = window.ESP || {};
       }).sort((a, b) => (b.propia - a.propia) || (a.t - b.t));
     },
 
+    /* Cargos que ocupa el jugador y a los que puede renunciar, del más alto al más bajo. */
+    cargosRenunciables(E) {
+      const J = E.jugador, g = E.paises.ES.gob, rc = J.region && E.esp.ccaa[J.region], m = J.muni && E.esp.muni.m[J.muni], T = C.Territorio, out = [];
+      if (g && g.pm === 'J') out.push({ k: 'pm', icono: '🦅', n: 'Presidente/a del Gobierno', d: 'Dimites: tu partido elige a otro líder y el Gobierno continúa con él. Conservas tu escaño.', pr: 6 });
+      if (g && J.ministerio && g.ministros[J.ministerio] === 'J') out.push({ k: 'ministro', icono: '🏛', n: 'Ministro/a', d: 'Dejas la cartera; el presidente nombra a otra persona.', pr: 2 });
+      if (rc && rc.gob && rc.gob.pres === 'J') out.push({ k: 'presauto', icono: '🗺', n: 'Presidente/a de ' + D().ccaa[J.region].nombre, d: 'Cedes la presidencia a otra persona de tu partido. Conservas tu escaño en el Parlamento.', pr: 4 });
+      if (rc && rc.gob && J.consejeria === J.region && J.area && rc.gob.consej && rc.gob.consej[J.area] === 'J') out.push({ k: 'consejero', icono: '💼', n: 'Consejero/a de ' + T.infoGrupo(E, J.region, J.area).nombre, d: 'Dejas la consejería; sigues en el Parlamento autonómico.', pr: 1.5 });
+      if (m && m.pm === 'J') out.push({ k: 'alcalde', icono: '🏛', n: 'Alcalde/sa de ' + m.nombre, d: 'El pleno elige a otro alcalde. Sigues como concejal/a.', pr: 4 });
+      if (J.electo) out.push({ k: 'diputado', icono: '🏛', n: 'Escaño en el Congreso', d: 'Dejas el Congreso (y la cartera, si la tienes): entra el siguiente de tu lista.', pr: 3 });
+      if (J.escReg) out.push({ k: 'dipauto', icono: '🗺', n: 'Escaño en el Parlamento autonómico', d: 'Dejas el Parlamento de tu comunidad (y la consejería o presidencia, si las tienes).', pr: 2.5 });
+      if (J.concejal) out.push({ k: 'concejal', icono: '🏘', n: 'Acta de concejal/a', d: 'Dejas el ayuntamiento (y la alcaldía, si la tienes).', pr: 1.5 });
+      return out;
+    },
+    renunciarCargo(E, k) {
+      const J = E.jugador, g = E.paises.ES.gob, T = C.Territorio, rc = J.region && E.esp.ccaa[J.region], m = J.muni && E.esp.muni.m[J.muni];
+      const op = Pj.cargosRenunciables(E).find(x => x.k === k); if (!op) return { ok: false, msg: 'No ocupas ese cargo' };
+      const pa = E.partidos[J.partido];
+      if (k === 'pm') { g.pm = null; C.Ejecutivo.nuevoLider(E, J.partido, 'tras la dimisión de ' + J.nombre); J.rol = 'direccion'; }
+      else if (k === 'ministro') { g.ministros[J.ministerio] = null; J.ministerio = null; C.Ejecutivo.cubrirVacantes(E); }
+      else if (k === 'presauto') { rc.cab[rc.gob.partido] = null; rc.gob.pres = pa.amb === 'nac' ? T.cabeza(E, J.region, rc.gob.partido).id : pa.lider; if (J.lidReg === J.region) J.lidReg = null; if (pa.lider === 'J' && pa.amb === 'reg') { C.Ejecutivo.nuevoLider(E, J.partido, 'tras la dimisión de ' + J.nombre); J.rol = 'direccion'; rc.gob.pres = E.partidos[J.partido].lider; } }
+      else if (k === 'consejero') { const a = J.area; rc.gob.consej[a] = C.Gabinete.nueva(E, { region: J.region, partido: J.partido, esp: C.Gabinete.cargos(E, 'aut:' + J.region).find(x => x.id === a).esp }); J.consejeria = null; J.area = null; }
+      else if (k === 'alcalde') { m.pm = null; C.Municipios.elegirAlcalde(E, J.muni, false); }
+      else if (k === 'diputado') Pj.dejarNacional(E, 'tras su renuncia al escaño', true);
+      else if (k === 'dipauto') Pj.dejar(E, 'autonomico');
+      else if (k === 'concejal') Pj.dejar(E, 'local');
+      Pj.cambiar(E, { prestigio: -op.pr, pop: -op.pr * 0.4 }, true);
+      Pj.log(E, `Renuncias a tu cargo: ${op.n}.`);
+      C.Noticias.poner(E, 'politica', `${J.nombre} (${pa.sigla}) renuncia a su cargo: ${op.n}.`, 'ES');
+      Pj.sincronizar(E);
+      return { ok: true, msg: `Has renunciado: ${op.n}.` };
+    },
+
     /* Hasta que cambie el territorio: cambia de comunidad al ser elegido/a por otra. */
     mudarRegion(E, c, conservaEscano) {
       const J = E.jugador;
@@ -960,6 +992,12 @@ window.ESP = window.ESP || {};
       if (cabeza) { Pj.cambiar(E, { prestigio: -2.5 }, true); return { ok: true, exito: false, msg: `La dirección regional prefiere a otro/a candidato/a en ${nom}.` }; }
       return { ok: true, exito: false, msg: 'La dirección regional te pide esperar.' };
     }
+  });
+  A('renunciar_cargo', {
+    nombre: 'Renunciar a un cargo', icono: '🚪', costo: 0, grupo: 'carrera',
+    desc: 'Dimite de un cargo (presidencia, cartera, consejería, alcaldía o escaño). Cuesta prestigio y popularidad, pero te libera para dar otro paso.',
+    disponible(E) { return Pj.esUE(E) ? 'Vuelve primero a la política española' : Pj.cargosRenunciables(E).length ? true : 'No ocupas ningún cargo al que renunciar'; },
+    ejecutar(E, a) { return Pj.renunciarCargo(E, a.k); }
   });
   A('renunciar_lista', {
     nombre: 'Renunciar a la candidatura', icono: '🚪', costo: 0, grupo: 'carrera', desc: 'Retira tu nombre de las listas por las que has pedido concurrir.',
