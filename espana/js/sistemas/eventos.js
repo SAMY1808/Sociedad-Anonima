@@ -16,7 +16,7 @@ window.ESP = window.ESP || {};
     disparar(E, def, ctx) {
       const J = E.jugador, P = E.paises[J.pais];
       const x = ctx || (def.ctx ? def.ctx(E, J, P) : {});
-      E.eventos.pendientes.push({ id: U.id('e'), key: def.id, titulo: def.titulo, icono: def.icono, texto: def.texto(E, J, P, x), opciones: def.opciones.map(o => o.t), t: E.fecha.t, ctx: x });
+      E.eventos.pendientes.push({ id: U.id('e'), key: def.id, titulo: def.titulo, icono: def.icono, texto: def.texto(E, J, P, x), opciones: def.opciones.map(o => typeof o.t === 'function' ? o.t(E, J, P, x) : o.t), t: E.fecha.t, ctx: x });
       E.eventos.historial.unshift({ key: def.id, t: E.fecha.t });
       if (E.eventos.historial.length > 80) E.eventos.historial.length = 80;
     },

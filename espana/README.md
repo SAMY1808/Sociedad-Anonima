@@ -75,6 +75,20 @@ Es una PWA: se puede instalar y jugar sin conexión.
   **cuatro ejes** (economía, valores, Europa, territorio). Escalera: concejal → alcalde/sa → diputado/a autonómico/a →
   consejero/a → presidente/a autonómico/a → diputado/a → ministro/a → presidente/a del Gobierno → eurodiputado/a →
   comisario/a. Campañas autonómicas, municipales y generales; **noche electoral** animada.
+- **Leyes con diseño e impacto** (inspirado en *Lawgivers II* y *Geopolitical Simulator 6*): cada ley se **diseña**
+  (alcance limitado/estándar/ambicioso, enfoque alternativo, financiación con deuda/impuestos/recortes, entrada en
+  vigor inmediata o gradual) y tiene un **informe de impacto** previo: efectos sobre **12 indicadores del país**
+  (igualdad, vivienda, sanidad, educación, seguridad, medio ambiente, energía, cohesión territorial, libertades,
+  competitividad, protección social, España rural), sobre la satisfacción de **11 colectivos sociales**, sobre la
+  economía y sobre el presupuesto, con **riesgos de efectos no deseados** y una incertidumbre que hace que el efecto
+  real se desvíe de lo previsto (mejor si el ministro del ramo es bueno). Las leyes entran en vigor de forma
+  **gradual**, se **evalúan al año**, se pueden **reformar o derogar** (los Gobiernos de signo contrario las
+  deshacen) y los colectivos descontentos castigan al Gobierno y se acercan a los partidos que sienten próximos.
+  Los grupos del Congreso piden **enmiendas** (más o menos alcance, otro enfoque, otra financiación…) a cambio de su
+  voto. Pestañas *En vigor* e *Impacto en el país* en **Leyes**, y tarjeta *Estado del país* en el Centro de mando.
+- **Consejerías y disolución autonómica**: si entras en el Parlamento regional en la lista de un partido que
+  gobierna (sin ser cabeza), el presidente puede ofrecerte una consejería (y puedes pedir otra de más peso); el
+  presidente/a autonómico/a puede **disolver el Parlamento** tras ver la proyección de escaños.
 - **Candidaturas autonómicas**: desde el ayuntamiento, el Congreso (incluso siendo ministro/a) o otro parlamento
   autonómico puedes **lanzar tu candidatura a las listas de cualquier comunidad** (Agenda → *Candidatura
   autonómica*): ves la fecha de las elecciones, los escaños de tu partido y tus opciones de **ir en la lista** o de
@@ -101,13 +115,13 @@ registrados en un motor de turnos, sin compilación ni dependencias. Ver [`docs/
 ```
 index.html · manifest.webmanifest · sw.js
 css/        base · layout · componentes · pantallas · europa · movil
-data/       territorio · partidos-es · pactos · leyes · instituciones · paises · partidos (UE) · nombres · ue · eventos
+data/       territorio · partidos-es · pactos · leyes · impactos · instituciones · paises · partidos (UE) · nombres · ue · eventos
 js/core/    util · bus · estado · tiempo · acciones
-js/sistemas/ economia · opinion · mundo · elecciones · gobierno (resto de la UE) ·
-            espana · generales · ejecutivo · congreso · consejo · territorio · municipios · ue · eventos · personaje · guardado
+js/sistemas/ economia · opinion · impacto · mundo · elecciones · gobierno (resto de la UE) ·
+            espana · generales · ejecutivo · congreso · consejo · gabinete · territorio · autonomia · municipios · ue · eventos · personaje · guardado
 js/ui/      dom · graficos · hemiciclo · mosaico (mapa de provincias) · componentes
-js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio · partido · europa · elecciones · personaje · partidas
-tools/      mini · prueba-es · jugador-es · ui-es · movil-es
+js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio · partido · europa · elecciones · personaje · partidas · impacto
+tools/      mini · prueba-es · jugador-es · ui-es · movil-es · leyes-es
 ```
 
 ## Pruebas (Node)
@@ -116,6 +130,7 @@ tools/      mini · prueba-es · jugador-es · ui-es · movil-es
 node tools/prueba-es.js 520 3        # 10 años de España con una semilla: gobiernos, disoluciones, investiduras
 node tools/jugador-es.js 11 ES_ASD nacional base "" "" 260   # agente aleatorio: semilla partido nivel rol región municipio semanas
 node tools/ui-es.js nacional ES_ASD lider 60                 # Playwright: crea partida, recorre pantallas y juega
+node tools/leyes-es.js [movil]                               # Playwright: diseñar, aprobar, reformar y derogar leyes, enmiendas, impacto
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
 

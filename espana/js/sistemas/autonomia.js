@@ -8,6 +8,16 @@ window.ESP = window.ESP || {};
   Object.assign(T, {
     NIV,
 
+    /* Proyección de unas elecciones autonómicas con la opinión de hoy (sin ruido): escaños previstos y bloque de gobierno. */
+    proyectar(E, c) {
+      const rc = E.esp.ccaa[c], d = D().ccaa[c], v = T.votosReg(E, c, 0), g = rc.gob;
+      const w = {}; for (const k in v) if (v[k] >= d.um) w[k] = v[k];
+      const e = C.Elecciones.divisores(Object.keys(w).length ? w : v, d.esc, false);
+      const escanos = {}; for (const k in e) if (e[k]) escanos[k] = e[k];
+      const may = Math.floor(d.esc / 2) + 1;
+      return { votos: v, escanos, may, bloque: g ? U.suma(g.coalicion.map(k => escanos[k] || 0)) : 0, ahora: g ? U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)) : 0 };
+    },
+
     initAut(E) {
       for (const c of T.ids()) {
         const rc = E.esp.ccaa[c], d = D().ccaa[c];
@@ -237,6 +247,7 @@ window.ESP = window.ESP || {};
       rc.relM = T.relObjetivo(E, c);
       if (esJ && rc.gob.pres !== 'J') { C.Eventos.info(E, '⚠️ Pierdes la presidencia', `Una moción de censura en el Parlamento de ${D().ccaa[c].nombre} desaloja a tu Gobierno.`); C.Personaje.sincronizar(E); }
       else if (J && J.pais === 'ES') C.Personaje.sincronizar(E);
+      if (J && J.pais === 'ES' && J.region === c && C.Personaje.ofertaConsejeria) C.Personaje.ofertaConsejeria(E, c, null);
     },
 
     /* El jugador, líder de la oposición regional, presenta una moción de censura. */

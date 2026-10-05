@@ -1,7 +1,7 @@
 /* Prueba del jugador en España: crea una partida con un perfil y simula, ejecutando acciones y resolviendo eventos al azar. */
 const mini = require('./mini');
-const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
-  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
+const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
+  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
   'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js'];
 const C = mini(F), U = C.U;
 const arg = process.argv.slice(2);
@@ -43,6 +43,8 @@ for (let i = 0; i < sem; i++) {
     if (id === 'politica_ibi') args.dir = U.pick(['subir', 'bajar']);
     if (id === 'fondos_municipales') args.quien = U.pick(['ccaa', 'estado', 'ue']);
     if (id === 'visita_ccaa') args.region = U.pick(C.Territorio.ids());
+    if (id === 'proponer_cambio_ley') { const v = (E.esp.vigor || []).filter(x => x.estado === 'activa'); if (v.length) { args.vigor = U.pick(v).id; args.tipo = U.pick(['derogar', 'reformar']); } }
+    if (id === 'aceptar_enmienda') { const ps = C.Congreso.abiertos(E).filter(p => p.autor.tipo === 'jugador' || p.autor.tipo === 'gobierno'); if (ps.length) { const p = U.pick(ps), en = C.Impacto.enmiendas(E, p); if (en.length) { args.proy = p.id; args.k = en[0].cambio.k; args.v = en[0].cambio.v; args.pid = en[0].pid; } } }
     if (id === 'candidatura_aut') { const o = U.pick(C.Personaje.opcionesLista(E)); args.region = o.c; args.cabeza = U.chance(0.5); }
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }

@@ -4,7 +4,7 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const GRUPOS = [['parlamento', '🏛', 'Congreso'], ['nacional', '🦅', 'Gobierno y Cortes'], ['autonomico', '🗺', 'Comunidad autónoma'], ['local', '🏘', 'Ayuntamiento'], ['carrera', '🪜', 'Carrera'], ['partido', '🎗', 'Partido'], ['medios', '📺', 'Medios'], ['campana', '📣', 'Campaña'], ['europa', '🇪🇺', 'Europa']];
-  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', candidatura_aut: 'candidatura', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
+  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', candidatura_aut: 'candidatura', adelanto_autonomico: 'adelanto', proponer_cambio_ley: 'envigor', aceptar_enmienda: 'enmienda', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
 
   const A = C.Pantallas.agenda = {
     render(el) {
@@ -30,6 +30,8 @@ window.ESP = window.ESP || {};
       const E = C.E;
       const k = MODAL[id];
       if (k === 'leyes') return C.App.ir('leyes', { tab: id === 'proponer_ley' ? 'proponer' : 'tramite' }), id === 'cabildear_ley' && UI.toast('Abre un proyecto y usa 👍 / 👎 en el grupo que quieras convencer.', '');
+      if (k === 'envigor') return C.App.ir('leyes', { tab: 'vigor' }), UI.toast('Elige la ley en vigor y pulsa Reformar o Derogar.', '');
+      if (k === 'enmienda') return C.App.ir('leyes', { tab: 'tramite' }), UI.toast('Abre tu proyecto (en registro o comisión): verás lo que pide cada grupo.', '');
       if (k === 'comp') {
         const J = E.jugador, rc = E.esp.ccaa[J.region], T = C.Territorio;
         const ks = Object.keys(D().competencias).filter(x => rc.comp[x] < 2).sort((a, b) => (rc.reclama.indexOf(a) < 0 ? 99 : rc.reclama.indexOf(a)) - (rc.reclama.indexOf(b) < 0 ? 99 : rc.reclama.indexOf(b)));
@@ -70,6 +72,16 @@ window.ESP = window.ESP || {};
       } else if (k === 'lista') {
         const J = E.jugador, circ = J.circ || C.Personaje.mejorProvincia(E, J.partido, J.region);
         UI.modal({ titulo: 'Pedir un puesto en las listas', icono: '🪜', clase: 'medio', cuerpo: `<div class="lista"><div class="it"><div class="cuerpo"><b>Lista al Congreso por ${esc(D().provincias[circ][0])}</b><span>Das el salto a las Cortes si tu partido te coloca en un puesto con escaño. Para las autonómicas usa <i>Candidatura autonómica</i>.</span></div>${UI.botonAccion(id, { nivel: 'nacional' }, 'Pedir', 'chico')}</div></div>` });
+      } else if (k === 'adelanto') {
+        const J = E.jugador, c = J.region, rc = E.esp.ccaa[c], pr = C.Territorio.proyectar(E, c), g = rc.gob, P = E.paises.ES;
+        const ks = Object.keys(Object.assign({}, rc.parl.escanos, pr.escanos)).sort((a, b) => (pr.escanos[b] || 0) - (pr.escanos[a] || 0));
+        const filas = ks.map(k => { const a = rc.parl.escanos[k] || 0, b = pr.escanos[k] || 0, d = b - a; return `<tr><td>${Comp.partido(E, k)}${g && g.coalicion.includes(k) ? ' <span class="etq oro">Gobierno</span>' : ''}</td><td class="num">${a}</td><td class="num"><b>${b}</b></td><td class="num ${d > 0 ? 'bien' : d < 0 ? 'mal' : 'tenue'}">${d > 0 ? '+' : ''}${d}</td></tr>`; }).join('');
+        const gana = pr.bloque >= pr.may, dif = pr.bloque - pr.ahora;
+        UI.modal({ titulo: 'Disolver el Parlamento de ' + esc(D().ccaa[c].nombre), icono: '🗳️', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0">Con las encuestas de hoy, así quedaría el Parlamento (mayoría absoluta: <b>${pr.may}</b> de ${D().ccaa[c].esc}). Convocarías elecciones para el <b>${U.fmtT(E.fecha.t + 7, true)}</b>.</p>
+          <div class="nota" style="margin-bottom:10px">Tu bloque de gobierno: <b>${pr.ahora}</b> escaños ahora → <b class="${gana ? 'bien' : 'mal'}">${pr.bloque}</b> proyectados (${dif >= 0 ? '+' : ''}${dif}). ${gana ? '<span class="bien">Conservaría la mayoría.</span>' : '<span class="mal">Perdería la mayoría absoluta: dependerías de pactos.</span>'} Tu aprobación: ${Math.round(g ? g.aprob : 0)} %.</div>
+          <table class="tabla"><thead><tr><th>Partido</th><th class="num">Ahora</th><th class="num">Proyección</th><th class="num">Δ</th></tr></thead><tbody>${filas}</tbody></table>
+          <p class="tenue" style="font-size:12.5px">Los socios de gobierno se inquietan si prevén perder escaños. Acertar con el momento da prestigio; fallar lo cuesta.</p>`,
+          pie: UI.botonAccion('adelanto_autonomico', {}, '🗳️ Disolver y convocar elecciones', 'prim') });
       } else if (k === 'candidatura') {
         const J = E.jugador, ops = C.Personaje.opcionesLista(E), pc = v => Math.round(v * 100) + ' %';
         const fila = o => `<div class="cand-fila">

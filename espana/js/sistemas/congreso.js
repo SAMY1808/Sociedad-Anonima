@@ -4,6 +4,7 @@ window.ESP = window.ESP || {};
 (function (C) {
   const U = C.U;
   const D = () => C.DATA;
+  const clamp100 = x => Math.max(5, Math.min(95, x));
   const ABIERTAS = ['registro', 'ponencia', 'pleno', 'pleno_pend', 'senado', 'vuelta', 'vuelta_pend', 'convalidacion', 'convalidacion_pend'];
   const PENDIENTES = ['pleno_pend', 'vuelta_pend', 'convalidacion_pend'];
   const MAX_VOTOS_SEMANA = 2;
@@ -106,9 +107,28 @@ window.ESP = window.ESP || {};
         id: U.id('L'), tpl: tplId, t: tpl.t, s: tpl.s, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu || 0, ter: tpl.ter || 0, costo: tpl.costo || 0, pop: tpl.pop, may: tpl.may || 'simple', d: tpl.d,
         autor, etapa: 'registro', t0: E.fecha.t, tEtapa: E.fecha.t, apoyo: {}, hist: [{ t: E.fecha.t, txt: autor.tipo === 'gobierno' ? 'El Consejo de Ministros aprueba el proyecto y lo remite a las Cortes' : 'Registrado en el Congreso' }], dur: 0, region: tpl.region || null
       };
+      // Diseño de la ley: alcance, enfoque, financiación y calendario determinan su posición, su coste y sus efectos
+      const Im = C.Impacto;
+      if (Im) { const dis = Im.norm(tpl, (extra && extra.dis) || Im.disDefecto(E, tpl, autor)); p.dis = dis; Object.assign(p, Im.campos(tpl, dis, extra && extra.ajuste)); }
       Object.assign(p, extra || {});
+      if (Im && p.dis) p.dis = Im.norm(tpl, p.dis);
       E.proyectos[p.id] = p;
       return p;
+    },
+
+    /* Proyecto «de mentira» con un diseño dado (para proyectar votos antes de registrarlo). */
+    pseudo(E, tpl, autor, dis, ajuste) { return C.Impacto.pseudo(E, tpl, autor, dis, ajuste); },
+
+    /* Reforma o derogación de una ley en vigor. */
+    proponerCambio(E, vigorId, tipo, autor, dis) {
+      const v = (E.esp.vigor || []).find(x => x.id === vigorId && x.estado === 'activa'), tpl = v && Co.plantilla(v.tpl); if (!tpl) return null;
+      if (Co.abiertos(E).some(p => p.reforma === vigorId || p.deroga === vigorId)) return null;
+      if (tipo === 'derogar') {
+        const p = Co.proponer(E, tpl.id, autor, { deroga: vigorId, dis: v.dis, t: `Derogación de «${v.t}»`, d: `Deroga la ley y revierte progresivamente sus efectos.` });
+        Object.assign(p, { eco: -tpl.eco, soc: -tpl.soc, eu: -(tpl.eu || 0), ter: -(tpl.ter || 0), pop: clamp100(100 - tpl.pop), costo: -(tpl.costo || 0) });
+        return p;
+      }
+      return Co.proponer(E, tpl.id, autor, { reforma: vigorId, dis: dis || v.dis, t: `Reforma de «${v.t}»`, d: `Modifica el diseño de la ley vigente (${tpl.d}).` });
     },
 
     /* Real decreto-ley: entra en vigor ya, y el Congreso debe convalidarlo en 30 días. */
@@ -116,14 +136,14 @@ window.ESP = window.ESP || {};
       const p = Co.proponer(E, tplId, autor || { tipo: 'gobierno', pid: E.paises.ES.gob.partido }, Object.assign({ etapa: 'convalidacion', rdl: true, tVoto: E.fecha.t + 3 }, extra || {}));
       if (!p) return null;
       p.hist = [{ t: E.fecha.t, txt: 'Real decreto-ley aprobado por el Consejo de Ministros: entra en vigor y se somete a convalidación' }];
-      Co.aplicarEfectos(E, p, 1);
+      C.Impacto.promulgar(E, p);
       return p;
     },
 
     elegirPlantilla(E, centro, sector, solo) {
       const P = E.paises.ES, hechas = P.flags.leyes || (P.flags.leyes = {});
-      const abiertos = Co.abiertos(E).map(p => p.tpl);
-      const cand = D().leyes.filter(l => !l.rdlSolo && !l.manual && !abiertos.includes(l.id) && !(hechas[l.id] && E.fecha.t - hechas[l.id] < 130) && (!solo || solo(l)));
+      const abiertos = Co.abiertos(E).map(p => p.tpl), vig = C.Impacto ? C.Impacto.vigentes(E) : new Set();
+      const cand = D().leyes.filter(l => !l.rdlSolo && !l.manual && !abiertos.includes(l.id) && !vig.has(l.id) && !(hechas[l.id] && E.fecha.t - hechas[l.id] < 130) && (!solo || solo(l)));
       return U.pesado(cand, l => Math.exp(-3.2 * U.distIdeo(centro, l)) * (sector && l.s === sector ? 2 : 1));
     },
 
@@ -289,7 +309,7 @@ window.ESP = window.ESP || {};
       if (J && miVoto && miVoto === linea) C.Personaje.cambiar(E, { prestigio: 0.15 });
       if (base === 'convalidacion') {
         p.etapa = ok ? 'sancionada' : 'rechazada'; p.hist.push({ t: E.fecha.t, txt: (ok ? 'Convalidado ' : 'Derogado ') + txt });
-        if (!ok) Co.aplicarEfectos(E, p, -1);
+        if (!ok) C.Impacto.derogarPorProyecto(E, p);
         Co.alFinalizar(E, p, ok, true);
       } else if (base === 'pleno') {
         if (ok) { p.etapa = 'senado'; p.dur = U.ri(2, 4); p.hist.push({ t: E.fecha.t, txt: 'Aprobado en el Congreso ' + txt + '. Pasa al Senado' }); p.tEtapa = E.fecha.t; }
@@ -317,13 +337,7 @@ window.ESP = window.ESP || {};
       } else { p.etapa = 'sancionada'; p.hist.push({ t: E.fecha.t, txt: `Aprobada por el Senado (${s.si} votos a favor). Pasa a sanción real` }); Co.alFinalizar(E, p, true); }
     },
 
-    /* ── Efectos de las leyes ── */
-    aplicarEfectos(E, p, signo) {
-      const tpl = Co.plantilla(p.tpl); if (!tpl) return;
-      const ef = {}; for (const k in tpl.ef || {}) ef[k] = k === 'aprob' ? tpl.ef[k] * signo : tpl.ef[k] * 0.5 * signo;
-      C.Economia.aplicar(E, 'ES', ef);
-      if (tpl.costo) E.paises.ES.ec.pol.deficit += tpl.costo * 0.4 * signo;
-    },
+    /* ── Efectos de las leyes: ver impacto.js (entrada en vigor gradual, grupos sociales, evaluación) ── */
 
     alFinalizar(E, p, ok, convalidacion) {
       const J = E.jugador, P = E.paises.ES, tpl = Co.plantilla(p.tpl);
@@ -336,11 +350,11 @@ window.ESP = window.ESP || {};
       }
       P.flags.leyes = P.flags.leyes || {}; P.flags.leyes[p.tpl] = E.fecha.t;
       if (!convalidacion && !p.rdl && tpl) {
-        Co.aplicarEfectos(E, p, 1);
-        const ef = tpl.ef || {};
+        if (p.deroga) C.Impacto.derogar(E, p.deroga, 'derogada por ley');
+        else { if (p.reforma) C.Impacto.derogar(E, p.reforma, 'reformada'); C.Impacto.promulgar(E, p); }
         P.gob.aprob = U.clamp(P.gob.aprob + (p.pop - 50) / 100 * 1.6, 5, 90);
       }
-      if (tpl && tpl.efecto) Co.efectoEspecial(E, tpl.efecto, p);
+      if (tpl && tpl.efecto && !p.deroga && !p.reforma) Co.efectoEspecial(E, tpl.efecto, p);
       const ap = p.autor.tipo === 'jugador' ? J.partido : p.autor.pid;
       if (ap && E.partidos[ap].amb === 'nac') C.Opinion.empujeES && C.Opinion.empujeES(E, ap, (p.pop - 50) / 100 * 0.3);
       if (J && p.autor.tipo === 'jugador') { C.Personaje.cambiar(E, { prestigio: 6, pop: 2.5 }, true); C.Personaje.log(E, `Tu proyecto «${p.t}» se convierte en ley.`); }

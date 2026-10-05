@@ -22,8 +22,22 @@ window.ESP = window.ESP || {};
         <div class="tabs">${[['consejo', 'Orden del día' + (cs.agenda.length ? ' (' + cs.agenda.length + ')' : '')], ['iniciativas', 'Iniciativas'], ['ministros', 'Ministros y socios'], ['economia', 'Economía y Presupuestos'], ['historial', 'Acuerdos']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('consejo', { tab: b.dataset.tab }));
       UI.$$('[data-res]', el).forEach(b => b.onclick = () => { const r = C.Consejo.resolver(E, b.dataset.id, b.dataset.res); UI.toast(esc(r || 'Hecho'), 'bien'); C.App.refrescar(); });
-      UI.$$('[data-ini]', el).forEach(b => b.onclick = () => { const r = C.Consejo.iniciativaPM(E, b.dataset.ini, b.dataset.via); if (r === true) { C.Personaje.cambiar(E, { prestigio: 1 }); UI.toast('Iniciativa aprobada en el Consejo de Ministros', 'bien'); } else UI.toast(esc(r), 'mal'); C.App.refrescar(); });
+      UI.$$('[data-ini]', el).forEach(b => b.onclick = () => Cn.disenarIni(b.dataset.ini, b.dataset.via));
+      UI.$$('[data-dis-item]', el).forEach(b => b.onclick = () => Cn.disenarItem(b.dataset.disItem));
       UI.$$('[data-ver-ley]', el).forEach(b => b.onclick = () => Cn.verIniciativa(b.dataset.verLey));
+    },
+
+    /* El presidente diseña una iniciativa propia antes de aprobarla. */
+    disenarIni(id, via) {
+      const E = C.E, g = E.paises.ES.gob;
+      C.Pantallas.impacto.disenar({ tplId: id, via, autor: { tipo: 'gobierno', pid: g.partido }, btn: via === 'rdl' ? '⚡ Aprobar el decreto-ley' : '📜 Aprobar el proyecto de ley',
+        onOk: dis => { const r = C.Consejo.iniciativaPM(E, id, via, dis); if (r === true) { C.Personaje.cambiar(E, { prestigio: 1 }); UI.toast('Iniciativa aprobada en el Consejo de Ministros', 'bien'); } else UI.toast(esc(r), 'mal'); C.App.refrescar(); } });
+    },
+    /* Diseña el texto de un punto del orden del día antes de resolverlo. */
+    disenarItem(id) {
+      const E = C.E, it = E.esp.consejo.agenda.find(x => x.id === id); if (!it) return;
+      const g = E.paises.ES.gob;
+      C.Pantallas.impacto.disenar({ tplId: it.tpl, autor: { tipo: 'gobierno', pid: g.partido }, dis: it.dis, btn: '✔ Guardar el diseño', onOk: dis => { it.dis = dis; UI.toast('Diseño guardado: se aplicará al aprobar el punto', 'bien'); C.App.refrescar(); } });
     },
 
     itemHTML(E, it, esPM) {
@@ -32,12 +46,13 @@ window.ESP = window.ESP || {};
       let proj = '';
       if (tpl && esPM) {
         const g = E.paises.ES.gob;
-        const pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
-        proj = `<div class="fila" style="margin-top:6px;font-size:12px;gap:10px"><span class="tenue">Proyección en el Congreso</span><span class="bien">${pr.si} sí</span><span class="mal">${pr.no} no</span><span class="${pr.dist >= 0 ? 'bien' : 'mal'}" style="margin-left:auto">${pr.dist >= 0 ? 'Margen +' + pr.dist : 'Faltan ' + Math.abs(pr.dist)}</span></div>`;
+        const pr = it.dero ? null : C.Congreso.proyectar(E, C.Congreso.pseudo(E, tpl, { tipo: 'gobierno', pid: g.partido }, it.dis));
+        proj = !pr ? '' : `<div class="fila" style="margin-top:6px;font-size:12px;gap:10px"><span class="tenue">Proyección en el Congreso</span><span class="bien">${pr.si} sí</span><span class="mal">${pr.no} no</span><span class="${pr.dist >= 0 ? 'bien' : 'mal'}" style="margin-left:auto">${pr.dist >= 0 ? 'Margen +' + pr.dist : 'Faltan ' + Math.abs(pr.dist)}</span></div>`;
       }
       const quien = q.tipo === 'ministro' && q.min ? `${esc(Comp.nombreMin(q.min))} · ${esc(q.nombre || '')}` : q.tipo === 'socio' ? `Socio: ${Comp.partido(E, q.pid)}` : q.tipo === 'ccaa' ? `Gobierno de ${esc(q.nombre)}` : esc(q.nombre || 'Presidencia');
       return `<div class="tarjeta" style="${it.urgente ? 'border-color:var(--alerta)' : ''}"><div class="fila" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap;gap:10px"><div style="min-width:0"><div class="fila" style="gap:6px"><span style="font-size:18px">${t[0]}</span><b style="font-size:15px">${esc(it.titulo)}</b></div><div class="tenue" style="font-size:12.5px;margin-top:2px">${t[1]} · propone: ${quien} · ${it.urgente ? '<span class="alerta">urgente</span>' : 'hasta ' + U.fmtT(it.limite, true)}</div></div>${tpl ? `<span class="etq">${Comp.mayoriaTxt(tpl.may)}</span>` : ''}</div>
         <p style="margin:8px 0 4px;font-size:13px;color:var(--texto2)">${esc(it.desc || '')}</p>${proj}
+        ${esPM && tpl && !it.dero ? `<div class="fila" style="margin-top:8px;gap:6px"><span class="tenue" style="font-size:12px">Diseño:</span>${C.Pantallas.impacto.disTxt(tpl, it.dis)}<button class="btn chico" data-dis-item="${it.id}">📐 Diseñar el texto</button></div>` : ''}
         ${esPM ? `<div class="fila" style="margin-top:10px;gap:6px">${ops.map(o => `<button class="btn chico ${o.k === 'enviar' || o.k === 'rdl' || o.k === 'conceder' || o.k === 'aprobar' || o.k === 'presentar' ? 'prim' : ''}" data-id="${it.id}" data-res="${o.k}"${UI.tt(esc(o.d))}>${esc(o.t)}</button>`).join('')}</div>` : ''}</div>`;
     },
 
@@ -89,7 +104,7 @@ window.ESP = window.ESP || {};
         <div class="sel-grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">${sorted.map(({ tpl: l, pr }) => `<div class="tarjeta"><div class="fila" style="gap:6px"><span>${(D().sectores[l.s] || {}).icono || '📄'}</span><b>${esc(l.t)}</b></div><div class="tenue" style="font-size:12.5px;margin:6px 0">${esc(l.d)}</div>
           <div class="fila" style="gap:6px;margin-bottom:6px"><span class="etq">${Comp.mayoriaTxt(l.may)}</span><span class="etq">Apoyo ${l.pop} %</span>${l.costo ? `<span class="etq ${l.costo > 0 ? 'rojo' : 'verde'}">${l.costo > 0 ? 'Cuesta' : 'Ingresa'} ${U.d1(Math.abs(l.costo))} % PIB</span>` : ''}</div>
           <div class="fila" style="font-size:12px;gap:10px;margin-bottom:8px"><span class="bien">${pr.si} sí</span><span class="mal">${pr.no} no</span><span class="${pr.dist >= 0 ? 'bien' : 'mal'}" style="margin-left:auto">${pr.dist >= 0 ? 'Margen +' + pr.dist : 'Faltan ' + Math.abs(pr.dist)}</span></div>
-          <div class="fila" style="gap:6px"><button class="btn chico prim" data-ini="${l.id}" data-via="ley" ${E.esp.cortes.estado !== 'activa' ? 'disabled' : ''}>📜 Proyecto de ley</button>${l.rdl || l.rdlSolo ? `<button class="btn chico" data-ini="${l.id}" data-via="rdl" ${E.esp.cortes.estado !== 'activa' ? 'disabled' : ''}>⚡ Decreto-ley</button>` : ''}</div></div>`).join('')}</div>`;
+          <div class="fila" style="gap:6px"><button class="btn chico prim" data-ini="${l.id}" data-via="ley" ${E.esp.cortes.estado !== 'activa' ? 'disabled' : ''}>📐 Diseñar proyecto de ley</button>${l.rdl || l.rdlSolo ? `<button class="btn chico" data-ini="${l.id}" data-via="rdl" ${E.esp.cortes.estado !== 'activa' ? 'disabled' : ''}>⚡ Decreto-ley</button>` : ''}</div></div>`).join('')}</div>`;
     },
 
     historial(E) {

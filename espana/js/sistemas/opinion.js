@@ -25,7 +25,7 @@ window.ESP = window.ESP || {};
         const g = P.gob;
         if (g) {
           // Aprobación: clima económico + desgaste + ruido
-          const objetivo = 44 + 7 * C.Economia.clima(E, id) - Math.min(8, (E.fecha.t - g.formado) / 52 * 1.4) + (g.tipo === 'mayoria' ? 0 : -2);
+          const objetivo = 44 + 7 * C.Economia.clima(E, id) - Math.min(8, (E.fecha.t - g.formado) / 52 * 1.4) + (g.tipo === 'mayoria' ? 0 : -2) + (id === 'ES' && E.esp && E.esp.soc ? 0.14 * E.esp.soc.clima : 0);
           g.aprob += (objetivo - g.aprob) * 0.04 + U.gauss(0, 0.5);
           g.aprob = U.clamp(g.aprob, 8, 85);
         }
@@ -57,6 +57,7 @@ window.ESP = window.ESP || {};
     turnoES(E) {
       const P = E.paises.ES, g = P.gob;
       if (E.esp.sumaNac == null) E.esp.sumaNac = U.suma(E.esp.nacionales.map(k => E.partidos[k].pop));
+      const S = E.esp.soc, GR = C.DATA.colectivos, sw = GR ? U.suma(Object.keys(GR).map(k => GR[k].peso)) : 1;
       for (const k of E.esp.nacionales) {
         const p = E.partidos[k];
         let d = (p.base - p.pop) * 0.012;
@@ -64,6 +65,11 @@ window.ESP = window.ESP || {};
           const enGob = g.coalicion.includes(k), apoyo = (g.apoyoExterno || []).includes(k);
           if (enGob) d += (g.aprob - 42) * 0.0016 * (k === g.partido ? 1.1 : 0.55);
           else if (!apoyo) d += (42 - g.aprob) * 0.0007;
+          // Los grupos sociales descontentos se van hacia los partidos que sienten cercanos (y los satisfechos premian al Gobierno)
+          if (S && GR) {
+            let x = 0; for (const gk in GR) x += GR[gk].peso / sw * C.Impacto.afinidad(E, gk, k) * (S.sat[gk] - 50) / 50;
+            d += 0.2 * x * (enGob ? 1 : apoyo ? 0.5 : -0.7);
+          }
         }
         d += U.gauss(0, 0.04 + 0.01 * Math.sqrt(p.pop));
         p.pop = Math.max(0.15, p.pop + d); p.base = Math.max(0.15, p.base + U.gauss(0, 0.008));

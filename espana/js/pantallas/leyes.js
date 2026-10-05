@@ -31,17 +31,20 @@ window.ESP = window.ESP || {};
       el.innerHTML = `<div class="cab"><div><h1>Leyes</h1><div class="sub">Congreso de los Diputados · 350 escaños · ${E.esp.cortes.estado !== 'activa' ? '<span class="alerta">Cortes sin actividad legislativa ordinaria</span>' : C.Congreso.enRecesion(E) ? '<span class="tenue">receso parlamentario</span>' : '<span class="bien">en sesiones</span>'}</div></div>
         <div class="fila"><label class="tenue" style="font-size:12px"><input type="checkbox" id="l-auto" ${E.parl.auto ? 'checked' : ''}> Votar automáticamente con mi grupo</label></div></div>
         ${E.parl.pendienteVoto.length ? `<div class="nota" style="border-color:var(--oro);margin-bottom:12px">🗳 Tienes <b>${E.parl.pendienteVoto.length}</b> votación(es) pendientes. <button class="btn chico prim" id="l-votar">Votar ahora</button></div>` : ''}
-        <div class="tabs"><button data-tab="tramite" class="${tab === 'tramite' ? 'activo' : ''}">En trámite (${tr.length})</button><button data-tab="proponer" class="${tab === 'proponer' ? 'activo' : ''}">Presentar proyecto</button><button data-tab="historial" class="${tab === 'historial' ? 'activo' : ''}">Historial</button></div>
+        <div class="tabs"><button data-tab="tramite" class="${tab === 'tramite' ? 'activo' : ''}">En trámite (${tr.length})</button><button data-tab="proponer" class="${tab === 'proponer' ? 'activo' : ''}">Presentar proyecto</button><button data-tab="vigor" class="${tab === 'vigor' ? 'activo' : ''}">En vigor (${C.Impacto.enVigor(E).length})</button><button data-tab="pais" class="${tab === 'pais' ? 'activo' : ''}">Impacto en el país</button><button data-tab="historial" class="${tab === 'historial' ? 'activo' : ''}">Historial</button></div>
         <div id="l-cuerpo"></div>`;
       const cu = UI.$('#l-cuerpo', el);
       if (tab === 'tramite') cu.innerHTML = tr.length ? `<div class="col">${tr.map(L.fila).join('')}</div>` : '<div class="vacio">No hay proyectos en trámite.</div>';
       else if (tab === 'historial') cu.innerHTML = hist.length ? `<div class="col">${hist.map(L.fila).join('')}</div>` : '<div class="vacio">Todavía no hay historial.</div>';
+      else if (tab === 'vigor') cu.innerHTML = C.Pantallas.impacto.vigorTab(E);
+      else if (tab === 'pais') cu.innerHTML = C.Pantallas.impacto.paisTab(E);
       else cu.innerHTML = L.proponer(E);
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('leyes', { tab: b.dataset.tab }));
       UI.$('#l-auto', el).onchange = e => { E.parl.auto = e.target.checked; };
       const v = UI.$('#l-votar', el); if (v) v.onclick = () => L.modalVoto(E.parl.pendienteVoto[0]);
       UI.$$('[data-proy]', el).forEach(f => f.onclick = () => L.ver(f.dataset.proy));
-      UI.$$('[data-tpl]', el).forEach(b => b.onclick = e => { e.stopPropagation(); const r = UI.accion('proponer_ley', { tpl: b.dataset.tpl }, {}); });
+      UI.$$('[data-tpl]', el).forEach(b => b.onclick = e => { e.stopPropagation(); L.disenarPropia(b.dataset.tpl); });
+      UI.$$('[data-vig]', el).forEach(b => b.onclick = () => C.Pantallas.impacto.accionVigor(b.dataset.vig, b.dataset.op));
     },
 
     fila(p) {
@@ -54,14 +57,21 @@ window.ESP = window.ESP || {};
     },
 
     proponer(E) {
-      const J = E.jugador;
+      const J = E.jugador, vig = C.Impacto.vigentes(E);
       const lista = D().leyes.filter(l => !l.manual && !l.rdlSolo).map(l => ({ l, d: U.distIdeo(J, l) })).sort((a, b) => a.d - b.d);
       const abiertos = C.Congreso.abiertos(E).map(p => p.tpl);
       const puede = C.Acciones.puede('proponer_ley', {});
-      return `<p class="tenue" style="margin-top:0">${puede === true ? 'Elige una iniciativa para registrar (cuesta 2 puntos de agenda). Se adapta algo a tu ideología.' : '<span class="mal">' + esc(puede) + '</span>'}</p>
+      const chips = l => { const im = D().impactos[l.id] || { ind: {} }; return Object.keys(im.ind || {}).sort((a, b) => Math.abs(im.ind[b]) - Math.abs(im.ind[a])).slice(0, 3).map(k => `<span class="etq ${im.ind[k] >= 0 ? 'verde' : 'rojo'}"${UI.tt(esc(D().indicadores[k].nombre))}>${D().indicadores[k].icono} ${U.signo(im.ind[k], 0)}</span>`).join(''); };
+      return `<p class="tenue" style="margin-top:0">${puede === true ? 'Elige una iniciativa, <b>diséñala</b> (alcance, enfoque, financiación, calendario), mira su informe de impacto y regístrala (cuesta 2 puntos de agenda). Se adapta algo a tu ideología.' : '<span class="mal">' + esc(puede) + '</span>'}</p>
         <div class="sel-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${lista.map(({ l, d }) => `<div class="tarjeta"><div class="fila" style="gap:6px"><span>${sec(l.s).icono}</span><b>${esc(l.t)}</b></div><div class="tenue" style="font-size:12.5px;margin:6px 0">${esc(l.d)}</div>
-          <div class="fila" style="gap:6px;margin-bottom:8px"><span class="etq ${d < 0.28 ? 'verde' : d < 0.5 ? 'amar' : 'rojo'}">Afinidad ${Math.round((1 - d) * 100)} %</span><span class="etq">Apoyo ${l.pop} %</span>${l.costo ? `<span class="etq ${l.costo > 0 ? 'rojo' : 'verde'}">${l.costo > 0 ? 'Cuesta' : 'Ingresa'} ${U.d1(Math.abs(l.costo))} % PIB</span>` : ''}</div>
-          <button class="btn chico prim" data-tpl="${l.id}" ${puede !== true || abiertos.includes(l.id) ? 'disabled' : ''}>📜 Registrar</button></div>`).join('')}</div>`;
+          <div class="fila" style="gap:6px;margin-bottom:8px"><span class="etq ${d < 0.28 ? 'verde' : d < 0.5 ? 'amar' : 'rojo'}">Afinidad ${Math.round((1 - d) * 100)} %</span><span class="etq">Apoyo ${l.pop} %</span>${l.costo ? `<span class="etq ${l.costo > 0 ? 'rojo' : 'verde'}">${l.costo > 0 ? 'Cuesta' : 'Ingresa'} ${U.d1(Math.abs(l.costo))} % PIB</span>` : ''}${chips(l)}</div>
+          <button class="btn chico prim" data-tpl="${l.id}" ${puede !== true || abiertos.includes(l.id) || vig.has(l.id) ? 'disabled' : ''}>${vig.has(l.id) ? '✔ Ya está en vigor' : '📐 Diseñar y registrar'}</button></div>`).join('')}</div>`;
+    },
+
+    /* El jugador (diputado) diseña y registra su propia proposición. */
+    disenarPropia(tplId) {
+      const E = C.E, tpl = C.Congreso.plantilla(tplId), J = E.jugador;
+      C.Pantallas.impacto.disenar({ tplId, titulo: tpl.t, autor: { tipo: 'jugador', pid: J.partido }, ajuste: C.Personaje.ajusteLey(E, tpl), btn: '📜 Registrar la proposición (2 ◆)', onOk: dis => UI.accion('proponer_ley', { tpl: tplId, dis }, {}) });
     },
 
     /* Ficha de un proyecto: estado, proyección por partido y cabildeo. */
@@ -79,11 +89,14 @@ window.ESP = window.ESP || {};
       const v = p.votacion ? E.votaciones.find(x => x.id === p.votacion) : null;
       const cuerpo = `<div class="tenue" style="font-size:12.5px">${autorTxt(E, p)} · ${esc(sec(p.s).nombre)}</div><p style="margin:6px 0 10px;font-size:14px">${esc(p.d || '')}</p>
         <div class="fila" style="gap:6px;margin-bottom:10px"><span class="etq">Posición: ${Comp.ideoTxt(p)}, ${Comp.terTxt(p.ter || 0)}</span><span class="etq">Apoyo ciudadano ${p.pop} %</span>${p.costo ? `<span class="etq ${p.costo > 0 ? 'rojo' : 'verde'}">${p.costo > 0 ? 'Coste' : 'Ingreso'} ${U.d1(Math.abs(p.costo))} % PIB</span>` : ''}<span class="etq oro">${Comp.mayoriaTxt(p.may)}</span></div>
+        <div class="fila" style="gap:6px;margin-bottom:10px">${C.Pantallas.impacto.disTxt(C.Congreso.plantilla(p.tpl) || {}, p.dis)}</div>
         ${tramite(p)}
         ${pr ? `<div style="margin:14px 0 4px">${G.apilada([{ etq: 'A favor', v: pr.si, color: 'var(--si)' }, { etq: 'Abstención', v: pr.abs, color: 'var(--abs)' }, { etq: 'En contra', v: pr.no, color: 'var(--no)' }], { total: pr.total, mayoria: pr.need, alto: 18 })}<div class="tenue" style="font-size:12px;margin-top:4px">Proyección: ${pr.si} a favor, ${pr.no} en contra · se necesitan ${pr.need}. ${pr.dist >= 0 ? '<b class="bien">Margen de ' + pr.dist + '</b>' : '<b class="mal">Faltan ' + Math.abs(pr.dist) + '</b>'}</div></div>` : ''}
         ${activo && !p.rdl ? (() => { const sn = C.Congreso.votoSenado(E, p); return `<div class="nota" style="margin-top:10px">🏛 <b>Senado</b> (proyección): ${sn.si} sí · ${sn.no} no · ${sn.abs} abst. ${sn.veto ? '<b class="mal">· Veto probable (mayoría absoluta en contra)</b>' : sn.no > sn.si ? '· Podría introducir enmiendas' : '· Sin veto previsto'}</div>`; })() : ''}
         <h3 style="margin:14px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">Posición de los grupos</h3>
         <table class="tabla apila"><thead><tr><th>Grupo</th><th class="num">Esc.</th><th>Postura</th><th>Factor principal</th><th></th></tr></thead><tbody>${filas}</tbody></table>
+        ${C.Pantallas.impacto.enmiendasHTML(E, p)}
+        ${(() => { const tp = C.Congreso.plantilla(p.tpl); if (!tp || p.deroga) return ''; const inf = C.Impacto.informe(E, p.tpl, p.dis, p.ajuste); return `<details class="imp-det"><summary>📊 Informe de impacto de la ley</summary>${C.Pantallas.impacto.informeHTML(E, inf, null)}</details>`; })()}
         <h3 style="margin:14px 0 6px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">Historial</h3>
         <div class="lista" style="font-size:12.5px">${p.hist.map(h => `<div class="it"><span class="tenue" style="width:86px">${U.fmtT(h.t, true)}</span><span>${esc(h.txt)}</span></div>`).join('')}</div>`;
       UI.modal({ titulo: p.t, icono: sec(p.s).icono, cuerpo, clase: 'medio', pie: v ? `<button class="btn" id="v-ver">Ver votación</button>` : null }, null);

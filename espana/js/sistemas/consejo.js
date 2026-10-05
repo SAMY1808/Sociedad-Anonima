@@ -31,7 +31,8 @@ window.ESP = window.ESP || {};
       const P = E.paises.ES, g = P.gob, cs = E.esp.consejo, t = E.fecha.t;
       if (cs.agenda.length >= MAX_AGENDA) return;
       const r = U.r();
-      if (r < 0.46) Cn.genMinisterio(E);
+      if (r < 0.04) Cn.genDerogacion(E);
+      else if (r < 0.46) Cn.genMinisterio(E);
       else if (r < 0.62) Cn.genSocio(E);
       else if (r < 0.76) Cn.genTerritorial(E);
       else if (r < 0.9) Cn.genDecreto(E);
@@ -68,6 +69,16 @@ window.ESP = window.ESP || {};
       Cn.nuevo(E, { tipo: 'territorial', titulo: x.t, desc: x.d, region: c, sub: x.k, sector: 'ter', quien: { tipo: 'ccaa', nombre: d.nombre, pid: rc.gob && rc.gob.partido } });
     },
 
+    /* Un Gobierno de signo contrario quiere deshacer una ley en vigor (derogación). */
+    genDerogacion(E) {
+      const g = E.paises.ES.gob, pm = E.politicos[g.pm]; if (!pm || !E.esp.vigor) return;
+      const cand = E.esp.vigor.filter(v => v.estado === 'activa' && !v.rdl && E.fecha.t - v.t0 > 52 && v.autor && v.autor.pid !== g.partido && !E.esp.consejo.agenda.some(i => i.dero === v.id) && !C.Congreso.abiertos(E).some(p => p.deroga === v.id || p.reforma === v.id));
+      const v = U.pesado(cand.map(x => ({ x, d: U.distIdeo(pm, C.Congreso.plantilla(x.tpl)) })).filter(y => y.d > 0.4), y => y.d * y.d);
+      if (!v) return;
+      const tpl = C.Congreso.plantilla(v.x.tpl);
+      Cn.nuevo(E, { tipo: 'ley', titulo: `Derogar «${v.x.t}»`, desc: 'El Gobierno estudia derogar esta ley, aprobada por otro signo político, y revertir sus efectos.', tpl: tpl.id, dero: v.x.id, sector: tpl.s, quien: { tipo: 'ministro', min: null, pid: g.partido, nombre: 'Consejo' } });
+    },
+
     genDecreto(E) {
       const dec = U.pick(D().decretos.filter(x => x.id !== 'rd_conferencia' || E.fecha.t - E.esp.confPres.ultima > 52));
       if (E.esp.consejo.agenda.some(i => i.dec === dec.id)) return;
@@ -77,7 +88,7 @@ window.ESP = window.ESP || {};
     /* ── Opciones disponibles de cada punto ── */
     opciones(E, it) {
       const o = [];
-      if (it.tipo === 'ley') { o.push({ k: 'enviar', t: 'Aprobar y remitir a las Cortes', d: 'Proyecto de ley: tramitación ordinaria (semanas o meses).' }); }
+      if (it.tipo === 'ley') { o.push({ k: 'enviar', t: it.dero ? 'Aprobar la derogación y remitirla a las Cortes' : 'Aprobar y remitir a las Cortes', d: it.dero ? 'Proyecto de ley de derogación: sus efectos se revertirán poco a poco.' : 'Proyecto de ley: tramitación ordinaria (semanas o meses).' }); }
       if (it.tipo === 'rdl') { o.push({ k: 'rdl', t: 'Aprobar por decreto-ley', d: 'Entra en vigor ya; el Congreso debe convalidarlo en 30 días. Si cae, se deroga.' }); o.push({ k: 'enviar', t: 'Remitir como proyecto de ley', d: 'Tramitación ordinaria, sin urgencia.' }); }
       if (it.tipo === 'territorial') { o.push({ k: 'conceder', t: 'Acceder a la petición', d: 'Mejora la relación con la comunidad, pero genera agravio comparativo.' }); o.push({ k: 'negociar', t: 'Abrir una mesa de negociación', d: 'Gana tiempo y algo de confianza.' }); }
       if (it.tipo === 'competencia') { const cp = D().competencias[it.comp]; o.push({ k: 'conceder', t: cp.ley ? 'Proponer la ley orgánica de transferencia' : 'Acordar el traspaso (comisión mixta y real decreto)', d: cp.ley ? 'Necesita 176 votos en el Congreso y el paso por el Senado.' : 'Se hace efectivo en unas semanas.' }); o.push({ k: 'negociar', t: 'Abrir una negociación', d: 'Gana tiempo y sube la probabilidad de acuerdo futuro.' }); }
@@ -112,12 +123,18 @@ window.ESP = window.ESP || {};
       if (k === 'rechazar') { Cn.sat(E, satP, -6); if (aut.tipo === 'ccaa') { const rc = E.esp.ccaa[it.region]; rc.relM = Math.max(0, rc.relM - 5); } return 'Rechazado'; }
       if (it.tipo === 'ley' || it.tipo === 'rdl') {
         const autor = { tipo: 'gobierno', pid: g.partido, ministerio: aut.min || null, socio: aut.tipo === 'socio' ? aut.pid : null };
+        if (it.dero) {
+          const p = C.Congreso.proponerCambio(E, it.dero, 'derogar', autor); if (!p) return 'Sin efecto';
+          C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley de ${p.t.charAt(0).toLowerCase() + p.t.slice(1)} y lo remite a las Cortes.`, 'ES');
+          Cn.sat(E, satP, 5); return 'Proyecto de derogación remitido a las Cortes';
+        }
+        const dis = it.dis || C.Impacto.disDefecto(E, tpl, autor);
         if (k === 'rdl') {
-          const pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
-          const p = C.Congreso.registrarRDL(E, tpl.id, autor, { pacto: null });
+          const pr = C.Congreso.proyectar(E, C.Congreso.pseudo(E, tpl, autor, dis));
+          const p = C.Congreso.registrarRDL(E, tpl.id, autor, { pacto: null, dis });
           if (p) { C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el real decreto-ley «${tpl.t}».`, 'ES'); Cn.sat(E, satP, 6); if (pr.dist < 0) g.estab -= 0.6; return 'Decreto-ley aprobado (convalidación en el Congreso)'; }
         }
-        const p = C.Congreso.proponer(E, tpl.id, autor); if (!p) return 'Sin efecto';
+        const p = C.Congreso.proponer(E, tpl.id, autor, { dis }); if (!p) return 'Sin efecto';
         C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley «${tpl.t}» y lo remite a las Cortes.`, 'ES');
         Cn.sat(E, satP, 5); if (aut.tipo === 'ministro') Cn.sat(E, g.partido, 0.5);
         return 'Proyecto remitido a las Cortes';
@@ -172,7 +189,9 @@ window.ESP = window.ESP || {};
       let k = 'aplazar';
       if (it.tipo === 'ley' || it.tipo === 'rdl') {
         const tpl = C.Congreso.plantilla(it.tpl);
-        const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
+        if (it.dero) { const v = (E.esp.vigor || []).find(x => x.id === it.dero && x.estado === 'activa'); const pr0 = v ? C.Congreso.proyectar(E, Object.assign(C.Congreso.pseudo(E, tpl, { tipo: 'gobierno', pid: g.partido }, v.dis), { eco: -tpl.eco, soc: -tpl.soc, eu: -(tpl.eu || 0), ter: -(tpl.ter || 0), pop: 100 - tpl.pop })) : null; Cn.resolver(E, it.id, pr0 && pr0.dist >= -4 ? 'enviar' : 'aplazar', true); return; }
+        const disIA = it.dis || (it.dis = C.Impacto.disDefecto(E, tpl, { tipo: 'gobierno', pid: g.partido }));
+        const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, C.Congreso.pseudo(E, tpl, { tipo: 'gobierno', pid: g.partido }, disIA));
         let s = 0.9 - 2.0 * dist + (it.quien.tipo === 'socio' ? 0.3 : 0) + pr.dist / 175 * 0.9;
         if (pr.dist < -20) s -= 0.6;
         if (pr.dist < -4 && (tpl.may === 'organica' || tpl.may === 'cons')) s = -0.1;
@@ -221,31 +240,39 @@ window.ESP = window.ESP || {};
 
     /* ── Iniciativas del presidente y de los ministros ── */
     catalogo(E) {
-      const g = E.paises.ES.gob, ab = C.Congreso.abiertos(E).map(p => p.tpl);
-      return D().leyes.filter(l => !l.manual && !l.rdlSolo || l.id === 'indultos').filter(l => !ab.includes(l.id)).map(l => {
-        const pr = C.Congreso.proyectar(E, { may: l.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: l.pop, t: l.t, eco: l.eco, soc: l.soc, eu: l.eu, ter: l.ter, costo: l.costo, apoyo: {}, region: l.region });
+      const g = E.paises.ES.gob, ab = C.Congreso.abiertos(E).map(p => p.tpl), vig = C.Impacto.vigentes(E);
+      return D().leyes.filter(l => !l.manual && !l.rdlSolo || l.id === 'indultos').filter(l => !ab.includes(l.id) && !vig.has(l.id)).map(l => {
+        const pr = C.Congreso.proyectar(E, C.Congreso.pseudo(E, l, { tipo: 'gobierno', pid: g.partido }, null));
         return { tpl: l, pr };
       });
     },
 
     /* El presidente del Gobierno lleva una iniciativa al Consejo. */
-    iniciativaPM(E, tplId, via) {
+    iniciativaPM(E, tplId, via, dis) {
       const g = E.paises.ES.gob, tpl = C.Congreso.plantilla(tplId); if (!tpl) return 'No existe';
       if (Cn.enFunciones(E)) return 'El Gobierno está en funciones';
       const autor = { tipo: 'gobierno', pid: g.partido };
       if (via === 'rdl') {
         if (!tpl.rdl && !tpl.rdlSolo) return 'Esta materia no puede regularse por decreto-ley (ley orgánica o reforma constitucional)';
-        const p = C.Congreso.registrarRDL(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el real decreto-ley «${tpl.t}».`, 'ES'); return true;
+        const p = C.Congreso.registrarRDL(E, tplId, autor, { dis }); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el real decreto-ley «${tpl.t}».`, 'ES'); return true;
       }
       if (tpl.rdlSolo) return 'Sólo puede aprobarse por decreto';
-      C.Congreso.proponer(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley «${tpl.t}».`, 'ES'); return true;
+      C.Congreso.proponer(E, tplId, autor, { dis }); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley «${tpl.t}».`, 'ES'); return true;
+    },
+
+    /* El presidente lleva al Consejo la reforma o la derogación de una ley en vigor. */
+    iniciativaCambio(E, vigorId, tipo, dis) {
+      const g = E.paises.ES.gob; if (Cn.enFunciones(E)) return 'El Gobierno está en funciones';
+      const p = C.Congreso.proponerCambio(E, vigorId, tipo, { tipo: 'gobierno', pid: g.partido }, dis);
+      if (!p) return 'Esa ley ya tiene una reforma o derogación en trámite';
+      C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba el proyecto de ley de ${p.t.charAt(0).toLowerCase() + p.t.slice(1)}.`, 'ES'); return true;
     },
 
     /* Un ministro (jugador) propone algo de su sector al presidente. */
     propuestaMinistro(E, tplId) {
       const J = E.jugador, g = E.paises.ES.gob, pm = E.politicos[g.pm], tpl = C.Congreso.plantilla(tplId);
       if (!tpl) return 'No existe';
-      const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, { may: tpl.may || 'simple', autor: { tipo: 'gobierno', pid: g.partido }, pop: tpl.pop, t: tpl.t, eco: tpl.eco, soc: tpl.soc, eu: tpl.eu, ter: tpl.ter, costo: tpl.costo, apoyo: {}, region: tpl.region });
+      const dist = U.distIdeo(pm, tpl), pr = C.Congreso.proyectar(E, C.Congreso.pseudo(E, tpl, { tipo: 'gobierno', pid: g.partido }, null));
       const s = 0.85 - 2.0 * dist + pr.dist / 175 * 0.8 + (J.partido !== g.partido ? -0.1 : 0.15) + J.prestigio / 400;
       if (s > 0.1) { const autor = { tipo: 'gobierno', pid: g.partido, ministerio: J.ministerio, jugador: true }; C.Congreso.proponer(E, tplId, autor); C.Noticias.poner(E, 'gobierno', `El Consejo de Ministros aprueba «${tpl.t}», impulsado por ${J.nombre}.`, 'ES'); return true; }
       return s > -0.25 ? 'El presidente la deja «sobre la mesa»: faltan apoyos' : 'El presidente la veta: no encaja con la línea del Gobierno';

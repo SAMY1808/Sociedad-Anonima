@@ -1,7 +1,7 @@
 /* Prueba rápida del motor de España (sin UI): crea el mundo y simula años. */
 const mini = require('./mini');
-const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js',
-  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
+const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js',
+  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
   'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js'];
 const C = mini(F);
 const U = C.U;

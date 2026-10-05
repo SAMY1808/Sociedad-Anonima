@@ -94,3 +94,32 @@ pista de desplazamiento, tablas dentro de `.tscroll` (con primera columna fija s
 convierten en fichas. `App.ajustarMovil` (observador del DOM) envuelve tablas y etiqueta celdas. Los botones
 desactivados usan `.desact` + `aria-disabled` (se pueden tocar y explican el motivo); los avisos `data-tt` salen al
 tocar. `tools/movil-es.js` captura todas las pantallas a 390×844 y detecta desbordamiento horizontal.
+
+
+## Leyes e impacto (impacto.js · data/impactos.js)
+
+**Datos.** `DATA.indicadores` (12, 0-100, más es mejor), `DATA.colectivos` (11 grupos sociales con ideología, peso electoral
+y lo que les importa), `DATA.impactos[ley]` (efecto a pleno rendimiento sobre indicadores `ind` y colectivos `gr`,
+enfoques alternativos `enf`, efectos no deseados `sec`, implantación `r` e incertidumbre `u`), `DATA.alcances` y
+`DATA.financiaciones` (comunes a todas las leyes).
+
+**Diseño.** Un proyecto lleva `p.dis = {alc, enf, fin, grad}`. `Impacto.parametros(tpl, dis, ajuste)` deriva de él la posición
+ideológica (más alcance = más radical), el apoyo ciudadano, el coste (la financiación con impuestos o recortes lo traslada
+a crecimiento/colectivos/protección social), los impactos escalados y los riesgos. La votación (`Congreso.postura`) usa
+esos campos, así que el diseño cambia los votos. `Impacto.informe` es el informe previo; `Impacto.disDefecto` diseña
+las iniciativas de la IA según su ideología y la situación fiscal.
+
+**Entrada en vigor.** Al sancionarse (o registrarse un decreto-ley) `Impacto.promulgar` crea una entrada en `E.esp.vigor`
+con el efecto *real* = previsto × factor (1 + sesgo del ministro del ramo + ruido según la incertidumbre) y los efectos
+secundarios que se materializarán. Cada semana `Impacto.turno` aplica la parte económica de forma incremental
+(`Economia.aplicar`), acerca cada indicador a su objetivo (`base + deriva + acople con la economía + ministros + Σ leyes ×
+rampa`, con rendimientos decrecientes `tanh`) y la satisfacción de cada colectivo (`50 + afinidad con el Gobierno +
+indicadores + economía + leyes`). A las 52 semanas la ley se evalúa (mejor/según lo previsto/peor/fracaso).
+Una versión nueva de una ley sustituye a la vigente; `derogar` deshace sus efectos en 26 semanas.
+
+**Efectos políticos.** `E.esp.soc.clima` (media ponderada de la satisfacción − 50) mueve la aprobación del Gobierno
+(`opinion.js`) y reparte el voto de los partidos nacionales según la afinidad ideológica de cada colectivo
+(`Opinion.turnoES`). Los colectivos con satisfacción < 30 protestan.
+
+**Enmiendas.** `Impacto.enmiendas(E, p)` busca, para cada grupo que no apoya el texto, el cambio de diseño que más mejora su
+postura y calcula el margen de votos que ganaría el autor; la acción `aceptar_enmienda` lo aplica (máx. 3).

@@ -265,6 +265,21 @@ ESP.DATA = ESP.DATA || {};
     ]
   });
   ev({
+    id: 'consejeria_lista', titulo: 'El presidente cuenta contigo', icono: '💼', peso: 0, cd: 0,
+    req: () => false,
+    texto: (E, J, P, x) => `${x.pos ? `Entras en el Parlamento de ${regNom(x.c)} en el puesto ${x.pos} de la lista de ${pa(E).sigla}. ` : ''}Con el nuevo Gobierno de ${regNom(x.c)} en marcha, el presidente te propone entrar en el Consejo de Gobierno como titular de ${C.DATA.consejerias[x.area].nombre}. ${C.DATA.consejerias[x.area].desc || ''}`,
+    opciones: [
+      { t: (E, J, P, x) => `Aceptar ${C.DATA.consejerias[x.area].icono} ${C.DATA.consejerias[x.area].nombre}`, ef: (E, J, P, x) => { Pj().tomarOferta(E, x.c, x.area); return 'Tomas posesión como consejero/a.'; } },
+      { t: (E, J, P, x) => x.area2 ? `Pedir una cartera de más peso: ${C.DATA.consejerias[x.area2].icono} ${C.DATA.consejerias[x.area2].nombre}` : 'Pedir una cartera de más peso', ef: (E, J, P, x) => {
+          if (!x.area2) { Pj().tomarOferta(E, x.c, x.area); return 'No hay una cartera mejor: aceptas la propuesta.'; }
+          const p = C.U.clamp(0.28 + (J.prestigio - 35) / 100 + (x.pos && x.pos <= 3 ? 0.2 : 0), 0.12, 0.8);
+          if (C.U.chance(p)) { Pj().tomarOferta(E, x.c, x.area2); Pj().cambiar(E, { prestigio: 2 }, true); return 'El presidente cede: te quedas con ' + C.DATA.consejerias[x.area2].nombre + '.'; }
+          Pj().cambiar(E, { prestigio: -1.5 }, true); Pj().tomarOferta(E, x.c, x.area); return 'El presidente se molesta por la presión, pero mantiene su oferta inicial.';
+        } },
+      { t: 'Seguir en el Parlamento', ef: () => 'Prefieres el escaño y la libertad de la bancada.' }
+    ]
+  });
+  ev({
     id: 'oferta_consejeria', titulo: 'Una consejería en el gobierno autonómico', icono: '💼', peso: 0, auto: true, cd: 100,
     req: (E, J) => J.nivel !== 'nacional' && !!J.region && J.cargo !== 'presauto' && J.cargo !== 'consejero' && !!E.esp.ccaa[J.region].gob && E.esp.ccaa[J.region].gob.coalicion.includes(J.partido) && C.Territorio.areasDe(E, J.region, J.partido).length > 0 && J.prestigio >= 34 && J.rol !== 'base' && E.fecha.t % 3 === 0,
     texto: (E, J) => `El presidente de ${regNom(J.region)} te ofrece entrar en su Gobierno como consejero/a. Tendrías competencias y presupuesto propios.`,
@@ -275,7 +290,7 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'oferta_lista', titulo: 'Un puesto en las listas', icono: '🪜', peso: 0, auto: true, cd: 120,
-    req: (E, J) => J.nivel !== 'nacional' && J.nivel !== 'europeo' && !J.aspira && J.prestigio >= (J.nivel === 'local' ? 30 : 42) && J.rol !== 'base' && E.fecha.t % 4 === 0,
+    req: (E, J) => J.nivel !== 'nacional' && J.nivel !== 'europeo' && J.cargo !== 'presauto' && !J.aspira && J.prestigio >= (J.nivel === 'local' ? 30 : 42) && J.rol !== 'base' && E.fecha.t % 4 === 0,
     ctx: (E, J) => ({ a: J.nivel === 'local' ? 'autonomico' : 'nacional' }),
     texto: (E, J, P, x) => x.a === 'autonomico' ? `La dirección regional de ${pa(E).sigla} te propone ir en la lista al Parlamento de ${regNom(J.region)} en las próximas autonómicas.` : `La dirección nacional de ${pa(E).sigla} te ofrece un puesto en la lista al Congreso por ${C.DATA.provincias[J.circ || Pj().mejorProvincia(E, J.partido, J.region)][0]}.`,
     opciones: [

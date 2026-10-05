@@ -34,3 +34,34 @@
 .cand-btns{display:flex;gap:10px;flex:none}
 .cand-op{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:190px}
 .cand-op small{font-size:11px;line-height:1.25}
+/* ── Impacto de las leyes ── */
+.imp-h{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tenue);font-weight:600;margin:14px 0 6px}
+.imp-sec{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--tenue);margin:0 0 8px}
+.imp-fila{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;font-size:12.5px;padding:3px 0}
+.imp-fila .nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imp-pista{position:relative;height:10px;background:var(--panel3);border-radius:5px;overflow:hidden}
+.imp-pista::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--borde2)}
+.imp-pista>i{position:absolute;top:0;bottom:0;border-radius:5px}
+.imp-pista>i.pos{left:50%;background:var(--bien)} .imp-pista>i.neg{right:50%;background:var(--mal)}
+.imp-val{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.dis-bloque{margin-bottom:10px}
+.dis-bloque .imp-h{margin-top:8px}
+.dis-nota{font-size:12px;margin-top:4px}
+.dis-informe{margin-top:14px;padding:12px 14px;border:1px solid var(--borde2);border-radius:10px;background:linear-gradient(180deg,#101b2e,#0d1626)}
+.imp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.imp-ind{padding:10px 12px}
+.imp-grupos{display:flex;flex-direction:column;gap:6px}
+.imp-grupo{display:grid;grid-template-columns:190px 1fr 30px 150px;gap:8px;align-items:center;font-size:12.5px}
+.imp-grupo .nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imp-det{margin-top:12px;border:1px solid var(--borde);border-radius:9px;padding:8px 12px;background:var(--panel)}
+.imp-det summary{cursor:pointer;font-weight:600;font-size:13px}
+.fila-sel[data-k]{cursor:pointer}
+@media (max-width:760px){
+  .imp-fila{grid-template-columns:136px 1fr 40px}
+  .imp-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .imp-grupo{grid-template-columns:1fr 36px;row-gap:3px;padding:4px 0;border-bottom:1px solid rgba(38,56,87,.4)}
+  .imp-grupo .nom{grid-column:1;grid-row:1}
+  .imp-grupo>b{grid-column:2;grid-row:1;text-align:right}
+  .imp-grupo .imp-sat{grid-column:1 / 3;grid-row:2}
+  .imp-grupo>.tenue{grid-column:1 / 3;grid-row:3}
+}

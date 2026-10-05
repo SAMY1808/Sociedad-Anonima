@@ -236,6 +236,34 @@ window.ESP = window.ESP || {};
       return 1 + Math.floor((1 - clamp(eff, 0, 100) / 100) * (Math.max(antes, nuevos) + 3));
     },
 
+    /* Ajuste de la posición de una ley a la ideología del jugador que la presenta (un tercio de la diferencia). */
+    ajusteLey(E, tpl) { const J = E.jugador; return { eco: Math.round((J.eco - tpl.eco) / 3), soc: Math.round((J.soc - tpl.soc) / 3), eu: Math.round((J.eu - (tpl.eu || 0)) / 3), ter: Math.round((J.ter - (tpl.ter || 0)) / 3) }; },
+
+    /* ── Consejerías ofrecidas tras unas elecciones o un cambio de gobierno ── */
+    /* Si el partido del jugador entra en el Gobierno autonómico y él no preside, puede recibir una consejería
+       (más probable cuanto mejor puesto en la lista, prestigio y peso en la dirección). */
+    ofertaConsejeria(E, c, pos) {
+      const J = E.jugador, T = C.Territorio, rc = E.esp.ccaa[c], gob = rc && rc.gob;
+      if (!J || !gob || J.region !== c || J.ofertaT === E.fecha.t) return false;
+      if (!J.escReg || gob.pres === 'J' || !gob.coalicion.includes(J.partido) || J.consejeria === c || J.cargo === 'consejero') return false;
+      const libres = T.areasDe(E, c, J.partido); if (!libres.length) return false;
+      J.ofertaT = E.fecha.t;
+      const bono = ({ direccion: 0.12, portavoz: 0.06, lider: 0.25 })[J.rol] || 0;
+      const pr = clamp(0.28 + (J.prestigio - 30) / 100 + (pos && pos <= 3 ? 0.3 : pos && pos <= 8 ? 0.12 : 0) + bono + f(E, 'negociacion', 'gestion') * 0.15, 0.1, 0.95);
+      if (!U.chance(pr)) { Pj.log(E, `El presidente de ${D().ccaa[c].nombre} no cuenta contigo para el Consejo de Gobierno.`); return false; }
+      const por = libres.slice().sort((a, b) => D().consejerias[b].peso - D().consejerias[a].peso);
+      const area = por[Math.min(por.length - 1, Math.floor(por.length / 2))], area2 = por[0] !== area ? por[0] : null;
+      C.Eventos.disparar(E, C.Eventos.def('consejeria_lista'), { c, area, area2, pos: pos || null });
+      return true;
+    },
+    tomarOferta(E, c, area) {
+      const J = E.jugador;
+      C.Territorio.tomarConsejeria(E, c, area);
+      if (J.nivel === 'local') { Pj.dejar(E, 'local'); J.nivel = 'autonomico'; }
+      Pj.cambiar(E, { prestigio: 5, pop: 2 }, true); Pj.sincronizar(E);
+      Pj.log(E, `Tomas posesión como consejero/a de ${D().consejerias[area].nombre} en ${D().ccaa[c].nombre}.`);
+    },
+
     /* ── Candidaturas a las listas autonómicas ── */
     /* Descripción de la candidatura pendiente del jugador (o null). */
     aspiraTxt(E) {
@@ -352,6 +380,7 @@ window.ESP = window.ESP || {};
       if (electo && gob && gob.partido === J.partido && cabeza) { gob.pres = 'J'; r.presidente = true; }
       else if (J.consejeria === c && !(gob && gob.coalicion.includes(J.partido))) J.consejeria = null;
       Pj.sincronizar(E);
+      if (electo && !cabeza && J.region === c) r.oferta = Pj.ofertaConsejeria(E, c, pos);
       return r;
     },
 
@@ -430,17 +459,44 @@ window.ESP = window.ESP || {};
     }
   });
   A('proponer_ley', {
-    nombre: 'Registrar una proposición de ley', icono: '📜', costo: 2, grupo: 'parlamento', desc: 'Registra tu propia iniciativa legislativa en el Congreso.',
+    nombre: 'Registrar una proposición de ley', icono: '📜', costo: 2, grupo: 'parlamento', desc: 'Diseña y registra tu propia iniciativa legislativa en el Congreso (alcance, enfoque, financiación y calendario).',
     disponible(E) { const r = enParl(E); if (r !== true) return r; if (C.Congreso.abiertos(E).filter(p => p.autor.tipo === 'jugador').length >= 2) return 'Ya tienes dos proyectos en trámite'; if (C.Generales.puedeDisolver && E.esp.cortes.estado !== 'activa') return 'Las Cortes no están en periodo ordinario'; return true; },
     ejecutar(E, a) {
       const tpl = D().leyes.find(l => l.id === a.tpl); if (!tpl || tpl.manual || tpl.rdlSolo) return { ok: false, msg: 'Elige un proyecto' };
       if (C.Congreso.abiertos(E).some(p => p.tpl === tpl.id)) return { ok: false, msg: 'Ya hay un proyecto igual en trámite' };
-      const p = C.Congreso.proponer(E, tpl.id, { tipo: 'jugador', pid: E.jugador.partido });
       const J = E.jugador;
-      p.eco = Math.round((p.eco * 2 + J.eco) / 3); p.soc = Math.round((p.soc * 2 + J.soc) / 3); p.eu = Math.round((p.eu * 2 + J.eu) / 3); p.ter = Math.round((p.ter * 2 + J.ter) / 3);
+      const p = C.Congreso.proponer(E, tpl.id, { tipo: 'jugador', pid: J.partido }, { dis: a.dis || null, ajuste: Pj.ajusteLey(E, tpl) });
       Pj.cambiar(E, { prestigio: 0.8, pop: 0.3 });
       C.Noticias.poner(E, 'parlamento', `${J.nombre} (${pa(E).sigla}) registra «${p.t}».`, 'ES');
       return { ok: true, msg: `Registras «${p.t}».` };
+    }
+  });
+  A('proponer_cambio_ley', {
+    nombre: 'Reformar o derogar una ley en vigor', icono: '♻️', costo: 2, grupo: 'parlamento', desc: 'Registra una proposición para modificar el diseño de una ley vigente o derogarla.',
+    disponible(E) { const r = enParl(E); if (r !== true) return r; if (C.Congreso.abiertos(E).filter(p => p.autor.tipo === 'jugador').length >= 2) return 'Ya tienes dos proyectos en trámite'; return E.esp.vigor && E.esp.vigor.some(v => v.estado === 'activa') ? true : 'No hay leyes en vigor'; },
+    ejecutar(E, a) {
+      const J = E.jugador, p = C.Congreso.proponerCambio(E, a.vigor, a.tipo === 'derogar' ? 'derogar' : 'reformar', { tipo: 'jugador', pid: J.partido }, a.dis);
+      if (!p) return { ok: false, msg: 'Esa ley ya tiene una reforma o derogación en trámite' };
+      Pj.cambiar(E, { prestigio: 0.8, pop: 0.3 });
+      C.Noticias.poner(E, 'parlamento', `${J.nombre} (${pa(E).sigla}) registra «${p.t}».`, 'ES');
+      return { ok: true, msg: `Registras «${p.t}».` };
+    }
+  });
+  A('aceptar_enmienda', {
+    nombre: 'Negociar una enmienda', icono: '✍️', costo: 1, grupo: 'parlamento', desc: 'Cambia el diseño de tu proyecto (o del proyecto de tu Gobierno) para atraer los votos de otro grupo.',
+    disponible(E, a) {
+      const p = a && a.proy && E.proyectos[a.proy];
+      if (!p) return C.Congreso.abiertos(E).some(q => ['registro', 'ponencia'].includes(q.etapa) && (q.autor.tipo === 'jugador' || (q.autor.tipo === 'gobierno' && C.Consejo.pmEsJ(E)))) ? true : 'Necesitas un proyecto propio en registro o en comisión';
+      if (!['registro', 'ponencia'].includes(p.etapa)) return 'Sólo se puede enmendar en el registro o la comisión';
+      if (!(p.autor.tipo === 'jugador' || (p.autor.tipo === 'gobierno' && C.Consejo.pmEsJ(E)))) return 'Sólo el autor del texto puede aceptar enmiendas';
+      return (p.enm || 0) >= 3 ? 'Ya se han aceptado tres enmiendas' : true;
+    },
+    ejecutar(E, a) {
+      const p = E.proyectos[a.proy]; if (!p) return { ok: false, msg: 'Elige un proyecto' };
+      C.Impacto.aplicarEnmienda(E, p, { k: a.k, v: a.v });
+      if (a.pid && E.partidos[a.pid]) { p.apoyo[a.pid] = (p.apoyo[a.pid] || 0) + 0.25; E.parl.miembros.forEach(i => { const m = E.politicos[i]; if (m && m.p === a.pid && i !== 'J') m.rel = clamp(m.rel + 3, -100, 100); }); }
+      Pj.cambiar(E, { prestigio: 0.5 });
+      return { ok: true, msg: `Aceptas la enmienda${a.pid ? ' de ' + E.partidos[a.pid].sigla : ''}: «${p.t}» queda más cerca de su posición.` };
     }
   });
   A('cabildear_ley', {
@@ -588,9 +644,24 @@ window.ESP = window.ESP || {};
     }
   });
   A('adelanto_autonomico', {
-    nombre: 'Convocar elecciones autonómicas anticipadas', icono: '🗳️', costo: 2, grupo: 'autonomico', desc: 'Presidente/a autonómico/a: disuelve el Parlamento regional (comicios en siete semanas).',
-    disponible(E) { const r = presAut(E); if (r !== true) return r; const rc = rcJ(E); if (rc.parl.proxT - E.fecha.t < 14) return 'Las elecciones están ya muy cerca'; if (E.fecha.t - rc.parl.ult < 52) return 'Hace menos de un año de las anteriores'; return true; },
-    ejecutar(E) { C.Territorio.adelantar(E, E.jugador.region, 'a petición del presidente'); return { ok: true, msg: 'Disuelves el Parlamento: elecciones autonómicas en siete semanas.' }; }
+    nombre: 'Disolver el Parlamento autonómico', icono: '🗳️', costo: 2, grupo: 'autonomico', desc: 'Presidente/a autonómico/a: disuelve el Parlamento y convoca elecciones anticipadas (siete semanas). Ves antes la proyección de escaños.',
+    disponible(E) {
+      const r = presAut(E); if (r !== true) return r; const rc = rcJ(E);
+      if (rc.suspendida) return 'La autonomía está suspendida por el artículo 155';
+      if (rc.parl.proxT - E.fecha.t < 14) return 'Las elecciones ya están convocadas o muy cerca';
+      if (E.fecha.t - rc.parl.ult < 52) return 'No puedes disolver hasta un año después de las últimas elecciones';
+      return true;
+    },
+    ejecutar(E) {
+      const J = E.jugador, c = J.region, rc = rcJ(E), T = C.Territorio, pr = T.proyectar(E, c);
+      const gana = pr.bloque >= pr.may, mejora = pr.bloque - pr.ahora;
+      T.adelantar(E, c, `a petición de ${J.nombre}`);
+      // Los socios temen perder escaños; el electorado premia o castiga el cálculo
+      if (rc.gob) rc.gob.estab = Math.max(5, rc.gob.estab - (mejora < 0 ? 4 : 1));
+      Pj.cambiar(E, { prestigio: gana ? 1.5 : -2.5, pop: mejora >= 0 ? 0.6 : -0.8 }, true);
+      Pj.log(E, `Disuelves el Parlamento de ${D().ccaa[c].nombre}: elecciones el ${U.fmtT(rc.parl.proxT)}. Proyección: ${pr.bloque} escaños para tu bloque (mayoría ${pr.may}).`);
+      return { ok: true, msg: `Disuelves el Parlamento: elecciones autonómicas el ${U.fmtT(rc.parl.proxT, true)}.` };
+    }
   });
   A('consulta', {
     nombre: 'Convocar una consulta de autodeterminación', icono: '🗳️', costo: 3, grupo: 'autonomico', desc: 'Con un Gobierno soberanista y apoyo social suficiente (varía por comunidad): desafío unilateral al Estado.',
@@ -724,6 +795,7 @@ window.ESP = window.ESP || {};
       if (Pj.esUE(E)) return 'Vuelve primero a la política española';
       if (J.aspira) return 'Ya has pedido un puesto';
       if (J.nivel === 'nacional') return 'Ya estás en el nivel nacional';
+      if (J.cargo === 'presauto') return 'Presides una comunidad: no puedes dejarla por una lista al Congreso';
       return J.prestigio >= (J.nivel === 'local' ? 28 : 40) ? true : `Necesitas prestigio ${J.nivel === 'local' ? 28 : 40}+`;
     },
     ejecutar(E, a) {
