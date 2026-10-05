@@ -4,7 +4,7 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const GRUPOS = [['parlamento', '🏛', 'Congreso'], ['nacional', '🦅', 'Gobierno y Cortes'], ['autonomico', '🗺', 'Comunidad autónoma'], ['local', '🏘', 'Ayuntamiento'], ['carrera', '🪜', 'Carrera'], ['partido', '🎗', 'Partido'], ['medios', '📺', 'Medios'], ['campana', '📣', 'Campaña'], ['europa', '🇪🇺', 'Europa']];
-  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', candidatura_aut: 'candidatura', adelanto_autonomico: 'adelanto', programa_consejeria: 'programas', presupuesto_aut: 'presup', reorganizar_gobierno: 'reorg', proponer_cambio_ley: 'envigor', aceptar_enmienda: 'enmienda', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area', cambiar_provincia: 'provincia', cambiar_comunidad: 'comunidad' };
+  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', candidatura_aut: 'candidatura', adelanto_autonomico: 'adelanto', programa_consejeria: 'programas', presupuesto_aut: 'presup', reorganizar_gobierno: 'reorg', proponer_cambio_ley: 'envigor', aceptar_enmienda: 'enmienda', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area', proponer_ley_aut: 'leyesaut', mocion_pleno: 'leyesmuni', cambiar_provincia: 'provincia', cambiar_comunidad: 'comunidad' };
 
   const A = C.Pantallas.agenda = {
     render(el) {
@@ -29,9 +29,11 @@ window.ESP = window.ESP || {};
     abrir(id) {
       const E = C.E;
       const k = MODAL[id];
-      if (k === 'leyes') return C.App.ir('leyes', { tab: id === 'proponer_ley' ? 'proponer' : 'tramite' }), id === 'cabildear_ley' && UI.toast('Abre un proyecto y usa 👍 / 👎 en el grupo que quieras convencer.', '');
-      if (k === 'envigor') return C.App.ir('leyes', { tab: 'vigor' }), UI.toast('Elige la ley en vigor y pulsa Reformar o Derogar.', '');
-      if (k === 'enmienda') return C.App.ir('leyes', { tab: 'tramite' }), UI.toast('Abre tu proyecto (en registro o comisión): verás lo que pide cada grupo.', '');
+      if (k === 'leyes') return C.App.ir('leyes', { amb: 'congreso', tab: id === 'proponer_ley' ? 'proponer' : 'tramite' }), id === 'cabildear_ley' && UI.toast('Abre un proyecto y usa 👍 / 👎 en el grupo que quieras convencer.', '');
+      if (k === 'leyesaut') return C.App.ir('leyes', { amb: 'aut' }), UI.toast('Elige la ley que quieres presentar al Parlamento autonómico.', '');
+      if (k === 'leyesmuni') return C.App.ir('leyes', { amb: 'muni' }), UI.toast('Elige la moción que quieres llevar al pleno.', '');
+      if (k === 'envigor') return C.App.ir('leyes', { amb: 'congreso', tab: 'vigor' }), UI.toast('Elige la ley en vigor y pulsa Reformar o Derogar.', '');
+      if (k === 'enmienda') return C.App.ir('leyes', { amb: 'congreso', tab: 'tramite' }), UI.toast('Abre tu proyecto (en registro o comisión): verás lo que pide cada grupo.', '');
       if (k === 'comp') {
         const J = E.jugador, rc = E.esp.ccaa[J.region], T = C.Territorio;
         const ks = Object.keys(D().competencias).filter(x => rc.comp[x] < 2).sort((a, b) => (rc.reclama.indexOf(a) < 0 ? 99 : rc.reclama.indexOf(a)) - (rc.reclama.indexOf(b) < 0 ? 99 : rc.reclama.indexOf(b)));

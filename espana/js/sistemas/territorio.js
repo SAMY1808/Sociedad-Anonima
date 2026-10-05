@@ -188,6 +188,7 @@ window.ESP = window.ESP || {};
         if (p.tipo === 'refer_estatuto') T.referendumEstatuto(E, c, p);
         else if (p.tipo === 'traspaso') T.aplicarTraspaso(E, c, p.comp);
         else if (p.tipo === 'prog') T.resolverPrograma(E, c, p);
+        else if (p.tipo === 'leyJ') T.resolverLeyJ(E, c, p);
         return false;
       });
       if (rc.inv && T.invTurno) T.invTurno(E, c);

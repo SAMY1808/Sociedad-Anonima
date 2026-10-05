@@ -23,13 +23,17 @@ window.ESP = window.ESP || {};
 
   const L = C.Pantallas.leyes = {
     render(el, params) {
-      const E = C.E;
+      const E = C.E, LN = C.Pantallas.leyesNiv;
+      const amb = (params && params.amb) || E.ui.ambLeyes || LN.defecto(E);
+      E.ui.ambLeyes = LN.ambitos(E).some(a => a[0] === amb) ? amb : 'congreso';
+      if (E.ui.ambLeyes !== 'congreso') { el.innerHTML = LN.pagina(E, E.ui.ambLeyes); LN.enlazar(el); UI.$$('[data-proy]', el).forEach(f => f.onclick = () => L.ver(f.dataset.proy)); return; }
       const tab = (params && params.tab) || E.ui.tabLeyes || 'tramite';
       E.ui.tabLeyes = tab;
       const tr = Object.values(E.proyectos).filter(p => ACTIVAS.includes(p.etapa)).sort((a, b) => (b.autor.tipo === 'jugador') - (a.autor.tipo === 'jugador') || b.t0 - a.t0);
       const hist = Object.values(E.proyectos).filter(p => !ACTIVAS.includes(p.etapa)).sort((a, b) => b.tEtapa - a.tEtapa).slice(0, 40);
       el.innerHTML = `<div class="cab"><div><h1>Leyes</h1><div class="sub">Congreso de los Diputados · 350 escaños · ${E.esp.cortes.estado !== 'activa' ? '<span class="alerta">Cortes sin actividad legislativa ordinaria</span>' : C.Congreso.enRecesion(E) ? '<span class="tenue">receso parlamentario</span>' : '<span class="bien">en sesiones</span>'}</div></div>
         <div class="fila"><label class="tenue" style="font-size:12px"><input type="checkbox" id="l-auto" ${E.parl.auto ? 'checked' : ''}> Votar automáticamente con mi grupo</label></div></div>
+        ${LN.barra(E, 'congreso')}${LN.observador(E) ? '<div class="nota" style="margin-bottom:12px">👀 No eres diputado/a: sigues el trabajo del Congreso como observador/a. Ves cada proyecto, su proyección y cada votación, pero sólo los diputados votan.</div>' : ''}
         ${E.parl.pendienteVoto.length ? `<div class="nota" style="border-color:var(--oro);margin-bottom:12px">🗳 Tienes <b>${E.parl.pendienteVoto.length}</b> votación(es) pendientes. <button class="btn chico prim" id="l-votar">Votar ahora</button></div>` : ''}
         <div class="tabs"><button data-tab="tramite" class="${tab === 'tramite' ? 'activo' : ''}">En trámite (${tr.length})</button><button data-tab="proponer" class="${tab === 'proponer' ? 'activo' : ''}">Presentar proyecto</button><button data-tab="vigor" class="${tab === 'vigor' ? 'activo' : ''}">En vigor (${C.Impacto.enVigor(E).length})</button><button data-tab="pais" class="${tab === 'pais' ? 'activo' : ''}">Impacto en el país</button><button data-tab="historial" class="${tab === 'historial' ? 'activo' : ''}">Historial</button></div>
         <div id="l-cuerpo"></div>`;
@@ -39,6 +43,7 @@ window.ESP = window.ESP || {};
       else if (tab === 'vigor') cu.innerHTML = C.Pantallas.impacto.vigorTab(E);
       else if (tab === 'pais') cu.innerHTML = C.Pantallas.impacto.paisTab(E);
       else cu.innerHTML = L.proponer(E);
+      LN.enlazar(el);
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('leyes', { tab: b.dataset.tab }));
       UI.$('#l-auto', el).onchange = e => { E.parl.auto = e.target.checked; };
       const v = UI.$('#l-votar', el); if (v) v.onclick = () => L.modalVoto(E.parl.pendienteVoto[0]);

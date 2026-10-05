@@ -232,6 +232,7 @@ window.ESP = window.ESP || {};
       const seats = U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)), ext = U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)), may = Math.floor(D().ccaa[c].esc / 2) + 1;
       const p = seats >= may ? 0.88 : seats + ext >= may ? 0.7 : 0.35;
       rc.pend.push({ t: E.fecha.t + prog.sem, tipo: 'prog', prog: id, res: 'ley', ok: U.chance(p), eff, p });
+      T.registrarLey(E, c, { id: 'G' + E.fecha.t + id, prog: id, pid: g.partido, quien: 'Gobierno autonómico', jugador: false, estado: 'tramite', t0: E.fecha.t, v: { p } });
       return { ok: true, msg: `Remites al Parlamento el proyecto «${prog.n}» (probabilidad de aprobación ≈ ${Math.round(p * 100)} %).`, p };
     },
     aplicarPrograma(E, c, prog, eff, ia) {
@@ -245,6 +246,7 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c], prog = T.programa(p.prog), J = E.jugador; if (!prog) return;
       const nom = D().ccaa[c].nombre, suyo = J && J.region === c && ['consejero', 'presauto'].includes(J.cargo);
       if (p.res === 'obra') { const o = rc.obras.find(x => x.id === p.prog && !x.fin); if (o) o.fin = true; T.aplicarPrograma(E, c, prog, p.eff); C.Noticias.poner(E, 'politica', `${nom}: se inaugura «${prog.n}».`, 'ES'); if (suyo) { C.Personaje.log(E, `Se inaugura «${prog.n}».`); C.Personaje.cambiar(E, { prestigio: 2.5, pop: 1.5 }, true); } return; }
+      T.cerrarLeyProg(E, c, p.prog, p.ok);
       if (p.ok) { T.aplicarPrograma(E, c, prog, p.eff); C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} aprueba: ${prog.n}.`, 'ES'); if (suyo) { C.Personaje.log(E, `Aprobada: ${prog.n}.`); C.Personaje.cambiar(E, { prestigio: 2, pop: 1 }, true); } }
       else { if (rc.gob) rc.gob.estab = U.clamp(rc.gob.estab - 2, 0, 100); C.Noticias.poner(E, 'politica', `El Parlamento de ${nom} rechaza el proyecto: ${prog.n}.`, 'ES'); if (suyo) { C.Personaje.log(E, `El Parlamento rechaza: ${prog.n}.`); C.Personaje.cambiar(E, { prestigio: -1.5 }, true); } }
     },
@@ -381,6 +383,11 @@ window.ESP = window.ESP || {};
       }
       if (t >= E.esp.cpff.proxT && E.esp.cortes.estado === 'activa') { T.cpffItem(E); E.esp.cpff.proxT = t + 52; }
     },
+
+    /* Registro de leyes autonómicas en tramitación o resueltas (las del Gobierno y las del jugador). */
+    registrarLey(E, c, l) { const rc = E.esp.ccaa[c]; rc.leyes = rc.leyes || []; rc.leyes.unshift(l); if (rc.leyes.length > 30) rc.leyes.length = 30; },
+    cerrarLey(E, c, id, ok) { const l = (E.esp.ccaa[c].leyes || []).find(x => x.id === id); if (l) { l.estado = ok ? 'aprobada' : 'rechazada'; l.t1 = E.fecha.t; } },
+    cerrarLeyProg(E, c, progId, ok) { const l = (E.esp.ccaa[c].leyes || []).find(x => x.prog === progId && x.estado === 'tramite' && !x.jugador); if (l) { l.estado = ok ? 'aprobada' : 'rechazada'; l.t1 = E.fecha.t; } },
 
     mocionIA(E, c) {
       const rc = E.esp.ccaa[c], g = rc.gob; rc.ultMocion = E.fecha.t;

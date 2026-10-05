@@ -1,0 +1,45 @@
+/* Prueba de interfaz de la investidura (Playwright): calendario, proponer candidato como presidente del Parlamento y negociar el bloque como candidato.
+   Uso: node tools/leyesniv-ui.js [movil] */
+const { chromium } = require('/opt/node22/lib/node_modules/playwright');
+const http = require('http'), fs = require('fs'), path = require('path');
+const raiz = path.join(__dirname, '..');
+const tipos = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webmanifest': 'application/json' };
+const srv = http.createServer((q, r) => { let f = path.join(raiz, decodeURIComponent(q.url.split('?')[0])); if (f.endsWith('/')) f += 'index.html'; fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'Content-Type': tipos[path.extname(f)] || 'text/plain' }); r.end(d); } }); });
+const movil = process.argv[2] === 'movil';
+(async () => {
+  await new Promise(r => srv.listen(8133, r));
+  const b = await chromium.launch({ args: ['--no-sandbox'] });
+  const ctx = await b.newContext(movil ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 860 } });
+  const pg = await ctx.newPage();
+  const err = []; pg.on('pageerror', e => err.push('PAGE ' + e.message)); pg.on('console', m => { if (m.type() === 'error') err.push('CON ' + m.text()); });
+  const clic = async s => { const el = await pg.waitForSelector(s, { timeout: 8000 }); await el.scrollIntoViewIfNeeded(); return movil ? pg.tap(s) : pg.click(s); };
+  let fallos = 0; const ok = (c, m) => { if (!c) { fallos++; console.log('  ✗', m); } else console.log('  ✓', m); };
+  await pg.goto('http://localhost:8133/index.html');
+  await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
+  await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
+  const cerrar = async () => { for (let i = 0; i < 6; i++) { if (!(await pg.$('.modal-fondo'))) break; await pg.evaluate(() => ESP.UI.cerrarModales()); } };
+  await cerrar();
+  await pg.evaluate(() => { const E = ESP.E, g = E.paises.ES.gob; E.parl.auto = true;
+    ['salario_minimo', 'control_alquileres', 'sanidad_publica'].forEach(id => { const tpl = ESP.Congreso.plantilla(id); ESP.Impacto.promulgar(E, { tpl: id, t: tpl.t, autor: { tipo: 'jugador', pid: g.partido }, dis: ESP.Impacto.norm(tpl, {}), region: null }); }); });
+  await pg.evaluate(() => { const E = ESP.E, J = E.jugador; J.region = 'MAD'; J.muni = 'm_mad'; E.paises.ES.gob.pm = 'X'; E.paises.ES.gob.ministros = {}; J.cargo = 'dipauto'; J.electo = false; J.nivel = 'autonomico'; J.escReg = true; J.agenda.puntos = 10; ESP.App.ir('leyes', { amb: 'aut' }); });
+  await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /Leyes que puedes presentar/i.test(document.querySelector('#vista').innerText)), 'ámbito autonómico: leyes presentables');
+  ok(await pg.$$eval('[data-amb]', b => b.length) === 3, 'selector de ámbito con tres opciones');
+  await pg.screenshot({ path: `/tmp/${movil ? 'lnm' : 'lnd'}-aut.png`, fullPage: true });
+  const b1 = await pg.$('[data-accion="proponer_ley_aut"]'); ok(!!b1, 'botón de presentar proposición');
+  await clic('[data-accion="proponer_ley_aut"]'); await pg.waitForTimeout(400);
+  ok(await pg.evaluate(() => ESP.E.esp.ccaa.MAD.leyes.some(l => l.jugador)), 'la proposición se registra y aparece en tramitación');
+  await clic('[data-amb="muni"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /Acuerdos recientes del pleno/i.test(document.querySelector('#vista').innerText)), 'ámbito municipal');
+  await pg.evaluate(() => { const J = ESP.E.jugador; J.cargo = 'concejal'; J.nivel = 'local'; J.concejal = true; ESP.App.refrescar(); }); await pg.waitForTimeout(250);
+  await pg.screenshot({ path: `/tmp/${movil ? 'lnm' : 'lnd'}-muni.png`, fullPage: true });
+  const bm = await pg.$('[data-accion="mocion_pleno"]'); ok(!!bm, 'botón de moción de concejal');
+  await clic('[data-accion="mocion_pleno"]'); await pg.waitForTimeout(400);
+  ok(await pg.evaluate(() => ESP.E.esp.muni.m.m_mad.pleno.some(x => /moción/.test(x.asunto))), 'la moción pasa por el pleno');
+  await clic('[data-amb="congreso"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /observador/.test(document.querySelector('#vista').innerText)), 'subcategoría Congreso con aviso de observador');
+  await pg.screenshot({ path: `/tmp/${movil ? 'lnm' : 'lnd'}-congreso.png` });
+  ok(await pg.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2), 'sin desbordamiento horizontal');
+  console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);
+  await b.close(); srv.close(); process.exit(fallos || err.length ? 1 : 0);
+})().catch(e => { console.error('FALLO', e); process.exit(1); });
