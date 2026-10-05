@@ -11,7 +11,7 @@ ESP.DATA = ESP.DATA || {};
   const aprob = (P, d) => { P.gob.aprob = clamp(P.gob.aprob + d, 5, 90); };
   const sectores = { diplomatico: ['ext', 'ter'], abogado: ['jus', 'int'], empresa: ['eco', 'ter'], academico: ['edu', 'sal'], sindical: ['tra', 'sal'], periodista: ['edu', 'cul'], concejal: ['ter', 'int'], activista: ['amb', 'sal'] };
   const eventos = [];
-  const ev = o => eventos.push(Object.assign({ peso: 1, cd: 40 }, o));
+  const ev = o => eventos.push(Object.assign({ peso: 1, cd: 40, req: () => true }, o));
 
   /* ── Políticos y del partido ── */
   ev({
@@ -311,6 +311,117 @@ ESP.DATA = ESP.DATA || {};
       { t: 'Presentarme como cabeza de lista', ef: (E, J, P, x) => { const ok = C.U.chance(Pj().probLista(E, x.c, true) + 0.2); if (!ok) { Pj().cambiar(E, { prestigio: -2 }, true); return 'Los barones regionales imponen a otro/a candidato/a.'; } J.aspira = { nivel: 'autonomico', region: x.c, cabeza: true, t: E.fecha.t }; Pj().log(E, `Serás candidato/a a la presidencia de ${regNom(x.c)}.`); return `Serás el/la candidato/a de ${pa(E).sigla} en ${regNom(x.c)}.`; } },
       { t: 'Ir en la lista, sin encabezarla', ef: (E, J, P, x) => { J.aspira = { nivel: 'autonomico', region: x.c, cabeza: false, t: E.fecha.t }; Pj().log(E, `Irás en la lista autonómica de ${regNom(x.c)}.`); return 'Figurarás en la lista.'; } },
       { t: 'Declinar', ef: () => 'Te quedas donde estás.' }
+    ]
+  });
+  /* ── La Corona ── */
+  const cor = E => (E.esp.corona = E.esp.corona || { apoyo: 58 });
+  const corona = (E, d, o = {}) => {
+    const c = cor(E); c.apoyo = clamp(c.apoyo + d, 15, 90);
+    const S = C.Impacto && C.Impacto.asegurar(E); if (!S) return;
+    S.sat.trad = clamp(S.sat.trad + d * 0.25, 3, 97); S.sat.prog = clamp(S.sat.prog - d * 0.2, 3, 97);
+    S.off.rep = (S.off.rep || 0) + (o.rep || 0); S.off.inst = (S.off.inst || 0) + (o.inst || 0);
+  };
+  const mes = () => C.U.hoy().getUTCMonth();
+  const republica = E => cor(E).apoyo < 45;
+  ev({
+    id: 'mensaje_navidad', titulo: 'El Mensaje de Navidad del Rey', icono: '👑', peso: 0, auto: true, cd: 50,
+    req: (E, J) => mes() === 11 && C.U.hoy().getUTCDate() >= 22 && C.U.hoy().getUTCDate() <= 28,
+    texto: (E, J, P) => `En su discurso de Nochebuena, el Rey apela a la unidad, a la Constitución y a la convivencia en un año de ${P.ec.paro > 9 ? 'dificultades económicas' : 'incertidumbre política'}. Los medios te piden valoración.`,
+    opciones: [
+      { t: 'Elogiar el discurso', ef: (E, J) => { corona(E, 1.5); Pj().cambiar(E, { pop: J.soc > 10 ? 1.2 : -0.6, prestigio: 0.4 }); return 'Tu respaldo agrada a los sectores institucionales.'; } },
+      { t: 'Reprochar que no hable de los problemas reales', ef: (E, J) => { corona(E, -0.5); Pj().cambiar(E, { pop: J.soc < -10 ? 1.2 : -0.8 }); return 'Tu crítica gusta a unos y irrita a otros.'; } },
+      { t: 'No comentarlo', ef: () => 'Pasas de puntillas.' }
+    ]
+  });
+  ev({
+    id: 'corona_patrimonio', titulo: 'Polémica por el patrimonio de la Corona', icono: '🏰', peso: 1.0, cd: 120,
+    texto: () => 'Un reportaje revela gastos y regalos poco claros en torno a la Casa Real. La oposición pide explicaciones y los partidos republicanos exigen una auditoría.',
+    opciones: [
+      { t: 'Exigir transparencia total y una auditoría', ef: (E, J) => { corona(E, -2, { rep: 0.4 }); Pj().cambiar(E, { prestigio: 1.5, pop: J.soc < 0 ? 1.5 : -0.5 }); return 'La Zarzuela anuncia más transparencia.'; } },
+      { t: 'Defender a la institución', ef: (E, J) => { corona(E, 0.5); Pj().cambiar(E, { prestigio: 0.5, pop: J.soc > 0 ? 1 : -1.5 }); return 'Cierras filas con la Corona.'; } },
+      { t: 'Proponer una reforma de la financiación de la Casa Real', ef: (E, J) => { corona(E, 0.5, { rep: 0.4 }); Pj().cambiar(E, { prestigio: 2 }); return 'Tu propuesta abre un debate transversal.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_emerito', titulo: 'El Rey emérito vuelve a ser noticia', icono: '🛬', peso: 0.8, cd: 150,
+    texto: () => 'El padre del Rey regresa a España tras una larga estancia en el extranjero. Sus asuntos fiscales y sus cacerías reabren el debate sobre la inviolabilidad.',
+    opciones: [
+      { t: 'Pedir que explique su patrimonio en el Parlamento', ef: (E, J, P) => { corona(E, -2.5, { rep: 0.3 }); Pj().cambiar(E, { pop: J.soc < 10 ? 1.5 : -1, prestigio: 1 }); return 'La petición abre un pulso institucional.'; } },
+      { t: 'Reclamar discreción y respeto a la Corona', ef: (E, J) => { corona(E, 0.5); Pj().cambiar(E, { pop: J.soc > 10 ? 1 : -1.5 }); return 'Tu llamada a la prudencia divide a la opinión.'; } },
+      { t: 'Impulsar la reforma de la inviolabilidad', ef: (E, J) => { corona(E, -1, { rep: 0.5 }); Pj().cambiar(E, { prestigio: 1.5, pop: J.soc < 0 ? 2 : -1.5 }); return 'Tu propuesta gana apoyos a la izquierda.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_territorial', titulo: 'El Rey ante la crisis territorial', icono: '🇪🇸', peso: 1.0, cd: 100,
+    req: (E) => ['CAT', 'PVA'].some(c => E.esp.ccaa[c].indep > 14),
+    texto: (E) => `El Rey dirige un mensaje a los españoles sobre la situación en ${E.esp.ccaa.CAT.indep >= E.esp.ccaa.PVA.indep ? 'Cataluña' : 'el País Vasco'}: llama al cumplimiento de la ley y al diálogo. Los partidos soberanistas lo rechazan.`,
+    opciones: [
+      { t: 'Respaldar el mensaje', ef: (E, J) => { corona(E, 1, { inst: 0.3 }); const c = E.esp.ccaa.CAT; c.indep = clamp(c.indep + 0.3, 0, 70); Pj().cambiar(E, { pop: J.ter < 0 ? 1.5 : -1 }); return 'Los sectores constitucionalistas te lo agradecen.'; } },
+      { t: 'Pedir que la Corona no intervenga en política', ef: (E, J) => { corona(E, -1); Pj().cambiar(E, { pop: J.ter > 20 ? 1.5 : -0.8 }); return 'Marcas distancias con la Corona.'; } },
+      { t: 'Aprovechar para proponer una mesa de diálogo', ef: (E, J) => { Pj().cambiar(E, { prestigio: 1.5 }); const c = E.esp.ccaa.CAT; c.relM = clamp(c.relM + 1.5, 0, 100); return 'Tu propuesta de diálogo recibe atención.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_sancion', titulo: 'El Rey y una ley polémica', icono: '✍️', peso: 0.8, cd: 120,
+    req: (E) => C.Congreso.abiertos(E).some(p => p.etapa === 'senado' || p.etapa === 'vuelta') || E.proyectos && Object.values(E.proyectos).some(p => p.etapa === 'sancionada' && E.fecha.t - p.tEtapa < 6 && p.pop < 40),
+    texto: () => 'Una ley muy discutida llega a la sanción real. Colectivos de ambos lados piden al Rey que la firme —o que no lo haga—, aunque la Constitución le obliga a sancionarla.',
+    opciones: [
+      { t: 'Recordar que el Rey debe sancionar toda ley aprobada', ef: (E, J) => { corona(E, 0.8, { inst: 0.2 }); Pj().cambiar(E, { prestigio: 1 }); return 'Tu explicación zanja el asunto.'; } },
+      { t: 'Pedir al Rey que no la firme', ef: (E, J) => { corona(E, -1.2, { inst: -0.4 }); Pj().cambiar(E, { pop: J.soc > 20 ? 1.5 : -2, prestigio: -1 }); return 'Se te acusa de querer politizar la Corona.'; } },
+      { t: 'Abstenerte de implicar a la Corona', ef: () => 'Dejas el asunto en manos de las Cortes.' }
+    ]
+  });
+  ev({
+    id: 'corona_familia', titulo: 'Un escándalo en la Familia Real', icono: '📸', peso: 0.8, cd: 140,
+    texto: () => 'Un miembro de la Familia Real se ve envuelto en una polémica por sus negocios y viajes. La Casa del Rey publica un comunicado de distanciamiento.',
+    opciones: [
+      { t: 'Pedir que se depuren responsabilidades', ef: (E, J) => { corona(E, -1); Pj().cambiar(E, { prestigio: 1.2, pop: 0.5 }); return 'Tu exigencia es bien recibida.'; } },
+      { t: 'Pedir respeto a la vida privada', ef: (E, J) => { corona(E, 0.3); Pj().cambiar(E, { pop: J.soc > 10 ? 0.8 : -1 }); return 'Tu defensa irrita a los republicanos.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_encuesta', titulo: 'Encuesta: monarquía o república', icono: '📊', peso: 0.9, cd: 90,
+    texto: (E) => `Una encuesta del CIS mide el apoyo a la Corona: el ${Math.round(cor(E).apoyo)} % de los españoles se declara partidario de la monarquía parlamentaria, y la cifra cae entre los jóvenes.`,
+    opciones: [
+      { t: 'Reivindicar la monarquía parlamentaria', ef: (E, J) => { corona(E, 1); Pj().cambiar(E, { pop: J.soc > 0 ? 1 : -1 }); return 'Los monárquicos celebran tus palabras.'; } },
+      { t: 'Abrir el debate sobre un referéndum', ef: (E, J) => { corona(E, -1.5, { rep: 0.4 }); Pj().cambiar(E, { pop: J.soc < -15 ? 2 : -2, prestigio: 0.5 }); C.Noticias.poner(E, 'politica', `${J.nombre} propone abrir el debate sobre el modelo de Estado.`, 'ES'); return 'Tu propuesta incendia el debate.'; } },
+      { t: 'Eludir la cuestión', ef: () => 'Prefieres no mojarte.' }
+    ]
+  });
+  ev({
+    id: 'corona_fiesta', titulo: 'Recepción del 12 de octubre', icono: '🎖️', peso: 0, auto: true, cd: 50,
+    req: (E, J) => mes() === 9 && C.U.hoy().getUTCDate() >= 8 && C.U.hoy().getUTCDate() <= 14 && J.cargo !== 'activista',
+    texto: () => 'El Rey ofrece la tradicional recepción de la Fiesta Nacional en el Palacio Real. Varios partidos republicanos e independentistas anuncian su ausencia.',
+    opciones: [
+      { t: 'Asistir con tu pareja', ef: (E, J) => { corona(E, 0.5); Pj().cambiar(E, { prestigio: 0.8, pop: J.soc > 0 ? 0.8 : -0.4 }); return 'Cumples con el protocolo.'; } },
+      { t: 'Sumarte al plante', ef: (E, J) => { corona(E, -0.5); Pj().cambiar(E, { pop: J.soc < -10 || J.ter > 30 ? 1.5 : -1.5, prestigio: -0.5 }); return 'Tu ausencia no pasa inadvertida.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_visita', titulo: 'El Rey visita tu comunidad', icono: '🤝', peso: 0.9, cd: 120,
+    req: (E, J) => !!J.region && J.nivel !== 'nacional' && J.nivel !== 'europeo',
+    texto: (E, J) => `El Rey visita ${regNom(J.region)} para inaugurar unas instalaciones y se reúne con las autoridades. Hay quien prepara una protesta.`,
+    opciones: [
+      { t: 'Recibirlo con todos los honores', ef: (E, J) => { corona(E, 0.8); Pj().cambiar(E, { prestigio: 1, pop: J.ter > 25 ? -1.5 : 1 }); return 'La visita transcurre con normalidad.'; } },
+      { t: 'Aprovechar para pedirle apoyo a un proyecto regional', ef: (E, J) => { E.esp.ccaa[J.region].relM = clamp(E.esp.ccaa[J.region].relM + 1.5, 0, 100); Pj().cambiar(E, { prestigio: 1 }); return 'El Rey toma nota de tu petición.'; } },
+      { t: 'Ausentarte por motivos de agenda', ef: (E, J) => { corona(E, -0.3); Pj().cambiar(E, { pop: J.ter > 25 ? 1.2 : -1 }); return 'Tu ausencia genera titulares.'; } }
+    ]
+  });
+  ev({
+    id: 'corona_abdicacion', titulo: 'Rumores de abdicación', icono: '👑', peso: 0.6, cd: 200, req: (E) => cor(E).apoyo < 52,
+    texto: () => 'Se multiplican los rumores sobre una posible abdicación del Rey en favor de su heredera, para relanzar la imagen de la institución.',
+    opciones: [
+      { t: 'Apoyar una sucesión ordenada', ef: (E, J) => { corona(E, 2, { inst: 0.3 }); Pj().cambiar(E, { prestigio: 1.2 }); return 'La idea gana adeptos entre los constitucionalistas.'; } },
+      { t: 'Reclamar un referéndum sobre el modelo de Estado', ef: (E, J) => { corona(E, -2, { rep: 0.5 }); Pj().cambiar(E, { pop: J.soc < -15 ? 2.5 : -2 }); return 'Tu demanda abre un frente.'; } },
+      { t: 'Negarte a comentar rumores', ef: () => 'Prefieres esperar.' }
+    ]
+  });
+  ev({
+    id: 'corona_catastrofe', titulo: 'El Rey en la zona de la catástrofe', icono: '🌧️', peso: 0.8, cd: 150,
+    texto: () => 'Tras unas graves inundaciones, el Rey visita a los afectados y recibe tanto abrazos como reproches por la lentitud de las ayudas.',
+    opciones: [
+      { t: 'Acompañar al Rey y pedir unidad', ef: (E, J, P) => { corona(E, 0.5); Pj().cambiar(E, { prestigio: 1.2 }); return 'Tu presencia se interpreta como responsabilidad institucional.'; } },
+      { t: 'Centrar las críticas en la administración', ef: (E, J) => { Pj().cambiar(E, { pop: 1, prestigio: 0.5 }); return 'Diriges la crítica donde corresponde.'; } }
     ]
   });
   ev({

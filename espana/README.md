@@ -96,6 +96,7 @@ Es una PWA: se puede instalar y jugar sin conexión.
   partido forma gobierno, presides la comunidad.
 - **Móvil**: interfaz pensada para pantallas táctiles (cabecera compacta, barra inferior con «Más», modales como
   hojas inferiores, tablas con desplazamiento, avisos al tocar botones desactivados y fichas al tocar un escaño).
+- **La Corona**: indicador de apoyo a la monarquía y eventos propios (Mensaje de Navidad, Fiesta Nacional, patrimonio de la Casa Real, el Rey emérito, el Rey ante la crisis territorial, sanción de leyes polémicas, encuestas monarquía/república, visitas a tu comunidad, rumores de abdicación…).
 - **Eventos** con decisiones (DANA, crisis migratoria, apagón, corrupción, vivienda, turismo masivo, Diada,
   financiación, moción de censura municipal…) y choques globales.
 - **Guardado** múltiple (IndexedDB), autoguardado, exportar/importar `.json`.

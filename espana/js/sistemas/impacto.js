@@ -199,6 +199,7 @@ window.ESP = window.ESP || {};
       Im.asegurar(E);
       const S = E.esp.soc, t = E.fecha.t, ec = E.paises.ES.ec;
       for (const k in S.off) S.off[k] += U.gauss(0, 0.12) - S.off[k] * 0.02;
+      if (E.esp.corona) E.esp.corona.apoyo += (58 - E.esp.corona.apoyo) * 0.004;
       // Economía: la parte económica de cada ley se incorpora a medida que se implanta
       for (const v of E.esp.vigor) {
         const f = Im.factor(v, t);
