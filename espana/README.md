@@ -75,6 +75,13 @@ Es una PWA: se puede instalar y jugar sin conexión.
   **cuatro ejes** (economía, valores, Europa, territorio). Escalera: concejal → alcalde/sa → diputado/a autonómico/a →
   consejero/a → presidente/a autonómico/a → diputado/a → ministro/a → presidente/a del Gobierno → eurodiputado/a →
   comisario/a. Campañas autonómicas, municipales y generales; **noche electoral** animada.
+- **Candidaturas autonómicas**: desde el ayuntamiento, el Congreso (incluso siendo ministro/a) o otro parlamento
+  autonómico puedes **lanzar tu candidatura a las listas de cualquier comunidad** (Agenda → *Candidatura
+  autonómica*): ves la fecha de las elecciones, los escaños de tu partido y tus opciones de **ir en la lista** o de
+  **encabezarla** (candidato/a a la presidencia). Si te eligen y ganas escaño, dejas el cargo anterior y, si tu
+  partido forma gobierno, presides la comunidad.
+- **Móvil**: interfaz pensada para pantallas táctiles (cabecera compacta, barra inferior con «Más», modales como
+  hojas inferiores, tablas con desplazamiento, avisos al tocar botones desactivados y fichas al tocar un escaño).
 - **Eventos** con decisiones (DANA, crisis migratoria, apagón, corrupción, vivienda, turismo masivo, Diada,
   financiación, moción de censura municipal…) y choques globales.
 - **Guardado** múltiple (IndexedDB), autoguardado, exportar/importar `.json`.
@@ -93,14 +100,14 @@ registrados en un motor de turnos, sin compilación ni dependencias. Ver [`docs/
 
 ```
 index.html · manifest.webmanifest · sw.js
-css/        base · layout · componentes · pantallas · europa
+css/        base · layout · componentes · pantallas · europa · movil
 data/       territorio · partidos-es · pactos · leyes · instituciones · paises · partidos (UE) · nombres · ue · eventos
 js/core/    util · bus · estado · tiempo · acciones
 js/sistemas/ economia · opinion · mundo · elecciones · gobierno (resto de la UE) ·
             espana · generales · ejecutivo · congreso · consejo · territorio · municipios · ue · eventos · personaje · guardado
 js/ui/      dom · graficos · hemiciclo · mosaico (mapa de provincias) · componentes
 js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio · partido · europa · elecciones · personaje · partidas
-tools/      mini · prueba-es · jugador-es · ui-es
+tools/      mini · prueba-es · jugador-es · ui-es · movil-es
 ```
 
 ## Pruebas (Node)
@@ -109,6 +116,7 @@ tools/      mini · prueba-es · jugador-es · ui-es
 node tools/prueba-es.js 520 3        # 10 años de España con una semilla: gobiernos, disoluciones, investiduras
 node tools/jugador-es.js 11 ES_ASD nacional base "" "" 260   # agente aleatorio: semilla partido nivel rol región municipio semanas
 node tools/ui-es.js nacional ES_ASD lider 60                 # Playwright: crea partida, recorre pantallas y juega
+node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
 
 ## Simplificaciones conocidas

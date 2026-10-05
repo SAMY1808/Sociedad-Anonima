@@ -84,7 +84,7 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
     // algunas acciones de agenda
     if (i % 12 === 0) {
       await pg.click('#nav [data-p="agenda"]').catch(() => {});
-      const botones = await pg.$$('[data-accion]:not([disabled])');
+      const botones = await pg.$$('[data-accion]:not([disabled]):not(.desact)');
       for (const bt of botones.slice(0, 3)) { await bt.click({ timeout: 1500 }).catch(() => {}); await resolver(); }
     }
     if (i % 24 === 0) await visitar();

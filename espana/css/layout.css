@@ -40,15 +40,7 @@
 .fila{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .col{display:flex;flex-direction:column;gap:10px}
 @media (max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g-dash{grid-template-columns:1fr}}
-@media (max-width:760px){
-  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto auto;grid-template-areas:"barra" "vista" "ticker" "nav"}
-  .nav{flex-direction:row;overflow-x:auto;min-width:0;padding:4px 6px;border-right:0;border-top:1px solid var(--borde)}
-  .nav button{flex-direction:column;gap:2px;font-size:10px;padding:6px 8px;min-width:62px;align-items:center;text-align:center}
-  .nav button.activo::before{left:10px;right:10px;top:-4px;bottom:auto;height:3px;width:auto}
-  .nav .sep{display:none}
-  .vista{padding:14px 16px 30px}
-  .g2,.g3,.g4{grid-template-columns:1fr} .span2{grid-column:auto}
-  .barra{flex-wrap:wrap;gap:8px;padding:8px 12px}
-  .logo small,.chip-cargo .txt span{display:none}
-  .cab h1{font-size:23px}
-}
+/* Elementos que sólo se muestran en móvil */
+.nav .corto,.nav .mas,.pips-n,.tiempo .corto{display:none}
+.chip-cargo .bandera{font-size:26px;line-height:1;padding-left:4px}
+.tscroll{overflow-x:auto;max-width:100%}

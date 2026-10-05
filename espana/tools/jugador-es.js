@@ -43,6 +43,7 @@ for (let i = 0; i < sem; i++) {
     if (id === 'politica_ibi') args.dir = U.pick(['subir', 'bajar']);
     if (id === 'fondos_municipales') args.quien = U.pick(['ccaa', 'estado', 'ue']);
     if (id === 'visita_ccaa') args.region = U.pick(C.Territorio.ids());
+    if (id === 'candidatura_aut') { const o = U.pick(C.Personaje.opcionesLista(E)); args.region = o.c; args.cabeza = U.chance(0.5); }
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }
     if (id === 'proponer_exp') args.tpl = U.pick(C.DATA.expedientes.filter(x => x.tipo !== 'cumbre')).id;

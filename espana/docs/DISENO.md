@@ -73,3 +73,24 @@ Cada pantalla es `C.Pantallas.<nombre>.render(el, params)`. Las decisiones que d
 Alcaldes y concejales como individuos para todos los municipios, circunscripciones provinciales en los parlamentos
 regionales, mociones de censura autonómicas, financiación autonómica con fórmula explícita, Casa Real y justicia como
 actores, y ampliar el catálogo de leyes y eventos regionales.
+
+
+## Candidaturas autonómicas
+
+`Personaje.opcionesLista(E)` devuelve una fila por comunidad donde el partido del jugador se presenta (fecha de las
+elecciones, escaños del partido, si puede pedir puesto o cabeza de lista y por qué no). La acción `candidatura_aut`
+(`{region, cabeza}`) fija `J.aspira = {nivel:'autonomico', region, cabeza}` con probabilidad `Personaje.probLista`
+(prestigio, popularidad, carisma/negociación, rol, presidente en ejercicio del propio partido y distancia territorial).
+Al celebrarse las elecciones, `Territorio.celebrar` llama a `Personaje.antes_autonomicas` (la cabeza de lista del
+jugador pasa a ser quien se presenta a la investidura) y a `Personaje.tras_autonomicas`, que resuelve la posición en
+la lista, cambia de comunidad con `mudarRegion` y renuncia al escaño/cartera nacional con `dejarNacional` si procede.
+El evento `candidato_autonomico` ofrece la cabeza de lista a dirigentes con prestigio.
+
+## Interfaz móvil
+
+`css/movil.css` (≤ 760 px y `pointer:coarse`): cabecera de dos filas (fecha + personaje / tiempo + puntos), barra
+inferior con cinco secciones y «Más» (hoja con el resto, `App.mas`), modales como hojas inferiores, pestañas con
+pista de desplazamiento, tablas dentro de `.tscroll` (con primera columna fija si desbordan) y tablas `.apila` que se
+convierten en fichas. `App.ajustarMovil` (observador del DOM) envuelve tablas y etiqueta celdas. Los botones
+desactivados usan `.desact` + `aria-disabled` (se pueden tocar y explican el motivo); los avisos `data-tt` salen al
+tocar. `tools/movil-es.js` captura todas las pantallas a 390×844 y detecta desbordamiento horizontal.

@@ -3,15 +3,16 @@ window.ESP = window.ESP || {};
 (function (C) {
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA;
   C.Pantallas = C.Pantallas || {};
+  /* [id, icono, nombre, nombre corto (barra inferior del móvil), en la barra inferior] */
   const NAV = [
-    ['dashboard', '🧭', 'Centro de mando'], ['agenda', '🎯', 'Agenda'], ['cortes', '🏛', 'Cortes Generales'], ['leyes', '📜', 'Leyes'],
-    ['consejo', '🦅', 'Consejo de Ministros'], ['gabinete', '🧑‍💼', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento'], ['territorio', '🗺', 'Territorio'], ['partido', '🎗', 'Mi partido'], ['europa', '🇪🇺', 'Europa'], ['elecciones', '🗳', 'Elecciones'],
-    ['personaje', '👤', 'Mi carrera'], null, ['partidas', '💾', 'Partidas']
+    ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['leyes', '📜', 'Leyes', 'Leyes'],
+    ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
+    ['personaje', '👤', 'Mi carrera', 'Carrera'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
   const App = {
     iniciar() {
-      UI.initTooltip(); UI.initAcciones();
+      UI.initTooltip(); UI.initAcciones(); App.observar();
       document.addEventListener('keydown', e => {
         if (!C.E || !C.E.jugador || e.target.matches('input,textarea,select') || UI.pila.length) return;
         if (e.key === 'n' || e.key === 'N') App.avanzar(1);
@@ -32,6 +33,16 @@ window.ESP = window.ESP || {};
         <header class="barra" id="barra"></header><nav class="nav" id="nav"></nav><main class="vista" id="vista"></main><div class="ticker" id="ticker"></div></div>`;
       App.ir(E.ui.pantalla || 'dashboard', E.ui.params);
       App.revisarPendientes();
+    },
+
+    /* Reajusta tablas y pestañas cada vez que cambia el DOM (pantallas y modales). */
+    observar() {
+      if (App._obs) return;
+      let pendiente = false;
+      const reaj = () => { pendiente = false; App.ajustarMovil(document.body); };
+      App._obs = new MutationObserver(() => { if (!pendiente) { pendiente = true; requestAnimationFrame(reaj); } });
+      App._obs.observe(document.body, { childList: true, subtree: true });
+      addEventListener('resize', () => { if (!pendiente) { pendiente = true; requestAnimationFrame(reaj); } });
     },
 
     ir(pantalla, params) {
@@ -60,12 +71,12 @@ window.ESP = window.ESP || {};
         <div class="logo">CURUL <small>España</small></div>
         <div class="fecha"><b>${U.fmtFecha(U.hoy())}</b><span>${estado} · ${sig}</span></div>
         <div class="espacio"></div>
-        <div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span style="font-size:26px;line-height:1;padding-left:4px">🇪🇸</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>
-        <div class="pips"${UI.tt('<b>Puntos de agenda</b><br>Cada acción importante consume puntos. Se renuevan cada semana.')}>${pips}</div>
+        <div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span class="bandera">🇪🇸</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>
+        <div class="pips"${UI.tt('<b>Puntos de agenda</b><br>Cada acción importante consume puntos. Se renuevan cada semana.')}>${pips}<span class="pips-n" data-ir="agenda">◆ ${J.agenda.puntos}/${J.agenda.max}</span></div>
         <div class="tiempo">
-          <button class="btn prim" id="b-sem"${UI.tt('Avanzar una semana (tecla N)')}>▶ Semana</button>
-          <button class="btn" id="b-mes"${UI.tt('Avanzar cuatro semanas (se detiene ante decisiones y votaciones)')}>▶▶ Mes</button>
-          <button class="btn" id="b-tri"${UI.tt('Avanzar trece semanas')}>⏩ Trimestre</button>
+          <button class="btn prim" id="b-sem"${UI.tt('Avanzar una semana (tecla N)')}>▶ <span>Semana</span></button>
+          <button class="btn" id="b-mes"${UI.tt('Avanzar cuatro semanas (se detiene ante decisiones y votaciones)')}>▶▶ <span>Mes</span></button>
+          <button class="btn" id="b-tri"${UI.tt('Avanzar trece semanas')}>⏩ <span class="largo">Trimestre</span><span class="corto">Trim.</span></button>
           <button class="btn fant" id="b-ayuda"${UI.tt('Cómo se juega')}>?</button>
         </div>`;
       document.getElementById('b-sem').onclick = () => App.avanzar(1);
@@ -78,9 +89,57 @@ window.ESP = window.ESP || {};
     nav() {
       const E = C.E;
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
-      const badges = { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
-      document.getElementById('nav').innerHTML = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('');
-      UI.$$('#nav button').forEach(b => b.onclick = () => App.ir(b.dataset.p));
+      const badges = App.badges(E, mios);
+      const items = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni]));
+      const enBarra = items.some(n => n && n[4] && n[0] === E.ui.pantalla);
+      const masN = items.reduce((a, n) => a + (n && !n[4] ? (+badges[n[0]] || 0) : 0), 0);
+      document.getElementById('nav').innerHTML = items.map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}${n[4] ? ' princ' : ''}"><span class="ic">${n[1]}</span><span class="largo">${n[2]}</span><span class="corto">${n[3]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('')
+        + `<button class="mas ${enBarra ? '' : 'activo'}" id="nav-mas" aria-label="Más secciones"><span class="ic">☰</span><span class="corto">Más</span>${masN ? `<span class="badge">${masN}</span>` : ''}</button>`;
+      UI.$$('#nav button[data-p]').forEach(b => b.onclick = () => App.ir(b.dataset.p));
+      document.getElementById('nav-mas').onclick = () => App.mas();
+    },
+
+    badges(E, mios) {
+      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
+    },
+
+    /* Hoja «Más» del móvil: el resto de secciones del juego. */
+    mas() {
+      const E = C.E, mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
+      const badges = App.badges(E, mios);
+      const items = NAV.filter(n => n && !n[4] && (n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])));
+      const cuerpo = `<div class="mas-grid">${items.map(n => `<button class="mas-it ${E.ui.pantalla === n[0] ? 'activo' : ''}" data-p="${n[0]}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>`).join('')}<button class="mas-it" data-ayuda="1"><span class="ic">❓</span><span>Cómo se juega</span></button></div>`;
+      const m = UI.modal({ titulo: 'Más secciones', icono: '☰', cuerpo, clase: 'hoja' });
+      m.cuerpo.addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b) return;
+        m.cerrar();
+        if (b.dataset.ayuda) App.ayuda(); else App.ir(b.dataset.p);
+      });
+    },
+
+    /* Ajustes de interfaz tras pintar: tablas con desplazamiento horizontal y pistas de scroll en pestañas. */
+    ajustarMovil(raiz) {
+      UI.$$('table.tabla.apila:not([data-ap])', raiz).forEach(t => {
+        const th = Array.from(t.querySelectorAll('thead th')).map(x => x.textContent.trim());
+        t.querySelectorAll('tbody tr').forEach(tr => Array.from(tr.children).forEach((td, i) => { if (i && th[i]) td.dataset.l = th[i]; }));
+        t.dataset.ap = '1';
+      });
+      UI.$$('table.tabla', raiz).forEach(t => {
+        let w = t.parentElement;
+        if (!w.classList.contains('tscroll')) { w = document.createElement('div'); w.className = 'tscroll'; t.parentNode.insertBefore(w, t); w.appendChild(t); }
+        w.classList.toggle('desborda', w.scrollWidth > w.clientWidth + 2);
+      });
+      UI.$$('.tabs,.seg,.tscroll', raiz).forEach(el => {
+        if (el.dataset.ps) { App.pista(el); return; }
+        el.dataset.ps = '1';
+        el.addEventListener('scroll', () => App.pista(el), { passive: true });
+        if (!el.classList.contains('tscroll')) { const a = el.querySelector('.activo'); if (a) el.scrollLeft = Math.max(0, a.offsetLeft - (el.clientWidth - a.offsetWidth) / 2); }
+        App.pista(el);
+      });
+    },
+    pista(el) {
+      el.classList.toggle('pista-izq', el.scrollLeft > 4);
+      el.classList.toggle('pista-der', el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
     },
 
     ticker() {
@@ -122,6 +181,7 @@ window.ESP = window.ESP || {};
         <div><b style="color:var(--texto)">🦅 Consejo de Ministros.</b> Aprueba proyectos de ley, decretos-ley (el Congreso debe convalidarlos en 30 días), reales decretos, Presupuestos y respuestas a las comunidades. Si eres presidente/a, decides tú; si no, influyes como ministro/a o socio.</div>
         <div><b style="color:var(--texto)">🗺 Territorio.</b> 17 comunidades y 2 ciudades autónomas con su parlamento, su gobierno y su relación con Moncloa. Negocia financiación, traspasos y estatutos; gestiona el independentismo, el 155 y el Tribunal Constitucional. 67 grandes ayuntamientos con elecciones municipales.</div>
         <div><b style="color:var(--texto)">🗳 Elecciones y gobiernos.</b> Tras las generales se constituyen las Cortes, el Rey consulta y se vota la investidura: 176 en primera votación o mayoría simple en la segunda; sin presidente en dos meses, nuevas elecciones. Puede haber mociones de censura, cuestiones de confianza y adelantos electorales.</div>
+        <div><b style="color:var(--texto)">🪜 Ascender.</b> Desde el ayuntamiento, el Congreso o la oposición puedes lanzar tu <i>candidatura autonómica</i> (en la Agenda): elige comunidad, pide un puesto en la lista o disputa la cabeza de lista para presidir la comunidad. También puedes pedir un puesto en la lista a las Cortes.</div>
         <div><b style="color:var(--texto)">🇪🇺 Europa.</b> Expedientes de la Comisión, Consejo y Parlamento Europeo; las directivas llegan al Congreso para su transposición.</div>
         <div><b style="color:var(--texto)">💾 Guardado.</b> Se autoguarda cada cuatro semanas; usa <i>Partidas</i> para exportar un archivo. Atajo: <b>N</b> avanza una semana.</div></div>`;
       UI.modal({ titulo: 'Cómo se juega', icono: '❓', cuerpo, clase: 'medio' });

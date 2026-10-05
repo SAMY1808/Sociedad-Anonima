@@ -12,23 +12,28 @@ window.ESP = window.ESP || {};
     /* ── Tooltip global (delegado en cualquier elemento con data-tt o data-pol) ── */
     initTooltip() {
       const tip = UI.$('#tooltip');
-      let actual = null;
+      let actual = null, tOcultar = null;
+      const tactil = () => matchMedia('(hover: none)').matches;
+      const ocultar = () => { tip.classList.remove('on'); actual = null; };
       const mostrar = (html, x, y) => {
         tip.innerHTML = html; tip.classList.add('on');
         const w = tip.offsetWidth, h = tip.offsetHeight;
         let lx = x + 14, ly = y + 14;
         if (lx + w > innerWidth - 8) lx = x - w - 14;
         if (ly + h > innerHeight - 8) ly = y - h - 14;
-        tip.style.left = Math.max(6, lx) + 'px'; tip.style.top = Math.max(6, ly) + 'px';
+        tip.style.left = Math.max(6, Math.min(lx, innerWidth - w - 6)) + 'px'; tip.style.top = Math.max(6, ly) + 'px';
       };
       document.addEventListener('mouseover', e => {
         const el = e.target.closest('[data-tt],[data-pol]');
-        if (!el) { if (actual) { tip.classList.remove('on'); actual = null; } return; }
+        if (!el) { if (actual && !tactil()) ocultar(); return; }   // en táctil se oculta con touchstart o por tiempo
+        // En pantallas táctiles el aviso sólo sale al tocar datos, no botones de acción
+        if (tactil() && el.closest('button,.btn,[data-accion],[data-ir],a')) { ocultar(); return; }
         actual = el;
         const html = el.dataset.tt || (el.dataset.pol && C.E ? C.Comp.tarjetaPolitico(C.E, el.dataset.pol, el.dataset.voto) : '');
-        if (html) mostrar(html, e.clientX, e.clientY);
+        if (html) { mostrar(html, e.clientX, e.clientY); if (tactil()) { clearTimeout(tOcultar); tOcultar = setTimeout(ocultar, 4500); } }
       });
-      document.addEventListener('mousemove', e => { if (actual && tip.classList.contains('on')) mostrar(tip.innerHTML, e.clientX, e.clientY); });
+      document.addEventListener('mousemove', e => { if (actual && !tactil() && tip.classList.contains('on')) mostrar(tip.innerHTML, e.clientX, e.clientY); });
+      document.addEventListener('touchstart', e => { if (!e.target.closest('[data-tt],[data-pol]')) ocultar(); }, { passive: true });
       document.addEventListener('scroll', () => tip.classList.remove('on'), true);
     },
 
@@ -53,6 +58,8 @@ window.ESP = window.ESP || {};
       UI.pila.push(m);
       return m;
     },
+    /* Al tocar un botón desactivado se explica por qué (en pantallas táctiles no hay «hover»). */
+    avisoDesact(b) { if (b.dataset.tt) UI.toast('🔒 ' + b.dataset.tt, 'mal'); },
     cerrarModales() { UI.pila.slice().forEach(m => m.cerrar()); },
 
     toast(msg, tipo) {
@@ -82,13 +89,14 @@ window.ESP = window.ESP || {};
       const costo = typeof a.costo === 'function' ? a.costo(E, args) : a.costo;
       const puede = C.Acciones.puede(id, args);
       const tt = puede === true ? '' : UI.tt(puede);
-      return `<button class="btn ${clase || ''}" data-accion="${id}" data-args='${U.esc(JSON.stringify(args || {}))}' ${puede === true ? '' : 'disabled'}${tt}>${texto ? '' : (a.icono || '')} ${texto || a.nombre}${costo ? ` <span class="coste">${costo} ◆</span>` : ''}</button>`;
+      return `<button class="btn ${clase || ''}${puede === true ? '' : ' desact'}" data-accion="${id}" data-args='${U.esc(JSON.stringify(args || {}))}' ${puede === true ? '' : 'aria-disabled="true"'}${tt}>${texto ? '' : (a.icono || '')} ${texto || a.nombre}${costo ? ` <span class="coste">${costo} ◆</span>` : ''}</button>`;
     },
     /* Delegación global para [data-accion] */
     initAcciones() {
       document.addEventListener('click', e => {
         const b = e.target.closest('[data-accion]');
-        if (!b || b.disabled) return;
+        if (!b) return;
+        if (b.disabled || b.classList.contains('desact')) { UI.avisoDesact(b); return; }
         let args = {}; try { args = JSON.parse(b.dataset.args || '{}'); } catch (x) {}
         // Campos asociados (selects dentro del mismo contenedor .accion-form)
         const form = b.closest('.accion-form');

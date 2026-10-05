@@ -8,7 +8,9 @@ window.ESP = window.ESP || {};
   C.Pantallas.ayuntamiento = {
     render(el, params) {
       const E = C.E, J = E.jugador;
-      let id = (params && params.id) || E.ui.idAyto || J.muni; E.ui.idAyto = id;
+      let id = (params && params.id) || E.ui.idAyto || J.muni;
+      if (!E.esp.muni.m[id]) id = J.muni && E.esp.muni.m[J.muni] ? J.muni : (J.region && Object.keys(E.esp.muni.m).find(k => E.esp.muni.m[k].ccaa === J.region)) || Object.keys(E.esp.muni.m)[0];
+      E.ui.idAyto = id;
       const m = E.esp.muni.m[id], esAlc = m.pm === 'J';
       const tot = U.suma(Object.values(m.esc)), may = Math.floor(tot / 2) + 1, gobEsc = U.suma(m.coal.map(k => m.esc[k] || 0));
       const rc = E.esp.ccaa[m.ccaa], alc = E.politicos[m.pm];

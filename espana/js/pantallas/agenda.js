@@ -4,7 +4,7 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const GRUPOS = [['parlamento', '🏛', 'Congreso'], ['nacional', '🦅', 'Gobierno y Cortes'], ['autonomico', '🗺', 'Comunidad autónoma'], ['local', '🏘', 'Ayuntamiento'], ['carrera', '🪜', 'Carrera'], ['partido', '🎗', 'Partido'], ['medios', '📺', 'Medios'], ['campana', '📣', 'Campaña'], ['europa', '🇪🇺', 'Europa']];
-  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
+  const MODAL = { proponer_ley: 'leyes', cabildear_ley: 'leyes', cabildear_exp: 'exp', ponencia: 'exp', proponer_exp: 'tpl', visita_ccaa: 'region', proyecto_urbano: 'proyecto', politica_gasto: 'gasto', politica_ibi: 'ibi', fondos_municipales: 'fondosm', concejalia: 'conc', propuesta_consejo: 'consejo', aspirar_lista: 'lista', candidatura_aut: 'candidatura', reclamar_competencia: 'comp', ofrecer_comp: 'ofrecer', negociar_financiacion: 'fin', politica_fiscal: 'fiscal', consejeria: 'area' };
 
   const A = C.Pantallas.agenda = {
     render(el) {
@@ -15,7 +15,7 @@ window.ESP = window.ESP || {};
         return `<div class="tarjeta"><h3>${ic} ${nom}</h3><div class="col" style="gap:8px">${as.map(a => {
           const costo = typeof a.costo === 'function' ? a.costo(E, {}) : a.costo;
           const pu = C.Acciones.puede(a.id, {});
-          const boton = MODAL[a.id] ? `<button class="btn chico ${pu === true ? '' : ''}" data-modal="${a.id}" ${pu === true ? '' : 'disabled'}${pu === true ? '' : UI.tt(esc(pu))}>${a.icono} Elegir… <span class="coste">${costo} ◆</span></button>` : UI.botonAccion(a.id, {}, a.icono + ' ' + a.nombre, 'chico');
+          const boton = MODAL[a.id] ? `<button class="btn chico${pu === true ? '' : ' desact'}" data-modal="${a.id}" ${pu === true ? '' : 'aria-disabled="true"'}${pu === true ? '' : UI.tt(esc(pu))}>${a.icono} Elegir… <span class="coste">${costo} ◆</span></button>` : UI.botonAccion(a.id, {}, a.icono + ' ' + a.nombre, 'chico');
           return `<div class="fila" style="justify-content:space-between;flex-wrap:nowrap;gap:10px"><div style="min-width:0"><b style="font-size:13.5px">${a.icono} ${esc(a.nombre)}</b><div class="tenue" style="font-size:12px">${esc(a.desc || '')}</div></div>${MODAL[a.id] ? boton : UI.botonAccion(a.id, {}, 'Hacer', 'chico')}</div>`;
         }).join('')}</div></div>`;
       };
@@ -23,7 +23,7 @@ window.ESP = window.ESP || {};
         <div class="grid g-dash"><div class="col">${GRUPOS.map(bloque).join('')}</div>
         <div class="col"><div class="tarjeta"><h3>Hecho esta semana</h3>${J.agenda.hechas.length ? `<div class="lista" style="font-size:13px">${J.agenda.hechas.map(h => `<div class="it"><span>✔</span><span>${esc(h.txt)}</span></div>`).join('')}</div>` : '<div class="vacio" style="padding:12px">Nada todavía.</div>'}</div>
           <div class="tarjeta"><h3>Bitácora de carrera</h3><div class="lista" style="font-size:12.5px">${J.historial.slice(0, 10).map(h => `<div class="it"><span class="tenue" style="width:78px">${U.fmtT(h.t, true)}</span><span>${esc(h.txt)}</span></div>`).join('') || '<div class="vacio">Sin eventos</div>'}</div></div></div></div>`;
-      UI.$$('[data-modal]', el).forEach(b => b.onclick = () => A.abrir(b.dataset.modal));
+      UI.$$('[data-modal]', el).forEach(b => b.onclick = () => b.classList.contains('desact') ? UI.avisoDesact(b) : A.abrir(b.dataset.modal));
     },
 
     abrir(id) {
@@ -68,9 +68,15 @@ window.ESP = window.ESP || {};
         const lista = D().leyes.filter(l => !l.manual && !l.rdlSolo && !ab.includes(l.id)).sort((a, b) => (b.s === sector) - (a.s === sector) || U.distIdeo(J, a) - U.distIdeo(J, b)).slice(0, 24);
         UI.modal({ titulo: 'Proponer al Consejo de Ministros', icono: '📨', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0">Iniciativas ordenadas por afinidad contigo (y por tu cartera). El presidente decide si las hace suyas.</p><div class="lista">${lista.map(l => `<div class="it"><div class="cuerpo"><b style="white-space:normal">${esc(l.t)} ${l.s === sector ? '<span class="etq oro">Tu área</span>' : ''}</b><span>${esc(l.d)}</span></div>${UI.botonAccion(id, { tpl: l.id }, 'Proponer', 'chico')}</div>`).join('')}</div>` });
       } else if (k === 'lista') {
-        const J = E.jugador, opts = J.nivel === 'local' ? [['autonomico', 'Lista autonómica de ' + D().ccaa[J.region].nombre]] : [];
-        opts.push(['nacional', 'Lista al Congreso por ' + D().provincias[J.circ || C.Personaje.mejorProvincia(E, J.partido, J.region)][0]]);
-        UI.modal({ titulo: 'Pedir un puesto en las listas', icono: '🪜', clase: 'medio', cuerpo: `<div class="lista">${opts.map(([n, t]) => `<div class="it"><div class="cuerpo"><b>${esc(t)}</b></div>${UI.botonAccion(id, { nivel: n }, 'Pedir', 'chico')}</div>`).join('')}</div>` });
+        const J = E.jugador, circ = J.circ || C.Personaje.mejorProvincia(E, J.partido, J.region);
+        UI.modal({ titulo: 'Pedir un puesto en las listas', icono: '🪜', clase: 'medio', cuerpo: `<div class="lista"><div class="it"><div class="cuerpo"><b>Lista al Congreso por ${esc(D().provincias[circ][0])}</b><span>Das el salto a las Cortes si tu partido te coloca en un puesto con escaño. Para las autonómicas usa <i>Candidatura autonómica</i>.</span></div>${UI.botonAccion(id, { nivel: 'nacional' }, 'Pedir', 'chico')}</div></div>` });
+      } else if (k === 'candidatura') {
+        const J = E.jugador, ops = C.Personaje.opcionesLista(E), pc = v => Math.round(v * 100) + ' %';
+        const fila = o => `<div class="cand-fila">
+          <div class="cuerpo"><b>${esc(o.nombre)}</b>${o.propia ? ' <span class="etq oro">tu comunidad</span>' : ''}<span class="tenue">Elecciones el ${U.fmtT(o.t, true)} · ${o.sem > 0 ? 'dentro de ' + o.sem + ' sem' : 'ya convocadas'} · tu partido tiene ${o.esc} escaños</span></div>
+          <div class="cand-btns">${o.puesto ? `<div class="cand-op">${UI.botonAccion('candidatura_aut', { region: o.c, cabeza: false }, 'Ir en la lista', 'chico')}<small class="tenue">éxito ≈ ${pc(o.pp)}</small></div>` : `<div class="cand-op"><small class="tenue">${esc(o.mp || '')}</small></div>`}
+            ${o.cabeza ? `<div class="cand-op">${UI.botonAccion('candidatura_aut', { region: o.c, cabeza: true }, '⭐ Cabeza de lista', 'chico prim')}<small class="tenue">éxito ≈ ${pc(o.pc)}</small></div>` : `<div class="cand-op"><small class="tenue">⭐ ${esc(o.mc || '')}</small></div>`}</div></div>`;
+        UI.modal({ titulo: 'Candidatura autonómica', icono: '🗳️', clase: 'medio', cuerpo: `<p class="tenue" style="margin-top:0;font-size:13px">Elige el parlamento autonómico por el que quieres concurrir. <b>Ir en la lista</b> te da un puesto (según tu prestigio, saldrás con más o menos opciones de escaño). <b>Cabeza de lista</b> te convierte en candidato/a a la presidencia: si tu partido gana o pacta el gobierno, presides la comunidad. Si das el salto desde otro nivel o comunidad, dejarás tu escaño o cargo anterior al ser elegido/a.</p><div class="cand-lista">${ops.map(fila).join('') || '<div class="vacio">Tu partido no concurre a ninguna elección autonómica.</div>'}</div>` });
       } else if (k === 'exp') {
         const abiertos = C.UE.abiertos(E);
         const cuerpo = abiertos.length ? `<div class="lista">${abiertos.map(e => `<div class="it" style="align-items:flex-start"><div class="cuerpo"><b style="white-space:normal">${esc(e.t)}</b><span>${esc(e.tipo)} · ${e.may === 'unan' ? 'unanimidad' : 'mayoría cualificada'} · votación en ${Comp.semanasA(E, e.tVoto)}</span></div><div class="fila" style="flex-wrap:nowrap">${UI.botonAccion(id, { exp: e.id, lado: 'si' }, '👍 Apoyar', 'chico')}${UI.botonAccion(id, { exp: e.id, lado: 'no' }, '👎 Frenar', 'chico')}</div></div>`).join('')}</div>` : '<div class="vacio">No hay expedientes abiertos.</div>';

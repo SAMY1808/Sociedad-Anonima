@@ -195,6 +195,7 @@ window.ESP = window.ESP || {};
       // La opinión regional se acerca al resultado
       for (const k of E.esp.regionales) { const p = E.partidos[k]; if (p.rp && p.rp[c] && res.votos[k] != null) p.rp[c] = U.clamp(p.rp[c] * 0.5 + res.votos[k] * 0.5, 0.3, 60); }
       C.Es.agregar(E);
+      if (E.jugador && C.Personaje.antes_autonomicas) C.Personaje.antes_autonomicas(E, c);
       T.formarGobierno(E, c);
       C.Generales.senado(E);
       const g = rc.gob;

@@ -284,6 +284,21 @@ ESP.DATA = ESP.DATA || {};
     ]
   });
   ev({
+    id: 'candidato_autonomico', titulo: 'Buscan candidato/a autonómico/a', icono: '🗳️', peso: 0, auto: true, cd: 160,
+    req: (E, J) => {
+      if (J.aspira || J.cargo === 'pm' || J.cargo === 'presauto' || Pj().esUE(E) || J.prestigio < 52 || (J.rol !== 'portavoz' && J.rol !== 'direccion')) return false;
+      if (E.partidos[J.partido].amb !== 'nac' || (J.rol === 'lider' && J.nivel === 'nacional') || E.fecha.t % 4 !== 1) return false;
+      return Pj().opcionesLista(E).some(o => o.cabeza && o.sem >= 8 && o.sem <= 60 && o.esc >= 6);
+    },
+    ctx: (E, J) => { const o = Pj().opcionesLista(E).filter(o => o.cabeza && o.sem >= 8 && o.sem <= 60 && o.esc >= 6).sort((a, b) => b.esc - a.esc)[0]; return { c: o.c, t: o.t }; },
+    texto: (E, J, P, x) => `La dirección de ${pa(E).sigla} no tiene candidato/a claro para las autonómicas de ${regNom(x.c)} (${C.U.fmtT(x.t)}). Varias voces piden que seas tú quien encabece la lista.`,
+    opciones: [
+      { t: 'Presentarme como cabeza de lista', ef: (E, J, P, x) => { const ok = C.U.chance(Pj().probLista(E, x.c, true) + 0.2); if (!ok) { Pj().cambiar(E, { prestigio: -2 }, true); return 'Los barones regionales imponen a otro/a candidato/a.'; } J.aspira = { nivel: 'autonomico', region: x.c, cabeza: true, t: E.fecha.t }; Pj().log(E, `Serás candidato/a a la presidencia de ${regNom(x.c)}.`); return `Serás el/la candidato/a de ${pa(E).sigla} en ${regNom(x.c)}.`; } },
+      { t: 'Ir en la lista, sin encabezarla', ef: (E, J, P, x) => { J.aspira = { nivel: 'autonomico', region: x.c, cabeza: false, t: E.fecha.t }; Pj().log(E, `Irás en la lista autonómica de ${regNom(x.c)}.`); return 'Figurarás en la lista.'; } },
+      { t: 'Declinar', ef: () => 'Te quedas donde estás.' }
+    ]
+  });
+  ev({
     id: 'temporal_municipal', titulo: 'Un temporal golpea la ciudad', icono: '🌧️', peso: 1.0, cd: 80,
     req: (E, J) => J.cargo === 'alcalde',
     texto: (E, J) => `Un temporal deja calles anegadas y apagones en ${mJ(E).nombre}. Los vecinos exigen respuestas al ayuntamiento.`,

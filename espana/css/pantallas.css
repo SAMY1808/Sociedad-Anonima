@@ -26,3 +26,11 @@
 .origen{display:flex;flex-direction:column;gap:4px}
 .origen.sel,.plantilla.sel,.cargos-elec .sel{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro) inset;background:linear-gradient(180deg,#221d10,#15120b)}
 .plantilla.interes{border-color:#3b5a3f}
+/* ── Candidaturas autonómicas ── */
+.cand-lista{display:flex;flex-direction:column;gap:8px}
+.cand-fila{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--borde);border-radius:9px;background:var(--panel)}
+.cand-fila .cuerpo{flex:1;min-width:0}
+.cand-fila .cuerpo>span.tenue{display:block;font-size:12px;margin-top:2px}
+.cand-btns{display:flex;gap:10px;flex:none}
+.cand-op{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:190px}
+.cand-op small{font-size:11px;line-height:1.25}
