@@ -15,7 +15,7 @@ window.ESP = window.ESP || {};
     turno(E) {
       const J = E.jugador; if (!J || J.pais !== 'ES') return;
       const p = Pi.asegurar(E), pa = E.partidos[J.partido], t = E.fecha.t, c = p.cong;
-      const barones = clamp(10 + C.Territorio.nPresidentes(E, pa.id) * 1.8, 8, 38), crit = clamp(58 - pa.cohesion * 0.55 + (pa.postura === 'oposicion' ? 4 : 0), 8, 55);
+      const barones = clamp(10 + C.Territorio.nPresidentes(E, pa.id) * 1.8 + (C.PoderLocal ? C.PoderLocal.alcaldes(E, pa.id) * 0.08 : 0), 8, 40), crit = clamp(58 - pa.cohesion * 0.55 + (pa.postura === 'oposicion' ? 4 : 0), 8, 55);
       p.fac.barones += (barones - p.fac.barones) * 0.04; p.fac.critico += (crit - p.fac.critico) * 0.04; p.fac.oficial = 100 - p.fac.barones - p.fac.critico;
       pa.cohesion = clamp(pa.cohesion + (66 - p.fac.critico * 0.8 - pa.cohesion) * 0.01, 15, 99);
       if (!c.fase && c.prox - t <= 6 && c.prox > t) { c.fase = 'precongreso'; C.Noticias.poner(E, 'partido', `${pa.sigla} convoca su congreso federal para el ${U.fmtT(c.prox, true)}.`, 'ES'); if (!E.meta.presim) C.Eventos.info(E, '🎗 Congreso del partido', `${pa.nombre} celebrará su congreso el ${U.fmtT(c.prox, true)}. Es el momento de amarrar apoyos${E.jugador.rol !== 'lider' && ['direccion', 'portavoz'].includes(E.jugador.rol) ? ' o de presentar tu candidatura al liderazgo' : ''} desde Mi partido → Congreso y facciones.`); }

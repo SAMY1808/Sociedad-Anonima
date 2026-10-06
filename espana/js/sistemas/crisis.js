@@ -7,7 +7,7 @@ window.ESP = window.ESP || {};
   const TIPOS = {
     dana: { n: 'DANA e inundaciones', ic: '🌊', meses: [8, 9, 10, 11], reg: ['VAL', 'MUR', 'AND', 'CAT', 'BAL', 'ARA'], dur: [8, 14], ind: { viv: -0.6, rur: -0.3 }, w: 1.2 },
     incendios: { n: 'Incendios forestales', ic: '🔥', meses: [5, 6, 7, 8], reg: ['GAL', 'CYL', 'EXT', 'AND', 'ARA', 'MAD'], dur: [4, 9], ind: { amb: -0.7, rur: -0.4 }, w: 1.2 },
-    calor: { n: 'Ola de calor y sequía', ic: '☀️', meses: [5, 6, 7], reg: ['AND', 'EXT', 'MUR', 'CMA', 'VAL', 'ARA'], dur: [5, 10], ind: { amb: -0.4, rur: -0.5 }, w: 0.8 },
+    calor: { n: 'Ola de calor y sequía', ic: '☀️', meses: [5, 6, 7], reg: ['AND', 'EXT', 'MUR', 'CLM', 'VAL', 'ARA'], dur: [5, 10], ind: { amb: -0.4, rur: -0.5 }, w: 0.8 },
     pandemia: { n: 'Brote epidémico', ic: '🦠', meses: [0, 1, 2, 9, 10, 11], reg: null, dur: [10, 20], ind: { sal: -0.8 }, w: 0.5 },
     atentado: { n: 'Atentado terrorista', ic: '⚠️', meses: null, reg: ['MAD', 'CAT', 'AND', 'VAL'], dur: [3, 5], ind: { seg: -0.6, lib: -0.2 }, w: 0.35 },
     migracion: { n: 'Crisis migratoria', ic: '🚤', meses: [3, 4, 5, 6, 7, 8, 9], reg: ['CAN', 'CEU', 'MEL', 'AND'], dur: [8, 16], ind: { coh: -0.5, seg: -0.2 }, w: 0.8 },
@@ -38,7 +38,7 @@ window.ESP = window.ESP || {};
       const pos = Object.keys(TIPOS).filter(k => !TIPOS[k].meses || TIPOS[k].meses.includes(mes)).filter(k => !cs.activas.some(c => c.tipo === k));
       if (!pos.length) return null;
       const k = U.pesado(pos, x => TIPOS[x].w), T = TIPOS[k], sev = U.chance(0.15) ? 3 : U.chance(0.45) ? 2 : 1;
-      let regs = T.reg ? [U.pick(T.reg)] : C.Territorio.ids();
+      let regs = T.reg ? [U.pick(T.reg.filter(x => D().ccaa[x]))] : C.Territorio.ids();
       if (T.reg && (k === 'calor' || k === 'incendios') && U.chance(0.5)) { const o = U.pick(T.reg.filter(x => x !== regs[0])); if (o) regs.push(o); }
       if (!regs.length) regs = [U.pick(T.reg || C.Territorio.ids())];
       const efic = {}; regs.forEach(c => { const rc = E.esp.ccaa[c]; efic[c] = clamp(0.2 + (rc && rc.gob ? rc.gob.estab / 100 * 0.2 : 0.1) + U.gauss(0, 0.05), 0.05, 0.6); });

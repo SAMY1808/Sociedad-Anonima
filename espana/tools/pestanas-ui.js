@@ -20,7 +20,7 @@ const movil = process.argv[2] === 'movil';
   const cerrar = async () => { for (let i = 0; i < 6; i++) { if (!(await pg.$('.modal-fondo'))) break; await pg.evaluate(() => ESP.UI.cerrarModales()); } };
   await cerrar();
   const PANTALLAS = {
-    mayorias: ['tabMay', ['mayorias', 'rivales', 'pactos']], corrupcion: ['tabCor', ['casos', 'coms', 'control']], coaliciones: [null, []], corona: [null, []], personas: ['tabPers', ['fichas', 'fichajes', 'expres']], organismos: [null, []], referendos: [null, []]
+    mayorias: ['tabMay', ['mayorias', 'rivales', 'pactos']], corrupcion: ['tabCor', ['casos', 'coms', 'control']], coaliciones: [null, []], corona: [null, []], personas: ['tabPers', ['fichas', 'fichajes', 'expres']], organismos: [null, []], referendos: [null, []], estructural: ['tabEst', ['viv', 'fin', 'ener', 'inm']], exterior: ['tabExt', ['ext', 'ue', 'mundo']], lenguas: [null, []], local2: [null, []], cortes: ['tabCortes', ['conferencia']]
   };
   await pg.evaluate(() => { const E = ESP.E; E.eventos.pendientes = []; E.ue.pendiente = []; ESP.Corrupcion.nuevo(E, E.paises.ES.partidos.find(x => x !== E.jugador.partido && E.partidos[x].amb === 'nac'), {}); });
   for (const p of Object.keys(PANTALLAS)) {
@@ -34,7 +34,7 @@ const movil = process.argv[2] === 'movil';
   }
   // Los menús: ¿están las entradas nuevas en el menú?
   const nav = await pg.evaluate(() => Array.from(document.querySelectorAll('#nav button')).map(b => b.dataset.p));
-  for (const p of Object.keys(PANTALLAS)) ok(movil || nav.includes(p), 'menú con ' + p);
+  for (const p of Object.keys(PANTALLAS)) ok(movil || nav.includes(p) || p === 'cortes', 'menú con ' + p);
   console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);
   await b.close(); srv.close(); process.exit(fallos || err.length ? 1 : 0);
 })().catch(e => { console.error('FALLO', e); process.exit(1); });
