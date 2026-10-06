@@ -22,7 +22,7 @@ const movil = process.argv[2] === 'movil';
   const PANTALLAS = {
     mayorias: ['tabMay', ['mayorias', 'rivales', 'pactos']], corrupcion: ['tabCor', ['casos', 'coms', 'control']], coaliciones: [null, []], corona: [null, []], personas: ['tabPers', ['fichas', 'fichajes', 'expres']], organismos: [null, []], referendos: [null, []], estructural: ['tabEst', ['viv', 'fin', 'ener', 'inm']], exterior: ['tabExt', ['ext', 'ue', 'mundo']], lenguas: [null, []], local2: [null, []], guia: [null, []], ajustes: [null, []], legado: ['tabLegado', ['semana', 'stats', 'balance', 'logros', 'epilogo']], medios: ['tabMed', ['prensa', 'tertulias']], cortes: ['tabCortes', ['conferencia']]
   };
-  await pg.evaluate(() => { const E = ESP.E; E.eventos.pendientes = []; E.ue.pendiente = []; ESP.Corrupcion.nuevo(E, E.paises.ES.partidos.find(x => x !== E.jugador.partido && E.partidos[x].amb === 'nac'), {}); });
+  await pg.evaluate(() => { const E = ESP.E; E.esp.corona = { apoyo: 52 }; E.eventos.pendientes = []; E.ue.pendiente = []; ESP.Corrupcion.nuevo(E, E.paises.ES.partidos.find(x => x !== E.jugador.partido && E.partidos[x].amb === 'nac'), {}); });
   for (const p of Object.keys(PANTALLAS)) {
     const [clave, tabs] = PANTALLAS[p];
     for (const t of (tabs.length ? tabs : [null])) {

@@ -37,4 +37,7 @@ J.agenda.puntos = 20; r = C.Acciones.ejecutar('renegociar_pacto', { pid: pa.pid,
 console.log('La Corona');
 const Cr = C.Corona; const cr = Cr.asegurar(E); J.agenda.puntos = 20; r = C.Acciones.ejecutar('audiencia_rey', {}); ok(r.ok, 'audiencia'); J.agenda.puntos = 20; r = C.Acciones.ejecutar('defender_corona', {}); ok(r.ok, 'defender'); J.agenda.puntos = 20; r = C.Acciones.ejecutar('cuestionar_corona', {}); ok(r.ok, 'cuestionar');
 cr.pop = 10; cr.bajas = 20; avanza(2); ok(!!cr.crisis, 'crisis de legitimidad con popularidad baja'); J.agenda.puntos = 20; r = C.Acciones.ejecutar('mediar_corona', {}); ok(r.ok, 'mediar'); cr.crisis = { t: E.fecha.t - 30 }; Cr.abdicar(E); ok(cr.reinado === 1 && cr.pop > 55, 'abdicación y nuevo reinado');
+// Compatibilidad con el estado antiguo de la Corona (sólo `apoyo`, usado por los eventos de la Casa Real)
+{ const E5 = crear({ semilla: 9 }); E5.esp.corona = { apoyo: 51 }; const c5 = C.Corona.asegurar(E5); ok(c5.pop === 51 && Array.isArray(c5.serie) && Array.isArray(c5.hist), 'estado antiguo de la Corona migrado'); c5.pop = 40; ok(E5.esp.corona.apoyo === 40, 'pop y apoyo son la misma cifra');
+  const E6 = crear({ semilla: 9 }); E6.esp.corona = { pop: 44, rel: 50 }; const c6 = C.Corona.asegurar(E6); ok(c6.apoyo === 44 && !Object.prototype.hasOwnProperty.call(JSON.parse(JSON.stringify(E6.esp.corona)), 'pop'), 'estado con `pop` migrado a `apoyo`'); }
 console.log('errores', errores, '| fallos', fallos); process.exit(fallos || errores ? 1 : 0);

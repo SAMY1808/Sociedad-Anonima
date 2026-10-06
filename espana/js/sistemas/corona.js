@@ -4,7 +4,15 @@ window.ESP = window.ESP || {};
   const U = C.U, clamp = U.clamp;
   const POLEMICAS = ['un viaje privado que despierta críticas', 'la polémica por las cuentas de la Casa Real', 'unas declaraciones fuera de protocolo', 'el patrimonio de un miembro de la familia real', 'un negocio de un pariente del Rey'];
   const Co = C.Corona = {
-    asegurar(E) { if (!E.esp.corona) E.esp.corona = { pop: 58, rel: 60, neutral: 70, crisis: null, bajas: 0, hist: [], ult: 0, reinado: 0, serie: [] }; return E.esp.corona; },
+    /* La popularidad del Rey es el campo `apoyo` que ya usan los eventos de la Casa Real; `pop` es un alias no guardado. */
+    asegurar(E) {
+      const c = E.esp.corona = E.esp.corona || {};
+      if (Object.prototype.hasOwnProperty.call(c, 'pop') && !Object.getOwnPropertyDescriptor(c, 'pop').get) { if (!isFinite(c.apoyo)) c.apoyo = c.pop; delete c.pop; }
+      if (!isFinite(c.apoyo)) c.apoyo = 58;
+      const d = { rel: 60, neutral: 70, crisis: null, bajas: 0, hist: [], ult: 0, reinado: 0, serie: [] }; for (const k in d) if (c[k] == null || (Array.isArray(d[k]) && !Array.isArray(c[k]))) c[k] = d[k];
+      if (!Object.getOwnPropertyDescriptor(c, 'pop')) Object.defineProperty(c, 'pop', { get() { return this.apoyo; }, set(v) { this.apoyo = v; }, enumerable: false, configurable: true });
+      return c;
+    },
     nota(E, txt) { const c = Co.asegurar(E); c.hist.unshift({ t: E.fecha.t, txt }); if (c.hist.length > 20) c.hist.length = 20; },
     cambiar(E, d) { const c = Co.asegurar(E); c.pop = clamp(c.pop + d, 5, 95); },
     turno(E) {
