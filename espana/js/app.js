@@ -7,7 +7,7 @@ window.ESP = window.ESP || {};
   const NAV = [
     ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['leyes', '📜', 'Leyes', 'Leyes'],
     ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['medios', '📰', 'Medios y opinión', 'Medios'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
-    ['personaje', '👤', 'Mi carrera', 'Carrera'], null, ['partidas', '💾', 'Partidas', 'Partidas']
+    ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
   const App = {

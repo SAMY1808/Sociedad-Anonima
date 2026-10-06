@@ -17,8 +17,8 @@ window.ESP = window.ESP || {};
       else if (tab === 'autonomicas') cuerpo = El.autonomicas(E);
       else if (tab === 'campana') cuerpo = C.Pantallas.campana.render(E);
       else if (tab === 'investidura') cuerpo = C.Pantallas.invest.calendario(E);
-      else if (tab === 'municipales') cuerpo = El.municipales(E);
-      else cuerpo = El.europeas(E);
+      else if (tab === 'municipales') cuerpo = (C.CampMini ? C.CampMini.panel(E, 'mun') : '') + El.municipales(E);
+      else cuerpo = (C.CampMini ? C.CampMini.panel(E, 'eu') : '') + El.europeas(E);
       el.innerHTML = `<div class="cab"><div><h1>🗳 Elecciones</h1><div class="sub">Generales ${E.esp.cortes.estado === 'disueltas' ? '<span class="alerta">convocadas el ' + U.fmtT(E.esp.cortes.proxT) + '</span>' : 'como tarde el ' + U.fmtT(E.esp.cortes.finMax)} · municipales ${U.fmtT(E.esp.muni.proxT, true)} · europeas ${U.fmtT(E.ue.proxPE, true)}</div></div></div>
         ${J.campania ? `<div class="tarjeta" style="border-color:var(--oro);margin-bottom:14px"><div class="t-cab"><h3>📣 Campaña en marcha ${J.campania.tipo === 'aut' ? '(autonómicas)' : J.campania.tipo === 'mun' ? '(municipales)' : '(generales)'}</h3><span class="etq oro">${Math.round(J.campania.pts)} puntos de campaña · ${J.campania.mitines} mítines</span></div><p class="tenue" style="margin:0 0 10px;font-size:13px">Cada punto de campaña suma votos a tu partido y mejora tu puesto en la lista.</p><div class="fila">${UI.botonAccion('mitin', {}, '📣 Mitin de campaña', 'prim')}${UI.botonAccion('entrevista', {}, '📺 Entrevista', '')}${UI.botonAccion('redes', {}, '📱 Redes', '')}</div></div>` : ''}
         <div class="tabs">${[['generales', 'Generales'], ['campana', 'Campaña'], ['autonomicas', 'Autonómicas'], ['investidura', 'Investidura'], ['municipales', 'Municipales'], ['europeas', 'Europeas']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;

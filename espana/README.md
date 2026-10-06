@@ -151,8 +151,20 @@ node tools/campana-ui.js [movil]                             # Playwright: table
 node tools/renuncia-es.js                                    # renuncia a cada tipo de cargo
 node tools/renuncia-ui.js [movil]                            # Playwright: modal de renuncia con confirmación
 node tools/leyes-es.js [movil]                               # Playwright: diseñar, aprobar, reformar y derogar leyes, enmiendas, impacto
+node tools/equipo-es.js                                      # jefe de gabinete, medios, justicia, partido interno, diálogo social, crisis, campañas municipal/europea, legado
+node tools/equipo-ui.js [movil]                              # Playwright: las pestañas nuevas (Jefe, Medios, Justicia, Social, Crisis, Partido, Legado)
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
+
+## Equipo, contrapesos y sociedad (pestañas propias)
+
+Cada sistema tiene su pestaña para que el juego no se amontone: **Jefe de gabinete** (nombras a una persona con perfil y
+atributos y repartes 10 áreas entre *Yo / Asesor / Delegado*; en delegado decide con sus propios puntos de agenda y lo anota
+en un registro), **Medios y opinión** (8 medios, portadas, entrevistas, filtraciones, bulos), **Justicia** (CGPJ, Tribunal
+Constitucional, Fiscal General, recursos y causas judiciales), **Diálogo social** (SMI, reforma laboral, pensiones,
+jornada, huelgas), **Crisis** (DANA, incendios, pandemia, atentado, migración, apagón), **Mi partido → Congreso y
+facciones**, **Legado** (resumen semanal, estadísticas, logros y epílogo) y campañas ligeras para municipales y europeas
+(en *Elecciones*).
 
 ## Simplificaciones conocidas
 

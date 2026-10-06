@@ -39,6 +39,14 @@ const movil = process.argv[2] === 'movil';
   await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-partido.png` });
   await pg.evaluate(() => { ESP.E.ui.tabPartido = 'resumen'; ESP.App.ir('partido'); }); await pg.waitForTimeout(200);
   ok(await pg.evaluate(() => /Apoyo estatal/.test(document.getElementById('vista').textContent)), 'Mi partido: resumen intacto');
+  await pg.evaluate(() => { const E = ESP.E; E.esp.muni.proxT = E.fecha.t + 6; E.ui.tabEl = 'municipales'; ESP.App.ir('elecciones', { tab: 'municipales' }); }); await pg.waitForTimeout(250);
+  ok(await pg.evaluate(() => /Tu campaña de las municipales/.test(document.getElementById('vista').textContent)), 'Elecciones: panel de campaña municipal');
+  await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-munic.png` });
+  for (const t of ['semana', 'stats', 'logros', 'epilogo']) {
+    await pg.evaluate(t => { ESP.E.ui.tabLegado = t; ESP.App.ir('legado'); }, t); await pg.waitForTimeout(200);
+    ok(await pg.evaluate(() => !/Error de interfaz/.test(document.getElementById('vista').textContent) && document.querySelector('#vista h1')), 'Legado: ' + t);
+  }
+  await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-legado.png` });
   console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);
   await b.close(); srv.close(); process.exit(fallos || err.length ? 1 : 0);
 })().catch(e => { console.error('FALLO', e); process.exit(1); });

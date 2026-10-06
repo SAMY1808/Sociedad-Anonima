@@ -154,3 +154,16 @@ La campaña autonómica reutiliza el módulo: `E.esp.campA[ccaa]` (`ambito:'aut'
 `E.esp.pge` guarda `lev` (palancas acumuladas: `gas[área]` en %, `ing[impuesto]` en %, `gran` 0–100), `inv[ccaa]`, `borrador`, `pactos[pid]`, `ejec` e `hist`. `Presupuesto.cuentas(E, lev)` devuelve ingresos y gasto en % del PIB (a calibración: ingresos 38,5 %, gasto de base según `ec.base.deficit`), déficit, deuda a tres años, impulso fiscal y aviso de la regla del 3 %.
 `presentar` crea el proyecto `pge` del Congreso (con apoyo por pactos); `aprobar` aplica el impulso a `ec.pol` (crecimiento, déficit, paro, inflación), a los indicadores por política (`Impacto.off`), a la popularidad por impuestos y a la relación con cada comunidad por inversión; `prorrogar` erosiona servicios. `turno` cierra el ejercicio en diciembre y abre una desviación si el déficit real supera al previsto en 0,6 pp.
 Comunidades: `rc.fisc` (impuestos propios −10…+10), `presIntereses` y `presPool` (intereses descontados antes de repartir), `presLey` (el presupuesto es una ley `__pres` de `leyesaut`), `presResultado`, `reglaFiscal` (PEF y fondo de liquidez) y `presCierre`.
+
+## Equipo y contrapesos (`jefe.js`, `medios.js`, `justicia.js`, `partidoint.js`, `social.js`, `crisis.js`, `campana2.js`, `legado.js`)
+
+- **Jefe de gabinete**: `E.esp.jefe`. Cada sistema registra con `Jefe.registrar(area, {propone, hace})`; en modo *asesor* se llama a
+  `propone` (propuestas aprobables en la pestaña) y en *delegado* a `hace`, que gasta los puntos propios del jefe (`capacidad`) con
+  efecto reducido al 80 % (`E._delegado`). Puede filtrar, marcharse o ser cesado.
+- **Medios**: `E.esp.medios` (relación por medio, portadas, bulos). **Justicia**: `E.esp.just` (CGPJ, TC, fiscal, causas por fases;
+  `Justicia.alAprobar` lo llama Congreso para recursos de la oposición). **Partido**: `E.esp.pint` (facciones y congreso federal).
+- **Diálogo social**: `E.esp.social`; `prob` calcula la aceptación de sindicatos y patronal. **Crisis**: `E.esp.crisis` con respuesta
+  del Estado y de las comunidades.
+- **Campañas municipal/europea**: `E.esp.cm` acumula impulso por actos; se aplica como empujón al partido justo antes del recuento
+  (envoltorio de `Municipios.elecciones` y `UE.celebrarPE`).
+- **Legado**: `E.esp.leg` guarda instantánea semanal, resumen, logros (funciones de condición en `Legado.LOGROS`) y serie de carrera.
