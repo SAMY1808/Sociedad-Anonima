@@ -174,3 +174,10 @@ Comunidades: `rc.fisc` (impuestos propios −10…+10), `presIntereses` y `presP
 el uso de la Diputación Permanente (`T.dp`, D'Hondt). `T.decretar` aplica el programa al instante y fija la convalidación a 4 semanas;
 `T.convalidar` vota con `posturaAut` (el bloque de gobierno apoya su decreto) en el Pleno o la DP. El jugador vota vía `E.esp.pendienteConvAut`
 (bloqueo 'voto'); el jefe de gabinete puede votar por él. Acción `decreto_ley_aut` para el presidente autonómico.
+
+## Autogobierno (`sistemas/autogobierno.js`)
+
+`rc.estatuto.reforma` = {fase borrador|comision|cortes|referendum|tc|cerrada, items:[{id, estado, ins}], hist}. `T.catalogoReforma` mezcla competencias y
+`ARTICULOS` (dif = dificultad, tc = riesgo ante el TC). `T.apoyoReforma` estima el apoyo parlamentario; `T.probArticulo` la aceptación del Estado.
+Al cerrar el acuerdo se crea el proyecto en el Congreso con `estIt`; `referendumEstatuto` (envuelto) aplica `aplicarReforma` y `estTurno` programa el
+recurso ante el TC (`anularArticulo` revierte efectos). `T.presionarComp` suma presión por cuatro vías con enfriamiento de 6 semanas.

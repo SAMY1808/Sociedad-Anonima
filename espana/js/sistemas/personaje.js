@@ -707,9 +707,7 @@ window.ESP = window.ESP || {};
     nombre: 'Impulsar la reforma del Estatuto', icono: '📖', costo: 3, grupo: 'autonomico', desc: 'Presidente/a autonómico/a: tramita en el Parlamento regional una reforma estatutaria y la remite a las Cortes.',
     disponible(E) { const r = presAut(E); if (r !== true) return r; return rcJ(E).estatuto.proceso ? 'Ya hay un proceso en marcha' : true; },
     ejecutar(E) {
-      const r = C.Territorio.proponerEstatuto(E, E.jugador.region, { tipo: 'jugador', pid: E.jugador.partido, region: E.jugador.region });
-      if (r === true) { Pj.cambiar(E, { prestigio: 2, pop: 1 }); return { ok: true, msg: 'La reforma estatutaria parte hacia las Cortes Generales.' }; }
-      return { ok: false, msg: r };
+      return C.Territorio.abrirBorrador ? C.Territorio.abrirBorrador(E, E.jugador.region) : { ok: false, msg: 'No disponible' };
     }
   });
   A('adelanto_autonomico', {

@@ -270,7 +270,7 @@ window.ESP = window.ESP || {};
         case 'estatuto': {
           const c = p.region; if (!c || !cc[c]) break;
           cc[c].estatuto.proceso = { fase: 'referendum', t: t + 8 };
-          cc[c].pend.push({ tipo: 'refer_estatuto', t: t + 8, aut: Math.max(4, Math.round(p.ter / 10)), tpl: p.tpl, t0: t });
+          cc[c].pend.push({ tipo: 'refer_estatuto', t: t + 8, aut: Math.max(4, Math.round(p.ter / 10)), tpl: p.tpl, t0: t, estIt: p.estIt || null });
           C.Noticias.poner(E, 'politica', `Las Cortes aprueban la reforma del Estatuto de ${D().ccaa[c].nombre}: referéndum autonómico en ocho semanas.`, 'ES');
           break;
         }

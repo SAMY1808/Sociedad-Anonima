@@ -155,6 +155,8 @@ node tools/equipo-es.js                                      # jefe de gabinete,
 node tools/equipo-ui.js [movil]                              # Playwright: las pestañas nuevas (Jefe, Medios, Justicia, Social, Crisis, Partido, Legado)
 node tools/parlaut-es.js                                     # Parlamento autonómico: disolución, Diputación Permanente, decretos-ley y convalidación
 node tools/parlaut-ui.js [movil]                             # Playwright: pestaña Parlamento autonómico y voto de convalidación
+node tools/autogob-es.js                                     # presión por competencias y reforma del Estatuto por artículos
+node tools/autogob-ui.js [movil]                             # Playwright: pestaña Autogobierno
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
 
@@ -174,6 +176,13 @@ Pestaña **Parlamento autonómico** con selector de comunidad (la tuya por defec
 Diputación Permanente y Votaciones. Con el Parlamento disuelto caducan las leyes en trámite y no se registran otras; el Gobierno
 puede dictar **decretos-ley** (también tú, si presides la comunidad) que deben convalidarse en 4 semanas en el Pleno o, si está disuelto,
 en la **Diputación Permanente** (reparto D'Hondt de ~1/5 de la cámara). Si formas parte, votas tú.
+
+## Autogobierno (pestaña propia)
+
+**Competencias**: seguimiento de cada una (en el Consejo de Ministros, comisión mixta, Cortes…) y cuatro vías de presión (comisión bilateral,
+resolución del Parlamento, movilización social, pacto con el Gobierno). **Reforma del Estatuto** con artículos concretos (21 entre competencias y
+cláusulas singulares): borrador → Parlamento autonómico (3/5) → negociación artículo por artículo con el Estado (aceptar, recortar, rechazar; insistir o ceder)
+→ Cortes → referéndum → posible recurso ante el Tribunal Constitucional, que puede anular artículos.
 
 ## Simplificaciones conocidas
 
