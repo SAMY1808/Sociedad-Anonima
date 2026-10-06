@@ -295,7 +295,7 @@ window.ESP = window.ESP || {};
     repartirConsejerias(E, c) {
       const rc = E.esp.ccaa[c], g = rc.gob, J = E.jugador; if (!g) return;
       g.n = U.clamp(g.n || D().nCons[c] || 10, D().nConsMin, D().nConsMax); g.estr = T.estructura(g.n); if (rc.pres) T.presAjustar(E, c);
-      const keep = J && J.consejeria === c && J.area ? T.cabezaDe(E, c, J.area) : null;
+      const keep = J && J.consejeria === c && J.area && g.consej && g.consej[J.area] === 'J' ? T.cabezaDe(E, c, J.area) : null;
       const coal = g.coalicion, P = rc.parl.escanos;
       const peso = {}, cuota = {}; let tp = 0; coal.forEach(k => { peso[k] = Math.pow(P[k] || 1, 0.75); tp += peso[k]; });
       const areas = g.estr.map(x => x.id).sort((a, b) => T.infoGrupo(E, c, b).peso - T.infoGrupo(E, c, a).peso), N = areas.length;

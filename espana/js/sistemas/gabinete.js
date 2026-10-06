@@ -156,7 +156,10 @@ window.ESP = window.ESP || {};
         mapa[cid] = cand.pol; per.cargo = 'min:' + cid; per.desdeCargo = E.fecha.t;
         if (E.jugador && E.jugador.ministerio === cid && mapa[cid] !== 'J') E.jugador.ministerio = null;
       } else {
+        // Si cesas a la persona que eras tú (presidente autonómico o alcalde), dejas de ocupar esa cartera
+        if (mapa[cid] === 'J' && E.jugador) { const J = E.jugador; if (key.startsWith('aut:') && J.area === cid) { J.consejeria = null; J.area = null; } else if (key.startsWith('muni:') && J.areaMuni === cid) J.areaMuni = null; }
         per.desde = E.fecha.t; mapa[cid] = per;
+        if (E.jugador && key.startsWith('aut:') && C.Personaje) C.Personaje.sincronizar(E);
       }
       per.expAnos = per.expAnos || {};
       // Tensión con el partido del cesado

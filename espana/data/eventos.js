@@ -100,7 +100,7 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'oferta_ministerio', titulo: 'Una llamada del jefe de Gobierno', icono: '📞', peso: 0, auto: true, cd: 80,
-    req: (E, J, P) => J.cargo === 'diputado' && enGob(E, J, P) && J.prestigio >= 42 && P.gob.pm !== 'J' && E.fecha.t - P.gob.formado > 6,
+    req: (E, J, P) => !(J.vetoOfertas > E.fecha.t) && J.cargo === 'diputado' && enGob(E, J, P) && J.prestigio >= 42 && P.gob.pm !== 'J' && E.fecha.t - P.gob.formado > 6,
     ctx: (E, J, P) => { const pref = sectores[J.trayectoria] || ['eco']; const cand = Object.keys(P.gob.ministros).filter(k => E.politicos[P.gob.ministros[k]] && E.politicos[P.gob.ministros[k]].p === J.partido); const k = cand.find(m => pref.includes(m)) || U().pick(cand.length ? cand : Object.keys(P.gob.ministros)); return { min: k }; },
     texto: (E, J, P, x) => `${nom(E, P.gob.pm)} te propone dirigir el ministerio de ${C.DATA.ministerios.find(m => m.id === x.min).nombre} en una remodelación del Ejecutivo.`,
     opciones: [
@@ -354,7 +354,7 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'oferta_consejeria', titulo: 'Una consejería en el gobierno autonómico', icono: '💼', peso: 0, auto: true, cd: 100,
-    req: (E, J) => J.nivel !== 'nacional' && !!J.region && J.cargo !== 'presauto' && J.cargo !== 'consejero' && !!E.esp.ccaa[J.region].gob && E.esp.ccaa[J.region].gob.coalicion.includes(J.partido) && C.Territorio.areasDe(E, J.region, J.partido).length > 0 && J.prestigio >= 34 && J.rol !== 'base' && E.fecha.t % 3 === 0,
+    req: (E, J) => !(J.vetoOfertas > E.fecha.t) && J.nivel !== 'nacional' && !!J.region && J.cargo !== 'presauto' && J.cargo !== 'consejero' && !!E.esp.ccaa[J.region].gob && E.esp.ccaa[J.region].gob.coalicion.includes(J.partido) && C.Territorio.areasDe(E, J.region, J.partido).length > 0 && J.prestigio >= 34 && J.rol !== 'base' && E.fecha.t % 3 === 0,
     texto: (E, J) => `El presidente de ${regNom(J.region)} te ofrece entrar en su Gobierno como consejero/a. Tendrías competencias y presupuesto propios.`,
     opciones: [
       { t: 'Aceptar la consejería', ef: (E, J) => { const libres = C.Territorio.areasDe(E, J.region, J.partido); const area = libres.sort((a, b) => C.Territorio.nivelArea(E, J.region, b) - C.Territorio.nivelArea(E, J.region, a))[0]; if (area) C.Territorio.tomarConsejeria(E, J.region, area); else J.consejeria = J.region; if (J.nivel === 'local') { Pj().dejar(E, 'local'); J.nivel = 'autonomico'; } Pj().cambiar(E, { prestigio: 5, pop: 2 }, true); Pj().sincronizar(E); return 'Tomas posesión como consejero/a.'; } },
@@ -363,7 +363,7 @@ ESP.DATA = ESP.DATA || {};
   });
   ev({
     id: 'oferta_lista', titulo: 'Un puesto en las listas', icono: '🪜', peso: 0, auto: true, cd: 120,
-    req: (E, J) => J.nivel !== 'nacional' && J.nivel !== 'europeo' && J.cargo !== 'presauto' && !J.aspira && J.prestigio >= (J.nivel === 'local' ? 30 : 42) && J.rol !== 'base' && E.fecha.t % 4 === 0,
+    req: (E, J) => !(J.vetoOfertas > E.fecha.t) && J.nivel !== 'nacional' && J.nivel !== 'europeo' && J.cargo !== 'presauto' && !J.aspira && J.prestigio >= (J.nivel === 'local' ? 30 : 42) && J.rol !== 'base' && E.fecha.t % 4 === 0,
     ctx: (E, J) => ({ a: J.nivel === 'local' ? 'autonomico' : 'nacional' }),
     texto: (E, J, P, x) => x.a === 'autonomico' ? `La dirección regional de ${pa(E).sigla} te propone ir en la lista al Parlamento de ${regNom(J.region)} en las próximas autonómicas.` : `La dirección nacional de ${pa(E).sigla} te ofrece un puesto en la lista al Congreso por ${C.DATA.provincias[J.circ || Pj().mejorProvincia(E, J.partido, J.region)][0]}.`,
     opciones: [

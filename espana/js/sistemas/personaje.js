@@ -154,6 +154,7 @@ window.ESP = window.ESP || {};
       if (Pj.esUE(E)) { Pj.hito(E); Pj.syncPol(E); return; }
       const g = E.paises.ES.gob, rc = J.region && E.esp.ccaa[J.region], m = J.muni && E.esp.muni.m[J.muni];
       let cargo = 'activista', min = null;
+      if (J.consejeria && J.area && rc && rc.gob && rc.gob.consej && rc.gob.consej[J.area] !== 'J') { J.consejeria = null; J.area = null; }
       const alza = c => { if (D().cargos[c].nivel >= D().cargos[cargo].nivel) cargo = c; };
       if (m && m.pm === 'J') alza('alcalde'); else if (J.concejal) alza('concejal');
       if (rc) {
@@ -255,7 +256,7 @@ window.ESP = window.ESP || {};
        (más probable cuanto mejor puesto en la lista, prestigio y peso en la dirección). */
     ofertaConsejeria(E, c, pos) {
       const J = E.jugador, T = C.Territorio, rc = E.esp.ccaa[c], gob = rc && rc.gob;
-      if (!J || !gob || J.region !== c || J.ofertaT === E.fecha.t) return false;
+      if (!J || !gob || J.region !== c || J.ofertaT === E.fecha.t || (J.vetoOfertas || 0) > E.fecha.t) return false;
       if (!J.escReg || gob.pres === 'J' || !gob.coalicion.includes(J.partido) || J.consejeria === c || J.cargo === 'consejero') return false;
       const libres = T.areasDe(E, c, J.partido); if (!libres.length) return false;
       J.ofertaT = E.fecha.t;
@@ -349,6 +350,7 @@ window.ESP = window.ESP || {};
       else if (k === 'dipauto') Pj.dejar(E, 'autonomico');
       else if (k === 'concejal') Pj.dejar(E, 'local');
       Pj.cambiar(E, { prestigio: -op.pr, pop: -op.pr * 0.4 }, true);
+      J.vetoOfertas = E.fecha.t + 104; // tras renunciar, nadie te vuelve a ofrecer cargos durante dos años
       Pj.log(E, `Renuncias a tu cargo: ${op.n}.`);
       C.Noticias.poner(E, 'politica', `${J.nombre} (${pa.sigla}) renuncia a su cargo: ${op.n}.`, 'ES');
       Pj.sincronizar(E);
