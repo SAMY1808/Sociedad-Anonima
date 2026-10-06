@@ -10,7 +10,7 @@ const crear = o => C.Mundo.nueva(Object.assign({ semilla: 121, partido: 'ES_ASD'
 let fallos = 0; const ok = (x, m) => { if (!x) { fallos++; console.log('  ✗', m); } else console.log('  ✓', m); };
 let errores = 0; const oe = console.error; console.error = (...a) => { errores++; oe(...a); };
 const E = crear({}), J = E.jugador, Ca = C.Campana, Gen = C.Generales, D = C.DATA;
-const sim = n => { for (let i = 0; i < n; i++) { E.eventos.pendientes.length = 0; E.parl.pendienteVoto.length = 0; E.esp.pendienteGabinete = null; E.esp.pendienteInvAut = null; E.esp.pendienteInvestidura = false; E.esp.pendienteSocio = false; E.esp.pendienteVotoAut = null; E.ue.pendiente.length = 0; if (E.esp.pendienteDebate) Ca.celebrarDebate(E, 'propuestas'); E.elecciones.nochePendiente = null; C.Tiempo.avanzar(); } };
+const sim = n => { for (let i = 0; i < n; i++) { E.eventos.pendientes.length = 0; E.parl.pendienteVoto.length = 0; E.esp.pendienteGabinete = null; E.esp.pendienteInvAut = null; E.esp.pendienteInvestidura = false; E.esp.pendienteSocio = false; E.esp.pendienteVotoAut = null; E.esp.pendienteConvAut = null; E.ue.pendiente.length = 0; if (E.esp.pendienteDebate) Ca.celebrarDebate(E, 'propuestas'); E.elecciones.nochePendiente = null; C.Tiempo.avanzar(); } };
 console.log('Antes de la campaña');
 ok(!Ca.activa(E), 'no hay campaña en marcha'); const r0 = C.Acciones.ejecutar('mitin_prov', { prov: 'MAD' }); ok(r0.ok === false, 'no se puede hacer campaña fuera de ella');
 console.log('Campaña');
