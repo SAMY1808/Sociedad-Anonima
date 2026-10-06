@@ -63,6 +63,29 @@ ESP.DATA = ESP.DATA || {};
     ]
   });
 
+  /* ── Justicia: causas contra el jugador ── */
+  ev({
+    id: 'causa_instruccion', titulo: 'Un juez te cita como investigado', icono: '⚖️', peso: 0, auto: true, cd: 1,
+    req: () => !!C.Justicia.causaPend(C.E, 'instruccion'),
+    ctx: () => { const c = C.Justicia.causaPend(C.E, 'instruccion'); return { id: c.id, delito: c.delito }; },
+    texto: (E, J, P, x) => `Un juzgado te cita como investigado/a por un presunto delito de ${x.delito}. Los medios piden explicaciones.`,
+    opciones: [
+      { t: 'Colaborar con la Justicia', ef: (E, J, P, x) => C.Justicia.responder(E, x.id, 'colaborar') },
+      { t: 'Recusar al juez', ef: (E, J, P, x) => C.Justicia.responder(E, x.id, 'recusar') },
+      { t: 'Denunciar una persecución política', ef: (E, J, P, x) => C.Justicia.responder(E, x.id, 'atacar') }
+    ]
+  });
+  ev({
+    id: 'causa_sentencia', titulo: 'Sentencia en tu caso', icono: '🔨', peso: 0, auto: true, cd: 1,
+    req: () => !!C.Justicia.causaPend(C.E, 'sentencia'),
+    ctx: () => { const c = C.Justicia.causaPend(C.E, 'sentencia'); return { id: c.id, res: c.resultado, delito: c.delito }; },
+    texto: (E, J, P, x) => x.res === 'condena' ? `El tribunal te condena por ${x.delito}. Puedes dimitir o recurrir y resistir en el cargo.` : `El tribunal te absuelve del delito de ${x.delito}.`,
+    opciones: [
+      { t: (E, J, P, x) => x.res === 'condena' ? 'Dimitir y aceptar la sentencia' : 'Celebrar la absolución', ef: (E, J, P, x) => C.Justicia.responder(E, x.id, 'dimitir') },
+      { t: (E, J, P, x) => x.res === 'condena' ? 'Recurrir y mantenerte en el cargo' : 'Pedir disculpas a los tuyos', ef: (E, J, P, x) => C.Justicia.responder(E, x.id, 'resistir') }
+    ]
+  });
+
   /* ── Políticos y del partido ── */
   ev({
     id: 'escandalo_aliado', titulo: 'Un compañero, imputado', icono: '⚖️', peso: 1.2,

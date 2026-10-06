@@ -6,7 +6,7 @@ window.ESP = window.ESP || {};
   /* [id, icono, nombre, nombre corto (barra inferior del móvil), en la barra inferior] */
   const NAV = [
     ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['leyes', '📜', 'Leyes', 'Leyes'],
-    ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
+    ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['medios', '📰', 'Medios y opinión', 'Medios'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
     ['personaje', '👤', 'Mi carrera', 'Carrera'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
@@ -104,7 +104,7 @@ window.ESP = window.ESP || {};
     },
 
     badges(E, mios) {
-      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '' };
+      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '', jefe: E.esp.jefe && E.esp.jefe.prop.length || '', crisis: C.Crisis ? (C.Crisis.asegurar(E).activas.filter(c => c.fase !== 'cerrada' && (C.Crisis.jugadorEstado(E) ? c.usadas.length < 2 : C.Crisis.jugadorRegion(E, c) && !c.usadasReg.length)).length || '') : '', medios: C.Medios ? (C.Medios.bulosJ(E).length || '') : '' };
     },
 
     /* Hoja «Más» del móvil: el resto de secciones del juego. */

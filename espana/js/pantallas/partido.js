@@ -4,8 +4,24 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, G = C.Graf, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
 
-  C.Pantallas.partido = {
+  const Pt = C.Pantallas.partido = {
     render(el) {
+      const E = C.E, tab = E.ui.tabPartido || 'resumen';
+      if (tab === 'interno') Pt.interno(el); else Pt.resumen(el);
+      el.insertAdjacentHTML('afterbegin', `<div class="seg" style="margin-bottom:12px"><button data-tab-pt="resumen" class="${tab === 'resumen' ? 'activo' : ''}">📊 Resumen</button><button data-tab-pt="interno" class="${tab === 'interno' ? 'activo' : ''}">🏛 Congreso y facciones</button></div>`);
+      UI.$$('[data-tab-pt]', el).forEach(b => b.onclick = () => { E.ui.tabPartido = b.dataset.tabPt; C.App.refrescar(); });
+    },
+    interno(el) {
+      const E = C.E, Pi = C.PartidoInt, p = Pi.asegurar(E), J = E.jugador, pa = E.partidos[J.partido], c = p.cong, f = p.fac, lider = pa.lider === 'J';
+      const sem = Math.max(0, Math.round(c.prox - E.fecha.t));
+      const fila = (n, v, col, d) => `<div style="margin:8px 0"><div class="fila" style="justify-content:space-between;font-size:12.5px"><b>${n}</b><span>${Math.round(v)} %</span></div><div class="barra-h" style="height:8px"><i style="width:${v}%;background:${col}"></i></div><div class="tenue" style="font-size:11px">${d}</div></div>`;
+      el.innerHTML = `<div class="cab"><div><h1>🎗 ${esc(pa.nombre)}</h1><div class="sub">Cohesión ${Math.round(pa.cohesion)} · ${pa.militantes.toLocaleString('es-ES')} militantes</div></div></div>
+        <div class="cuadricula-2"><div class="tarjeta"><div class="t-cab"><h3>Familias del partido</h3></div>${fila('Oficialistas', f.oficial, 'var(--oro)', 'Respaldan a la dirección.')}${fila('Críticos', f.critico, 'var(--no)', 'Piden un giro o un relevo.')}${fila('Barones territoriales', f.barones, 'var(--si)', 'Presidentes autonómicos y alcaldes del partido.')}<div class="tenue" style="font-size:12px">Apoyo al liderazgo: <b>${Math.round(Pi.apoyoLider(E))} %</b></div></div>
+        <div class="tarjeta"><div class="t-cab"><h3>🏁 Congreso federal</h3><span class="etq ${c.fase ? 'oro' : ''}">${c.fase ? 'Convocado' : sem + ' semanas'}</span></div><div class="tenue" style="font-size:12.5px;margin-bottom:8px">${c.fase ? 'Se ha convocado el congreso: es el momento de pelear el liderazgo.' : 'El próximo congreso es el ' + U.fmtT(c.prox, true) + '.'}</div>${c.cand === 'J' ? '<div class="nota">Ya eres candidato/a al liderazgo.</div>' : lider ? '' : UI.botonAccion('candidatura_liderazgo', {}, '🏁 Presentar candidatura', 'chico prim')}</div></div>
+        <div class="tarjeta"><div class="t-cab"><h3>Gestión interna</h3></div><div class="fila" style="gap:6px;flex-wrap:wrap">${UI.botonAccion('amarrar_apoyos', {}, '🤝 Amarrar apoyos', 'chico')}${UI.botonAccion('pactar_criticos', {}, '🕊️ Pactar con los críticos', 'chico')}${UI.botonAccion('campana_afiliacion', {}, '📋 Campaña de afiliación', 'chico')}</div></div>
+        <div class="tarjeta"><div class="t-cab"><h3>📜 Historial de congresos</h3></div><div class="lista">${p.hist.map(h => `<div class="it"><span class="etq">${U.fmtT(h.t, true)}</span><div class="cuerpo" style="flex:1;white-space:normal;font-size:12.5px">${esc(h.txt)}</div></div>`).join('') || '<div class="vacio" style="padding:10px">Todavía no ha habido congresos en tu etapa.</div>'}</div></div>`;
+    },
+    resumen(el) {
       const E = C.E, J = E.jugador, P = E.paises[J.pais], pa = E.partidos[J.partido], S = E.series;
       const lider = E.politicos[pa.lider];
       const top = P.partidos.slice().sort((a, b) => (E.partidos[b].popN || E.partidos[b].pop) - (E.partidos[a].popN || E.partidos[a].pop)).slice(0, 5);

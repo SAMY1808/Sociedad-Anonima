@@ -24,7 +24,7 @@ window.ESP = window.ESP || {};
       const costo = typeof a.costo === 'function' ? a.costo(E, args) : (a.costo || 0);
       // Fatiga: repetir la misma acción en una semana rinde cada vez menos
       const n = E.jugador.agenda.hechas.filter(h => h.id === id).length;
-      E.jugador.fatiga = 1 / (1 + 0.6 * n);
+      E.jugador.fatiga = 1 / (1 + 0.6 * n) * (E._delegado || 1);
       const r = a.ejecutar(E, args || {}) || { ok: true };
       E.jugador.fatiga = 1;
       if (r.ok !== false) {

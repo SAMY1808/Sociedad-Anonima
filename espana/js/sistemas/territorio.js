@@ -412,7 +412,8 @@ window.ESP = window.ESP || {};
         const anula = U.chance(pAnula);
         if (anula) {
           C.Noticias.poner(E, 'justicia', `El Tribunal Constitucional anula parcialmente «${r.titulo}».`, 'ES');
-          if (r.cual !== 'recentralizar') { const c = r.region || 'CAT'; const rc = E.esp.ccaa[c]; if (rc) { rc.relM = Math.max(0, rc.relM - 8); rc.concesiones.push({ t: E.fecha.t, v: 2.5, d: 'Sentencia del TC' }); } }
+          if (r.cual === 'ley') { const v = (E.esp.vigor || []).find(x => x.tpl === r.tpl && x.estado === 'activa'); if (v) C.Impacto.derogar(E, v.id, 'anulada por el Tribunal Constitucional'); if (r.jugador) C.Personaje.cambiar(E, { prestigio: 2 }, true); }
+          else if (r.cual !== 'recentralizar') { const c = r.region || 'CAT'; const rc = E.esp.ccaa[c]; if (rc) { rc.relM = Math.max(0, rc.relM - 8); rc.concesiones.push({ t: E.fecha.t, v: 2.5, d: 'Sentencia del TC' }); } }
           E.paises.ES.gob.estab -= 2;
         } else C.Noticias.poner(E, 'justicia', `El Tribunal Constitucional avala «${r.titulo}».`, 'ES');
         return false;

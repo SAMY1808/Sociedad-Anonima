@@ -349,6 +349,7 @@ window.ESP = window.ESP || {};
         return;
       }
       P.flags.leyes = P.flags.leyes || {}; P.flags.leyes[p.tpl] = E.fecha.t;
+      if (C.Justicia && ok && !convalidacion) C.Justicia.alAprobar(E, p);
       if (!convalidacion && !p.rdl && tpl) {
         if (p.deroga) C.Impacto.derogar(E, p.deroga, 'derogada por ley');
         else { if (p.reforma) C.Impacto.derogar(E, p.reforma, 'reformada'); C.Impacto.promulgar(E, p); }
