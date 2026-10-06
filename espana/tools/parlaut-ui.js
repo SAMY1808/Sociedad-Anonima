@@ -20,6 +20,7 @@ const movil = process.argv[2] === 'movil';
   const cerrar = async () => { for (let i = 0; i < 6; i++) { if (!(await pg.$('.modal-fondo'))) break; await pg.evaluate(() => ESP.UI.cerrarModales()); } };
   await cerrar();
   await pg.evaluate(() => { const E = ESP.E, T = ESP.Territorio; E.eventos.pendientes = []; E.ue.pendiente = []; E.ui.regPA = 'ARA'; ESP.App.ir('parlaut'); });
+  await pg.evaluate(() => { const rc = ESP.E.esp.ccaa.ARA; rc.leyes = rc.leyes || []; rc.leyes.push({ id: 'Gviejo', prog: ESP.Territorio.leyesDisponibles(ESP.E, 'ARA')[0].id, pid: rc.gob.partido, quien: 'Gobierno autonómico', jugador: false, estado: 'tramite', t0: 1, v: { p: 0.7 } }); });
   await pg.waitForSelector('[data-tab-pa]');
   for (const t of ['pleno', 'leyes', 'decretos', 'dp', 'votos']) {
     await pg.evaluate(t => ESP.App.ir('parlaut', { tab: t }), t); await pg.waitForTimeout(200);
