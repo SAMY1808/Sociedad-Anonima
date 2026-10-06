@@ -5,7 +5,7 @@ window.ESP = window.ESP || {};
   C.Pantallas = C.Pantallas || {};
   C.Pantallas.corona = {
     render(el) {
-      const E = C.E, Co = C.Corona, c = Co.asegurar(E), col = v => v > 60 ? 'var(--si)' : v > 40 ? 'var(--oro)' : 'var(--no)';
+      const E = C.E, Co = C.Corona, c = Co.asegurar(E); c.serie = c.serie || []; c.hist = c.hist || []; const col = v => v > 60 ? 'var(--si)' : v > 40 ? 'var(--oro)' : 'var(--no)';
       const barra = (n, v) => `<div style="margin:8px 0"><div class="fila" style="justify-content:space-between;font-size:12.5px"><b>${n}</b><span>${Math.round(v)}</span></div><div class="barra-h" style="height:8px"><i style="width:${v}%;background:${col(v)}"></i></div></div>`;
       el.innerHTML = `<div class="cab"><div><h1>👑 La Corona</h1><div class="sub">${c.reinado ? 'Reinado de la Princesa heredera' : 'Reinado actual'}${c.crisis ? ' · <b style="color:var(--no)">crisis de legitimidad</b>' : ''}</div></div></div>
         <div class="cuadricula-2" style="align-items:start"><div class="tarjeta"><div class="t-cab"><h3>Imagen de la Casa Real</h3></div>${barra('Popularidad del Rey', c.pop)}${barra('Relación con el Gobierno', c.rel)}${barra('Neutralidad percibida', c.neutral)}${c.serie.length > 2 ? G.linea([{ nombre: 'Popularidad', color: '#E3C06A', datos: c.serie.slice(-100) }], { alto: 150 }) : ''}</div>
