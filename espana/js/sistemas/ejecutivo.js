@@ -343,7 +343,7 @@ window.ESP = window.ESP || {};
       for (const pa of E.esp.pactos) {
         if (pa.estado !== 'pendiente' || t < pa.limite) continue;
         const def = D().demandas[pa.dem];
-        const retira = U.chance(0.25);
+        const retira = C.Coaliciones ? C.Coaliciones.retira(E, pa) : U.chance(0.25);
         pa.estado = retira ? 'incumplida' : 'cumplida';
         if (retira) {
           g.estab = Math.max(0, g.estab - 6);

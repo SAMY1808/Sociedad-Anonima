@@ -1,0 +1,31 @@
+/* Mayorías y rivales: mayorías alternativas (nacional / autonómica), rivales con estilo y ofertas de pacto. */
+window.ESP = window.ESP || {};
+(function (C) {
+  const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
+  C.Pantallas = C.Pantallas || {};
+  const TABS = [['mayorias', '🧮 Mayorías'], ['rivales', '🎭 Rivales'], ['pactos', '🤝 Ofertas']];
+  C.Pantallas.mayorias = {
+    render(el) {
+      const E = C.E, M = C.Mayorias, m = M.asegurar(E), J = E.jugador, P = E.paises.ES, g = P.gob, tab = E.ui.tabMay || 'mayorias';
+      let h = `<div class="cab"><div><h1>🧮 Mayorías y rivales</h1><div class="sub">¿Quién puede derribar a quién? Estabilidad del Gobierno: <b>${Math.round(g.estab)}</b></div></div></div><div class="tabs" style="margin-bottom:12px">${TABS.map(([k, n]) => `<button data-tm="${k}" class="${tab === k ? 'activo' : ''}">${n}${k === 'pactos' && m.ofertas.length ? ` <span class="badge">${m.ofertas.length}</span>` : ''}</button>`).join('')}</div>`;
+      if (tab === 'mayorias') {
+        const alt = M.alternativas(E), sondeado = m.sonda && E.fecha.t - m.sonda.t < 8;
+        h += `<div class="tarjeta"><div class="t-cab"><h3>Moción de censura (Congreso)</h3><span class="etq ${g.estab < 48 ? 'rojo' : ''}">Gobierno: ${g.coalicion.map(k => E.partidos[k].sigla).join(' + ')}</span></div>
+          <div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px">${UI.botonAccion('sondear_mayoria', {}, '📡 Sondear a los grupos', 'chico')}${J.rol === 'lider' && !g.coalicion.includes(J.partido) ? UI.botonAccion('mocion_censura', {}, '⚡ Presentar moción', 'chico') : ''}</div>
+          <div class="lista">${alt.map(a => `<div class="it" style="flex-direction:column;align-items:stretch"><div class="fila" style="gap:8px;flex-wrap:wrap"><b>${Comp.partido(E, a.cand)}</b><span class="tenue" style="font-size:12px">bloque: ${a.bloque.map(k => E.partidos[k].sigla).join(' + ')}</span><span class="etq ${a.exito ? 'verde' : 'rojo'}" style="margin-left:auto">${a.si} a favor ${a.exito ? '· prosperaría' : '· faltan ' + a.falta}</span></div>
+            <div class="barra-h" style="height:8px;margin:6px 0"><i style="width:${Math.min(100, a.si / 350 * 100)}%;background:${a.exito ? 'var(--si)' : 'var(--no)'}"></i></div>${sondeado ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${Object.keys(a.est).filter(k => (P.escanos[k] || 0) >= 3).map(k => `<span class="etq ${a.est[k] === 'si' ? 'verde' : a.est[k] === 'abs' ? 'amar' : 'rojo'}" ${UI.tt(esc(E.partidos[k].nombre))}>${E.partidos[k].sigla} ${a.est[k] === 'si' ? 'sí' : a.est[k] === 'abs' ? 'abst.' : 'no'}</span>`).join('')}</div>` : '<div class="tenue" style="font-size:11.5px">Sondea a los grupos para ver sus posturas.</div>'}${a.vetos.length ? `<div class="tenue" style="font-size:11.5px;margin-top:4px">Vetos: ${a.vetos.map(k => E.partidos[k].sigla).join(', ')}</div>` : ''}</div>`).join('') || '<div class="vacio" style="padding:10px">No hay oposición con fuerza suficiente.</div>'}</div></div>`;
+        if (J.region && E.esp.ccaa[J.region] && E.esp.ccaa[J.region].gob) { const aa = M.alternativasAut(E, J.region); h += `<div class="tarjeta"><div class="t-cab"><h3>Moción de censura en ${esc(D().ccaa[J.region].nombre)}</h3><span class="etq">Estabilidad ${Math.round(E.esp.ccaa[J.region].gob.estab)}</span></div><div class="lista">${aa.map(a => `<div class="it"><b>${Comp.partido(E, a.cand)}</b><span class="tenue" style="font-size:12px;flex:1;margin-left:8px">${a.bloque.map(k => E.partidos[k].sigla).join(' + ')}</span><span class="etq ${a.exito ? 'verde' : 'rojo'}">${a.si}/${a.may}</span></div>`).join('') || '<div class="vacio" style="padding:10px">Sin alternativas.</div>'}</div></div>`; }
+      } else if (tab === 'rivales') {
+        const ks = P.partidos.filter(k => k !== J.partido && (P.escanos[k] || 0) >= 4).sort((a, b) => P.escanos[b] - P.escanos[a]);
+        h += `<div class="tarjeta"><div class="t-cab"><h3>Los rivales</h3></div><div class="lista">${ks.map(k => { const p = E.partidos[k], e = M.ESTILOS[m.estilo[k]], l = E.politicos[p.lider], r = Math.round(m.rel[k]); return `<div class="it" style="flex-direction:column;align-items:stretch"><div class="fila" style="gap:8px;flex-wrap:wrap"><b>${Comp.partido(E, k)}</b><span class="tenue" style="font-size:12px">${l ? esc(l.n) : ''} · ${P.escanos[k]} esc.</span><span class="etq">${e[1]} ${e[0]}</span><span class="etq ${r > 20 ? 'verde' : r < -20 ? 'rojo' : ''}" style="margin-left:auto">Relación ${r > 0 ? '+' : ''}${r}</span></div><div class="tenue" style="font-size:11.5px;white-space:normal">${esc(e[2])}</div>
+          <div class="fila" style="gap:6px;margin-top:6px">${UI.botonAccion('reunirse_rival', { pid: k }, '☕ Reunirte', 'chico')}${UI.botonAccion('atacar_rival', { pid: k }, '🗡️ Atacar', 'chico')}</div></div>`; }).join('')}</div></div>`;
+      } else {
+        h += `<div class="tarjeta"><div class="t-cab"><h3>Ofertas de pacto</h3></div><div class="lista">${m.ofertas.map(o => `<div class="it" style="flex-wrap:wrap"><div class="cuerpo" style="flex:1;min-width:190px"><b>${Comp.partido(E, o.pid)} propone ${esc(o.tema)}</b><div class="tenue" style="font-size:11px">Caduca en ${Math.max(0, 8 - Math.round(E.fecha.t - o.t))} semanas</div></div><button class="btn chico prim" data-of="${o.id}" data-k="a">Aceptar</button><button class="btn chico" data-of="${o.id}" data-k="r">Rechazar</button></div>`).join('') || '<div class="vacio" style="padding:10px">Ninguna oferta por ahora. Sólo llegan si presides el Gobierno y hay rivales pactistas.</div>'}</div></div>
+          <div class="tarjeta"><h3>Historial de pactos</h3><div class="lista">${m.hist.slice(0, 8).map(x => `<div class="it"><span class="etq">${U.fmtT(x.t, true)}</span><div class="cuerpo" style="flex:1;white-space:normal">${esc(x.txt)}</div></div>`).join('') || '<div class="vacio" style="padding:10px">Aún no has cerrado ningún pacto.</div>'}</div></div>`;
+      }
+      el.innerHTML = h;
+      UI.$$('[data-tm]', el).forEach(b => b.onclick = () => { E.ui.tabMay = b.dataset.tm; C.App.refrescar(); });
+      UI.$$('[data-of]', el).forEach(b => b.onclick = () => { const r = b.dataset.k === 'a' ? M.aceptarOferta(E, b.dataset.of) : M.rechazarOferta(E, b.dataset.of); UI.toast(esc(r.msg), r.ok ? 'bien' : 'mal'); C.App.refrescar(); });
+    }
+  };
+})(window.ESP);
