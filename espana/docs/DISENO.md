@@ -167,3 +167,10 @@ Comunidades: `rc.fisc` (impuestos propios −10…+10), `presIntereses` y `presP
 - **Campañas municipal/europea**: `E.esp.cm` acumula impulso por actos; se aplica como empujón al partido justo antes del recuento
   (envoltorio de `Municipios.elecciones` y `UE.celebrarPE`).
 - **Legado**: `E.esp.leg` guarda instantánea semanal, resumen, logros (funciones de condición en `Legado.LOGROS`) y serie de carrera.
+
+## Parlamento autonómico (`sistemas/parlaut.js`)
+
+`E.esp.ccaa[c].pa` = {dis, dp, rdl[], hist[]}. `T.disuelto` (elecciones convocadas o intervención) activa la caducidad de las leyes en trámite y
+el uso de la Diputación Permanente (`T.dp`, D'Hondt). `T.decretar` aplica el programa al instante y fija la convalidación a 4 semanas;
+`T.convalidar` vota con `posturaAut` (el bloque de gobierno apoya su decreto) en el Pleno o la DP. El jugador vota vía `E.esp.pendienteConvAut`
+(bloqueo 'voto'); el jefe de gabinete puede votar por él. Acción `decreto_ley_aut` para el presidente autonómico.

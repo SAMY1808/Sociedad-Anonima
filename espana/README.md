@@ -153,6 +153,8 @@ node tools/renuncia-ui.js [movil]                            # Playwright: modal
 node tools/leyes-es.js [movil]                               # Playwright: diseñar, aprobar, reformar y derogar leyes, enmiendas, impacto
 node tools/equipo-es.js                                      # jefe de gabinete, medios, justicia, partido interno, diálogo social, crisis, campañas municipal/europea, legado
 node tools/equipo-ui.js [movil]                              # Playwright: las pestañas nuevas (Jefe, Medios, Justicia, Social, Crisis, Partido, Legado)
+node tools/parlaut-es.js                                     # Parlamento autonómico: disolución, Diputación Permanente, decretos-ley y convalidación
+node tools/parlaut-ui.js [movil]                             # Playwright: pestaña Parlamento autonómico y voto de convalidación
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
 
@@ -165,6 +167,13 @@ Constitucional, Fiscal General, recursos y causas judiciales), **Diálogo social
 jornada, huelgas), **Crisis** (DANA, incendios, pandemia, atentado, migración, apagón), **Mi partido → Congreso y
 facciones**, **Legado** (resumen semanal, estadísticas, logros y epílogo) y campañas ligeras para municipales y europeas
 (en *Elecciones*).
+
+## Parlamento autonómico (pestaña propia)
+
+Pestaña **Parlamento autonómico** con selector de comunidad (la tuya por defecto): Pleno (hemiciclo y mayoría), Leyes, Decretos-ley,
+Diputación Permanente y Votaciones. Con el Parlamento disuelto caducan las leyes en trámite y no se registran otras; el Gobierno
+puede dictar **decretos-ley** (también tú, si presides la comunidad) que deben convalidarse en 4 semanas en el Pleno o, si está disuelto,
+en la **Diputación Permanente** (reparto D'Hondt de ~1/5 de la cámara). Si formas parte, votas tú.
 
 ## Simplificaciones conocidas
 

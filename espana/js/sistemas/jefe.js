@@ -166,6 +166,7 @@ window.ESP = window.ESP || {};
     hace(E) {
       const out = []; if (!E.parl.auto) { E.parl.auto = true; out.push('Activa el voto automático con tu grupo en el Congreso.'); }
       const pv = E.esp.pendienteVotoAut; if (pv && C.Territorio.leyAut) { const b = C.Territorio.leyAut(E, pv.c, pv.id); if (b) { const lin = C.Territorio.proyectarAut(E, pv.c, b).pos[E.jugador.partido]; C.Territorio.votarLey(E, pv.c, b, lin ? lin.voto : 'abs'); out.push('Vota en el Parlamento autonómico con la línea del grupo.'); } }
+      const pc = E.esp.pendienteConvAut; if (pc && C.Territorio.rdlAut) { const d = C.Territorio.rdlAut(E, pc.c, pc.id); if (d) { const b = { pid: d.pid, cab: {}, neg: {}, ruido: d.ruido, interv: 0, decreto: true }, lin = C.Territorio.posturaAut(E, pc.c, b, E.jugador.partido); C.Territorio.convalidar(E, pc.c, d, lin.voto); out.push('Vota la convalidación de un decreto-ley autonómico con la línea de tu grupo.'); } else E.esp.pendienteConvAut = null; }
       return out;
     }
   });
