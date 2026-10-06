@@ -7,7 +7,7 @@ window.ESP = window.ESP || {};
   const NAV = [
     ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['leyes', '📜', 'Leyes', 'Leyes'],
     ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['medios', '📰', 'Medios y opinión', 'Medios'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
-    ['mayorias', '🧮', 'Mayorías y rivales', 'Mayorías'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['coaliciones', '📝', 'Acuerdos de gobierno', 'Pactos'], ['corona', '👑', 'La Corona', 'Corona'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], null, ['partidas', '💾', 'Partidas', 'Partidas']
+    ['mayorias', '🧮', 'Mayorías y rivales', 'Mayorías'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['coaliciones', '📝', 'Acuerdos de gobierno', 'Pactos'], ['corona', '👑', 'La Corona', 'Corona'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
   const App = {

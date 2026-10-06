@@ -1,0 +1,41 @@
+/* Prueba de personas e instituciones: políticos, organismos, referendos y primarias. Uso: node tools/gente-es.js */
+/* Prueba de leyes por nivel: proposición de ley autonómica (diputado/a autonómico/a) y moción al pleno (concejal/a). Uso: node tools/leyesniv-es.js */
+const mini = require('./mini');
+const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js',
+  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/campana.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/presupuesto.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/leyesaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js','js/sistemas/jefe.js','js/sistemas/medios.js','js/sistemas/justicia.js','js/sistemas/partidoint.js','js/sistemas/social.js','js/sistemas/crisis.js','js/sistemas/campana2.js','js/sistemas/parlaut.js','js/sistemas/autogobierno.js','js/sistemas/mayorias.js','js/sistemas/corrupcion.js','js/sistemas/coaliciones.js','js/sistemas/corona.js','js/sistemas/personas.js','js/sistemas/organismos.js','js/sistemas/referendos.js','js/sistemas/legado.js'];
+const C = mini(F), U = C.U;
+
+const crear = o => C.Mundo.nueva(Object.assign({ semilla: 171, partido: 'ES_ASD', nombre: 'Test', g: 'm', edad: 40, region: 'MAD', muni: null, nivel: 'nacional', rol: 'lider' }, o));
+let fallos = 0; const ok = (x, m) => { if (!x) { fallos++; console.log('  ✗', m); } else console.log('  ✓', m); };
+let errores = 0; const oe = console.error; console.error = (...a) => { errores++; oe(...a); };
+const E = crear({}), J = E.jugador, g = E.paises.ES.gob;
+const lim = () => { E.eventos.pendientes.length = 0; E.parl.pendienteVoto.length = 0; E.ue.pendiente.length = 0; E.esp.pendienteGabinete = null; E.esp.pendienteInvAut = null; E.esp.pendienteInvestidura = false; E.esp.pendienteSocio = false; E.esp.pendienteVotoAut = null; E.esp.pendienteDebate = false; E.elecciones.nochePendiente = null; };
+
+
+const avanza = n => { for (let i = 0; i < n; i++) { lim(); E.elecciones.nochePendiente = E.elecciones.presPendiente = E.elecciones.pePendiente = null; if (E.esp.gab) E.esp.gab.escandalo = null; C.Tiempo.avanzar(); } };
+const P = E.paises.ES; J.agenda.max = 60;
+const pt = () => { J.agenda.puntos = 60; };
+console.log('Políticos');
+const Pe = C.Personas; const rel = Pe.relevantes(E); ok(rel.length >= 10, 'políticos relevantes: ' + rel.length);
+const b = Pe.bio(E, rel[0]); ok(b && b.prof && b.hito && b.edad, 'biografía generada'); ok(Pe.bio(E, rel[0]) === b, 'la biografía es estable'); ok(Pe.rasgos(E.politicos[rel[0]]).length >= 0, 'rasgos'); ok(typeof Pe.cargoTxt(E, rel[0]) === 'string', 'cargo: ' + Pe.cargoTxt(E, rel[0]));
+const dip = E.parl.miembros.find(id => id !== 'J' && E.politicos[id] && E.politicos[id].p !== J.partido); const e0 = P.escanos[J.partido] || 0, e1 = P.escanos[E.politicos[dip].p];
+J.rol = 'lider'; let ficha = 0; for (let i = 0; i < 12; i++) { pt(); const ids = E.parl.miembros.filter(id => id !== 'J' && E.politicos[id] && E.politicos[id].p !== J.partido); const r = C.Acciones.ejecutar('fichar_diputado', { id: ids[0] }); if (r.ok && r.exito !== false) { ficha++; break; } }
+ok(ficha === 1 && (P.escanos[J.partido] || 0) === e0 + 1, 'se ficha a un diputado (escaños ' + e0 + ' → ' + (P.escanos[J.partido] || 0) + ')');
+E.meta.presim = false; let mv = 0; for (let i = 0; i < 400; i++) { lim(); E.elecciones.nochePendiente = E.elecciones.presPendiente = E.elecciones.pePendiente = null; if (E.esp.gab) E.esp.gab.escandalo = null; C.Tiempo.avanzar(); } ok(Pe.asegurar(E).hist.length >= 1, 'movimientos y pasados que reaparecen (' + Pe.asegurar(E).hist.length + ')');
+const tot = U.suma(Object.values(P.escanos)); ok(Math.abs(tot - 350) <= 3, 'el reparto de escaños se mantiene (' + tot + ')');
+console.log('Organismos');
+const Og = C.Organismos; const s = Og.asegurar(E); ok(Object.keys(s.o).length === 7, '7 organismos'); ok(Og.mercados(E) >= 0 && Og.confianza(E) > 0, 'índices de confianza');
+P.gob.pm = 'J'; J.cargo = 'pm'; ['afin', 'tecnico', 'consenso'].forEach(pf => { pt(); const r = C.Acciones.ejecutar('nombrar_organismo', { org: 'rtve', perfil: pf }); ok(r.ok, 'nombrar RTVE (' + pf + '): ' + (r.msg || '').slice(0, 50)); });
+pt(); C.Acciones.ejecutar('nombrar_organismo', { org: 'cis', perfil: 'afin' }); ok(s.o.cis.pid === P.gob.partido && Og.sesgoCIS(E, P.gob.partido) > 0.5, 'un CIS afín sesga a favor del Gobierno (' + U.d1(Og.sesgoCIS(E, P.gob.partido)) + ' pp)');
+pt(); C.Acciones.ejecutar('nombrar_organismo', { org: 'cis', perfil: 'tecnico' }); ok(Og.sesgoCIS(E, P.gob.partido) < 0.01 || s.o.cis.pid == null, 'un CIS técnico no sesga');
+console.log('Referendos');
+const Rf = C.Referendos; ok(Object.keys(Rf.TEMAS).length >= 8, 'catálogo de temas'); ok(Rf.opinion(E, 'ue') > 0.05 && Rf.opinion(E, 'monarquia') < 0.95, 'opinión pública calculada');
+let ref = null; for (let i = 0; i < 12 && !ref; i++) { pt(); Rf.asegurar(E).act = []; const r = C.Acciones.ejecutar('proponer_referendo', { tema: 'ue' }); if (r.ok && r.exito !== false) ref = Rf.asegurar(E).act[0]; }
+ok(!!ref, 'consulta nacional autorizada'); pt(); let r2 = C.Acciones.ejecutar('campana_referendo', { id: ref.id, lado: 'si' }); ok(r2.ok, 'campaña por el sí'); ref.tVoto = E.fecha.t; avanza(1); ok(ref.estado === 'cerrado' && ref.res.si > 0, 'se vota: ' + (ref.res && ref.res.si) + ' % sí');
+E.esp.flags.refPactado = null; J.cargo = 'presauto'; J.region = 'CAT'; E.esp.ccaa.CAT.gob.pres = 'J'; E.esp.ccaa.CAT.gob.coalicion = [E.esp.ccaa.CAT.gob.partido]; let susp = 0, vot = 0; for (let i = 0; i < 25; i++) { pt(); Rf.asegurar(E).act = []; const rr = Rf.proponer(E, 'autodet'); if (Rf.asegurar(E).act[0]) { if (Rf.asegurar(E).act[0].suspendido) susp++; else vot++; } }
+ok(susp + vot >= 1 && susp > vot, 'consulta unilateral: el TC la suspende la mayoría de las veces (' + susp + ' suspendidas, ' + vot + ' en campaña)');
+console.log('Primarias');
+const Pi = C.PartidoInt; const pi = Pi.asegurar(E); J.cargo = 'diputado'; J.rol = 'direccion'; E.partidos[J.partido].lider = E.partidos[J.partido].lider === 'J' ? 'x' : E.partidos[J.partido].lider; pi.cong.fase = 'precongreso'; pt(); C.Acciones.ejecutar('candidatura_liderazgo', {}); ok(pi.cong.cand === 'J', 'te presentas al liderazgo');
+['recoger_avales', 'debate_interno', 'campana_interna'].forEach(a => { pt(); const rr = C.Acciones.ejecutar(a, {}); ok(rr.ok !== false, a + ': ' + (rr.msg || '')); }); ok(pi.cong.camp && pi.cong.camp.avales > 0 && pi.cong.camp.debate > 0 && pi.cong.camp.bases > 0, 'la campaña interna acumula puntos');
+console.log('errores', errores, '| fallos', fallos); process.exit(fallos || errores ? 1 : 0);

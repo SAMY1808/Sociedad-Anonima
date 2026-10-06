@@ -143,7 +143,7 @@ window.ESP = window.ESP || {};
       for (const k of P.partidos) {
         if (nat[k] == null) continue;
         let x = nat[k] + U.gauss(0, cfg.sd * Math.sqrt(Math.max(0.3, nat[k]) / 14));
-        if (tipo === 'cis' && k === g) x += 0.8;
+        if (tipo === 'cis') x += C.Organismos ? C.Organismos.sesgoCIS(E, k) : (k === g ? 0.8 : 0);
         if (tipo === 'prensa' && camp && camp.sesgo && camp.sesgo.medio === k) x += camp.sesgo.v;
         votos[k] = Math.max(0, x); sum += votos[k];
       }

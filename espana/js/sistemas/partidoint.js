@@ -23,10 +23,10 @@ window.ESP = window.ESP || {};
     },
     congreso(E) {
       const J = E.jugador, pa = E.partidos[J.partido], p = Pi.asegurar(E), c = p.cong, esL = pa.lider === 'J';
-      c.ult = E.fecha.t; c.prox = E.fecha.t + U.ri(180, 230); const cand = c.cand; c.fase = null; c.cand = null;
+      c.ult = E.fecha.t; c.prox = E.fecha.t + U.ri(180, 230); const cand = c.cand; c.fase = null; c.cand = null; const campUsada = c.camp; c.camp = null;
       let res;
       if (cand === 'J' && !esL) {
-        const ap = clamp(35 + (J.prestigio - 40) / 2 + p.fac.critico * 0.7 + (J.rol === 'direccion' ? 6 : 0) - p.fac.oficial * 0.25 + U.gauss(0, 7), 5, 95);
+        const cp = campUsada || { avales: 0, debate: 0, bases: 0 }; const ap = clamp(35 + (J.prestigio - 40) / 2 + p.fac.critico * 0.7 + (J.rol === 'direccion' ? 6 : 0) - p.fac.oficial * 0.25 + cp.avales * 0.8 + cp.debate * 1.0 + cp.bases * 0.8 + U.gauss(0, 7), 5, 95);
         if (ap > 50) { C.Ejecutivo.nuevoLider(E, J.partido, 'tras la victoria de ' + J.nombre + ' en el congreso'); const viejo = pa.lider; pa.lider = 'J'; J.rol = 'lider'; C.Personaje.cambiar(E, { prestigio: 8, pop: 3 }, true); pa.cohesion -= 4; res = `${J.nombre} gana el congreso con el ${Math.round(ap)} % y se hace con el liderazgo.`; C.Personaje.sincronizar(E); }
         else { C.Personaje.cambiar(E, { prestigio: -3 }, true); res = `${J.nombre} pierde el congreso (${Math.round(ap)} %).`; }
       } else if (esL) {
@@ -52,6 +52,12 @@ window.ESP = window.ESP || {};
   const dir = E => ['direccion', 'lider'].includes(E.jugador.rol) ? true : 'Necesitas un puesto en la dirección del partido';
   R({ id: 'amarrar_apoyos', nombre: 'Amarrar apoyos internos', icono: '🤝', desc: 'Habla con delegados y barones: refuerza a los oficialistas frente a los críticos.', disponible: dir, ejecutar: E => Pi.amarrar(E) });
   R({ id: 'pactar_criticos', nombre: 'Pactar con los críticos', icono: '🕊️', costo: 2, desc: 'Ofrece puestos y presencia al sector crítico: baja la tensión interna.', disponible: dir, ejecutar: E => Pi.pactarCriticos(E) });
+  /* Primarias: campaña interna por el liderazgo (avales, debate, bases). */
+  const prim = E => { const J = E.jugador; if (J.pais !== 'ES') return 'Sólo en España'; const c = Pi.asegurar(E).cong; return c.fase === 'precongreso' && c.cand === 'J' ? true : 'Sólo si eres candidato/a al liderazgo en un congreso convocado'; };
+  const camp = (E, k, txt, f) => { const c = Pi.asegurar(E).cong; c.camp = c.camp || { avales: 0, debate: 0, bases: 0 }; if (c.camp[k] >= 10) return { ok: false, msg: 'Ya has agotado esa vía' }; const x = f(E.jugador); c.camp[k] = clamp(c.camp[k] + x, 0, 10); return { ok: true, msg: `${txt} (+${U.d1(x)}).` }; };
+  R({ id: 'recoger_avales', nombre: 'Recoger avales de delegados', icono: '✍️', desc: 'Primarias: firmas de delegados y cargos para tu candidatura.', disponible: prim, ejecutar: E => camp(E, 'avales', 'Recoges avales de delegados y barones', J => 1.2 + J.atrib.negociacion / 8) });
+  R({ id: 'debate_interno', nombre: 'Debate entre candidatos', icono: '🎙️', desc: 'Primarias: un debate interno ante los medios y la militancia.', disponible: prim, ejecutar: E => camp(E, 'debate', 'Ganas presencia en el debate interno', J => 1 + J.atrib.oratoria / 7) });
+  R({ id: 'campana_interna', nombre: 'Gira por las agrupaciones', icono: '🚌', desc: 'Primarias: recorres agrupaciones locales para ganarte a la militancia.', disponible: prim, ejecutar: E => camp(E, 'bases', 'Recorres las agrupaciones del partido', J => 1.1 + J.atrib.carisma / 8) });
   R({ id: 'candidatura_liderazgo', nombre: 'Presentarte al liderazgo', icono: '🏁', costo: 2, desc: 'Cuando el partido convoca congreso, presenta tu candidatura frente al líder.', disponible: E => { const J = E.jugador, pa = E.partidos[J.partido]; if (pa.lider === 'J') return 'Ya eres el líder'; if (!['direccion', 'portavoz'].includes(J.rol)) return 'Necesitas puesto en la dirección o ser portavoz'; return C.PartidoInt.asegurar(E).cong.fase === 'precongreso' ? true : 'El partido aún no ha convocado congreso'; }, ejecutar: E => Pi.candidatura(E) });
   R({ id: 'campana_afiliacion', nombre: 'Campaña de afiliación', icono: '📋', desc: 'Capta militantes y cuotas: sube la militancia y las finanzas.', disponible: E => E.jugador.pais === 'ES' ? true : 'Sólo en España', ejecutar: E => Pi.afiliacion(E) });
   if (C.Jefe) C.Jefe.registrar('partido', {

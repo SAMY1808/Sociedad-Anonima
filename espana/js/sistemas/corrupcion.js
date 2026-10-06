@@ -59,7 +59,7 @@ window.ESP = window.ESP || {};
     /* ── Control parlamentario ── */
     reprobar(E, mid, promotor) {
       const g = E.paises.ES.gob, id = g.ministros[mid]; if (!id || id === 'J') return { ok: false, msg: 'No hay ministro que reprobar' };
-      const pol = E.politicos[id], P = E.paises.ES, tot = U.suma(Object.values(P.escanos));
+      const pol = E.politicos[id], P = E.paises.ES, tot = U.suma(Object.values(P.escanos)); if (!pol) return { ok: false, msg: 'Ese ministro ya no está en el cargo' };
       const si = U.suma(P.partidos.filter(x => !g.coalicion.includes(x) && !(g.apoyoExterno || []).includes(x)).map(x => P.escanos[x] || 0)) + U.suma((g.apoyoExterno || []).map(x => U.chance(0.2) ? (P.escanos[x] || 0) : 0));
       const ok = si > tot / 2 || (si > tot * 0.42 && U.chance(0.3));
       if (ok) { g.estab = clamp(g.estab - 3, 0, 100); g.aprob = clamp(g.aprob - 0.8, 5, 90); C.Noticias.poner(E, 'parlamento', `El Congreso reprueba a ${pol.n}, ministro/a de ${((C.DATA.ministerios || []).find(x => x.id === mid) || {}).nombre || mid}.`, 'ES'); if (U.chance(0.35) && C.Gabinete && C.Gabinete.dimision) { try { C.Gabinete.dimision(E, C.Gabinete.cargos(E, 'central').find(x => x.id === mid), pol); } catch (e) { } } return { ok: true, msg: `El Congreso reprueba a ${pol.n}.` }; }
