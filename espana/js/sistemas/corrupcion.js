@@ -80,7 +80,7 @@ window.ESP = window.ESP || {};
     },
     suyos(E) { const J = E.jugador; return K.asegurar(E).casos.filter(c => c.pid === J.partido && c.fase !== 'cerrado'); },
     destapar(E, pid) {
-      const J = E.jugador, md = C.Medios && C.Medios.asegurar(E), rel = md ? Math.max(...Object.values(md.rel)) : 0; if (pid === J.partido) return { ok: false, msg: 'Elige otro partido' };
+      const J = E.jugador, md = C.Medios && C.Medios.asegurar(E), rel = md ? Math.max(...Object.values(md.rel)) : 0; if (!E.partidos[pid] || pid === J.partido) return { ok: false, msg: 'Elige otro partido' };
       if (rel < 12) return { ok: false, msg: 'Ningún medio te hace caso lo bastante para publicar tu información' };
       const k = K.asegurar(E), abiertos = k.casos.filter(c => c.pid === pid && c.fase !== 'cerrado'); if (abiertos.length >= 2) return { ok: false, msg: 'Ya hay demasiados casos abiertos contra ese partido' };
       const riesgo = clamp(0.3 - J.atrib.integridad / 40, 0.05, 0.4); if (U.chance(riesgo)) { C.Personaje.cambiar(E, { prestigio: -2.5, pop: -1 }, true); return { ok: true, exito: false, msg: 'La información era floja y se te vuelve en contra.' }; }
