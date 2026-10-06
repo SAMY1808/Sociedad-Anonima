@@ -90,6 +90,31 @@ window.ESP = window.ESP || {};
       if (U.chance(p)) { b.fuerza *= 0.3; if (b.fuerza < 0.1) b.activo = false; C.Personaje.cambiar(E, { prestigio: 0.8 }); return { ok: true, msg: 'Tu desmentido frena el bulo.' }; }
       b.fuerza *= 0.8; return { ok: true, exito: false, msg: 'El desmentido apenas llega: el bulo sigue circulando.' };
     },
+    /* Temas del momento (tendencias en redes) según el estado del país. */
+    tendencias(E) {
+      const P = E.paises.ES, ec = P.ec, g = P.gob, out = [], add = (tag, f, txt, sg, sujeto) => out.push({ tag, f: clamp(Math.round(f), 5, 100), txt, sg, sujeto: sujeto || null });
+      if (C.Corrupcion) { const k = C.Corrupcion.asegurar(E); k.casos.filter(c => c.fase !== 'cerrado').slice(0, 2).forEach(c => add('#Caso' + E.partidos[c.pid].sigla, 30 + c.gravedad * 60, `${C.Corrupcion.TIPOS[c.tipo][0]} en ${E.partidos[c.pid].sigla}`, -1, c.pid)); }
+      if (C.Estructural) { const s = C.Estructural.asegurar(E); if (C.Estructural.esfuerzo(E) > 38) add('#AlquilerYa', (C.Estructural.esfuerzo(E) - 30) * 4, 'El alquiler se come el sueldo', -1, g.partido); if (s.ener.precio > 125) add('#LuzPorLasNubes', (s.ener.precio - 100) * 1.4, 'La factura de la luz se dispara', -1, g.partido); if (s.inm.tension > 55) add('#FronteraSur', s.inm.tension, 'Tensión migratoria en la frontera sur', -1, g.partido); if (s.fin.prima > 250) add('#PrimaDeRiesgo', s.fin.prima / 5, 'La prima de riesgo inquieta a los mercados', -1, g.partido); }
+      if (ec.paro > 12) add('#Paro', ec.paro * 4, 'El paro vuelve a las portadas', -1, g.partido); if (ec.crec > 2.4) add('#EspañaVa', ec.crec * 18, 'El crecimiento sorprende al alza', 1, g.partido);
+      if (C.Crisis) C.Crisis.asegurar(E).activas.filter(c => c.fase !== 'cerrada').slice(0, 2).forEach(c => add('#' + C.Crisis.TIPOS[c.tipo].n.split(' ')[0], 55 + c.sev * 12, C.Crisis.TIPOS[c.tipo].n, -1, g.partido));
+      if (C.Corona) { const co = C.Corona.asegurar(E); if (co.pop < 42) add('#Corona', 70 - co.pop, 'Debate sobre la monarquía', -1); }
+      if (C.Referendos) C.Referendos.asegurar(E).act.filter(r => r.estado === 'campana').forEach(r => add('#Consulta', 60, C.Referendos.TEMAS[r.tema].n, 0));
+      if (g.aprob > 58) add('#Gobierno', g.aprob, 'El Gobierno goza de buena imagen', 1, g.partido);
+      return out.sort((a, b) => b.f - a.f).slice(0, 7);
+    },
+    /* Tertulias: cada medio comenta un tema desde su línea editorial. */
+    tertulias(E) {
+      const g = E.paises.ES.gob, tn = Md.tendencias(E), r = ((E.fecha.t * 2654435761) >>> 0) % 997; if (!tn.length) return []; const afin = (m) => 1 - U.distIdeo(m, E.partidos[g.partido]) * 2; const out = [];
+      MEDIOS.forEach((m, i) => { const t = tn[(i + r) % tn.length], pro = afin(m) > 0.1, tono = t.sg === 0 ? 0 : (t.sg < 0 ? (pro ? -0.3 : 1) : (pro ? 1 : -0.4));
+        const frase = tono > 0.4 ? U.pick(['Una oportunidad que hay que aprovechar', 'El Gobierno acierta con el rumbo', 'Los datos hablan por sí solos']) : tono < -0.3 ? U.pick(['Una vergüenza que no puede seguir así', 'La oposición tiene razón: hay que rectificar', 'Lo del Gobierno ya no es gestión, es improvisación']) : U.pick(['Un asunto con muchos matices', 'Habrá que esperar a ver cómo evoluciona', 'Ni tan bien ni tan mal']);
+        out.push({ medio: m.id, nom: m.n, ic: m.ic, tag: t.tag, frase, tono }); });
+      return out;
+    },
+    encuestaPrivada(E) {
+      const J = E.jugador; const res = C.Generales.simular(E, { ruido: 0, ruidoN: 0 }), md = Md.asegurar(E), votos = {}; let sum = 0;
+      for (const k of E.paises.ES.partidos) { if (res.nat[k] == null) continue; votos[k] = Math.max(0, res.nat[k] + U.gauss(0, 0.7)); sum += votos[k]; } for (const k in votos) votos[k] = votos[k] * 100 / sum;
+      md.priv = { t: E.fecha.t, votos }; C.Personaje.cambiar(E, { prestigio: 0.1 }); return { ok: true, msg: 'Tu equipo encarga un sondeo privado: ya tienes los datos.' };
+    },
     bulosJ(E) { const J = E.jugador, md = Md.asegurar(E); return md.bulos.filter(b => b.activo && b.pid === J.partido); }
   };
   const R = o => C.Acciones.registrar(Object.assign({ costo: 1, grupo: 'medios' }, o));
@@ -97,6 +122,7 @@ window.ESP = window.ESP || {};
   R({ id: 'entrevista_medio', nombre: 'Entrevista en un medio', icono: '🎙️', desc: 'Concede una entrevista a un medio concreto: mejora la relación con él si sale bien.', disponible: esp, ejecutar: (E, a) => Md.entrevista(E, a.medio) });
   R({ id: 'rueda_prensa', nombre: 'Rueda de prensa', icono: '🎤', desc: 'Atiende a todos los medios: mejora la relación general y frena los bulos.', disponible: esp, ejecutar: E => Md.rueda(E) });
   R({ id: 'filtrar_medio', nombre: 'Filtrar a un medio afín', icono: '🕵️', costo: 2, desc: 'Pasa información a un medio amigo para dañar a un rival. Si se descubre, pagas el precio.', disponible: esp, ejecutar: (E, a) => Md.filtrar(E, a.medio, a.pid) });
+  R({ id: 'encuesta_privada', nombre: 'Encargar un sondeo privado', icono: '📊', desc: 'Una encuesta propia, con menos ruido que el CIS, sobre la intención de voto actual.', disponible: esp, ejecutar: E => Md.encuestaPrivada(E) });
   R({ id: 'desmentir_bulo', nombre: 'Desmentir un bulo', icono: '🛡️', desc: 'Contrarresta un bulo que circula contra tu partido.', disponible: E => esp(E) === true ? (C.Medios.bulosJ(E).length ? true : 'No hay bulos contra tu partido') : esp(E), ejecutar: (E, a) => Md.desmentir(E, a.id || (Md.bulosJ(E)[0] || {}).id) });
   C.Tiempo.registrar('medios', { turno: Md.turno, postInit: E => { if (E.jugador && E.jugador.pais === 'ES') Md.asegurar(E); } }, 38);
 

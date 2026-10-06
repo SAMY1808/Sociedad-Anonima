@@ -52,7 +52,7 @@ button,.btn,[data-ir],.clic,.fila-sel{touch-action:manipulation}
 
   /* Barra de navegación inferior */
   .nav{flex-direction:row;align-items:stretch;gap:0;overflow:visible;padding:3px 2px calc(3px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--borde2);background:#0B1422;box-shadow:0 -6px 18px rgba(0,0,0,.35);z-index:30}
-  .nav .sep,.nav button:not(.princ):not(.mas){display:none}
+  .nav .sep,.nav .nav-h,.nav button:not(.princ):not(.mas){display:none}
   .nav button.princ,.nav button.mas{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 1px 5px;font-size:10.5px;text-align:center;border-radius:10px;line-height:1.1}
   .nav button .ic{font-size:21px;width:auto;filter:none}
   .nav button .largo{display:none}.nav button .corto{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}

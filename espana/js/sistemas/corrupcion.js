@@ -70,7 +70,7 @@ window.ESP = window.ESP || {};
       for (const pid in k.calor) { k.calor[pid] *= 0.985; if (k.calor[pid] > 3) C.Opinion.empujeES(E, pid, -k.calor[pid] * 0.00035); }
       // Casos nuevos
       if (!E.meta.presim || U.chance(0.2)) {
-        if (U.chance(0.012) && k.casos.filter(c => c.fase !== 'cerrado').length < 5) {
+        if (U.chance(0.012 * (C.Ajustes ? C.Ajustes.get(E).azar : 1)) && k.casos.filter(c => c.fase !== 'cerrado').length < 5) {
           const ps = P.partidos.filter(x => E.partidos[x].amb === 'nac' && (P.escanos[x] || 0) >= 8); const w = x => (g.coalicion.includes(x) ? 1.3 : 1) * (0.6 + (100 - (E.partidos[x].integridad || 60)) / 60) * Math.sqrt(P.escanos[x] || 1);
           const pid = U.pesado(ps, w); if (pid) K.nuevo(E, pid);
         }

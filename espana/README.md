@@ -157,6 +157,12 @@ node tools/parlaut-es.js                                     # Parlamento auton�
 node tools/parlaut-ui.js [movil]                             # Playwright: pestaña Parlamento autonómico y voto de convalidación
 node tools/autogob-es.js                                     # presión por competencias y reforma del Estatuto por artículos
 node tools/autogob-ui.js [movil]                             # Playwright: pestaña Autogobierno
+node tools/poder-es.js                                      # mayorías y rivales, corrupción, acuerdos de gobierno y Corona
+node tools/gente-es.js                                       # políticos, organismos, referendos y primarias
+node tools/mundo-es.js                                       # problemas de país, exterior, lenguas, poder local y Conferencia de Presidentes
+node tools/extras-es.js                                      # tertulias, guía, balance, ajustes, escenarios y partido propio
+node tools/pestanas-ui.js [movil]                            # Playwright: humo de todas las pestañas nuevas
+node tools/creacion-ui.js [movil]                            # Playwright: partido propio, escenario y código de partida
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 ```
 
@@ -183,6 +189,18 @@ en la **Diputación Permanente** (reparto D'Hondt de ~1/5 de la cámara). Si for
 resolución del Parlamento, movilización social, pacto con el Gobierno). **Reforma del Estatuto** con artículos concretos (21 entre competencias y
 cláusulas singulares): borrador → Parlamento autonómico (3/5) → negociación artículo por artículo con el Estado (aceptar, recortar, rechazar; insistir o ceder)
 → Cortes → referéndum → posible recurso ante el Tribunal Constitucional, que puede anular artículos.
+
+## Segunda ola de contenido (cada sistema con su pestaña)
+
+El menú se agrupa en secciones plegables: *Parlamento y gobierno*, *Territorio*, *Poder e instituciones*, *País y mundo*, *Partido y personas*, *Mi carrera*.
+
+- **Mayorías y rivales**: calculadora de mayorías para mociones de censura, rivales con estilo (bloqueo, pacto, populismo…) y ofertas de pacto.
+- **Corrupción y control**: casos que escalan, comisiones de investigación, reprobaciones y comparecencias.
+- **Acuerdos de gobierno**: cláusulas con los socios, comisión de seguimiento y factura política real.
+- **La Corona**, **Referendos y consultas**, **Organismos y altos cargos** (RTVE, CIS, Banco de España…).
+- **Políticos** (biografías, fichajes, tránsfugas, expresidentes), primarias internas en *Mi partido*.
+- **Problemas de país** (vivienda, finanzas, energía, inmigración), **Mundo** (exterior, fondos europeos, familias políticas), **Lenguas y símbolos**, **Poder local** y **Conferencia de Presidentes** (dentro de Cortes).
+- **Guía y asesor**, **Ajustes** (dificultad, ritmo, código para compartir la partida), **Balance de legislatura**, tertulias y sondeos privados, escenarios de inicio y partido propio con logotipo, financiación e implantación territorial.
 
 ## Simplificaciones conocidas
 

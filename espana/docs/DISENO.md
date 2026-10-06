@@ -181,3 +181,11 @@ el uso de la Diputación Permanente (`T.dp`, D'Hondt). `T.decretar` aplica el pr
 `ARTICULOS` (dif = dificultad, tc = riesgo ante el TC). `T.apoyoReforma` estima el apoyo parlamentario; `T.probArticulo` la aceptación del Estado.
 Al cerrar el acuerdo se crea el proyecto en el Congreso con `estIt`; `referendumEstatuto` (envuelto) aplica `aplicarReforma` y `estTurno` programa el
 recurso ante el TC (`anularArticulo` revierte efectos). `T.presionarComp` suma presión por cuatro vías con enfriamiento de 6 semanas.
+
+## Segunda ola (mayorias, corrupcion, coaliciones, corona, personas, organismos, referendos, estructural, exterior, lenguas, local2, conferencia, guia, ajustes, escenarios)
+
+Cada módulo guarda su estado en `E.esp.<clave>` y se registra con `Tiempo.registrar` (prioridades 44–54). Convenciones:
+- Las acciones con argumentos validan siempre su entrada (la simulación de prueba las llama con `{}`) y la Agenda las enlaza a su pestaña con `MODAL = 'ir:pantalla'`.
+- `Ejecutivo.mejorPlan` alimenta la calculadora de mayorías; los pactos usan `E.esp.pactos` y el plazo se resuelve con `Coaliciones.retira` (real, no aleatorio).
+- `Organismos.sesgoCIS` sustituye al +0,8 fijo del CIS; `Organismos.mercados` entra en la prima de riesgo de `Estructural`.
+- Las herramientas de prueba deben limpiar `pendienteConvAut` y `E.esp.gab.escandalo` además de los bloqueos clásicos.

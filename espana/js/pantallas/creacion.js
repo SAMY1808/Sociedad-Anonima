@@ -13,7 +13,7 @@ window.ESP = window.ESP || {};
 
   const nuevoEstado = () => ({
     paso: 1, semilla: (Math.random() * 2 ** 31) | 0, nivel: 'nacional', prov: 'MAD', region: 'MAD', muni: 'm_mad', partido: 'ES_ASD',
-    nuevo: { nombre: 'Movimiento Cívico', sigla: 'MCI', eco: 0, soc: -10, eu: 40, ter: 0, color: '#8E44AD' },
+    nuevo: { nombre: 'Movimiento Cívico', sigla: 'MCI', eco: 0, soc: -10, eu: 40, ter: 0, color: '#8E44AD', logo: '⭐', fin: 'media', implant: [] }, escenario: 'normal',
     nombre: '', genero: 'f', edad: 38, trayectoria: 'concejal', atrib: { carisma: 3, oratoria: 3, gestion: 3, negociacion: 3, integridad: 3 }, libres: 5,
     eco: null, soc: null, eu: null, ter: null, rol: 'base', nombrePartida: ''
   });
@@ -70,7 +70,10 @@ window.ESP = window.ESP || {};
         <div class="fila-sel ${nuevoSel ? 'sel' : ''}" data-partido="nuevo"><span style="font-size:22px">✦</span><div style="flex:1"><b>Fundar un partido nuevo</b><div class="tenue" style="font-size:12px">Nivel difícil: empiezas con ~1,2 % de apoyo y como líder.</div></div></div>
         ${nuevoSel ? `<div class="tarjeta"><div class="campo"><label>Nombre</label><input id="n-nombre" value="${esc(S.nuevo.nombre)}" maxlength="42"></div><div class="campo"><label>Siglas</label><input id="n-sigla" value="${esc(S.nuevo.sigla)}" maxlength="6" style="max-width:120px"></div>
           ${[['eco', 'Economía (− izq / + der)'], ['soc', 'Social (− prog / + cons)'], ['eu', 'Europa (− escépt. / + fed.)'], ['ter', 'Territorial (− centralista / + soberanista)']].map(([k, t]) => `<div class="slider-fila"><span>${t}</span><input type="range" min="-100" max="100" value="${S.nuevo[k]}" data-nuevo="${k}"><span>${S.nuevo[k]}</span></div>`).join('')}
-          <div class="campo"><label>Color</label><input type="color" id="n-color" value="${S.nuevo.color}" style="width:60px;padding:2px"></div></div>` : ''}</div>
+          <div class="campo"><label>Color</label><input type="color" id="n-color" value="${S.nuevo.color}" style="width:60px;padding:2px"></div>
+          <div class="campo"><label>Logotipo</label><div class="seg" style="flex-wrap:wrap">${['⭐', '🌿', '🔥', '🕊️', '🦅', '⚙️', '🌊', '🛡️', '🌻', '🚀', '🏛️', '✊'].map(x => `<button data-logo="${x}" class="${S.nuevo.logo === x ? 'activo' : ''}">${x}</button>`).join('')}</div></div>
+          <div class="campo"><label>Financiación y militancia</label><div class="seg">${[['austera', '🪙 Austera'], ['media', '💶 Media'], ['potente', '🏦 Potente']].map(([k, n]) => `<button data-fin="${k}" class="${S.nuevo.fin === k ? 'activo' : ''}">${n}</button>`).join('')}</div><div class="tenue" style="font-size:11.5px;margin-top:4px">Más recursos permiten campañas más fuertes, pero un partido nuevo con tanto dinero arranca con menos credibilidad.</div></div>
+          <div class="campo"><label>Estructura territorial (dónde eres fuerte)</label><div class="seg" style="flex-wrap:wrap">${Object.keys(D().ccaa).filter(c => !['CEU', 'MEL'].includes(c)).map(c => `<button data-impl="${c}" class="${S.nuevo.implant.includes(c) ? 'activo' : ''}">${esc(D().ccaa[c].nombre)}</button>`).join('')}</div><div class="tenue" style="font-size:11.5px;margin-top:4px">Con implantación concentrada tienes más voto en esas comunidades y menos en el resto.</div></div></div>` : ''}</div>
       <div class="col"><div class="tarjeta"><h3>Mapa ideológico (economía / valores)</h3>${G.plano(pts, { tam: 340 })}<div class="tenue" style="font-size:11.5px;margin-top:4px">El tamaño del círculo refleja el apoyo electoral.</div></div>
         ${sel ? `<div class="tarjeta"><h3>${esc(sel.nombre)}</h3><p style="margin:0 0 6px;font-size:13px">Perfil: ${C.Comp.ideoTxt(sel)}${sel.ter != null ? ' · ' + C.Comp.terTxt(sel.ter) : ''}.</p><div class="lista" style="font-size:13px"><div class="it"><span class="tenue" style="width:120px">Líder</span><b>${esc(E.politicos[sel.lider].n)}</b></div><div class="it"><span class="tenue" style="width:120px">Cohesión</span><b>${sel.cohesion}</b></div><div class="it"><span class="tenue" style="width:120px">Escaños</span><b>${E.paises.ES.escanos[sel.id] || 0} de 350</b></div></div>
         ${(E.paises.ES.escanos[sel.id] || 0) === 0 ? '<p class="mal" style="font-size:12.5px">No tiene escaños en el Congreso.</p>' : ''}</div>` : ''}</div></div>`;
@@ -121,6 +124,7 @@ window.ESP = window.ESP || {};
       <li>Las <b>generales anticipadas</b>, las investiduras con pactos, las mociones de censura y el Consejo de Ministros marcan el ritmo.</li>
       <li>Gestiona el <b>territorio</b>: estatutos, financiación, independentismo, 155, Tribunal Constitucional y municipios.</li>
       <li>No hay un final único: puedes cerrar tu carrera en el ayuntamiento o presidiendo el Gobierno.</li></ul></div></div>
+    <div class="tarjeta" style="margin-top:12px"><h3>🎬 Escenario de inicio</h3><div class="lista">${C.Escenarios.LISTA.map(([k, n, d]) => `<div class="it clic" data-esc="${k}" style="cursor:pointer;${S.escenario === k ? 'background:rgba(227,192,106,.12)' : ''}"><span>${S.escenario === k ? '◉' : '○'}</span><div class="cuerpo" style="flex:1"><b>${esc(n)}</b><div class="tenue" style="font-size:11.5px;white-space:normal">${esc(d)}</div></div></div>`).join('')}</div></div>
     <div class="campo" style="max-width:360px;margin-top:12px"><label>Nombre de la partida</label><input id="r-partida" value="${esc(S.nombrePartida || (S.nombre ? S.nombre.split(' ')[0] + ' · ' + lugar : lugar))}"></div>`;
   };
 
@@ -145,6 +149,7 @@ window.ESP = window.ESP || {};
         S.paso++; re();
       };
       const ok = $('#c-ok'); if (ok) ok.onclick = () => C_.comenzar();
+      UI.$$('[data-esc]', el).forEach(r => r.onclick = () => { S.escenario = r.dataset.esc; re(); });
       if (S.paso === 1) {
         UI.$$('[data-nivel]', el).forEach(b => b.onclick = () => { S.nivel = b.dataset.nivel; re(); });
         UI.$$('[data-prov]', el).forEach(g => g.onclick = () => {
@@ -156,6 +161,9 @@ window.ESP = window.ESP || {};
       } else if (S.paso === 2) {
         UI.$$('[data-partido]', el).forEach(f => f.onclick = () => { S.partido = f.dataset.partido; S.eco = null; if (S.partido === 'nuevo') S.rol = 'lider'; re(); });
         const nn = $('#n-nombre'); if (nn) { nn.oninput = () => S.nuevo.nombre = nn.value; $('#n-sigla').oninput = e => S.nuevo.sigla = e.target.value.toUpperCase().slice(0, 6); $('#n-color').oninput = e => { S.nuevo.color = e.target.value; }; $('#n-color').onchange = re; }
+        UI.$$('[data-logo]', el).forEach(r => r.onclick = () => { S.nuevo.logo = r.dataset.logo; re(); });
+        UI.$$('[data-fin]', el).forEach(r => r.onclick = () => { S.nuevo.fin = r.dataset.fin; re(); });
+        UI.$$('[data-impl]', el).forEach(r => r.onclick = () => { const i = S.nuevo.implant.indexOf(r.dataset.impl); if (i >= 0) S.nuevo.implant.splice(i, 1); else if (S.nuevo.implant.length < 4) S.nuevo.implant.push(r.dataset.impl); re(); });
         UI.$$('[data-nuevo]', el).forEach(r => { r.oninput = () => { S.nuevo[r.dataset.nuevo] = +r.value; r.nextElementSibling.textContent = r.value; }; r.onchange = re; });
       } else if (S.paso === 3) {
         $('#p-nombre').oninput = e => S.nombre = e.target.value;
@@ -179,12 +187,13 @@ window.ESP = window.ESP || {};
         nombre: S.nombre || 'Alex Navarro', genero: S.genero, edad: S.edad, trayectoria: S.trayectoria, atrib: S.atrib,
         eco: S.eco, soc: S.soc, eu: S.eu, ter: S.ter, rol: S.partido === 'nuevo' ? 'lider' : S.rol, nombrePartida: S.nombrePartida || 'España'
       };
-      if (S.partido === 'nuevo') opts.nuevo = { nombre: S.nuevo.nombre || 'Partido nuevo', sigla: (S.nuevo.sigla || 'PN').toUpperCase(), eco: S.nuevo.eco, soc: S.nuevo.soc, eu: S.nuevo.eu, ter: S.nuevo.ter, color: S.nuevo.color, arq: C_.arqCercano(S.nuevo) };
+      opts.escenario = S.escenario || 'normal';
+      if (S.partido === 'nuevo') opts.nuevo = { logo: S.nuevo.logo, fin: S.nuevo.fin, implant: S.nuevo.implant.slice(), nombre: S.nuevo.nombre || 'Partido nuevo', sigla: (S.nuevo.sigla || 'PN').toUpperCase(), eco: S.nuevo.eco, soc: S.nuevo.soc, eu: S.nuevo.eu, ter: S.nuevo.ter, color: S.nuevo.color, arq: C_.arqCercano(S.nuevo) };
       else opts.partido = S.partido;
       el.innerHTML = '<div class="inicio"><div class="cargando" style="font-size:18px;color:var(--oro2)">Generando España: 52 circunscripciones, 19 comunidades, 67 ayuntamientos y la Unión Europea…</div></div>';
       setTimeout(() => {
         const E = C.Mundo.nueva(opts);
-        E.meta.nombrePartida = opts.nombrePartida;
+        E.meta.nombrePartida = opts.nombrePartida; if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);
         S = null; preview = null;
         C.Guardado.guardar(null, opts.nombrePartida).then(() => C.App.comenzar());
       }, 30);

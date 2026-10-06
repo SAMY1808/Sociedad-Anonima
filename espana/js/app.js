@@ -5,9 +5,13 @@ window.ESP = window.ESP || {};
   C.Pantallas = C.Pantallas || {};
   /* [id, icono, nombre, nombre corto (barra inferior del móvil), en la barra inferior] */
   const NAV = [
-    ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['leyes', '📜', 'Leyes', 'Leyes'],
-    ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['partido', '🎗', 'Mi partido', 'Partido'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['medios', '📰', 'Medios y opinión', 'Medios'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
-    ['mayorias', '🧮', 'Mayorías y rivales', 'Mayorías'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['coaliciones', '📝', 'Acuerdos de gobierno', 'Pactos'], ['corona', '👑', 'La Corona', 'Corona'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['estructural', '🗺', 'Problemas de país', 'País'], ['exterior', '🌍', 'Mundo', 'Mundo'], ['lenguas', '🗣', 'Lenguas y símbolos', 'Lenguas'], ['local2', '🏘', 'Poder local', 'Local'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], null, ['partidas', '💾', 'Partidas', 'Partidas']
+    ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['guia', '🧭', 'Guía y asesor', 'Guía'],
+    ['#', 'Parlamento y gobierno'], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['leyes', '📜', 'Leyes', 'Leyes'], ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['coaliciones', '📝', 'Acuerdos de gobierno', 'Pactos'], ['mayorias', '🧮', 'Mayorías y rivales', 'Mayorías'],
+    ['#', 'Territorio'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['local2', '🏘', 'Poder local', 'Local'], ['lenguas', '🗣', 'Lenguas y símbolos', 'Lenguas'],
+    ['#', 'Poder e instituciones'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['corona', '👑', 'La Corona', 'Corona'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['medios', '📰', 'Medios y opinión', 'Medios'],
+    ['#', 'País y mundo'], ['estructural', '🗺', 'Problemas de país', 'País'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['exterior', '🌍', 'Mundo', 'Mundo'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
+    ['#', 'Partido y personas'], ['partido', '🎗', 'Mi partido', 'Partido'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'],
+    ['#', 'Mi carrera'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], ['ajustes', '⚙️', 'Ajustes y compartir', 'Ajustes'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
   const App = {
@@ -49,7 +53,7 @@ window.ESP = window.ESP || {};
       const E = C.E;
       if (!C.Pantallas[pantalla]) pantalla = 'dashboard';
       const igual = E.ui.pantalla === pantalla;
-      E.ui.pantalla = pantalla; E.ui.params = params || null;
+      E.ui.pantalla = pantalla; E.ui.params = params || null; (E.ui.vis = E.ui.vis || {})[pantalla] = 1;
       App.refrescar(!igual);
     },
 
@@ -97,9 +101,12 @@ window.ESP = window.ESP || {};
       const items = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', 1] : n && n[0] === 'ayuntamiento' && E.jugador.nivel === 'local' ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
       const enBarra = items.some(n => n && n[4] && n[0] === E.ui.pantalla);
       const masN = items.reduce((a, n) => a + (n && !n[4] ? (+badges[n[0]] || 0) : 0), 0);
-      document.getElementById('nav').innerHTML = items.map(n => n ? `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}${n[4] ? ' princ' : ''}"><span class="ic">${n[1]}</span><span class="largo">${n[2]}</span><span class="corto">${n[3]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>` : '<div class="sep"></div>').join('')
+      const col = E.ui.navCol = E.ui.navCol || {}; let oculto = false, hdr = null, cnt = {}; items.forEach(n => { if (n && n[0] === '#') hdr = n[1]; else if (n && hdr) cnt[hdr] = (cnt[hdr] || 0) + (+badges[n[0]] || 0); });
+      document.getElementById('nav').innerHTML = items.map(n => { if (!n) return '<div class="sep"></div>'; if (n[0] === '#') { oculto = !!col[n[1]]; return `<div class="nav-h" data-h="${n[1]}"><span>${oculto ? '▸' : '▾'} ${n[1]}</span>${oculto && cnt[n[1]] ? `<span class="badge">${cnt[n[1]]}</span>` : ''}</div>`; }
+        return `<button data-p="${n[0]}" class="${E.ui.pantalla === n[0] ? 'activo' : ''}${n[4] ? ' princ' : ''}${oculto && E.ui.pantalla !== n[0] ? ' plegado' : ''}"><span class="ic">${n[1]}</span><span class="largo">${n[2]}</span><span class="corto">${n[3]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>`; }).join('')
         + `<button class="mas ${enBarra ? '' : 'activo'}" id="nav-mas" aria-label="Más secciones"><span class="ic">☰</span><span class="corto">Más</span>${masN ? `<span class="badge">${masN}</span>` : ''}</button>`;
       UI.$$('#nav button[data-p]').forEach(b => b.onclick = () => App.ir(b.dataset.p));
+      UI.$$('#nav .nav-h').forEach(h => h.onclick = () => { E.ui.navCol[h.dataset.h] = !E.ui.navCol[h.dataset.h]; App.nav(); });
       document.getElementById('nav-mas').onclick = () => App.mas();
     },
 
@@ -112,7 +119,7 @@ window.ESP = window.ESP || {};
       const E = C.E, mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = App.badges(E, mios);
       const items = NAV.filter(n => n && !n[4] && (n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])));
-      const cuerpo = `<div class="mas-grid">${items.map(n => `<button class="mas-it ${E.ui.pantalla === n[0] ? 'activo' : ''}" data-p="${n[0]}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>`).join('')}<button class="mas-it" data-ayuda="1"><span class="ic">❓</span><span>Cómo se juega</span></button></div>`;
+      const cuerpo = `<div class="mas-grid">${items.map(n => n[0] === '#' ? `<div class="mas-h">${n[1]}</div>` : `<button class="mas-it ${E.ui.pantalla === n[0] ? 'activo' : ''}" data-p="${n[0]}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>`).join('')}<button class="mas-it" data-ayuda="1"><span class="ic">❓</span><span>Cómo se juega</span></button></div>`;
       const m = UI.modal({ titulo: 'Más secciones', icono: '☰', cuerpo, clase: 'hoja' });
       m.cuerpo.addEventListener('click', e => {
         const b = e.target.closest('button'); if (!b) return;

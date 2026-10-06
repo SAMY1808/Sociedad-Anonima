@@ -40,7 +40,7 @@ window.ESP = window.ESP || {};
         if (def) { def.efecto(E); E.eventos.historial.unshift({ key: def.id, t: E.fecha.t }); C.Noticias.poner(E, 'mundo', def.titulo + ': ' + def.texto(), null); Ev.disparar(E, def); return; }
       }
       // Eventos aleatorios
-      if (!U.chance(0.09)) return;
+      if (!U.chance(0.09 * (C.Ajustes ? C.Ajustes.get(E).eventos : 1))) return;
       const cand = C.DATA.eventos.filter(d => !d.auto && !d.global && !Ev.enfriado(E, d) && (() => { try { return d.req(E, J, P); } catch (e) { return false; } })());
       const def = U.pesado(cand, d => d.peso);
       if (def) Ev.disparar(E, def);

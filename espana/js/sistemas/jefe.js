@@ -36,7 +36,7 @@ window.ESP = window.ESP || {};
     },
     modo(E, area) { const j = Jf.asegurar(E); return j.jefe ? (j.deleg[area] || 'manual') : 'manual'; },
     delegado(E, area) { return Jf.modo(E, area) === 'delegado'; },
-    capacidad(E) { const j = Jf.asegurar(E); return j.jefe ? Math.round(1 + j.jefe.gestion / 3) : 0; },
+    capacidad(E) { const j = Jf.asegurar(E); return j.jefe ? Math.max(1, Math.round((1 + j.jefe.gestion / 3) * (C.Ajustes ? C.Ajustes.get(E).jefe : 1))) : 0; },
 
     candidatos(E) {
       const j = Jf.asegurar(E); j.cand = [];

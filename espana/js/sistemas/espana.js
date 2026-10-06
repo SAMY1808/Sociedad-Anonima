@@ -38,11 +38,13 @@ window.ESP = window.ESP || {};
         const nu = op.nuevo, pid = 'ES_' + nu.sigla;
         const pa = { id: pid, pais: 'ES', nombre: nu.nombre, sigla: nu.sigla, arq: nu.arq || 'cen', color: nu.color || '#8E44AD', eco: nu.eco, soc: nu.soc, eu: nu.eu, ter: nu.ter != null ? nu.ter : 0, indep: 0, grupo: D().arquetipos[nu.arq || 'cen'].grupo, amb: 'nac', region: null,
           pop: 1.2, base: 1.2, popN: 0, cohesion: 80, finanzas: 40, militantes: 5000, lider: null, nuevo: true };
+        pa.logo = nu.logo || null; const F = { austera: [25, 2200], media: [40, 5000], potente: [68, 12000] }[nu.fin] || [40, 5000]; pa.finanzas = F[0]; pa.militantes = F[1]; if (nu.fin === 'potente') { pa.pop = 1.0; pa.base = 1.0; } if (nu.implant && nu.implant.length) pa.implant = nu.implant.slice();
         E.partidos[pid] = pa; P.partidos.push(pid);
       }
       E.esp.nacionales = P.partidos.filter(k => E.partidos[k].amb === 'nac');
       E.esp.regionales = P.partidos.filter(k => E.partidos[k].amb === 'reg');
       for (const prov in D().provincias) { E.esp.pn[prov] = {}; P.partidos.forEach(k => E.esp.pn[prov][k] = Math.exp(U.gauss(0, 0.07))); }
+      P.partidos.forEach(k => { const im = E.partidos[k].implant; if (im) for (const prov in D().provincias) E.esp.pn[prov][k] *= im.includes(D().provincias[prov][1]) ? 1.55 : 0.82; });
       Es.calibrar(E);
     },
 

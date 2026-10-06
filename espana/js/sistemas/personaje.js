@@ -110,7 +110,7 @@ window.ESP = window.ESP || {};
 
     maxAgenda(E) {
       const J = E.jugador;
-      return 5 + (['ministro', 'pm', 'presauto', 'vicepres', 'comisario', 'presCom', 'presCE', 'presPE'].includes(J.cargo) ? 1 : 0) + (J.rol === 'lider' ? 1 : 0);
+      return 5 + (['ministro', 'pm', 'presauto', 'vicepres', 'comisario', 'presCom', 'presCE', 'presPE'].includes(J.cargo) ? 1 : 0) + (J.rol === 'lider' ? 1 : 0) + (C.Ajustes ? C.Ajustes.bonoAgenda(E) : 0);
     },
 
     cargoTxt(E) {
