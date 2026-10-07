@@ -59,6 +59,13 @@ window.ESP = window.ESP || {};
         { k: 'matizar', t: 'Matizar con datos y plazos', d: 'Menos titulares, más credibilidad.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 0.8 }); return 'Una respuesta sobria que no hace ruido.'; } },
         { k: 'eludir', t: 'Eludir la pregunta', d: 'Se nota y se recorta.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: -0.8, pop: -0.3 }); return 'Eludir te cuesta un recorte viral.'; } }],
       as: { jefe: 'matizar', portavoz: 'prometer', estratega: 'prometer' } },
+    escision: { ic: '💥', n: 'Un barón amenaza con irse', req: E => false, plazo: 3, defecto: 2,
+      txt: (E, x) => { const b = x && x.reg && C.Barones.asegurar(E).b[x.reg], p = b && E.politicos[b.id]; return `${p ? p.n : 'Un barón'}, presidente/a de ${x && x.reg ? C.DATA.ccaa[x.reg].nombre : 'su comunidad'}, se siente maltratado/a y estudia abandonar el partido para fundar uno propio.`; },
+      op: [
+        { k: 'ceder', t: 'Ceder: financiación y peso en la dirección', d: 'Compras su lealtad; otros barones protestarán por el agravio.', cap: 8, ef: (E, J, x) => { const B = C.Barones, s = B.asegurar(E), b = s.b[x.reg]; if (!b) return 'El barón ya no está en tu partido.'; if (b) b.leal = clamp(b.leal + 38, 0, 100); for (const o of B.lista(E)) if (o.c !== x.reg) o.b.leal = clamp(o.b.leal - 4, 0, 100); pa(E).cohesion = clamp(pa(E).cohesion + 1, 15, 99); return 'El barón se queda… por ahora. Otros miran con envidia.'; }, mem: { tipo: 'cesion', txt: 'cediste ante el chantaje de un barón' } },
+        { k: 'expulsar', t: 'Plantarle cara: expulsarlo/a', d: 'Muestras autoridad, pero se va y funda su partido con parte de la estructura.', cap: 6, ef: (E, J, x) => { if (!C.Barones.fundar(E, x.reg, 0.55)) return 'El barón ya no está en tu partido.'; C.Personaje.cambiar(E, { prestigio: 1.0 }); return 'Lo expulsas: nace un nuevo partido regional.'; } },
+        { k: 'dejar', t: 'No hacer nada', d: 'Quizá se calme… o quizá se vaya con todo.', ef: (E, J, x) => { if (U.chance(0.5) && C.Barones.fundar(E, x.reg, 1)) { return 'Tu pasividad lo empuja a la ruptura: funda su partido.'; } const b = C.Barones.asegurar(E).b[x.reg]; if (b) b.leal = 40; return 'La tormenta amaina, pero la herida sigue abierta.'; } }],
+      as: { jefe: 'ceder', portavoz: 'expulsar', estratega: 'ceder' } },
     pactoEstado: { ic: '🏛', n: 'Una oferta de pacto de Estado', req: E => true, plazo: 3, defecto: 1,
       txt: E => `${sg(E, rival(E))} te ofrece un pacto de Estado, pero te exige un gesto que irritará a tus bases.`,
       op: [
@@ -83,7 +90,7 @@ window.ESP = window.ESP || {};
     decidir(E, uid, k) {
       const d = Dl.asegurar(E), i = d.act.findIndex(x => x.uid === uid); if (i < 0) return { ok: false, msg: 'Ese dilema ya se ha resuelto' }; const x = d.act[i], def = CAT[x.id], o = def.op.find(y => y.k === k), J = E.jugador; if (!o) return { ok: false, msg: 'Opción no válida' };
       if ((o.cap || 0) > d.capital) return { ok: false, msg: `Necesitas ${o.cap} de capital político (tienes ${Math.round(d.capital)})` };
-      d.act.splice(i, 1); d.capital = clamp(d.capital - (o.cap || 0), 0, 100); let msg = ''; try { msg = o.ef(E, J) || ''; } catch (e) { console.error('[dilema]', x.id, e); }
+      d.act.splice(i, 1); d.capital = clamp(d.capital - (o.cap || 0), 0, 100); let msg = ''; try { msg = o.ef(E, J, x) || ''; } catch (e) { console.error('[dilema]', x.id, e); }
       // Asesores: el que aconsejó esa opción gana confianza; los demás pierden un poco
       for (const a in def.as) { const c = d.asesor[a]; if (def.as[a] === k) c.conf = clamp(c.conf + 4, 0, 100); else c.conf = clamp(c.conf - 1.5, 0, 100); }
       if (o.mem) { d.memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: o.mem.tipo, txt: o.mem.txt, k: o.mem.k || null, pid: o.mem.pid === 'r' ? x.rival : null, ini: o.mem.k ? C.Legado.valor(E, o.mem.k === 'corr' ? 'aprob' : o.mem.k) : null, cobrado: false }); if (d.memoria.length > 40) d.memoria.length = 40; }

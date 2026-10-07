@@ -7,9 +7,15 @@ window.ESP = window.ESP || {};
   const Pt = C.Pantallas.partido = {
     render(el) {
       const E = C.E, tab = E.ui.tabPartido || 'resumen';
-      if (tab === 'interno') Pt.interno(el); else Pt.resumen(el);
+      if (tab === 'interno') { Pt.interno(el); if (C.Barones && E.jugador.pais === 'ES') el.insertAdjacentHTML('beforeend', Pt.baronesHTML(E)); } else Pt.resumen(el);
       el.insertAdjacentHTML('afterbegin', `<div class="seg" style="margin-bottom:12px"><button data-tab-pt="resumen" class="${tab === 'resumen' ? 'activo' : ''}">📊 Resumen</button><button data-tab-pt="interno" class="${tab === 'interno' ? 'activo' : ''}">🏛 Congreso y facciones</button></div>`);
       UI.$$('[data-tab-pt]', el).forEach(b => b.onclick = () => { E.ui.tabPartido = b.dataset.tabPt; C.App.refrescar(); });
+    },
+    baronesHTML(E) {
+      const B = C.Barones, s = B.asegurar(E), l = B.lista(E), col = v => v >= 60 ? 'var(--si,#3bb273)' : v >= 35 ? 'var(--oro)' : 'var(--no,#d9534f)';
+      const filas = l.map(({ c, b, pol }) => `<div class="it" style="flex-wrap:wrap"><div class="cuerpo" style="flex:1;min-width:200px;white-space:normal"><b>${esc(pol.n)}</b> <span class="tenue">· ${esc(D().ccaa[c].nombre)} · ambición ${b.amb}</span><div class="barra-h" style="height:6px;margin-top:4px"><i style="width:${b.leal}%;background:${col(b.leal)}"></i></div><div class="tenue" style="font-size:11.5px">Lealtad ${Math.round(b.leal)}${b.leal < 30 ? ' · <b style="color:var(--no,#d9534f)">riesgo de ruptura</b>' : ''}</div></div>${UI.botonAccion('cortejar_baron', { c }, '🤝 Atender', 'chico')}</div>`).join('');
+      const esc2 = s.esc.map(e => { const pa = E.partidos[e.pid]; return `<div class="it" style="flex-wrap:wrap"><div class="cuerpo" style="flex:1;min-width:200px;white-space:normal"><b>${esc(pa.nombre)}</b> <span class="tenue">· fundado por ${esc(e.baron)} en ${U.fmtT(e.t, true)} · ${e.cerrada ? 'reabsorbido' : (E.paises.ES.escanos[e.pid] || 0) + ' diputados'}</span></div>${e.cerrada ? '' : UI.botonAccion('reconciliar_baron', { pid: e.pid }, '🕊️ Reconciliar', 'chico')}</div>`; }).join('');
+      return `<div class="tarjeta" style="margin-top:14px"><div class="t-cab"><h3>🧑‍💼 Barones territoriales</h3><span class="etq">${l.length}</span></div><div class="lista">${filas || '<div class="vacio" style="padding:10px">Ningún presidente autonómico de tu partido: no tienes barones… de momento.</div>'}</div>${esc2 ? `<h4 style="margin:12px 0 4px">💥 Escisiones</h4><div class="lista">${esc2}</div>` : ''}<div class="tenue" style="font-size:11.5px;margin-top:6px">Si un barón pierde la lealtad puede fundar su propio partido regional y llevarse votos, escaños y gobierno.</div></div>`;
     },
     interno(el) {
       const E = C.E, Pi = C.PartidoInt, p = Pi.asegurar(E), J = E.jugador, pa = E.partidos[J.partido], c = p.cong, f = p.fac, lider = pa.lider === 'J';

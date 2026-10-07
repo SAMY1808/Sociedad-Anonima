@@ -215,4 +215,4 @@ con un Gobierno de izquierdas apoyado por regionalistas.
 - **Némesis** (`Nemesis`, Mayorías → Rivales): un rival personal que filtra casos, te quita aliados y te reta a debatir; historial de enfrentamientos en las urnas.
 - **Dilemas** (`Dilemas`, pestaña *Dilemas*): decisiones con reloj, capital político, tres asesores que se contradicen y una hemeroteca que te pasa factura semanas después. **Voto decisivo**: cuando una votación se decide por ≤3 votos aparecen las llamadas de presión.
 - **Metas personales** y **Crónica semanal** (Legado): eliges a qué aspiras y lees la portada de la semana.
-
+- **Barones** (`Barones`, Mi partido → Interno): cada presidente autonómico de tu partido tiene lealtad y ambición; si se enfada salta el dilema «Un barón amenaza con irse» (ceder, expulsar o no hacer nada). Si rompe, **funda un partido regional** que se lleva votos, escaños autonómicos, diputados y el gobierno de su comunidad; puedes intentar reconciliarte más tarde.
