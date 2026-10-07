@@ -52,7 +52,7 @@ window.ESP = window.ESP || {};
       const socios = camp.coal ? `<div class="nota">🤝 Coalición pactada con <b>${esc(E.partidos[camp.coal.b].sigla)}</b>.</div>` : (Ca.listasAbiertas(E, camp) && peso ? `<div class="lista">${Ca.socios(E, camp).map(s => `<div class="it"><span class="pto" style="background:${E.partidos[s.k].color}"></span><div class="cuerpo" style="flex:1"><b>${esc(E.partidos[s.k].sigla)}</b><span>Afinidad ${Math.round(s.a * 100)} %</span></div><span class="etq ${s.p >= 0.5 ? 'verde' : s.p >= 0.3 ? 'amar' : 'rojo'}">${Math.round(s.p * 100)} %</span>${UI.botonAccion('coalicion_pre', { pid: s.k }, 'Proponer', 'chico')}</div>`).join('')}</div>` : '<div class="tenue" style="font-size:12.5px">No puedes pactar coaliciones ahora (las listas están cerradas o no diriges el partido).</div>');
       const coal = `<div class="tarjeta"><h3>🤝 Coalición preelectoral</h3>${socios}</div>`;
       return `${Cp.selector(E, camps, camp)}<div class="titulo-camp" style="margin-bottom:10px"><b>Campaña de ${esc(Ca.nombre(E, camp))}</b> <span class="tenue">· elecciones el ${U.fmtT(camp.tVoto, true)}</span></div>
-        <div class="grid g-dash"><div class="col">${asesor}${presup}${encu}${debate}${sucesos}</div><div class="col">${terr}${gasto}${coal}</div></div>`;
+        <div class="grid g-dash"><div class="col">${C.Pantallas.campana3 ? C.Pantallas.campana3.html(E, camp) : ''}${asesor}${presup}${encu}${debate}${sucesos}</div><div class="col">${terr}${gasto}${coal}</div></div>`;
     },
 
     fuera(E) {

@@ -77,11 +77,11 @@ window.ESP = window.ESP || {};
       let s = `<svg class="graf mosaico" viewBox="0 0 ${W} ${Ht}" style="max-height:${o.altoMax || 520}px">`;
       for (const id in P) {
         const d = P[id], x = d[4] * (tw + gap), y = d[5] * (th + gap), rc = E.esp.ccaa[d[1]], pr = E.esp.prov[id];
-        const col = Mo.colorProv(E, id, capa);
+        const oculta = o.visible && !o.visible.has(id), col = oculta ? '#1b2640' : Mo.colorProv(E, id, capa);
         const propio = E.jugador && (E.jugador.circ === id && E.jugador.nivel === 'nacional');
         const sel = o.region && o.region === d[1];
         let tt = `<div class="tt-t">${esc(d[0])} · ${esc(C.DATA.ccaa[d[1]].nombre)}</div><div class="tt-f"><span>Diputados</span><b>${d[2]}</b></div>`;
-        if (pr) { const top = Object.keys(pr.escanos).sort((a, b) => pr.escanos[b] - pr.escanos[a]).slice(0, 4); tt += top.map(k => `<div class="tt-f"><span><i class="pto" style="background:${E.partidos[k].color}"></i> ${E.partidos[k].sigla}</span><b>${pr.escanos[k]} · ${U.d1(pr.votos[k])} %</b></div>`).join(''); }
+        if (pr && !oculta) { const top = Object.keys(pr.escanos).sort((a, b) => pr.escanos[b] - pr.escanos[a]).slice(0, 4); tt += top.map(k => `<div class="tt-f"><span><i class="pto" style="background:${E.partidos[k].color}"></i> ${E.partidos[k].sigla}</span><b>${pr.escanos[k]} · ${U.d1(pr.votos[k])} %</b></div>`).join(''); }
         tt += `<div class="tt-f"><span>Gobierno autonómico</span><b>${rc.gob ? E.partidos[rc.gob.partido].sigla : '—'}</b></div><div class="tt-f"><span>Relación con Moncloa</span><b>${Math.round(rc.relM)}</b></div><div class="tt-f"><span>Independentismo</span><b>${U.d1(rc.indep)} %</b></div>`;
         s += `<g class="ficha" data-ccaa="${d[1]}" data-prov="${id}" data-tt="${esc(tt)}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${tw}" height="${th}" rx="8" fill="${col}" stroke="${propio ? COL.jugador : sel ? '#fff' : '#0A111D'}" stroke-width="${propio || sel ? 3.4 : 1.2}"/>
           <text x="${x + tw / 2}" y="${y + 20}" text-anchor="middle" style="font-size:12.5px;fill:#fff;font-weight:700;paint-order:stroke;stroke:rgba(0,0,0,.5);stroke-width:2px">${id}</text>

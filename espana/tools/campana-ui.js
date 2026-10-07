@@ -43,6 +43,7 @@ const movil = process.argv[2] === 'movil';
   await pg.waitForSelector('#n-saltar', { timeout: 15000 }); await clic('#n-saltar'); await pg.waitForTimeout(600);
   ok(await pg.evaluate(() => /Sondeo a pie de urna/i.test(document.querySelector('.modal-fondo').innerText)), 'la noche electoral muestra el sondeo a pie de urna');
   await pg.screenshot({ path: `/tmp/${movil ? 'cam' : 'cad'}-noche.png`, fullPage: false });
+  if (await pg.$('#n-dec [data-op]')) await clic('#n-dec [data-op="0"]'); await pg.waitForFunction(() => !document.querySelector('#n-cerrar').disabled, null, { timeout: 8000 });
   await clic('#n-cerrar'); await cerrar();
   await pg.evaluate(() => { const E = ESP.E; E.esp.pendienteInvestidura = false; E.esp.pendienteSocio = false; E.elecciones.nochePendiente = null; E.jugador.agenda.puntos = 20; E.jugador.region = 'MAD'; E.esp.ccaa.MAD.parl.proxT = E.fecha.t + 8; ESP.Campana.turno(E); ESP.App.ir('elecciones', { tab: 'campana' }); }); await pg.waitForTimeout(400);
   ok(await pg.evaluate(() => /Campaña de las autonómicas de/i.test(document.querySelector('#vista').innerText)), 'la campaña autonómica tiene su panel');
