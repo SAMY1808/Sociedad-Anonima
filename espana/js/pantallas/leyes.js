@@ -123,8 +123,19 @@ window.ESP = window.ESP || {};
         <table class="tabla"><tbody>${filas}</tbody></table>
         <div class="voto-btns">${['si', 'abs', 'no'].map(v => `<button class="btn ${v} ${v === linea ? 'linea' : ''}" data-v="${v}"><b>${VT[v]}</b><span class="tenue" style="font-size:11px">${v === linea ? 'Línea de tu partido' : ''}</span></button>`).join('')}</div>
         <div class="tenue" style="font-size:12px;margin-top:10px">Votar contra la línea del partido erosiona tu prestigio interno y la cohesión del grupo.</div>`;
-      const m = UI.modal({ titulo: 'Votación en el pleno · ' + p.t, icono: '🗳', cuerpo, clase: 'medio', sinCerrar: true });
+      const decisivo = Math.abs(pr.dist) <= 3 && C.Dilemas;
+      const LL = { direccion: ['📞', 'Llamada de la dirección', 'Te piden votar con el partido: cohesión si cedes.'], rival: ['🤝', 'Llamada del rival', 'Te ofrecen un favor futuro a cambio de tu voto.'], conciencia: ['🕯', 'Voto de conciencia', 'Decides por convicción, caiga quien caiga.'] };
+      const banner = decisivo ? `<div class="nota" style="border-left:3px solid var(--no,#d9534f);margin-bottom:10px"><b>⚡ Voto decisivo</b> — la ley pende de un hilo (${pr.si} sí · ${pr.no} no; margen ${pr.dist >= 0 ? '+' : ''}${pr.dist}). Tu voto puede cambiarlo todo.<div class="fila" style="gap:6px;margin-top:8px;flex-wrap:wrap">${Object.keys(LL).map(k => `<button class="btn chico" data-ll="${k}" title="${esc(LL[k][2])}">${LL[k][0]} ${LL[k][1]}</button>`).join('')}</div><div id="ll-res" class="tenue" style="font-size:12px;margin-top:6px"></div></div>` : '';
+      const m = UI.modal({ titulo: 'Votación en el pleno · ' + p.t, icono: '🗳', cuerpo: banner + cuerpo, clase: 'medio', sinCerrar: true });
       m.cuerpo.addEventListener('click', e => {
+        const ll = e.target.closest('[data-ll]');
+        if (ll) {
+          const k = ll.dataset.ll, pa = E.partidos[J.partido], rv = C.Nemesis && C.Nemesis.elegir(E).pid; let txt = '';
+          if (k === 'direccion') { pa.cohesion = Math.min(99, pa.cohesion + 1.5); txt = 'La dirección agradece tu lealtad (+cohesión), pero te recordarán que te presionaron.'; }
+          else if (k === 'rival') { if (rv && C.Mayorias) C.Mayorias.cambiarRel(E, rv, 5); C.Dilemas.asegurar(E).memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: 'favor', txt: `aceptaste una llamada de ${E.partidos[rv].sigla} antes de votar «${p.t}»`, pid: rv, cobrado: false }); txt = 'Aceptas el favor: un rival te deberá… y tú a él.'; }
+          else { C.Personaje.cambiar(E, { prestigio: 1.1 }); txt = 'Tu conciencia te marca el camino: prestigio personal.'; }
+          m.cuerpo.querySelectorAll('[data-ll]').forEach(b => b.disabled = true); const r = m.cuerpo.querySelector('#ll-res'); if (r) r.textContent = txt; return;
+        }
         const b = e.target.closest('[data-v]'); if (!b) return;
         const ix = E.parl.pendienteVoto.indexOf(id); if (ix >= 0) E.parl.pendienteVoto.splice(ix, 1);
         const v = C.Congreso.resolver(E, p, b.dataset.v);

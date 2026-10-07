@@ -79,7 +79,7 @@ window.ESP = window.ESP || {};
       const J = E.jugador, hit = J.hitos || {}, anios = E.fecha.t / 52, pa = E.partidos[J.partido], pts = C.Personaje.puntuacion(E);
       const cima = hit.pm ? 'llegó a presidir el Gobierno de España' : hit.presauto ? 'presidió una comunidad autónoma' : hit.ministro ? 'fue ministro/a' : hit.lider ? 'lideró su partido' : hit.alcalde ? 'fue alcalde/sa' : 'hizo carrera desde la base';
       const tono = pts > 600 ? 'Los manuales de historia política le dedicarán un capítulo.' : pts > 250 ? 'Dejará una huella reconocible en su partido y en las instituciones.' : 'Su paso por la política será recordado, sobre todo, por quienes trabajaron a su lado.';
-      return `${J.nombre} lleva ${U.d1(anios)} años en política con ${pa.nombre}: ${cima}. ${tono} Puntuación actual: ${pts} puntos.`;
+      return `${J.nombre} lleva ${U.d1(anios)} años en política con ${pa.nombre}: ${cima}. ${tono} Puntuación actual: ${pts} puntos.${(() => { const m = C.Metas && C.Metas.asegurar(E), h = m ? Object.keys(m.hechas) : []; return h.length ? ' Metas cumplidas: ' + h.map(k => C.Metas.META[k][1]).join(', ') + '.' : ''; })()}`;
     }
   };
   C.Tiempo.registrar('legado', { turno: Lg.turno }, 80);

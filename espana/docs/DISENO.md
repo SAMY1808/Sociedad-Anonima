@@ -189,3 +189,5 @@ Cada módulo guarda su estado en `E.esp.<clave>` y se registra con `Tiempo.regis
 - `Ejecutivo.mejorPlan` alimenta la calculadora de mayorías; los pactos usan `E.esp.pactos` y el plazo se resuelve con `Coaliciones.retira` (real, no aleatorio).
 - `Organismos.sesgoCIS` sustituye al +0,8 fijo del CIS; `Organismos.mercados` entra en la prima de riesgo de `Estructural`.
 - Las herramientas de prueba deben limpiar `pendienteConvAut` y `E.esp.gab.escandalo` además de los bloqueos clásicos.
+- Nuevos módulos: `campana3` (82-… semanal, envuelve `Campana.turnoCamp`/`consejos`), `nemesis` (55), `dilemas` (56), `metas` (82). Estado en `E.esp.nem`, `E.esp.dil`, `E.esp.metas`. La noche electoral sustituye a `C.Pantallas.elecciones.noche`/`nocheLocales` desde `js/pantallas/noche.js` y delega en la versión clásica como respaldo.
+

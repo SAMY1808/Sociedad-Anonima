@@ -17,6 +17,7 @@ window.ESP = window.ESP || {};
         if (J.region && E.esp.ccaa[J.region] && E.esp.ccaa[J.region].gob) { const aa = M.alternativasAut(E, J.region); h += `<div class="tarjeta"><div class="t-cab"><h3>Moción de censura en ${esc(D().ccaa[J.region].nombre)}</h3><span class="etq">Estabilidad ${Math.round(E.esp.ccaa[J.region].gob.estab)}</span></div><div class="lista">${aa.map(a => `<div class="it"><b>${Comp.partido(E, a.cand)}</b><span class="tenue" style="font-size:12px;flex:1;margin-left:8px">${a.bloque.map(k => E.partidos[k].sigla).join(' + ')}</span><span class="etq ${a.exito ? 'verde' : 'rojo'}">${a.si}/${a.may}</span></div>`).join('') || '<div class="vacio" style="padding:10px">Sin alternativas.</div>'}</div></div>`; }
       } else if (tab === 'rivales') {
         const ks = P.partidos.filter(k => k !== J.partido && (P.escanos[k] || 0) >= 4).sort((a, b) => P.escanos[b] - P.escanos[a]);
+        h += C.Nemesis ? C.Pantallas.mayorias.nemesisHTML(E) : '';
         h += `<div class="tarjeta"><div class="t-cab"><h3>Los rivales</h3></div><div class="lista">${ks.map(k => { const p = E.partidos[k], e = M.ESTILOS[m.estilo[k]], l = E.politicos[p.lider], r = Math.round(m.rel[k]); return `<div class="it" style="flex-direction:column;align-items:stretch"><div class="fila" style="gap:8px;flex-wrap:wrap"><b>${Comp.partido(E, k)}</b><span class="tenue" style="font-size:12px">${l ? esc(l.n) : ''} · ${P.escanos[k]} esc.</span><span class="etq">${e[1]} ${e[0]}</span><span class="etq ${r > 20 ? 'verde' : r < -20 ? 'rojo' : ''}" style="margin-left:auto">Relación ${r > 0 ? '+' : ''}${r}</span></div><div class="tenue" style="font-size:11.5px;white-space:normal">${esc(e[2])}</div>
           <div class="fila" style="gap:6px;margin-top:6px">${UI.botonAccion('reunirse_rival', { pid: k }, '☕ Reunirte', 'chico')}${UI.botonAccion('atacar_rival', { pid: k }, '🗡️ Atacar', 'chico')}</div></div>`; }).join('')}</div></div>`;
       } else {
@@ -26,6 +27,15 @@ window.ESP = window.ESP || {};
       el.innerHTML = h;
       UI.$$('[data-tm]', el).forEach(b => b.onclick = () => { E.ui.tabMay = b.dataset.tm; C.App.refrescar(); });
       UI.$$('[data-of]', el).forEach(b => b.onclick = () => { const r = b.dataset.k === 'a' ? M.aceptarOferta(E, b.dataset.of) : M.rechazarOferta(E, b.dataset.of); UI.toast(esc(r.msg), r.ok ? 'bien' : 'mal'); C.App.refrescar(); });
-    }
+    },
+    nemesisHTML(E) {
+      const N = C.Nemesis, s = N.elegir(E); if (!s.pid) return '';
+      const r = E.partidos[s.pid], l = E.politicos[s.id], J = E.jugador, ganas = s.enfr.filter(x => x.gana).length;
+      return `<div class="tarjeta" style="border-left:3px solid var(--no,#d9534f)"><div class="t-cab"><h3>🥊 Tu némesis: ${esc(l.n)}</h3><span class="etq">${Comp.partido(E, s.pid)}</span></div>
+        <div class="fila" style="gap:10px;align-items:center"><span class="tenue" style="font-size:12px;width:90px">Animadversión</span><div class="barra-h" style="height:8px;flex:1"><i style="width:${s.odio}%;background:var(--no,#d9534f)"></i></div><b>${Math.round(s.odio)}</b></div>
+        ${s.enfr.length ? `<div class="tenue" style="font-size:12px;margin-top:6px">Cara a cara en las urnas: ${ganas} victorias – ${s.enfr.length - ganas} derrotas · último: ${esc(J.partidoSigla || E.partidos[J.partido].sigla)} ${s.enfr[0].tu} frente a ${s.enfr[0].el}</div>` : ''}
+        <div class="fila" style="gap:6px;margin:8px 0">${UI.botonAccion('tender_mano_nemesis', {}, '🕊️ Tender la mano', 'chico')}${UI.botonAccion('provocar_nemesis', {}, '🔥 Provocar', 'chico')}${UI.botonAccion('desafiar_nemesis', {}, '🥊 Cara a cara', 'chico')}</div>
+        <div class="lista" style="font-size:12.5px">${s.hist.slice(0, 5).map(x => `<div class="it"><span class="etq">${U.fmtT(x.t, true)}</span><div class="cuerpo" style="flex:1;white-space:normal">${esc(x.txt)}</div></div>`).join('')}</div></div>`;
+    },
   };
 })(window.ESP);

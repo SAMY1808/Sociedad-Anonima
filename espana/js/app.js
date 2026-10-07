@@ -11,7 +11,7 @@ window.ESP = window.ESP || {};
     ['#', 'Poder e instituciones'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['corona', '👑', 'La Corona', 'Corona'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['medios', '📰', 'Medios y opinión', 'Medios'],
     ['#', 'País y mundo'], ['estructural', '🗺', 'Problemas de país', 'País'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['exterior', '🌍', 'Mundo', 'Mundo'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
     ['#', 'Partido y personas'], ['partido', '🎗', 'Mi partido', 'Partido'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'],
-    ['#', 'Mi carrera'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], ['ajustes', '⚙️', 'Ajustes y compartir', 'Ajustes'], null, ['partidas', '💾', 'Partidas', 'Partidas']
+    ['#', 'Mi carrera'], ['dilemas', '⏳', 'Dilemas', 'Dilemas'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], ['ajustes', '⚙️', 'Ajustes y compartir', 'Ajustes'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 
   const App = {
@@ -111,7 +111,7 @@ window.ESP = window.ESP || {};
     },
 
     badges(E, mios) {
-      return { leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '', jefe: E.esp.jefe && E.esp.jefe.prop.length || '', crisis: C.Crisis ? (C.Crisis.asegurar(E).activas.filter(c => c.fase !== 'cerrada' && (C.Crisis.jugadorEstado(E) ? c.usadas.length < 2 : C.Crisis.jugadorRegion(E, c) && !c.usadasReg.length)).length || '') : '', medios: C.Medios ? (C.Medios.bulosJ(E).length || '') : '' };
+      return { dilemas: (C.Dilemas && E.jugador.pais === 'ES' && C.Dilemas.asegurar(E).act.length) || '', leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '', jefe: E.esp.jefe && E.esp.jefe.prop.length || '', crisis: C.Crisis ? (C.Crisis.asegurar(E).activas.filter(c => c.fase !== 'cerrada' && (C.Crisis.jugadorEstado(E) ? c.usadas.length < 2 : C.Crisis.jugadorRegion(E, c) && !c.usadasReg.length)).length || '') : '', medios: C.Medios ? (C.Medios.bulosJ(E).length || '') : '' };
     },
 
     /* Hoja «Más» del móvil: el resto de secciones del juego. */

@@ -74,7 +74,7 @@ Es una PWA: se puede instalar y jugar sin conexión.
 - **Personaje**: nivel de partida (local / autonómico / nacional), partido, trayectoria, atributos, ideología en
   **cuatro ejes** (economía, valores, Europa, territorio). Escalera: concejal → alcalde/sa → diputado/a autonómico/a →
   consejero/a → presidente/a autonómico/a → diputado/a → ministro/a → presidente/a del Gobierno → eurodiputado/a →
-  comisario/a. Campañas autonómicas, municipales y generales; **noche electoral** animada.
+  comisario/a. Campañas autonómicas, municipales y generales; **noche electoral en directo** (pie de urna, escrutinio provincia a provincia, decisiones, llamadas y balcón).
 - **Leyes con diseño e impacto** (inspirado en *Lawgivers II* y *Geopolitical Simulator 6*): cada ley se **diseña**
   (alcance limitado/estándar/ambicioso, enfoque alternativo, financiación con deuda/impuestos/recortes, entrada en
   vigor inmediata o gradual) y tiene un **informe de impacto** previo: efectos sobre **14 indicadores del país**
@@ -208,3 +208,11 @@ Los datos (población, escaños, umbrales) son aproximados. Los parlamentos auto
 circunscripción única; sólo 67 municipios se simulan individualmente. Los otros 26 países de la UE funcionan de forma
 agregada. La partida arranca en octubre de 2026 con unas Cortes calibradas a 2023: derecha primera en escaños, pero
 con un Gobierno de izquierdas apoyado por regionalistas.
+
+## Más emoción (campaña viva, noche electoral, némesis, dilemas)
+- **Campaña viva** (`Campana3`): fases (arranque, carrera, debate, recta final), indecisos que se decantan, sucesos interactivos, investigar y publicar dosieres sobre el rival, mitin de cierre.
+- **Noche electoral en directo** (`NocheEnVivo`, `js/pantallas/noche.js`): pie de urna a las 20:00, participación, escrutinio por franjas con mapa que se va coloreando y proyección de escaños, decisiones durante la noche y cierre con cara a cara con tu némesis. También en vivo para la noche autonómica.
+- **Némesis** (`Nemesis`, Mayorías → Rivales): un rival personal que filtra casos, te quita aliados y te reta a debatir; historial de enfrentamientos en las urnas.
+- **Dilemas** (`Dilemas`, pestaña *Dilemas*): decisiones con reloj, capital político, tres asesores que se contradicen y una hemeroteca que te pasa factura semanas después. **Voto decisivo**: cuando una votación se decide por ≤3 votos aparecen las llamadas de presión.
+- **Metas personales** y **Crónica semanal** (Legado): eliges a qué aspiras y lees la portada de la semana.
+

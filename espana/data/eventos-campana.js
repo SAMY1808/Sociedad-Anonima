@@ -75,4 +75,11 @@ window.ESP = window.ESP || {};
       { t: 'Respetar la jornada de reflexión', ef: (E, J) => { Pj().cambiar(E, { prestigio: 0.8 }); return 'Pasas el día en silencio; tu imagen institucional sube.'; } },
       { t: 'Lanzar la filtración «anónima»', ef: (E, J) => { const r = rival(E, J); if (U().chance(0.45)) { C.Campana.mover(E, r, -0.9, `Una filtración sacude a ${sig(E, r)} en la jornada de reflexión.`); return 'Funciona: llega justo el sábado.'; } mover(E, J, -0.8, `${pa(E).sigla} acusado de saltarse la jornada de reflexión.`); Pj().cambiar(E, { prestigio: -1.5 }); return 'La Junta Electoral te investiga y se te vuelve en contra.'; } },
       { t: 'Mensaje de movilización en redes', ef: (E, J) => { const c = C.Campana.cur(E); c.movil[J.partido] = clamp((c.movil[J.partido] || 0) + 0.2, 0, 2); return 'Un mensaje cálido a los tuyos, sin saltarte las normas.'; } }] });
+  /* Némesis: duelo televisado propuesto por el rival. */
+  ev({ id: 'nem_debate', titulo: 'Tu némesis te reta a un cara a cara', icono: '🥊', peso: 0, cd: 40, req: () => false,
+    texto: (E, J) => `${C.Nemesis.nombre(E)} te emplaza públicamente a un debate a dos, sin moderadores, en una gran cadena. Los medios ya lo llaman «el duelo del año».`,
+    opciones: [
+      { t: 'Aceptar y prepararte a fondo', ef: (E, J) => { const o = (J.atrib.oratoria + J.atrib.carisma) / 20; C.Nemesis.subir(E, 5); if (U().chance(clamp(0.38 + o * 0.45, 0.2, 0.85))) { C.Opinion.empujeES(E, C.Nemesis.asegurar(E).pid, -0.05); C.Opinion.empuje(E, J.partido, 0.05, 0.3); Pj().cambiar(E, { prestigio: 2, pop: 1.2 }); return 'Brillas en el duelo y los medios te dan la victoria.'; } C.Opinion.empuje(E, J.partido, -0.03, 0.3); Pj().cambiar(E, { prestigio: -1.5, pop: -0.8 }); return 'El duelo no sale como esperabas: tu rival se lleva el titular.'; } },
+      { t: 'Rechazarlo: «no hago el juego a nadie»', ef: (E, J) => { Pj().cambiar(E, { prestigio: -0.4 }); C.Nemesis.subir(E, 2); return 'Te acusan de huir del debate, pero evitas el riesgo.'; } },
+      { t: 'Proponer un debate con todos los candidatos', ef: (E, J) => { Pj().cambiar(E, { prestigio: 0.4 }); return 'Contraproposición hábil: el asunto se enfría.'; } }] });
 })(window.ESP);

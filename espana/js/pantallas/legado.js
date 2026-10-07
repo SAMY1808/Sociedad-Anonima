@@ -3,7 +3,7 @@ window.ESP = window.ESP || {};
 (function (C) {
   const U = C.U, UI = C.UI, esc = U.esc, G = C.Graf;
   C.Pantallas = C.Pantallas || {};
-  const TABS = [['semana', '🗞 Resumen semanal'], ['stats', '📊 Estadísticas'], ['balance', '⚖️ Balance de legislatura'], ['logros', '🏆 Logros'], ['epilogo', '📖 Epílogo']];
+  const TABS = [['semana', '🗞 Resumen semanal'], ['stats', '📊 Estadísticas'], ['balance', '⚖️ Balance de legislatura'], ['logros', '🏆 Logros'], ['cronica', '📰 Crónica semanal'], ['metas', '🎯 Metas'], ['epilogo', '📖 Epílogo']];
   C.Pantallas.legado = {
     render(el) {
       const E = C.E, Lg = C.Legado, l = Lg.asegurar(E), tab = E.ui.tabLegado || 'semana'; let h;
@@ -19,8 +19,15 @@ window.ESP = window.ESP || {};
           ${(Lg.asegurar(E).legs || []).length ? `<div class="tarjeta"><h3>Legislaturas anteriores</h3><div class="lista">${Lg.asegurar(E).legs.map(x => `<div class="it"><span class="etq">${U.fmtT(x.t1, true)}</span><div class="cuerpo" style="flex:1">Legislatura ${x.n}: ${x.ok}/${x.tot} promesas</div><span class="etq oro">${esc(x.nota)} · ${x.pts}</span></div>`).join('')}</div></div>` : ''}`;
       } else if (tab === 'logros') {
         h = `<div class="cuadricula-2">${Object.keys(Lg.LOGROS).map(k => { const g = Lg.LOGROS[k], t = l.logros[k]; return `<div class="tarjeta" style="${t ? 'border-color:var(--oro)' : 'opacity:.55'}"><div class="t-cab"><h3>${t ? g[0] : '🔒'} ${esc(g[1])}</h3>${t ? `<span class="etq oro">${U.fmtT(t, true)}</span>` : ''}</div><div class="tenue" style="font-size:12.5px">${esc(g[2])}</div></div>`; }).join('')}</div>`;
+      } else if (tab === 'cronica') {
+        const ed = C.Cronica.edicion(E);
+        h = `<div class="tarjeta" style="font-family:Georgia,serif"><div class="tenue" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;text-align:center;border-bottom:2px solid var(--borde,#444);padding-bottom:4px">El Diario de la Semana · ${esc(ed.fecha)}</div><h2 style="margin:12px 0 6px;font-size:22px;line-height:1.2">${esc(ed.titular)}</h2><div class="cuadricula-2" style="align-items:start;margin-top:10px"><div class="lista">${ed.resto.map(n => `<div class="it"><div class="cuerpo" style="white-space:normal;font-size:13px">${esc(n.texto)}</div></div>`).join('') || '<div class="vacio">Sin más noticias.</div>'}</div><div><h4 style="margin:0 0 4px">✍️ Editorial</h4><p style="font-size:13px;line-height:1.5;margin:0 0 10px">${esc(ed.editorial)}</p><h4 style="margin:0 0 4px">🔥 En redes</h4>${ed.tendencias.map(x => `<div style="font-size:12.5px"><b>${esc(x.tag)}</b> <span class="tenue">${esc(x.txt)}</span></div>`).join('') || '<div class="tenue">Calma en las redes.</div>'}</div></div></div>`;
+      } else if (tab === 'metas') {
+        const Mt = C.Metas, m = Mt.asegurar(E);
+        h = `<div class="tarjeta"><div class="t-cab"><h3>🎯 Tu meta personal</h3><span class="etq">${m.id ? Mt.META[m.id][1] : 'sin elegir'}</span></div><div class="tenue" style="font-size:12.5px">Elige a qué aspiras: al cumplirla ganas prestigio y queda en tu epílogo.</div></div><div class="cuadricula-2">${Object.keys(Mt.META).map(k => { const g = Mt.META[k], hecha = m.hechas[k], p = Mt.progreso(E, k); return `<div class="tarjeta" style="${hecha ? 'border-color:var(--oro)' : m.id === k ? 'border-color:var(--si,#3bb273)' : ''}"><div class="t-cab"><h3>${g[0]} ${esc(g[1])}</h3><span class="etq ${hecha ? 'oro' : ''}">${hecha ? '✔ ' + U.fmtT(hecha, true) : '+' + g[4] + ' pres.'}</span></div><div class="tenue" style="font-size:12.5px">${esc(g[2])}</div><div class="barra-h" style="height:6px;margin:8px 0"><i style="width:${Math.round(p * 100)}%;background:var(--oro)"></i></div>${hecha ? '' : m.id === k ? '<span class="etq verde">Meta activa</span>' : `<button class="btn chico" data-meta="${k}">Elegir como meta</button>`}</div>`; }).join('')}</div>`;
       } else h = `<div class="tarjeta"><div class="t-cab"><h3>📖 Tu epílogo, hasta ahora</h3></div><p style="font-size:14px;line-height:1.6">${esc(Lg.epilogo(E))}</p><div class="tenue" style="font-size:12px">Se reescribe a medida que avanza tu carrera. Si te retiras, esta es la historia que queda.</div></div>`;
       el.innerHTML = `<div class="cab"><div><h1>🏆 Legado</h1><div class="sub">Qué ha pasado esta semana, cómo vas y qué has conseguido</div></div></div><div class="seg" style="margin-bottom:12px;flex-wrap:wrap">${TABS.map(([k, n]) => `<button data-tl="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${h}`;
+      UI.$$('[data-meta]', el).forEach(b => b.onclick = () => { const r = C.Metas.elegir(E, b.dataset.meta); UI.toast(r.msg); C.App.refrescar(); });
       UI.$$('[data-tl]', el).forEach(b => b.onclick = () => { E.ui.tabLegado = b.dataset.tl; C.App.refrescar(); });
     }
   };
