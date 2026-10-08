@@ -4,11 +4,12 @@ window.ESP = window.ESP || {};
   const U = C.U, UI = C.UI, esc = U.esc, D = () => C.DATA, Comp = C.Comp;
   C.Pantallas = C.Pantallas || {};
   const TABS = [['mayorias', '🧮 Mayorías'], ['rivales', '🎭 Rivales'], ['pactos', '🤝 Ofertas']];
-  C.Pantallas.mayorias = {
+  const M_ = C.Pantallas.mayorias = {
     render(el) {
       const E = C.E, M = C.Mayorias, m = M.asegurar(E), J = E.jugador, P = E.paises.ES, g = P.gob, tab = E.ui.tabMay || 'mayorias';
       let h = `<div class="cab"><div><h1>🧮 Mayorías y rivales</h1><div class="sub">¿Quién puede derribar a quién? Estabilidad del Gobierno: <b>${Math.round(g.estab)}</b></div></div></div><div class="tabs" style="margin-bottom:12px">${TABS.map(([k, n]) => `<button data-tm="${k}" class="${tab === k ? 'activo' : ''}">${n}${k === 'pactos' && m.ofertas.length ? ` <span class="badge">${m.ofertas.length}</span>` : ''}</button>`).join('')}</div>`;
       if (tab === 'mayorias') {
+        if (C.Presion && J.pais === 'ES') h += M_.presionHTML(E);
         const alt = M.alternativas(E), sondeado = m.sonda && E.fecha.t - m.sonda.t < 8;
         h += `<div class="tarjeta"><div class="t-cab"><h3>Moción de censura (Congreso)</h3><span class="etq ${g.estab < 48 ? 'rojo' : ''}">Gobierno: ${g.coalicion.map(k => E.partidos[k].sigla).join(' + ')}</span></div>
           <div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px">${UI.botonAccion('sondear_mayoria', {}, '📡 Sondear a los grupos', 'chico')}${J.rol === 'lider' && !g.coalicion.includes(J.partido) ? UI.botonAccion('mocion_censura', {}, '⚡ Presentar moción', 'chico') : ''}</div>
@@ -18,6 +19,7 @@ window.ESP = window.ESP || {};
       } else if (tab === 'rivales') {
         const ks = P.partidos.filter(k => k !== J.partido && (P.escanos[k] || 0) >= 4).sort((a, b) => P.escanos[b] - P.escanos[a]);
         h += C.Nemesis ? C.Pantallas.mayorias.nemesisHTML(E) : '';
+        h += C.Intriga ? M_.vetosHTML(E, ks) : '';
         h += `<div class="tarjeta"><div class="t-cab"><h3>Los rivales</h3></div><div class="lista">${ks.map(k => { const p = E.partidos[k], e = M.ESTILOS[m.estilo[k]], l = E.politicos[p.lider], r = Math.round(m.rel[k]); return `<div class="it" style="flex-direction:column;align-items:stretch"><div class="fila" style="gap:8px;flex-wrap:wrap"><b>${Comp.partido(E, k)}</b><span class="tenue" style="font-size:12px">${l ? esc(l.n) : ''} · ${P.escanos[k]} esc.</span><span class="etq">${e[1]} ${e[0]}</span><span class="etq ${r > 20 ? 'verde' : r < -20 ? 'rojo' : ''}" style="margin-left:auto">Relación ${r > 0 ? '+' : ''}${r}</span></div><div class="tenue" style="font-size:11.5px;white-space:normal">${esc(e[2])}</div>
           <div class="fila" style="gap:6px;margin-top:6px">${UI.botonAccion('reunirse_rival', { pid: k }, '☕ Reunirte', 'chico')}${UI.botonAccion('atacar_rival', { pid: k }, '🗡️ Atacar', 'chico')}</div></div>`; }).join('')}</div></div>`;
       } else {
@@ -27,6 +29,29 @@ window.ESP = window.ESP || {};
       el.innerHTML = h;
       UI.$$('[data-tm]', el).forEach(b => b.onclick = () => { E.ui.tabMay = b.dataset.tm; C.App.refrescar(); });
       UI.$$('[data-of]', el).forEach(b => b.onclick = () => { const r = b.dataset.k === 'a' ? M.aceptarOferta(E, b.dataset.of) : M.rechazarOferta(E, b.dataset.of); UI.toast(esc(r.msg), r.ok ? 'bien' : 'mal'); C.App.refrescar(); });
+    },
+    presionHTML(E) {
+      const Pr = C.Presion, s = Pr.asegurar(E), n = Math.round(s.nivel), g = E.paises.ES.gob, c = E.esp.cortes, J = E.jugador, pm = Pr.esPM(E), col = n >= 65 ? 'var(--no,#d9534f)' : n >= 40 ? 'var(--oro)' : 'var(--si,#3bb273)';
+      const desde = Math.max(0, (c.ultDisolucion || 0) + 52 - E.fecha.t), fin = Math.max(0, c.finMax - E.fecha.t), fac = Pr.factores(E);
+      const socios = g.coalicion.filter(k => k !== g.partido);
+      const botones = pm ? `${UI.botonAccion('dar_la_cara', {}, '🛡️ Dar la cara', 'chico')}` : `${UI.botonAccion('exigir_elecciones', {}, '📣 Exigir elecciones ya', 'chico')}${UI.botonAccion('movilizar_elecciones', {}, '🪧 Movilización', 'chico')}${UI.botonAccion('bloquear_gobierno', {}, '🚧 Obstruir', 'chico')}${socios.map(k => UI.botonAccion('presionar_socio_gobierno', { pid: k }, '🔨 Presionar a ' + esc(E.partidos[k].sigla), 'chico')).join('')}`;
+      return `<div class="tarjeta" style="border-left:3px solid ${col}"><div class="t-cab"><h3>📣 Presión para adelantar las elecciones</h3><span class="etq">${n} / 100</span></div>
+        <div class="barra-h" style="height:10px"><i style="width:${n}%;background:${col}"></i></div>
+        <div class="tenue" style="font-size:12px;margin:6px 0">${pm ? 'La oposición aprieta para que convoques elecciones: si pasa de 65 te llegará un dilema.' : 'Cuanta más presión, más probable es que el presidente convoque elecciones (a partir de 55) o que caiga su mayoría.'} ${desde > 0 ? `Aún no pueden disolverse las Cortes (faltan ${desde} sem.).` : `Fin de legislatura en ${fin} sem.`}</div>
+        ${fac.length ? `<div class="lista" style="font-size:12.5px">${fac.map(f => `<div class="it"><span>${f[0]}</span><span style="margin-left:8px">${esc(f[1])}</span></div>`).join('')}</div>` : '<div class="tenue" style="font-size:12px">El Gobierno no atraviesa ninguna crisis de fondo.</div>'}
+        <div class="fila" style="gap:6px;margin-top:8px;flex-wrap:wrap">${botones}</div>
+        ${s.hist.length ? `<div class="tenue" style="font-size:11.5px;margin-top:8px">${s.hist.slice(0, 3).map(x => U.fmtT(x.t, true) + ': ' + esc(x.txt)).join(' · ')}</div>` : ''}</div>`;
+    },
+    vetosHTML(E, ks) {
+      const In = C.Intriga, J = E.jugador, vs = In.asegurar(E).vetos, mios = vs.filter(v => v.a === J.partido).map(v => v.b), otros = vs.filter(v => v.a !== J.partido && v.b !== J.partido);
+      const aMi = vs.filter(v => v.b === J.partido).map(v => v.a);
+      const libres = ks.filter(k => !mios.includes(k));
+      return `<div class="tarjeta"><div class="t-cab"><h3>⛔ Vetos</h3><span class="etq">${vs.length}</span></div>
+        <div class="tenue" style="font-size:12px;margin-bottom:6px">Un veto impide que dos partidos gobiernen juntos. Se declaran en campaña y caducan tras las elecciones.</div>
+        ${aMi.length ? `<div class="nota" style="margin-bottom:6px">Te vetan: ${aMi.map(k => Comp.partido(E, k)).join(' · ')}</div>` : ''}
+        ${mios.length ? `<div class="lista">${mios.map(k => `<div class="it"><span style="flex:1">Tú vetas a ${Comp.partido(E, k)}</span>${UI.botonAccion('levantar_veto', { pid: k }, '🔓 Levantar', 'chico')}</div>`).join('')}</div>` : ''}
+        ${otros.length ? `<div class="tenue" style="font-size:12px;margin-top:6px">Entre otros: ${otros.slice(0, 6).map(v => esc(E.partidos[v.a].sigla) + ' ⛔ ' + esc(E.partidos[v.b].sigla)).join(' · ')}</div>` : ''}
+        <div class="fila" style="gap:6px;margin-top:8px;flex-wrap:wrap">${libres.slice(0, 6).map(k => UI.botonAccion('vetar_partido', { pid: k }, '⛔ Vetar a ' + esc(E.partidos[k].sigla), 'chico')).join('')}</div></div>`;
     },
     nemesisHTML(E) {
       const N = C.Nemesis, s = N.elegir(E); if (!s.pid) return '';

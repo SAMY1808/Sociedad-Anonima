@@ -7,6 +7,7 @@ window.ESP = window.ESP || {};
   const sg = (E, k) => E.partidos[k].sigla;
   const pa = E => E.partidos[E.jugador.partido];
   const rival = E => { const s = C.Nemesis && C.Nemesis.elegir(E); return s && s.pid ? s.pid : C.Mayorias.oposicion(E)[0]; };
+  const lz = (E, x, d) => { if (x && x.pol && E.politicos[x.pol]) C.Intriga.sumarLazo(E, x.pol, d); };
   const rel = (E, k, d) => { if (C.Mayorias && k) C.Mayorias.cambiarRel(E, k, d); };
   /* Catálogo: texto, opciones {k,t,d,cap,ef→msg,mem?}, consejo por asesor, plazo (semanas) y defecto (índice). */
   const CAT = {
@@ -15,27 +16,27 @@ window.ESP = window.ESP || {};
       op: [
         { k: 'publicar', t: 'Publicarlos a través de un medio afín', d: 'Daña al rival, con riesgo de que se descubra el origen.', ef: (E, J) => { const r = rival(E); if (U.chance(0.6)) { C.Opinion.empujeES(E, r, -0.06); rel(E, r, -8); return `La filtración golpea a ${sg(E, r)}.`; } C.Personaje.cambiar(E, { prestigio: -2.5 }, true); return 'Se descubre el origen: escándalo en tu entorno.'; }, mem: { tipo: 'filtracion', txt: 'filtraste documentos contra un rival' } },
         { k: 'guardar', t: 'Guardarlos para un momento mejor', d: 'Sin riesgo ahora, pero otros pueden acabar sabiéndolo.', ef: (E, J) => { return 'Los guardas bajo llave: sin ruido por ahora.'; }, mem: { tipo: 'filtracion', txt: 'guardaste documentos comprometedores' } },
-        { k: 'destruir', t: 'Destruirlos y avisar al rival', d: 'Un gesto limpio que le obliga a deberte una.', cap: 5, ef: (E, J) => { const r = rival(E); rel(E, r, 10); C.Personaje.cambiar(E, { prestigio: 1.5 }); return `${sg(E, r)} te debe un favor.`; }, mem: { tipo: 'favor', txt: 'le perdonaste una filtración a tu rival', pid: 'r' } }],
+        { k: 'destruir', t: 'Destruirlos y avisar al rival', d: 'Un gesto limpio que le obliga a deberte una.', cap: 8, ef: (E, J) => { const r = rival(E); rel(E, r, 10); C.Personaje.cambiar(E, { prestigio: 1.5 }); return `${sg(E, r)} te debe un favor.`; }, mem: { tipo: 'favor', txt: 'le perdonaste una filtración a tu rival', pid: 'r' } }],
       as: { jefe: 'guardar', portavoz: 'publicar', estratega: 'destruir' } },
     socio: { ic: '🤝', n: 'Un socio aprieta', req: E => E.paises.ES.gob.pm === 'J' && (E.paises.ES.gob.apoyoExterno || []).length > 0, plazo: 3, defecto: 1,
       txt: E => { const g = E.paises.ES.gob, k = (g.apoyoExterno || [])[0]; return `${sg(E, k)} advierte de que dejará de apoyarte si no cedes en un asunto que considera «innegociable».`; },
       op: [
         { k: 'ceder', t: 'Ceder y cerrar el acuerdo', d: 'Aseguras el apoyo, a costa de imagen.', ef: (E, J) => { const g = E.paises.ES.gob; g.estab = clamp(g.estab + 4, 0, 100); g.aprob = clamp(g.aprob - 1.2, 5, 90); return 'Cedes: tu mayoría respira.'; }, mem: { tipo: 'cesion', txt: 'cediste ante un socio' } },
-        { k: 'plantar', t: 'Plantarte: «no hay trato»', d: 'Muestras firmeza, pero te arriesgas a perder la mayoría.', cap: 10, ef: (E, J) => { const g = E.paises.ES.gob; if (U.chance(0.5)) { g.estab = clamp(g.estab + 1, 0, 100); C.Personaje.cambiar(E, { prestigio: 1.5 }); return 'El socio traga: ganas autoridad.'; } g.estab = clamp(g.estab - 7, 0, 100); return 'El socio rompe: tu mayoría se tambalea.'; } },
+        { k: 'plantar', t: 'Plantarte: «no hay trato»', d: 'Muestras firmeza, pero te arriesgas a perder la mayoría.', cap: 15, ef: (E, J) => { const g = E.paises.ES.gob; if (U.chance(0.5)) { g.estab = clamp(g.estab + 1, 0, 100); C.Personaje.cambiar(E, { prestigio: 1.5 }); return 'El socio traga: ganas autoridad.'; } g.estab = clamp(g.estab - 7, 0, 100); return 'El socio rompe: tu mayoría se tambalea.'; } },
         { k: 'aplazar', t: 'Aplazar con una comisión de seguimiento', d: 'Ganas semanas sin resolver el fondo.', ef: (E, J) => { const g = E.paises.ES.gob; g.estab = clamp(g.estab + 0.5, 0, 100); return 'Compras tiempo con una comisión.'; } }],
       as: { jefe: 'aplazar', portavoz: 'plantar', estratega: 'ceder' } },
     baron: { ic: '🧑‍💼', n: 'Un barón se rebela', req: E => E.partidos[E.jugador.partido].amb === 'nac', plazo: 3, defecto: 2,
       txt: E => `Un barón territorial de tu partido critica públicamente tu liderazgo y amenaza con un congreso extraordinario.`,
       op: [
         { k: 'pactar', t: 'Pactar con él: dar peso a su territorio', d: 'Compras su silencio y refuerzas la unidad.', ef: (E, J) => { pa(E).cohesion = clamp(pa(E).cohesion + 3, 15, 99); return 'El barón se calma: más unidad.'; }, mem: { tipo: 'cesion', txt: 'pactaste con un barón rebelde' } },
-        { k: 'castigar', t: 'Castigarle: apartarle de la dirección', d: 'Muestras autoridad, con riesgo de guerra interna.', cap: 12, ef: (E, J) => { if (U.chance(0.55)) { pa(E).cohesion = clamp(pa(E).cohesion + 1.5, 15, 99); C.Personaje.cambiar(E, { prestigio: 1.5 }); return 'La dirección cierra filas contigo.'; } pa(E).cohesion = clamp(pa(E).cohesion - 7, 15, 99); return 'El barón arrastra a otros: guerra civil en el partido.'; } },
+        { k: 'castigar', t: 'Castigarle: apartarle de la dirección', d: 'Muestras autoridad, con riesgo de guerra interna.', cap: 18, ef: (E, J) => { if (U.chance(0.55)) { pa(E).cohesion = clamp(pa(E).cohesion + 1.5, 15, 99); C.Personaje.cambiar(E, { prestigio: 1.5 }); return 'La dirección cierra filas contigo.'; } pa(E).cohesion = clamp(pa(E).cohesion - 7, 15, 99); return 'El barón arrastra a otros: guerra civil en el partido.'; } },
         { k: 'ignorar', t: 'Ignorarle', d: 'No haces nada y esperas que se enfríe.', ef: (E, J) => { pa(E).cohesion = clamp(pa(E).cohesion - 2.5, 15, 99); return 'Lo ignoras y la crítica crece.'; } }],
       as: { jefe: 'pactar', portavoz: 'ignorar', estratega: 'castigar' } },
     amigo: { ic: '🫂', n: 'Un compañero, en problemas', req: E => true, plazo: 3, defecto: 2,
       txt: E => `Un viejo compañero tuyo aparece en un informe judicial por un asunto turbio. Los medios piden que te pronuncies.`,
       op: [
         { k: 'defender', t: 'Defender su inocencia', d: 'Lealtad: si se confirma, tu imagen se resiente.', ef: (E, J) => { if (U.chance(0.5)) { C.Personaje.cambiar(E, { prestigio: 1 }); return 'Se aclara: quedas como un amigo leal.'; } C.Personaje.cambiar(E, { prestigio: -3 }, true); return 'Se confirma lo peor: te salpica.'; }, mem: { tipo: 'promesa', txt: 'dijiste que tu compañero era inocente', k: 'corr' } },
-        { k: 'apartar', t: 'Apartarle de inmediato', d: 'Ejemplaridad, con enfado entre los tuyos.', cap: 6, ef: (E, J) => { pa(E).cohesion = clamp(pa(E).cohesion - 2, 15, 99); C.Personaje.cambiar(E, { prestigio: 2 }); return 'Das ejemplo, pero hay malestar interno.'; } },
+        { k: 'apartar', t: 'Apartarle de inmediato', d: 'Ejemplaridad, con enfado entre los tuyos.', cap: 9, ef: (E, J) => { pa(E).cohesion = clamp(pa(E).cohesion - 2, 15, 99); C.Personaje.cambiar(E, { prestigio: 2 }); return 'Das ejemplo, pero hay malestar interno.'; } },
         { k: 'callar', t: 'Guardar silencio', d: 'Esperas que pase la tormenta.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: -1 }); return 'El silencio se interpreta como complicidad.'; } }],
       as: { jefe: 'apartar', portavoz: 'defender', estratega: 'callar' } },
     encuesta: { ic: '📊', n: 'Una encuesta incómoda', req: E => true, plazo: 2, defecto: 0,
@@ -62,16 +63,58 @@ window.ESP = window.ESP || {};
     escision: { ic: '💥', n: 'Un barón amenaza con irse', req: E => false, plazo: 3, defecto: 2,
       txt: (E, x) => { const b = x && x.reg && C.Barones.asegurar(E).b[x.reg], p = b && E.politicos[b.id]; return `${p ? p.n : 'Un barón'}, presidente/a de ${x && x.reg ? C.DATA.ccaa[x.reg].nombre : 'su comunidad'}, se siente maltratado/a y estudia abandonar el partido para fundar uno propio.`; },
       op: [
-        { k: 'ceder', t: 'Ceder: financiación y peso en la dirección', d: 'Compras su lealtad; otros barones protestarán por el agravio.', cap: 8, ef: (E, J, x) => { const B = C.Barones, s = B.asegurar(E), b = s.b[x.reg]; if (!b) return 'El barón ya no está en tu partido.'; if (b) b.leal = clamp(b.leal + 38, 0, 100); for (const o of B.lista(E)) if (o.c !== x.reg) o.b.leal = clamp(o.b.leal - 4, 0, 100); pa(E).cohesion = clamp(pa(E).cohesion + 1, 15, 99); return 'El barón se queda… por ahora. Otros miran con envidia.'; }, mem: { tipo: 'cesion', txt: 'cediste ante el chantaje de un barón' } },
-        { k: 'expulsar', t: 'Plantarle cara: expulsarlo/a', d: 'Muestras autoridad, pero se va y funda su partido con parte de la estructura.', cap: 6, ef: (E, J, x) => { if (!C.Barones.fundar(E, x.reg, 0.55)) return 'El barón ya no está en tu partido.'; C.Personaje.cambiar(E, { prestigio: 1.0 }); return 'Lo expulsas: nace un nuevo partido regional.'; } },
+        { k: 'ceder', t: 'Ceder: financiación y peso en la dirección', d: 'Compras su lealtad; otros barones protestarán por el agravio.', cap: 12, ef: (E, J, x) => { const B = C.Barones, s = B.asegurar(E), b = s.b[x.reg]; if (!b) return 'El barón ya no está en tu partido.'; if (b) b.leal = clamp(b.leal + 38, 0, 100); for (const o of B.lista(E)) if (o.c !== x.reg) o.b.leal = clamp(o.b.leal - 4, 0, 100); pa(E).cohesion = clamp(pa(E).cohesion + 1, 15, 99); return 'El barón se queda… por ahora. Otros miran con envidia.'; }, mem: { tipo: 'cesion', txt: 'cediste ante el chantaje de un barón' } },
+        { k: 'expulsar', t: 'Plantarle cara: expulsarlo/a', d: 'Muestras autoridad, pero se va y funda su partido con parte de la estructura.', cap: 9, ef: (E, J, x) => { if (!C.Barones.fundar(E, x.reg, 0.55)) return 'El barón ya no está en tu partido.'; C.Personaje.cambiar(E, { prestigio: 1.0 }); return 'Lo expulsas: nace un nuevo partido regional.'; } },
         { k: 'dejar', t: 'No hacer nada', d: 'Quizá se calme… o quizá se vaya con todo.', ef: (E, J, x) => { if (U.chance(0.5) && C.Barones.fundar(E, x.reg, 1)) { return 'Tu pasividad lo empuja a la ruptura: funda su partido.'; } const b = C.Barones.asegurar(E).b[x.reg]; if (b) b.leal = 40; return 'La tormenta amaina, pero la herida sigue abierta.'; } }],
       as: { jefe: 'ceder', portavoz: 'expulsar', estratega: 'ceder' } },
+    presion: { ic: '📣', n: 'La oposición exige elecciones', req: E => false, plazo: 3, defecto: 0,
+      txt: E => `La presión en la calle y en el Congreso para que convoques elecciones anticipadas es máxima (${Math.round(C.Presion.asegurar(E).nivel)} de 100).`,
+      op: [
+        { k: 'resistir', t: 'Resistir: «agotaré la legislatura»', d: 'Bajas la presión, pero pierdes algo de apoyo parlamentario.', cap: 8, ef: (E, J) => { C.Presion.empujar(E, -14, 'Resistes la presión.'); E.paises.ES.gob.estab = clamp(E.paises.ES.gob.estab - 1.5, 0, 100); C.Personaje.cambiar(E, { prestigio: -0.4 }); return 'Resistes el chaparrón: la presión baja.'; } },
+        { k: 'convocar', t: 'Convocar elecciones', d: 'Tomas la iniciativa y disuelves las Cortes.', ef: (E, J) => { const r = C.Generales.disolver(E, 'ante la presión de la oposición', false); if (r !== true) { C.Presion.empujar(E, -8); return 'No puedes disolver ahora (' + r + '): ganas tiempo.'; } C.Personaje.cambiar(E, { pop: 0.5, prestigio: 0.5 }); return 'Convocas elecciones: tomas la iniciativa.'; } },
+        { k: 'confianza', t: 'Plantear una cuestión de confianza', d: 'Si la ganas, quedas fortalecido; si la pierdes, caen las Cortes.', ef: (E, J) => { const g = E.paises.ES.gob, p = clamp(0.22 + g.estab / 140 + (g.coalicion.length - 1) * 0.04, 0.15, 0.85); if (U.chance(p)) { C.Presion.empujar(E, -32, 'Ganas la cuestión de confianza.'); g.estab = clamp(g.estab + 8, 0, 100); C.Personaje.cambiar(E, { prestigio: 2 }); return 'Superas la cuestión de confianza: sales reforzado.'; } C.Generales.disolver(E, 'tras perder la cuestión de confianza', true); C.Personaje.cambiar(E, { prestigio: -2 }); return 'Pierdes la cuestión de confianza: se disuelven las Cortes.'; } }],
+      as: { jefe: 'resistir', portavoz: 'confianza', estratega: 'convocar' } },
+    favorAmigo: { ic: '🤝', n: 'Un viejo amigo pide un favor', req: E => false, plazo: 4, defecto: 2,
+      txt: (E, x) => { const p = x && E.politicos[x.pol]; return `${p ? p.n : 'Un viejo amigo'} (${p ? E.partidos[p.p].sigla : ''}) te pide un favor delicado: que suavices tu postura en un asunto que le afecta.`; },
+      op: [
+        { k: 'conceder', t: 'Concederle el favor', d: 'Refuerzas la amistad; te lo pueden echar en cara.', cap: 6, ef: (E, J, x) => { lz(E, x, 25); const p = E.politicos[x.pol]; if (p) rel(E, p.p, 6); C.Personaje.cambiar(E, { prestigio: -0.3 }); return 'Le haces el favor: ganas un aliado personal.'; }, mem: { tipo: 'favor', txt: 'concediste un favor a un viejo amigo político', pid: 'r' } },
+        { k: 'condicionar', t: 'Condicionarlo a algo a cambio', d: 'Transaccional: ni amigo ni enemigo.', ef: (E, J, x) => { lz(E, x, 4); C.Personaje.cambiar(E, { prestigio: 0.3 }); return 'Pides contrapartidas: la relación se enfría un poco.'; } },
+        { k: 'negar', t: 'Negárselo con elegancia', d: 'Mantienes la coherencia a costa de la amistad.', ef: (E, J, x) => { lz(E, x, -12); C.Personaje.cambiar(E, { prestigio: 0.6 }); return 'Se lo niegas: su afecto se resiente.'; } }],
+      as: { jefe: 'condicionar', portavoz: 'negar', estratega: 'conceder' } },
+    traicion: { ic: '🗡️', n: 'Un enemigo te filtra a la prensa', req: E => false, plazo: 3, defecto: 1,
+      txt: (E, x) => { const p = x && E.politicos[x.pol]; return `${p ? p.n : 'Un adversario'} (${p ? E.partidos[p.p].sigla : ''}) prepara una filtración contra ti. Te enteras antes de que salga.`; },
+      op: [
+        { k: 'adelantarte', t: 'Adelantarte: contar tu versión', d: 'Reduces el daño pero das pábulo.', ef: (E, J, x) => { C.Personaje.cambiar(E, { prestigio: -0.4 }); lz(E, x, -5); return 'Cuentas tu versión antes: el golpe pierde fuerza.'; } },
+        { k: 'dejar', t: 'Dejar que salga', d: 'Pierdes apoyos si es grave.', ef: (E, J, x) => { C.Personaje.cambiar(E, { prestigio: -1.4, pop: -0.4 }); lz(E, x, -8); return 'La filtración sale y te hace daño.'; } },
+        { k: 'pactar', t: 'Buscar un acuerdo con él', d: 'Rebajas el enfrentamiento personal.', cap: 8, ef: (E, J, x) => { lz(E, x, 30); return 'Pactáis una tregua: la filtración no llega a salir.'; } }],
+      as: { jefe: 'pactar', portavoz: 'adelantarte', estratega: 'adelantarte' } },
+    reportaje: { ic: '📰', n: 'Un reportaje de investigación te señala', req: E => false, plazo: 3, defecto: 2,
+      txt: E => { const m = C.Dilemas.asegurar(E).memoria.find(x => !x.cobrado); return m ? `Un medio publica un reportaje que recuerda que ${m.txt}.` : `Un medio prepara un reportaje sobre tu gestión y tu entorno. Te dan 24 horas para responder.`; },
+      op: [
+        { k: 'desmentir', t: 'Desmentirlo con contundencia', d: 'Puede salir bien o mal según tu integridad.', ef: (E, J) => { const p = clamp(0.35 + (J.atrib.integridad || 3) / 20, 0.2, 0.8); if (U.chance(p)) { C.Personaje.cambiar(E, { prestigio: 0.8 }); return 'Tu desmentido convence: el reportaje se desinfla.'; } C.Personaje.cambiar(E, { prestigio: -1.8 }); return 'Tu desmentido se desmonta: peor que si hubieras callado.'; } },
+        { k: 'demandar', t: 'Anunciar una demanda contra el medio', d: 'Intimida, pero te enemista con la prensa.', cap: 9, ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: -0.6, pop: -0.3 }); if (C.Medios && C.Medios.asegurar) { const m = C.Medios.asegurar(E); if (m && m.rel) for (const k in m.rel) m.rel[k] = clamp(m.rel[k] - 2, -100, 100); } return 'Anuncias acciones legales: sale el titular, pero te ganas enemigos.'; } },
+        { k: 'asumir', t: 'Asumirlo y pedir disculpas', d: 'Duele ahora, pero te hace creíble.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: -0.6, pop: 0.1 }); const m = C.Dilemas.asegurar(E).memoria.find(x => !x.cobrado); if (m) m.cobrado = true; return 'Pides disculpas: el asunto se cierra rápido.'; } }],
+      as: { jefe: 'asumir', portavoz: 'desmentir', estratega: 'demandar' } },
+    rey: { ic: '👑', n: 'Palabras del Rey que te interpelan', req: E => false, plazo: 2, defecto: 1,
+      txt: E => `El discurso del Rey ha dejado frases que la prensa interpreta como un mensaje para ti. Te piden una reacción.`,
+      op: [
+        { k: 'acoger', t: 'Acoger sus palabras y comprometerte', d: 'Imagen institucional.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 1.0 }); if (C.Corona) C.Corona.cambiar(E, 0.4); return 'Valoras el discurso y te comprometes: buena imagen.'; } },
+        { k: 'silencio', t: 'Mantener silencio', d: 'No ganas ni pierdes.', ef: () => 'Dejas pasar el asunto.' },
+        { k: 'critica', t: 'Marcar distancia con la Corona', d: 'Agrada a tu base más crítica.', ef: (E, J) => { C.Personaje.cambiar(E, { pop: 0.2, prestigio: -0.7 }); if (C.Corona) C.Corona.cambiar(E, -0.4); pa(E).cohesion = clamp(pa(E).cohesion + 0.5, 15, 99); return 'Te desmarcas: ruido institucional.'; } }],
+      as: { jefe: 'acoger', portavoz: 'silencio', estratega: 'acoger' } },
+    extranjero: { ic: '🌍', n: 'Una victoria electoral en el extranjero', req: E => false, plazo: 3, defecto: 1,
+      txt: (E, x) => `${x && x.sg ? x.sg : 'Un partido'} gana las elecciones en ${x && x.nom ? x.nom : 'otro país'} (${x && x.gr ? x.gr : ''}). Te piden que te posiciones.`,
+      op: [
+        { k: 'felicitar', t: 'Felicitar públicamente', d: 'Sube la relación, pero te asocian con él.', ef: (E, J, x) => { const Ex = C.Exterior; if (Ex) { const m = { FR: 'francia', DE: 'alemania', PT: 'portugal' }[x.ext]; if (m) { const e = Ex.asegurar(E); e.rel[m] = clamp(e.rel[m] + 2, 0, 100); } } C.Personaje.cambiar(E, { prestigio: ['ANR', 'PAT'].includes(x.gr) ? -1.2 : 0.4 }); return 'Felicitas al ganador.'; } },
+        { k: 'neutral', t: 'Respeto a la voluntad popular', d: 'Neutral, sin sobresaltos.', ef: () => 'Respetas el resultado sin comentarlo.' },
+        { k: 'distancia', t: 'Marcar distancia', d: 'Útil si el ganador es incómodo.', ef: (E, J, x) => { const ex = ['ANR', 'PAT'].includes(x.gr); C.Personaje.cambiar(E, { prestigio: ex ? 0.8 : -0.3 }); return ex ? 'Marcas distancia con la extrema derecha: aplauso en tu base.' : 'Te distancias sin mucho eco.'; } }],
+      as: { jefe: 'neutral', portavoz: 'distancia', estratega: 'felicitar' } },
     pactoEstado: { ic: '🏛', n: 'Una oferta de pacto de Estado', req: E => true, plazo: 3, defecto: 1,
       txt: E => `${sg(E, rival(E))} te ofrece un pacto de Estado, pero te exige un gesto que irritará a tus bases.`,
       op: [
         { k: 'aceptar', t: 'Aceptar el pacto', d: 'Sube tu imagen de estadista; tus bases lo sufren.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 2.2 }); pa(E).cohesion = clamp(pa(E).cohesion - 2.5, 15, 99); rel(E, rival(E), 9); return 'Cierras el pacto: imagen de Estado, ruido interno.'; }, mem: { tipo: 'cesion', txt: 'pactaste con tu rival contra el criterio de tus bases' } },
         { k: 'rechazar', t: 'Rechazarlo', d: 'Cierras filas con los tuyos.', ef: (E, J) => { pa(E).cohesion = clamp(pa(E).cohesion + 1.5, 15, 99); rel(E, rival(E), -4); return 'Rechazas el pacto: tu base aplaude.'; } },
-        { k: 'contra', t: 'Contraoferta: tus condiciones', d: 'Arriesgado: puede cuajar o romperse.', cap: 6, ef: (E, J) => { if (U.chance(0.45)) { C.Personaje.cambiar(E, { prestigio: 2.5 }); rel(E, rival(E), 6); return 'Aceptan tu contraoferta: gran golpe de efecto.'; } rel(E, rival(E), -6); return 'Rechazan tu contraoferta: sin pacto.'; } }],
+        { k: 'contra', t: 'Contraoferta: tus condiciones', d: 'Arriesgado: puede cuajar o romperse.', cap: 9, ef: (E, J) => { if (U.chance(0.45)) { C.Personaje.cambiar(E, { prestigio: 2.5 }); rel(E, rival(E), 6); return 'Aceptan tu contraoferta: gran golpe de efecto.'; } rel(E, rival(E), -6); return 'Rechazan tu contraoferta: sin pacto.'; } }],
       as: { jefe: 'contra', portavoz: 'rechazar', estratega: 'aceptar' } }
   };
   const Dl = C.Dilemas = {
@@ -86,19 +129,23 @@ window.ESP = window.ESP || {};
       const x = { uid: U.id('dl'), id, t0: t, limite: t + def.plazo, rival: rival(E) }; d.act.push(x); d.ult = t;
       C.Noticias.poner(E, 'politica', `${E.jugador.nombre} afronta una decisión delicada: ${def.n.toLowerCase()}.`, 'ES'); return x;
     },
+    /* Valora un cambio: prestigio y popularidad personales, cohesión del partido y apoyo del partido. */
+    puntua(dd) { return Math.round((dd.pr * 1 + dd.pop * 1.2 + dd.coh * 0.35 + (dd.ap || 0) * 6) * 10) / 10; },
+    registrar(E, tipo, txt, score) { const d = Dl.asegurar(E); d.hist.unshift({ t: E.fecha.t, txt, res: '', score, tipo }); if (d.hist.length > 60) d.hist.length = 60; },
+    libro(E) { return Dl.asegurar(E).hist.filter(h => h.score != null).slice().reverse(); },
     coste(o) { return o.cap || 0; },
     decidir(E, uid, k) {
       const d = Dl.asegurar(E), i = d.act.findIndex(x => x.uid === uid); if (i < 0) return { ok: false, msg: 'Ese dilema ya se ha resuelto' }; const x = d.act[i], def = CAT[x.id], o = def.op.find(y => y.k === k), J = E.jugador; if (!o) return { ok: false, msg: 'Opción no válida' };
       if ((o.cap || 0) > d.capital) return { ok: false, msg: `Necesitas ${o.cap} de capital político (tienes ${Math.round(d.capital)})` };
-      d.act.splice(i, 1); d.capital = clamp(d.capital - (o.cap || 0), 0, 100); let msg = ''; try { msg = o.ef(E, J, x) || ''; } catch (e) { console.error('[dilema]', x.id, e); }
+      const pa0 = pa(E), s0 = { pr: J.prestigio, pop: J.pop, coh: pa0.cohesion, ap: pa0.popN || pa0.pop }; d.act.splice(i, 1); d.capital = clamp(d.capital - (o.cap || 0), 0, 100); let msg = ''; try { msg = o.ef(E, J, x) || ''; } catch (e) { console.error('[dilema]', x.id, e); }
       // Asesores: el que aconsejó esa opción gana confianza; los demás pierden un poco
       for (const a in def.as) { const c = d.asesor[a]; if (def.as[a] === k) c.conf = clamp(c.conf + 4, 0, 100); else c.conf = clamp(c.conf - 1.5, 0, 100); }
       if (o.mem) { d.memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: o.mem.tipo, txt: o.mem.txt, k: o.mem.k || null, pid: o.mem.pid === 'r' ? x.rival : null, ini: o.mem.k ? C.Legado.valor(E, o.mem.k === 'corr' ? 'aprob' : o.mem.k) : null, cobrado: false }); if (d.memoria.length > 40) d.memoria.length = 40; }
-      d.hist.unshift({ t: E.fecha.t, txt: `${def.n}: ${o.t}`, res: msg }); if (d.hist.length > 25) d.hist.length = 25; C.Personaje.log(E, `${def.n}: ${o.t}. ${msg}`); return { ok: true, msg };
+      const pa1 = pa(E), dd = { pr: J.prestigio - s0.pr, pop: J.pop - s0.pop, coh: pa1.cohesion - s0.coh, ap: (pa1.popN || pa1.pop) - s0.ap }; d.hist.unshift({ t: E.fecha.t, txt: `${def.n}: ${o.t}`, res: msg, score: Dl.puntua(dd), tipo: 'dilema' }); if (d.hist.length > 60) d.hist.length = 60; C.Personaje.log(E, `${def.n}: ${o.t}. ${msg}`); return { ok: true, msg };
     },
     turno(E) {
       const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; const d = Dl.asegurar(E), t = E.fecha.t, aj = C.Ajustes ? C.Ajustes.get(E) : { eventos: 1 };
-      d.capital = clamp(d.capital + 0.4, 0, 100); Dl.asesores(E);
+      d.capital = clamp(d.capital + 0.15, 0, 100); Dl.asesores(E);
       // Caducan los dilemas sin decidir: se aplica la opción por defecto
       for (const x of d.act.slice()) if (t >= x.limite) { const def = CAT[x.id], o = def.op[def.defecto]; const cap = o.cap; if (cap) o.cap = 0; const r = Dl.decidir(E, x.uid, o.k); if (cap) o.cap = cap; C.Noticias.poner(E, 'politica', `${J.nombre} deja pasar el plazo en «${def.n.toLowerCase()}» y se impone la inercia.`, 'ES'); d.hist[0] && (d.hist[0].txt += ' (por inacción)'); }
       // Aparece un dilema nuevo

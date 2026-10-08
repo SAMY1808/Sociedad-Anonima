@@ -372,7 +372,8 @@ window.ESP = window.ESP || {};
         let pr = 0;
         if (g.estab < 22) pr = 0.03; else if (g.estab < 34 && margenBajo(E)) pr = 0.006;
         if (ventaja > 2.5 && bloque >= MAYORIA && c.finMax - t < 40) pr = Math.max(pr, 0.02);
-        if (U.chance(pr)) C.Generales.disolver(E, g.estab < 38 ? 'falta de apoyos parlamentarios' : 'adelanto electoral por conveniencia', false);
+        if (C.Presion) pr = Math.max(pr, C.Presion.probDisolucion(E, ventaja));
+        if (U.chance(pr)) C.Generales.disolver(E, g.estab < 38 ? 'falta de apoyos parlamentarios' : (C.Presion && C.Presion.asegurar(E).nivel >= 55 ? 'ante la presión de la oposición' : 'adelanto electoral por conveniencia'), false);
       }
     },
 

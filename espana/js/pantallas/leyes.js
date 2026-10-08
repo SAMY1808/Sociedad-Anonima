@@ -134,7 +134,7 @@ window.ESP = window.ESP || {};
           if (k === 'direccion') { pa.cohesion = Math.min(99, pa.cohesion + 1.5); txt = 'La dirección agradece tu lealtad (+cohesión), pero te recordarán que te presionaron.'; }
           else if (k === 'rival') { if (rv && C.Mayorias) C.Mayorias.cambiarRel(E, rv, 5); C.Dilemas.asegurar(E).memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: 'favor', txt: `aceptaste una llamada de ${E.partidos[rv].sigla} antes de votar «${p.t}»`, pid: rv, cobrado: false }); txt = 'Aceptas el favor: un rival te deberá… y tú a él.'; }
           else { C.Personaje.cambiar(E, { prestigio: 1.1 }); txt = 'Tu conciencia te marca el camino: prestigio personal.'; }
-          m.cuerpo.querySelectorAll('[data-ll]').forEach(b => b.disabled = true); const r = m.cuerpo.querySelector('#ll-res'); if (r) r.textContent = txt; return;
+          if (C.Dilemas) C.Dilemas.registrar(E, 'voto', `Voto decisivo en «${p.t}»: ${LL[k][1]}`, k === 'conciencia' ? 1.1 : k === 'direccion' ? 1.5 : 1.2); m.cuerpo.querySelectorAll('[data-ll]').forEach(b => b.disabled = true); const r = m.cuerpo.querySelector('#ll-res'); if (r) r.textContent = txt; return;
         }
         const b = e.target.closest('[data-v]'); if (!b) return;
         const ix = E.parl.pendienteVoto.indexOf(id); if (ix >= 0) E.parl.pendienteVoto.splice(ix, 1);

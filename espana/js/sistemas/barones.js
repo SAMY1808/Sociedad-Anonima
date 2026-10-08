@@ -20,16 +20,26 @@ window.ESP = window.ESP || {};
       return out;
     },
     turno(E) {
-      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; const t = E.fecha.t, pa = E.partidos[J.partido], P = E.paises.ES, pm = P.gob.partido === J.partido;
+      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; Br.turnoRivales(E); const t = E.fecha.t, pa = E.partidos[J.partido], P = E.paises.ES, pm = P.gob.partido === J.partido;
       for (const { c, b } of Br.lista(E)) {
         const rc = E.esp.ccaa[c], obj = 38 + pa.cohesion * 0.35 + (J.prestigio - 50) * 0.18 + (rc.relM - 55) * (pm ? 0.3 : 0.1) - rc.agravio * 0.8 - (b.amb - 50) * 0.25 + (rc.gob.aprob - 50) * 0.15;
         b.leal = clamp(b.leal + (obj - b.leal) * 0.04 + U.gauss(0, 1), 0, 100);
         if (b.leal < 30 && t - b.ult >= 10 && C.Dilemas && !C.Dilemas.asegurar(E).act.some(x => x.id === 'escision') && U.chance(0.05 + (30 - b.leal) * 0.003)) { const x = C.Dilemas.nuevo(E, 'escision'); if (x) { x.reg = c; b.ult = t; } }
       }
     },
+    /* Escisiones en los partidos rivales: presidentes autonómicos de otros partidos nacionales que rompen la baraja. */
+    turnoRivales(E) {
+      const J = E.jugador, s = Br.asegurar(E), t = E.fecha.t; if (!J || J.pais !== 'ES') return;
+      for (const c of C.Territorio.ids()) {
+        const g = E.esp.ccaa[c].gob, op = g && E.partidos[g.partido]; if (!g || g.partido === J.partido || !op || op.amb !== 'nac' || g.pres === 'J' || !E.politicos[g.pres]) continue;
+        if (s.esc.some(x => x.reg === c && t - x.t < 104)) continue;
+        const p = 0.0003 + Math.max(0, 62 - op.cohesion) * 0.00003 + (E.esp.ccaa[c].agravio || 0) * 0.0002;
+        if (U.chance(p)) { const f = U.rf(0.4, 1); const pid = Br.fundar(E, c, f, g.partido); if (pid && C.Intriga) C.Intriga.nota && C.Intriga.nota(E, `Escisión en ${op.sigla}`); }
+      }
+    },
     /* El barón se marcha y funda un partido regional. fuerza 0.4–1: cuánta estructura se lleva. */
-    fundar(E, c, fuerza) {
-      const J = E.jugador, P = E.paises.ES, s = Br.asegurar(E), rc = E.esp.ccaa[c]; if (!rc) return null; const g = rc.gob, old = J.partido, op = E.partidos[old], pol = g && E.politicos[g.pres]; if (!pol || g.partido !== old) return null;
+    fundar(E, c, fuerza, oldPid) {
+      const J = E.jugador, P = E.paises.ES, s = Br.asegurar(E), rc = E.esp.ccaa[c]; if (!rc) return null; const g = rc.gob, old = oldPid || J.partido, mio = old === J.partido, op = E.partidos[old], pol = g && E.politicos[g.pres]; if (!pol || g.partido !== old) return null;
       const cn = D().ccaa[c].nombre, sigla = ('B' + c).slice(0, 4), pid = 'ES_' + sigla + s.esc.length;
       const reg = (E.esp.aggReg && E.esp.aggReg[c] && E.esp.aggReg[c][old]) || 20, cuota = clamp(reg * (0.25 + fuerza * 0.3), 3, 28);
       const nombre = U.pick(['Unidos por ' + cn, 'Alternativa ' + cn, cn + ' Primero', 'Compromís ' + cn, 'Partido Regionalista de ' + cn]);
@@ -39,10 +49,10 @@ window.ESP = window.ESP || {};
       pol.p = pid; pol.partido = pid; g.partido = pid; g.coalicion = [pid].concat(g.coalicion.filter(k => k !== old && k !== pid));
       // Escaños autonómicos y diputados al Congreso que se van con él
       const esc = rc.parl.escanos, tr = Math.round((esc[old] || 0) * clamp(fuerza * 0.55, 0.2, 0.6)); esc[old] = (esc[old] || 0) - tr; esc[pid] = tr; if (!esc[old]) delete esc[old];
-      let dip = 0; if (C.Personas) { const cand = E.parl.miembros.filter(id => E.politicos[id] && E.politicos[id].p === old && id !== 'J'); const n = Math.min(cand.length || 0, Math.round(1 + fuerza * 3)); for (let i = 0; i < n; i++) if (C.Personas.mover(E, cand.splice(U.ri(0, cand.length - 1), 1)[0], pid, 'escisión')) dip++; }
-      op.cohesion = clamp(op.cohesion - 6 * fuerza, 15, 99); if (C.PartidoInt) { const pi = C.PartidoInt.asegurar(E); pi.fac.barones = clamp(pi.fac.barones - 3, 5, 60); }
-      C.Personaje.cambiar(E, { prestigio: -2.5 * fuerza }, true); if (C.Mayorias) C.Mayorias.cambiarRel(E, pid, -35);
-      s.esc.unshift({ t: E.fecha.t, reg: c, pid, baron: pol.n, de: old, dip }); delete s.b[c];
+      let dip = 0; if (C.Personas) { const rg = id => { const m = E.politicos[id]; return m && m.prov && D().provincias[m.prov] ? D().provincias[m.prov][1] : null; }; let cand = E.parl.miembros.filter(id => E.politicos[id] && E.politicos[id].p === old && id !== 'J' && rg(id) === c); if (cand.length < 2) cand = cand.concat(E.parl.miembros.filter(id => E.politicos[id] && E.politicos[id].p === old && id !== 'J' && rg(id) !== c).slice(0, 1)); const n = Math.min(cand.length || 0, Math.round(1 + fuerza * 3)); for (let i = 0; i < n; i++) if (C.Personas.mover(E, cand.splice(U.ri(0, cand.length - 1), 1)[0], pid, 'escisión')) dip++; }
+      op.cohesion = clamp(op.cohesion - 6 * fuerza, 15, 99); if (mio && C.PartidoInt) { const pi = C.PartidoInt.asegurar(E); pi.fac.barones = clamp(pi.fac.barones - 3, 5, 60); }
+      if (mio) C.Personaje.cambiar(E, { prestigio: -2.5 * fuerza }, true); if (C.Mayorias) C.Mayorias.cambiarRel(E, pid, -35);
+      s.esc.unshift({ t: E.fecha.t, reg: c, pid, baron: pol.n, de: old, dip, rival: !mio }); delete s.b[c];
       Br.nota(E, `${pol.n} abandona ${op.sigla} y funda «${nombre}» en ${cn}${dip ? ` con ${dip} diputado(s)` : ''}.`);
       C.Noticias.poner(E, 'politica', `ESCISIÓN: ${pol.n}, presidente/a de ${cn}, abandona ${op.sigla} y funda «${nombre}»; se lleva el gobierno autonómico.`, 'ES');
       return pid;
