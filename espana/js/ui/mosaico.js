@@ -65,6 +65,7 @@ window.ESP = window.ESP || {};
       const d = C.DATA.provincias[id], c = d[1], rc = E.esp.ccaa[c];
       if (capa === 'voto') { const pr = E.esp.prov[id]; return pr ? E.partidos[pr.ganador].color : '#444'; }
       if (capa === 'autonomico') return rc && rc.gob ? E.partidos[rc.gob.partido].color : '#444';
+      if (capa === 'impl') return escala(C.Sede ? (C.Sede.asegurar(E).impl[id] || 0) : 0, 10, 80);
       if (capa === 'relM') return escala(rc.relM, 15, 80);
       if (capa === 'indep') { const t = U.clamp(rc.indep / 40, 0, 1), m = (x, y) => Math.round(x + (y - x) * t); return `rgb(${m(60, 232)},${m(90, 177)},${m(150, 0)})`; }
       if (capa === 'aut') return escala(rc.aut, 40, 90);

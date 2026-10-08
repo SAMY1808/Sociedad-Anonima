@@ -10,7 +10,7 @@ window.ESP = window.ESP || {};
     ['#', 'Territorio'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['local2', '🏘', 'Poder local', 'Local'], ['lenguas', '🗣', 'Lenguas y símbolos', 'Lenguas'],
     ['#', 'Poder e instituciones'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['corona', '👑', 'La Corona', 'Corona'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['medios', '📰', 'Medios y opinión', 'Medios'],
     ['#', 'País y mundo'], ['estructural', '🗺', 'Problemas de país', 'País'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['exterior', '🌍', 'Mundo', 'Mundo'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
-    ['#', 'Partido y personas'], ['partido', '🎗', 'Mi partido', 'Partido'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'],
+    ['#', 'Partido y personas'], ['sede', '🏢', 'Sede del partido', 'Sede'], ['partido', '🎗', 'Mi partido', 'Partido'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'],
     ['#', 'Mi carrera'], ['dilemas', '⏳', 'Dilemas', 'Dilemas'], ['personaje', '👤', 'Mi carrera', 'Carrera'], ['legado', '🏆', 'Legado', 'Legado'], ['ajustes', '⚙️', 'Ajustes y compartir', 'Ajustes'], null, ['partidas', '💾', 'Partidas', 'Partidas']
   ];
 

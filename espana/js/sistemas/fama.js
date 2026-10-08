@@ -41,6 +41,7 @@ window.ESP = window.ESP || {};
       debate: ['📺 Debate', 'En cada tema, elige el tono: ataque brilla si el rival es débil, datos es seguro, ironía depende de tu carisma.'],
       vetos: ['⛔ Vetos', 'Los partidos se declaran vetos en campaña; los puedes ver y usar desde Mayorías → Rivales.'],
       vida: ['❤️ Vida personal', 'El estrés recorta tus puntos de agenda. Cuídate o te pasará factura (Dilemas → Vida personal).'],
+      sede: ['🏢 Sede del partido', 'Dirige el partido como organización: define el programa, abre sedes, ficha equipo y candidatos y cuida la caja.'],
       sesion: ['🏛 Sesión en directo', 'Tu discurso y tus pasillos pueden mover votos en la investidura y en la moción de censura.']
     },
     una(E, k) {

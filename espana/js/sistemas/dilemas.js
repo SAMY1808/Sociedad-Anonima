@@ -145,6 +145,13 @@ window.ESP = window.ESP || {};
         { k: 'expulsar', t: 'Plantarles cara y expulsarlos', d: 'Se van y fundan su partido con parte de la estructura.', cap: 5, ef: (E, J) => { const r = C.Escision.fundarNacional(E, { old: J.partido, fuerza: U.rf(0.4, 0.8), lider: null, motivo: 'expulsión de críticos' }); C.Personaje.cambiar(E, { prestigio: 0.8 }, true); return r ? 'Los críticos se van y fundan un partido propio.' : 'No llegan a irse.'; } },
         { k: 'dejar', t: 'No hacer nada', d: 'Quizá se queden… o se vayan con todo.', ef: (E, J) => { if (U.chance(0.45)) { const r = C.Escision.fundarNacional(E, { old: J.partido, fuerza: U.rf(0.6, 1), lider: null, motivo: 'crisis interna' }); if (r) return 'Se van con estrépito y fundan su partido.'; } return 'La amenaza se enfría, pero el malestar sigue.'; } }],
       as: { jefe: 'integrar', portavoz: 'expulsar', estratega: 'integrar' } },
+    donativo: { ic: '💼', n: 'Un empresario ofrece una donación', req: E => false, plazo: 3, defecto: 1,
+      txt: E => `Un empresario influyente ofrece una importante donación a ${pa(E).sigla} a cambio de «sensibilidad» con su sector. Las arcas del partido (${C.Sede ? C.Sede.millones(pa(E)) : Math.round(pa(E).finanzas)} M€) lo agradecerían.`,
+      op: [
+        { k: 'aceptar', t: 'Aceptar la donación sin preguntas', d: 'Mucha caja, pero puede acabar en los tribunales.', ef: (E, J) => { pa(E).finanzas = clamp(pa(E).finanzas + 14, 0, 99); if (C.Corrupcion && U.chance(0.35)) { C.Corrupcion.nuevo(E, J.partido, { gravedad: U.rf(0.25, 0.5), tipo: 'financiacion' }); return 'Aceptas el dinero… y a las semanas aparece una investigación por financiación irregular.'; } return 'Aceptas la donación: las arcas respiran.'; }, mem: { tipo: 'filtracion', txt: 'aceptaste una donación polémica para el partido' } },
+        { k: 'rechazar', t: 'Rechazarla públicamente', d: 'Ganas imagen; sigues escaso de caja.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 0.9 }, true); pa(E).cohesion = clamp(pa(E).cohesion + 0.5, 15, 99); return 'Rechazas la donación: ganas credibilidad.'; } },
+        { k: 'condicionar', t: 'Aceptar sólo como donación transparente y limitada', d: 'Menos dinero, sin riesgo.', ef: (E, J) => { pa(E).finanzas = clamp(pa(E).finanzas + 5, 0, 99); return 'Aceptas una donación legal, pública y limitada.'; } }],
+      as: { jefe: 'condicionar', portavoz: 'rechazar', estratega: 'aceptar' } },
     pactoEstado: { ic: '🏛', n: 'Una oferta de pacto de Estado', req: E => true, plazo: 3, defecto: 1,
       txt: E => `${sg(E, rival(E))} te ofrece un pacto de Estado, pero te exige un gesto que irritará a tus bases.`,
       op: [

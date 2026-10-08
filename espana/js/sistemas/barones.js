@@ -46,7 +46,7 @@ window.ESP = window.ESP || {};
       const pa = { id: pid, pais: 'ES', nombre, sigla, arq: op.arq, color: '#' + ((parseInt(op.color.slice(1), 16) ^ 0x3a5f2c) & 0xffffff).toString(16).padStart(6, '0'), eco: op.eco + U.ri(-6, 6), soc: op.soc + U.ri(-6, 6), eu: op.eu, ter: clamp((op.ter || 0) + 20, -60, 80), indep: 0, grupo: op.grupo, amb: 'reg', region: c, pop: cuota, base: cuota, popN: 0, cohesion: 80, finanzas: 35, militantes: 3000, lider: pol.id, nuevo: true, rp: { [c]: cuota }, rp0: { [c]: cuota } };
       E.partidos[pid] = pa; P.partidos.push(pid); E.esp.regionales.push(pid);
       if (C.Campana && C.Campana.registrar) C.Campana.registrar(E, pid);
-      for (const prov in D().provincias) { E.esp.pn[prov][pid] = 1; if (D().provincias[prov][1] === c) E.esp.pn[prov][old] *= clamp(1 - cuota / Math.max(reg, 1) * 0.9, 0.35, 0.95); }
+      for (const prov in D().provincias) { E.esp.pn[prov][pid] = 1; if (D().provincias[prov][1] === c) { const fct = clamp(1 - cuota / Math.max(reg, 1) * 0.9, 0.35, 0.95); E.esp.pn[prov][old] *= fct; if (E.esp.sede && E.esp.sede.pid === old) E.esp.sede.pn0[prov] *= fct; } }
       pol.p = pid; pol.partido = pid; g.partido = pid; g.coalicion = [pid].concat(g.coalicion.filter(k => k !== old && k !== pid));
       // Escaños autonómicos y diputados al Congreso que se van con él
       const esc = rc.parl.escanos, tr = Math.round((esc[old] || 0) * clamp(fuerza * 0.55, 0.2, 0.6)); esc[old] = (esc[old] || 0) - tr; esc[pid] = tr; if (!esc[old]) delete esc[old];
@@ -65,7 +65,7 @@ window.ESP = window.ESP || {};
       const rel = C.Mayorias ? C.Mayorias.asegurar(E).rel[pid] : 0; if (rel < 10) return { ok: false, msg: 'La relación está demasiado rota (necesitas mejorarla con el partido regional)' };
       if (!U.chance(clamp(0.3 + rel / 120 + (J.atrib.negociacion || 5) / 30, 0.2, 0.85))) { if (C.Mayorias) C.Mayorias.cambiarRel(E, pid, -4); return { ok: true, exito: false, msg: 'El intento de reconciliación fracasa' }; }
       const old = E.partidos[e.de], c = e.reg, rc = E.esp.ccaa[c], pol = E.politicos[pa.lider], esc = rc.parl.escanos; pa.rp[c] = 0; e.cerrada = true; pa.disuelto = true;
-      for (const prov in D().provincias) if (D().provincias[prov][1] === c) E.esp.pn[prov][e.de] = Math.min(1.3, E.esp.pn[prov][e.de] / 0.6);
+      for (const prov in D().provincias) if (D().provincias[prov][1] === c) { E.esp.pn[prov][e.de] = Math.min(1.3, E.esp.pn[prov][e.de] / 0.6); if (E.esp.sede && E.esp.sede.pid === e.de) E.esp.sede.pn0[prov] = Math.min(1.5, E.esp.sede.pn0[prov] / 0.6); }
       esc[e.de] = (esc[e.de] || 0) + (esc[pid] || 0); delete esc[pid]; if (pol) { pol.p = e.de; pol.partido = e.de; } if (rc.gob && rc.gob.partido === pid) { rc.gob.partido = e.de; rc.gob.coalicion = [e.de].concat(rc.gob.coalicion.filter(k => k !== pid)); }
       old.cohesion = clamp(old.cohesion + 4, 15, 99); C.Personaje.cambiar(E, { prestigio: 2.5 }); Br.nota(E, `${pol ? pol.n : 'El barón'} regresa a ${old.sigla}.`); C.Noticias.poner(E, 'politica', `Reconciliación: ${pa.nombre} se disuelve y su líder vuelve a ${old.sigla}.`, 'ES');
       return { ok: true, msg: 'Reconciliación lograda: el barón vuelve a casa' };

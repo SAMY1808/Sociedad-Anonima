@@ -7,6 +7,7 @@ window.ESP = window.ESP || {};
   const NIVELES = [
     { id: 'local', icono: '🏘️', nombre: 'Política local', desc: 'Concejal/a o alcaldable de uno de los 67 grandes ayuntamientos. Camino largo: ayuntamiento → comunidad → Cortes.' },
     { id: 'autonomico', icono: '🏛️', nombre: 'Política autonómica', desc: 'Diputado/a de un parlamento regional. Negocias con Moncloa financiación, traspasos y estatutos; puedes llegar a presidente/a autonómico/a.' },
+    { id: 'partido', icono: '🎗', nombre: 'Modo Partido', desc: 'Dirige un partido como organización: programa electoral, sedes provinciales, finanzas, equipo, candidatos y campañas dirigidas. Tú eres su líder.' },
     { id: 'nacional', icono: '🇪🇸', nombre: 'Política nacional', desc: 'Diputado/a del Congreso por una circunscripción. Cortes, Consejo de Ministros, investiduras y Bruselas.' }
   ];
   let S = null, preview = null;
@@ -33,7 +34,7 @@ window.ESP = window.ESP || {};
     const dc = D().ccaa[S.region], mun = Object.values(E.esp.muni.m).filter(m => m.ccaa === S.region);
     return `<h1>¿Dónde empieza tu carrera?</h1>
     <p class="tenue" style="margin-top:-8px">Elige el nivel y el territorio. Pulsa una provincia del mapa para elegir tu circunscripción o comunidad.</p>
-    <div class="sel-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-bottom:12px">${NIVELES.map(n => `<div class="fila-sel ${S.nivel === n.id ? 'sel' : ''}" data-nivel="${n.id}" style="flex-direction:column;align-items:flex-start;gap:3px"><b>${n.icono} ${n.nombre}</b><span class="tenue" style="font-size:12.5px">${n.desc}</span></div>`).join('')}</div>
+    <div class="sel-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-bottom:12px">${NIVELES.map(n => `<div class="fila-sel ${(n.id === 'partido' ? S.modoPartido : (!S.modoPartido && S.nivel === n.id)) ? 'sel' : ''}" data-nivel="${n.id}" style="flex-direction:column;align-items:flex-start;gap:3px"><b>${n.icono} ${n.nombre}</b><span class="tenue" style="font-size:12.5px">${n.desc}</span></div>`).join('')}</div>
     <div class="c-dos">
       <div class="tarjeta" id="c-mapa">${C.Mosaico.provincias(E, 'voto', { region: S.region })}${C.Mosaico.leyendaEs(E, 'voto')}</div>
       <div class="tarjeta"><div class="fila" style="gap:12px"><span class="rotulo-pais">📍</span><div><h2 style="font-size:23px">${esc(dc.nombre)}</h2><div class="tenue">${esc(dc.capital)} · ${U.d1(dc.pob)} M hab. · ${esc(dc.regimen)}</div></div></div>
@@ -100,7 +101,7 @@ window.ESP = window.ESP || {};
         <div class="tarjeta"><h3>Tu ideología</h3>
           ${[['eco', 'Economía (− izq / + der)'], ['soc', 'Social (− prog / + cons)'], ['eu', 'Europa (− escépt. / + fed.)'], ['ter', 'Territorial (− centralista / + soberanista)']].map(([k, t]) => `<div class="slider-fila"><span>${t}</span><input type="range" min="-100" max="100" value="${S[k]}" data-ideo="${k}"><span>${S[k]}</span></div>`).join('')}
           <div class="tenue" style="font-size:12px">Parte de la posición de tu partido; alejarte de ella te da perfil propio pero erosiona tu disciplina.</div></div>
-        <div class="tarjeta"><h3>Posición de partida</h3><div class="col">${roles.map(([k, n, d]) => `<div class="fila-sel ${(nuevo ? 'lider' : S.rol) === k ? 'sel' : ''}" data-rol="${k}" ${nuevo && k !== 'lider' ? 'style="opacity:.4;pointer-events:none"' : ''}><div><b>${n}</b><div class="tenue" style="font-size:12px">${d}</div></div></div>`).join('')}</div></div>
+        <div class="tarjeta"><h3>Posición de partida</h3><div class="col">${roles.map(([k, n, d]) => `<div class="fila-sel ${((nuevo || S.modoPartido) ? 'lider' : S.rol) === k ? 'sel' : ''}" data-rol="${k}" ${(nuevo || S.modoPartido) && k !== 'lider' ? 'style="opacity:.4;pointer-events:none"' : ''}><div><b>${n}</b><div class="tenue" style="font-size:12px">${d}</div></div></div>`).join('')}</div></div>
       </div></div>`;
   };
 
@@ -151,7 +152,7 @@ window.ESP = window.ESP || {};
       const ok = $('#c-ok'); if (ok) ok.onclick = () => C_.comenzar();
       UI.$$('[data-esc]', el).forEach(r => r.onclick = () => { S.escenario = r.dataset.esc; re(); });
       if (S.paso === 1) {
-        UI.$$('[data-nivel]', el).forEach(b => b.onclick = () => { S.nivel = b.dataset.nivel; re(); });
+        UI.$$('[data-nivel]', el).forEach(b => b.onclick = () => { const id = b.dataset.nivel; S.modoPartido = id === 'partido'; S.nivel = id === 'partido' ? 'nacional' : id; if (S.modoPartido) S.rol = 'lider'; re(); });
         UI.$$('[data-prov]', el).forEach(g => g.onclick = () => {
           S.prov = g.dataset.prov; S.region = D().provincias[S.prov][1];
           const E = mundoPrevio(); const ms = Object.values(E.esp.muni.m).filter(m => m.prov === S.prov); const rm = Object.values(E.esp.muni.m).filter(m => m.ccaa === S.region);
@@ -185,7 +186,7 @@ window.ESP = window.ESP || {};
       const opts = {
         semilla: S.semilla, pais: 'ES', nivel: S.nivel, region: S.region, circ: S.nivel === 'nacional' ? S.prov : null, muni: S.nivel === 'local' ? S.muni : null,
         nombre: S.nombre || 'Alex Navarro', genero: S.genero, edad: S.edad, trayectoria: S.trayectoria, atrib: S.atrib,
-        eco: S.eco, soc: S.soc, eu: S.eu, ter: S.ter, rol: S.partido === 'nuevo' ? 'lider' : S.rol, nombrePartida: S.nombrePartida || 'España'
+        eco: S.eco, soc: S.soc, eu: S.eu, ter: S.ter, rol: (S.partido === 'nuevo' || S.modoPartido) ? 'lider' : S.rol, nombrePartida: S.nombrePartida || 'España'
       };
       opts.escenario = S.escenario || 'normal';
       if (S.partido === 'nuevo') opts.nuevo = { logo: S.nuevo.logo, fin: S.nuevo.fin, implant: S.nuevo.implant.slice(), nombre: S.nuevo.nombre || 'Partido nuevo', sigla: (S.nuevo.sigla || 'PN').toUpperCase(), eco: S.nuevo.eco, soc: S.nuevo.soc, eu: S.nuevo.eu, ter: S.nuevo.ter, color: S.nuevo.color, arq: C_.arqCercano(S.nuevo) };
@@ -193,7 +194,7 @@ window.ESP = window.ESP || {};
       el.innerHTML = '<div class="inicio"><div class="cargando" style="font-size:18px;color:var(--oro2)">Generando España: 52 circunscripciones, 19 comunidades, 67 ayuntamientos y la Unión Europea…</div></div>';
       setTimeout(() => {
         const E = C.Mundo.nueva(opts);
-        E.meta.nombrePartida = opts.nombrePartida; if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);
+        E.meta.nombrePartida = opts.nombrePartida; E.meta.modoPartido = !!S.modoPartido; if (E.meta.modoPartido) { E.ui = E.ui || {}; E.ui.pantalla = 'sede'; } if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);
         S = null; preview = null;
         C.Guardado.guardar(null, opts.nombrePartida).then(() => C.App.comenzar());
       }, 30);
