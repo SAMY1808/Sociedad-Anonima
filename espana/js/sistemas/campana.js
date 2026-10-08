@@ -71,7 +71,7 @@ window.ESP = window.ESP || {};
     comunes(E, camp, v, share) {
       for (const k in v) {
         const pa = E.partidos[k];
-        v[k] *= 1 + camp.mom[k] / Math.max(4, share ? share[k] : (pa.popN || pa.pop || 4));
+        v[k] *= 1 + (camp.mom[k] || 0) / Math.max(4, share ? share[k] : (pa.popN || pa.pop || 4));
         v[k] *= 1 + (camp.movil[k] || 0) * 0.02;
         v[k] *= 1 + (pa.finanzas - 60) / 60 * 0.012;
       }
@@ -291,7 +291,7 @@ window.ESP = window.ESP || {};
         sc[k] = s;
       }
       const orden = ps.slice().sort((a, b) => sc[b] - sc[a]), efs = [0.9, 0.3, -0.2, -0.6];
-      orden.forEach((k, i) => { camp.mom[k] += efs[i]; });
+      orden.forEach((k, i) => { camp.mom[k] = (camp.mom[k] || 0) + efs[i]; });
       camp.debate.hecho = true; camp.debate.res = orden;
       const ld = Ca.lideres(E, camp, orden[0]), lugar = camp.ambito === 'gen' ? '' : ' en ' + D().ccaa[camp.c].nombre;
       C.Noticias.poner(E, 'politica', `Debate decisivo${lugar}: ${ld ? ld.n : E.partidos[orden[0]].sigla} (${E.partidos[orden[0]].sigla}) se impone en el cara a cara; ${E.partidos[orden[ps.length - 1]].sigla} sale tocado.`, 'ES');
@@ -342,14 +342,14 @@ window.ESP = window.ESP || {};
     /* ── Turno semanal ── */
     turnoCamp(E, camp) {
       const t = E.fecha.t, P = E.paises.ES;
-      for (const k of P.partidos) camp.mom[k] = clamp(camp.mom[k] * 0.9 + U.gauss(0, 0.22), -4, 4);
+      for (const k of P.partidos) camp.mom[k] = clamp((camp.mom[k] || 0) * 0.9 + U.gauss(0, 0.22), -4, 4);
       Ca.encuesta(E, 'cis', camp);
       if (!camp.debate.hecho && t >= camp.debate.t) { if (Ca.debateJugador(E, camp) && !E.meta.presim) E.esp.pendienteDebate = true; else Ca.celebrarDebate(E, null, camp); }
       if (U.chance(camp.ambito === 'gen' ? 0.22 : 0.15)) {
         const pool = camp.ambito === 'gen' ? P.partidos.filter(x => E.partidos[x].amb === 'nac') : Object.keys(E.esp.ccaa[camp.c].parl.escanos);
         const k = U.pick(pool.filter(x => !E.jugador || x !== E.jugador.partido)); if (!k) return;
         const T = [['sale a la luz una filtración sobre su financiación', -1.1], ['comete un tropiezo en un mitin viral', -0.7], ['recibe el apoyo de una figura muy popular', 0.8], ['cierra un acto multitudinario', 0.6], ['pierde a un candidato clave por un escándalo', -1.3]];
-        const [txt, dv] = U.pick(T); camp.mom[k] = clamp(camp.mom[k] + dv, -4, 4);
+        const [txt, dv] = U.pick(T); camp.mom[k] = clamp((camp.mom[k] || 0) + dv, -4, 4);
         camp.sucesos.unshift({ t, txt: `${E.partidos[k].sigla} ${txt}.` }); if (camp.sucesos.length > 20) camp.sucesos.length = 20;
         C.Noticias.poner(E, 'politica', `Campaña${camp.ambito === 'aut' ? ' en ' + D().ccaa[camp.c].nombre : ''}: ${E.partidos[k].sigla} ${txt}.`, 'ES');
       }
@@ -372,6 +372,8 @@ window.ESP = window.ESP || {};
     },
 
     /* Efecto de un suceso de campaña sobre tu partido (usado por los eventos). */
+    /* Un partido nacido en plena campaña (escisión) entra en el tablero de las campañas abiertas. */
+    registrar(E, pid) { for (const x of Ca.camps(E)) { const c = x.camp; c.mom[pid] = 0; c.movil[pid] = 0; c.util[pid] = 0; } },
     mover(E, pid, dv, txt) { const camp = Ca.cur(E); if (!camp) return; camp.mom[pid] = clamp((camp.mom[pid] || 0) + dv, -4, 4); if (txt) { camp.sucesos.unshift({ t: E.fecha.t, txt }); if (camp.sucesos.length > 20) camp.sucesos.length = 20; } },
 
     /* ── Cierre: gasto, multas y datos de la noche electoral ── */

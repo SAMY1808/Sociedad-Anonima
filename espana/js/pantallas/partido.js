@@ -7,9 +7,19 @@ window.ESP = window.ESP || {};
   const Pt = C.Pantallas.partido = {
     render(el) {
       const E = C.E, tab = E.ui.tabPartido || 'resumen';
-      if (tab === 'interno') { Pt.interno(el); if (C.Barones && E.jugador.pais === 'ES') el.insertAdjacentHTML('beforeend', Pt.baronesHTML(E)); } else Pt.resumen(el);
+      if (tab === 'interno') { Pt.interno(el); if (C.Barones && E.jugador.pais === 'ES') el.insertAdjacentHTML('beforeend', Pt.baronesHTML(E)); if (C.Escision && E.jugador.pais === 'ES') el.insertAdjacentHTML('beforeend', Pt.escisionHTML(E)); } else Pt.resumen(el);
       el.insertAdjacentHTML('afterbegin', `<div class="seg" style="margin-bottom:12px"><button data-tab-pt="resumen" class="${tab === 'resumen' ? 'activo' : ''}">📊 Resumen</button><button data-tab-pt="interno" class="${tab === 'interno' ? 'activo' : ''}">🏛 Congreso y facciones</button></div>`);
       UI.$$('[data-tab-pt]', el).forEach(b => b.onclick = () => { E.ui.tabPartido = b.dataset.tabPt; C.App.refrescar(); });
+    },
+    escisionHTML(E) {
+      const Es = C.Escision, c = Es.asegurar(E), J = E.jugador, pi = C.PartidoInt.asegurar(E), lider = Es.esLider(E), n = Math.round(c.presion), col = n >= 65 ? 'var(--no,#d9534f)' : n >= 40 ? 'var(--oro)' : 'var(--si,#3bb273)';
+      const botonesC = lider ? `${UI.botonAccion('amarrar_apoyos', {}, '🤝 Amarrar apoyos', 'chico')}${UI.botonAccion('pactar_criticos', {}, '🕊️ Pactar con críticos', 'chico')}` : `${UI.botonAccion('exigir_congreso', {}, '📣 Exigir congreso', 'chico')}${UI.botonAccion('firmas_congreso', {}, '✍️ Recoger firmas', 'chico')}${UI.botonAccion('aliarse_criticos', {}, '🤝 Aliarte con críticos', 'chico')}${UI.botonAccion('amenazar_escision', {}, '💣 Amenazar con escindirte', 'chico')}`;
+      const barones = !lider && C.Barones ? C.Barones.lista(E).map(x => UI.botonAccion('empujar_baron', { c: x.c }, '🧨 Empujar a ' + esc(x.pol.n.split(' ')[0]) + ' (' + esc(D().ccaa[x.c].nombre) + ')', 'chico')).join('') : '';
+      const hist = (E.esp.esn || []).slice(0, 4).map(e => `<div class="it"><span class="etq">${U.fmtT(e.t, true)}</span><div class="cuerpo" style="flex:1;white-space:normal;font-size:12.5px"><b>${esc(E.partidos[e.pid].nombre)}</b> (${esc(E.partidos[e.pid].sigla)}) · escisión de ${esc(E.partidos[e.de].sigla)} liderada por ${esc(e.lider)}${e.dip ? ' · ' + e.dip + ' diputados' : ''}</div></div>`).join('');
+      return `<div class="tarjeta" style="margin-top:14px"><div class="t-cab"><h3>🏁 Congreso extraordinario y escisiones</h3><span class="etq">Presión ${n} / 100</span></div><div class="barra-h" style="height:10px"><i style="width:${n}%;background:${col}"></i></div>
+        <div class="tenue" style="font-size:12px;margin:6px 0">${lider ? 'Si la presión de los críticos pasa de 75, te llegará el dilema de un congreso extraordinario. Tu mejor defensa: amarrar apoyos y pactar.' : 'Si la presión pasa de 75, la dirección adelantará el congreso (y podrás presentar tu candidatura). Con el partido muy dividido, puedes llegar a escindirte.'} Peso crítico: <b>${Math.round(pi.fac.critico)} %</b> · cohesión: <b>${Math.round(E.partidos[J.partido].cohesion)}</b>.</div>
+        <div class="fila" style="gap:6px;flex-wrap:wrap">${botonesC}${barones}${lider ? '' : UI.botonAccion('liderar_escision', {}, '🚪 Liderar una escisión', 'chico')}</div>
+        ${hist ? `<h4 style="margin:12px 0 4px">Escisiones recientes</h4><div class="lista">${hist}</div>` : ''}</div>`;
     },
     baronesHTML(E) {
       const B = C.Barones, s = B.asegurar(E), l = B.lista(E), col = v => v >= 60 ? 'var(--si,#3bb273)' : v >= 35 ? 'var(--oro)' : 'var(--no,#d9534f)';

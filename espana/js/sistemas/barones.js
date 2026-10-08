@@ -45,6 +45,7 @@ window.ESP = window.ESP || {};
       const nombre = U.pick(['Unidos por ' + cn, 'Alternativa ' + cn, cn + ' Primero', 'Compromís ' + cn, 'Partido Regionalista de ' + cn]);
       const pa = { id: pid, pais: 'ES', nombre, sigla, arq: op.arq, color: '#' + ((parseInt(op.color.slice(1), 16) ^ 0x3a5f2c) & 0xffffff).toString(16).padStart(6, '0'), eco: op.eco + U.ri(-6, 6), soc: op.soc + U.ri(-6, 6), eu: op.eu, ter: clamp((op.ter || 0) + 20, -60, 80), indep: 0, grupo: op.grupo, amb: 'reg', region: c, pop: cuota, base: cuota, popN: 0, cohesion: 80, finanzas: 35, militantes: 3000, lider: pol.id, nuevo: true, rp: { [c]: cuota }, rp0: { [c]: cuota } };
       E.partidos[pid] = pa; P.partidos.push(pid); E.esp.regionales.push(pid);
+      if (C.Campana && C.Campana.registrar) C.Campana.registrar(E, pid);
       for (const prov in D().provincias) { E.esp.pn[prov][pid] = 1; if (D().provincias[prov][1] === c) E.esp.pn[prov][old] *= clamp(1 - cuota / Math.max(reg, 1) * 0.9, 0.35, 0.95); }
       pol.p = pid; pol.partido = pid; g.partido = pid; g.coalicion = [pid].concat(g.coalicion.filter(k => k !== old && k !== pid));
       // Escaños autonómicos y diputados al Congreso que se van con él
