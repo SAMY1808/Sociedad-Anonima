@@ -72,7 +72,7 @@ window.ESP = window.ESP || {};
 
     turno(E) {
       const cs = Cr.asegurar(E), t = E.fecha.t, g = E.paises.ES.gob; if (E.meta.presim) return;
-      const base = 0.011 * (E.esp.cortes.estado === 'activa' ? 1 : 0.5);
+      const base = 0.011 * (E.esp.cortes.estado === 'activa' ? 1 : 0.5) * ((C.Ajustes && C.Ajustes.get(E).crisis) || 1);
       if (cs.activas.filter(c => c.fase !== 'cerrada').length < 2 && t - cs.ult > 10 && U.chance(base)) { if (Cr.nueva(E)) cs.ult = t; }
       for (const cr of cs.activas) {
         if (cr.fase === 'cerrada') continue;

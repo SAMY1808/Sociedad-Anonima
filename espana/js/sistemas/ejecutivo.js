@@ -273,14 +273,18 @@ window.ESP = window.ESP || {};
 
     votar(E) {
       const c = E.esp.cortes, inv = c.investidura, P = Ej.P(E);
-      // Pequeño azar de última hora
+      if (!E.esp.sesionHecha && !E.meta.presim && C.Sesion && C.Sesion.involucra(E, inv.cand, 'investidura')) { E.esp.pendienteSesion = { tipo: 'investidura', cand: inv.cand }; return; }
+      const swing = E.esp.sesionHecha ? (E.esp.sesionSwing || 0) : 0; E.esp.sesionHecha = false; E.esp.sesionSwing = 0;
+      // Pequeño azar de última hora (y el efecto del discurso del candidato)
       const ev = Ej.evaluar(E, inv.cand, inv.plan);
-      let si = ev.si, no = ev.no;
+      let si = ev.si, no = ev.no; const est2 = Object.assign({}, ev.est);
       for (const p in ev.est) {
         const n = P.escanos[p] || 0, acc = inv.plan.aceptadas[p];
-        if (ev.est[p] === 'si' && acc && acc.length && U.chance(0.03)) { si -= n; no += n; }
-        else if (ev.est[p] === 'abs' && U.chance(0.03)) no += n;
+        if (ev.est[p] === 'si' && acc && acc.length && U.chance(0.03 + (swing < 0 ? -swing * 0.1 : 0))) { si -= n; no += n; est2[p] = 'no'; }
+        else if (ev.est[p] === 'abs' && U.chance(0.03)) { no += n; est2[p] = 'no'; }
+        else if (ev.est[p] === 'abs' && swing > 0 && U.chance(swing * 0.3)) { si += n; est2[p] = 'si'; }
       }
+      E.esp.ultVot = { tipo: 'investidura', cand: inv.cand, est: est2, si, no, abs: U.suma(Object.keys(est2).map(k => P.escanos[k] || 0)) - si - no };
       const cand = inv.cand; E.esp.votoJ = null;
       if (c.t1 == null) c.t1 = E.fecha.t;
       const nombre = (E.politicos[E.partidos[cand].lider] || {}).n || Ej.sig(E, cand);
@@ -373,7 +377,7 @@ window.ESP = window.ESP || {};
         if (g.estab < 22) pr = 0.03; else if (g.estab < 34 && margenBajo(E)) pr = 0.006;
         if (ventaja > 2.5 && bloque >= MAYORIA && c.finMax - t < 40) pr = Math.max(pr, 0.02);
         if (C.Presion) pr = Math.max(pr, C.Presion.probDisolucion(E, ventaja));
-        if (U.chance(pr)) C.Generales.disolver(E, g.estab < 38 ? 'falta de apoyos parlamentarios' : (C.Presion && C.Presion.asegurar(E).nivel >= 55 ? 'ante la presión de la oposición' : 'adelanto electoral por conveniencia'), false);
+        if (U.chance(pr)) { if (C.Presion && C.Presion.asegurar(E).nivel >= 55 && E.jugador && E.jugador.pais === 'ES' && E.jugador.rol && g.pm !== 'J') C.Presion.asegurar(E).exitos = (C.Presion.asegurar(E).exitos || 0) + 1; C.Generales.disolver(E, g.estab < 38 ? 'falta de apoyos parlamentarios' : (C.Presion && C.Presion.asegurar(E).nivel >= 55 ? 'ante la presión de la oposición' : 'adelanto electoral por conveniencia'), false); }
       }
     },
 
@@ -385,8 +389,12 @@ window.ESP = window.ESP || {};
     },
 
     votarMocion(E) {
-      const c = E.esp.cortes, m = c.mocion; c.mocion = null; c.ultMocion = E.fecha.t;
-      const ev = Ej.evaluar(E, m.cand, m.plan);
+      const c = E.esp.cortes, m = c.mocion;
+      if (!E.esp.sesionHecha && !E.meta.presim && C.Sesion && C.Sesion.involucra(E, m.cand, 'mocion')) { E.esp.pendienteSesion = { tipo: 'mocion', cand: m.cand }; return false; }
+      const swing = E.esp.sesionHecha ? (E.esp.sesionSwing || 0) : 0; E.esp.sesionHecha = false; E.esp.sesionSwing = 0; c.mocion = null; c.ultMocion = E.fecha.t;
+      const ev = Ej.evaluar(E, m.cand, m.plan); const P = Ej.P(E); const est2 = Object.assign({}, ev.est);
+      if (swing) for (const p in ev.est) { const n = P.escanos[p] || 0; if (ev.est[p] === 'abs' && swing > 0 && U.chance(swing * 0.3)) { ev.si += n; ev.abs -= n; est2[p] = 'si'; } else if (ev.est[p] === 'si' && swing < 0 && p !== m.cand && !m.plan.bloque.includes(p) && U.chance(-swing * 0.1)) { ev.si -= n; ev.no += n; est2[p] = 'no'; } }
+      E.esp.ultVot = { tipo: 'mocion', cand: m.cand, est: est2, si: ev.si, no: ev.no, abs: ev.abs };
       if (ev.si >= MAYORIA) { Ej.proclamar(E, Object.assign({}, m.plan, { ev }), { censura: true }); return true; }
       C.Noticias.poner(E, 'politica', `La moción de censura de ${Ej.sig(E, m.cand)} fracasa: ${ev.si} votos a favor.`, 'ES');
       E.partidos[m.cand].cohesion = Math.max(30, E.partidos[m.cand].cohesion - 3);

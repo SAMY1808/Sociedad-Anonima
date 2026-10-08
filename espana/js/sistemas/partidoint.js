@@ -18,25 +18,28 @@ window.ESP = window.ESP || {};
       const barones = clamp(10 + C.Territorio.nPresidentes(E, pa.id) * 1.8 + (C.PoderLocal ? C.PoderLocal.alcaldes(E, pa.id) * 0.08 : 0), 8, 40), crit = clamp(58 - pa.cohesion * 0.55 + (pa.postura === 'oposicion' ? 4 : 0), 8, 55);
       p.fac.barones += (barones - p.fac.barones) * 0.04; p.fac.critico += (crit - p.fac.critico) * 0.04; p.fac.oficial = 100 - p.fac.barones - p.fac.critico;
       pa.cohesion = clamp(pa.cohesion + (66 - p.fac.critico * 0.8 - pa.cohesion) * 0.01, 15, 99);
-      if (!c.fase && c.prox - t <= 6 && c.prox > t) { c.fase = 'precongreso'; C.Noticias.poner(E, 'partido', `${pa.sigla} convoca su congreso federal para el ${U.fmtT(c.prox, true)}.`, 'ES'); if (!E.meta.presim) C.Eventos.info(E, '🎗 Congreso del partido', `${pa.nombre} celebrará su congreso el ${U.fmtT(c.prox, true)}. Es el momento de amarrar apoyos${E.jugador.rol !== 'lider' && ['direccion', 'portavoz'].includes(E.jugador.rol) ? ' o de presentar tu candidatura al liderazgo' : ''} desde Mi partido → Congreso y facciones.`); }
+      if (!c.fase && c.prox - t <= 6 && c.prox > t) { c.fase = 'precongreso'; c.retador = null; if (pa.lider === 'J' && U.chance(clamp(0.12 + p.fac.critico / 100 + (55 - pa.cohesion) / 150, 0.08, 0.7))) { const pr = C.Mundo.persona('ES'); c.retador = { n: pr.n, fuerza: U.rf(0.35, 0.6) }; C.Noticias.poner(E, 'partido', `${pr.n} anuncia que disputará el liderazgo de ${pa.sigla} a ${J.nombre}.`, 'ES'); } C.Noticias.poner(E, 'partido', `${pa.sigla} convoca su congreso federal para el ${U.fmtT(c.prox, true)}.`, 'ES'); if (!E.meta.presim) C.Eventos.info(E, '🎗 Congreso del partido', `${pa.nombre} celebrará su congreso el ${U.fmtT(c.prox, true)}. Es el momento de amarrar apoyos${E.jugador.rol !== 'lider' && ['direccion', 'portavoz'].includes(E.jugador.rol) ? ' o de presentar tu candidatura al liderazgo' : ''} desde Mi partido → Congreso y facciones.`); }
       if (t >= c.prox) Pi.congreso(E);
     },
-    congreso(E) {
+    congreso(E, extras) {
       const J = E.jugador, pa = E.partidos[J.partido], p = Pi.asegurar(E), c = p.cong, esL = pa.lider === 'J';
-      c.ult = E.fecha.t; c.prox = E.fecha.t + U.ri(180, 230); const cand = c.cand; c.fase = null; c.cand = null; const campUsada = c.camp; c.camp = null;
+      if (!extras && !E.meta.presim && (esL || c.cand === 'J')) { E.esp.pendienteCongreso = true; return; }
+      E.esp.pendienteCongreso = false; const bonus = (extras && extras.bonus) || 0;
+      const c0 = Object.assign({}, c); c.ult = E.fecha.t; c.prox = E.fecha.t + U.ri(180, 230); const cand = c.cand; c.retador = null; if (extras) extras.ap = null; c.fase = null; c.cand = null; const campUsada = c.camp; c.camp = null;
       let res;
       if (cand === 'J' && !esL) {
-        const cp = campUsada || { avales: 0, debate: 0, bases: 0 }; const ap = clamp(35 + (J.prestigio - 40) / 2 + p.fac.critico * 0.7 + (J.rol === 'direccion' ? 6 : 0) - p.fac.oficial * 0.25 + cp.avales * 0.8 + cp.debate * 1.0 + cp.bases * 0.8 + U.gauss(0, 7), 5, 95);
-        if (ap > 50) { C.Ejecutivo.nuevoLider(E, J.partido, 'tras la victoria de ' + J.nombre + ' en el congreso'); const viejo = pa.lider; pa.lider = 'J'; J.rol = 'lider'; C.Personaje.cambiar(E, { prestigio: 8, pop: 3 }, true); pa.cohesion -= 4; res = `${J.nombre} gana el congreso con el ${Math.round(ap)} % y se hace con el liderazgo.`; C.Personaje.sincronizar(E); }
-        else { C.Personaje.cambiar(E, { prestigio: -3 }, true); res = `${J.nombre} pierde el congreso (${Math.round(ap)} %).`; }
+        const cp = campUsada || { avales: 0, debate: 0, bases: 0 }; const ap = clamp(bonus + 35 + (J.prestigio - 40) / 2 + p.fac.critico * 0.7 + (J.rol === 'direccion' ? 6 : 0) - p.fac.oficial * 0.25 + cp.avales * 0.8 + cp.debate * 1.0 + cp.bases * 0.8 + U.gauss(0, 7), 5, 95);
+        if (ap > 50) { C.Ejecutivo.nuevoLider(E, J.partido, 'tras la victoria de ' + J.nombre + ' en el congreso'); const viejo = pa.lider; pa.lider = 'J'; J.rol = 'lider'; C.Personaje.cambiar(E, { prestigio: 8, pop: 3 }, true); pa.cohesion -= 4; res = `${J.nombre} gana el congreso con el ${Math.round(ap)} % y se hace con el liderazgo.`; if (extras) extras.pct = Math.round(ap); C.Personaje.sincronizar(E); }
+        else { C.Personaje.cambiar(E, { prestigio: -3 }, true); res = `${J.nombre} pierde el congreso (${Math.round(ap)} %).`; if (extras) extras.pct = Math.round(ap); }
       } else if (esL) {
-        const ap = Pi.apoyoLider(E) + U.gauss(0, 6);
-        if (ap >= 48) { C.Personaje.cambiar(E, { prestigio: 4 }, true); pa.cohesion += 3; res = `${J.nombre} revalida el liderazgo en el congreso con el ${Math.round(clamp(ap, 50, 96))} %.`; }
-        else { C.Ejecutivo.nuevoLider(E, J.partido, 'tras el congreso del partido'); J.rol = 'direccion'; C.Personaje.cambiar(E, { prestigio: -8, pop: -3 }, true); res = `${J.nombre} pierde el congreso y deja el liderazgo.`; C.Personaje.sincronizar(E); }
+        const ap = Pi.apoyoLider(E) + bonus - (c0.retador ? c0.retador.fuerza * 18 : 0) + U.gauss(0, 6);
+        if (ap >= 48) { C.Personaje.cambiar(E, { prestigio: 4 }, true); pa.cohesion += 3; res = `${J.nombre} revalida el liderazgo en el congreso con el ${Math.round(clamp(ap, 50, 96))} %${c0.retador ? ' frente a ' + c0.retador.n : ''}.`; if (extras) extras.pct = Math.round(clamp(ap, 50, 96)); }
+        else { C.Ejecutivo.nuevoLider(E, J.partido, 'tras el congreso del partido'); J.rol = 'direccion'; C.Personaje.cambiar(E, { prestigio: -8, pop: -3 }, true); res = `${J.nombre} pierde el congreso${c0.retador ? ' ante ' + c0.retador.n : ''} y deja el liderazgo.`; if (extras) extras.pct = Math.round(clamp(ap, 20, 49)); C.Personaje.sincronizar(E); }
       } else {
         const d = pa.cohesion < 50 && U.chance(0.4) || p.fac.critico > 38 && U.chance(0.35);
         if (d) { C.Ejecutivo.nuevoLider(E, J.partido, 'tras el congreso del partido'); res = `${pa.sigla} elige a un nuevo líder.`; } else res = `${pa.sigla} ratifica a su líder.`;
       }
+      if (extras) extras.res = res; if (extras && C.Dilemas && (esL || cand === 'J')) C.Dilemas.registrar(E, 'congreso', 'Congreso del partido: ' + res, /gana|revalida/.test(res) ? 4 : -4);
       p.hist.unshift({ t: E.fecha.t, txt: res }); if (p.hist.length > 10) p.hist.length = 10;
       C.Noticias.poner(E, 'partido', 'Congreso de ' + pa.sigla + ': ' + res, 'ES'); C.Personaje.log(E, 'Congreso del partido: ' + res);
       p.fac.critico = clamp(p.fac.critico * 0.7, 8, 55); p.fac.oficial = 100 - p.fac.barones - p.fac.critico;

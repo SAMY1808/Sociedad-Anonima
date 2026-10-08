@@ -18,10 +18,10 @@ window.ESP = window.ESP || {};
     nombre(E) { const s = N.elegir(E); return s.id && E.politicos[s.id] ? E.politicos[s.id].n : 'tu rival'; },
     subir(E, d) { const s = N.asegurar(E); s.odio = clamp(s.odio + d, 0, 100); },
     turno(E) {
-      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; const s = N.elegir(E), t = E.fecha.t, P = E.paises.ES; if (!s.pid) return;
+      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; const s = N.elegir(E), t = E.fecha.t, P = E.paises.ES; if (!s.pid) return; if (C.Tutor) C.Tutor.una(E, 'nemesis');
       const pa = E.partidos[J.partido], r = E.partidos[s.pid], nom = N.nombre(E), poder = (J.prestigio + (P.gob.pm === 'J' ? 20 : 0)) / 100;
       s.odio = clamp(s.odio + (30 + poder * 25 - s.odio) * 0.01 + (C.Mayorias ? (-C.Mayorias.asegurar(E).rel[s.pid] || 0) * 0.0006 : 0), 0, 100);
-      const p = 0.012 + s.odio / 100 * 0.03; if (t - s.ult < 5 || !U.chance(p)) return; s.ult = t;
+      const p = (0.012 + s.odio / 100 * 0.03) * ((C.Ajustes && C.Ajustes.get(E).rival) || 1); if (t - s.ult < 5 || !U.chance(p)) return; s.ult = t;
       const k = U.pesado(['filtra', 'ataca', 'aliado', 'reta'], x => ({ filtra: 1, ataca: 1.5, aliado: 0.8, reta: 0.8 })[x]);
       if (k === 'filtra' && C.Corrupcion && C.Corrupcion.asegurar(E).casos.filter(c => c.pid === J.partido && c.fase !== 'cerrado').length < 2) { C.Corrupcion.nuevo(E, J.partido, { gravedad: U.rf(0.25, 0.55), por: s.pid }); C.Noticias.poner(E, 'politica', `${nom} (${r.sigla}) respalda las informaciones que salpican a ${pa.sigla}.`, 'ES'); N.nota(E, `${nom} te filtra un caso.`); }
       else if (k === 'aliado' && C.Mayorias) { const ally = P.partidos.filter(x => x !== J.partido && x !== s.pid && (P.escanos[x] || 0) > 5).sort((a, b) => C.Mayorias.asegurar(E).rel[b] - C.Mayorias.asegurar(E).rel[a])[0]; if (ally) { C.Mayorias.cambiarRel(E, ally, -6); C.Mayorias.cambiarRel(E, s.pid, 4); C.Noticias.poner(E, 'politica', `${nom} se reúne con ${E.partidos[ally].sigla}: movimientos en el tablero de alianzas.`, 'ES'); N.nota(E, `${nom} te quita un aliado: ${E.partidos[ally].sigla}.`); } }

@@ -19,6 +19,14 @@ window.ESP = window.ESP || {};
     cuatro_anios: ['⏳', 'Superviviente', 'Cuatro años en política.', E => E.fecha.t >= 208],
     diez_anios: ['🏅', 'Veterano/a', 'Diez años en política.', E => E.fecha.t >= 520],
     prestigio: ['⭐', 'Figura respetada', 'Alcanza 80 de prestigio.', E => E.jugador.prestigio >= 80],
+    nemesis_vence: ['🥊', 'Némesis derrotado', 'Supera a tu gran rival en dos elecciones seguidas.', E => { const s = E.esp.nem; return !!(s && s.enfr.length >= 2 && s.enfr[0].gana && s.enfr[1].gana); }],
+    debate_estrella: ['📺', 'Estrella del debate', 'Gana con claridad un debate televisado.', E => !!(E.esp.dil && E.esp.dil.hist.some(h => h.tipo === 'debate' && h.score >= 3))],
+    crisis_heroe: ['🦺', 'Sangre fría', 'Gestiona una crisis en directo con una valoración sobresaliente.', E => !!(E.esp.cv && E.esp.cv.hist.some(h => h.jug && h.V > 0.6))],
+    crisis_tres: ['🚨', 'Bombero/a político/a', 'Gestiona tres crisis en directo.', E => !!(E.esp.cv && E.esp.cv.hist.filter(h => h.jug).length >= 3)],
+    congreso_ganado: ['🎗', 'Dueño/a del partido', 'Gana un congreso de tu partido.', E => !!(E.esp.dil && E.esp.dil.hist.some(h => h.tipo === 'congreso' && h.score > 0))],
+    saldo_20: ['📈', 'Buen olfato', 'Acumula un saldo de decisiones de +20.', E => !!(C.Dilemas && C.Dilemas.libro(E).reduce((a, x) => a + x.score, 0) >= 20)],
+    baron_reconciliado: ['🕊️', 'Hijo pródigo', 'Reconcilia a un barón escindido.', E => !!(E.esp.bar && E.esp.bar.esc.some(x => x.cerrada))],
+    presion_exito: ['📣', 'Elecciones ya', 'Consigue que el presidente convoque elecciones ante tu presión.', E => !!(E.esp.pres && E.esp.pres.exitos >= 1)],
     popular: ['❤️', 'Popular', 'Alcanza 75 de popularidad.', E => E.jugador.pop >= 75]
   };
   const Lg = C.Legado = {

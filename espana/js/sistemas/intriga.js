@@ -15,7 +15,7 @@ window.ESP = window.ESP || {};
     levantar(E, a, b) { const s = In.asegurar(E), n = s.vetos.length; s.vetos = s.vetos.filter(v => !(v.a === a && v.b === b)); return s.vetos.length < n; },
     /* Al arrancar una campaña los partidos se declaran los vetos habituales; a la vez se anulan los de la legislatura anterior. */
     generarVetos(E) {
-      const s = In.asegurar(E), P = E.paises.ES, ps = P.partidos.filter(k => (P.escanos[k] || 0) >= 8 && E.partidos[k].lider !== 'J'); s.vetos = [];
+      if (C.Tutor) C.Tutor.una(E, 'vetos'); const s = In.asegurar(E), P = E.paises.ES, ps = P.partidos.filter(k => (P.escanos[k] || 0) >= 8 && E.partidos[k].lider !== 'J'); s.vetos = [];
       for (const a of ps) for (const b of ps) {
         if (a >= b || E.partidos[a].lider === 'J' || E.partidos[b].lider === 'J') continue;
         const dist = U.distIdeo(E.partidos[a], E.partidos[b]), p = dist > 0.38 ? 0.4 : dist > 0.28 ? 0.12 : 0.02;

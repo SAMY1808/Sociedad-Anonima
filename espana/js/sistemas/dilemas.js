@@ -109,6 +109,28 @@ window.ESP = window.ESP || {};
         { k: 'neutral', t: 'Respeto a la voluntad popular', d: 'Neutral, sin sobresaltos.', ef: () => 'Respetas el resultado sin comentarlo.' },
         { k: 'distancia', t: 'Marcar distancia', d: 'Útil si el ganador es incómodo.', ef: (E, J, x) => { const ex = ['ANR', 'PAT'].includes(x.gr); C.Personaje.cambiar(E, { prestigio: ex ? 0.8 : -0.3 }); return ex ? 'Marcas distancia con la extrema derecha: aplauso en tu base.' : 'Te distancias sin mucho eco.'; } }],
       as: { jefe: 'neutral', portavoz: 'distancia', estratega: 'felicitar' } },
+    crisisPostura: { ic: '🎙', n: 'Cómo te posicionas ante la crisis', req: E => false, plazo: 2, defecto: 2,
+      txt: (E, x) => `El país está pendiente de «${x && x.nom ? x.nom.toLowerCase() : 'la crisis'}». Todos esperan tu posición.`,
+      op: [
+        { k: 'hombro', t: 'Arrimar el hombro y ofrecer apoyo', d: 'Imagen de Estado.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 0.9 }); return 'Ofreces tu apoyo sin condiciones: buena imagen.'; } },
+        { k: 'criticar', t: 'Criticar la gestión del Gobierno', d: 'Rentable si sale mal; arriesgado si sale bien.', ef: (E, J) => { C.Personaje.cambiar(E, { pop: 0.3, prestigio: -0.2 }); if (C.Nemesis) C.Nemesis.subir(E, 2); return 'Cargas contra el Gobierno: tus bases aplauden.'; } },
+        { k: 'callar', t: 'Mantener un perfil bajo', d: 'No ganas ni pierdes.', ef: () => 'Dejas que pase la crisis.' }],
+      as: { jefe: 'hombro', portavoz: 'criticar', estratega: 'hombro' } },
+    salud: { ic: '🩺', n: 'Tu cuerpo dice basta', req: E => false, plazo: 3, defecto: 1,
+      txt: E => `El ritmo te pasa factura: cansancio, insomnio y un aviso del médico (salud ${Math.round(C.Vida.asegurar(E).salud)}, estrés ${Math.round(C.Vida.asegurar(E).estres)}).`,
+      op: [
+        { k: 'parar', t: 'Parar unas semanas', d: 'Recuperas salud; pierdes puntos de agenda y algo de tracción.', ef: (E, J) => { C.Vida.parar(E, 3); C.Vida.nota(E, 'Paras tres semanas por prescripción médica.'); C.Personaje.cambiar(E, { prestigio: 0.3, pop: -0.3 }, true); return 'Paras tres semanas: te recuperas.'; } },
+        { k: 'aguantar', t: 'Aguantar como puedas', d: 'Riesgo de colapso, pero mantienes el ritmo.', ef: (E, J) => { const v = C.Vida.asegurar(E); if (U.chance(0.4)) { v.salud = clamp(v.salud - 15, 0, 100); C.Vida.parar(E, 2); C.Noticias.poner(E, 'politica', `${J.nombre} sufre un desvanecimiento y es atendido en el hospital.`, 'ES'); C.Personaje.cambiar(E, { prestigio: -0.8 }, true); return 'Te desvaneces en un acto público: ingreso hospitalario.'; } C.Personaje.cambiar(E, { prestigio: 0.5 }, true); v.estres = clamp(v.estres - 5, 0, 100); return 'Aguantas y la imagen de fortaleza te favorece.'; } },
+        { k: 'excedencia', t: 'Pedir una excedencia de seis semanas', d: 'Un parón largo y visible: costoso pero curativo.', cap: 5, ef: (E, J) => { C.Vida.parar(E, 6); C.Vida.asegurar(E).estres = 15; C.Personaje.cambiar(E, { prestigio: -1.5, pop: -0.5 }, true); C.Vida.nota(E, 'Excedencia de seis semanas.'); return 'Te tomas seis semanas: vuelves como nuevo/a.'; } },
+        { k: 'ocultar', t: 'Ocultarlo y descansar discretamente', d: 'Descansas poco; si se sabe, es un problema.', ef: (E, J) => { C.Vida.parar(E, 1); C.Vida.asegurar(E).estres = clamp(C.Vida.asegurar(E).estres - 12, 0, 100); return 'Descansas a escondidas.'; }, mem: { tipo: 'filtracion', txt: 'ocultaste un problema de salud' } }],
+      as: { jefe: 'parar', portavoz: 'aguantar', estratega: 'ocultar' } },
+    familia: { ic: '👪', n: 'Un escándalo familiar te salpica', req: E => false, plazo: 3, defecto: 2,
+      txt: E => `La prensa publica que un familiar cercano tiene negocios con la Administración. Todos esperan tu reacción.`,
+      op: [
+        { k: 'defender', t: 'Defender a tu familiar', d: 'Lealtad personal; coste político.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: -0.7, pop: -0.3 }, true); C.Vida.asegurar(E).estres = clamp(C.Vida.asegurar(E).estres - 4, 0, 100); return 'Defiendes a tu familiar: tu entorno te lo agradece, la prensa no.'; } },
+        { k: 'distanciarte', t: 'Distanciarte públicamente', d: 'Ejemplaridad; dolor personal.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 0.4 }, true); C.Vida.asegurar(E).estres = clamp(C.Vida.asegurar(E).estres + 6, 0, 100); return 'Marcas distancia con tu familiar: ganas ejemplaridad.'; } },
+        { k: 'explicar', t: 'Comparecer y explicar los hechos', d: 'Si cuela, sales reforzado/a.', cap: 6, ef: (E, J) => { if (U.chance(clamp(0.4 + (J.atrib.integridad || 3) / 20, 0.25, 0.85))) { C.Personaje.cambiar(E, { prestigio: 0.9 }, true); return 'Tu explicación convence.'; } C.Personaje.cambiar(E, { prestigio: -1.6, pop: -0.5 }, true); return 'Tu explicación no convence y empeora las cosas.'; }, mem: { tipo: 'filtracion', txt: 'un familiar tuyo tenía contratos con la Administración' } }],
+      as: { jefe: 'explicar', portavoz: 'distanciarte', estratega: 'defender' } },
     pactoEstado: { ic: '🏛', n: 'Una oferta de pacto de Estado', req: E => true, plazo: 3, defecto: 1,
       txt: E => `${sg(E, rival(E))} te ofrece un pacto de Estado, pero te exige un gesto que irritará a tus bases.`,
       op: [
@@ -126,7 +148,7 @@ window.ESP = window.ESP || {};
     asesores(E) { const d = Dl.asegurar(E), j = C.Jefe && C.Jefe.asegurar(E).jefe; if (j) d.asesor.jefe.n = j.n; return d.asesor; },
     nuevo(E, id) {
       const d = Dl.asegurar(E), def = CAT[id]; if (!def || d.act.some(x => x.id === id)) return null; const t = E.fecha.t;
-      const x = { uid: U.id('dl'), id, t0: t, limite: t + def.plazo, rival: rival(E) }; d.act.push(x); d.ult = t;
+      const x = { uid: U.id('dl'), id, t0: t, limite: t + def.plazo, rival: rival(E) }; d.act.push(x); d.ult = t; if (C.Tutor) C.Tutor.una(E, 'dilema');
       C.Noticias.poner(E, 'politica', `${E.jugador.nombre} afronta una decisión delicada: ${def.n.toLowerCase()}.`, 'ES'); return x;
     },
     /* Valora un cambio: prestigio y popularidad personales, cohesión del partido y apoyo del partido. */
@@ -159,6 +181,7 @@ window.ESP = window.ESP || {};
       const d = Dl.asegurar(E), t = E.fecha.t, J = E.jugador, cand = d.memoria.filter(m => !m.cobrado && t - m.t >= 14); if (!cand.length) return null; const m = U.pick(cand); m.cobrado = true; const p = pa(E);
       let txt = '';
       if (m.tipo === 'promesa' && m.ini != null) { const v = C.Legado.valor(E, m.k === 'corr' ? 'aprob' : m.k), bajo = ['alquiler', 'corr'].includes(m.k) ? true : false, cumple = m.k === 'corr' ? v >= m.ini : bajo ? v < m.ini - 1 : v > m.ini + 1; txt = cumple ? `La hemeroteca te sonríe: ${m.txt} y los hechos te dan la razón.` : `Te recuerdan que ${m.txt}: los datos no acompañan.`; C.Personaje.cambiar(E, { prestigio: cumple ? 1.5 : -2.2, pop: cumple ? 0.5 : -0.8 }, true); if (!cumple) C.Opinion.empuje(E, J.partido, -0.03, 0.3); }
+      else if (m.tipo === 'crisis') { if (m.bien) { C.Personaje.cambiar(E, { prestigio: 0.8 }); txt = `Se recuerda que ${m.txt}: tu gestión sigue siendo un activo.`; } else { C.Personaje.cambiar(E, { prestigio: -1.0 }); if (C.Nemesis) C.Nemesis.subir(E, 2); txt = `Te echan en cara que ${m.txt}.`; } }
       else if (m.tipo === 'filtracion') { txt = `Sale a la luz que ${m.txt}.`; C.Personaje.cambiar(E, { prestigio: -2 }, true); if (m.pid) rel(E, m.pid, -6); }
       else if (m.tipo === 'favor' && m.pid) { rel(E, m.pid, 6); txt = `${sg(E, m.pid)} te devuelve el favor: ${m.txt}.`; C.Personaje.cambiar(E, { prestigio: 0.8 }); }
       else if (m.tipo === 'cesion') { txt = `Te echan en cara que ${m.txt}.`; p.cohesion = clamp(p.cohesion - 1.5, 15, 99); C.Personaje.cambiar(E, { prestigio: -0.6 }); }

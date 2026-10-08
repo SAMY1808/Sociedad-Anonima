@@ -17,6 +17,10 @@ window.ESP = window.ESP || {};
       if (C.Coaliciones && g.pm === 'J' && E.esp.pactos.some(p => p.estado === 'pendiente' && p.limite - E.fecha.t < 10)) add(7, '📝', 'Hay cláusulas de pactos a punto de vencer.', 'coaliciones');
       if (C.Corrupcion && C.Corrupcion.suyos(E).length) add(9, '🕵️', 'Hay un caso judicial abierto en tu partido: decide cómo responder.', 'corrupcion');
       if (C.Crisis && C.Crisis.asegurar(E).activas.some(c => c.fase !== 'cerrada') && (g.pm === 'J' || J.cargo === 'presauto')) add(9, '🚨', 'Hay una crisis activa pendiente de tu respuesta.', 'crisis');
+      if (C.Dilemas && C.Dilemas.asegurar(E).act.length) add(9, '⏳', `Tienes ${C.Dilemas.asegurar(E).act.length} dilema(s) con plazo: decide antes de que caduquen.`, 'dilemas');
+      if (C.Vida && C.Vida.asegurar(E).estres > 70) add(7, '❤️', 'Estás al límite de estrés: cuídate o te pasará factura.', 'dilemas');
+      if (C.Presion && C.Presion.asegurar(E).nivel > 55 && g.pm !== 'J') add(6, '📣', 'La presión sobre el Gobierno es alta: es buen momento para apretar.', 'mayorias');
+      if (C.Presion && C.Presion.asegurar(E).nivel > 55 && g.pm === 'J') add(8, '📣', 'La oposición presiona para adelantar elecciones.', 'mayorias');
       if (C.Campana && C.Campana.activa(E)) add(8, '📣', 'Estás en campaña electoral: revisa el tablero.', 'elecciones', { tab: 'campana' });
       if (C.Organismos && g.pm === 'J') { const o = C.Organismos.asegurar(E); const v = Object.keys(o.o).find(k => E.fecha.t - o.o[k].t0 >= C.Organismos.ORGS[k].mandato); if (v) add(4, '🏢', `Ha vencido el mandato en ${C.Organismos.ORGS[v].n}.`, 'organismos'); }
       if (C.Estructural) { const s = C.Estructural.asegurar(E); if (s.fin.crisis && g.pm === 'J') add(9, '🏦', `${s.fin.crisis.entidad} está en crisis.`, 'estructural', { tab: 'fin' }); if (s.fin.prima > 350) add(7, '📉', 'La prima de riesgo está disparada.', 'estructural'); }

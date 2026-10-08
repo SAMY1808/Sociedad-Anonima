@@ -278,7 +278,7 @@ window.ESP = window.ESP || {};
       if (!Ca.participantes(E, camp).includes(J.partido)) return false;
       return camp.ambito === 'aut' ? (E.esp.ccaa[camp.c].cab[J.partido] === 'J' || (E.partidos[J.partido].amb === 'reg' && E.partidos[J.partido].lider === 'J')) : E.partidos[J.partido].lider === 'J';
     },
-    celebrarDebate(E, estrategia, camp) {
+    celebrarDebate(E, estrategia, camp, puntos) {
       camp = camp || Ca.cur(E) || E.esp.camp; const J = E.jugador, ps = Ca.participantes(E, camp), sc = {};
       for (const k of ps) {
         const l = Ca.lideres(E, camp, k);
@@ -286,7 +286,7 @@ window.ESP = window.ESP || {};
         if (J && l && l.id === 'J') {
           const o = J.atrib.oratoria / 10, ca = J.atrib.carisma / 10;
           s = 0.3 + (o + ca) / 2 * 0.5;
-          if (estrategia === 'ataque') s += 0.1 + U.gauss(0, 0.45); else if (estrategia === 'propuestas') s += 0.1 + o * 0.15; else s += -0.04 + U.gauss(0, 0.1);
+          if (puntos != null) s = puntos; else if (estrategia === 'ataque') s += 0.1 + U.gauss(0, 0.45); else if (estrategia === 'propuestas') s += 0.1 + o * 0.15; else s += -0.04 + U.gauss(0, 0.1);
         }
         sc[k] = s;
       }

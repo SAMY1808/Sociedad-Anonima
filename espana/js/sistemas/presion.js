@@ -19,7 +19,7 @@ window.ESP = window.ESP || {};
       return out;
     },
     objetivo(E) { return clamp(U.suma(Pr.factores(E).map(f => f[2])), 0, 70); },
-    empujar(E, d, txt) { const s = Pr.asegurar(E), a = s.nivel; s.nivel = clamp(s.nivel + d, 0, 100); if (txt) Pr.nota(E, txt); if (a < 60 && s.nivel >= 60) C.Noticias.poner(E, 'politica', 'Crece el clamor por un adelanto electoral: la presión sobre el Gobierno alcanza máximos.', 'ES'); },
+    empujar(E, d, txt) { const s = Pr.asegurar(E), a = s.nivel; s.nivel = clamp(s.nivel + d, 0, 100); if (txt) Pr.nota(E, txt); if (s.nivel >= 40 && C.Tutor) C.Tutor.una(E, 'presion'); if (a < 60 && s.nivel >= 60) C.Noticias.poner(E, 'politica', 'Crece el clamor por un adelanto electoral: la presión sobre el Gobierno alcanza máximos.', 'ES'); },
     puede(E, id, sem) { const s = Pr.asegurar(E), t = E.fecha.t; if (s.cd[id] != null && t - s.cd[id] < sem) return `Espera ${sem - (t - s.cd[id])} semana(s) para repetirlo`; return true; },
     disponible(E) { if (E.jugador.pais !== 'ES') return 'Sólo en España'; if (Pr.esPM(E)) return 'Eres el presidente: te presionan a ti'; if (E.esp.cortes.estado !== 'activa') return 'Las Cortes no están en su etapa ordinaria'; return true; },
     /* Probabilidad semanal de que la IA convoque elecciones por la presión. */

@@ -183,6 +183,9 @@ window.ESP = window.ESP || {};
       if (C.Consejo.pendientesJugador(E).length) { C.Pantallas.consejo.modalUrgente(C.Consejo.pendientesJugador(E)[0]); return; }
       if (E.elecciones.pePendiente) { const n = E.elecciones.pePendiente; E.elecciones.pePendiente = null; C.Pantallas.europa.nochePE(n); return; }
       if (E.elecciones.presPendiente) { const n = E.elecciones.presPendiente; E.elecciones.presPendiente = null; C.Pantallas.elecciones.nochePres(n); return; }
+      if (E.esp.pendienteSesion && C.Pantallas.sesion) { C.Pantallas.sesion.modal(); return; }
+      if (E.esp.pendienteCongreso && C.Pantallas.congresopartido) { C.Pantallas.congresopartido.modal(); return; }
+      if (E.esp.pendienteCrisisV && C.Pantallas.crisis2) { C.Pantallas.crisis2.modal(E.esp.pendienteCrisisV); return; }
       if (E.eventos.pendientes.length) { App.modalEvento(E.eventos.pendientes[0]); return; }
       if (E.parl.pendienteVoto.length) { C.Pantallas.leyes.modalVoto(E.parl.pendienteVoto[0]); return; }
       if (E.ue.pendiente.length) { C.Pantallas.europa.modalVoto(0); return; }

@@ -14,7 +14,7 @@ window.ESP = window.ESP || {};
         const g = E.esp.ccaa[c].gob, pol = g && E.politicos[g.pres];
         if (g && g.partido === J.partido && pol && g.pres !== 'J') {
           let b = s.b[c]; if (!b || b.id !== g.pres) b = s.b[c] = { id: g.pres, leal: clamp(U.gauss(65, 10), 35, 90), amb: Math.round(U.clamp(U.gauss(50, 18), 10, 95)), ult: -99 };
-          out.push({ c, b, pol });
+          out.push({ c, b, pol }); if (C.Tutor) C.Tutor.una(E, 'baron');
         } else if (s.b[c]) delete s.b[c];
       }
       return out;
