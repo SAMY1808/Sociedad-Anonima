@@ -78,8 +78,8 @@ window.ESP = window.ESP || {};
         <div class="logo">CURUL <small>España</small></div>
         <div class="fecha"><b>${U.fmtFecha(U.hoy())}</b><span>${estado} · ${sig}</span></div>
         <div class="espacio"></div>
-        <div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span class="bandera">🇪🇸</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>
-        <div class="pips"${UI.tt('<b>Puntos de agenda</b><br>Cada acción importante consume puntos. Se renuevan cada semana.')}>${pips}<span class="pips-n" data-ir="agenda">◆ ${J.agenda.puntos}/${J.agenda.max}</span></div>
+        ${E.meta.vistaPartido && J.pais === 'ES' ? `<div class="chip-cargo" data-ir="sede" style="cursor:pointer"><span class="bandera">🏢</span><div class="txt"><b>${esc(E.partidos[J.partido].nombre)}</b><span>Dirección de ${esc(J.nombre)} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>` : `<div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span class="bandera">🇪🇸</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>`}
+        <div class="pips"${UI.tt('<b>' + (E.meta.vistaPartido ? 'Puntos de dirección' : 'Puntos de agenda') + '</b><br>Cada acción importante consume puntos. Se renuevan cada semana.')}>${pips}<span class="pips-n" data-ir="agenda">◆ ${J.agenda.puntos}/${J.agenda.max}</span></div>
         <div class="tiempo">
           <button class="btn prim" id="b-sem"${UI.tt('Avanzar una semana (tecla N)')}>▶ <span>Semana</span></button>
           <button class="btn" id="b-mes"${UI.tt('Avanzar cuatro semanas (se detiene ante decisiones y votaciones)')}>▶▶ <span>Mes</span></button>
@@ -98,7 +98,8 @@ window.ESP = window.ESP || {};
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = App.badges(E, mios);
       const aut = E.jugador.nivel === 'autonomico' && E.jugador.region && E.esp.ccaa[E.jugador.region].gob;
-      const items = NAV.filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', 1] : n && n[0] === 'ayuntamiento' && E.jugador.nivel === 'local' ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
+      const vp = E.meta.vistaPartido && E.jugador.pais === 'ES';
+      const items = NAV.filter(n => !(vp && n && n[0] === 'personaje')).filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => vp && n && n[0] === 'agenda' ? ['agenda', '🎯', 'Puntos de dirección', 'Agenda', 1] : n).map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', 1] : n && n[0] === 'ayuntamiento' && E.jugador.nivel === 'local' ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
       const enBarra = items.some(n => n && n[4] && n[0] === E.ui.pantalla);
       const masN = items.reduce((a, n) => a + (n && !n[4] ? (+badges[n[0]] || 0) : 0), 0);
       const col = E.ui.navCol = E.ui.navCol || {}; let oculto = false, hdr = null, cnt = {}; items.forEach(n => { if (n && n[0] === '#') hdr = n[1]; else if (n && hdr) cnt[hdr] = (cnt[hdr] || 0) + (+badges[n[0]] || 0); });

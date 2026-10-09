@@ -19,7 +19,7 @@ window.ESP = window.ESP || {};
     asegurar(E) { if (!E.esp.metas) E.esp.metas = { id: null, t0: 0, hechas: {}, limpioDesde: null }; return E.esp.metas; },
     elegir(E, id) { const m = Mt.asegurar(E); if (!META[id] || m.hechas[id]) return { ok: false, msg: 'Meta no válida' }; m.id = id; m.t0 = E.fecha.t; return { ok: true, msg: 'Nueva meta: ' + META[id][1] }; },
     turno(E) {
-      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; const m = Mt.asegurar(E);
+      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim || E.meta.vistaPartido) return; const m = Mt.asegurar(E);
       const abiertos = C.Corrupcion ? C.Corrupcion.asegurar(E).casos.filter(c => c.pid === J.partido && c.fase !== 'cerrado').length : 0;
       if (abiertos) m.limpioDesde = null; else if (m.limpioDesde == null) m.limpioDesde = E.fecha.t;
       for (const k in META) if (!m.hechas[k]) { let ok = false; try { ok = !!META[k][3](E); } catch (e) { } if (ok) { m.hechas[k] = E.fecha.t; if (k === m.id || !m.id) { C.Personaje.cambiar(E, { prestigio: META[k][4] }); C.Personaje.log(E, `🎯 Meta cumplida: ${META[k][1]} (+${META[k][4]} prestigio).`); C.Noticias.poner(E, 'politica', `${J.nombre} cumple su meta personal: ${META[k][1].toLowerCase()}.`, 'ES'); if (k === m.id) m.id = null; } } }

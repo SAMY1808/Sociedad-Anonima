@@ -11,7 +11,7 @@ window.ESP = window.ESP || {};
       if (C.Campana && C.Campana.activa(E)) x += 0.2; if (E.esp.crisis) x += E.esp.crisis.activas.filter(k => k.fase !== 'cerrada').length * 0.08; if (E.esp.cv) x += E.esp.cv.act.length * 0.15; if (C.Presion && C.Presion.esPM(E)) x += C.Presion.asegurar(E).nivel / 100 * 0.15; return x;
     },
     turno(E) {
-      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim || J.retirado) return; const v = Vd.asegurar(E), t = E.fecha.t, aj = C.Ajustes ? C.Ajustes.get(E) : { eventos: 1 };
+      const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim || J.retirado || E.meta.vistaPartido) return; const v = Vd.asegurar(E), t = E.fecha.t, aj = C.Ajustes ? C.Ajustes.get(E) : { eventos: 1 };
       if (v.estres > 60 && C.Tutor) C.Tutor.una(E, 'vida'); v.estres = clamp(v.estres + Vd.carga(E) - 0.24 - (v.baja > 0 ? 1.2 : 0), 0, 100);
       if (v.estres > 70) v.salud = clamp(v.salud - (v.estres - 70) / 100 * 0.7, 0, 100); else v.salud = clamp(v.salud + 0.09 + (v.baja > 0 ? 0.5 : 0), 0, 96);
       if (v.baja > 0) v.baja--;

@@ -194,7 +194,7 @@ window.ESP = window.ESP || {};
       el.innerHTML = '<div class="inicio"><div class="cargando" style="font-size:18px;color:var(--oro2)">Generando España: 52 circunscripciones, 19 comunidades, 67 ayuntamientos y la Unión Europea…</div></div>';
       setTimeout(() => {
         const E = C.Mundo.nueva(opts);
-        E.meta.nombrePartida = opts.nombrePartida; E.meta.modoPartido = !!S.modoPartido; if (E.meta.modoPartido) { E.ui = E.ui || {}; E.ui.pantalla = 'sede'; } if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);
+        E.meta.nombrePartida = opts.nombrePartida; E.meta.modoPartido = !!S.modoPartido; E.meta.vistaPartido = !!S.modoPartido; if (E.meta.modoPartido) { E.ui = E.ui || {}; E.ui.pantalla = 'sede'; } if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);
         S = null; preview = null;
         C.Guardado.guardar(null, opts.nombrePartida).then(() => C.App.comenzar());
       }, 30);
