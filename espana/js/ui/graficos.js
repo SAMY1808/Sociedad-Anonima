@@ -15,6 +15,7 @@ window.ESP = window.ESP || {};
     /* Serie temporal. series: [{nombre, color, datos:[[t,v]]}] */
     linea(series, o = {}) {
       const W = o.ancho || 520, H = o.alto || 180, pl = o.padIzq || 36, pr = 12, pt = 10, pb = 22;
+      series = series.map(s => Object.assign({}, s, { datos: s.datos.filter(d => d && isFinite(d[0]) && isFinite(d[1])) }));
       const todos = series.flatMap(s => s.datos);
       if (!todos.length) return `<div class="vacio">Sin datos todavía</div>`;
       let min = o.min != null ? o.min : Math.min(...todos.map(d => d[1])), max = o.max != null ? o.max : Math.max(...todos.map(d => d[1]));

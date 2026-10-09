@@ -152,6 +152,13 @@ window.ESP = window.ESP || {};
         { k: 'rechazar', t: 'Rechazarla públicamente', d: 'Ganas imagen; sigues escaso de caja.', ef: (E, J) => { C.Personaje.cambiar(E, { prestigio: 0.9 }, true); pa(E).cohesion = clamp(pa(E).cohesion + 0.5, 15, 99); return 'Rechazas la donación: ganas credibilidad.'; } },
         { k: 'condicionar', t: 'Aceptar sólo como donación transparente y limitada', d: 'Menos dinero, sin riesgo.', ef: (E, J) => { pa(E).finanzas = clamp(pa(E).finanzas + 5, 0, 99); return 'Aceptas una donación legal, pública y limitada.'; } }],
       as: { jefe: 'condicionar', portavoz: 'rechazar', estratega: 'aceptar' } },
+    pactoPrograma: { ic: '📑', n: 'Tus socios exigen cambiar tu programa', req: E => false, plazo: 5, defecto: 2,
+      txt: (E, x) => { if (!x || !x.pid || !x.area) return 'Un socio exige cambios en tu programa.'; const a = C.DATA.programa.find(y => y.id === x.area), s = C.Sede.asegurar(E), act = a.ops.find(o => o.k === s.prog[x.area]), alt = a.ops.find(o => o.k === x.alt); return `${sg(E, x.pid)} condiciona su apoyo a que cambies tu postura en ${a.n.toLowerCase()}: quiere «${alt.t}» en lugar de «${act ? act.t : 'tu postura actual'}».`; },
+      op: [
+        { k: 'ceder', t: 'Ceder: adoptar su postura', d: 'Mejora la relación y la estabilidad; cuesta cohesión interna.', ef: (E, J, x) => { if (!x || !x.pid) return 'Sin efecto.'; return C.PactosPrograma.ceder(E, x); }, mem: { tipo: 'cesion', txt: 'cediste en tu programa para cerrar un pacto' } },
+        { k: 'compromiso', t: 'Negociar una fórmula intermedia', d: 'Puede cuajar o no.', cap: 6, ef: (E, J, x) => { if (!x || !x.pid) return 'Sin efecto.'; if (U.chance(0.5 + (J.atrib.negociacion || 3) / 25)) { rel(E, x.pid, 3); E.paises.ES.gob.estab = clamp(E.paises.ES.gob.estab + 1, 0, 100); return 'Pactáis una fórmula intermedia y el socio se da por satisfecho.'; } rel(E, x.pid, -3); return 'La fórmula intermedia no convence y el socio se molesta.'; } },
+        { k: 'mantener', t: 'Mantener tu programa', d: 'Coherencia a costa del socio.', ef: (E, J, x) => { if (!x || !x.pid) return 'Sin efecto.'; rel(E, x.pid, -7); const g = E.paises.ES.gob; g.estab = clamp(g.estab - 3, 0, 100); if (g.coalicion.includes(x.pid) && x.pid !== g.partido && U.chance(0.12) && C.Consejo && C.Consejo.rompe) { C.Consejo.rompe(E, x.pid); return 'Mantienes tu programa y el socio abandona el Gobierno.'; } C.Personaje.cambiar(E, { prestigio: 0.4 }, true); return 'Mantienes tu programa: ganas coherencia, el socio protesta.'; } }],
+      as: { jefe: 'compromiso', portavoz: 'mantener', estratega: 'ceder' } },
     pactoEstado: { ic: '🏛', n: 'Una oferta de pacto de Estado', req: E => true, plazo: 3, defecto: 1,
       txt: E => `${sg(E, rival(E))} te ofrece un pacto de Estado, pero te exige un gesto que irritará a tus bases.`,
       op: [
@@ -167,8 +174,8 @@ window.ESP = window.ESP || {};
       return E.esp.dil = { act: [], hist: [], memoria: [], capital: 50, asesor: { jefe: { n: 'Tu jefe/a de gabinete', conf: 60 }, portavoz: { n: nm(), conf: 60 }, estratega: { n: nm(), conf: 60 } }, ult: -99 };
     },
     asesores(E) { const d = Dl.asegurar(E), j = C.Jefe && C.Jefe.asegurar(E).jefe; if (j) d.asesor.jefe.n = j.n; return d.asesor; },
-    nuevo(E, id) {
-      const d = Dl.asegurar(E), def = CAT[id]; if (!def || d.act.some(x => x.id === id)) return null; const t = E.fecha.t;
+    nuevo(E, id, multi) {
+      const d = Dl.asegurar(E), def = CAT[id]; if (!def || (!multi && d.act.some(x => x.id === id))) return null; const t = E.fecha.t;
       const x = { uid: U.id('dl'), id, t0: t, limite: t + def.plazo, rival: rival(E) }; d.act.push(x); d.ult = t; if (C.Tutor) C.Tutor.una(E, 'dilema');
       C.Noticias.poner(E, 'politica', `${E.jugador.nombre} afronta una decisión delicada: ${def.n.toLowerCase()}.`, 'ES'); return x;
     },

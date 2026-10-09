@@ -33,11 +33,12 @@ window.ESP = window.ESP || {};
     jugadorEstado(E) { const J = E.jugador; return !!(J && J.pais === 'ES' && E.paises.ES.gob.pm === 'J'); },
     jugadorRegion(E, cr) { const J = E.jugador; return !!(J && J.pais === 'ES' && J.cargo === 'presauto' && cr.regs.includes(J.region)); },
 
-    nueva(E) {
+    nueva(E, forzar) {
       const cs = Cr.asegurar(E), mes = U.hoy().getUTCMonth();
       const pos = Object.keys(TIPOS).filter(k => !TIPOS[k].meses || TIPOS[k].meses.includes(mes)).filter(k => !cs.activas.some(c => c.tipo === k));
-      if (!pos.length) return null;
-      const k = U.pesado(pos, x => TIPOS[x].w), T = TIPOS[k], sev = U.chance(0.15) ? 3 : U.chance(0.45) ? 2 : 1;
+      if (forzar && TIPOS[forzar.tipo] && cs.activas.some(c => c.tipo === forzar.tipo)) return null;
+      if (!pos.length && !(forzar && TIPOS[forzar.tipo])) return null;
+      const k = forzar && TIPOS[forzar.tipo] ? forzar.tipo : U.pesado(pos, x => TIPOS[x].w), T = TIPOS[k], sev = forzar && forzar.sev ? forzar.sev : U.chance(0.15) ? 3 : U.chance(0.45) ? 2 : 1;
       let regs = T.reg ? [U.pick(T.reg.filter(x => D().ccaa[x]))] : C.Territorio.ids();
       if (T.reg && (k === 'calor' || k === 'incendios') && U.chance(0.5)) { const o = U.pick(T.reg.filter(x => x !== regs[0])); if (o) regs.push(o); }
       if (!regs.length) regs = [U.pick(T.reg || C.Territorio.ids())];

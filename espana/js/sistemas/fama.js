@@ -11,9 +11,11 @@ window.ESP = window.ESP || {};
       const J = E.jugador; if (!J || J.pais !== 'ES' || E.meta.presim) return; if (!E.meta.famaId) E.meta.famaId = U.id('f');
       const sal = C.Dilemas ? C.Dilemas.libro(E).reduce((a, x) => a + x.score, 0) : 0, mt = C.Metas ? Object.keys(C.Metas.asegurar(E).hechas).length : 0, lg = E.esp.leg ? Object.keys(E.esp.leg.logros).length : 0;
       const e = { id: E.meta.famaId, nombre: J.nombre, partido: E.partidos[J.partido] ? E.partidos[J.partido].sigla : '', cima: Fm.cima(E), pts: C.Personaje.puntuacion(E), anios: Math.round(E.fecha.t / 52 * 10) / 10, metas: mt, logros: lg, saldo: Math.round(sal * 10) / 10, fin: !!fin || !!J.retirado, ts: Date.now() };
+      if (C.Objetivos && C.Sede && C.Sede.activo(E) && (E.meta.modoPartido || E.meta.vistaPartido || Object.keys(C.Objetivos.asegurar(E).hechos).length)) { const ob = C.Objetivos.asegurar(E), pp = C.Objetivos.puntuacion(E); e.pp = pp.pts; e.nota = pp.nota; e.gob = Math.round(ob.semGob / 52 * 10) / 10; e.pico = ob.pico; e.obj = Object.keys(ob.hechos).length; e.sigla = E.partidos[J.partido].sigla; e.pnombre = E.partidos[J.partido].nombre; }
       const l = Fm.leer().filter(x => x.id !== e.id); l.push(e); l.sort((a, b) => b.pts - a.pts); Fm.escribir(l); return e;
     },
     ranking() { return Fm.leer().sort((a, b) => b.pts - a.pts); },
+    rankingPartidos() { return Fm.leer().filter(x => x.pp != null).sort((a, b) => b.pp - a.pp); },
     /* Epílogo largo: párrafos con la historia de tu carrera. */
     epilogo(E) {
       const J = E.jugador, ps = [], anios = E.fecha.t / 52, pa = E.partidos[J.partido], h = J.hitos || {};
@@ -42,6 +44,7 @@ window.ESP = window.ESP || {};
       vetos: ['⛔ Vetos', 'Los partidos se declaran vetos en campaña; los puedes ver y usar desde Mayorías → Rivales.'],
       vida: ['❤️ Vida personal', 'El estrés recorta tus puntos de agenda. Cuídate o te pasará factura (Dilemas → Vida personal).'],
       sede: ['🏢 Sede del partido', 'Dirige el partido como organización: define el programa, abre sedes, ficha equipo y candidatos y cuida la caja.'],
+      objetivos: ['🎯 Objetivos de partido', 'Fija hasta tres objetivos con plazo en Sede → Objetivos: cumplirlos da prestigio y militancia; fallarlos cuesta caro.'],
       sesion: ['🏛 Sesión en directo', 'Tu discurso y tus pasillos pueden mover votos en la investidura y en la moción de censura.']
     },
     una(E, k) {

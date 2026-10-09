@@ -20,7 +20,7 @@ const movil = process.argv[2] === 'movil';
   await pg.evaluate(() => { ESP.UI.cerrarModales(); const E = ESP.E, J = E.jugador, Pi = ESP.PartidoInt, pa = E.partidos[J.partido], c = Pi.asegurar(E).cong; E.eventos.pendientes = []; pa.lider = 'J'; J.rol = 'lider'; c.fase = 'precongreso'; c.retador = { n: 'Rival Interno', fuerza: 0.45 }; c.prox = E.fecha.t; Pi.congreso(E); ESP.App.revisarPendientes(); });
   await pg.waitForSelector('.modal-fondo [data-o]', { timeout: 8000 }); ok(true, 'se abre el congreso del partido en directo');
   await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-congreso.png` });
-  await clic('.modal-fondo [data-o="0"]'); await pg.waitForSelector('.modal-fondo [data-o]'); await clic('.modal-fondo [data-o="0"]');
+  for (let i = 0; i < 6 && !(await pg.$('#cp-si')); i++) { await clic('.modal-fondo [data-o="0"]'); await pg.waitForTimeout(150); }
   await pg.waitForSelector('#cp-si', { timeout: 5000 }); ok(true, 'comienza la votación de delegados');
   await pg.waitForSelector('#cp-ok', { timeout: 15000 }); ok(await pg.evaluate(() => /liderazgo|congreso/i.test(document.querySelector('#cp-fin').innerText)), 'el congreso termina con resultado'); await clic('#cp-ok');
   console.log(err.length ? 'ERRORES ' + err.join('\n') : 'sin errores de consola', '| fallos', fallos);

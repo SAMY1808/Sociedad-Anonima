@@ -8,7 +8,7 @@ window.ESP = window.ESP || {};
     /* Escoge (o renueva) al némesis: el líder del partido rival con más intención de voto. */
     elegir(E) {
       const J = E.jugador, s = N.asegurar(E), P = E.paises.ES; if (!J || J.pais !== 'ES') return s;
-      const ok = k => k !== J.partido && E.partidos[k].amb === 'nac' && E.partidos[k].lider && E.partidos[k].lider !== 'J' && E.politicos[E.partidos[k].lider];
+      const ok = k => P.partidos.includes(k) && k !== J.partido && E.partidos[k].amb === 'nac' && E.partidos[k].lider && E.partidos[k].lider !== 'J' && E.politicos[E.partidos[k].lider];
       const mejor = P.partidos.filter(ok).sort((a, b) => (E.partidos[b].popN || E.partidos[b].pop) - (E.partidos[a].popN || E.partidos[a].pop))[0];
       if (!mejor) return s;
       if (!s.pid || !ok(s.pid) || s.id !== E.partidos[s.pid].lider || (mejor !== s.pid && (E.partidos[mejor].popN || 0) > (E.partidos[s.pid].popN || 0) + 4)) { const cambio = s.pid; s.pid = mejor; s.id = E.partidos[mejor].lider; if (cambio) { s.odio = clamp(s.odio * 0.6, 10, 90); N.nota(E, `Nuevo némesis: ${E.politicos[s.id].n} (${E.partidos[mejor].sigla}).`); } else N.nota(E, `Tu némesis es ${E.politicos[s.id].n} (${E.partidos[mejor].sigla}).`); }

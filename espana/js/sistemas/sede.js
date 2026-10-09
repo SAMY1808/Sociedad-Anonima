@@ -17,7 +17,7 @@ window.ESP = window.ESP || {};
     asegurar(E) {
       const J = E.jugador; let s = E.esp.sede;
       if (s && s.pid === J.partido) return s;
-      const pa = E.partidos[J.partido], agg = pa.popN || pa.pop || 1; s = E.esp.sede = { pid: J.partido, base: { eco: pa.eco, soc: pa.soc, eu: pa.eu, ter: pa.ter }, prog: {}, impl: {}, pn0: {}, equipo: { org: null, camp: null, com: null }, pool: {}, cab: {}, sat: {}, deuda: 0, cd: {}, hist: [] };
+      const pa = E.partidos[J.partido], agg = pa.popN || pa.pop || 1; s = E.esp.sede = { pid: J.partido, base: { eco: pa.eco, soc: pa.soc, eu: pa.eu, ter: pa.ter }, prog: {}, impl: {}, pn0: {}, equipo: { org: null, camp: null, com: null }, pool: {}, cab: {}, sat: {}, deuda: 0, cd: {}, hist: [], m0: pa.militantes, pop0: agg };
       for (const prov of Object.keys(D().provincias)) { if (!Sd.enRegion(E, prov)) { s.impl[prov] = 0; s.pn0[prov] = E.esp.pn[prov][J.partido] || 1; continue; } const v = (C.Es.votosProv(E, prov, 0)[J.partido]) || 0, r = Math.max(0.15, v / Math.max(0.5, agg)); const im = Math.round(clamp(25 + 25 * Math.log(Math.max(0.3, v) / 6), 3, 95)); s.impl[prov] = im; const pn = E.esp.pn[prov][J.partido] || 1; s.pn0[prov] = pn / (0.8 + 0.4 * im / 100); }
       return s;
     },
@@ -40,7 +40,7 @@ window.ESP = window.ESP || {};
       const ant = Sd.ideologia(E); s.prog[area] = k; const nue = Sd.ideologia(E), pa = E.partidos[E.jugador.partido], pi = C.PartidoInt.asegurar(E);
       for (const ax in nue) pa[ax] = clamp(s.base[ax] + nue[ax], -100, 100);
       const mov = Math.abs(nue.eco - ant.eco) + Math.abs(nue.soc - ant.soc) + Math.abs(nue.eu - ant.eu) + Math.abs(nue.ter - ant.ter);
-      pa.cohesion = clamp(pa.cohesion - Math.min(6, mov / 14 * (1 + pi.fac.critico / 60)), 15, 99); pi.fac.critico = clamp(pi.fac.critico + mov / 20, 5, 60); pi.fac.oficial = 100 - pi.fac.barones - pi.fac.critico;
+      pa.cohesion = clamp(pa.cohesion - Math.min(6, mov / 14 * (1 + pi.fac.critico / 60) / (1 + 0.15 * (C.Satelites ? C.Satelites.nivel(E, 'fun') : 0))), 15, 99); pi.fac.critico = clamp(pi.fac.critico + mov / 20, 5, 60); pi.fac.oficial = 100 - pi.fac.barones - pi.fac.critico;
       s.cd['p_' + area] = E.fecha.t; Sd.nota(E, `Programa — ${a.n}: ${o.t}.`); C.Personaje.cambiar(E, { prestigio: 0.15 }, true);
       return { ok: true, msg: `Programa: «${o.t}». ${mov > 12 ? 'El giro ideológico inquieta a una parte del partido.' : 'Encaja con la línea del partido.'}` };
     },
@@ -54,6 +54,27 @@ window.ESP = window.ESP || {};
     /* ── Promesas del programa: lo que se aprueba (gobernando) frente a lo que prometiste ── */
     cumplimiento(E) { const s = Sd.asegurar(E); s.cumpl = s.cumpl || {}; return s.cumpl; },
     fiabilidad(E) { const c = Sd.cumplimiento(E); let ok = 0, ko = 0; for (const a in c) { ok += c[a].ok; ko += c[a].ko; } return ok + ko ? ok / (ok + ko) : null; },
+    /* Compatibilidad de un proyecto con tu programa: [{area, m}] con m>0 cumple, m<0 contradice. */
+    compat(E, p) {
+      const s = Sd.asegurar(E), out = [];
+      for (const a of D().programa) {
+        const k = s.prog[a.id], o = k && a.ops.find(x => x.k === k); if (!o || !(a.sec || []).includes(p.s)) continue;
+        let m = 0, n = 0; for (const ax of ['eco', 'soc', 'eu', 'ter']) { const v = o.v[ax] || 0, l = p[ax] || 0; if (!v) continue; n++; m += Math.sign(v) * Math.sign(l) * Math.min(Math.abs(v), 10) / 10 * Math.min(Math.abs(l), 60) / 60; }
+        if (n && Math.abs(m) >= 0.12) out.push({ a, m });
+      }
+      return out;
+    },
+    /* Coherencia de voto: votar a favor de lo que contradice tu programa, o en contra de lo que lo cumple, te lo cobran. */
+    evaluarVoto(E, p, voto) {
+      const J = E.jugador; if (!J || !Sd.activo(E) || E.meta.presim || !['si', 'no'].includes(voto)) return null; const s = Sd.asegurar(E); s.votos = s.votos || { coh: 0, inc: 0 };
+      for (const { a, m } of Sd.compat(E, p)) {
+        const coherente = (m > 0 && voto === 'si') || (m < 0 && voto === 'no');
+        if (coherente) { s.votos.coh++; C.Personaje.cambiar(E, { prestigio: 0.1 }, true); }
+        else { s.votos.inc++; C.Personaje.cambiar(E, { prestigio: -0.5 }, true); Sd.empujar(E, J.partido, -0.03); if (C.Dilemas && U.chance(0.35)) C.Dilemas.asegurar(E).memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: 'crisis', txt: `votaste ${voto === 'si' ? 'a favor de' : 'en contra de'} «${p.t}», contra tu programa de ${a.n.toLowerCase()}`, bien: false, cobrado: false }); Sd.nota(E, `✖ Voto incoherente: ${voto === 'si' ? 'a favor de' : 'en contra de'} «${p.t}» (${a.n}).`); }
+      }
+      return s.votos;
+    },
+    coherenciaVoto(E) { const v = Sd.asegurar(E).votos; return v && v.coh + v.inc ? v.coh / (v.coh + v.inc) : null; },
     evaluarLey(E, p) {
       const J = E.jugador; if (!J || !Sd.activo(E) || E.meta.presim) return null; const g = E.paises.ES.gob, mio = J.partido;
       const gobierna = g.partido === mio || (g.coalicion || []).includes(mio), autor = p.autor || {};
@@ -64,7 +85,7 @@ window.ESP = window.ESP || {};
         let m = 0, n = 0; for (const ax of ['eco', 'soc', 'eu', 'ter']) { const v = o.v[ax] || 0, l = p[ax] || 0; if (!v) continue; n++; m += Math.sign(v) * Math.sign(l) * Math.min(Math.abs(v), 10) / 10 * Math.min(Math.abs(l), 60) / 60; }
         if (!n || Math.abs(m) < 0.12) continue; const c = Sd.cumplimiento(E); c[a.id] = c[a.id] || { ok: 0, ko: 0 };
         if (m > 0) { c[a.id].ok++; C.Personaje.cambiar(E, { prestigio: 0.5 }, true); Sd.empujar(E, mio, 0.05); res.push({ a, bien: true }); C.Noticias.poner(E, 'partido', `${E.partidos[mio].sigla} cumple su programa en ${a.n.toLowerCase()} con «${p.t}».`, 'ES'); }
-        else { c[a.id].ko++; C.Personaje.cambiar(E, { prestigio: -1 }, true); E.partidos[mio].cohesion = clamp(E.partidos[mio].cohesion - 0.8, 15, 99); Sd.empujar(E, mio, -0.1); res.push({ a, bien: false }); C.Noticias.poner(E, 'partido', `«${p.t}» contradice el programa de ${E.partidos[mio].sigla} en ${a.n.toLowerCase()}: la oposición habla de promesa incumplida.`, 'ES'); }
+        else { c[a.id].ko++; if (C.Satelites) C.Satelites.incumplimiento(E, a.id); C.Personaje.cambiar(E, { prestigio: -1 }, true); E.partidos[mio].cohesion = clamp(E.partidos[mio].cohesion - 0.8, 15, 99); Sd.empujar(E, mio, -0.1); res.push({ a, bien: false }); C.Noticias.poner(E, 'partido', `«${p.t}» contradice el programa de ${E.partidos[mio].sigla} en ${a.n.toLowerCase()}: la oposición habla de promesa incumplida.`, 'ES'); }
         if (C.Dilemas) { C.Dilemas.asegurar(E).memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: 'crisis', txt: m > 0 ? `cumpliste tu programa en ${a.n.toLowerCase()}` : `aprobaste «${p.t}», contra tu programa de ${a.n.toLowerCase()}`, bien: m > 0, cobrado: false }); C.Dilemas.registrar(E, 'programa', (m > 0 ? 'Programa cumplido: ' : 'Programa incumplido: ') + a.n, m > 0 ? 1.5 : -2.5); }
         Sd.nota(E, (m > 0 ? '✔ ' : '✖ ') + `${a.n}: «${p.t}»`);
       }
@@ -88,7 +109,7 @@ window.ESP = window.ESP || {};
       const pa = E.partidos[E.jugador.partido], s = Sd.asegurar(E), sedes = Sd.provs(E).filter(p => s.impl[p] >= 30).length, sedeCoste = Sd.provs(E).reduce((a, p) => a + Math.max(0, s.impl[p] - 20) / 100 * 0.012, 0), eq = Object.values(s.equipo).filter(Boolean);
       const org = s.equipo.org ? 1 + s.equipo.org.comp / 20 : 1;
       const pop = pa.popN || pa.pop, cuotas = pa.militantes / 100000 * 0.08 * org, subv = pop / 100 * 0.6, don = 0;
-      const base = 0.04 + 0.18 * clamp(pa.militantes / 200000, 0, 1) + 0.005 * pop, sed = sedeCoste, equ = eq.reduce((a, x) => a + 0.02 + x.comp * 0.006, 0), int = s.deuda * 0.004;
+      const base = 0.04 + 0.18 * clamp(pa.militantes / 200000, 0, 1) + 0.005 * pop, sed = sedeCoste, equ = eq.reduce((a, x) => a + 0.02 + x.comp * 0.006, 0) + (C.Satelites ? C.Satelites.coste(E) : 0), int = s.deuda * 0.004;
       return { cuotas, subv, don, base, sed, equ, int, sedes, ing: cuotas + subv + don, gas: base + sed + equ + int, neto: cuotas + subv + don - base - sed - equ - int };
     },
     credito(E) { const s = Sd.asegurar(E), pa = E.partidos[E.jugador.partido]; if (s.deuda >= 40) return { ok: false, msg: 'Los bancos no te dan más crédito' }; pa.finanzas = clamp(pa.finanzas + 15, 0, 99); s.deuda += 17; Sd.nota(E, 'Crédito bancario de 17 M€.'); return { ok: true, msg: 'Obtienes un crédito de 17 M€: caja al alza, pero pagarás intereses cada semana.' }; },
@@ -128,7 +149,7 @@ window.ESP = window.ESP || {};
     /* ── Estrategia: campaña dirigida a un colectivo ── */
     dirigida(E, g) {
       const s = Sd.asegurar(E), GR = D().colectivos, col = GR[g]; if (!col) return { ok: false, msg: 'Colectivo desconocido' }; if (!Sd.cost(E, 3)) return { ok: false, msg: 'No hay caja (3 puntos de finanzas)' };
-      const sw = U.suma(Object.keys(GR).map(k => GR[k].peso)), af = C.Impacto.afinidad(E, g, E.jugador.partido), sat = s.sat[g] || 0, dc = s.equipo.camp ? 1 + s.equipo.camp.comp / 20 : 1, gan = 1.6 * col.peso / sw * af * dc * (1 - sat);
+      const sw = U.suma(Object.keys(GR).map(k => GR[k].peso)), af = C.Impacto.afinidad(E, g, E.jugador.partido), sat = s.sat[g] || 0, dc = (s.equipo.camp ? 1 + s.equipo.camp.comp / 20 : 1) * (1 + 0.08 * (C.Satelites ? C.Satelites.nivel(E, 'fun') : 0)), gan = 1.6 * col.peso / sw * af * dc * (1 - sat);
       s.sat[g] = clamp(sat + 0.35, 0, 0.9); s.cd['d_' + g] = E.fecha.t; Sd.empujar(E, E.jugador.partido, gan); Sd.nota(E, `Campaña dirigida a ${col.nombre.toLowerCase()}: +${U.d1(gan)} puntos.`);
       return { ok: true, msg: `Campaña dirigida a ${col.nombre.toLowerCase()}: ${gan > 0.08 ? '+' : '+'}${U.d1(gan)} puntos de apoyo${af < 0.35 ? ' (poca afinidad: rinde poco)' : ''}.` };
     },
@@ -149,6 +170,7 @@ window.ESP = window.ESP || {};
       for (const r in s.equipo) { const x = s.equipo[r]; if (x && U.chance(0.003 * (10 - x.leal) / 10 * (1 + x.amb / 10))) { s.equipo[r] = null; Sd.nota(E, `${x.n} abandona su puesto.`); C.Noticias.poner(E, 'partido', `${x.n} deja la dirección de ${pa.sigla} y se pasa al rival.`, 'ES'); C.Personaje.cambiar(E, { prestigio: -0.5 }, true); } }
       if (t % 26 === 0) for (const r in ROLES) if (!s.equipo[r]) Sd.buscar(E, r);
       for (const g in s.sat) s.sat[g] = Math.max(0, s.sat[g] - 0.012);
+      if (s.m0 && s.pop0) pa.militantes = Math.max(500, Math.round(pa.militantes + (s.m0 * Math.pow(Math.max(0.2, (pa.popN || pa.pop) / s.pop0), 1.2) - pa.militantes) * 0.004));
     }
   };
   const R = (id, nombre, icono, desc, costo, disp, ejecutar) => C.Acciones.registrar({ id, nombre, icono, desc, costo, grupo: 'partido', disponible: E => !Sd.activo(E) ? 'Sólo con un partido nacional en España' : disp(E), ejecutar });
@@ -165,6 +187,7 @@ window.ESP = window.ESP || {};
   R('credito_partido', 'Pedir un crédito al banco', '🏦', 'Caja inmediata a cambio de deuda con intereses.', 1, E => dir(E), E => Sd.credito(E));
   R('amortizar_deuda', 'Amortizar deuda', '💳', 'Devuelves parte de la deuda con la caja del partido.', 1, E => dir(E), E => Sd.amortizar(E));
   R('microdonaciones', 'Campaña de microdonaciones', '🪙', 'Pides pequeñas aportaciones a militantes y simpatizantes.', 1, E => { const c = Sd.puede(E, 'micro', 8); return c !== true ? c : true; }, E => Sd.micro(E));
+  if (C.Congreso) { const r0 = C.Congreso.resolver; C.Congreso.resolver = function (E, p, votoJ) { const v = r0.apply(this, arguments); try { if (v && v.miVoto) Sd.evaluarVoto(E, p, v.miVoto); } catch (e) { console.error('[sede]', e); } return v; }; }
   if (C.Congreso) { const f0 = C.Congreso.alFinalizar; C.Congreso.alFinalizar = function (E, p, ok) { const r = f0.apply(this, arguments); if (ok) { try { Sd.evaluarLey(E, p); } catch (e) { console.error('[sede]', e); } } return r; }; }
   C.Tiempo.registrar('sede', { turno: Sd.turno, postInit: E => { if (E.jugador && E.meta.modoPartido && E.ui) E.ui.pantalla = 'sede'; } }, 39);
 })(window.ESP);

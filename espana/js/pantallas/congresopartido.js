@@ -11,6 +11,9 @@ window.ESP = window.ESP || {};
       const rival = esL ? (ret ? `${esc(ret.n)} (retador/a)` : 'Nadie se presenta frente a ti, pero la sala puede castigarte') : `${esc(vieja ? vieja.n : 'la dirección')} (líder actual)`;
       const cab = () => `<div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="etq">${esL ? '🎗 Defiendes el liderazgo' : '🏁 Eres candidato/a al liderazgo'}</span><span class="etq">Frente a: ${rival}</span></div><div class="grid" style="grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px;margin-bottom:8px">${Object.keys(Pi.FAC).map(k => `<div><b>${Pi.FAC[k][1]} ${Pi.FAC[k][0]}</b><div class="barra-h" style="height:6px"><i style="width:${Math.round(p.fac[k])}%;background:var(--oro)"></i></div>${Math.round(p.fac[k])} %</div>`).join('')}</div>`;
       const hist = () => `<div class="lista" style="font-size:12.5px;margin-bottom:8px">${log.map(l => `<div class="it"><span class="etq">${esc(l[0])}</span><div class="cuerpo" style="flex:1;white-space:normal;margin-left:8px">${esc(l[1])}</div></div>`).join('')}</div>`;
+      const Ml = C.Militancia, esLid = esL, censoPaso = esLid ? { t: '🗳 Censo de las primarias', q: 'Como líder, decides quién vota: ¿sólo la militancia o también los simpatizantes?', ops: [
+        ['Censo cerrado (sólo militantes)', 'Favorece al aparato y a los barones.', () => { Ml.fijarCenso(E, 'cerrado'); bonus += Ml.ajusteCenso(E); return 'Votarán sólo los militantes.'; }],
+        ['Primarias abiertas a simpatizantes', 'Favorece a quien tenga más tirón popular.', () => { Ml.fijarCenso(E, 'abierto'); bonus += Ml.ajusteCenso(E); return 'Votarán también los simpatizantes.'; }]] } : null;
       const pasos = [
         { t: '🎤 Tu discurso ante los delegados', q: 'Seiscientos delegados esperan tu intervención. El tono marcará la sala.', ops: [
           ['Un discurso ilusionante', 'Más carisma que fondo.', () => { const b = 1 + car * 4 + U.gauss(0, 1.5); bonus += b; return b > 3.5 ? 'La sala se pone en pie. Ovación larga.' : 'Buen discurso, aunque la sala se queda a medias.'; }],
@@ -21,6 +24,9 @@ window.ESP = window.ESP || {};
           ['Pactar con los críticos', 'Les ofreces puestos en la ejecutiva.', () => { bonus += 1.5 + neg * 2; p.fac.critico = clamp(p.fac.critico - 4, 5, 60); pa.cohesion = clamp(pa.cohesion + 1.5, 15, 99); return 'Los críticos se avienen a un pacto de integración.'; }],
           ['Ir delegación por delegación', 'Lento pero seguro.', () => { bonus += 2.5 + car * 1.5; return 'Hablas con las delegaciones una a una.'; }]] }
       ];
+      if (censoPaso) pasos.unshift(censoPaso); else bonus += Ml.ajusteCenso(E);
+      const pons = Ml.ponencias(E);
+      if (pons.length) pasos.push({ t: '📑 Ponencias al programa', q: 'El congreso debate enmiendas al programa del partido. ¿Defiendes alguna?', ops: pons.map(x => [x.txt, 'Puede salir adelante o decaer.', () => { const r = Ml.defender(E, x, neg); bonus += r.bono; return r.txt; }]).concat([['No presentar ponencias', 'Evitas riesgos.', () => 'No defiendes ninguna ponencia.']]) });
       const pinta = () => {
         if (paso >= pasos.length) return votar();
         const s = pasos[paso]; m.cuerpo.innerHTML = `${cab()}${hist()}<div class="tarjeta" style="border-color:var(--oro)"><div class="t-cab"><h3>${s.t}</h3><span class="etq">${paso + 1}/${pasos.length + 1}</span></div><p style="margin:4px 0 8px;font-size:14px">${esc(s.q)}</p><div class="lista">${s.ops.map((o, i) => `<div class="it" style="flex-wrap:wrap"><div class="cuerpo" style="flex:1;min-width:190px;white-space:normal"><b>${esc(o[0])}</b><div class="tenue" style="font-size:11.5px">${esc(o[1])}</div></div><button class="btn chico" data-o="${i}">Elegir</button></div>`).join('')}</div></div>`;
