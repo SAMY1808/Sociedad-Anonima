@@ -18,7 +18,7 @@ const movil = process.argv[2] === 'movil';
   await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
   await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
   await pg.evaluate(() => { ESP.UI.cerrarModales(); const E = ESP.E, J = E.jugador, Ej = ESP.Ejecutivo, c = E.esp.cortes; E.eventos.pendientes = []; J.rol = 'lider'; E.partidos[J.partido].lider = 'J'; const cand = J.partido; c.estado = 'investidura'; c.fallidos = []; c.t1 = null; c.investidura = { cand, plan: Ej.mejorPlan(E, cand), tVoto: E.fecha.t, negociaJ: false }; Ej.votar(E); ESP.App.revisarPendientes(); });
-  await pg.waitForSelector('.modal-fondo [data-o]', { timeout: 8000 }); ok(true, 'se abre la sesión de investidura en directo');
+  await pg.waitForSelector('.modal-fondo [data-o]', { timeout: 8000 }); ok(true, 'se abre la sesión de investidura en directo'); ok(await pg.evaluate(() => !!document.querySelector('.modal-fondo .escena[data-escena="investidura"], .modal-fondo .escena[data-escena="mocion_censura"]')), 'la sesión muestra la escena del hemiciclo');
   await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-sesion.png` });
   await clic('.modal-fondo [data-o="0"]'); await pg.waitForSelector('.modal-fondo [data-o]'); await clic('.modal-fondo [data-o="0"]');
   await pg.waitForSelector('#se-bar', { timeout: 5000 }); ok(true, 'comienza la votación nominal');

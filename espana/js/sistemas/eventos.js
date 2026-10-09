@@ -7,8 +7,8 @@ window.ESP = window.ESP || {};
     init(E) { E.eventos = { pendientes: [], historial: [] }; },
 
     /* Evento informativo sin decisión. */
-    info(E, titulo, texto) {
-      E.eventos.pendientes.push({ id: U.id('e'), key: null, titulo, texto, icono: '', opciones: ['Entendido'], t: E.fecha.t, ctx: {} });
+    info(E, titulo, texto, escena) {
+      E.eventos.pendientes.push({ id: U.id('e'), key: null, titulo, texto, icono: '', opciones: ['Entendido'], t: E.fecha.t, ctx: {}, escena: escena || null });
     },
 
     def(key) { return C.DATA.eventos.find(e => e.id === key); },

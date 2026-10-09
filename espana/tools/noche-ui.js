@@ -29,13 +29,14 @@ const movil = process.argv[2] === 'movil';
   await pg.waitForSelector('.modal-fondo #n-hora', { timeout: 8000 }); ok(true, 'se abre la noche electoral');
   const T = async () => (await pg.evaluate(() => document.querySelector('#n-hora') ? document.querySelector('#n-hora').textContent : ''));
   // Decisiones: jornada, 20:00, llamada, balcón
-  const decidir = async (nombre) => { await pg.waitForSelector('#n-dec [data-op]', { timeout: 40000 }); const txt = await pg.$eval('#n-dec h3', e => e.textContent); await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-noche-${nombre}.png` }); await clic('#n-dec [data-op="0"]'); await pg.waitForTimeout(200); return txt; };
+  let esc = null;
+  const decidir = async (nombre) => { await pg.waitForSelector('#n-dec [data-op]', { timeout: 40000 }); const txt = await pg.$eval('#n-dec h3', e => e.textContent); esc = await pg.evaluate(() => { const e = document.querySelector('#n-dec .escena'); return e ? e.dataset.escena : null; }); await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-noche-${nombre}.png` }); await clic('#n-dec [data-op="0"]'); await pg.waitForTimeout(200); return txt; };
   ok(/Tu voto/.test(await decidir('jornada')), 'decisión de la jornada');
   ok(/20:00/.test(await decidir('decl20')), 'declaración a las 20:00');
   await pg.waitForTimeout(3500); await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-noche-parcial.png` });
   ok(await pg.evaluate(() => /escrutinio/i.test(document.querySelector('#n-bol').textContent) && document.querySelectorAll('#n-tele .it').length >= 2), 'escrutinio en marcha con comentarios');
   // Salta al final y decide el balcón
-  await clic('#n-saltar'); const bal = await decidir('balcon'); ok(/balc|Comparecencia/i.test(bal), 'discurso desde el balcón: ' + bal);
+  await clic('#n-saltar'); const bal = await decidir('balcon'); ok(/balc|Comparecencia/i.test(bal), 'discurso desde el balcón: ' + bal); ok(/^noche_/.test(esc || ''), 'el discurso muestra el atril del partido (escena ' + esc + ')');
   await pg.waitForFunction(() => !document.querySelector('#n-cerrar').disabled, null, { timeout: 8000 }); ok(await pg.evaluate(() => /Tu resultado/.test(document.querySelector('#n-final').textContent)), 'resultado final y mapa');
   await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-noche-final.png` });
   await clic('#n-cerrar'); await pg.waitForTimeout(400); ok(!(await pg.$('#n-hora')), 'se cierra la noche');

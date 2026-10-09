@@ -210,7 +210,7 @@ window.ESP = window.ESP || {};
     modalEvento(ev) {
       const E = C.E, def = ev.key ? C.Eventos.def(ev.key) : null;
       const ops = ev.opciones;
-      const cuerpo = `<div class="evento-cab"><div class="evento-icono">${ev.icono || '📰'}</div><div><p style="font-size:15px;margin:.2em 0 0">${esc(ev.texto)}</p></div></div>
+      const cuerpo = `${ev.escena && C.Escenas ? C.Escenas.html(E, ev.escena, { compacta: true }) : ''}<div class="evento-cab"><div class="evento-icono">${ev.icono || '📰'}</div><div><p style="font-size:15px;margin:.2em 0 0">${esc(ev.texto)}</p></div></div>
         <h3 style="margin:14px 0 8px;font-size:12px;letter-spacing:.12em;color:var(--tenue);text-transform:uppercase">${ops.length > 1 ? '¿Cómo respondes?' : ''}</h3>
         <div class="col">${ops.map((o, i) => `<button class="btn opcion" data-op="${i}" style="justify-content:flex-start;text-align:left;white-space:normal;padding:12px 14px">${esc(o)}</button>`).join('')}</div>`;
       const m = UI.modal({ titulo: ev.titulo, cuerpo, sinCerrar: true, clase: 'evento' });

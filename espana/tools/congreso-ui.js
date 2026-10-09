@@ -18,7 +18,7 @@ const movil = process.argv[2] === 'movil';
   await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
   await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
   await pg.evaluate(() => { ESP.UI.cerrarModales(); const E = ESP.E, J = E.jugador, Pi = ESP.PartidoInt, pa = E.partidos[J.partido], c = Pi.asegurar(E).cong; E.eventos.pendientes = []; pa.lider = 'J'; J.rol = 'lider'; c.fase = 'precongreso'; c.retador = { n: 'Rival Interno', fuerza: 0.45 }; c.prox = E.fecha.t; Pi.congreso(E); ESP.App.revisarPendientes(); });
-  await pg.waitForSelector('.modal-fondo [data-o]', { timeout: 8000 }); ok(true, 'se abre el congreso del partido en directo');
+  await pg.waitForSelector('.modal-fondo [data-o]', { timeout: 8000 }); ok(true, 'se abre el congreso del partido en directo'); ok(await pg.evaluate(() => !!document.querySelector('.modal-fondo .escena[data-escena="congreso_partido"]')), 'el congreso muestra la escena del escenario del partido');
   await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-congreso.png` });
   for (let i = 0; i < 6 && !(await pg.$('#cp-si')); i++) { await clic('.modal-fondo [data-o="0"]'); await pg.waitForTimeout(150); }
   await pg.waitForSelector('#cp-si', { timeout: 5000 }); ok(true, 'comienza la votación de delegados');

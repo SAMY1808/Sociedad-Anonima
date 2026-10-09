@@ -11,7 +11,7 @@ window.ESP = window.ESP || {};
       const titulo = mocion ? '⚡ Moción de censura' : '🏛 Debate de investidura';
       const m = UI.modal({ titulo, icono: '🏛', clase: 'medio', sinCerrar: true, cuerpo: '' });
       const intro = rol === 'candidato' ? (mocion ? 'Defiendes tu moción de censura desde la tribuna.' : 'Defiendes tu investidura desde la tribuna.') : rol === 'defensor' ? `Debes defender a tu Gobierno de la moción de censura de ${esc(nom)}.` : `Replicas desde la bancada a ${esc(nom)}.`;
-      const cab = () => `<div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="etq">${mocion ? 'Moción de censura de' : 'Candidato/a:'} ${esc(nom)} (${esc(E.partidos[cand].sigla)})</span><span class="etq">Mayoría absoluta: 176</span></div><p style="margin:0 0 8px;font-size:13.5px">${intro}</p>`;
+      const cab = () => `${C.Escenas ? C.Escenas.html(E, mocion ? 'mocion_censura' : 'investidura', { compacta: true, leyenda: mocion ? 'Moción de censura' : 'Debate de investidura' }) : ''}<div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="etq">${mocion ? 'Moción de censura de' : 'Candidato/a:'} ${esc(nom)} (${esc(E.partidos[cand].sigla)})</span><span class="etq">Mayoría absoluta: 176</span></div><p style="margin:0 0 8px;font-size:13.5px">${intro}</p>`;
       const hist = () => `<div class="lista" style="font-size:12.5px;margin-bottom:8px">${log.map(l => `<div class="it"><span class="etq">${esc(l[0])}</span><div class="cuerpo" style="flex:1;white-space:normal;margin-left:8px">${esc(l[1])}</div></div>`).join('')}</div>`;
       const R = rol === 'oposicion' ? 'tu réplica' : 'tu intervención';
       const pasos = [

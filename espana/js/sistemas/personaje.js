@@ -142,7 +142,7 @@ window.ESP = window.ESP || {};
       const J = E.jugador; J.retirado = true;
       const nom = Object.keys(J.hitos).sort((a, b) => J.hitos[a] - J.hitos[b]).map(k => `${D().cargos[k].nombre} (${U.fmtT(J.hitos[k], true)})`);
       Pj.log(E, 'Te retiras de la política.');
-      C.Eventos.info(E, '🏁 Fin de una carrera', `${J.nombre} se retira tras ${U.d1(E.fecha.t / 52)} años en política. Cargos: ${nom.join(' → ')}. Puntuación final: ${Pj.puntuacion(E)} puntos. Puedes seguir observando cómo evoluciona España o iniciar una nueva carrera desde el menú.`);
+      C.Eventos.info(E, '🏁 Fin de una carrera', `${J.nombre} se retira tras ${U.d1(E.fecha.t / 52)} años en política. Cargos: ${nom.join(' → ')}. Puntuación final: ${Pj.puntuacion(E)} puntos. Puedes seguir observando cómo evoluciona España o iniciar una nueva carrera desde el menú.`, 'retirada');
     },
 
     enParlamento(E) { return !!(E.jugador && E.jugador.electo); },
