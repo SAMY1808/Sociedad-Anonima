@@ -238,7 +238,7 @@ window.ESP = window.ESP || {};
       jo.cerrada = true;
       const J = E.jugador; if (!J || J.pais !== 'ES') return;
       if (E.elecciones.nochePendiente) return;
-      E.elecciones.nochePendiente = { tipo: 'locales', pais: 'ES', t: E.fecha.t, aut: jo.aut, mun: jo.mun };
+      if (!C.Foco || C.Foco.noche(E, 'locales', jo)) E.elecciones.nochePendiente = { tipo: 'locales', pais: 'ES', t: E.fecha.t, aut: jo.aut, mun: jo.mun };
     },
 
     /* ── Gobierno central → comunidades ── */

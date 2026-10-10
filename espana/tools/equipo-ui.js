@@ -17,6 +17,7 @@ const movil = process.argv[2] === 'movil';
   await pg.goto('http://localhost:8136/index.html');
   await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
   await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
+  await pg.evaluate(() => ESP.Ajustes.fijar(ESP.E, 'foco', 'todo')); // esta prueba recorre varios niveles a la vez: enfoque Panorámico
   const cerrar = async () => { for (let i = 0; i < 6; i++) { if (!(await pg.$('.modal-fondo'))) break; await pg.evaluate(() => ESP.UI.cerrarModales()); } };
   await cerrar();
   await pg.evaluate(() => { const E = ESP.E; E.eventos.pendientes = []; E.ue.pendiente = []; ESP.App.ir('jefe'); });

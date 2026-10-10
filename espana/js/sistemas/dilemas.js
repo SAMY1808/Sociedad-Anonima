@@ -175,7 +175,7 @@ window.ESP = window.ESP || {};
     },
     asesores(E) { const d = Dl.asegurar(E), j = C.Jefe && C.Jefe.asegurar(E).jefe; if (j) d.asesor.jefe.n = j.n; return d.asesor; },
     nuevo(E, id, multi) {
-      const d = Dl.asegurar(E), def = CAT[id]; if (!def || (!multi && d.act.some(x => x.id === id))) return null; const t = E.fecha.t;
+      const d = Dl.asegurar(E), def = CAT[id]; if (!def || (!multi && d.act.some(x => x.id === id)) || (C.Foco && !C.Foco.dilema(E, id))) return null; const t = E.fecha.t;
       const x = { uid: U.id('dl'), id, t0: t, limite: t + def.plazo, rival: rival(E) }; d.act.push(x); d.ult = t; if (C.Tutor) C.Tutor.una(E, 'dilema');
       C.Noticias.poner(E, 'politica', `${E.jugador.nombre} afronta una decisión delicada: ${def.n.toLowerCase()}.`, 'ES'); return x;
     },
@@ -199,7 +199,7 @@ window.ESP = window.ESP || {};
       // Caducan los dilemas sin decidir: se aplica la opción por defecto
       for (const x of d.act.slice()) if (t >= x.limite) { const def = CAT[x.id], o = def.op[def.defecto]; const cap = o.cap; if (cap) o.cap = 0; const r = Dl.decidir(E, x.uid, o.k); if (cap) o.cap = cap; C.Noticias.poner(E, 'politica', `${J.nombre} deja pasar el plazo en «${def.n.toLowerCase()}» y se impone la inercia.`, 'ES'); d.hist[0] && (d.hist[0].txt += ' (por inacción)'); }
       // Aparece un dilema nuevo
-      if (d.act.length < 2 && t - d.ult >= 6 && U.chance(0.07 * aj.eventos)) { const pos = Object.keys(CAT).filter(k => !d.act.some(x => x.id === k) && !d.hist.slice(0, 5).some(h => h.txt.startsWith(CAT[k].n)) && CAT[k].req(E)); const k = U.pick(pos); if (k) Dl.nuevo(E, k); }
+      if (d.act.length < 2 && t - d.ult >= 6 && U.chance(0.07 * aj.eventos)) { const pos = Object.keys(CAT).filter(k => (!C.Foco || C.Foco.dilema(E, k)) && !d.act.some(x => x.id === k) && !d.hist.slice(0, 5).some(h => h.txt.startsWith(CAT[k].n)) && CAT[k].req(E)); const k = U.pick(pos); if (k) Dl.nuevo(E, k); }
       // Hemeroteca: lo que dijiste y lo que hiciste vuelve
       if (U.chance(0.035)) Dl.hemeroteca(E);
       // Asesores quemados filtran

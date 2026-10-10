@@ -29,7 +29,7 @@ window.ESP = window.ESP || {};
       if (J.cargo === 'presauto' && E.esp.ccaa[J.region] && C.Territorio.disuelto(E, J.region)) add(5, '🗺', 'El Parlamento de tu comunidad está disuelto: sólo puedes gobernar por decreto-ley.', 'parlaut', { tab: 'decretos' });
       if (E.esp.pendienteConvAut) add(10, '📑', 'Tienes una convalidación pendiente de voto.', 'parlaut');
       if (C.Referendos && C.Referendos.asegurar(E).act.some(r => r.estado === 'campana')) add(6, '🗳️', 'Hay una consulta en campaña.', 'referendos');
-      const vis = E.ui.vis || {}; const nov = MAPA.filter(m => !vis[m[0]]); if (nov.length) add(1, '🧭', `Aún no has visitado ${nov.length} pestañas: empieza por «${nov[0][2]}».`, nov[0][0]);
+      const vis = E.ui.vis || {}; const nov = MAPA.filter(m => !vis[m[0]] && (!C.Foco || C.Foco.pantalla(E, m[0]))); if (nov.length) add(1, '🧭', `Aún no has visitado ${nov.length} pestañas: empieza por «${nov[0][2]}».`, nov[0][0]);
       return out.sort((a, b) => b.p - a.p).slice(0, 8);
     }
   };

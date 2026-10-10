@@ -17,7 +17,7 @@ const movil = process.argv[2] === 'movil';
   await pg.goto('http://localhost:8143/index.html');
   await clic('#i-nueva'); await pg.waitForSelector('[data-nivel]');
   await clic('[data-nivel="nacional"]'); await clic('#c-sig'); await pg.waitForSelector('[data-partido]'); await clic('[data-partido="ES_ASD"]'); await clic('#c-sig'); await pg.waitForSelector('[data-rol]'); await clic('[data-rol="lider"]'); await clic('#c-sig'); await pg.waitForSelector('#c-ok'); await clic('#c-ok'); await pg.waitForSelector('#vista', { timeout: 60000 });
-  await pg.evaluate(() => { ESP.UI.cerrarModales(); const E = ESP.E; E.eventos.pendientes = []; const c = E.jugador.region; E.esp.jornada = E.esp.jornada || {}; ESP.Territorio.celebrar(E, c); ESP.Territorio.cerrarJornada(E); });
+  await pg.evaluate(() => { ESP.UI.cerrarModales(); const E = ESP.E; E.eventos.pendientes = []; const c = E.jugador.region; E.esp.jornada = E.esp.jornada || {}; ESP.Territorio.celebrar(E, c); const J = E.jugador; J.cargo = 'dipauto'; J.nivel = 'autonomico'; /* con el enfoque por cargo, la noche autonómica es para quien juega en la comunidad */ ESP.Territorio.cerrarJornada(E); });
   await pg.evaluate(() => ESP.App.revisarPendientes());
   await pg.waitForSelector('.modal-fondo #na-hora', { timeout: 8000 }); ok(true, 'se abre la noche autonómica en directo');
   await pg.waitForSelector('#na-dec [data-op]', { timeout: 10000 }); await pg.screenshot({ path: `/tmp/${movil ? 'm' : 'd'}-nocheaut-20.png` }); await clic('#na-dec [data-op="0"]');

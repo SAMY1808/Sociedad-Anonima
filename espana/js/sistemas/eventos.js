@@ -29,7 +29,7 @@ window.ESP = window.ESP || {};
       if (E.eventos.pendientes.length > 2) return;
       // Eventos automáticos de carrera
       for (const def of C.DATA.eventos) {
-        if (!def.auto || Ev.enfriado(E, def)) continue;
+        if (!def.auto || (C.Foco && !C.Foco.evento(E, def.id)) || Ev.enfriado(E, def)) continue;
         let ok = false; try { ok = def.req(E, J, P); } catch (e) { ok = false; }
         if (ok) { Ev.disparar(E, def); return; }
       }
@@ -37,11 +37,11 @@ window.ESP = window.ESP || {};
       if (U.chance(0.012)) {
         const g = C.DATA.eventos.filter(d => d.global && !Ev.enfriado(E, d));
         const def = U.pick(g);
-        if (def) { def.efecto(E); E.eventos.historial.unshift({ key: def.id, t: E.fecha.t }); C.Noticias.poner(E, 'mundo', def.titulo + ': ' + def.texto(), null); Ev.disparar(E, def); return; }
+        if (def) { def.efecto(E); E.eventos.historial.unshift({ key: def.id, t: E.fecha.t }); C.Noticias.poner(E, 'mundo', def.titulo + ': ' + def.texto(), null); if (!C.Foco || C.Foco.evento(E, def.id)) Ev.disparar(E, def); return; }
       }
       // Eventos aleatorios
       if (!U.chance(0.09 * (C.Ajustes ? C.Ajustes.get(E).eventos : 1))) return;
-      const cand = C.DATA.eventos.filter(d => !d.auto && !d.global && !Ev.enfriado(E, d) && (() => { try { return d.req(E, J, P); } catch (e) { return false; } })());
+      const cand = C.DATA.eventos.filter(d => !d.auto && !d.global && (!C.Foco || C.Foco.evento(E, d.id)) && !Ev.enfriado(E, d) && (() => { try { return d.req(E, J, P); } catch (e) { return false; } })());
       const def = U.pesado(cand, d => d.peso);
       if (def) Ev.disparar(E, def);
     },

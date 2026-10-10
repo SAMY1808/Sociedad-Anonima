@@ -13,7 +13,7 @@ window.ESP = window.ESP || {};
     },
 
     render(E) {
-      const Ca = C.Campana, camps = Ca.camps(E), camp = Ca.cur(E);
+      const Ca = C.Campana, camps = Ca.mias(E), camp = Ca.cur(E);
       if (!camp) return Cp.fuera(E);
       const J = E.jugador, pid = J.partido, gen = camp.ambito === 'gen', pr = camp.presup, libre = Ca.libre(camp), topeAv = pr.gastado > camp.tope;
       const sem = Ca.semanasHasta(E, camp), peso = Ca.peso(E, camp), cis = Ca.ultimaEncuesta(E, null, camp);
@@ -87,7 +87,7 @@ window.ESP = window.ESP || {};
     /* Decisión del jugador en el debate decisivo. */
     modalDebate() {
       const E = C.E, Ca = C.Campana; if (!E.esp.pendienteDebate) return C.App.revisarPendientes();
-      const camp = Ca.camps(E).map(x => x.camp).find(x => !x.debate.hecho && E.fecha.t >= x.debate.t && Ca.debateJugador(E, x)) || Ca.cur(E);
+      const camp = Ca.mias(E).map(x => x.camp).find(x => !x.debate.hecho && E.fecha.t >= x.debate.t && Ca.debateJugador(E, x)) || Ca.cur(E);
       const ps = Ca.participantes(E, camp), J = E.jugador;
       const op = [['propuestas', '📋 Centrarte en propuestas', 'Resultado estable que mejora con tu oratoria.'], ['ataque', '⚔️ Atacar a tus rivales', 'Alto riesgo: puede ser tu noche… o un desastre.'], ['prudente', '🛡 Jugar sobre seguro', 'Sin sobresaltos: casi nunca ganas, casi nunca pierdes.']];
       const m = UI.modal({ titulo: '📺 Debate decisivo' + (camp.ambito === 'aut' ? ' · ' + D().ccaa[camp.c].nombre : ''), icono: '🎙', clase: 'medio', sinCerrar: true, cuerpo: `<p style="margin-top:0;font-size:13.5px">Los candidatos de ${ps.map(k => esc(E.partidos[k].sigla)).join(', ')} se enfrentan cara a cara ante millones de espectadores. ¿Cuál es tu estrategia?</p><div class="lista">${op.map(([k, n, d]) => `<div class="it" style="flex-wrap:wrap"><div class="cuerpo" style="flex:1;min-width:180px"><b>${n}</b><span>${d}</span></div><button class="btn prim chico" data-deb="${k}">Elegir</button></div>`).join('')}</div>` });

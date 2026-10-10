@@ -392,7 +392,7 @@ window.ESP = window.ESP || {};
         if (pos > n) { J.cargo = 'activista'; J.cargoUE = null; J.meps = null; C.Personaje.log(E, 'Pierdes tu escaño en el Parlamento Europeo.'); C.Personaje.sincronizar(E); C.Eventos.info(E, '🇪🇺 Pierdes tu escaño europeo', 'No logras reelección en la Eurocámara. Regresas a la política nacional.'); }
         else { J.meps = { grupo: p.grupo, pais: J.pais }; C.Personaje.log(E, 'Eres reelegido/a eurodiputado/a.'); }
       }
-      if (J) E.elecciones.pePendiente = { t: E.fecha.t, antes: anterior, despues: JSON.parse(JSON.stringify(pe.escanos)), deleg: J && pe.porPais[J.pais] ? JSON.parse(JSON.stringify(pe.porPais[J.pais])) : null, presidente: E.ue.comision.presidente.n, pais: J.pais };
+      if (J && (!C.Foco || C.Foco.noche(E, 'europeas'))) E.elecciones.pePendiente = { t: E.fecha.t, antes: anterior, despues: JSON.parse(JSON.stringify(pe.escanos)), deleg: J && pe.porPais[J.pais] ? JSON.parse(JSON.stringify(pe.porPais[J.pais])) : null, presidente: E.ue.comision.presidente.n, pais: J.pais };
       C.Bus.emit('elecciones-europeas', {});
     },
 

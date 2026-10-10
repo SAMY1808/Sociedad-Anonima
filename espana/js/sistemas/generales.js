@@ -168,7 +168,7 @@ window.ESP = window.ESP || {};
       const personal = J && J.pais === 'ES' ? C.Personaje.tras_generales(E, previo, res) : null;
       C.Congreso.recomponer(E, antes);
       E.elecciones.historico.unshift({ t: E.fecha.t, tipo: 'generales', votos: res.nat, escanos: P.escanos, part: res.part });
-      E.elecciones.nochePendiente = { tipo: 'generales', pais: 'ES', t: E.fecha.t, votos: res.nat, escanos: Object.assign({}, P.escanos), antes, part: res.part, previo: previo ? previo.votos : null, personal, prov: res.prov, camp: cierre };
+      if (!C.Foco || C.Foco.noche(E, 'generales')) E.elecciones.nochePendiente = { tipo: 'generales', pais: 'ES', t: E.fecha.t, votos: res.nat, escanos: Object.assign({}, P.escanos), antes, part: res.part, previo: previo ? previo.votos : null, personal, prov: res.prov, camp: cierre };
       C.Bus.emit('elecciones', { tipo: 'generales' });
       return res;
     },

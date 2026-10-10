@@ -141,7 +141,7 @@ window.ESP = window.ESP || {};
     propone(E) { const c = C.Campana.cur(E); return c ? C.Campana.consejos(E, c).filter(x => x.accion).slice(0, 3).map(x => ({ txt: x.txt, accion: x.accion, args: x.args })) : []; },
     hace(E) {
       const out = [], c = C.Campana.cur(E); if (!c) return out;
-      if (E.esp.pendienteDebate) { const camp = C.Campana.camps(E).map(x => x.camp).find(x => !x.debate.hecho && E.fecha.t >= x.debate.t && C.Campana.debateJugador(E, x)) || c; C.Campana.celebrarDebate(E, 'propuestas', camp); out.push('Prepara el debate con una estrategia de propuestas.'); }
+      if (E.esp.pendienteDebate) { const camp = C.Campana.mias(E).map(x => x.camp).find(x => !x.debate.hecho && E.fecha.t >= x.debate.t && C.Campana.debateJugador(E, x)) || c; C.Campana.celebrarDebate(E, 'propuestas', camp); out.push('Prepara el debate con una estrategia de propuestas.'); }
       if (C.Campana.peso(E, c)) { const r = C.Campana.auto(E); if (r.ok) out.push(r.msg); }
       const hechos = Jf.gastarAgenda(E, C.Campana.consejos(E, c).filter(x => x.accion && ['mitin_prov', 'apelar_voto_util', 'coalicion_pre'].includes(x.accion)).slice(0, 3).map(x => ({ accion: x.accion, args: x.args, txt: x.txt })), Jf.capacidad(E));
       if (hechos.length) out.push('Campaña: ' + hechos.join(' · '));

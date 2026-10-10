@@ -10,7 +10,7 @@ window.ESP = window.ESP || {};
     render(el) {
       const E = C.E, J = E.jugador;
       const bloque = ([k, ic, nom]) => {
-        const as = C.Acciones.lista(k).filter(a => !(a.id === 'mitin' && !J.campania)).filter(a => { const r = C.Acciones.razon(a.id, {}); return r === true || !/^Sólo|^Necesitas|^Debes|^Tu partido no|^Sin gobierno|^Ya /.test(String(r)) || ['parlamento', 'partido', 'medios', 'campana', 'carrera', 'europa'].includes(k); });
+        const as = (C.Foco ? C.Acciones.lista().filter(a => C.Foco.grupoDe(E, a) === k) : C.Acciones.lista(k)).filter(a => !C.Foco || C.Foco.accion(E, a)).filter(a => !(a.id === 'mitin' && !J.campania)).filter(a => { const r = C.Acciones.razon(a.id, {}); return r === true || !/^Sólo|^Necesitas|^Debes|^Tu partido no|^Sin gobierno|^Ya /.test(String(r)) || ['parlamento', 'partido', 'medios', 'campana', 'carrera', 'europa'].includes(k); });
         if (!as.length) return '';
         return `<div class="tarjeta"><h3>${ic} ${nom}</h3><div class="col" style="gap:8px">${as.map(a => {
           const costo = typeof a.costo === 'function' ? a.costo(E, {}) : a.costo;

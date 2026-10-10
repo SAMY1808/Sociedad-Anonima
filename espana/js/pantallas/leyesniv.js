@@ -11,7 +11,7 @@ window.ESP = window.ESP || {};
       const J = E.jugador, out = [['congreso', '🏛 Congreso']];
       if (J.region && E.esp.ccaa[J.region]) out.push(['aut', '🗺 ' + D().ccaa[J.region].nombre]);
       if (J.muni && E.esp.muni.m[J.muni]) out.push(['muni', '🏘 ' + E.esp.muni.m[J.muni].nombre]);
-      return out;
+      const lim = C.Foco && C.Foco.ambitosLey(E); const f = lim ? out.filter(a => lim.includes(a[0])) : out; return f.length ? f : out;
     },
     defecto(E) {
       const J = E.jugador, ok = LN.ambitos(E).map(a => a[0]);

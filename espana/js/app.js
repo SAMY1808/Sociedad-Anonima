@@ -97,9 +97,7 @@ window.ESP = window.ESP || {};
       const E = C.E;
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = App.badges(E, mios);
-      const aut = E.jugador.nivel === 'autonomico' && E.jugador.region && E.esp.ccaa[E.jugador.region].gob;
-      const vp = E.meta.vistaPartido && E.jugador.pais === 'ES';
-      const items = NAV.filter(n => !(vp && n && n[0] === 'personaje')).filter(n => !n || n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])).map(n => vp && n && n[0] === 'agenda' ? ['agenda', '🎯', 'Puntos de dirección', 'Agenda', 1] : n).map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', 1] : n && n[0] === 'ayuntamiento' && E.jugador.nivel === 'local' ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
+      const items = App.navItems(E);
       const enBarra = items.some(n => n && n[4] && n[0] === E.ui.pantalla);
       const masN = items.reduce((a, n) => a + (n && !n[4] ? (+badges[n[0]] || 0) : 0), 0);
       const col = E.ui.navCol = E.ui.navCol || {}; let oculto = false, hdr = null, cnt = {}; items.forEach(n => { if (n && n[0] === '#') hdr = n[1]; else if (n && hdr) cnt[hdr] = (cnt[hdr] || 0) + (+badges[n[0]] || 0); });
@@ -111,6 +109,21 @@ window.ESP = window.ESP || {};
       document.getElementById('nav-mas').onclick = () => App.mas();
     },
 
+    /* Elementos del menú según tu cargo: el foco oculta lo que pertenece a otros niveles y deja una barra inferior propia. */
+    navItems(E) {
+      const J = E.jugador, F = C.Foco, foco = !!(F && F.activo(E)), am = foco ? F.ambito(E) : null;
+      const aut = foco ? am === 'aut' : J.nivel === 'autonomico' && J.region && E.esp.ccaa[J.region].gob, local = foco ? am === 'local' : J.nivel === 'local';
+      const vp = E.meta.vistaPartido && J.pais === 'ES';
+      const pr = F ? F.principales(E) : [];
+      let items = NAV.filter(n => !(vp && n && n[0] === 'personaje')).filter(n => !n || n[0] === '#' || n[0] !== 'ayuntamiento' || (J.muni && E.esp.muni.m[J.muni]));
+      if (foco) items = items.filter(n => !n || n[0] === '#' || F.pantalla(E, n[0]));
+      // fuera las cabeceras que se quedan sin secciones
+      items = items.filter((n, i, a) => !(n && n[0] === '#') || (a[i + 1] && a[i + 1][0] !== '#'));
+      return items.map(n => n && n[0] !== '#' && foco ? Object.assign(n.slice(), { 4: pr.includes(n[0]) ? 1 : 0 }) : n)
+        .map(n => vp && n && n[0] === 'agenda' ? ['agenda', '🎯', 'Puntos de dirección', 'Agenda', n[4]] : n)
+        .map(n => n && n[0] === 'consejo' && aut ? ['consejo', '🏛', 'Consejo de Gobierno', 'Gobierno', n[4]] : n && n[0] === 'ayuntamiento' && local ? ['ayuntamiento', '🏘', 'Consejo municipal', 'Ayto.', n[4]] : n);
+    },
+
     badges(E, mios) {
       return { dilemas: (C.Dilemas && E.jugador.pais === 'ES' && C.Dilemas.asegurar(E).act.length) || '', leyes: E.parl.pendienteVoto.length || (mios || ''), europa: E.ue.pendiente.length || '', agenda: E.jugador.agenda.puntos || '', elecciones: C.Campana.activa(E) ? '📣' : '', consejo: C.Consejo.pmEsJ(E) ? (E.esp.consejo.agenda.length || '') : '', jefe: E.esp.jefe && E.esp.jefe.prop.length || '', crisis: C.Crisis ? (C.Crisis.asegurar(E).activas.filter(c => c.fase !== 'cerrada' && (C.Crisis.jugadorEstado(E) ? c.usadas.length < 2 : C.Crisis.jugadorRegion(E, c) && !c.usadasReg.length)).length || '') : '', medios: C.Medios ? (C.Medios.bulosJ(E).length || '') : '' };
     },
@@ -119,7 +132,7 @@ window.ESP = window.ESP || {};
     mas() {
       const E = C.E, mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa)).length;
       const badges = App.badges(E, mios);
-      const items = NAV.filter(n => n && !n[4] && (n[0] !== 'ayuntamiento' || (E.jugador.muni && E.esp.muni.m[E.jugador.muni])));
+      const items = App.navItems(E).filter(n => n && !n[4]);
       const cuerpo = `<div class="mas-grid">${items.map(n => n[0] === '#' ? `<div class="mas-h">${n[1]}</div>` : `<button class="mas-it ${E.ui.pantalla === n[0] ? 'activo' : ''}" data-p="${n[0]}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${badges[n[0]] ? `<span class="badge">${badges[n[0]]}</span>` : ''}</button>`).join('')}<button class="mas-it" data-ayuda="1"><span class="ic">❓</span><span>Cómo se juega</span></button></div>`;
       const m = UI.modal({ titulo: 'Más secciones', icono: '☰', cuerpo, clase: 'hoja' });
       m.cuerpo.addEventListener('click', e => {

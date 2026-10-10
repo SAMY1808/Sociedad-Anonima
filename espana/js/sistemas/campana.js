@@ -28,7 +28,9 @@ window.ESP = window.ESP || {};
       const A = E.esp.campA || {}; for (const c in A) if (A[c].activa) out.push({ key: c, camp: A[c] });
       return out;
     },
-    cur(E) { const l = Ca.camps(E); if (!l.length) return null; const k = E.ui && E.ui.campScope; return (l.find(x => x.key === k) || l[0]).camp; },
+    /* Las campañas que te corresponden según tu cargo (con el foco desactivado, todas). */
+    mias(E) { return Ca.camps(E).filter(x => !C.Foco || C.Foco.campana(E, x.key)); },
+    cur(E) { const l = Ca.mias(E); if (!l.length) return null; const k = E.ui && E.ui.campScope; return (l.find(x => x.key === k) || l[0]).camp; },
     activa(E) { return !!Ca.cur(E); },
     semanasHasta(E, camp) { camp = camp || Ca.cur(E); return camp ? Math.max(0, camp.tVoto - E.fecha.t) : 0; },
     listasAbiertas(E, camp) { camp = camp || Ca.cur(E); return !camp || !camp.activa || camp.tVoto - E.fecha.t > SEM_LISTAS; },
