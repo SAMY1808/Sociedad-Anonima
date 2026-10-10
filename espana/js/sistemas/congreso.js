@@ -270,6 +270,8 @@ window.ESP = window.ESP || {};
         else if (p.etapa === 'ponencia' && dt >= p.dur) {
           if (p.autor.tipo !== 'gobierno' && p.autor.tipo !== 'ue') {
             const pr = Co.proyectar(E, p);
+            // Un estatuto remitido por una comunidad abre un plazo de enmiendas de cuatro semanas: es el momento de cabildear a los grupos
+            if (p.estReg && !p.plazoEnm) { p.plazoEnm = true; p.dur = dt + 4; p.hist.push({ t: E.fecha.t, txt: 'La Comisión abre un plazo de enmiendas de cuatro semanas para buscar apoyos al texto' }); if (E.jugador && E.jugador.region === p.estReg && E.jugador.cargo === 'presauto' && !E.meta.presim) C.Personaje.log(E, `Plazo de enmiendas al Estatuto de ${D().ccaa[p.estReg].nombre} en las Cortes: cuatro semanas para cabildear a los grupos.`); return; }
             if (pr.si < (pr.si + pr.no) * 0.4 && U.chance(0.6)) { p.etapa = 'rechazada'; p.tEtapa = E.fecha.t; p.hist.push({ t: E.fecha.t, txt: 'La Mesa y la Comisión la bloquean: sin apoyos suficientes' }); Co.alFinalizar(E, p, false); return; }
           }
           p.etapa = 'pleno'; p.tEtapa = E.fecha.t; p.hist.push({ t: E.fecha.t, txt: 'Dictamen: pasa al Pleno' });

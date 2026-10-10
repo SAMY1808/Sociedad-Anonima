@@ -5,7 +5,9 @@ window.ESP = window.ESP || {};
 (function (C) {
   const U = C.U, D = () => C.DATA, clamp = U.clamp, T = C.Territorio;
   const nm = c => D().ccaa[c].nombre;
-  const SEM_RONDA = 3, MAX_RONDAS = 3, MAX_ITEMS = 8, ENFRIA = 6;
+  const SEM_RONDA = 3, MAX_RONDAS = 3, MAX_ITEMS = 8, ENFRIA = 6, CAB_MAX = 0.4, SUAV = 0.6;
+  /* Semanas entre dos intentos con el mismo grupo: en el Parlamento autonómico no hay prisa; en las Cortes, el texto corre. */
+  const ENF_CAB = { parl: 3, cortes: 1 };
 
   /* Artículos propios del Estatuto (además de transferir competencias). dif: dificultad política · tc: riesgo ante el Tribunal Constitucional. */
   const ARTICULOS = {
@@ -32,19 +34,38 @@ window.ESP = window.ESP || {};
     },
     itemInfo(E, c, id) { return T.catalogoReforma(E, c).find(x => x.id === id) || (ARTICULOS[id] ? Object.assign({ id }, ARTICULOS[id]) : id.startsWith('comp_') ? { id, n: D().competencias[id.slice(5)].nombre, ic: D().competencias[id.slice(5)].icono, dif: D().competencias[id.slice(5)].dif, tc: 0.2, comp: id.slice(5) } : null); },
 
-    /* Apoyo estimado en el Parlamento autonómico a un conjunto de artículos. */
-    apoyoReforma(E, c, ids) {
-      const rc = E.esp.ccaa[c], g = rc.gob, tot = U.suma(Object.values(rc.parl.escanos)); let si = 0; const por = {};
-      const its = ids.map(i => T.itemInfo(E, c, i)).filter(Boolean), amb = its.length ? U.suma(its.map(x => x.dif * (1 + x.tc))) / its.length / 1.5 : 0;
+    /* Versión de un artículo tal como figura en el borrador: si se ha suavizado, pesa menos para la oposición y el Tribunal Constitucional. */
+    itemEf(E, c, x) {
+      const info = T.itemInfo(E, c, x.id); if (!info) return null;
+      return x.suav ? Object.assign({}, info, { dif: info.dif * SUAV, tc: info.tc * SUAV, suav: true }) : info;
+    },
+    /* Ambición de un artículo a ojos de un grupo: lo que supera su tolerancia es lo que le molesta. */
+    toleranciaGrupo(E, pid) { return 0.45 + (E.partidos[pid].ter || 0) / 140; },
+    ambicion(info) { return info.dif * (1 + info.tc) / 1.5; },
+    /* Artículos que cada grupo del Parlamento autonómico (o de las Cortes, si se pasa su lista) rechaza, de mayor a menor. */
+    objeciones(E, c, items, grupos) {
+      const rc = E.esp.ccaa[c], out = {};
+      for (const k of grupos || Object.keys(rc.parl.escanos)) {
+        const tol = T.toleranciaGrupo(E, k), l = [];
+        for (const x of items) { const i = T.itemEf(E, c, x); if (i && T.ambicion(i) > tol) l.push({ id: x.id, exceso: T.ambicion(i) - tol }); }
+        out[k] = l.sort((a, b) => b.exceso - a.exceso);
+      }
+      return out;
+    },
+
+    /* Apoyo estimado en el Parlamento autonómico a un conjunto de artículos. Con borr, cuenta el cabildeo y los artículos suavizados del borrador. */
+    apoyoReforma(E, c, ids, borr) {
+      const rc = E.esp.ccaa[c], g = rc.gob, tot = U.suma(Object.values(rc.parl.escanos)), rf = borr ? T.reformaActiva(E, c) : null; let si = 0; const por = {};
+      const its = ids.map(i => { const x = rf && rf.items.find(y => y.id === i); return x ? T.itemEf(E, c, x) : T.itemInfo(E, c, i); }).filter(Boolean), amb = its.length ? U.suma(its.map(x => x.dif * (1 + x.tc))) / its.length / 1.5 : 0;
       for (const k in rc.parl.escanos) {
-        const p = E.partidos[k], gob = g && g.coalicion.includes(k), tol = 0.45 + (p.ter || 0) / 140, base = gob ? 0.88 : p.amb === 'reg' ? 0.85 : 0.55;
-        const ap = clamp(base - Math.max(0, amb - tol) * 1.1 - (its.length ? 0 : 1), 0.02, 0.97); por[k] = ap; si += rc.parl.escanos[k] * ap;
+        const p = E.partidos[k], gob = g && g.coalicion.includes(k), tol = T.toleranciaGrupo(E, k), base = gob ? 0.88 : p.amb === 'reg' ? 0.85 : 0.55, cab = rf && rf.cab ? (rf.cab[k] || 0) : 0;
+        const ap = clamp(base - Math.max(0, amb - tol) * 1.1 - (its.length ? 0 : 1) + cab, 0.02, 0.97); por[k] = ap; si += rc.parl.escanos[k] * ap;
       }
       return { si: Math.round(si), tot, req: Math.ceil(tot * 0.6), ok: si >= Math.ceil(tot * 0.6), por };
     },
     /* Probabilidad de que el Estado acepte un artículo (negociación en comisión). */
     probArticulo(E, c, it, bono) {
-      const rc = E.esp.ccaa[c], g = E.paises.ES.gob, info = T.itemInfo(E, c, it.id); if (!info) return 0.3;
+      const rc = E.esp.ccaa[c], g = E.paises.ES.gob, info = T.itemEf(E, c, it); if (!info) return 0.3;
       const pr = rc.gob ? rc.gob.partido : null, al = pr && g.coalicion.includes(pr) ? 0.18 : pr && (g.apoyoExterno || []).includes(pr) ? 0.1 : 0;
       return clamp(0.62 - info.dif * 0.55 - info.tc * 0.2 + (rc.relM - 50) / 200 + al + (info.comp ? (rc.presion[info.comp] || 0) : 0) + (bono || 0), 0.03, 0.92);
     },
@@ -73,9 +94,9 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c], r = T.reformaActiva(E, c); if (!r || r.fase !== 'borrador') return { ok: false, msg: 'No hay borrador que presentar' };
       if (r.items.length < 2) return { ok: false, msg: 'Un estatuto necesita al menos dos artículos' };
       if (E.fecha.t - r.ultParl < 4) return { ok: false, msg: 'Acaba de fallar la votación: espera unas semanas' };
-      const a = T.apoyoReforma(E, c, r.items.map(x => x.id)), si = Math.round(a.si + U.gauss(0, a.tot * 0.02));
+      const a = T.apoyoReforma(E, c, r.items.map(x => x.id), true), si = Math.round(a.si + U.gauss(0, a.tot * 0.02));
       r.ultParl = E.fecha.t;
-      if (si < a.req) { T.reformaNota(E, c, `El Parlamento no reúne los tres quintos (${si}/${a.tot}).`); return { ok: false, msg: `Sin tres quintos en el Parlamento (${si} de ${a.tot}; hacen falta ${a.req}). Quita artículos polémicos o negocia con la oposición.` }; }
+      if (si < a.req) { r.fallos = (r.fallos || 0) + 1; T.reformaNota(E, c, `El Parlamento no reúne los tres quintos (${si}/${a.tot}).`); return { ok: false, msg: `Sin tres quintos en el Parlamento (${si} de ${a.tot}; hacen falta ${a.req}). Cabildea con los grupos, suaviza o quita los artículos que más rechazo provocan${r.fallos ? ', o pide la votación por artículos para que no caiga todo el texto' : ''}.` }; }
       r.fase = 'comision'; r.ronda = 1; r.tFase = E.fecha.t; T.estadoResponde(E, c, r);
       T.reformaNota(E, c, `El Parlamento aprueba la propuesta (${si}/${a.tot}) y se abre la comisión de negociación con el Estado.`);
       C.Noticias.poner(E, 'politica', `El Parlamento de ${nm(c)} aprueba por ${si} votos su propuesta de reforma estatutaria (${r.items.length} artículos).`, 'ES');
@@ -113,13 +134,99 @@ window.ESP = window.ESP || {};
       const rc = E.esp.ccaa[c], r = T.reformaActiva(E, c); if (!r || r.fase !== 'comision') return { ok: false, msg: 'No estás negociando' };
       const vivos = r.items.filter(x => ['aceptado', 'recortado'].includes(x.estado));
       if (!vivos.length) { r.fase = 'cerrada'; rc.estatuto.reforma = Object.assign(r, { fase: 'cerrada', res: 'sin acuerdo' }); rc.estatuto.ultReforma = E.fecha.t; rc.relM = clamp(rc.relM - 4, 0, 100); C.Noticias.poner(E, 'politica', `La negociación del Estatuto de ${nm(c)} termina sin acuerdo.`, 'ES'); return { ok: true, msg: 'Sin ningún artículo aceptado, la negociación se cierra sin acuerdo.' }; }
-      const ter = clamp(10 + U.suma(vivos.map(x => T.itemInfo(E, c, x.id).dif * (x.estado === 'recortado' ? 0.5 : 1))) * 14, 10, 90);
+      const ter = clamp(10 + U.suma(vivos.map(x => T.itemEf(E, c, x).dif * (x.estado === 'recortado' ? 0.5 : 1))) * 14, 10, 90);
       const tplId = C.Congreso.plantilla('estatuto_' + c.toLowerCase()) ? 'estatuto_' + c.toLowerCase() : 'estatuto_gen';
-      const J = E.jugador, prop = C.Congreso.proponer(E, tplId, { tipo: 'jugador', pid: J.partido, region: c }, { region: c, t: `Reforma del Estatuto de Autonomía de ${nm(c)} (${vivos.length} artículos)`, ter, estIt: vivos.map(x => ({ id: x.id, recortado: x.estado === 'recortado' })) });
+      const J = E.jugador, prop = C.Congreso.proponer(E, tplId, { tipo: 'jugador', pid: J.partido, region: c }, { region: c, estReg: c, t: `Reforma del Estatuto de Autonomía de ${nm(c)} (${vivos.length} artículos)`, ter, estIt: vivos.map(x => ({ id: x.id, recortado: x.estado === 'recortado' || !!x.suav })) });
       r.fase = 'cortes'; r.tFase = E.fecha.t; r.propId = prop.id; rc.estatuto.proceso = { fase: 'cortes', id: prop.id, t: E.fecha.t };
       T.reformaNota(E, c, `Acuerdo cerrado: ${vivos.length} artículos pasan a las Cortes como ley orgánica.`);
       C.Noticias.poner(E, 'politica', `El texto pactado de reforma del Estatuto de ${nm(c)} llega a las Cortes Generales.`, 'ES');
       return { ok: true, msg: `Texto remitido a las Cortes (${vivos.length} artículos). Necesita mayoría absoluta del Congreso.` };
+    },
+
+    /* ── Cabildeo del Estatuto: grupos del Parlamento autonómico (borrador) o de las Cortes (texto remitido) ── */
+    /* Dónde se está jugando el cabildeo: el borrador en el Parlamento autonómico o el texto remitido en el Congreso. */
+    cabCtx(E, c) {
+      const r = T.reformaActiva(E, c); if (!r) return null;
+      if (r.fase === 'borrador') return { r, donde: 'parl' };
+      const p = r.fase === 'cortes' && r.propId && E.proyectos[r.propId];
+      if (p && C.Congreso.ABIERTAS.includes(p.etapa) && ['registro', 'ponencia', 'pleno', 'pleno_pend', 'senado', 'vuelta'].includes(p.etapa)) return { r, donde: 'cortes', p };
+      return null;
+    },
+    /* Artículos vivos del texto (los que siguen en pie tras la negociación con el Estado). */
+    itemsVivos(r) { return r.items.filter(x => ['aceptado', 'recortado'].includes(x.estado)); },
+    /* Habla con un grupo para ganar su voto. Funciona igual en el Parlamento autonómico y en las Cortes. */
+    cabildearEstatuto(E, c, pid, contra) {
+      const rc = E.esp.ccaa[c], J = E.jugador, x = T.cabCtx(E, c);
+      if (!x) return { ok: false, msg: 'Sólo se cabildea mientras el borrador está en el Parlamento autonómico o el texto en las Cortes' };
+      const { r, donde } = x, k = pid, pa = E.partidos[k]; if (!pa) return { ok: false, msg: 'Elige un grupo' };
+      if (donde === 'parl' && !rc.parl.escanos[k]) return { ok: false, msg: 'Ese grupo no tiene escaños en el Parlamento autonómico' };
+      if (donde === 'cortes' && !(E.paises.ES.escanos[k] > 0)) return { ok: false, msg: 'Ese grupo no tiene escaños en el Congreso' };
+      r.cab = r.cab || {}; r.cabT = r.cabT || {}; r.contra = r.contra || {};
+      const key = donde + ':' + k, cur = donde === 'parl' ? (r.cab[k] || 0) : (x.p.apoyo[k] || 0), tope = donde === 'parl' ? (contra ? CAB_MAX + 0.1 : CAB_MAX) : (contra ? 1 : 0.9);
+      if (cur >= tope - 0.01) return { ok: false, msg: `${pa.sigla} ya ha dado de sí todo lo que va a dar` };
+      const xx = J.atrib.negociacion / 10 * 0.5 + J.atrib.carisma / 10 * 0.5;
+      const poner = v => { if (donde === 'parl') r.cab[k] = clamp(cur + v, 0, tope); else { x.p.apoyo[k] = clamp(cur + v, -0.8, tope); E.parl.miembros.forEach(i => { const m = E.politicos[i]; if (m && m.p === k && i !== 'J') m.rel = clamp(m.rel + 3, -100, 100); }); } };
+      const dnd = donde === 'parl' ? 'en el Parlamento' : 'en las Cortes';
+      if (contra) {
+        if (r.contra[key]) return { ok: false, msg: `Ya has pactado una contrapartida con ${pa.sigla}` };
+        // En las Cortes, un grupo grande puede cerrar un pacto de fondo (una vez por texto): su apoyo es casi seguro, pero sale caro
+        const pacto = donde === 'cortes' && !x.p.pacto && E.paises.ES.escanos[k] >= 15;
+        r.contra[key] = true; rc.deuda = clamp(rc.deuda + (pacto ? 1.2 : 0.6), 0, 99); C.Personaje.cambiar(E, { prestigio: pacto ? -1 : -0.4 }); poner(donde === 'parl' ? 0.3 : 0.45);
+        if (pacto) { x.p.pacto = k; T.reformaNota(E, c, `Cierras un pacto de fondo con ${pa.sigla} para sacar el Estatuto adelante en las Cortes.`); return { ok: true, msg: `Pacto con ${pa.sigla}: votará a favor del Estatuto a cambio de concesiones (más deuda y un coste de prestigio).` }; }
+        const reg = pa.amb === 'reg' || pa.region === c;
+        T.reformaNota(E, c, `Pactas una contrapartida con ${pa.sigla} (${reg ? 'inversiones en su comarca' : 'un puesto en la comisión de seguimiento y fondos para sus alcaldías'}) a cambio de su voto ${dnd}.`);
+        return { ok: true, msg: `${pa.sigla} acepta tu oferta (${reg ? 'inversiones en su territorio' : 'presencia en la comisión de seguimiento'}): su apoyo ${dnd} sube con claridad. Cuesta deuda y algo de prestigio.` };
+      }
+      if (E.fecha.t - (r.cabT[key] != null ? r.cabT[key] : -99) < ENF_CAB[donde]) return { ok: false, msg: `Acabas de hablar con ${pa.sigla}: espera ${ENF_CAB[donde]} semana${ENF_CAB[donde] > 1 ? 's' : ''}` };
+      r.cabT[key] = E.fecha.t;
+      const objs = donde === 'parl' ? (T.objeciones(E, c, r.items, [k])[k] || []).length : (T.objeciones(E, c, T.itemsVivos(r), [k])[k] || []).length;
+      if (U.chance(clamp(0.42 + 0.5 * xx - 0.06 * Math.min(3, objs), 0.12, 0.92))) {
+        poner(donde === 'parl' ? 0.13 + 0.14 * xx : 0.22 + 0.2 * xx); C.Personaje.cambiar(E, { prestigio: 0.3 });
+        T.reformaNota(E, c, `Negocias con ${pa.sigla} ${dnd}: se muestran más receptivos.`);
+        return { ok: true, msg: `${pa.sigla} se muestra más receptivo al Estatuto${objs ? ` (aún le disgustan ${objs} artículo${objs > 1 ? 's' : ''})` : ''}.` };
+      }
+      return { ok: true, exito: false, msg: `${pa.sigla} no se deja convencer por ahora.` };
+    },
+    /* Redacta una versión suavizada de un artículo del borrador: menos rechazo y menos riesgo, pero la mitad de efecto. */
+    suavizarArticulo(E, c, id) {
+      const r = T.reformaActiva(E, c); if (!r || r.fase !== 'borrador') return { ok: false, msg: 'Sólo se suaviza un artículo mientras es borrador' };
+      const it = r.items.find(x => x.id === id); if (!it) return { ok: false, msg: 'Ese artículo no está en el borrador' };
+      if (it.suav) return { ok: false, msg: 'Ese artículo ya está suavizado' };
+      it.suav = true; const info = T.itemInfo(E, c, id);
+      T.reformaNota(E, c, `Suavizas «${info.n}» para atraer a la oposición.`);
+      return { ok: true, msg: `Redactas una versión suavizada de «${info.n}»: ${info.comp ? 'pasaría a compartirse con el Estado en vez de transferirse' : 'menos rechazo y menos riesgo ante el Tribunal Constitucional'}, pero con la mitad de efecto.` };
+    },
+    /* Cuando el paquete no alcanza los tres quintos, se vota artículo por artículo: cae sólo lo que no tiene apoyo. */
+    votarArticulos(E, c) {
+      const rc = E.esp.ccaa[c], r = T.reformaActiva(E, c); if (!r || r.fase !== 'borrador') return { ok: false, msg: 'No hay borrador que votar' };
+      if (!(r.fallos > 0)) return { ok: false, msg: 'La votación por artículos sólo se pide después de que el paquete haya fallado' };
+      if (r.items.length < 2) return { ok: false, msg: 'Un estatuto necesita al menos dos artículos' };
+      r.fallos++; r.ultParl = E.fecha.t; const caen = [], quedan = [];
+      for (const it of r.items.slice()) { const a = T.apoyoReforma(E, c, [it.id], true), si = Math.round(a.si + U.gauss(0, a.tot * 0.02)); (si >= a.req ? quedan : caen).push(it); }
+      for (const it of caen) { r.items.splice(r.items.indexOf(it), 1); (r.caidos = r.caidos || []).push(it.id); }
+      C.Personaje.cambiar(E, { prestigio: -0.4 });
+      const nom = l => l.map(x => '«' + T.itemInfo(E, c, x.id).n + '»').join(', ');
+      if (quedan.length < 2) { T.reformaNota(E, c, `Votación por artículos: ${quedan.length ? 'sólo sobrevive ' + nom(quedan) : 'no sobrevive ninguno'}. El borrador sigue abierto.`); return { ok: false, msg: `Votación por artículos: ${caen.length ? 'caen ' + nom(caen) : ''}${quedan.length ? '; sobrevive ' + nom(quedan) : ''}. Con menos de dos artículos no hay estatuto: cabildea y añade otros.` }; }
+      r.fase = 'comision'; r.ronda = 1; r.tFase = E.fecha.t; T.estadoResponde(E, c, r);
+      T.reformaNota(E, c, `Votación por artículos en el Parlamento: pasan ${quedan.length}${caen.length ? ' y caen ' + caen.length : ''}. Se abre la negociación con el Estado.`);
+      C.Noticias.poner(E, 'politica', `El Parlamento de ${nm(c)} aprueba por separado ${quedan.length} artículos de su reforma estatutaria${caen.length ? ' y rechaza ' + caen.length : ''}.`, 'ES');
+      return { ok: true, msg: `Pasan ${quedan.length} artículo${quedan.length > 1 ? 's' : ''}${caen.length ? ' (caen ' + nom(caen) + ')' : ''}. Comienza la negociación con el Estado.` };
+    },
+    /* En las Cortes, retira un artículo del texto para desbloquear la votación: baja el listón territorial y contenta a quien lo rechazaba. */
+    retirarArticuloCortes(E, c, id) {
+      const rc = E.esp.ccaa[c], x = T.cabCtx(E, c); if (!x || x.donde !== 'cortes') return { ok: false, msg: 'El texto no está ahora en las Cortes' };
+      const { r, p } = x, i = (p.estIt || []).findIndex(y => y.id === id); if (i < 0) return { ok: false, msg: 'Ese artículo no está en el texto' };
+      if (p.estIt.length <= 1) return { ok: false, msg: 'El texto quedaría vacío' };
+      const itR = r.items.find(y => y.id === id), nac = E.paises.ES.partidos.filter(k => E.paises.ES.escanos[k] > 0), ob = itR ? T.objeciones(E, c, [itR], nac) : {}, quienes = nac.filter(k => (ob[k] || []).length);
+      p.estIt.splice(i, 1);
+      const it = r.items.find(y => y.id === id); if (it) { it.estado = 'cedido'; it.retirado = true; }
+      p.ter = clamp(10 + U.suma(p.estIt.map(y => { const z = r.items.find(w => w.id === y.id); return (z ? T.itemEf(E, c, z).dif : 0.4) * (y.recortado ? 0.5 : 1); })) * 14, 10, 90);
+      for (const k of quienes) p.apoyo[k] = clamp((p.apoyo[k] || 0) + 0.2, -0.8, 0.8);
+      rc.relM = clamp(rc.relM + 1, 0, 100); C.Personaje.cambiar(E, { prestigio: -0.3 });
+      const nmA = T.itemInfo(E, c, id).n;
+      T.reformaNota(E, c, `Aceptas retirar «${nmA}» del texto en las Cortes para facilitar su aprobación.`);
+      C.Noticias.poner(E, 'politica', `El Gobierno de ${nm(c)} acepta retirar «${nmA.toLowerCase()}» de su reforma estatutaria para salvar el resto del texto.`, 'ES');
+      return { ok: true, msg: `Retiras «${nmA}» del texto: ${quienes.length ? quienes.map(k => E.partidos[k].sigla).slice(0, 4).join(', ') + ' se muestran más favorables' : 'baja el listón territorial'}.` };
     },
 
     /* Aplica los artículos ratificados en referéndum. */
@@ -175,9 +282,9 @@ window.ESP = window.ESP || {};
       }
       if (r.fase === 'tc' && t >= r.tTC) {
         const vivos = (r.items || []).filter(x => ['aceptado', 'recortado'].includes(x.estado)), tcs = E.esp.tc ? E.esp.tc.sesgo : 0, opo = E.paises.ES.partidos.filter(k => !E.paises.ES.gob.coalicion.includes(k)), esc = U.suma(opo.map(k => E.paises.ES.escanos[k] || 0));
-        const recurre = esc >= 50 && vivos.some(x => T.itemInfo(E, c, x.id) && T.itemInfo(E, c, x.id).tc >= 0.3) && U.chance(0.75);
+        const recurre = esc >= 50 && vivos.some(x => T.itemEf(E, c, x) && T.itemEf(E, c, x).tc >= 0.3) && U.chance(0.75);
         const anul = [];
-        if (recurre) for (const x of vivos) { const info = T.itemInfo(E, c, x.id); if (info && U.chance(clamp(info.tc * (0.55 - tcs * 0.5), 0.02, 0.85))) anul.push(x); }
+        if (recurre) for (const x of vivos) { const info = T.itemEf(E, c, x); if (info && U.chance(clamp(info.tc * (0.55 - tcs * 0.5), 0.02, 0.85))) anul.push(x); }
         r.fase = 'cerrada'; r.res = anul.length ? `el TC anula ${anul.length} artículo(s)` : 'ratificada'; rc.estatuto.ultReforma = t;
         if (anul.length) {
           anul.forEach(x => T.anularArticulo(E, c, x)); rc.relM = clamp(rc.relM - 4, 0, 100); rc.agravio += 0.8 * anul.length; r.anulados = anul.map(x => x.id);
@@ -244,5 +351,11 @@ window.ESP = window.ESP || {};
   R({ id: 'abrir_reforma_estatuto', nombre: 'Abrir un borrador de reforma del Estatuto', icono: '📖', costo: 1, desc: 'Presidente autonómico: elige artículos concretos y negocia con el Estado.', disponible: pres, ejecutar: E => T.abrirBorrador(E, E.jugador.region) });
   R({ id: 'presentar_reforma_estatuto', nombre: 'Presentar el borrador al Parlamento', icono: '🏛', costo: 2, desc: 'Se vota en el Parlamento autonómico (tres quintos).', disponible: pres, ejecutar: E => T.votarParlamento(E, E.jugador.region) });
   R({ id: 'insistir_articulo', nombre: 'Insistir en un artículo', icono: '✊', costo: 1, desc: 'Vuelve a pedir un artículo recortado o rechazado (cuesta relación con el Estado).', disponible: pres, ejecutar: (E, a) => T.insistir(E, E.jugador.region, a.id) });
+  const cabEst = E => { const r = pres(E); if (r !== true) return r; return T.cabCtx(E, E.jugador.region) ? true : 'El Estatuto no está ahora en el Parlamento autonómico ni en las Cortes'; };
+  R({ id: 'cabildear_estatuto', nombre: 'Cabildear el Estatuto con un grupo', icono: '🤝', costo: 1, desc: 'Negocia con un grupo del Parlamento autonómico (si es borrador) o de las Cortes (si ya está remitido) para ganar su voto aunque algún artículo no le guste.', disponible: (E, a) => { const r = cabEst(E); if (r !== true) return r; const x = T.cabCtx(E, E.jugador.region), k = a && a.pid; if (k && x) { const t = (x.r.cabT || {})[x.donde + ':' + k]; if (t != null && E.fecha.t - t < ENF_CAB[x.donde]) return 'Acabas de hablar con ese grupo (espera unas semanas)'; } return true; }, ejecutar: (E, a) => T.cabildearEstatuto(E, E.jugador.region, a.pid, false) });
+  R({ id: 'contrapartida_estatuto', nombre: 'Ofrecer una contrapartida por el Estatuto', icono: '🎁', costo: 2, desc: 'Compra el voto de un grupo con inversiones o presencia en la comisión de seguimiento: apoyo seguro pero cuesta deuda y prestigio. Una sola vez por grupo.', disponible: (E, a) => { const r = cabEst(E); if (r !== true) return r; const x = T.cabCtx(E, E.jugador.region), k = a && a.pid; if (k && x && (x.r.contra || {})[x.donde + ':' + k]) return 'Ya pactaste una contrapartida con ese grupo'; return true; }, ejecutar: (E, a) => T.cabildearEstatuto(E, E.jugador.region, a.pid, true) });
+  R({ id: 'suavizar_articulo', nombre: 'Suavizar un artículo del borrador', icono: '✂️', costo: 1, desc: 'Redacta una versión más moderada: menos rechazo de la oposición y menos riesgo ante el TC, pero con la mitad de efecto.', disponible: E => { const r = pres(E); if (r !== true) return r; const f = T.reformaActiva(E, E.jugador.region); return f && f.fase === 'borrador' ? true : 'Sólo mientras el Estatuto es borrador'; }, ejecutar: (E, a) => T.suavizarArticulo(E, E.jugador.region, a.id) });
+  R({ id: 'votar_articulos_estatuto', nombre: 'Pedir la votación por artículos', icono: '🗳', costo: 2, desc: 'Si el paquete no alcanza los tres quintos, el Parlamento vota cada artículo: cae sólo lo que no tiene apoyo y el resto sigue adelante.', disponible: E => { const r = pres(E); if (r !== true) return r; const f = T.reformaActiva(E, E.jugador.region); if (!f || f.fase !== 'borrador') return 'Sólo mientras el Estatuto es borrador'; return f.fallos > 0 ? true : 'Primero hay que intentar el voto del paquete completo'; }, ejecutar: E => T.votarArticulos(E, E.jugador.region) });
+  R({ id: 'retirar_articulo_cortes', nombre: 'Retirar un artículo del texto en las Cortes', icono: '✖', costo: 1, desc: 'Cede un artículo conflictivo para que no se hunda todo el Estatuto: baja el listón territorial y contenta a quien lo rechazaba.', disponible: E => { const r = pres(E); if (r !== true) return r; const x = T.cabCtx(E, E.jugador.region); return x && x.donde === 'cortes' ? true : 'El texto no está ahora en las Cortes'; }, ejecutar: (E, a) => T.retirarArticuloCortes(E, E.jugador.region, a.id) });
   R({ id: 'cerrar_acuerdo_estatuto', nombre: 'Cerrar el acuerdo y remitirlo a las Cortes', icono: '✅', costo: 1, desc: 'Da por terminada la negociación con lo pactado.', disponible: pres, ejecutar: E => T.cerrarAcuerdo(E, E.jugador.region) });
 })(window.ESP);

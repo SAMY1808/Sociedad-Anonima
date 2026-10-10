@@ -56,7 +56,7 @@ window.ESP = window.ESP || {};
     genTerritorial(E) {
       const T = C.Territorio, ids = T.ids().filter(c => { const rc = E.esp.ccaa[c]; return rc.relM < 50 || rc.indep > 10 || U.chance(0.2); });
       if (!ids.length) return;
-      const c = U.pesado(ids, x => 60 - E.esp.ccaa[x].relM + E.esp.ccaa[x].indep), rc = E.esp.ccaa[c], d = D().ccaa[c];
+      const c = U.pesado(ids, x => Math.max(1, 60 - E.esp.ccaa[x].relM + E.esp.ccaa[x].indep)), rc = E.esp.ccaa[c], d = D().ccaa[c];
       const tipos = [
         { k: 'fondos', t: `${d.nombre} reclama fondos y un plan de infraestructuras`, d: 'La comunidad pide al Gobierno un plan específico de inversiones y la ejecución de las obras pendientes.' },
         { k: 'bilat', t: `Comisión bilateral Estado–${d.nombre}`, d: 'El Gobierno autonómico solicita reunir la comisión bilateral para tratar financiación y competencias.' }

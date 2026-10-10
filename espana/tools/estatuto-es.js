@@ -1,0 +1,81 @@
+/* Prueba del cabildeo del Estatuto: grupos del Parlamento autonómico y de las Cortes, artículos suavizados, votación por artículos y retirada en Cortes. Uso: node tools/estatuto-es.js */
+const mini = require('./mini');
+const F = ['data/paises.js','data/partidos.js','data/nombres.js','data/instituciones.js','data/leyes.js','data/impactos.js','data/territorio.js','data/partidos-es.js','data/pactos.js','data/competencias.js','data/ue.js','data/eventos.js','data/eventos-campana.js','data/crisis-directo.js','data/programa.js',
+  'js/core/util.js','js/core/bus.js','js/core/estado.js','js/core/tiempo.js','js/core/acciones.js','js/sistemas/economia.js','js/sistemas/opinion.js','js/sistemas/impacto.js','js/sistemas/mundo.js','js/sistemas/elecciones.js','js/sistemas/gobierno.js',
+  'js/sistemas/espana.js','js/sistemas/generales.js','js/sistemas/campana.js','js/sistemas/ejecutivo.js','js/sistemas/congreso.js','js/sistemas/consejo.js','js/sistemas/presupuesto.js','js/sistemas/gabinete.js','js/sistemas/territorio.js','js/sistemas/autonomia.js','js/sistemas/invaut.js','js/sistemas/leyesaut.js','js/sistemas/municipios.js','js/sistemas/ayuntamientos.js','js/sistemas/ue.js','js/sistemas/eventos.js','js/sistemas/personaje.js','js/sistemas/leyesniv.js','js/sistemas/jefe.js','js/sistemas/medios.js','js/sistemas/justicia.js','js/sistemas/partidoint.js','js/sistemas/social.js','js/sistemas/crisis.js','js/sistemas/campana2.js','js/sistemas/parlaut.js','js/sistemas/autogobierno.js','js/sistemas/mayorias.js','js/sistemas/corrupcion.js','js/sistemas/coaliciones.js','js/sistemas/corona.js','js/sistemas/personas.js','js/sistemas/organismos.js','js/sistemas/referendos.js','js/sistemas/estructural.js','js/sistemas/exterior.js','js/sistemas/lenguas.js','js/sistemas/local2.js','js/sistemas/conferencia.js','js/sistemas/guia.js','js/sistemas/ajustes.js','js/sistemas/escenarios.js','js/sistemas/campana3.js','js/sistemas/nemesis.js','js/sistemas/dilemas.js','js/sistemas/metas.js','js/sistemas/barones.js','js/sistemas/presion.js','js/sistemas/intriga.js','js/sistemas/crisis2.js','js/sistemas/debate.js','js/sistemas/sesion.js','js/sistemas/vida.js','js/sistemas/fama.js','js/sistemas/escision.js','js/sistemas/sede.js','js/sistemas/pactos2.js','js/sistemas/fusion.js','js/sistemas/satelites.js','js/sistemas/militancia.js','js/sistemas/rivales.js','js/sistemas/objetivos.js','js/sistemas/informe.js','js/sistemas/foco.js','js/sistemas/art155.js','js/sistemas/ccaa2.js','js/sistemas/legado.js'];
+const C = mini(F), U = C.U;
+let errores = 0; const oe = console.error; console.error = (...a) => { errores++; oe(...a); };
+let fallos = 0; const ok = (c, m) => { if (!c) { fallos++; console.log('  ✗', m); } else console.log('  ✓', m); };
+const A = C.Art155, Cc = C.Ccaa2, T = C.Territorio;
+const crear = (op, sem) => { const E = C.Mundo.nueva(Object.assign({ semilla: sem || 77, partido: 'ES_ASD', nombre: 'Prueba', trayectoria: 'abogado', pais: 'ES', nivel: 'nacional', rol: 'lider', region: 'CAT', muni: 'm_bcn' }, op)); C.E = E; E.meta.presim = false; E.jugador.agenda.max = 99; E.esp.cortes.estado = 'activa'; return E; };
+const pt = E => { E.jugador.agenda.puntos = 99; };
+const lim = E => { E.eventos.pendientes.length = 0; E.parl.pendienteVoto.length = 0; E.ue.pendiente.length = 0; E.esp.pendienteGabinete = null; E.esp.pendienteInvAut = null; E.esp.pendienteInvestidura = false; E.esp.pendienteSocio = false; E.esp.pendienteVotoAut = null; E.esp.pendienteDebate = false; E.esp.pendienteConvAut = null; if (E.esp.gab) E.esp.gab.escandalo = null; E.elecciones.nochePendiente = E.elecciones.presPendiente = E.elecciones.pePendiente = null; E.esp.pendienteCrisisV = null; E.esp.pendienteCongreso = false; if (E.esp.consejo) for (const i of E.esp.consejo.agenda) i.urgente = false; if (E.esp.pendienteSesion) C.Sesion.resolverAuto(E); };
+const sem = (E, n, dec) => { for (let i = 0; i < n; i++) { lim(E); if (dec) for (const x of C.Dilemas.asegurar(E).act.slice()) C.Dilemas.decidir(E, x.uid, dec(x)); C.Tiempo.avanzar(); } };
+const comoPres = (E, c) => { const J = E.jugador; J.cargo = 'presauto'; J.nivel = 'autonomico'; J.region = c; E.esp.ccaa[c].gob.pres = 'J'; E.paises.ES.gob.pm = 'otro'; };
+const comoPM = E => { const J = E.jugador; J.cargo = 'pm'; J.nivel = 'nacional'; E.paises.ES.gob.pm = 'J'; };
+
+
+const lista = (E, c) => Object.keys(E.esp.ccaa[c].parl.escanos).sort((a, b) => E.esp.ccaa[c].parl.escanos[b] - E.esp.ccaa[c].parl.escanos[a]);
+const prep = (sem, c) => { const E = crear({ nivel: 'autonomico', rol: 'lider', region: c || 'CAT' }, sem); comoPres(E, c || 'CAT'); E.esp.ccaa[c || 'CAT'].relM = 60; E.esp.cortes.estado = 'activa'; pt(E); return E; };
+const ejec = (E, id, args) => { pt(E); return C.Acciones.ejecutar(id, args); };
+const abrir = (E, c, ids) => { const r = ejec(E, 'abrir_reforma_estatuto', {}); for (const id of ids) T.marcarArticulo(E, c, id); return r; };
+const aCortes = (E, c) => { const f = T.reformaActiva(E, c); f.fase = 'comision'; f.ronda = 1; f.tFase = E.fecha.t; for (const x of f.items) x.estado = 'aceptado'; return T.cerrarAcuerdo(E, c); };
+
+console.log('Cabildeo del borrador en el Parlamento autonómico');
+{ const E = prep(78), c = 'CAT', rc = E.esp.ccaa[c]; ok(abrir(E, c, ['consulta', 'nacionalidad', 'financ', 'justicia']).ok, 'se abre el borrador con cuatro artículos ambiciosos');
+  const f = T.reformaActiva(E, c), ids = f.items.map(x => x.id), a0 = T.apoyoReforma(E, c, ids, true), ob = T.objeciones(E, c, f.items);
+  ok(Object.keys(ob).length === Object.keys(rc.parl.escanos).length && Object.values(ob).some(l => l.length), 'cada grupo tiene su lista de artículos que le disgustan');
+  ok(Object.values(ob).every(l => l.every((x, i) => i === 0 || l[i - 1].exceso >= x.exceso)), 'la lista va de mayor a menor rechazo');
+  ok(!ejec(E, 'votar_articulos_estatuto', {}).ok, 'la votación por artículos no se puede pedir antes de fallar el paquete');
+  let r = ejec(E, 'presentar_reforma_estatuto', {}); ok(!r.ok && f.fallos === 1 && /Cabildea/.test(r.msg), 'el paquete ambicioso falla en el Parlamento y el aviso apunta al cabildeo (' + a0.si + '/' + a0.tot + ')');
+  // un paquete intermedio para ver mover a los grupos que no están en el suelo
+  const f2 = f; f2.fase = 'borrador'; f2.items.length = 0; for (const id of ['inversion', 'lengua', 'carta', 'justicia']) T.marcarArticulo(E, c, id); const ids2 = f2.items.map(x => x.id), a2 = T.apoyoReforma(E, c, ids2, true);
+  const opo = lista(E, c).find(k => !(rc.gob && rc.gob.coalicion.includes(k)) && a2.por[k] > 0.06 && a2.por[k] < 0.9); ok(!!opo, 'hay un grupo moderadamente reacio al que cabildear (' + opo + ' al ' + Math.round((a2.por[opo] || 0) * 100) + ' %)');
+  const antes = a2.por[opo]; let ganado = false; for (let i = 0; i < 12 && !ganado; i++) { E.fecha.t += 3; const rr = ejec(E, 'cabildear_estatuto', { pid: opo }); if (rr.ok && rr.exito !== false) ganado = true; }
+  const des = T.apoyoReforma(E, c, ids2, true).por[opo]; ok(ganado && (f.cab[opo] || 0) > 0 && des > antes, 'cabildear a ese grupo sube su apoyo previsto (' + Math.round(antes * 100) + ' % → ' + Math.round(des * 100) + ' %)');
+  ok(!ejec(E, 'cabildear_estatuto', { pid: opo }).ok && /Acabas/.test(String(C.Acciones.razon('cabildear_estatuto', { pid: opo }))), 'no se puede insistir con el mismo grupo la misma semana');
+  const d0 = rc.deuda; r = ejec(E, 'contrapartida_estatuto', { pid: opo }); ok(r.ok && rc.deuda > d0 && T.apoyoReforma(E, c, ids2, true).por[opo] >= des, 'la contrapartida asegura apoyo a cambio de deuda');
+  ok(!ejec(E, 'contrapartida_estatuto', { pid: opo }).ok, 'una sola contrapartida por grupo');
+  // Suavizar un artículo
+  const it = f.items.find(x => x.id === 'justicia'), si0 = T.apoyoReforma(E, c, ids2, true).si, ef0 = T.itemEf(E, c, it); r = ejec(E, 'suavizar_articulo', { id: 'justicia' }); const ef1 = T.itemEf(E, c, it);
+  ok(r.ok && it.suav && ef1.dif < ef0.dif && ef1.tc < ef0.tc && T.apoyoReforma(E, c, ids2, true).si >= si0, 'suavizar un artículo baja su rechazo y su riesgo ante el TC (dificultad ' + ef0.dif.toFixed(2) + ' → ' + ef1.dif.toFixed(2) + ')');
+  ok(!ejec(E, 'suavizar_articulo', { id: 'justicia' }).ok, 'no se suaviza dos veces'); ok(T.probArticulo(E, c, it, 0) > T.probArticulo(E, c, { id: 'justicia' }, 0), 'un artículo suavizado lo acepta más fácilmente el Estado'); }
+
+console.log('Un artículo polémico no bloquea todo el Estatuto');
+{ const g0 = C.U.gauss; C.U.gauss = () => 0; const E = prep(78), c = 'CAT'; abrir(E, c, ['inversion', 'carta', 'lengua', 'consulta', 'nacionalidad', 'financ', 'justicia', 'agencia']); const f = T.reformaActiva(E, c), todos = f.items.map(x => x.id);
+  let r = ejec(E, 'presentar_reforma_estatuto', {}); ok(!r.ok && f.fallos === 1 && f.fase === 'borrador', 'el paquete con artículos polémicos no pasa los tres quintos'); E.fecha.t += 5; r = ejec(E, 'votar_articulos_estatuto', {});
+  ok(r.ok && f.fase === 'comision', 'la votación por artículos saca adelante el resto del texto: ' + r.msg.slice(0, 120)); ok(f.items.map(x => x.id).sort().join() === 'carta,inversion,lengua', 'sobreviven los tres moderados (' + f.items.map(x => x.id).join(', ') + ')');
+  ok((f.caidos || []).sort().join() === ['agencia', 'consulta', 'financ', 'justicia', 'nacionalidad'].sort().join() && f.caidos.length + f.items.length === todos.length, 'caen los ambiciosos y quedan anotados (' + (f.caidos || []).join(', ') + ')'); ok(f.hist.some(x => /Votación por artículos/.test(x.txt)), 'queda anotado en el cuaderno del proceso');
+  const E2 = prep(78), g = 'CAT'; abrir(E2, g, ['consulta', 'nacionalidad']); const f2 = T.reformaActiva(E2, g); ejec(E2, 'presentar_reforma_estatuto', {}); E2.fecha.t += 5; r = ejec(E2, 'votar_articulos_estatuto', {});
+  ok(!r.ok && f2.fase === 'borrador' && /menos de dos/.test(r.msg), 'si caen casi todos, el borrador sigue abierto para añadir otros: ' + r.msg.slice(0, 90)); C.U.gauss = g0; }
+
+console.log('Estatuto en las Cortes: plazo de enmiendas, cabildeo, pacto y retirada de un artículo');
+{ const E = prep(78), c = 'CAT'; abrir(E, c, ['inversion', 'carta', 'lengua', 'nacionalidad', 'consulta']); const f = T.reformaActiva(E, c); const r0 = aCortes(E, c); ok(r0.ok && f.fase === 'cortes', 'el texto llega a las Cortes'); const p = E.proyectos[f.propId];
+  ok(p.estReg === c, 'el proyecto va marcado como estatuto de la comunidad'); const nac = E.paises.ES.partidos.filter(k => E.paises.ES.escanos[k] > 0).sort((a, b) => E.paises.ES.escanos[b] - E.paises.ES.escanos[a]);
+  ok(T.cabCtx(E, c) && T.cabCtx(E, c).donde === 'cortes', 'el cabildeo pasa a las Cortes'); const cv0 = C.Congreso.calcular(E, p, null, true), ter0 = p.ter;
+  const grande = nac.filter(k => E.paises.ES.escanos[k] >= 15 && !E.paises.ES.gob.coalicion.includes(k))[0], peq = nac.filter(k => E.paises.ES.escanos[k] < 15 && !E.paises.ES.gob.coalicion.includes(k))[0];
+  const pe0 = p.apoyo[peq] || 0; let gan = false; for (let i = 0; i < 12 && !gan; i++) { E.fecha.t += 1; const rr = ejec(E, 'cabildear_estatuto', { pid: peq }); if (rr.ok && rr.exito !== false) gan = true; } ok(gan && (p.apoyo[peq] || 0) > pe0, 'cabildear a un grupo pequeño del Congreso mueve su postura (' + peq + ' +' + Math.round(((p.apoyo[peq] || 0) - pe0) * 100) + ')');
+  const s0 = C.Congreso.postura(E, grande, p).s; r = ejec(E, 'contrapartida_estatuto', { pid: grande }); ok(r.ok && p.pacto === grande && /Pacto/.test(r.msg) && C.Congreso.postura(E, grande, p).s > s0 + 1, 'un pacto de fondo con el grupo grande cambia su voto (' + grande + ': ' + s0.toFixed(2) + ' → ' + C.Congreso.postura(E, grande, p).s.toFixed(2) + ')');
+  const otro = nac.filter(k => k !== grande && k !== peq && E.paises.ES.escanos[k] >= 15)[0]; if (otro) { r = ejec(E, 'contrapartida_estatuto', { pid: otro }); ok(r.ok && p.pacto === grande, 'sólo hay un pacto de fondo por texto'); }
+  const n0 = p.estIt.length; r = ejec(E, 'retirar_articulo_cortes', { id: 'consulta' }); ok(r.ok && p.estIt.length === n0 - 1 && !p.estIt.some(x => x.id === 'consulta') && p.ter < ter0, 'retirar «consulta popular» baja el listón territorial del texto (' + ter0.toFixed(1) + ' → ' + p.ter.toFixed(1) + ')');
+  ok(f.items.find(x => x.id === 'consulta').estado === 'cedido', 'el artículo queda como cedido en el cuaderno'); while (p.estIt.length > 1) ejec(E, 'retirar_articulo_cortes', { id: p.estIt[0].id }); ok(!ejec(E, 'retirar_articulo_cortes', { id: p.estIt[0].id }).ok, 'no se puede dejar el texto vacío');
+  // plazo de enmiendas
+  const E3 = prep(78), c3 = 'CAT'; abrir(E3, c3, ['inversion', 'carta']); aCortes(E3, c3); const f3 = T.reformaActiva(E3, c3), p3 = E3.proyectos[f3.propId]; let sem = 0; while (!p3.plazoEnm && sem < 14 && ['registro', 'ponencia'].includes(p3.etapa)) { lim(E3); pt(E3); E3.esp.cortes.estado = 'activa'; C.Tiempo.avanzar(); sem++; }
+  ok(p3.plazoEnm && p3.hist.some(x => /plazo de enmiendas/.test(x.txt)), 'la Comisión abre un plazo de enmiendas de cuatro semanas para cabildear'); }
+
+console.log('Disponibilidad y foco');
+{ const E = crear(); comoPM(E); ok(typeof C.Acciones.razon('cabildear_estatuto', { pid: 'ES_UPC' }) === 'string', 'el Presidente/a del Gobierno no cabildea estatutos');
+  const E2 = prep(78); ok(C.Acciones.razon('cabildear_estatuto', { pid: 'x' }) !== true, 'sin reforma en marcha no hay cabildeo'); ok(C.Acciones.razon('suavizar_articulo', { id: 'consulta' }) !== true, 'sin borrador no se suaviza'); ok(C.Acciones.razon('retirar_articulo_cortes', { id: 'consulta' }) !== true, 'sin texto en Cortes no se retira nada');
+  ok(C.Foco.accion(E2, C.Acciones.get('cabildear_estatuto')) && C.Foco.accion(E2, C.Acciones.get('votar_articulos_estatuto')), 'el presidente/a autonómico/a ve las acciones del Estatuto'); E2.jugador.cargo = 'diputado'; E2.jugador.nivel = 'nacional'; ok(!C.Foco.accion(E2, C.Acciones.get('cabildear_estatuto')), 'un/a diputado/a nacional no las ve'); }
+
+console.log('Con cabildeo el Estatuto sale; sin él, no');
+{ const juega = (sem, c, ayuda) => { const E = prep(sem, c), rc = E.esp.ccaa[c]; abrir(E, c, ['inversion', 'carta', 'lengua', 'bilateral']); const f = T.reformaActiva(E, c); let lim0 = 0;
+    for (let i = 0; i < 90; i++) { lim(E); pt(E); E.esp.cortes.estado = E.esp.cortes.estado === 'disueltas' ? 'disueltas' : 'activa'; const ff = rc.estatuto.reforma; if (!ff || ff.fase === 'cerrada') break;
+      if (ff.fase === 'borrador') { const x = C.Acciones.ejecutar('presentar_reforma_estatuto', {}); if (!x.ok && ayuda && ff.fallos) { for (const pid of lista(E, c).slice(0, 4)) { pt(E); C.Acciones.ejecutar('cabildear_estatuto', { pid }); } if (ff.fallos >= 2) { pt(E); C.Acciones.ejecutar('votar_articulos_estatuto', {}); } } }
+      const cx = T.cabCtx(E, c); if (ayuda && cx && cx.donde === 'cortes') { const nac = E.paises.ES.partidos.filter(k => E.paises.ES.escanos[k] >= 3).sort((a, b) => E.paises.ES.escanos[b] - E.paises.ES.escanos[a]); const cv = C.Congreso.calcular(E, cx.p, null, true); if (!cx.p.pacto) { const g = nac.find(k => E.paises.ES.escanos[k] >= 15 && cv.posturas[k] && cv.posturas[k].voto !== 'si'); if (g) { pt(E); C.Acciones.ejecutar('contrapartida_estatuto', { pid: g }); } } for (const k of nac) if (cv.posturas[k] && cv.posturas[k].voto !== 'si') { pt(E); C.Acciones.ejecutar('cabildear_estatuto', { pid: k }); } }
+      for (const x of C.Dilemas.asegurar(E).act.slice()) C.Dilemas.decidir(E, x.uid, C.Dilemas.CAT[x.id].op[0].k); C.Tiempo.avanzar(); if (!isFinite(rc.relM) || !isFinite(rc.aut) || !isFinite(rc.deuda)) return 'raro'; }
+    const ff = rc.estatuto.reforma; return ff ? (ff.res || ff.fase) : '?'; };
+  let con = 0, sin = 0, raros = 0; for (const [sem, c] of [[78, 'GAL'], [83, 'GAL'], [84, 'GAL'], [86, 'GAL'], [78, 'CAT'], [90, 'CAT']]) { const a = juega(sem, c, true), b = juega(sem, c, false); if (a === 'raro' || b === 'raro') raros++; if (/ratificada|anula|referéndum/.test(a)) con++; if (/ratificada|anula|referéndum/.test(b)) sin++; }
+  ok(raros === 0, 'sin valores raros en 90 semanas de reforma'); ok(con >= 3 && con > sin, 'con cabildeo el texto llega a las Cortes y al referéndum en ' + con + ' de 6 partidas; sin cabildeo, en ' + sin); }
+console.log('errores', errores, '| fallos', fallos);
+process.exit(errores || fallos ? 1 : 0);
