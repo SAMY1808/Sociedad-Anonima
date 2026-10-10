@@ -24,7 +24,8 @@
 | 15 | `opinion` | aprobación y popularidad (nacionales + regionales) |
 | 20 | `congreso` | 350 diputados, trámite legislativo, Senado, decretos-ley |
 | 25 | `ejecutivo` | investidura, pactos, vetos, mociones, ministerios, estabilidad |
-| 30 | `consejo` | Consejo de Ministros, socios, Presupuestos, 155 |
+| 30 | `consejo` | Consejo de Ministros, socios, Presupuestos |
+| 34–35 | `art155`, `ccaa2` | procedimientos del artículo 155 y mundo de las comunidades (convenios, FLA, impuestos propios) |
 | 31 | `gabinete` | ministros, consejeros y concejales como personas: rendimiento, escándalos, choques, cuotas de los socios |
 | 32 | `congreso_turno` | semana parlamentaria |
 | 12 | `ayuntamientos` | indicadores urbanos, presupuesto, pleno, proyectos, mociones locales |
@@ -212,6 +213,14 @@ Estado en `E.esp.sede`, `E.esp.fus`, `E.esp.sat`, `E.esp.riv`, `E.esp.obj` y con
 ## Escenas ilustradas (`js/ui/escenas.js`, `data/imagenes.js`)
 
 `C.Escenas.html(E, id, {pid, pid2, compacta, leyenda})` devuelve un `<figure class="escena">` con una ilustración SVG procedimental (semilla estable por escena y partido; colores y sigla de `E.partidos[pid]`; el hemiciclo colorea 350 escaños con el reparto real). Si `C.IMAGENES[id]` apunta a un archivo, se superpone un `<img>` con `onerror="this.remove()"` (sólo se pide el archivo si está declarado, así no hay 404 en consola). Se enlaza en: `noche.js` (discurso, vía el parámetro `escena` de `decision`), `crisis2.js` (`Escenas.paraCrisis` elige por texto del paso), `sesion.js`, `debate.js`, `congresopartido.js`, `gabinete.js` (formación) y `Eventos.info(E, titulo, texto, escena)` (fin de carrera). Prueba: `tools/escenas-ui.js` (todas las escenas, integración y sustitución por imagen) más las aserciones de `noche-ui`, `nocheaut-ui`, `sesion-ui` y `congreso-ui`.
+
+## Artículo 155 (`sistemas/art155.js`)
+
+`C.Art155` generaliza el viejo 155 del procés (que sigue disponible: `Territorio.aplicar155` queda envuelto y registra su intervención con `registrarExterna`). Estado: `E.esp.a155 = {p, hist, ult}` (`p` = procedimientos abiertos, `hist` = cerrados) y `rc.interv = {nivel, hasta, ...}` en la comunidad. Fases: `requerimiento` (plazo +4 semanas) → `tc` (fallo +8, si recurre) / `espera` (límite +10) → `autorizada` (4 semanas para elegir medidas) → `intervenida` (26/39/26 semanas según nivel) → cierre. `legit(E,c,motivo)` mide la solidez del motivo (afecta al voto del Senado y al coste político); `senado(E,c,p)` da el voto previsto por grupo (los partidos pactados votan que sí). `puede` limita a un procedimiento por comunidad, enfriamiento de 52 semanas y un máximo de 2 simultáneos, y exige Cortes activas. El jugador puede ser el Gobierno (acciones `requerir_155`, `negociar_senado_155`, `autorizacion_155`, `medidas_155`, `levantar_155`, `retirar_155`) o la comunidad (dilema `requerimiento155`, acción `resistir_155`). Una intervención bloquea las acciones del presidente/a autonómico/a envolviendo `a.disponible` (`bloqueoAccion`/`protege`; el nivel suave sólo bloquea la política fiscal). Pantalla: `pantallas/art155.js` (pestaña *Art. 155* de Territorio).
+
+## Mundo de las comunidades (`sistemas/ccaa2.js`)
+
+`C.Ccaa2` (`E.esp.cc2 = {conv, disp, rel, ext, fla, ult}`) añade las decisiones de una comunidad más allá de las competencias: `convenio` (y su disputa), `atraer`, `delegacion` (máx. 3), `municipios`, `despoblacion`, `pedirFLA` (deuda ≥ 20; 104 semanas de tutela, que envuelve `politica_fiscal`, `presupuesto_aut` e `impuesto_propio`), `impuesto` (añade un recurso a `E.esp.tc.recursos` con `jugador: true`), `sectorial` (Presidente/a del Gobierno). `turno` (prioridad 35) mueve la relación entre comunidades y firma convenios de la IA. Todas las acciones autonómicas pasan por `A.protege` para respetar la intervención del 155. Pantalla: *Cooperación* (`C.Pantallas.cooperacion`). Los seis sucesos nuevos (`tc_anula_ley_aut`, `requerimiento_hacienda`, `disputa_agua_ccaa`, `fuga_empresa`, `crisis_policial_aut`, `alarma_despoblacion`) y los de `art155` están dados de alta en `Foco.EV_AMB`; las acciones, en `ACC_GOB`/`ACC_AMB`; las pestañas, en `TABS_TERR`. Pruebas: `tools/art155-es.js` y `tools/art155-ui.js`.
 
 ## Foco por cargo (`sistemas/foco.js`)
 

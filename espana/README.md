@@ -66,6 +66,8 @@ Es una PWA: se puede instalar y jugar sin conexión.
   singular, traspasos) y a la dureza; **procés** por fases (distensión, tensión, desafío unilateral, declaración),
   **artículo 155** autorizado por el Senado, mesa de diálogo, referéndum pactado y **Tribunal Constitucional** que puede
   anular leyes territoriales.
+- **Artículo 155 completo** (Territorio → *Art. 155*): sirve contra **cualquier comunidad**, no sólo por el procés. Seis motivos con su solidez (desafío institucional, desacato al Constitucional, incumplimiento fiscal, corrupción o inhabilitación, emergencia mal gestionada, interés general) y procedimiento por fases: **requerimiento** al presidente/a autonómico/a → respuesta (atiende, negocia con una prórroga, recurre al Constitucional o desafía) → **votación del Senado** por grupos (mayoría absoluta; pactas con partidos) → **medidas** en tres niveles (control de funciones, cese del Gobierno regional con gestión directa, disolución del parlamento y elecciones) → levantamiento anticipado o fin del plazo. Un 155 sin base o sin Senado se paga en aprobación, estabilidad y prestigio. Puedes ser el Gobierno (**Presidente/a del Gobierno**) o el **presidente/a autonómico/a requerido/a** (dilema con cuatro salidas y botón **Resistir** durante la intervención); las acciones de una comunidad intervenida quedan bloqueadas. La IA también lo usa, con límites (enfriamiento de un año por comunidad, máximo dos a la vez).
+- **El mundo de las comunidades** (Territorio → *Cooperación*): convenios entre comunidades (agua, infraestructuras, turismo, sanidad) y disputas; atraer empresas de otra comunidad (enfría la relación); delegaciones en el exterior (hasta 3); fondo de cohesión con los municipios y plan contra la despoblación; **Fondo de Liquidez Autonómico** (rescate con tutela fiscal de Hacienda durante dos años); **impuestos propios** (turismo, banca, grandes fortunas) recurribles ante el Constitucional; **conferencias sectoriales** del Gobierno central con las 17 comunidades. Seis sucesos autonómicos nuevos (el TC anula una ley tuya, requerimiento de Hacienda, disputa por el agua, fuga de una empresa, malestar en la policía autonómica, alarma por la despoblación).
 - **Municipios**: 67 grandes ayuntamientos con concejales (D'Hondt, umbral del 5 %), pactos de alcaldía, aprobación
   municipal, y las ~8.100 alcaldías agregadas por comunidad; municipales en mayo de 2027.
 - **Unión Europea**: Consejo (mayoría cualificada o unanimidad), Parlamento Europeo (España: circunscripción única),
@@ -130,7 +132,7 @@ js/core/    util · bus · estado · tiempo · acciones
 js/sistemas/ economia · opinion · impacto · mundo · elecciones · gobierno (resto de la UE) ·
             espana · generales · ejecutivo · congreso · consejo · gabinete · territorio · autonomia · municipios · ue · eventos · personaje · guardado
 js/ui/      dom · graficos · hemiciclo · mosaico (mapa de provincias) · componentes
-js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio · partido · europa · elecciones · personaje · partidas · impacto
+js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio (+ art155 · cooperación) · partido · europa · elecciones · personaje · partidas · impacto
 tools/      mini · prueba-es · jugador-es · ui-es · movil-es · leyes-es
 ```
 
