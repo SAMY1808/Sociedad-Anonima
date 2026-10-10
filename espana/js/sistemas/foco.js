@@ -88,6 +88,13 @@ window.ESP = window.ESP || {};
     ambitosLey(E) { const am = Fc.ambito(E); return am === 'todo' ? null : am === 'central' ? ['congreso'] : am === 'aut' ? ['aut'] : ['muni']; },
     tabsTerritorio(E) { const am = Fc.ambito(E); return am === 'todo' ? null : TABS_TERR[am]; },
     tabsElecciones(E) { const am = Fc.ambito(E); return am === 'todo' ? null : TABS_ELEC[am]; },
+    /* ¿Se te muestra este titular? Lo de otros niveles (y de otras comunidades o municipios) se queda fuera. */
+    noticia(E, n) {
+      if (!Fc.activo(E) || !n.amb) return true; const J = E.jugador, am = Fc.ambito(E), m = n.muni && E.esp.muni && E.esp.muni.m[n.muni];
+      if (am === 'central') return false;
+      if (am === 'aut') return n.amb === 'aut' ? (!n.reg || n.reg === J.region) : !!(m && m.ccaa === J.region);
+      return n.amb === 'local' ? (!n.muni || n.muni === J.muni) : (!n.reg || n.reg === J.region);
+    },
     /* Resumen de tu foco para el Centro de mando y Ajustes. */
     info(E) {
       const am = Fc.ambito(E); if (am === 'todo') return null; const ej = Fc.ejecutivo(E);

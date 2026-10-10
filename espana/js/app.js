@@ -169,7 +169,7 @@ window.ESP = window.ESP || {};
 
     ticker() {
       const E = C.E;
-      const ns = E.noticias.slice(0, 14);
+      const ns = E.noticias.filter(n => !C.Foco || C.Foco.noticia(E, n)).slice(0, 14);
       document.getElementById('ticker').innerHTML = `<span class="rotulo">ÚLTIMA HORA</span><div style="overflow:hidden;flex:1"><div class="cinta">${ns.map(n => `<span><b>${n.pais === 'ES' ? '🇪🇸' : n.pais ? (D().paises[n.pais] || { bandera: '🌍' }).bandera : '🌍'}</b>${esc(n.texto)}</span>`).join('') || '<span>Sin noticias</span>'}</div></div>`;
     },
 

@@ -8,7 +8,7 @@ window.ESP = window.ESP || {};
     modal(uid) {
       const E = C.E, Cv = C.CrisisDirecto, cv = Cv.asegurar(E), cr = cv.act.find(x => x.uid === uid); if (!cr) { E.esp.pendienteCrisisV = null; return; }
       const s = Cv.cat(cr.id), nom = Cv.nombreLugar(E, cr.a, cr.lugar), m = UI.modal({ titulo: `${s.ic} ${s.n}`, icono: '🚨', cuerpo: '', clase: 'medio', sinCerrar: true });
-      const cabecera = () => `<div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="etq">${AMB[cr.a]}</span><span class="etq">📍 ${esc(nom)}</span><span class="etq ${cr.sev === 3 ? 'rojo' : 'amar'}">Gravedad ${cr.sev}/3</span></div>`;
+      const cabecera = () => `<div class="fila" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="etq">${AMB[cr.a]}</span><span class="etq">📍 ${esc(nom)}</span><span class="etq ${cr.sev === 3 ? 'rojo' : 'amar'}">Gravedad ${cr.sev}/3</span>${cr.jug && ((cr.a === 'nac' && E.paises.ES.gob.pm !== 'J') || (cr.a === 'aut' && E.jugador.cargo === 'consejero')) ? '<span class="etq oro">Te corresponde por tu cartera</span>' : ''}</div>`;
       const linea = () => `<div class="lista" style="font-size:12.5px;margin-bottom:8px">${cr.log.map(l => `<div class="it"><span class="etq">${esc(l.h)}</span><div class="cuerpo" style="flex:1;white-space:normal"><b>${esc(l.opc)}</b><div class="${l.cls === 'b' ? 'bien' : l.cls === 'x' ? 'mal' : 'tenue'}" style="font-size:12px">${esc(l.txt)}</div></div></div>`).join('')}</div>`;
       const pinta = () => {
         if (cr.paso >= s.pasos.length) { const r = Cv.cerrar(E, cr); return final(r); }

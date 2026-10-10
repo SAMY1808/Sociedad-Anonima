@@ -52,4 +52,32 @@ for (const [nombre, cuenta] of PRUEBAS) {
   for (const cg of Object.keys(cuenta)) { const am = AMB[cg]; if (!am) continue; for (const k of Object.keys(cuenta[cg])) { total += cuenta[cg][k]; if (PROHIBIDO[am].test(k)) malos.push(cg + ':' + k + '×' + cuenta[cg][k]); } }
   ok(total > 0 && malos.length === 0, nombre + ': ' + total + ' decisiones de su nivel' + (malos.length ? ' · FUERA DE NIVEL: ' + malos.join(', ') : ''));
 }
+// Titulares por nivel
+{ const E = C.Mundo.nueva({ semilla: 41, partido: 'ES_ASD', nombre: 'P', trayectoria: 'abogado', pais: 'ES', nivel: 'nacional', rol: 'lider', region: 'MAD', muni: 'm_mad' }); C.E = E; const J = E.jugador; const N = C.Noticias, nv = (t, x, a) => N.nivel(E, t, x, a);
+  let v = nv('politica', 'El Parlamento de Extremadura deroga el decreto-ley «Ley agraria autonómica» (26–39).'); ok(v.amb === 'aut' && v.reg === 'EXT', 'titular del parlamento de Extremadura: autonómico (' + v.amb + '/' + v.reg + ')');
+  v = nv('politica', 'Fracasa la investidura de Rafael Romero (PPI) en Aragón: 29 votos a favor y 38 en contra.'); ok(v.amb === 'aut' && v.reg === 'ARA', 'investidura fallida en Aragón: autonómico');
+  v = nv('politica', 'El pleno municipal de Bilbao aprueba la ordenanza de terrazas.'); ok(v.amb === 'local' && v.muni === 'm_bil', 'pleno municipal de Bilbao: local (' + v.amb + '/' + v.muni + ')');
+  v = nv('elecciones', 'Elecciones municipales: UPC 3346 alcaldías, ASD 2289 alcaldías.'); ok(v.amb === 'central', 'el resumen de las municipales es noticia general');
+  v = nv('elecciones', 'Elecciones en La Rioja: UPC gana con el 46,5 %.'); ok(v.amb === 'aut' && v.reg === 'RIO', 'elecciones en La Rioja: autonómico');
+  v = nv('politica', 'El Congreso aprueba la ley de vivienda.'); ok(v.amb === 'central', 'una ley del Congreso es noticia general');
+  N.poner(E, 'politica', 'El Parlamento de Extremadura deroga el decreto-ley «Ley agraria autonómica» (26–39).', 'ES'); N.poner(E, 'politica', 'El pleno municipal de Bilbao aprueba la ordenanza de terrazas.', 'ES'); N.poner(E, 'politica', 'El Parlamento de Madrid aprueba la ley de suelo (50–40).', 'ES'); N.poner(E, 'politica', 'El Congreso aprueba la ley de vivienda.', 'ES');
+  const vis = () => E.noticias.slice(0, 4).filter(n => C.Foco.noticia(E, n)).length;
+  J.cargo = 'pm'; J.nivel = 'nacional'; ok(vis() === 1, 'Presidencia: sólo ve el titular nacional (' + vis() + ')');
+  J.cargo = 'dipauto'; J.nivel = 'autonomico'; J.region = 'MAD'; ok(vis() === 2, 'Cargo autonómico de Madrid: ve lo nacional y lo de su comunidad, no el parlamento de otra comunidad ni el pleno de Bilbao (' + vis() + ')');
+  J.cargo = 'alcalde'; J.nivel = 'local'; J.muni = 'm_bil'; J.region = 'PVA'; ok(vis() === 2, 'Alcalde/sa de Bilbao: ve lo nacional y lo de su ciudad (' + vis() + ')');
+  C.Ajustes.fijar(E, 'foco', 'todo'); ok(vis() === 4, 'Panorámico: ve todos los titulares'); C.Ajustes.fijar(E, 'foco', 'cargo'); }
+// Crisis: ministros y consejeros gestionan las de su ramo
+{ const E = C.Mundo.nueva({ semilla: 42, partido: 'ES_ASD', nombre: 'P', trayectoria: 'abogado', pais: 'ES', nivel: 'nacional', rol: 'lider', region: 'MAD', muni: 'm_mad' }); C.E = E; E.meta.presim = false; const J = E.jugador, Cv = C.CrisisDirecto; E.paises.ES.gob.pm = 'otro';
+  J.cargo = 'ministro'; J.ministerio = 'int'; ok(Cv.decide(E, 'nac', null, 'cv_atentado') && !Cv.decide(E, 'nac', null, 'cv_tren') && !Cv.decide(E, 'nac', null, undefined), 'el/la ministro/a de Interior gestiona el atentado, no el accidente ferroviario');
+  J.ministerio = 'tpt'; ok(Cv.decide(E, 'nac', null, 'cv_tren') && !Cv.decide(E, 'nac', null, 'cv_atentado'), 'el/la ministro/a de Transportes gestiona el accidente ferroviario');
+  J.cargo = 'consejero'; J.region = 'MAD'; J.area = 'sal'; ok(Cv.decide(E, 'aut', 'MAD', 'cv_urgencias') && !Cv.decide(E, 'aut', 'MAD', 'cv_colegios') && !Cv.decide(E, 'aut', 'CAT', 'cv_urgencias'), 'el/la consejero/a de Sanidad gestiona las urgencias de su comunidad, no los colegios ni las de otra comunidad');
+  J.cargo = 'diputado'; ok(!Cv.decide(E, 'nac', null, 'cv_atentado') && !Cv.decide(E, 'aut', 'MAD', 'cv_urgencias'), 'un/a diputado/a no gestiona crisis');
+  J.cargo = 'ministro'; J.ministerio = 'int'; let jugadas = 0; for (let i = 0; i < 80 && jugadas < 2; i++) { Cv.asegurar(E).cd = {}; Cv.asegurar(E).act.length = 0; E.esp.pendienteCrisisV = null; const cr = Cv.nueva(E, 'nac'); if (cr && cr.jug && E.esp.pendienteCrisisV) { const sc = Cv.cat(cr.id); ok(Cv.SECTOR[cr.id] && Cv.SECTOR[cr.id].includes('int'), 'a Interior le toca «' + sc.n + '»'); while (cr.paso < sc.pasos.length) Cv.elegir(E, cr, sc.pasos[cr.paso][4][0][0]); const r = Cv.cerrar(E, cr); ok(isFinite(r.V) && E.esp.pendienteCrisisV === null, 'la crisis del ramo se juega entera'); jugadas++; } } ok(jugadas >= 1, 'el/la ministro/a recibe crisis de su ramo (' + jugadas + ')');
+  ok(C.DATA.crisisDirecto.filter(s => s.a !== 'mun').every(s => Cv.SECTOR[s.id]), 'todas las crisis nacionales y autonómicas tienen ramo asignado'); }
+// Metas por cargo
+{ const E = C.Mundo.nueva({ semilla: 43, partido: 'ES_ASD', nombre: 'P', trayectoria: 'abogado', pais: 'ES', nivel: 'nacional', rol: 'lider', region: 'MAD', muni: 'm_mad' }); C.E = E; const J = E.jugador, Mt = C.Metas;
+  J.cargo = 'pm'; J.nivel = 'nacional'; let vs = Mt.visibles(E); ok(vs.includes('pm') && vs.includes('absoluta') && !vs.includes('presauto') && !vs.includes('alcaldia'), 'Presidencia: metas del Gobierno, sin las autonómicas ni las locales');
+  J.cargo = 'dipauto'; J.nivel = 'autonomico'; J.region = 'MAD'; vs = Mt.visibles(E); ok(vs.includes('presauto') && vs.includes('mayoria_aut') && !vs.includes('pm') && !vs.includes('mayoria_local') && vs.includes('veterano'), 'Cargo autonómico: metas de su comunidad y las generales');
+  J.cargo = 'concejal'; J.nivel = 'local'; J.muni = 'm_mad'; vs = Mt.visibles(E); ok(vs.includes('alcaldia') && vs.includes('deuda_local') && !vs.includes('presauto'), 'Cargo local: metas de su ciudad');
+  ok(Object.keys(Mt.META).every(k => { const p = Mt.progreso(E, k); return isFinite(p) && p >= 0 && p <= 1; }), 'los progresos de todas las metas son válidos'); C.Ajustes.fijar(E, 'foco', 'todo'); ok(Mt.visibles(E).length === Object.keys(Mt.META).length, 'Panorámico: todas las metas'); }
 console.log('errores', errores, '| fallos', fallos); process.exit(fallos || errores ? 1 : 0);

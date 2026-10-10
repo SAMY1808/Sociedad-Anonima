@@ -83,9 +83,29 @@ window.ESP = window.ESP || {};
   };
 
   /* Noticias: titulares del mundo (cinta inferior y bitácora). */
+  /* Cada titular se etiqueta con su nivel (central, autonómico o local) y, si se reconoce, con su comunidad o municipio: el enfoque por cargo
+     lo usa para no mostrarte lo de otros niveles. Quien escribe la noticia puede indicarlo (amb) o se deduce del texto. */
+  const LOCAL_RE = /ayuntamiento|alcald(?:e|esa|ía|ías)\b|concejal|pleno municipal|ordenanza|moci[oó]n de censura (?:local|en el ayuntamiento)/i;
+  const AUT_RE = /parlamento (?:autonómico|de (?!la Unión|Europa)[A-ZÁÉÍÓÚ])|consejo de gobierno de|gobierno autonómico|presidente\/a autonómic|autonómic[oa]s?\b|a la presidencia de [A-ZÁÉÍÓÚ]|presidente\/a de (?!España|l Gobierno)[A-ZÁÉÍÓÚ]|diputación permanente|investidura de .+ en [A-ZÁÉÍÓÚ]|^[A-ZÁÉÍÓÚ][\wáéíóúñ ]+: se inaugura/i;
+  let nombresCache = null;
+  const nombres = (E) => {
+    const D = C.DATA, claves = (E.esp && E.esp.muni && E.esp.muni.m ? Object.keys(E.esp.muni.m) : []).length;
+    if (nombresCache && nombresCache.n === claves) return nombresCache;
+    const reg = [], mun = []; for (const c in D.ccaa) { const d = D.ccaa[c], vs = new Set([d.nombre, d.nombre.replace(/^(Comunidad de |Comunitat |Región de |Principado de |Illes |La |Comunidad Foral de )/, ''), (d.capital || '').split(' / ')[0]]); for (const v of vs) if (v && v.length > 3) reg.push([v.toLowerCase(), c]); }
+    if (E.esp && E.esp.muni && E.esp.muni.m) for (const k in E.esp.muni.m) mun.push([E.esp.muni.m[k].nombre.toLowerCase(), k]);
+    reg.sort((a, b) => b[0].length - a[0].length); mun.sort((a, b) => b[0].length - a[0].length); return nombresCache = { n: claves, reg, mun };
+  };
+  const buscar = (lista, t) => { for (const [v, id] of lista) if (t.includes(v)) return id; return null; };
   C.Noticias = {
-    poner(E, tipo, texto, pais) {
-      E.noticias.unshift({ t: E.fecha.t, tipo, texto, pais: pais || null });
+    nivel(E, tipo, texto, amb) {
+      const t = String(texto).toLowerCase(), nm = nombres(E); let a = amb;
+      if (!a) a = tipo === 'elecciones' ? (/^Elecciones en /.test(texto) && !/municipales|generales/.test(texto) ? 'aut' : 'central') : tipo === 'local' || LOCAL_RE.test(texto) ? 'local' : AUT_RE.test(texto) ? 'aut' : 'central';
+      const reg = a === 'central' ? null : buscar(nm.reg, t), muni = a === 'local' ? buscar(nm.mun, t) : null;
+      return { amb: a, reg: reg || (muni && E.esp.muni.m[muni] ? E.esp.muni.m[muni].ccaa : null), muni };
+    },
+    poner(E, tipo, texto, pais, amb) {
+      const n = { t: E.fecha.t, tipo, texto, pais: pais || null }; if ((pais === 'ES' || !pais) && tipo !== 'europa' && tipo !== 'mundo') { const v = C.Noticias.nivel(E, tipo, texto, amb); if (v.amb !== 'central') { n.amb = v.amb; if (v.reg) n.reg = v.reg; if (v.muni) n.muni = v.muni; } }
+      E.noticias.unshift(n);
       if (E.noticias.length > 160) E.noticias.length = 160;
       C.Bus.emit('noticia', { tipo, texto, pais });
     }

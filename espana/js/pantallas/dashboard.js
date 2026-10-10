@@ -20,7 +20,7 @@ window.ESP = window.ESP || {};
       const gg = UI.$('#d-cerrar-guia', el); if (gg) gg.onclick = () => { C.E.ui.sinGuia = true; C.App.refrescar(); };
     },
     noticias(E) {
-      const ns = E.noticias.filter(n => !n.pais || n.pais === 'ES' || n.tipo === 'europa').slice(0, 8);
+      const ns = E.noticias.filter(n => (!n.pais || n.pais === 'ES' || n.tipo === 'europa') && (!C.Foco || C.Foco.noticia(E, n))).slice(0, 8);
       return `<div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${ns.map(n => `<div class="it"><span style="font-size:18px">${n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>`;
     },
     carrera(E) {
@@ -98,7 +98,7 @@ window.ESP = window.ESP || {};
       const pm = E.politicos[g.pm];
       const pa = E.partidos[J.partido];
       const mios = Object.values(E.proyectos).filter(p => p.autor.tipo === 'jugador' && C.Congreso.ABIERTAS.includes(p.etapa));
-      const noticias = E.noticias.filter(n => !n.pais || n.pais === 'ES' || n.tipo === 'europa').slice(0, 7);
+      const noticias = E.noticias.filter(n => (!n.pais || n.pais === 'ES' || n.tipo === 'europa') && (!C.Foco || C.Foco.noticia(E, n))).slice(0, 7);
       const encuesta = C.Generales.encuesta(E, 0.5);
       const orden = P.partidos.slice().sort((a, b) => encuesta[b] - encuesta[a]).slice(0, 7);
       const ue = E.ue, abiertos = C.UE.abiertos(E).slice(0, 3);

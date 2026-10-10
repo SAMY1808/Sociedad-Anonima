@@ -12,11 +12,14 @@ window.ESP = window.ESP || {};
     ARQ,
     asegurar(E) { if (!E.esp.cv) E.esp.cv = { act: [], hist: [], ult: {}, cd: {} }; return E.esp.cv; },
     cat(id) { return D().crisisDirecto.find(x => x.id === id); },
-    /* ¿Decide el jugador en este ámbito? */
-    decide(E, a, lugar) {
-      const J = E.jugador; if (!J || J.pais !== 'ES') return false;
-      if (a === 'nac') return E.paises.ES.gob.pm === 'J';
-      if (a === 'aut') return J.cargo === 'presauto' && (!lugar || J.region === lugar);
+    /* Ministerio (nacionales) o consejería (autonómicas) al que le toca cada crisis: su titular la gestiona en lugar del presidente/a. */
+    SECTOR: { cv_atentado: ['int'], cv_ciber: ['int', 'dig'], cv_tren: ['tpt'], cv_vertido: ['amb'], cv_espionaje: ['def'], cv_huelgatrans: ['tra', 'tpt'], cv_alimentaria: ['sal'], cv_rehenes: ['ext'], cv_terremoto: ['int'], cv_deepfake: ['dig', 'pre'], cv_datos: ['dig'], cv_frontera: ['def'], cv_temporal: ['int'], cv_sentencia: ['jus'], cv_estafa: ['eco', 'hac'], cv_porcina: ['agr'], cv_incendios_multi: ['amb', 'int'], cv_accidente_aereo: ['tpt'],
+      cv_incendio_ac: ['amb'], cv_puente: ['mov'], cv_tractorada: ['agr'], cv_urgencias: ['sal'], cv_contratos: ['pre'], cv_legionela: ['sal'], cv_referendo: ['pre'], cv_sequia_ac: ['amb', 'agr'], cv_informatica: ['sal'], cv_colegios: ['edu'], cv_turismofobia: ['emp'], cv_quimica: ['ind', 'int'], cv_pesca: ['agr'], cv_nevada_ac: ['int'], cv_plaga: ['agr'], cv_policia: ['int'], cv_vertedero: ['amb'], cv_minas: ['ind'], cv_universidad: ['uni'] },
+    /* ¿Decide el jugador en este ámbito? Presidente/a (nacional), presidente/a autonómico/a, alcalde/sa, y ministros/as y consejeros/as en las crisis de su ramo. */
+    decide(E, a, lugar, id) {
+      const J = E.jugador; if (!J || J.pais !== 'ES') return false; const sc = id && Cv.SECTOR[id];
+      if (a === 'nac') return E.paises.ES.gob.pm === 'J' || !!(sc && J.cargo === 'ministro' && sc.includes(J.ministerio));
+      if (a === 'aut') return (J.cargo === 'presauto' && (!lugar || J.region === lugar)) || !!(sc && J.cargo === 'consejero' && lugar && J.region === lugar && sc.includes(J.area));
       if (a === 'mun') { const m = J.muni && E.esp.muni.m[J.muni]; return !!(m && m.pm === 'J' && (!lugar || J.muni === lugar)); }
       return false;
     },
@@ -25,7 +28,7 @@ window.ESP = window.ESP || {};
       const J = E.jugador;
       if (a === 'nac') { if (s.rg) { const ok = s.rg.filter(x => D().ccaa[x]); return ok.length ? U.pick(ok) : null; } return null; }
       if (a === 'aut') {
-        if (J && J.cargo === 'presauto' && U.chance(0.5) && (!s.rg || s.rg.includes(J.region))) return J.region;
+        if (J && ['presauto', 'consejero'].includes(J.cargo) && U.chance(0.5) && (!s.rg || s.rg.includes(J.region))) return J.region;
         const rs = (s.rg || C.Territorio.ids()).filter(x => D().ccaa[x] && E.esp.ccaa[x] && E.esp.ccaa[x].gob); return rs.length ? U.pick(rs) : null;
       }
       const mi = J && J.muni && E.esp.muni.m[J.muni]; if (mi && mi.pm === 'J' && U.chance(0.55)) return J.muni;
@@ -36,10 +39,10 @@ window.ESP = window.ESP || {};
       const pos = D().crisisDirecto.filter(s => s.a === a && (!s.m || s.m.includes(mes)) && t - (cv.cd[s.id] || -99) > 40 && !cv.act.some(x => x.id === s.id));
       if (!pos.length) return null;
       const s = U.pesado(pos, x => x.w), lugar = Cv.elegirLugar(E, s, a); if (a !== 'nac' && !lugar) return null;
-      const sev = U.chance(0.15) ? 3 : U.chance(0.45) ? 2 : 1, cr = { uid: U.id('cv'), id: s.id, a, lugar, sev, t0: t, paso: 0, elec: [], log: [], jug: Cv.decide(E, a, lugar) };
+      const sev = U.chance(0.15) ? 3 : U.chance(0.45) ? 2 : 1, cr = { uid: U.id('cv'), id: s.id, a, lugar, sev, t0: t, paso: 0, elec: [], log: [], jug: Cv.decide(E, a, lugar, s.id) };
       cv.cd[s.id] = t; cv.ult[a] = t; cv.act.push(cr);
       const nom = Cv.nombreLugar(E, a, lugar), cabeza = s.pasos[0][1].replace('{lugar}', nom);
-      C.Noticias.poner(E, 'politica', `${s.n}${a === 'nac' ? '' : ' en ' + nom}: ${cabeza.split('. ')[0]}.`, 'ES');
+      C.Noticias.poner(E, 'politica', `${s.n}${a === 'nac' ? '' : ' en ' + nom}: ${cabeza.split('. ')[0]}.`, 'ES', a === 'nac' ? 'central' : a === 'aut' ? 'aut' : 'local');
       if (cr.jug && C.Tutor) C.Tutor.una(E, 'crisis'); if (cr.jug && !E.meta.presim) E.esp.pendienteCrisisV = cr.uid; else Cv.ia(E, cr);
       return cr;
     },
@@ -64,7 +67,7 @@ window.ESP = window.ESP || {};
       else if (cr.a === 'aut') { const rc = E.esp.ccaa[cr.lugar]; if (rc && rc.gob) { rc.gob.aprob = clamp(rc.gob.aprob + V * 5 * m, 5, 90); rc.gob.estab = clamp(rc.gob.estab + V * 3 * m, 0, 100); } if (cr.jug) C.Personaje.cambiar(E, { prestigio: V * 3 * m, pop: V * 2.5 * m }, true); }
       else { const mu = E.esp.muni.m[cr.lugar]; if (mu) mu.aprob = clamp(mu.aprob + V * 6 * m, 20, 85); if (cr.jug) C.Personaje.cambiar(E, { prestigio: V * 2.5 * m, pop: V * 2 * m }, true); }
       const juicio = bien ? 'La gestión es elogiada' : mal ? 'La gestión se considera un fracaso' : 'La gestión recibe valoraciones dispares';
-      C.Noticias.poner(E, 'politica', `Fin de «${s.n.toLowerCase()}»${cr.a === 'nac' ? '' : ' en ' + nom}: ${vict ? vict + ' víctimas y ' : ''}${dano} millones en daños. ${juicio}.`, 'ES');
+      C.Noticias.poner(E, 'politica', `Fin de «${s.n.toLowerCase()}»${cr.a === 'nac' ? '' : ' en ' + nom}: ${vict ? vict + ' víctimas y ' : ''}${dano} millones en daños. ${juicio}.`, 'ES', cr.a === 'nac' ? 'central' : cr.a === 'aut' ? 'aut' : 'local');
       if (cr.jug && C.Dilemas) { C.Dilemas.registrar(E, 'crisis', `${s.n}: ${juicio.toLowerCase()}`, Math.round(V * 4 * 10) / 10); C.Dilemas.asegurar(E).memoria.unshift({ id: U.id('mm'), t: E.fecha.t, tipo: 'crisis', txt: `gestionaste «${s.n.toLowerCase()}» ${bien ? 'con acierto' : 'con torpeza'}`, bien, cobrado: false }); }
       cv.hist.unshift({ uid: cr.uid, id: cr.id, n: s.n, ic: s.ic, a: cr.a, lugar: nom, t: E.fecha.t, V, vict, dano, jug: cr.jug, log: cr.log }); if (cv.hist.length > 30) cv.hist.length = 30;
       cv.act = cv.act.filter(x => x !== cr); if (E.esp.pendienteCrisisV === cr.uid) E.esp.pendienteCrisisV = null;
