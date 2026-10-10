@@ -30,6 +30,28 @@ window.ESP = window.ESP || {};
   const edificios = (r, uid, x0, x1, base, hmin, hmax, col, ventanas, op = 1) => { let s = '', x = x0; while (x < x1) { const w = 28 + r() * 48, h = hmin + r() * (hmax - hmin); s += `<rect x="${f1(x)}" y="${f1(base - h)}" width="${f1(w)}" height="${f1(h)}" fill="${col}" opacity="${op}"/>`; if (ventanas) for (let vy = base - h + 8; vy < base - 8; vy += 12) for (let vx = x + 5; vx < x + w - 6; vx += 10) if (r() < ventanas.p) s += `<rect x="${f1(vx)}" y="${f1(vy)}" width="4" height="6" fill="${ventanas.c}" opacity="${f1(0.5 + r() * 0.5)}"/>`; x += w + 2 + r() * 6; } return s; };
   const humo = (id, x, y, rx, ry, color, op) => `<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${color}" opacity="${op}" filter="url(#${id})"/>`;
 
+  const banderaUE = (x, y, w, h) => `<g><rect x="${x - 2}" y="${y}" width="3" height="${h * 3.2}" fill="#9aa4b5"/><rect x="${x + 1}" y="${y}" width="${w}" height="${h}" fill="#1d4fbf"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${f1(x + 1 + w / 2 + h * 0.34 * Math.cos(i * Math.PI / 6))}" cy="${f1(y + h / 2 + h * 0.34 * Math.sin(i * Math.PI / 6))}" r="${f1(Math.max(1.1, h * 0.04))}" fill="#f6d03c"/>`).join('')}</g>`;
+  /* Atril institucional de madera con el emblema dorado y un haz de micrófonos. */
+  const atrilInst = (x, y, w, u) => `<g><path d="M${x - w / 2} ${y} L${x + w / 2} ${y} L${x + w / 2 - 12} ${y + 82} L${x - w / 2 + 12} ${y + 82} Z" fill="#2b1d14"/><path d="M${x - w / 2 + 7} ${y + 8} L${x + w / 2 - 7} ${y + 8} L${x + w / 2 - 17} ${y + 74} L${x - w / 2 + 17} ${y + 74} Z" fill="#3a281b"/><rect x="${x - w / 2 - 3}" y="${y - 4}" width="${w + 6}" height="8" rx="2" fill="#4a3322"/><circle cx="${x}" cy="${y + 40}" r="${f1(w * 0.1)}" fill="#c9a24b"/><circle cx="${x}" cy="${y + 40}" r="${f1(w * 0.065)}" fill="none" stroke="#6b5420" stroke-width="1.4"/><path d="M${x - 14} ${y - 4} q-4 -16 -10 -26 M${x + 4} ${y - 4} q0 -20 2 -30 M${x + 18} ${y - 4} q6 -14 14 -22" stroke="#0b0b10" stroke-width="2.4" fill="none"/><rect x="${x - 29}" y="${y - 36}" width="9" height="12" rx="3" fill="#0b0b10"/><rect x="${x + 1}" y="${y - 44}" width="9" height="13" rx="3" fill="#0b0b10"/><rect x="${x + 29}" y="${y - 34}" width="9" height="12" rx="3" fill="#0b0b10"/></g>`;
+  const camaraTV = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0 L-16 46 M0 0 L16 46 M0 0 V48" stroke="#171a24" stroke-width="3"/><rect x="-24" y="-30" width="46" height="28" rx="4" fill="#10131c" stroke="#2a3248"/><rect x="-14" y="-24" width="20" height="16" rx="2" fill="#070a12"/><circle cx="-20" cy="-8" r="9" fill="#0a0d16" stroke="#3a4560" stroke-width="2"/><circle cx="-20" cy="-8" r="4" fill="#1b2b52"/><circle cx="16" cy="-26" r="2" fill="#e03131"/></g>`;
+  const destellos = (r, n, x0, x1, y0, y1) => { let s = ''; for (let i = 0; i < n; i++) { const x = f1(x0 + r() * (x1 - x0)), y = f1(y0 + r() * (y1 - y0)), t = f1(3 + r() * 5); s += `<path d="M${x} ${f1(y - t)} L${f1(x + t * 0.3)} ${y} L${x} ${f1(y + t)} L${f1(x - t * 0.3)} ${y} Z M${f1(x - t)} ${y} L${x} ${f1(y - t * 0.3)} L${f1(x + t)} ${y} L${x} ${f1(y + t * 0.3)} Z" fill="#fff" opacity="${f1(0.5 + r() * 0.5)}"/>`; } return s; };
+  /* Sala de declaraciones: pared de madera, cortinas, banderas a los lados, atril y prensa con cámaras. fondoBanda = rótulo tras el atril. */
+  const salaDeclaracion = (ctx, o) => {
+    const { r, u } = ctx; let s = grad(u + 'a', '#120c0a', '#3b2a1f') + `<rect width="800" height="360" fill="url(#${u}a)"/>` + resplandor(u + 'b', 400, 120, 330, '#f3c778', 0.38) + `<rect width="800" height="360" fill="url(#${u}b)"/>`;
+    for (let x = 150; x < 660; x += 38) s += `<rect x="${x}" y="0" width="22" height="262" fill="#000" opacity="${f1(0.1 + 0.08 * (x % 3))}"/>`;
+    s += grad(u + 'c', '#8c1d2b', '#4a0e17', false) + `<path d="M0 0 H128 Q106 120 144 232 Q92 300 120 360 H0 Z" fill="url(#${u}c)"/><path d="M800 0 H672 Q694 120 656 232 Q708 300 680 360 H800 Z" fill="url(#${u}c)"/><path d="M34 0 Q26 180 44 360 M76 0 Q66 180 84 360 M766 0 Q774 180 756 360 M724 0 Q734 180 716 360" stroke="#2e0910" stroke-width="3" fill="none" opacity=".55"/>`;
+    s += `<rect x="220" y="12" width="360" height="52" rx="4" fill="${o.banda}"/><rect x="220" y="12" width="360" height="5" fill="#c9a24b"/><text x="400" y="40" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="${o.fs1 || 19}" letter-spacing="3" fill="#fff"${o.tl1 ? ` textLength="${o.tl1}" lengthAdjust="spacingAndGlyphs"` : ''}>${esc(o.l1)}</text>${o.l2 ? `<text x="400" y="57" text-anchor="middle" font-family="sans-serif" font-size="10.5" letter-spacing="4" fill="#e8d9a8">${esc(o.l2)}</text>` : ''}`;
+    s += o.banderas(ctx);
+    s += foco(u + 'd', 400, 0, 260, 300, '#fff', 0.2);
+    s += persona(400, 262, 3.5, '#090c14', { brazo: o.brazo }) + atrilInst(400, 232, 150, u);
+    s += `<polygon points="0,318 800,318 800,360 0,360" fill="#0a0709"/>`;
+    for (const [x, y, sc] of [[110, 350, 1.2], [690, 350, 1.2], [260, 356, 1.0], [560, 356, 1.0]]) s += camaraTV(x, y, sc);
+    s += `<path d="M330 330 L470 290" stroke="#0b0b10" stroke-width="3"/><ellipse cx="478" cy="287" rx="16" ry="6" fill="#4b4b55" transform="rotate(-24 478 287)"/>`;
+    s += multitud(r, 40, 20, 780, 332, 372, ['#05060a', '#08090f', '#0b0d14'], 1.7, 2.3, {});
+    s += destellos(r, 22, 30, 770, 296, 352);
+    return s;
+  };
+
   /* ── Escenas ── */
   const ESCENAS = {
     noche_victoria: {
@@ -158,6 +180,15 @@ window.ESP = window.ESP || {};
         s += `<path d="M0 260 H800 V360 H0 Z" fill="#0f0b14"/>` + edificios(r, u, 320, 800, 262, 24, 90, '#140f1c', null) + `<path d="M600 232 q8 -8 16 0 M630 216 q8 -8 16 0 M668 240 q8 -8 16 0" stroke="#150f1c" stroke-width="2.4" fill="none"/>`;
         s += `<polygon points="190,360 420,360 640,330 460,330" fill="#07050b" opacity=".6"/>` + atril(200, 250, 120, '#4a2c34', '', { madera: '#1a1211', borde: '#0b0708' }) + `<path d="M170 150 H260" stroke="#0b0708" stroke-width="0"/>`;
         s += `<g fill="#0b0708"><rect x="36" y="296" width="22" height="12"/><rect x="38" y="308" width="3" height="22"/><rect x="53" y="308" width="3" height="22"/><rect x="36" y="280" width="22" height="3"/></g>`; return s; }
+    },
+    declaracion_pm: {
+      n: 'Declaración institucional: disolución de las Cortes', d: 'El presidente del Gobierno comparece en La Moncloa ante el atril, con las banderas de España y la UE y la prensa acreditada.', prompt: 'cinematic photo of a Spanish prime minister delivering an institutional statement from a wooden lectern at the Moncloa Palace, announcing the dissolution of parliament, Spanish and European Union flags behind, dark wood panelling and crimson curtains, a cluster of microphones, TV cameras and photographers in the foreground, flashes, serious mood, no real person',
+      f(ctx) { return salaDeclaracion(ctx, { banda: '#16233f', l1: 'DECLARACIÓN INSTITUCIONAL', fs1: 19, l2: 'PRESIDENCIA DEL GOBIERNO', brazo: false, banderas: c => banderaES(170, 88, 104, 58) + banderaUE(530, 88, 104, 58) }); }
+    },
+    declaracion_aut: {
+      n: 'Declaración institucional: disolución del Parlamento autonómico', d: 'El presidente de la comunidad comparece ante el atril con la bandera de su comunidad, la de España y la de la UE.', prompt: 'cinematic photo of a Spanish regional president delivering an institutional statement from a wooden lectern in the regional government palace, announcing the dissolution of the regional parliament, the regional flag, the Spanish flag and the European Union flag behind, elegant wood panelling and curtains, a cluster of microphones, TV cameras and photographers in the foreground, flashes, serious mood, no real person',
+      f(ctx) { const nom = (ctx.region && C.DATA && C.DATA.ccaa && C.DATA.ccaa[ctx.region] ? C.DATA.ccaa[ctx.region].nombre : 'Gobierno autonómico').toUpperCase(), B = C.Banderas;
+        return salaDeclaracion(ctx, { banda: '#1f2a44', l1: 'GOBIERNO DE ' + nom, fs1: 18, y1: 54, tl1: Math.min(330, 13.5 * ('GOBIERNO DE ' + nom).length), l2: 'DECLARACIÓN INSTITUCIONAL', brazo: false, banderas: c => (B && ctx.region && B.tiene(ctx.region) ? `<rect x="142" y="88" width="3" height="184" fill="#9aa4b5"/>` + B.dentro(ctx.region, 146, 88, 104) : '') + banderaES(512, 88, 86, 48) + banderaUE(618, 88, 86, 48) }); }
     }
   };
 
@@ -184,14 +215,14 @@ window.ESP = window.ESP || {};
       const d = ESCENAS[id]; if (!d) return '';
       const pa = E && o.pid && E.partidos[o.pid] ? E.partidos[o.pid] : (E && E.jugador && E.partidos[E.jugador.partido]) || null, pa2 = E && o.pid2 && E.partidos[o.pid2] ? E.partidos[o.pid2] : null;
       const c = hex(pa && pa.color ? pa.color : '#b8932f'), c2 = hex(pa2 && pa2.color ? pa2.color : '#2f7de1');
-      const u = 'es' + (++N), ctx = { E, c, cd: oscuro(c, 0.45), cl: claro(c, 0.3), c2, sigla: (pa && pa.sigla) || 'PARTIDO', sigla2: (pa2 && pa2.sigla) || '', logo: pa && pa.logo ? pa.logo : '', u, r: rng(hash(id + ((pa && pa.sigla) || '') + (o.semilla || ''))) };
+      const u = 'es' + (++N), ctx = { E, c, cd: oscuro(c, 0.45), cl: claro(c, 0.3), c2, sigla: (pa && pa.sigla) || 'PARTIDO', sigla2: (pa2 && pa2.sigla) || '', logo: pa && pa.logo ? pa.logo : '', region: o.region || null, u, r: rng(hash(id + ((pa && pa.sigla) || '') + (o.semilla || ''))) };
       return `<svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(d.n)}" xmlns="http://www.w3.org/2000/svg">${d.f(ctx)}</svg>`;
     },
     /* Bloque listo para insertar en un modal: la imagen asociada (si la hay) sobre la ilustración de respaldo. */
     html(E, id, o = {}) {
       const d = ESCENAS[id]; if (!d) return '';
       let svg = ''; try { svg = Es.svg(E, id, o); } catch (e) { console.error('[escenas]', id, e); return ''; }
-      const url = C.IMAGENES && C.IMAGENES[id], img = url ? `<img src="${esc(url)}" alt="${esc(d.n)}" loading="lazy" onerror="this.remove()">` : '';
+      const url = C.IMAGENES && ((o.region && C.IMAGENES[id + '_' + o.region]) || C.IMAGENES[id]), img = url ? `<img src="${esc(url)}" alt="${esc(d.n)}" loading="lazy" onerror="this.remove()">` : '';
       const ley = o.leyenda != null ? o.leyenda : d.n;
       return `<figure class="escena${o.compacta ? ' compacta' : ''}" data-escena="${esc(id)}">${svg}${img}${ley ? `<figcaption>${esc(ley)}</figcaption>` : ''}</figure>`;
     },

@@ -35,7 +35,7 @@ const movil = process.argv[2] === 'movil';
   await pg.evaluate(() => ESP.UI.cerrarModales());
   await clic('[data-accion="encargar_encuesta"][data-args*="propia"], [data-accion="encargar_encuesta"]'); await pg.waitForTimeout(300);
   await pg.evaluate(() => ESP.UI.cerrarModales());
-  await pg.evaluate(() => { ESP.E.esp.pendienteDebate = true; ESP.App.revisarPendientes(); }); await pg.waitForSelector('[data-t]');
+  await pg.evaluate(() => { ESP.Disolucion.asegurar(ESP.E).pend.length = 0; ESP.E.esp.pendienteDebate = true; ESP.App.revisarPendientes(); }); await pg.waitForSelector('[data-t]');
   await pg.screenshot({ path: `/tmp/${movil ? 'cam' : 'cad'}-debate.png` });
   for (let i = 0; i < 5; i++) { await clic('[data-t="datos"]'); await pg.waitForTimeout(120); } await clic('#db-ok'); await pg.waitForTimeout(300);
   ok(await pg.evaluate(() => ESP.E.esp.camp.debate.hecho && !ESP.E.esp.pendienteDebate), 'el debate en directo se celebra y termina');

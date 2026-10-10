@@ -89,3 +89,13 @@ C.IMAGENES = {
 - **Qué muestra la ilustración:** Un atril vacío contra un atardecer: se cierra una etapa política.
 - **Prompt sugerido (inglés):** cinematic photo of an empty political podium with a single microphone at sunset in front of a Spanish government building, long shadows, warm golden light, quiet and reflective mood, no people
 
+### `declaracion_pm` — Declaración institucional: disolución de las Cortes
+- **Dónde sale:** Al disolverse las Cortes Generales (tú como presidente/a del Gobierno, la IA, fin de legislatura o falta de investidura): ventana «Declaración institucional» y selector «sorpresa / anunciada».
+- **Qué muestra la ilustración:** El presidente del Gobierno ante el atril en La Moncloa, con las banderas de España y la UE, cortinas, cámaras de televisión y prensa con flashes.
+- **Prompt sugerido (inglés):** cinematic photo of a Spanish prime minister delivering an institutional statement from a wooden lectern at the Moncloa Palace, announcing the dissolution of parliament, Spanish and European Union flags behind, dark wood panelling and crimson curtains, a cluster of microphones, TV cameras and photographers in the foreground, flashes, serious mood, no real person
+
+### `declaracion_aut` — Declaración institucional: disolución del Parlamento autonómico
+- **Dónde sale:** Al disolverse el parlamento de tu comunidad (tú como presidente/a autonómico/a, la IA o por falta de apoyos).
+- **Qué muestra la ilustración:** El presidente de la comunidad ante el atril, con la bandera de su comunidad, la de España y la de la UE, y el rótulo «Gobierno de …». La bandera autonómica se dibuja según la comunidad.
+- **Prompt sugerido (inglés):** cinematic photo of a Spanish regional president delivering an institutional statement from a wooden lectern in the regional government palace, announcing the dissolution of the regional parliament, the regional flag, the Spanish flag and the European Union flag behind, elegant wood panelling and curtains, a cluster of microphones, TV cameras and photographers in the foreground, flashes, serious mood, no real person
+  - Añade al prompt el nombre y la bandera de la comunidad que quieras (por ejemplo «the Catalan senyera flag»). Si asocias una sola imagen a `declaracion_aut`, se usará para todas las comunidades; para una comunidad concreta, asocia `declaracion_aut_CAT`, `declaracion_aut_MAD`… (el id de la comunidad: AND, ARA, AST, BAL, CAN, CNT, CLM, CYL, CAT, VAL, EXT, GAL, MAD, MUR, NAV, PVA, RIO, CEU, MEL) y tendrá prioridad.

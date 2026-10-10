@@ -9,7 +9,7 @@ window.ESP = window.ESP || {};
     /* Selector de ámbito cuando hay varias campañas a la vez. */
     selector(E, camps, cur) {
       if (camps.length < 2) return '';
-      return `<div class="seg" style="margin-bottom:12px">${camps.map(x => `<button data-camp-scope="${x.key}" class="${x.camp === cur ? 'activo' : ''}">${x.key === 'gen' ? '🇪🇸 Generales' : '🗺 ' + esc(D().ccaa[x.key].nombre)}</button>`).join('')}</div>`;
+      return `<div class="seg" style="margin-bottom:12px">${camps.map(x => `<button data-camp-scope="${x.key}" class="${x.camp === cur ? 'activo' : ''}">${x.key === 'gen' ? '🇪🇸 Generales' : (C.Banderas.mini(x.key, 13) || '🗺 ') + esc(D().ccaa[x.key].nombre)}</button>`).join('')}</div>`;
     },
 
     render(E) {
@@ -43,7 +43,7 @@ window.ESP = window.ESP || {};
       } else {
         const ri = Ca.regInfo(E, camp.c), ts = Ca.territoriosAut(E, camp.c);
         const filas = ts.map(t => `<tr><td><b>${esc(t.nombre)}</b><br><span class="tenue" style="font-size:11.5px">${Math.round(t.peso * 100)} % del voto${t.esfuerzo ? ' · esfuerzo ' + U.d1(t.esfuerzo) : ''}</span></td><td style="text-align:right;white-space:nowrap">${UI.botonAccion('mitin_prov', { prov: t.id }, '📣', 'chico')} ${peso ? `<button class="btn chico" data-gastar-prov="${t.id}">💶</button>` : ''}</td></tr>`).join('');
-        terr = `<div class="tarjeta"><div class="t-cab"><h3>🗺 ${esc(D().ccaa[camp.c].nombre)}: dónde se juega</h3><span class="etq">Mayoría ${ri.may} de ${ri.n}</span></div>
+        terr = `<div class="tarjeta"><div class="t-cab"><h3>${C.Banderas.mini(camp.c, 15) || '🗺 '}${esc(D().ccaa[camp.c].nombre)}: dónde se juega</h3><span class="etq">Mayoría ${ri.may} de ${ri.n}</span></div>
           <div class="nota" style="margin-bottom:8px">Tu partido: <b>${ri.esc}</b> escaños previstos (${U.d1(ri.voto)} %). ${ri.ganar < 0.15 ? `<span class="bien">${ri.ganar * 100 < 1 ? 'Con menos de un 1 % más de voto' : 'Con un ' + pct(ri.ganar) + ' más de voto'} ganas un escaño.</span>` : `Necesitas un ${pct(ri.ganar)} más de voto para sumar otro.`} ${ri.perder != null && ri.perder < 0.15 ? `<span class="mal">Riesgo: con un ${pct(ri.perder)} menos pierdes uno.</span>` : ''}</div>
           <table class="tabla apila"><thead><tr><th>Provincia</th><th></th></tr></thead><tbody>${filas}</tbody></table></div>`;
       }

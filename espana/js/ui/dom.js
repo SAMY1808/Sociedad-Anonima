@@ -73,6 +73,8 @@ window.ESP = window.ESP || {};
 
     /* ── Ejecuta una acción del jugador y refresca la interfaz ── */
     accion(id, args, opts = {}) {
+      // Disolver las Cortes o el Parlamento: antes se elige cómo se anuncia (sorpresa o anunciada)
+      const Dc = C.Pantallas && C.Pantallas.declaracion; if (Dc && Dc.interceptar(id, args || {})) return { ok: false, msg: '', pendiente: true };
       const r = C.Acciones.ejecutar(id, args);
       const dd = C.E && C.E.jugador && C.E.jugador._d; if (C.E && C.E.jugador) C.E.jugador._d = null;
       const nom = { prestigio: 'prestigio', pop: 'popularidad', capEU: 'capital europeo' };
@@ -102,6 +104,7 @@ window.ESP = window.ESP || {};
         const form = b.closest('.accion-form');
         if (form) UI.$$('[data-arg]', form).forEach(inp => { args[inp.dataset.arg] = inp.type === 'number' ? +inp.value : inp.value; });
         const r = UI.accion(b.dataset.accion, args);
+        if (r && r.pendiente) return;   // se abrió un selector (p. ej. cómo anunciar una disolución): la acción aún no se ha ejecutado
         if (b.dataset.cierra && r.ok !== false) UI.cerrarModales();
         C.Bus.emit('ui:accion', { id: b.dataset.accion, args, r });
       });

@@ -26,6 +26,7 @@
 | 25 | `ejecutivo` | investidura, pactos, vetos, mociones, ministerios, estabilidad |
 | 30 | `consejo` | Consejo de Ministros, socios, Presupuestos |
 | 34–35 | `art155`, `ccaa2` | procedimientos del artículo 155 y mundo de las comunidades (convenios, FLA, impuestos propios) |
+| — | `disolucion` | envuelve `Generales.disolver` y `Territorio.adelantar`: modo del anuncio y declaración institucional (sin turno propio) |
 | 31 | `gabinete` | ministros, consejeros y concejales como personas: rendimiento, escándalos, choques, cuotas de los socios |
 | 32 | `congreso_turno` | semana parlamentaria |
 | 12 | `ayuntamientos` | indicadores urbanos, presupuesto, pleno, proyectos, mociones locales |
@@ -217,6 +218,12 @@ Estado en `E.esp.sede`, `E.esp.fus`, `E.esp.sat`, `E.esp.riv`, `E.esp.obj` y con
 ## Artículo 155 (`sistemas/art155.js`)
 
 `C.Art155` generaliza el viejo 155 del procés (que sigue disponible: `Territorio.aplicar155` queda envuelto y registra su intervención con `registrarExterna`). Estado: `E.esp.a155 = {p, hist, ult}` (`p` = procedimientos abiertos, `hist` = cerrados) y `rc.interv = {nivel, hasta, ...}` en la comunidad. Fases: `requerimiento` (plazo +4 semanas) → `tc` (fallo +8, si recurre) / `espera` (límite +10) → `autorizada` (4 semanas para elegir medidas) → `intervenida` (26/39/26 semanas según nivel) → cierre. `legit(E,c,motivo)` mide la solidez del motivo (afecta al voto del Senado y al coste político); `senado(E,c,p)` da el voto previsto por grupo (los partidos pactados votan que sí). `puede` limita a un procedimiento por comunidad, enfriamiento de 52 semanas y un máximo de 2 simultáneos, y exige Cortes activas. El jugador puede ser el Gobierno (acciones `requerir_155`, `negociar_senado_155`, `autorizacion_155`, `medidas_155`, `levantar_155`, `retirar_155`) o la comunidad (dilema `requerimiento155`, acción `resistir_155`). Una intervención bloquea las acciones del presidente/a autonómico/a envolviendo `a.disponible` (`bloqueoAccion`/`protege`; el nivel suave sólo bloquea la política fiscal). Pantalla: `pantallas/art155.js` (pestaña *Art. 155* de Territorio).
+
+## Banderas (`ui/banderas.js`) y disolución (`sistemas/disolucion.js`)
+
+`C.Banderas` dibuja cada bandera en un lienzo SVG de 60 × 40 (`svg(id, {h})` en línea, `mini(id, h)` antepuesta a un texto, `nombre(E, id)` con el nombre, `dentro(id, x, y, w)` para anidarla en otra escena). Los escudos son esquemáticos; Ceuta y Melilla llevan un diseño genérico. Aviso de CSS: `.escena>svg` (hijo directo) es el que se estira al ancho de la figura; si fuera `.escena svg`, anularía el tamaño de las banderas anidadas.
+
+`C.Disolucion` guarda `E.esp.dis = {pend, hist}`. `registrar(E, ambito, modo, motivo)` (ámbito `'ES'` o el id de la comunidad) se llama desde los envoltorios de `Generales.disolver` y `Territorio.adelantar`; el modo sale de `E._modoDisol` (lo fijan las acciones `disolver_cortes` y `adelanto_autonomico` con su argumento `modo`: `sorpresa` | `anunciada`, por defecto `anunciada`) o de `modoPorDefecto` (fin de legislatura → `ordinaria`, sin investidura o falta de apoyos → `forzada`, la IA → 40 % sorpresa). Los efectos van en `efectos` (sorpresa: +0,6 de popularidad al partido que disuelve, −0,3 a su principal rival, −1,5 de estabilidad; anunciada: +0,8). Si afecta al jugador (España o su comunidad) deja un anuncio en `pend`, que `App.revisarPendientes` abre con `Pantallas.declaracion.modal`. `UI.accion` consulta antes a `Pantallas.declaracion.interceptar`, que abre el selector «sorpresa / anunciada» y devuelve `{ok:false, pendiente:true}` (el delegado de clics no cierra modales ni emite `ui:accion` en ese caso). Escenas: `declaracion_pm` y `declaracion_aut` (esta dibuja la bandera de `o.region`; la imagen de IA puede ser por comunidad con la clave `declaracion_aut_<id>`). Pruebas: `tools/disolucion-es.js` y `tools/declaracion-ui.js`.
 
 ## Cabildeo del Estatuto (`sistemas/autogobierno.js`)
 

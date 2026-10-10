@@ -78,7 +78,7 @@ window.ESP = window.ESP || {};
         <div class="logo">CURUL <small>España</small></div>
         <div class="fecha"><b>${U.fmtFecha(U.hoy())}</b><span>${estado} · ${sig}</span></div>
         <div class="espacio"></div>
-        ${E.meta.vistaPartido && J.pais === 'ES' ? `<div class="chip-cargo" data-ir="sede" style="cursor:pointer"><span class="bandera">🏢</span><div class="txt"><b>${esc(E.partidos[J.partido].nombre)}</b><span>Dirección de ${esc(J.nombre)} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>` : `<div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span class="bandera">🇪🇸</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>`}
+        ${E.meta.vistaPartido && J.pais === 'ES' ? `<div class="chip-cargo" data-ir="sede" style="cursor:pointer"><span class="bandera">🏢</span><div class="txt"><b>${esc(E.partidos[J.partido].nombre)}</b><span>Dirección de ${esc(J.nombre)} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>` : `<div class="chip-cargo" data-ir="personaje" style="cursor:pointer"><span class="bandera">${['presauto', 'dipauto', 'consejero'].includes(J.cargo) && J.region && C.Banderas.tiene(J.region) ? C.Banderas.svg(J.region, { h: 24 }) : '🇪🇸'}</span><div class="txt"><b>${esc(J.nombre)}</b><span>${esc(C.Personaje.cargoTxt(E))} · ${esc(E.partidos[J.partido].sigla)}</span></div></div>`}
         <div class="pips"${UI.tt('<b>' + (E.meta.vistaPartido ? 'Puntos de dirección' : 'Puntos de agenda') + '</b><br>Cada acción importante consume puntos. Se renuevan cada semana.')}>${pips}<span class="pips-n" data-ir="agenda">◆ ${J.agenda.puntos}/${J.agenda.max}</span></div>
         <div class="tiempo">
           <button class="btn prim" id="b-sem"${UI.tt('Avanzar una semana (tecla N)')}>▶ <span>Semana</span></button>
@@ -170,7 +170,7 @@ window.ESP = window.ESP || {};
     ticker() {
       const E = C.E;
       const ns = E.noticias.filter(n => !C.Foco || C.Foco.noticia(E, n)).slice(0, 14);
-      document.getElementById('ticker').innerHTML = `<span class="rotulo">ÚLTIMA HORA</span><div style="overflow:hidden;flex:1"><div class="cinta">${ns.map(n => `<span><b>${n.pais === 'ES' ? '🇪🇸' : n.pais ? (D().paises[n.pais] || { bandera: '🌍' }).bandera : '🌍'}</b>${esc(n.texto)}</span>`).join('') || '<span>Sin noticias</span>'}</div></div>`;
+      document.getElementById('ticker').innerHTML = `<span class="rotulo">ÚLTIMA HORA</span><div style="overflow:hidden;flex:1"><div class="cinta">${ns.map(n => `<span><b>${n.reg && C.Banderas.tiene(n.reg) ? C.Banderas.svg(n.reg, { h: 13 }) : n.pais === 'ES' ? '🇪🇸' : n.pais ? (D().paises[n.pais] || { bandera: '🌍' }).bandera : '🌍'}</b>${esc(n.texto)}</span>`).join('') || '<span>Sin noticias</span>'}</div></div>`;
     },
 
     /* ── Tiempo ── */
@@ -185,6 +185,7 @@ window.ESP = window.ESP || {};
     revisarPendientes() {
       const E = C.E; if (!E) return;
       if (UI.pila.length) return;
+      if (C.Disolucion && C.Disolucion.pendiente(E) && C.Pantallas.declaracion) { C.Pantallas.declaracion.modal(E); return; }
       if (E.esp.pendienteGabinete) { C.Pantallas.gabinete.formacion(E.esp.pendienteGabinete); return; }
       if (E.esp.gab && E.esp.gab.escandalo) { C.Pantallas.gabinete.escandalo(E.esp.gab.escandalo); return; }
       if (E.esp.pendienteSocio) { C.Pantallas.elecciones.socio(); return; }

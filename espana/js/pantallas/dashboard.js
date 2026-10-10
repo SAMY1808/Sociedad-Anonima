@@ -21,7 +21,7 @@ window.ESP = window.ESP || {};
     },
     noticias(E) {
       const ns = E.noticias.filter(n => (!n.pais || n.pais === 'ES' || n.tipo === 'europa') && (!C.Foco || C.Foco.noticia(E, n))).slice(0, 8);
-      return `<div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${ns.map(n => `<div class="it"><span style="font-size:18px">${n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>`;
+      return `<div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${ns.map(n => `<div class="it"><span style="font-size:18px">${n.reg && C.Banderas.tiene(n.reg) ? C.Banderas.svg(n.reg, { h: 15 }) : n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>`;
     },
     carrera(E) {
       const J = E.jugador;
@@ -38,7 +38,7 @@ window.ESP = window.ESP || {};
       const tot = U.suma(Object.values(rc.parl.escanos)), may = Math.floor(tot / 2) + 1, sg = g ? U.suma(g.coalicion.map(k => rc.parl.escanos[k] || 0)) : 0, sa = g ? U.suma((g.apoyoExterno || []).map(k => rc.parl.escanos[k] || 0)) : 0;
       const pres = g && g.pres === 'J' ? { n: J.nombre } : g && E.politicos[g.pres];
       const camp = C.Campana.activa(E), votoAut = E.esp.pendienteVotoAut, dis = T.disuelto ? T.disuelto(E, c) : false;
-      el.innerHTML = `${DB.cabecera(E, '🗺', 'Centro de mando · ' + esc(d.nombre))}${DB.foco(E)}
+      el.innerHTML = `${DB.cabecera(E, C.Banderas.svg(c, { h: 28 }) || '🗺', 'Centro de mando · ' + esc(d.nombre))}${DB.foco(E)}
       <div class="grid g4">
         <div class="tarjeta clic" data-ir="${C.Foco.ejecutivo(E) ? 'consejo' : 'parlaut'}"><div class="t-cab"><h3>Gobierno autonómico</h3><span class="etq">${g ? esc(({ minoria: 'En minoría', mayoria: 'Mayoría', coalicion: 'Coalición' })[g.tipo] || g.tipo || '') : ''}</span></div>
           <div class="fila" style="flex-wrap:nowrap;justify-content:space-between">${G.medidor(g ? g.aprob : 50, { tam: 120, etq: 'APRUEBA' })}<div style="min-width:0;flex:1"><div style="font-size:12.5px"><b>${esc(pres ? pres.n : '—')}</b><div class="tenue">${g ? g.coalicion.map(k => Comp.partido(E, k)).join(' ') : ''}</div></div><div class="tenue" style="font-size:12px;margin-top:4px">Estabilidad <b class="num">${Math.round(g ? g.estab : 0)}</b></div></div></div></div>
@@ -151,7 +151,7 @@ window.ESP = window.ESP || {};
       <div class="grid g2" style="margin-top:14px">
         <div class="tarjeta"><div class="t-cab"><h3>Territorio</h3><span class="etq">${T.ids().filter(c => E.esp.ccaa[c].gob && ['ES_UPC', 'ES_VAP'].includes(E.esp.ccaa[c].gob.partido)).length} comunidades de la derecha · ${T.ids().filter(c => E.esp.ccaa[c].gob && ['ES_ASD', 'ES_PPI', 'ES_APU'].includes(E.esp.ccaa[c].gob.partido)).length} de la izquierda</span></div>${C.Mosaico.provincias(E, 'autonomico', { altoMax: 230, region: J.region })}
           ${rc && !(C.Foco && C.Foco.activo(E)) ? `<div class="fila" style="margin-top:8px;gap:14px;font-size:12.5px"><span><b>${esc(D().ccaa[J.region].nombre)}</b></span><span>Gobierno ${Comp.partido(E, rc.gob.partido)}</span><span>Relación con Moncloa <b class="num">${Math.round(rc.relM)}</b></span><span>Independentismo <b class="num">${U.d1(rc.indep)} %</b></span>${mu ? `<span>${esc(mu.nombre)}: alcaldía ${Comp.partido(E, mu.alcalde)} · aprob. <b class="num">${Math.round(mu.aprob)}</b></span>` : ''}</div>` : ''}</div>
-        <div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${noticias.map(n => `<div class="it"><span style="font-size:18px">${n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>
+        <div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${noticias.map(n => `<div class="it"><span style="font-size:18px">${n.reg && C.Banderas.tiene(n.reg) ? C.Banderas.svg(n.reg, { h: 15 }) : n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>
       </div>`;
       UI.$$('[data-ir]', el).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir, b.dataset.tab ? { tab: b.dataset.tab } : null); });
       UI.$$('[data-ccaa]', el).forEach(g => g.onclick = e => { e.stopPropagation(); C.Pantallas.territorio.verCcaa(g.dataset.ccaa); });

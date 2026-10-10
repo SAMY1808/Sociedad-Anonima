@@ -15,7 +15,7 @@ window.ESP = window.ESP || {};
       const E = C.E, T = C.Territorio, J = E.jugador; if (params && params.reg) E.ui.regAG = params.reg;
       const c = AG.region(E), rc = E.esp.ccaa[c], tab = (params && params.tab) || E.ui.tabAG || 'comp'; E.ui.tabAG = tab;
       const gestor = J.pais === 'ES' && J.region === c && ['presauto', 'consejero'].includes(J.cargo), presi = J.pais === 'ES' && J.region === c && J.cargo === 'presauto' && rc.gob && rc.gob.pres === 'J';
-      let h = `<div class="cab"><div><h1>🏛 Autogobierno de ${esc(D().ccaa[c].nombre)}</h1><div class="sub">Autogobierno ${Math.round(rc.aut)} · relación con Moncloa ${Math.round(rc.relM)} · Estatuto de ${rc.estatuto.ano}</div></div>
+      let h = `<div class="cab"><div><h1>${C.Banderas.svg(c, { h: 26 }) || '🏛'} Autogobierno de ${esc(D().ccaa[c].nombre)}</h1><div class="sub">Autogobierno ${Math.round(rc.aut)} · relación con Moncloa ${Math.round(rc.relM)} · Estatuto de ${rc.estatuto.ano}</div></div>
         <select id="ag-reg" class="btn" style="max-width:190px">${T.ids().map(x => `<option value="${x}" ${x === c ? 'selected' : ''}>${esc(D().ccaa[x].nombre)}</option>`).join('')}</select></div>
         <div class="tabs" style="margin-bottom:12px">${TABS.map(([k, n]) => `<button data-tab-ag="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>`;
       h += tab === 'comp' ? AG.competencias(E, c, gestor) : tab === 'reforma' ? AG.reforma(E, c, presi) : AG.vigente(E, c);
