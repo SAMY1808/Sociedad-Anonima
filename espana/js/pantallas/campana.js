@@ -14,7 +14,7 @@ window.ESP = window.ESP || {};
 
     render(E) {
       const Ca = C.Campana, camps = Ca.mias(E), camp = Ca.cur(E);
-      if (!camp) return Cp.fuera(E);
+      if (!camp) return C.CampMun && C.CampMun.activa(E) && C.Pantallas.campmun ? C.Pantallas.campmun.panel(E) : Cp.fuera(E);
       const J = E.jugador, pid = J.partido, gen = camp.ambito === 'gen', pr = camp.presup, libre = Ca.libre(camp), topeAv = pr.gastado > camp.tope;
       const sem = Ca.semanasHasta(E, camp), peso = Ca.peso(E, camp), cis = Ca.ultimaEncuesta(E, null, camp);
       const ords = Object.keys((cis || { votos: {} }).votos).sort((a, b) => cis.votos[b] - cis.votos[a]).slice(0, 8);
