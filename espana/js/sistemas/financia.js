@@ -43,7 +43,7 @@ window.ESP = window.ESP || {};
       for (const c of ps) raw[c] = M.f(E, c, med);
       const mean = U.suma(ps.map(c => pob(c) * raw[c])) / tot; let mx = 0.0001; for (const c of ps) { raw[c] -= mean; mx = Math.max(mx, Math.abs(raw[c])); }
       const delta = {}; for (const c of ps) delta[c] = raw[c] * M.max / mx;
-      let coste = 0; if (ref.garantia) for (const c of ps) if (delta[c] < 0) { coste += pob(c) * -delta[c]; delta[c] = 0; }
+      let coste = 0; if (ref.garantia || Fa.asegurar(E).blindada) for (const c of ps) if (delta[c] < 0) { coste += pob(c) * -delta[c]; delta[c] = 0; }
       coste = coste / tot * 0.06 + ref.fondo * 0.09;
       for (const c of ps) delta[c] += ref.fondo * 0.7;
       return { delta, coste };

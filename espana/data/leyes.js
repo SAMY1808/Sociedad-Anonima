@@ -98,3 +98,4 @@ ESP.DATA.decretos = [
   { id: 'rd_seguridad_nacional', t: 'Plan de seguridad nacional', sector: 'seg', ter: -25, eco: 5, soc: 30, pop: 50, texto: 'Refuerzo de ciberseguridad e infraestructuras críticas.' },
   { id: 'rd_nombramientos', t: 'Nombramientos de altos cargos', sector: 'ins', ter: 0, eco: 0, soc: 0, pop: 50, texto: 'Cambios en la cúpula de empresas públicas y organismos reguladores.' }
 ];
+ESP.DATA.leyes.push({ id: 'reforma_const_terr', t: 'Reforma constitucional territorial', s: 'ter', eco: 0, soc: 0, eu: 5, ter: 40, costo: 0, pop: 45, may: 'cons', manual: true, efecto: 'constit_terr', ef: {}, d: 'Gran reforma constitucional del modelo territorial: Senado, competencias, financiación y artículo 155.' });

@@ -38,7 +38,7 @@ window.ESP = window.ESP || {};
     calcAut(E, c) {
       const rc = E.esp.ccaa[c], cp = D().competencias; let num = 0, den = 0;
       for (const k in cp) { num += cp[k].peso * rc.comp[k] / 2; den += cp[k].peso; }
-      rc.aut = Math.round(U.clamp(22 + 72 * num / den + (rc.fin && rc.fin.regimen === 'foral' ? 6 : 0), 20, 98));
+      rc.aut = Math.round(U.clamp(22 + 72 * num / den + (rc.fin && rc.fin.regimen === 'foral' ? 6 : 0) + (E.esp.cn && E.esp.cn.efectos.federal ? 6 : 0), 20, 98));
       return rc.aut;
     },
 

@@ -20,11 +20,12 @@ window.ESP = window.ESP || {};
       else if (tab === 'estatutos') cuerpo = T.estatutos(E);
       else if (tab === 'financiacion') cuerpo = T.financiacion(E);
       else if (tab === 'art155') cuerpo = C.Pantallas.art155.panel(E);
+      else if (tab === 'constitucion') cuerpo = C.Pantallas.constit.panel(E);
       else if (tab === 'cooperacion') cuerpo = C.Pantallas.cooperacion.panel(E);
       else if (tab === 'presupuesto') cuerpo = T.presupuesto(E);
       else cuerpo = T.municipios(E);
       el.innerHTML = `<div class="cab"><div><h1>🗺 Territorio</h1><div class="sub">17 comunidades y 2 ciudades autónomas · 52 circunscripciones · 67 grandes ayuntamientos · relación media con Moncloa ${Math.round(U.prom(C.Territorio.ids().map(c => E.esp.ccaa[c].relM)))}</div></div></div>
-        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['presupuesto', 'Presupuesto autonómico'], ['munis', 'Municipios'], ['art155', '⚖️ Art. 155'], ['cooperacion', '🤝 Cooperación']].filter(([k]) => !tabsOk || tabsOk.includes(k)).map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
+        <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['presupuesto', 'Presupuesto autonómico'], ['munis', 'Municipios'], ['art155', '⚖️ Art. 155'], ['constitucion', '📜 Constitución'], ['cooperacion', '🤝 Cooperación']].filter(([k]) => !tabsOk || tabsOk.includes(k)).map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('territorio', { tab: b.dataset.tab }));
       UI.$$('[data-ir]', el).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir); });
       UI.$$('[data-capa]', el).forEach(b => b.onclick = () => { E.ui.capaEs = b.dataset.capa; C.App.refrescar(); });

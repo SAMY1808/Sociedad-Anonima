@@ -284,7 +284,7 @@ window.ESP = window.ESP || {};
         const vivos = (r.items || []).filter(x => ['aceptado', 'recortado'].includes(x.estado)), tcs = E.esp.tc ? E.esp.tc.sesgo : 0, opo = E.paises.ES.partidos.filter(k => !E.paises.ES.gob.coalicion.includes(k)), esc = U.suma(opo.map(k => E.paises.ES.escanos[k] || 0));
         const recurre = esc >= 50 && vivos.some(x => T.itemEf(E, c, x) && T.itemEf(E, c, x).tc >= 0.3) && U.chance(0.75);
         const anul = [];
-        if (recurre) for (const x of vivos) { const info = T.itemEf(E, c, x); if (info && U.chance(clamp(info.tc * (0.55 - tcs * 0.5), 0.02, 0.85))) anul.push(x); }
+        if (recurre) for (const x of vivos) { const info = T.itemEf(E, c, x); if (info && U.chance(clamp(info.tc * (0.55 - tcs * 0.5) * (E.esp.cn && E.esp.cn.efectos.competencias ? 0.5 : 1), 0.02, 0.85))) anul.push(x); }
         r.fase = 'cerrada'; r.res = anul.length ? `el TC anula ${anul.length} artículo(s)` : 'ratificada'; rc.estatuto.ultReforma = t;
         if (anul.length) {
           anul.forEach(x => T.anularArticulo(E, c, x)); rc.relM = clamp(rc.relM - 4, 0, 100); rc.agravio += 0.8 * anul.length; r.anulados = anul.map(x => x.id);
