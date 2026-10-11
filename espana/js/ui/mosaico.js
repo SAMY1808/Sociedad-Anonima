@@ -73,6 +73,7 @@ window.ESP = window.ESP || {};
     },
 
     provincias(E, capa, o = {}) {
+      if (C.Mapa && C.DATA.mapaEs) return C.Mapa.svg(E, capa, o);   // mapa real; el mosaico queda como respaldo
       const P = C.DATA.provincias, cols = 11, filas = 10, tw = 58, th = 46, gap = 4;
       const W = cols * (tw + gap), Ht = filas * (th + gap);
       let s = `<svg class="graf mosaico" viewBox="0 0 ${W} ${Ht}" style="max-height:${o.altoMax || 520}px">`;
@@ -92,6 +93,7 @@ window.ESP = window.ESP || {};
     },
 
     leyendaEs(E, capa) {
+      if (C.Mapa && C.DATA.mapaEs) return C.Mapa.leyenda(E, capa);
       if (capa === 'voto' || capa === 'autonomico') {
         const ps = E.paises.ES.partidos.filter(k => E.partidos[k].amb === 'nac' || E.partidos[k].lider).filter(k => Object.values(E.esp.prov).some(p => p.ganador === k) || E.esp.nacionales.includes(k) || Object.values(E.esp.ccaa).some(c => c.gob && c.gob.partido === k));
         return `<div class="leyenda">${ps.map(k => `<span><i style="background:${E.partidos[k].color}"></i>${E.partidos[k].sigla}</span>`).join('')}</div>`;

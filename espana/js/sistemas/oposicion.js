@@ -134,6 +134,7 @@ window.ESP = window.ESP || {};
       return clamp(p, 0.05, 0.9);
     },
     proponer(E, tema) {
+      if (!TEMAS[tema]) return { ok: false, msg: 'Elige primero el asunto del pacto.' };
       const r = Op.puedeProponer(E, tema); if (r !== true) return { ok: false, msg: r }; const pe = Op.pe(E), k = Op.socio(E), T0 = TEMAS[tema], p = Op.probAcepta(E); pe.ult = E.fecha.t;
       if (!U.chance(p)) { if (C.Mayorias) C.Mayorias.cambiarRel(E, k, -2); return { ok: true, exito: false, msg: `${Op.sg(E, k)} rechaza sentarse a negociar «${T0.n}» (${Math.round(p * 100)} % de probabilidad).` }; }
       pe.act.push({ id: U.id('pe'), tema, socio: k, t0: E.fecha.t, tRonda: -99, prog: 20, rup: 0, con: 0, hist: [] });

@@ -37,7 +37,7 @@ ok(rc.gob.partido === pid, 'el barón se lleva el gobierno autonómico');
 for (let i = 0; i < 60; i++) { lim(); E.esp.pendienteConvAut = null; if (E.esp.gab) E.esp.gab.escandalo = null; E.elecciones.nochePendiente = null; C.Tiempo.avanzar(); }
 ok(true, '60 semanas con el nuevo partido sin errores');
 C.Mayorias.cambiarRel(E, pid, 50); E.paises.ES.partidos.includes(pid); B.asegurar(E).esc[0].t -= 30; J.atrib.negociacion = 9; let rr; for (let i = 0; i < 12 && !(rr && rr.msg.includes('lograda')); i++) { pt(); rr = C.Acciones.ejecutar('reconciliar_baron', { pid }); } ok(rr && rr.msg.includes('lograda'), 'reconciliación: ' + (rr && rr.msg));
-const x0 = D.nuevo(E, 'escision'); x0.reg = rg; ok(D.CAT.escision.txt(E, x0).length > 10, 'dilema de escisión se redacta');
+E.meta.ajustes = Object.assign({}, E.meta.ajustes, { foco: 'todo' }); const x0 = D.nuevo(E, 'escision', true); x0.reg = rg; ok(D.CAT.escision.txt(E, x0).length > 10, 'dilema de escisión se redacta');
 const rv2 = C.Territorio.ids().find(c => c !== rg && E.esp.ccaa[c].gob && E.esp.ccaa[c].gob.partido !== J.partido && E.partidos[E.esp.ccaa[c].gob.partido].amb === 'nac' && E.politicos[E.esp.ccaa[c].gob.pres]);
 if (rv2) { const pr = B.fundar(E, rv2, 0.7, E.esp.ccaa[rv2].gob.partido); ok(!!pr && B.asegurar(E).esc[0].rival, 'escisión en un partido rival (' + E.esp.ccaa[rv2].gob.pres + ')'); for (let i = 0; i < 30; i++) { lim(); C.Tiempo.avanzar(); } ok(true, 'el mundo sigue con la escisión rival'); }
 console.log('Presión electoral'); const Pr = C.Presion, gb = E.paises.ES.gob, pm0 = gb.pm; const cor = E.esp.cortes;

@@ -14,6 +14,16 @@ Es una PWA: se puede instalar y jugar sin conexión.
 
 ## Qué hay
 
+- **El mapa de España como centro del juego** (pantalla *Mapa*, la primera al empezar): el contorno real de las 52
+  circunscripciones (Ceuta, Melilla y las Canarias en su recuadro), con **16 capas** de datos (generales, gobierno
+  autonómico, alcaldías, próximas autonómicas, relación con Moncloa, independentismo, autogobierno, agravio,
+  competencias, financiación, deuda, aprobación, estabilidad, emergencias, implantación de tu partido y peso en el
+  Congreso). **Zoom con la rueda o el pellizco, arrastre, doble clic y teclado**; pulsas una comunidad, una provincia
+  o una de las 66 grandes ciudades y se abre su ficha (gobierno, indicadores, resultados, alcaldía, escudo) con las
+  **acciones que puedes lanzar allí** (mitin, visita, cabildeo, plan territorial, abrir sede, mudarte…). Se adapta a tu
+  cargo (si presides una comunidad o una ciudad, el mapa se abre encuadrado en ella), marca el artículo 155 y las
+  emergencias, y está también en el Centro de mando, en Territorio, en Crisis, en la creación de partida, en
+  Elecciones, en la noche electoral y en la Sede.
 - **Elecciones generales** por 52 circunscripciones (50 provincias + Ceuta y Melilla), D'Hondt con umbral del 3 %
   por circunscripción: el voto de cada provincia combina el apoyo nacional de cada partido con su fuerza regional
   (calibrado a las generales de 2023). **Generales anticipadas**: el presidente puede disolver las Cortes (una vez al año,
@@ -138,13 +148,13 @@ registrados en un motor de turnos, sin compilación ni dependencias. Ver [`docs/
 ```
 index.html · manifest.webmanifest · sw.js
 css/        base · layout · componentes · pantallas · europa · movil
-data/       territorio · partidos-es · pactos · leyes · impactos · instituciones · paises · partidos (UE) · nombres · ue · eventos
+data/       territorio · mapa-es (geometría real, generada) · partidos-es · pactos · leyes · impactos · instituciones · paises · partidos (UE) · nombres · ue · eventos
 js/core/    util · bus · estado · tiempo · acciones
 js/sistemas/ economia · opinion · impacto · mundo · elecciones · gobierno (resto de la UE) ·
             espana · generales · ejecutivo · congreso · consejo · gabinete · territorio · autonomia · municipios · ue · eventos · personaje · guardado
-js/ui/      dom · graficos · banderas · escenas · hemiciclo · mosaico (mapa de provincias) · componentes
+js/ui/      dom · graficos · banderas · escenas · hemiciclo · mapa (mapa real: capas, SVG y cámara) · mosaico (mapa de teselas de Europa; para España delega en mapa) · componentes
 js/pantallas/ inicio · creacion · dashboard · agenda · cortes · leyes · consejo · territorio (+ art155 · constit · cooperación) · invest (+ gobaut) · partido · europa · elecciones · personaje · partidas · impacto
-tools/      mini · prueba-es · jugador-es · ui-es · movil-es · leyes-es
+tools/      mini · prueba-es · jugador-es · ui-es · movil-es · leyes-es · mapa/ (generador de data/mapa-es.js)
 ```
 
 ## Pruebas (Node)
@@ -177,6 +187,8 @@ node tools/extras-es.js                                      # tertulias, guía,
 node tools/pestanas-ui.js [movil]                            # Playwright: humo de todas las pestañas nuevas
 node tools/creacion-ui.js [movil]                            # Playwright: partido propio, escenario y código de partida
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
+node tools/mapa-es.js                                        # mapa de España: geometría (52 circunscripciones, 66 ciudades, Canarias), 16 capas, SVG, marcas y enfoque por cargo
+node tools/mapa-ui.js [movil]                                # Playwright: capas, selección, zoom, arrastre, teclado, ciudades, Centro de mando, Territorio, Crisis y Creación
 ```
 
 ## Equipo, contrapesos y sociedad (pestañas propias)
@@ -248,4 +260,22 @@ Al crear la partida, elige **🎗 Modo Partido**: eres el líder y dirigís el p
 - **Escenas ilustradas en los momentos clave**: la noche electoral (atril del partido en el discurso, con victoria o derrota), el funeral de Estado, las investiduras y mociones en el hemiciclo (escaños con el reparto real), el debate televisado, el congreso del partido, la promesa del cargo, el fin de carrera y las crisis (emergencia, incendio, inundación, apagón, manifestación). Son ilustraciones SVG con los colores y las siglas de tu partido; puedes sustituir cualquiera por una **imagen generada con IA** (instrucciones y prompts en `docs/IMAGENES.md`).
 - **Escenarios nuevos**: Transición (1977–82), Irrupción de nuevos partidos (2015), Gobierno hegemónico (contrafactual), Pandemia y shock económico y Polarización.
 - **Informe de partida** (Ajustes): resumen anónimo (sin nombres) con ritmo de acciones, dilemas y crisis, opciones elegidas, economía y estado del partido, más lecturas automáticas de equilibrio, para compartirlo y ajustar el juego.
+
+## Mapa de España (`data/mapa-es.js`, `js/ui/mapa.js`, `js/pantallas/mapa.js`)
+
+- **Geometría real**: los contornos salen de [Natural Earth](https://www.naturalearthdata.com/) (divisiones administrativas de
+  nivel 1, **dominio público**). `tools/mapa/construir_mapa.py` los proyecta (cónica conforme de Lambert), parte los límites
+  en arcos compartidos para que las provincias vecinas encajen sin huecos y los simplifica una sola vez (65 KB en total).
+  Para regenerarlo: `node tools/mapa/exportar_juego.js > juego.json` y `python3 tools/mapa/construir_mapa.py ne_admin1.geojson juego.json data/mapa-es.js`
+  (el comando para bajar el GeoJSON está en la cabecera del script). **No se edita a mano.**
+- **Capas**: cada una es un objeto de `C.Mapa.CAPAS` con `color(E, provincia)`, `tt(E, provincia)` (el aviso), `leyenda(E)` y,
+  opcionalmente, `etq` (valor rotulado), `rank` (ranking por comunidad), `ciudades` o `marcas`. Añadir una capa es añadir un
+  objeto; aparece sola en los selectores y en el ranking.
+- **Cámara** (`C.Mapa.camara`): rueda y pellizco con zoom hacia el puntero, arrastre, doble clic, animación (respeta
+  `prefers-reduced-motion`) y teclado (`+`, `−`, flechas y `0`). En los mapas incrustados en páginas que se desplazan
+  (Centro de mando, Territorio, Crisis) la rueda sólo acerca con **Ctrl** y el dedo sólo arrastra con el mapa ampliado.
+- **Compatibilidad**: `C.Mosaico.provincias/leyendaEs` delegan en el mapa real, así que Elecciones, Noche electoral, Sede y
+  Creación lo usan sin cambios (con `.ficha[data-prov][data-ccaa][data-tt]` como siempre). El mosaico sigue dibujando Europa.
+- **Límites conocidos**: las geometrías están simplificadas (≈ 300 m), Ceuta y Melilla se dibujan como anillos pulsables, no
+  hay mapa municipal (las 66 ciudades son puntos) y las capas se calculan en el navegador cada vez que cambia la partida.
 

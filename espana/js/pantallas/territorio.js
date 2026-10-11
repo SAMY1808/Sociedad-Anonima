@@ -27,26 +27,20 @@ window.ESP = window.ESP || {};
       el.innerHTML = `<div class="cab"><div><h1>🗺 Territorio</h1><div class="sub">17 comunidades y 2 ciudades autónomas · 52 circunscripciones · 66 grandes ayuntamientos · relación media con Moncloa ${Math.round(U.prom(C.Territorio.ids().map(c => E.esp.ccaa[c].relM)))}</div></div></div>
         <div class="tabs">${[['mapa', 'Mapa'], ['ccaa', 'Comunidades'], ['competencias', 'Competencias'], ['proces', 'Independentismo'], ['estatutos', 'Estatutos'], ['financiacion', 'Financiación'], ['presupuesto', 'Presupuesto autonómico'], ['munis', 'Municipios'], ['art155', '⚖️ Art. 155'], ['constitucion', '📜 Constitución'], ['cooperacion', '🤝 Cooperación']].filter(([k]) => !tabsOk || tabsOk.includes(k)).map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'activo' : ''}">${n}</button>`).join('')}</div>${cuerpo}`;
       UI.$$('[data-tab]', el).forEach(b => b.onclick = () => C.App.ir('territorio', { tab: b.dataset.tab }));
+      if (tab === 'mapa') C.Pantallas.mapa.montar(el, E, { compacto: true, suave: true });
       UI.$$('[data-ir]', el).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir); });
       UI.$$('[data-capa]', el).forEach(b => b.onclick = () => { E.ui.capaEs = b.dataset.capa; C.App.refrescar(); });
-      UI.$$('[data-ccaa]', el).forEach(b => b.onclick = e => { if (e.target.closest('[data-accion]')) return; T.verCcaa(b.dataset.ccaa); });
+      UI.$$('[data-ccaa]', el).filter(b => !b.closest('.mapa-w')).forEach(b => b.onclick = e => { if (e.target.closest('[data-accion]')) return; T.verCcaa(b.dataset.ccaa); });
       UI.$$('[data-comp]', el).forEach(b => b.onclick = () => T.verComp(b.dataset.c, b.dataset.comp));
       UI.$$('[data-r]', el).forEach(b => b.onclick = () => C.Pantallas.leyes.ver(b.dataset.r));
-      UI.$$('[data-muni]', el).forEach(b => b.onclick = () => T.verMuni(b.dataset.muni));
+      UI.$$('[data-muni]', el).filter(b => !b.closest('.mapa-w')).forEach(b => b.onclick = () => T.verMuni(b.dataset.muni));
       const sel = UI.$('#t-orden', el); if (sel) sel.onchange = () => { E.ui.ordenCcaa = sel.value; C.App.refrescar(); };
       C.Pantallas.presupuestos.enlazarRegional(el, E.ui.regPres && E.esp.ccaa[E.ui.regPres] ? E.ui.regPres : (E.jugador.region || 'MAD'));
       const pr = UI.$('#t-pres', el); if (pr) pr.onchange = () => { E.ui.regPres = pr.value; C.App.refrescar(); };
       const fm = UI.$('#t-fm', el); if (fm) fm.onchange = () => { E.ui.filtroMuni = fm.value; C.App.refrescar(); };
     },
 
-    mapa(E) {
-      const capa = E.ui.capaEs || 'autonomico';
-      const ids = C.Territorio.ids();
-      const gob = {}; ids.forEach(c => { const g = E.esp.ccaa[c].gob; if (g) gob[g.partido] = (gob[g.partido] || 0) + 1; });
-      return `<div class="c-dos amplio"><div class="tarjeta"><div class="t-cab"><h3>Mapa de mosaicos de España</h3>${C.Mosaico.selectorEs(capa)}</div>${C.Mosaico.provincias(E, capa, { region: E.jugador.region })}${C.Mosaico.leyendaEs(E, capa)}<div class="tenue" style="font-size:12px;margin-top:6px">Cada ficha es una circunscripción del Congreso (diputados que elige). Pulsa una para abrir su comunidad.</div></div>
-        <div class="col"><div class="tarjeta"><h3>Presidencias autonómicas</h3>${G.barrasH(Object.keys(gob).sort((a, b) => gob[b] - gob[a]).map(k => ({ etq: Comp.partido(E, k), v: gob[k], color: E.partidos[k].color })), { max: 19, fmt: v => v + ' / 19', anchoEtq: '70px' })}</div>
-        <div class="tarjeta"><h3>Alcaldías</h3>${(() => { const a = C.Municipios.alcaldias(E); const t = U.suma(Object.values(a)) || 1; return G.barrasH(Object.keys(a).sort((x, y) => a[y] - a[x]).slice(0, 7).map(k => ({ etq: k === 'IND' ? 'Indep.' : Comp.partido(E, k), v: a[k], color: k === 'IND' ? '#7D8799' : E.partidos[k].color })), { max: Math.max(...Object.values(a)) * 1.05, fmt: v => U.n(v), anchoEtq: '70px' }); })()}<div class="tenue" style="font-size:12px;margin-top:6px">${U.n(E.esp.muni.resumen.total)} ayuntamientos · próximas municipales ${U.fmtT(E.esp.muni.proxT, true)}</div></div></div></div>`;
-    },
+    mapa(E) { return C.Pantallas.mapa.html(E, { compacto: true, suave: true }); },
 
     tabla(E) {
       const orden = E.ui.ordenCcaa || 'poblacion';

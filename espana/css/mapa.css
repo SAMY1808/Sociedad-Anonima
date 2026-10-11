@@ -1,0 +1,88 @@
+/* ── Mapa de España: el mapa como centro del juego ── */
+.mapa-es{display:block;width:100%;height:auto;border-radius:var(--radio);background:#0a1424;user-select:none;-webkit-user-select:none}
+.mapa-es .ficha{cursor:pointer;transition:filter .12s}
+.mapa-es .ficha:hover{filter:brightness(1.22)}
+.mapa-es .m-b-prov{stroke:rgba(255,255,255,.18);stroke-width:.7}
+.mapa-es .m-b-ccaa{stroke:rgba(255,255,255,.62);stroke-width:1.4}
+.mapa-es .m-costa-halo{stroke:rgba(84,148,224,.24);stroke-width:5}
+.mapa-es .m-costa{stroke:rgba(196,218,246,.9);stroke-width:1.1}
+.mapa-es .m-sel{stroke:#fff;stroke-width:2.6}
+.mapa-es .m-sel-c{stroke:rgba(255,255,255,.95);stroke-width:1.2;fill:rgba(255,255,255,.12)}
+.mapa-es .m-propio{stroke:var(--oro2);stroke-width:2;stroke-dasharray:5 3}
+.mapa-es .m-aro{stroke:#fff;stroke-width:1.2}
+.mapa-es .m-inset{stroke:rgba(160,185,220,.55);stroke-width:1;stroke-dasharray:6 4}
+.mapa-es .m-inset-t{fill:rgba(190,205,230,.75);font-size:62px;font-family:var(--ui);letter-spacing:.06em}
+.mapa-es .m-etq text,.mapa-es .m-etq-est text{fill:#fff;text-anchor:middle;font-family:var(--ui);font-weight:700;paint-order:stroke;stroke:rgba(5,10,20,.85);stroke-linejoin:round;pointer-events:none}
+.mapa-es .m-etq .et-c{letter-spacing:.04em;text-transform:uppercase;font-weight:600;fill:rgba(255,255,255,.92)}
+.mapa-es .m-etq .et-p{letter-spacing:.1em;text-transform:uppercase;font-weight:600;fill:rgba(255,255,255,.86)}
+.mapa-es .m-etq .et-v{font-weight:600;fill:var(--oro2)}
+.mapa-es .m-etq .et-m,.mapa-es .m-etq .et-izq{text-anchor:start;font-weight:600}
+.mapa-es .ciu{stroke:#0a111d;stroke-width:1.2;cursor:pointer;transition:filter .12s}
+.mapa-es .ciu:hover{filter:brightness(1.3)}
+.mapa-es .ciu.sel{stroke:var(--oro2);stroke-width:2.4}
+.mapa-es .ciu.mia{stroke:var(--oro2);stroke-width:2}
+.mapa-es .marca{cursor:pointer}
+.mapa-es .marca .pulso{opacity:.9;stroke:#fff;stroke-width:1.2;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;animation:mapa-pulso 1.9s ease-in-out infinite}
+@keyframes mapa-pulso{0%,100%{transform:scale(1)}50%{transform:scale(1.22);opacity:.7}}
+@media (prefers-reduced-motion:reduce){.mapa-es .marca .pulso{animation:none}}
+
+.mapa-w{display:flex;flex-direction:column;gap:10px}
+.mapa-barra{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.mapa-tabs{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--borde);border-radius:999px;padding:2px;flex:none}
+.mapa-tabs button{border:0!important;background:transparent!important;border-radius:999px;padding:5px 12px;font-size:12.5px;color:var(--texto2);white-space:nowrap}
+.mapa-tabs button.activo{background:var(--oro-tenue)!important;color:var(--oro2)!important}
+.mapa-chips{display:flex;flex-wrap:wrap;gap:6px}
+.mapa-chips button[hidden]{display:none}
+.mapa-barra button{background:var(--panel2);border:1px solid var(--borde);color:var(--texto2);border-radius:999px;padding:5px 11px;font-size:12px;white-space:nowrap;transition:background .12s,border-color .12s,color .12s}
+.mapa-barra button:hover{border-color:var(--borde2);color:var(--texto)}
+.mapa-barra button.activo{background:var(--oro-tenue);border-color:var(--oro);color:var(--oro2)}
+.mapa-cuerpo{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(300px,1fr);gap:12px;align-items:start}
+.mapa-lienzo{position:relative;height:clamp(420px,calc(100vh - 290px),860px);background:#0a1424;border:1px solid var(--borde);border-radius:var(--radio);overflow:hidden}
+.mapa-lienzo svg.mapa-es{width:100%;height:100%;border-radius:0}
+.mapa-zoom{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px}
+.mapa-zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--borde2);background:rgba(18,29,48,.9);color:var(--texto);font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mapa-zoom button:hover{border-color:var(--oro);color:var(--oro2)}
+.mapa-leyenda{position:absolute;right:10px;bottom:10px;max-width:min(62%,420px);background:rgba(10,17,29,.82);border:1px solid var(--borde);border-radius:8px;padding:6px 10px;backdrop-filter:blur(4px)}
+.mapa-leyenda .leyenda{margin:0}
+.mapa-grad{display:flex;align-items:center;gap:8px}
+.mapa-grad i{width:140px;height:10px;border-radius:5px}
+.mapa-desc{font-size:12.5px;color:var(--texto2);margin:-2px 2px 0}
+.mapa-desc b{color:var(--oro2);font-weight:600}
+.mapa-panel{display:flex;flex-direction:column;min-width:0;max-height:calc(100vh - 290px);overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.mapa-ficha .t-cab h3{display:flex;align-items:center;gap:8px}
+.mapa-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px}
+.mapa-kpis .kpi .v{font-size:21px}
+.mapa-kpis .kpi .l{font-size:9.5px;letter-spacing:.06em}
+.mapa-panel .it[data-msel]:hover,.mapa-panel tr[data-msel]:hover{background:var(--oro-tenue)}
+.mapa-w.compacto .mapa-lienzo{height:clamp(320px,52vh,560px)}
+.mapa-w.compacto .mapa-cuerpo{grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)}
+.mapa-w.compacto .mapa-panel{max-height:clamp(320px,52vh,560px)}
+
+.mapa-sel{display:none;width:100%;background:var(--panel2);border:1px solid var(--borde);color:var(--texto);border-radius:10px;padding:9px 12px;font-size:14px}
+@media (max-width:980px){
+  .mapa-barra{display:none}
+  .mapa-sel{display:block}
+  .mapa-cuerpo{grid-template-columns:minmax(0,1fr)}
+  .mapa-panel{max-height:none;overflow:visible}
+  .mapa-lienzo{height:clamp(340px,118vw,640px)}
+  .mapa-w.compacto .mapa-lienzo{height:clamp(300px,108vw,480px)}
+  .mapa-w.compacto .mapa-cuerpo{grid-template-columns:minmax(0,1fr)}
+  .mapa-desc{font-size:12px}
+  .mapa-grad i{width:90px}
+  .mapa-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+.mapa-pista{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(10,17,29,.9);border:1px solid var(--borde2);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--texto2);opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+.mapa-pista.ver{opacity:1}
+@media (hover:none){.mapa-pista{display:none}}
+.mapa-w>.t-cab{margin-bottom:2px}
+.mapa-es:focus-visible{outline:2px solid var(--oro);outline-offset:-3px}
+.mapa-panel [data-msel][role="button"]:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+
+.mapa-resumen{display:none}
+@media (max-width:980px){
+  .mapa-resumen.ver{display:flex;align-items:center;gap:8px;position:absolute;left:10px;top:10px;max-width:calc(100% - 66px);background:rgba(10,17,29,.92);border:1px solid var(--oro);border-radius:999px;padding:4px 5px 4px 12px;font-size:13px;backdrop-filter:blur(4px)}
+  .mapa-resumen b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mapa-resumen .btn{white-space:nowrap}
+  .mapa-panel{scroll-margin-top:100px}
+}

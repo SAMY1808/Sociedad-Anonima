@@ -5,7 +5,7 @@ window.ESP = window.ESP || {};
 (function (C) {
   const CARGO_AMB = { pm: 'central', vicepres: 'central', ministro: 'central', diputado: 'central', senador: 'central', activista: 'central', mep: 'central', comisario: 'central', presCE: 'central', presCom: 'central', presPE: 'central', presauto: 'aut', consejero: 'aut', dipauto: 'aut', alcalde: 'local', concejal: 'local' };
   const EJEC = ['pm', 'vicepres', 'ministro', 'presauto', 'consejero', 'alcalde'];
-  const COMUN = ['dashboard', 'agenda', 'guia', 'leyes', 'corrupcion', 'medios', 'crisis', 'elecciones', 'sede', 'partido', 'personas', 'dilemas', 'personaje', 'legado', 'ajustes', 'partidas'];
+  const COMUN = ['dashboard', 'mapa', 'agenda', 'guia', 'leyes', 'corrupcion', 'medios', 'crisis', 'elecciones', 'sede', 'partido', 'personas', 'dilemas', 'personaje', 'legado', 'ajustes', 'partidas'];
   const PANTALLAS = {
     central: COMUN.concat(['cortes', 'coaliciones', 'mayorias', 'oposicion', 'territorio', 'autogob', 'lenguas', 'justicia', 'organismos', 'corona', 'referendos', 'estructural', 'social', 'europa', 'exterior']),
     aut: COMUN.concat(['territorio', 'autogob', 'parlaut', 'lenguas']),
@@ -60,11 +60,11 @@ window.ESP = window.ESP || {};
     },
     /* Pantallas fijas en la barra inferior del móvil. */
     principales(E) {
-      if (!Fc.activo(E)) return ['dashboard', 'agenda', 'cortes', 'consejo', 'territorio'];
+      if (!Fc.activo(E)) return ['dashboard', 'mapa', 'agenda', 'cortes', 'consejo'];
       const am = Fc.ambito(E), ej = Fc.ejecutivo(E);
-      if (am === 'aut') return ['dashboard', 'agenda', 'parlaut', ej ? 'consejo' : 'leyes', 'territorio'];
-      if (am === 'local') return ['dashboard', 'agenda', 'ayuntamiento', 'local2', 'elecciones'];
-      return ['dashboard', 'agenda', 'cortes', ej ? 'consejo' : 'leyes', 'territorio'];
+      if (am === 'aut') return ['dashboard', 'mapa', 'agenda', 'parlaut', ej ? 'consejo' : 'leyes'];
+      if (am === 'local') return ['dashboard', 'mapa', 'agenda', 'ayuntamiento', 'local2'];
+      return ['dashboard', 'mapa', 'agenda', 'cortes', ej ? 'consejo' : 'leyes'];
     },
     /* ¿Se muestra esta acción en la agenda? */
     accion(E, a) {

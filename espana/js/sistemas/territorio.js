@@ -437,6 +437,7 @@ window.ESP = window.ESP || {};
   };
 
   C.Territorio = T;
-  C.Tiempo.registrar('territorio', { init: T.init }, 10);
+  /* Tras generar el mundo, la relación con Moncloa de cada comunidad parte de su valor natural (según quién gobierna allí y en España), no de un 55 uniforme. */
+  C.Tiempo.registrar('territorio', { init: T.init, postInit: E => { for (const c of T.ids()) { const rc = E.esp.ccaa[c]; if (rc && rc.gob) rc.relM = T.relObjetivo(E, c); } } }, 10);
   C.Tiempo.registrar('territorio_turno', { turno: T.turno }, 36);
 })(window.ESP);

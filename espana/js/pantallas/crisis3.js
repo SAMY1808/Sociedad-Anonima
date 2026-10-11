@@ -10,6 +10,7 @@ window.ESP = window.ESP || {};
   C.Pantallas.crisis.render = function (el) {
     const E = C.E, Cr = C.Crisis, Em = C.Emerg, cs = Cr.asegurar(E), act = cs.activas.filter(c => c.fase !== 'cerrada'), est = Cr.jugadorEstado(E), J = E.jugador;
     let h = `<div class="cab"><div><h1>🚨 Crisis y emergencias</h1><div class="sub">DANA, incendios, pandemias, atentados, apagones… la gestión se juzga en las urnas, y el mando se reparte entre el Estado y cada comunidad</div></div></div>`;
+    h += `<div class="tarjeta d-mapa">${C.Pantallas.mapa.html(E, { compacto: true, suave: true, cab: true, capa: act.length ? 'emerg' : null, id: 'crisis' })}</div>`;
     if (!act.length) h += `<div class="vacio">Sin crisis activas. España respira tranquila… por ahora.</div>`;
     for (const c of act) {
       const T = Cr.TIPOS[c.tipo], regional = Em.regional(c), em = regional ? Em.de(c) : null, lugar = c.regs.length > 4 ? 'toda España' : c.regs.map(x => bn(x) + esc(D().ccaa[x].nombre)).join(', '), reg = Cr.jugadorRegion(E, c);
@@ -37,5 +38,6 @@ window.ESP = window.ESP || {};
     const hist = cs.hist.slice(0, 10);
     h += `<div class="tarjeta"><div class="t-cab"><h3>🗂 Crisis pasadas</h3></div><div class="lista">${hist.map(c => { const T = Cr.TIPOS[c.tipo]; return `<div class="it" style="flex-wrap:wrap"><span style="font-size:18px">${T.ic}</span><div class="cuerpo" style="flex:1;min-width:160px"><b>${T.n}</b><div class="tenue" style="font-size:11px">${U.fmtT(c.t0, true)} · ${c.regs.length > 4 ? 'toda España' : c.regs.map(x => bn(x, 11) + esc(D().ccaa[x].nombre)).join(', ')}</div></div><span class="etq ${c.score < 0.35 ? 'verde' : c.score < 0.65 ? 'amar' : 'rojo'}">${c.score < 0.35 ? 'Buena gestión' : c.score < 0.65 ? 'Gestión mixta' : 'Mala gestión'}</span><span class="tenue" style="font-size:11px">${c.victimas} víctimas · ${c.danos} M€</span></div>`; }).join('') || '<div class="vacio" style="padding:10px">Todavía no ha habido crisis.</div>'}</div></div>`;
     el.innerHTML = h;
+    C.Pantallas.mapa.montar(el, E, { compacto: true, suave: true });
   };
 })(window.ESP);

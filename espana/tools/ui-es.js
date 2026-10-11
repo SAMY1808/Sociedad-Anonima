@@ -54,7 +54,7 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
       const f2 = await pg.$('.modal-fondo'); if (f2) { await pg.evaluate(() => ESP.UI.cerrarModales()); }
     }
   };
-  const pantallas = ['dashboard', 'agenda', 'cortes', 'leyes', 'consejo', 'gabinete', 'ayuntamiento', 'territorio', 'partido', 'europa', 'elecciones', 'personaje', 'partidas'];
+  const pantallas = ['dashboard', 'mapa', 'agenda', 'cortes', 'leyes', 'consejo', 'gabinete', 'ayuntamiento', 'territorio', 'partido', 'europa', 'elecciones', 'personaje', 'partidas'];
   const visitar = async () => {
     for (const p of pantallas) {
       await pg.click(`#nav [data-p="${p}"]`).catch(() => {}); await pg.waitForTimeout(60);

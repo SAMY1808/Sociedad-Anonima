@@ -5,9 +5,9 @@ window.ESP = window.ESP || {};
   C.Pantallas = C.Pantallas || {};
   /* [id, icono, nombre, nombre corto (barra inferior del móvil), en la barra inferior] */
   const NAV = [
-    ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['guia', '🧭', 'Guía y asesor', 'Guía'],
+    ['dashboard', '🧭', 'Centro de mando', 'Inicio', 1], ['mapa', '🗺', 'Mapa', 'Mapa', 1], ['agenda', '🎯', 'Agenda', 'Agenda', 1], ['guia', '🧭', 'Guía y asesor', 'Guía'],
     ['#', 'Parlamento y gobierno'], ['cortes', '🏛', 'Cortes Generales', 'Cortes', 1], ['leyes', '📜', 'Leyes', 'Leyes'], ['consejo', '🦅', 'Consejo de Ministros', 'Consejo', 1], ['gabinete', '🧑‍💼', 'Gabinete', 'Gabinete'], ['jefe', '🧑‍💼', 'Jefe de gabinete', 'Jefe'], ['coaliciones', '📝', 'Acuerdos de gobierno', 'Pactos'], ['mayorias', '🧮', 'Mayorías y rivales', 'Mayorías'], ['oposicion', '🎭', 'Oposición y pactos', 'Oposición'],
-    ['#', 'Territorio'], ['territorio', '🗺', 'Territorio', 'Territorio', 1], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['local2', '🏘', 'Poder local', 'Local'], ['lenguas', '🗣', 'Lenguas y símbolos', 'Lenguas'],
+    ['#', 'Territorio'], ['territorio', '🧩', 'Territorio', 'Territorio', 1], ['autogob', '🏛', 'Autogobierno', 'Autogob.'], ['parlaut', '🗺', 'Parlamento autonómico', 'Parl. aut.'], ['ayuntamiento', '🏘', 'Ayuntamiento', 'Ayto.'], ['local2', '🏘', 'Poder local', 'Local'], ['lenguas', '🗣', 'Lenguas y símbolos', 'Lenguas'],
     ['#', 'Poder e instituciones'], ['justicia', '⚖️', 'Justicia', 'Justicia'], ['corrupcion', '🕵️', 'Corrupción y control', 'Control'], ['organismos', '🏢', 'Organismos y altos cargos', 'Organismos'], ['corona', '👑', 'La Corona', 'Corona'], ['referendos', '🗳️', 'Referendos y consultas', 'Consultas'], ['medios', '📰', 'Medios y opinión', 'Medios'],
     ['#', 'País y mundo'], ['estructural', '🗺', 'Problemas de país', 'País'], ['social', '🤝', 'Diálogo social', 'Social'], ['crisis', '🚨', 'Crisis', 'Crisis'], ['europa', '🇪🇺', 'Europa', 'Europa'], ['exterior', '🌍', 'Mundo', 'Mundo'], ['elecciones', '🗳', 'Elecciones', 'Elecciones'],
     ['#', 'Partido y personas'], ['sede', '🏢', 'Sede del partido', 'Sede'], ['partido', '🎗', 'Mi partido', 'Partido'], ['personas', '🧑‍💼', 'Políticos', 'Políticos'],
@@ -35,7 +35,7 @@ window.ESP = window.ESP || {};
       const E = C.E; E.ui = E.ui || {};
       document.getElementById('app').innerHTML = `<div class="shell">
         <header class="barra" id="barra"></header><nav class="nav" id="nav"></nav><main class="vista" id="vista"></main><div class="ticker" id="ticker"></div></div>`;
-      App.ir(E.ui.pantalla || 'dashboard', E.ui.params);
+      App.ir(E.ui.pantalla || 'mapa', E.ui.params);
       App.revisarPendientes();
     },
 

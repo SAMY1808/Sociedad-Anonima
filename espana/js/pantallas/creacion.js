@@ -36,7 +36,7 @@ window.ESP = window.ESP || {};
     <p class="tenue" style="margin-top:-8px">Elige el nivel y el territorio. Pulsa una provincia del mapa para elegir tu circunscripción o comunidad.</p>
     <div class="sel-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-bottom:12px">${NIVELES.map(n => `<div class="fila-sel ${(n.id === 'partido' ? S.modoPartido : (!S.modoPartido && S.nivel === n.id)) ? 'sel' : ''}" data-nivel="${n.id}" style="flex-direction:column;align-items:flex-start;gap:3px"><b>${n.icono} ${n.nombre}</b><span class="tenue" style="font-size:12.5px">${n.desc}</span></div>`).join('')}</div>
     <div class="c-dos">
-      <div class="tarjeta" id="c-mapa">${C.Mosaico.provincias(E, 'voto', { region: S.region })}${C.Mosaico.leyendaEs(E, 'voto')}</div>
+      <div class="tarjeta" id="c-mapa">${C.Mosaico.provincias(E, 'voto', { region: S.region, prov: S.nivel === 'nacional' ? S.prov : null, sinPropio: true, ciudades: S.nivel === 'local', muni: S.muni })}${C.Mosaico.leyendaEs(E, 'voto')}</div>
       <div class="tarjeta"><div class="fila" style="gap:12px"><span class="rotulo-pais">📍</span><div><h2 style="font-size:23px">${esc(dc.nombre)}</h2><div class="tenue">${esc(dc.capital)} · ${U.d1(dc.pob)} M hab. · ${esc(dc.regimen)}</div></div></div>
         <p style="margin:8px 0;font-size:13px;color:var(--texto2)">${esc(dc.rasgo)}</p>
         <div class="lista" style="font-size:13px">
@@ -153,6 +153,7 @@ window.ESP = window.ESP || {};
       UI.$$('[data-esc]', el).forEach(r => r.onclick = () => { S.escenario = r.dataset.esc; re(); });
       if (S.paso === 1) {
         UI.$$('[data-nivel]', el).forEach(b => b.onclick = () => { const id = b.dataset.nivel; S.modoPartido = id === 'partido'; S.nivel = id === 'partido' ? 'nacional' : id; if (S.modoPartido) S.rol = 'lider'; re(); });
+        UI.$$('[data-muni]', el).forEach(g => g.onclick = e => { e.stopPropagation(); const m = mundoPrevio().esp.muni.m[g.dataset.muni]; if (!m) return; S.muni = m.id; S.prov = m.prov; S.region = m.ccaa; re(); });
         UI.$$('[data-prov]', el).forEach(g => g.onclick = () => {
           S.prov = g.dataset.prov; S.region = D().provincias[S.prov][1];
           const E = mundoPrevio(); const ms = Object.values(E.esp.muni.m).filter(m => m.prov === S.prov); const rm = Object.values(E.esp.muni.m).filter(m => m.ccaa === S.region);

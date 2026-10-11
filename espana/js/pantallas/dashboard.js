@@ -15,9 +15,12 @@ window.ESP = window.ESP || {};
       const P = E.paises.ES, g = P.gob, S = E.series, ec = P.ec, pm = E.politicos[g.pm];
       return `<div class="tarjeta"><div class="t-cab"><h3>🇪🇸 España, de fondo</h3><span class="etq">Gobierno ${C.Comp.partido(E, g.partido)}</span></div><div class="fila" style="gap:14px;font-size:12.5px;flex-wrap:wrap"><span>${esc(pm ? pm.n : '—')}</span><span>Aprobación <b class="num">${Math.round(g.aprob)}</b></span><span>Crecimiento <b class="num">${U.signo(ec.crec)} %</b></span><span>Paro <b class="num">${U.d1(ec.paro)} %</b></span><span>Inflación <b class="num">${U.d1(ec.infl)} %</b></span></div></div>`;
     },
+    /* El mapa de España en versión compacta: la tarjeta principal tras los indicadores. */
+    mapa(E) { return `<div class="tarjeta d-mapa" style="margin-top:14px">${C.Pantallas.mapa.html(E, { compacto: true, suave: true, cab: true })}</div>`; },
     cierre(el) {
-      UI.$$('[data-ir]', el).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir, b.dataset.tab ? { tab: b.dataset.tab } : null); });
+      UI.$$('[data-ir]', el).filter(b => !b.closest('.mapa-w')).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir, b.dataset.tab ? { tab: b.dataset.tab } : null); });
       const gg = UI.$('#d-cerrar-guia', el); if (gg) gg.onclick = () => { C.E.ui.sinGuia = true; C.App.refrescar(); };
+      if (UI.$('#mapa-w', el)) C.Pantallas.mapa.montar(el, C.E, { compacto: true, suave: true });
     },
     noticias(E) {
       const ns = E.noticias.filter(n => (!n.pais || n.pais === 'ES' || n.tipo === 'europa') && (!C.Foco || C.Foco.noticia(E, n))).slice(0, 8);
@@ -46,6 +49,7 @@ window.ESP = window.ESP || {};
         <div class="tarjeta clic" data-ir="territorio" data-tab="competencias"><div class="t-cab"><h3>Relación con el Estado</h3></div>${[['Relación con Moncloa', rc.relM, rc.relM > 55 ? 'var(--bien)' : rc.relM > 30 ? 'var(--alerta)' : 'var(--mal)'], ['Autogobierno', rc.aut, '#6CC4F5'], ['Deuda', rc.deuda * 2, '#9AA7C0']].map(([n, v, col]) => `<div style="margin-bottom:7px"><div class="fila" style="justify-content:space-between;font-size:12px"><span class="tenue">${n}</span><b class="num">${Math.round(v)}</b></div>${Comp.barraRango(Math.min(100, v), col)}</div>`).join('')}${rc.indep > 3 ? `<div class="tenue" style="font-size:12px">Independentismo <b class="num">${U.d1(rc.indep)} %</b></div>` : ''}</div>
         ${DB.carrera(E)}
       </div>
+      ${DB.mapa(E)}
       <div class="grid g-dash" style="margin-top:14px">
         <div class="tarjeta"><div class="t-cab"><h3>Parlamento de ${esc(d.nombre)}</h3><button class="btn chico fant" data-ir="parlaut">Ver más →</button></div>${H2.bloques(DB.bloques(E, rc.parl.escanos), { altoMax: 300, mayoria: may, centroSub: 'ESCAÑOS · MAYORÍA ' + may })}${H2.leyendaPartidos ? H2.leyendaPartidos(E, rc.parl.escanos) : ''}</div>
         <div class="col">
@@ -72,6 +76,7 @@ window.ESP = window.ESP || {};
         <div class="tarjeta clic" data-ir="local2"><div class="t-cab"><h3>La ciudad</h3></div>${[['Deuda municipal', Math.min(100, m.deuda * 2), '#9AA7C0'], ['Tensión social', m.tension, m.tension > 60 ? 'var(--mal)' : m.tension > 35 ? 'var(--alerta)' : 'var(--bien)']].map(([n, v, col]) => `<div style="margin-bottom:7px"><div class="fila" style="justify-content:space-between;font-size:12px"><span class="tenue">${n}</span><b class="num">${Math.round(v)}</b></div>${Comp.barraRango(v, col)}</div>`).join('')}</div>
         ${DB.carrera(E)}
       </div>
+      ${DB.mapa(E)}
       <div class="grid g-dash" style="margin-top:14px">
         <div class="tarjeta"><div class="t-cab"><h3>Pleno de ${esc(m.nombre)}</h3><button class="btn chico fant" data-ir="ayuntamiento">Ver más →</button></div>${H2.bloques(DB.bloques(E, m.esc), { altoMax: 300, mayoria: may, centroSub: 'CONCEJALES · MAYORÍA ' + may })}${H2.leyendaPartidos ? H2.leyendaPartidos(E, m.esc) : ''}</div>
         <div class="col">
@@ -102,8 +107,6 @@ window.ESP = window.ESP || {};
       const encuesta = C.Generales.encuesta(E, 0.5);
       const orden = P.partidos.slice().sort((a, b) => encuesta[b] - encuesta[a]).slice(0, 7);
       const ue = E.ue, abiertos = C.UE.abiertos(E).slice(0, 3);
-      const rc = J.region && E.esp.ccaa[J.region], mu = J.muni && E.esp.muni.m[J.muni];
-      const T = C.Territorio;
       const cargoEstado = { activa: 'Legislatura en curso', disueltas: 'Cortes disueltas · campaña', constitucion: 'Constitución de las Cortes', consultas: 'Consultas del Rey', investidura: 'Debate de investidura' }[cs.estado];
 
       el.innerHTML = `
@@ -128,6 +131,8 @@ window.ESP = window.ESP || {};
           ${[['Prestigio interno', J.prestigio, 'var(--oro)'], ['Popularidad', J.pop, '#6CC4F5'], ['Capital europeo', J.capEU, '#5E8DF0']].map(([n, v, c]) => `<div style="margin-bottom:7px"><div class="fila" style="justify-content:space-between;font-size:12px"><span class="tenue">${n}</span><b class="num">${Math.round(v)}</b></div>${Comp.barraRango(v, c)}</div>`).join('')}${J.aspira ? `<div class="nota" style="margin-top:8px;font-size:12.5px">🗳️ <b>Candidatura:</b> ${esc(C.Personaje.aspiraTxt(E))}</div>` : ''}</div>
       </div>
 
+      ${C.Pantallas.dashboard.mapa(E)}
+
       <div class="grid g-dash" style="margin-top:14px">
         <div class="tarjeta"><div class="t-cab"><h3>Congreso de los Diputados</h3><button class="btn chico fant" data-ir="cortes">Ver más →</button></div>${H.parlamento(E, { altoMax: 320, mayoria: maj })}${H.leyendaPartidos(E, P.escanos)}</div>
         <div class="col">
@@ -148,14 +153,10 @@ window.ESP = window.ESP || {};
         const gr = Im.grupos(E).sort((a, b) => a.v - b.v); return `<div class="tarjeta clic" data-ir="leyes" data-tab="pais" style="margin-top:14px"><div class="t-cab"><h3>📊 Estado del país</h3><span class="fila" style="gap:6px"><span class="etq">👑 Apoyo a la Corona ${Math.round((E.esp.corona || { apoyo: 58 }).apoyo)} %</span><span class="etq ${S.clima >= 4 ? 'verde' : S.clima <= -4 ? 'rojo' : 'amar'}">Clima social ${U.signo(S.clima, 0)}</span></span></div>
           <div class="grid g2"><div class="col" style="gap:6px"><span class="tenue" style="font-size:11.5px;text-transform:uppercase;letter-spacing:.1em">Más débil</span>${peor.map(fila).join('')}</div><div class="col" style="gap:6px"><span class="tenue" style="font-size:11.5px;text-transform:uppercase;letter-spacing:.1em">Más fuerte</span>${mejor.map(fila).join('')}</div></div>
           <div class="tenue" style="font-size:12.5px;margin-top:8px">Colectivos más descontentos: ${gr.slice(0, 3).map(x => x.icono + ' ' + esc(x.nombre) + ' (' + Math.round(x.v) + ')').join(' · ')}. Las leyes que apruebas cambian estos indicadores.</div></div>`; })()}
-      <div class="grid g2" style="margin-top:14px">
-        <div class="tarjeta"><div class="t-cab"><h3>Territorio</h3><span class="etq">${T.ids().filter(c => E.esp.ccaa[c].gob && ['ES_UPC', 'ES_VAP'].includes(E.esp.ccaa[c].gob.partido)).length} comunidades de la derecha · ${T.ids().filter(c => E.esp.ccaa[c].gob && ['ES_ASD', 'ES_PPI', 'ES_APU'].includes(E.esp.ccaa[c].gob.partido)).length} de la izquierda</span></div>${C.Mosaico.provincias(E, 'autonomico', { altoMax: 230, region: J.region })}
-          ${rc && !(C.Foco && C.Foco.activo(E)) ? `<div class="fila" style="margin-top:8px;gap:14px;font-size:12.5px"><span><b>${esc(D().ccaa[J.region].nombre)}</b></span><span>Gobierno ${Comp.partido(E, rc.gob.partido)}</span><span>Relación con Moncloa <b class="num">${Math.round(rc.relM)}</b></span><span>Independentismo <b class="num">${U.d1(rc.indep)} %</b></span>${mu ? `<span>${esc(mu.nombre)}: alcaldía ${Comp.partido(E, mu.alcalde)} · aprob. <b class="num">${Math.round(mu.aprob)}</b></span>` : ''}</div>` : ''}</div>
+      <div style="margin-top:14px">
         <div class="tarjeta"><div class="t-cab"><h3>Última hora</h3></div><div class="lista" style="font-size:13px">${noticias.map(n => `<div class="it"><span style="font-size:18px">${n.reg && C.Banderas.tiene(n.reg) ? C.Banderas.svg(n.reg, { h: 15 }) : n.pais === 'ES' ? '🇪🇸' : n.pais && D().paises[n.pais] ? D().paises[n.pais].bandera : '🌍'}</span><div class="cuerpo"><b style="white-space:normal">${esc(n.texto)}</b><span>${U.fmtT(n.t, true)}</span></div></div>`).join('') || '<div class="vacio">Sin noticias</div>'}</div></div>
       </div>`;
-      UI.$$('[data-ir]', el).forEach(b => b.onclick = e => { e.preventDefault(); C.App.ir(b.dataset.ir, b.dataset.tab ? { tab: b.dataset.tab } : null); });
-      UI.$$('[data-ccaa]', el).forEach(g => g.onclick = e => { e.stopPropagation(); C.Pantallas.territorio.verCcaa(g.dataset.ccaa); });
-      const gg = UI.$('#d-cerrar-guia', el); if (gg) gg.onclick = () => { E.ui.sinGuia = true; C.App.refrescar(); };
+      C.Pantallas.dashboard.cierre(el);
     }
   };
 })(window.ESP);

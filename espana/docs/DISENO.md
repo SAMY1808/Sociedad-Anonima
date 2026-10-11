@@ -75,7 +75,7 @@ Congreso. Los socios con satisfacción < 15 pueden abandonar el Gobierno.
 
 ## Interfaz
 
-`C.UI` (modales, tooltips, acciones), `C.Graf` (SVG propio), `C.Hemiciclo`, `C.Mosaico` (mapa de provincias).
+`C.UI` (modales, tooltips, acciones), `C.Graf` (SVG propio), `C.Hemiciclo`, `C.Mapa` (mapa real de España), `C.Mosaico` (mapa de teselas de Europa; para España delega en `C.Mapa`).
 Cada pantalla es `C.Pantallas.<nombre>.render(el, params)`. Las decisiones que detienen el tiempo se detectan en
 `C.Tiempo.bloqueo()` y se muestran con `C.App.revisarPendientes()`.
 
@@ -269,3 +269,34 @@ La reforma estatutaria (`rc.estatuto.reforma`) admite cabildeo en dos sitios, re
 - **Titulares por nivel**: `Noticias.poner(E, tipo, texto, pais, amb)` etiqueta cada titular con `amb` (`aut` | `local`; los generales no llevan etiqueta), `reg` y `muni`, deduciéndolos del texto con `Noticias.nivel` (patrones y nombres de comunidades y municipios) si quien escribe la noticia no los indica; `Foco.noticia` decide qué se ve (ticker, Centro de mando y crónica). Las crisis en directo los indican explícitamente.
 - **Crisis por ramo**: `CrisisDirecto.SECTOR` asigna a cada crisis nacional y autonómica los ministerios o consejerías a los que corresponde; `decide(E, a, lugar, id)` hace que su titular la juegue. Al añadir una crisis, hay que darla de alta ahí (lo comprueba `tools/foco-es.js`).
 - **Metas por cargo**: el sexto elemento de `Metas.META` es el ámbito en el que se ofrece (`AMB_META` para las existentes); `Metas.visibles` filtra la pestaña y `turno` sólo cumple las visibles.
+
+## Mapa de España (`data/mapa-es.js`, `ui/mapa.js`, `pantallas/mapa.js`)
+
+**Datos.** `ESP.DATA.mapaEs = { e, vb, prov, bb, cen, ccaa, ccBb, ccCen, bExt, bCcaa, bProv, ciu, inset }`: `prov[id]` es la ruta SVG de cada una de
+las 52 circunscripciones (enteros en cuartos de kilómetro, movimientos relativos), `bb` y `cen` su caja y su centro, `ccaa[c]` las
+provincias de cada comunidad, `ccBb/ccCen` caja y centro de la comunidad, `bExt/bCcaa/bProv` tres capas de bordes (costa, entre
+comunidades, entre provincias de una misma comunidad), `ciu[m]` la posición de cada una de las 66 ciudades y `inset` el recuadro de
+Canarias (proyectadas aparte a escala 0,7). Lo genera `tools/mapa/construir_mapa.py` a partir de Natural Earth (dominio público): proyección
+cónica conforme de Lambert (paralelos 36° y 44°, meridiano −3,5°), arcos compartidos entre provincias vecinas, Douglas-Peucker por arco
+(0,32 km). Ceuta y Melilla se dibujan además como anillos pulsables.
+
+**Capas (`C.Mapa.CAPAS`).** `{ id, g (familia), n, d, nivel: 'prov'|'ccaa', color(E,p) → {f, o, h, p}, tt(E,p), leyenda(E), etq?, rank?, ciudades?, marcas? }`.
+`f` es el color, `o` la opacidad, `h` el rayado (artículo 155) y `p` los puntos (riesgo estacional). `capaCcaa(...)` construye una capa por
+comunidad a partir de una rampa de color y una función de valor; de ella salen sola la leyenda en degradado y el ranking de mejores y peores.
+`C.Mapa.svg(E, capa, opciones)` devuelve un SVG estático (`region`, `prov`, `muni`, `ciudades`, `sinPropio`, `visible`, `etq`, `interactivo`);
+`C.Mapa.camara(svg, cont, opciones)` añade zoom, arrastre y teclado.
+
+**Pantalla (`C.Pantallas.mapa`).** `html(E, {compacto, suave, cab, capa, id})` y `montar(el, E, opciones)` (un único controlador activo; no se guarda en `E`).
+El estado serializable vive en `E.ui.mapa = {capa, sel: {t: 'ccaa'|'prov'|'muni', id}, cam, camC, ...}` (la cámara del mapa compacto se guarda aparte). El panel
+(`Panel.nacion/ccaa/prov/muni`) se compone de la ficha, los indicadores, los resultados y las **acciones sobre el territorio**
+(`accionesDe`: las mismas `Acciones` de la agenda, filtradas por `Foco.accion` y por `Acciones.razon`). Las etiquetas, ciudades y marcas se redibujan
+con cada cambio de zoom (`dinamico`) con control de choques; las ciudades escalan con el zoom (10, 22, 40 o todas). En móvil las capas se eligen con un
+selector y una barra sobre el mapa lleva a la ficha.
+
+**Dónde está.** Menú *Mapa* (la primera pantalla de una partida nueva; en el móvil, la segunda de la barra inferior), tarjeta del Centro de mando (los tres
+ámbitos), pestaña *Mapa* de Territorio, Crisis (se abre con la capa de emergencias si hay una activa), y, por el mismo camino que el mosaico antiguo,
+Creación (pulsar una provincia o una ciudad elige tu territorio), Elecciones, Noche electoral (revelado progresivo con `visible`) y Sede (implantación).
+
+**Pruebas.** `tools/mapa-es.js` (geometría, 16 capas, SVG, marcas, `Foco`) y `tools/mapa-ui.js [movil]` (Playwright: capas, selección, zoom, arrastre, teclado,
+ciudades, Centro de mando, Territorio, Crisis, Creación y estado serializable).
+

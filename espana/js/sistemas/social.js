@@ -40,7 +40,7 @@ window.ESP = window.ESP || {};
       return { ok: true, exito: false, msg: `Sin acuerdo: ${!okS && !okP ? 'ni sindicatos ni patronal aceptan' : !okS ? 'los sindicatos rechazan la oferta' : 'la patronal rechaza la oferta'}. Puedes imponerlo por decreto.` };
     },
     imponer(E, tema, L) {
-      const s = So.asegurar(E), T = TEMAS[tema]; if (!T.niveles[L]) return { ok: false, msg: 'Nivel no válido' };
+      const s = So.asegurar(E), T = TEMAS[tema]; if (!T) return { ok: false, msg: 'Tema desconocido' }; if (!T.niveles[L]) return { ok: false, msg: 'Nivel no válido' };
       So.aplicar(E, tema, L, 'decreto'); s.niv[tema] = L; s.conf = clamp(s.conf + (L >= T.sind ? 2 : 8) + (L > T.pat ? 5 : 0), 0, 100); s.acuerdos.unshift({ t: E.fecha.t, tema, L, tipo: 'decreto' });
       C.Personaje.cambiar(E, { prestigio: 0.3 }); return { ok: true, msg: `Impones por decreto: ${T.niveles[L][0]}.` };
     },
