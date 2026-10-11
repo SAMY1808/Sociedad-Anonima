@@ -1,4 +1,4 @@
-/* Municipios: 67 ciudades principales con concejales (D'Hondt, umbral del 5 %), alcaldes e investidura municipal.
+/* Municipios: 66 ciudades principales con concejales (D'Hondt, umbral del 5 %), alcaldes e investidura municipal.
    El resto de ayuntamientos (unos 8.000) se agrega por comunidad para dar el mapa de alcaldías. */
 window.ESP = window.ESP || {};
 (function (C) {
@@ -104,7 +104,7 @@ window.ESP = window.ESP || {};
       m.aprob = U.clamp(m.aprob + (inicial ? 0 : U.gauss(3, 4)), 25, 80);
     },
 
-    /* Resumen nacional: alcaldías de las 67 ciudades más el resto estimado por comunidad. */
+    /* Resumen nacional: alcaldías de las 66 ciudades más el resto estimado por comunidad. */
     resto(E, res) {
       const alc = Object.assign({}, res.alc); let total = U.suma(Object.values(res.alc));
       const principal = {}; Mu.ids().forEach(id => { principal[E.esp.muni.m[id].ccaa] = (principal[E.esp.muni.m[id].ccaa] || 0) + 1; });

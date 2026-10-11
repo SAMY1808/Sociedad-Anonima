@@ -10,7 +10,7 @@ window.ESP = window.ESP || {};
     partido(E, pid, largo) {
       const p = E.partidos[pid]; if (!p) return '—';
       const tt = `<div class="tt-t">${esc(p.nombre)}</div><div class="tt-f"><span>Familia</span><b>${esc(D().arquetipos[p.arq].nombre)}</b></div><div class="tt-f"><span>Grupo europeo</span><b>${esc(D().grupos[p.grupo].sigla)}</b></div><div class="tt-f"><span>Apoyo</span><b>${U.d1(p.pop)} %</b></div><div class="tt-f"><span>Líder</span><b>${esc((E.politicos[p.lider] || {}).n || '—')}</b></div>`;
-      return `<span class="sigla"${UI.tt(tt)}><i class="pto" style="background:${p.color}"></i>${esc(largo ? p.nombre : p.sigla)}</span>`;
+      return `<span class="sigla"${UI.tt(tt)}>${C.Logos ? C.Logos.mini(E, pid, 14) : `<i class="pto" style="background:${p.color}"></i>`}${esc(largo ? p.nombre : p.sigla)}</span>`;
     },
     terTxt(t) { return t < -65 ? 'centralista' : t < -25 ? 'unitario' : t <= 25 ? 'autonomista moderado' : t <= 60 ? 'federalista' : t <= 85 ? 'soberanista' : 'independentista'; },
     postura(p) { return p === 'gobierno' ? '<span class="etq oro">Gobierno</span>' : p === 'apoyo' ? '<span class="etq amar">Apoyo externo</span>' : '<span class="etq">Oposición</span>'; },

@@ -17,7 +17,7 @@ window.ESP = window.ESP || {};
       const A = Mu().AREAS;
       const ind = Mu().indicesTxt(E, m);
       const conc = Object.keys(D().concejalias).map(a => { const per = C.Gabinete.persona(E, 'muni:' + id, a), cg = C.Gabinete.cargos(E, 'muni:' + id).find(x => x.id === a); return { a, per, r: C.Gabinete.rend(E, cg, per) }; });
-      el.innerHTML = `<div class="cab"><div><h1>🏘 ${esc(m.nombre)}</h1><div class="sub">${U.n(m.pob)} mil habitantes · ${esc(D().ccaa[m.ccaa].nombre)} · alcalde/sa ${alc ? esc(alc.n) : '—'}${esAlc ? ' <span class="etq oro">Tú</span>' : ''} (${Comp.partido(E, m.alcalde)}) · próximas municipales ${U.fmtT(E.esp.muni.proxT, true)}</div></div>
+      el.innerHTML = `<div class="cab"><div><h1>${C.Escudos ? C.Escudos.svg(m.id, { h: 34 }) : '🏘'} ${esc(m.nombre)}</h1><div class="sub">${U.n(m.pob)} mil habitantes · ${esc(D().ccaa[m.ccaa].nombre)} · alcalde/sa ${alc ? esc(alc.n) : '—'}${esAlc ? ' <span class="etq oro">Tú</span>' : ''} (${Comp.partido(E, m.alcalde)}) · próximas municipales ${U.fmtT(E.esp.muni.proxT, true)}</div></div>
         <div class="fila">${esAlc ? UI.botonAccion('proyecto_urbano', {}, '🏗 Proyecto urbano', 'prim') : ''}<button class="btn" data-gab="1">🧑‍💼 Gobierno municipal</button></div></div>
         <div class="grid g4"><div class="tarjeta">${G.medidor(m.aprob, { tam: 120, etq: 'APROBACIÓN' })}</div>
           <div class="tarjeta">${Comp.kpi('Deuda municipal', Math.round(m.deuda) + ' %', `<span class="${m.deuda > 90 ? 'mal' : m.deuda > 60 ? 'alerta' : 'bien'}">${m.deuda > 90 ? 'Muy alta' : m.deuda > 60 ? 'Elevada' : 'Sostenible'}</span>`)}<div class="tenue" style="font-size:12px;margin-top:6px">IBI y tasas: <b>${m.ibi > 0 ? '+' + m.ibi : m.ibi}</b> · fondos conseguidos: ${m.fondos}</div></div>

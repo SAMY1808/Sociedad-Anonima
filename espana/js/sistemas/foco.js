@@ -7,7 +7,7 @@ window.ESP = window.ESP || {};
   const EJEC = ['pm', 'vicepres', 'ministro', 'presauto', 'consejero', 'alcalde'];
   const COMUN = ['dashboard', 'agenda', 'guia', 'leyes', 'corrupcion', 'medios', 'crisis', 'elecciones', 'sede', 'partido', 'personas', 'dilemas', 'personaje', 'legado', 'ajustes', 'partidas'];
   const PANTALLAS = {
-    central: COMUN.concat(['cortes', 'coaliciones', 'mayorias', 'territorio', 'autogob', 'lenguas', 'justicia', 'organismos', 'corona', 'referendos', 'estructural', 'social', 'europa', 'exterior']),
+    central: COMUN.concat(['cortes', 'coaliciones', 'mayorias', 'oposicion', 'territorio', 'autogob', 'lenguas', 'justicia', 'organismos', 'corona', 'referendos', 'estructural', 'social', 'europa', 'exterior']),
     aut: COMUN.concat(['territorio', 'autogob', 'parlaut', 'lenguas']),
     local: COMUN.concat(['ayuntamiento', 'local2'])
   };

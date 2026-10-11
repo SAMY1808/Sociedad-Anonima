@@ -1,5 +1,5 @@
 /* Territorio de España: 17 comunidades autónomas, 2 ciudades autónomas, 50 provincias + Ceuta y Melilla
-   (52 circunscripciones del Congreso) y 67 municipios principales.
+   (52 circunscripciones del Congreso) y 66 municipios principales.
    Datos aproximados (población 2023). Las posiciones `pos` sirven para el mapa de mosaicos por provincias. */
 window.ESP = window.ESP || {};
 ESP.DATA = ESP.DATA || {};

@@ -5,7 +5,7 @@ window.ESP = window.ESP || {};
   C.Pantallas = C.Pantallas || {};
   const ATRIB = [['carisma', 'Carisma', 'Capta atención y simpatías'], ['oratoria', 'Oratoria', 'Discursos, debates y entrevistas'], ['gestion', 'Gestión', 'Organización y administración'], ['negociacion', 'Negociación', 'Pactos y cabildeo'], ['integridad', 'Integridad', 'Credibilidad y ética pública']];
   const NIVELES = [
-    { id: 'local', icono: '🏘️', nombre: 'Política local', desc: 'Concejal/a o alcaldable de uno de los 67 grandes ayuntamientos. Camino largo: ayuntamiento → comunidad → Cortes.' },
+    { id: 'local', icono: '🏘️', nombre: 'Política local', desc: 'Concejal/a o alcaldable de uno de los 66 grandes ayuntamientos. Camino largo: ayuntamiento → comunidad → Cortes.' },
     { id: 'autonomico', icono: '🏛️', nombre: 'Política autonómica', desc: 'Diputado/a de un parlamento regional. Negocias con Moncloa financiación, traspasos y estatutos; puedes llegar a presidente/a autonómico/a.' },
     { id: 'partido', icono: '🎗', nombre: 'Modo Partido', desc: 'Dirige un partido como organización: programa electoral, sedes provinciales, finanzas, equipo, candidatos y campañas dirigidas. Tú eres su líder.' },
     { id: 'nacional', icono: '🇪🇸', nombre: 'Política nacional', desc: 'Diputado/a del Congreso por una circunscripción. Cortes, Consejo de Ministros, investiduras y Bruselas.' }
@@ -56,7 +56,7 @@ window.ESP = window.ESP || {};
       const p = E.partidos[k], esc_ = E.paises.ES.escanos[k] || 0, aq = apoyoAqui(E, k), g = E.paises.ES.gob.coalicion.includes(k);
       const rg = E.esp.ccaa[S.region].gob;
       const noPresente = p.amb === 'reg' && !(p.rp && p.rp[S.region]) && S.nivel !== 'nacional';
-      return `<div class="fila-sel ${S.partido === k ? 'sel' : ''}" data-partido="${k}" style="${noPresente ? 'opacity:.55' : ''}"><i class="pto" style="background:${p.color};width:14px;height:14px"></i>
+      return `<div class="fila-sel ${S.partido === k ? 'sel' : ''}" data-partido="${k}" style="${noPresente ? 'opacity:.55' : ''}">${C.Logos ? C.Logos.svg(E, k, { h: 26 }) : `<i class="pto" style="background:${p.color};width:14px;height:14px"></i>`}
         <div style="flex:1;min-width:0"><b>${esc(p.nombre)}</b> <span class="tenue">· ${esc(p.sigla)}</span><div class="tenue" style="font-size:12px">${p.amb === 'reg' ? 'Partido regional (' + esc(D().ccaa[p.region].nombre) + ')' : 'Partido de ámbito estatal'} · ${esc(D().grupos[p.grupo].sigla)} en Europa${rg && rg.coalicion.includes(k) ? ' · <span class="oro">gobierna ' + esc(D().ccaa[S.region].nombre) + '</span>' : ''}</div></div>
         <div style="text-align:right"><b class="num">${U.d1(S.nivel === 'nacional' ? p.popN : aq)} %</b><div class="tenue" style="font-size:12px">${esc_} escaños${g ? ' · <span class="oro">Gobierno</span>' : ''}${noPresente ? ' · no se presenta aquí' : ''}</div></div></div>`;
     }).join('');
@@ -191,7 +191,7 @@ window.ESP = window.ESP || {};
       opts.escenario = S.escenario || 'normal';
       if (S.partido === 'nuevo') opts.nuevo = { logo: S.nuevo.logo, fin: S.nuevo.fin, implant: S.nuevo.implant.slice(), nombre: S.nuevo.nombre || 'Partido nuevo', sigla: (S.nuevo.sigla || 'PN').toUpperCase(), eco: S.nuevo.eco, soc: S.nuevo.soc, eu: S.nuevo.eu, ter: S.nuevo.ter, color: S.nuevo.color, arq: C_.arqCercano(S.nuevo) };
       else opts.partido = S.partido;
-      el.innerHTML = '<div class="inicio"><div class="cargando" style="font-size:18px;color:var(--oro2)">Generando España: 52 circunscripciones, 19 comunidades, 67 ayuntamientos y la Unión Europea…</div></div>';
+      el.innerHTML = '<div class="inicio"><div class="cargando" style="font-size:18px;color:var(--oro2)">Generando España: 52 circunscripciones, 19 comunidades, 66 ayuntamientos y la Unión Europea…</div></div>';
       setTimeout(() => {
         const E = C.Mundo.nueva(opts);
         E.meta.nombrePartida = opts.nombrePartida; E.meta.modoPartido = !!S.modoPartido; E.meta.vistaPartido = !!S.modoPartido; if (E.meta.modoPartido) { E.ui = E.ui || {}; E.ui.pantalla = 'sede'; } if (opts.escenario && C.Escenarios) C.Escenarios.aplicar(E, opts.escenario);

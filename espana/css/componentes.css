@@ -94,3 +94,8 @@ select{background:var(--panel);border:1px solid var(--borde2);border-radius:8px;
 /* Banderas de las comunidades autónomas */
 .bnd{display:inline-block;vertical-align:-.2em;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.22);flex:none}
 .bnd-nombre{display:inline-flex;align-items:center;gap:6px}
+.logo-p{display:inline-block;vertical-align:-.25em;flex:none;border-radius:4px}
+.sigla .logo-p{vertical-align:middle}
+.esc{display:inline-block;vertical-align:-.3em;flex:none;margin-right:2px}
+.esc-nombre{display:inline-flex;align-items:center;gap:6px}
+.cab h1 .logo-p,.cab h1 .esc{vertical-align:-.3em;margin-right:6px}
