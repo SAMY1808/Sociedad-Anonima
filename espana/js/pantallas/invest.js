@@ -24,7 +24,7 @@ window.ESP = window.ESP || {};
         <div class="tenue" style="font-size:12.5px;margin-bottom:8px">${calC.activo ? 'Procedimiento en curso.' : cs.estado === 'disueltas' ? 'Cortes disueltas: la campaña termina con las elecciones generales.' : 'Gobierno formado. Así será el procedimiento tras las próximas generales: constitución de las Cortes a las 4 semanas, consultas del Rey, debate (176 votos en primera votación, mayoría simple en la segunda) y disolución si pasan dos meses sin presidente.'}</div>${pasos(E, calC)}</div>
         <div class="tarjeta"><div class="t-cab"><h3>🏛 Investidura autonómica</h3><select id="inv-reg">${ids.map(c => `<option value="${c}" ${c === reg ? 'selected' : ''}>${esc(D().ccaa[c].nombre)}</option>`).join('')}</select></div>
         <div class="fila" style="margin-bottom:8px;gap:6px">${rolA}${acciones.join('')}</div>
-        <div class="tenue" style="font-size:12.5px;margin-bottom:8px">${calA.activo ? 'Procedimiento en curso en el Parlamento de ' + esc(D().ccaa[reg].nombre) + '. El Gobierno saliente sigue en funciones.' : 'Sin procedimiento abierto. Tras unas elecciones: sesión constitutiva a las 4 semanas, consultas de la Presidencia del Parlamento, debate (mayoría absoluta; después simple) y plazo máximo de dos meses.'}</div>${pasos(E, calA)}</div></div>`;
+        <div class="tenue" style="font-size:12.5px;margin-bottom:8px">${calA.activo ? 'Procedimiento en curso en el Parlamento de ' + esc(D().ccaa[reg].nombre) + '. El Gobierno saliente sigue en funciones.' : 'Sin procedimiento abierto. Tras unas elecciones: sesión constitutiva a las 4 semanas, consultas de la Presidencia del Parlamento, debate (mayoría absoluta; después simple) y plazo máximo de dos meses.'}</div>${pasos(E, calA)}</div></div>${C.Pantallas.gobaut ? C.Pantallas.gobaut.panel(E) : ''}`;
     },
 
     enlazar(el) {
@@ -62,9 +62,10 @@ window.ESP = window.ESP || {};
       const cand = v.cand, esc0 = rc.parl.escanos, may = Math.floor(U.suma(Object.values(esc0)) / 2) + 1;
       const partes = Object.keys(esc0).filter(k => k !== cand && esc0[k] > 0).sort((a, b) => esc0[b] - esc0[a]);
       const sel = new Set(T.bloque(E, c, cand).bloque);
-      const incompat = k => [...sel].some(q => q !== k && (Ej.vetaA(E, k, q) || Ej.vetaA(E, q, k))) || Ej.afinidad(E, cand, k) < 0.3;
+      const Ga = C.GobAut, incompat = k => Ga.en(c, () => [...sel].some(q => q !== k && (Ej.vetaA(E, k, q) || Ej.vetaA(E, q, k))) || Ej.afinidad(E, cand, k) < 0.3);
       const cuerpo = `<p style="margin-top:0;font-size:13.5px">Se te propone como candidato/a a presidir <b>${esc(D().ccaa[c].nombre)}</b>. Tu partido tiene ${esc0[cand]} de ${U.suma(Object.values(esc0))} escaños: necesitas <b>${may}</b> votos en primera votación (mayoría absoluta) o más síes que noes en la segunda. Negocia tu bloque: cada partido solo apoya si no veta a tus socios y la afinidad lo permite.</p>
         <div class="fila" style="margin-bottom:6px"><b>Voto previsto:</b> <span id="ci-res" class="num"></span></div><div id="ci-barra"></div><div id="ci-sum" class="tenue" style="font-size:12px;margin:4px 0 8px"></div>
+        <div class="tarjeta" id="ci-neg" style="margin:6px 0 10px"><div class="t-cab"><h4 style="margin:0">🤝 Negociación</h4><span class="tenue" style="font-size:11.5px" id="ci-pts"></span></div><div class="fila" style="gap:6px;flex-wrap:wrap"><select id="ci-neg-p" style="max-width:150px">${partes.map(k => `<option value="${k}">${esc(E.partidos[k].sigla)}</option>`).join('')}</select><button class="btn chico" data-neg="cab">🤝 Cabildear</button><button class="btn chico" data-neg="programa">${Ga.CONTRA.programa.ic} Programa</button><button class="btn chico" data-neg="cargos">${Ga.CONTRA.cargos.ic} Cargos</button></div><div class="tenue" style="font-size:11.5px;margin-top:4px" id="ci-negs"></div></div>
         <div class="lista">${partes.map(k => { const p = E.partidos[k]; return `<label class="it" style="cursor:pointer;flex-wrap:wrap"><input type="checkbox" data-incl="${k}" style="width:auto;flex:none"><span class="pto" style="background:${p.color}"></span><div class="cuerpo" style="flex:1;min-width:150px"><b>${esc(p.nombre)}</b><span>${esc0[k]} escaños · ${Comp.ideoTxt(p)}</span></div><span class="etq" id="ci-e-${k}"></span></label>`; }).join('')}</div>`;
       const m = UI.modal({ titulo: '🗳 Investidura: forma tu bloque', icono: '🤝', clase: 'medio', sinCerrar: true, cuerpo, pie: '<button class="btn" id="ci-no">Renunciar</button><button class="btn prim" id="ci-ok">Someterme a la votación</button>' });
       const act = () => {
@@ -76,7 +77,13 @@ window.ESP = window.ESP || {};
           const st = en ? ['En el bloque', 'verde'] : bad ? ['Veto / lejano', 'rojo'] : Ej.afinidad(E, cand, k) >= 0.6 ? ['Apoyo externo', 'amar'] : ['No apoya', '']; e.className = 'etq ' + st[1]; e.textContent = st[0]; });
       };
       UI.$$('[data-incl]', m.el).forEach(cb => cb.onchange = () => { if (cb.checked) sel.add(cb.dataset.incl); else sel.delete(cb.dataset.incl); act(); });
-      act();
+      const negAct = () => { const n = Ga.neg(E, c); UI.$('#ci-pts', m.el).textContent = '◆ ' + E.jugador.agenda.puntos; UI.$('#ci-negs', m.el).innerHTML = partes.map(k => { const b = n ? Ga.bono(n, k) : 0; return b ? esc(E.partidos[k].sigla) + ' +' + Math.round(b * 100) : ''; }).filter(Boolean).join(' · ') || 'Aún no has negociado con nadie.'; };
+      UI.$$('[data-neg]', m.el).forEach(b => b.onclick = () => {
+        const k = UI.$('#ci-neg-p', m.el).value, id = b.dataset.neg === 'cab' ? 'cabildear_investidura' : 'contrapartida_investidura', r = C.Acciones.ejecutar(id, { c, pid: k, tipo: b.dataset.neg });
+        UI.toast(r.msg || 'No disponible', r.ok === false ? 'mal' : r.exito === false ? 'alerta' : 'bien');
+        if (r.ok !== false && !incompat(k)) sel.add(k); act(); negAct();
+      });
+      act(); negAct();
       UI.$('#ci-no', m.el).onclick = () => { m.cerrar(); T.invRenunciaJugador(E, c); C.App.refrescar(); C.App.revisarPendientes(); };
       UI.$('#ci-ok', m.el).onclick = () => { m.cerrar(); T.invCandidatoJugador(E, c, [...sel]); UI.toast('Te someterás a la votación de investidura la próxima semana.', 'bien'); C.App.refrescar(); C.App.revisarPendientes(); };
     }

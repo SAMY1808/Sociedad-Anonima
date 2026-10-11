@@ -110,7 +110,7 @@ window.ESP = window.ESP || {};
       }
       if (b.si > b.no) return T.invInstalar(E, c, b, 'es investido/a por mayoría simple');
       // Pactos de última hora: los grupos que vetaban acaban absteniéndose (más probable cuantos más candidatos han fracasado). Al jugador no se le regala.
-      if (!jug && U.chance(U.clamp(0.2 + 0.25 * v.fallidos.length + 0.5 * b.si / Math.max(1, b.si + b.no), 0.1, 0.9))) return T.invInstalar(E, c, b, 'es investido/a con la abstención de los grupos que lo vetaban');
+      if (!jug && v.votoJ !== 'no' && U.chance(U.clamp(0.2 + 0.25 * v.fallidos.length + 0.5 * b.si / Math.max(1, b.si + b.no), 0.1, 0.9))) return T.invInstalar(E, c, b, 'es investido/a con la abstención de los grupos que lo vetaban');
       v.fallidos.push(v.cand); v.estado = 'consultas'; v.tNom = t + 1; v.bloq = null; v.cand = null; v.vuelta = 0;
       C.Noticias.poner(E, 'politica', `Fracasa la investidura de ${lid.n} (${sig(E, cand)}) en ${nom(E, c)}: ${b.si} votos a favor y ${b.no} en contra.`, 'ES');
       if (jug) C.Eventos.info(E, '🗳️ Investidura fallida', `Tu investidura como presidente/a de ${nom(E, c)} fracasa (${b.si} votos a favor, ${b.no} en contra). La Presidencia del Parlamento abre nueva ronda; el plazo de dos meses desde la primera votación vence el ${U.fmtT(v.t1 + PLAZO, true)}.`);

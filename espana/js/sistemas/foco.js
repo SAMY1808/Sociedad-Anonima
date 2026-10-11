@@ -13,7 +13,7 @@ window.ESP = window.ESP || {};
   };
   const SOLO_EJEC = ['consejo', 'gabinete', 'jefe'];   // sólo con cargo de gobierno (central o autonómico)
   const TABS_TERR = { central: ['mapa', 'ccaa', 'competencias', 'proces', 'estatutos', 'financiacion', 'art155', 'constitucion', 'cooperacion'], aut: ['ccaa', 'competencias', 'estatutos', 'financiacion', 'presupuesto', 'proces', 'art155', 'constitucion', 'cooperacion'], local: ['munis'] };
-  const TABS_ELEC = { central: ['generales', 'campana', 'investidura', 'europeas'], aut: ['autonomicas', 'campana'], local: ['municipales', 'campana'] };
+  const TABS_ELEC = { central: ['generales', 'campana', 'investidura', 'europeas'], aut: ['autonomicas', 'investidura', 'campana'], local: ['municipales', 'campana'] };
   // Acciones de la agenda por grupo y por identificador
   const GRUPO_AMB = { parlamento: ['central'], nacional: ['central'], autonomico: ['aut'], local: ['local'], europa: ['central'] };
   const ACC_AMB = { audiencia_rey: ['central'], cuestionar_corona: ['central'], defender_corona: ['central'], mediar_corona: ['central'], proponer_referendo: ['central'], campana_referendo: ['central'], campana_mun: ['local'], mitin_local: ['local'], gasto_local: ['local'], candidato_estrella: ['local'], encuesta_local: ['local'], campana_mun_auto: ['local'], visita_emergencia: ['central', 'aut'], campana_auto: ['aut'], campana_eu: ['central'], votar_conferencia: ['aut'] };
