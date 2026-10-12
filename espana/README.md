@@ -138,7 +138,9 @@ Es una PWA: se puede instalar y jugar sin conexión.
 Cada turno es una **semana**. Dispones de 5–7 **puntos de agenda**: discursos, leyes, cabildeo, partido, medios,
 campaña, gestión del Consejo, de tu comunidad o de tu ayuntamiento… Avanza (`N`, o ▶ Semana / Mes / Trimestre); el
 tiempo se detiene cuando hay una votación, una investidura, una decisión del Consejo de Ministros o una noche
-electoral.
+electoral. Si alguna vez el tiempo se queda parado sin que se abra ninguna ventana, el juego se desatasca solo
+(resuelve esa decisión por la vía más neutra y te avisa) y, por si acaso, en **Ajustes → 🛟 Si el tiempo no avanza**
+hay un botón para hacerlo a mano.
 
 ## Arquitectura
 
@@ -189,6 +191,8 @@ node tools/creacion-ui.js [movil]                            # Playwright: parti
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
 node tools/mapa-es.js                                        # mapa de España: geometría (52 circunscripciones, 66 ciudades, Canarias), 16 capas, SVG, marcas y enfoque por cargo
 node tools/mapa-ui.js [movil]                                # Playwright: capas, selección, zoom, arrastre, teclado, ciudades, Centro de mando, Territorio, Crisis y Creación
+node tools/desatasco-es.js                                   # el debate de unas generales que un cargo autonómico no ve, la reparación al cargar y el desatasco de decisiones sin ventana
+node tools/desatasco-ui.js [movil]                           # Playwright: partida con el aviso heredado, ventana que falla o no se abre, botón de Ajustes y juego normal sin intervenciones
 ```
 
 ## Equipo, contrapesos y sociedad (pestañas propias)

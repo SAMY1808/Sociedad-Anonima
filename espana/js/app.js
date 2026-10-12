@@ -176,14 +176,32 @@ window.ESP = window.ESP || {};
     /* ── Tiempo ── */
     avanzar(n) {
       const E = C.E;
-      if (C.Tiempo.bloqueo()) { App.revisarPendientes(); return; }
+      if (C.Tiempo.bloqueo()) { App.revisarPendientes(); App.vigilar(); return; }
       for (let i = 0; i < n; i++) { if (!C.Tiempo.avanzar()) break; if (C.Tiempo.bloqueo()) break; }
       App.refrescar();
-      App.revisarPendientes();
+      App.revisarPendientes(); App.vigilar();
+    },
+
+    /* Red de seguridad: si hay una decisión pendiente y, pasado un instante, no se ha abierto ninguna ventana, el tiempo se quedaría parado para siempre.
+       Se resuelve sola por el camino más neutro y se avisa. */
+    vigilar() {
+      clearTimeout(App._vig);
+      App._vig = setTimeout(() => { const E = C.E; if (E && !UI.pila.length && C.Tiempo.bloqueo()) App.desatascar('sin ventana'); }, 400);
+    },
+    desatascar(motivo, prof) {
+      const E = C.E; if (!E || !C.Desatasco || (prof || 0) > 12) return;
+      const txt = C.Desatasco.resolver(E); if (!txt) return;
+      console.warn('[App] ' + txt, motivo || '');
+      UI.toast('⚠ ' + esc(txt)); App.refrescar();
+      if (C.Tiempo.bloqueo() && !UI.pila.length) { try { App._revisar(E); } catch (e) { App.desatascar('fallo en la ventana', (prof || 0) + 1); } }
     },
 
     revisarPendientes() {
       const E = C.E; if (!E) return;
+      try { App._revisar(E); } catch (e) { console.error('[App] la ventana de una decisión pendiente falló', e); App.desatascar('ventana con error'); }
+    },
+
+    _revisar(E) {
       if (UI.pila.length) return;
       if (C.Disolucion && C.Disolucion.pendiente(E) && C.Pantallas.declaracion) { C.Pantallas.declaracion.modal(E); return; }
       if (E.esp.pendienteGabinete) { C.Pantallas.gabinete.formacion(E.esp.pendienteGabinete); return; }

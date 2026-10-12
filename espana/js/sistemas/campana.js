@@ -30,6 +30,8 @@ window.ESP = window.ESP || {};
     },
     /* Las campañas que te corresponden según tu cargo (con el foco desactivado, todas). */
     mias(E) { return Ca.camps(E).filter(x => !C.Foco || C.Foco.campana(E, x.key)); },
+    /* ¿Es una campaña tuya según tu cargo? Con el foco por cargo, quien preside una comunidad no hace campaña en unas generales. */
+    esMia(E, camp) { return Ca.mias(E).some(x => x.camp === camp); },
     cur(E) { const l = Ca.mias(E); if (!l.length) return null; const k = E.ui && E.ui.campScope; return (l.find(x => x.key === k) || l[0]).camp; },
     activa(E) { return !!Ca.cur(E); },
     semanasHasta(E, camp) { camp = camp || Ca.cur(E); return camp ? Math.max(0, camp.tVoto - E.fecha.t) : 0; },
@@ -275,6 +277,17 @@ window.ESP = window.ESP || {};
       if (camp.ambito === 'aut') { const rc = E.esp.ccaa[camp.c]; if (rc.cab[k] === 'J') return E.politicos.J; return C.Territorio.cabeza(E, camp.c, k); }
       return E.politicos[E.partidos[k].lider];
     },
+    /* Debates que ya tocan y no se han celebrado. */
+    debatesDebidos(E) { return Ca.camps(E).map(x => x.camp).filter(x => !x.debate.hecho && E.fecha.t >= x.debate.t); },
+    /* Celebra por el jugador los debates debidos (con el tono dado). */
+    resolverDebates(E, estrategia) { for (const c of Ca.debatesDebidos(E)) Ca.celebrarDebate(E, estrategia || null, c); E.esp.pendienteDebate = false; },
+    /* Un debate sólo se le pide al jugador si es de una campaña suya; los demás se celebran solos. Así no queda una decisión pendiente sin ventana
+       (partidas guardadas con el aviso de un debate de unas generales que su cargo no ve). Devuelve true si cambió algo. */
+    sanearDebate(E) {
+      if (!E.esp.pendienteDebate) return false;
+      if (Ca.debatesDebidos(E).some(c => Ca.esMia(E, c) && Ca.debateJugador(E, c))) return false;
+      Ca.resolverDebates(E, null); return true;
+    },
     debateJugador(E, camp) {
       camp = camp || Ca.cur(E); const J = E.jugador; if (!J || J.pais !== 'ES' || !camp) return false;
       if (!Ca.participantes(E, camp).includes(J.partido)) return false;
@@ -346,7 +359,7 @@ window.ESP = window.ESP || {};
       const t = E.fecha.t, P = E.paises.ES;
       for (const k of P.partidos) camp.mom[k] = clamp((camp.mom[k] || 0) * 0.9 + U.gauss(0, 0.22), -4, 4);
       Ca.encuesta(E, 'cis', camp);
-      if (!camp.debate.hecho && t >= camp.debate.t) { if (Ca.debateJugador(E, camp) && !E.meta.presim) E.esp.pendienteDebate = true; else Ca.celebrarDebate(E, null, camp); }
+      if (!camp.debate.hecho && t >= camp.debate.t) { if (Ca.debateJugador(E, camp) && Ca.esMia(E, camp) && !E.meta.presim) E.esp.pendienteDebate = true; else Ca.celebrarDebate(E, null, camp); }
       if (U.chance(camp.ambito === 'gen' ? 0.22 : 0.15)) {
         const pool = camp.ambito === 'gen' ? P.partidos.filter(x => E.partidos[x].amb === 'nac') : Object.keys(E.esp.ccaa[camp.c].parl.escanos);
         const k = U.pick(pool.filter(x => !E.jugador || x !== E.jugador.partido)); if (!k) return;
@@ -414,4 +427,5 @@ window.ESP = window.ESP || {};
     }
   };
   C.Tiempo.registrar('campana', { turno: Ca.turno }, 9);
+  C.Bus.on('partida:cargada', E => { try { Ca.sanearDebate(E); } catch (e) { console.error('[Campana] no se pudo sanear el debate', e); } });
 })(window.ESP);

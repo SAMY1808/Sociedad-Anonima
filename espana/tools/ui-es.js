@@ -12,7 +12,7 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
   const pg = await b.newPage({ viewport: { width: 1360, height: 860 } });
   const errores = [];
   pg.on('pageerror', e => errores.push('PAGEERROR ' + e.message + '\n' + (e.stack || '').split('\n').slice(0, 4).join('\n')));
-  pg.on('console', m => { if (m.type() === 'error') errores.push('CONSOLE ' + m.text()); });
+  pg.on('console', m => { if (m.type() === 'error') errores.push('CONSOLE ' + m.text()); if (m.type() === 'warning' && /\[App\] Se resolvió/.test(m.text())) errores.push('DESATASCO ' + m.text()); });   // el desatasco sólo interviene si una ventana falla: en el juego normal no debe salir nunca
   await pg.goto('http://localhost:8123/index.html');
   await pg.waitForSelector('#i-nueva');
   await pg.click('#i-nueva');
@@ -102,5 +102,6 @@ const [nivel = 'nacional', partido = 'ES_ASD', rol = 'base', semanas = '60', tag
   console.log('estado final', JSON.stringify(info));
   console.log('modales:', JSON.stringify(titulos));
   console.log(errores.length ? 'ERRORES:\n' + [...new Set(errores)].slice(0, 15).join('\n') : 'sin errores');
+  process.exitCode = errores.length ? 1 : 0;
   await b.close(); srv.close();
 })().catch(e => { console.error('FALLO', e); process.exit(1); });

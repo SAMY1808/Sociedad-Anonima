@@ -300,3 +300,18 @@ Creación (pulsar una provincia o una ciudad elige tu territorio), Elecciones, N
 **Pruebas.** `tools/mapa-es.js` (geometría, 16 capas, SVG, marcas, `Foco`) y `tools/mapa-ui.js [movil]` (Playwright: capas, selección, zoom, arrastre, teclado,
 ciudades, Centro de mando, Territorio, Crisis, Creación y estado serializable).
 
+## Desatasco (`sistemas/desatasco.js`, `App.vigilar/desatascar`, Ajustes → 🛟)
+
+**El problema.** `Tiempo.bloqueo()` detiene el avance mientras haya una decisión pendiente (`pendienteDebate`, votos, investiduras, sucesos…) y `App.revisarPendientes()` abre la
+ventana que corresponde. Si esa ventana no puede abrirse, el tiempo queda parado para siempre. Caso real: una presidenta autonómica que lidera un partido nacional recibía el aviso
+del debate de unas generales que su enfoque por cargo oculta (`Campana.mias` no incluye esa campaña); `modalDebate` no encontraba campaña, fallaba y el aviso nunca se borraba.
+
+**Arreglo en origen.** `turnoCamp` sólo levanta `pendienteDebate` si la campaña es del jugador (`Campana.esMia`); los demás debates se celebran solos (`debatesDebidos`, `resolverDebates`).
+`Campana.sanearDebate` repara los avisos huérfanos y se ejecuta al cargar una partida (evento `partida:cargada`), de modo que las partidas ya bloqueadas se recuperan solas.
+
+**Red de seguridad genérica.** `C.Desatasco.resolver(E)` resuelve UNA decisión pendiente por el camino más neutro (abstención, primera opción, tono prudente, ignorar noche o
+escándalo huérfanos…), devuelve un texto y, si no basta, `limpiar(E)` borra los avisos que detienen el tiempo. La usan: `App.revisarPendientes` (si una ventana lanza una excepción),
+`App.vigilar` (si pasados 400 ms de un avance sigue habiendo bloqueo y ninguna ventana abierta) y el botón de Ajustes. Cada intervención deja un `console.warn('[App] …')` y un aviso en pantalla;
+`tools/ui-es.js` falla si ocurre en el juego normal, porque entonces falta una ventana de verdad. Al añadir una decisión pendiente nueva hay que dar de alta su rama en `Tiempo.bloqueo`, en
+`App._revisar` y aquí.
+
