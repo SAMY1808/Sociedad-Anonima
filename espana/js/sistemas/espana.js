@@ -53,11 +53,11 @@ window.ESP = window.ESP || {};
     /* Reparte el voto de una provincia entre los partidos: nacionales (con su multiplicador regional) y regionales. */
     votosProv(E, prov, ruido) {
       const d = D().provincias[prov], ccaa = d[1], P = E.paises.ES;
-      const reg = {}, nac = {};
+      const reg = {}, nac = {}, ob = E.esp.obras && E.esp.obras.bonus && E.esp.obras.bonus[prov];   // el crédito de las obras inauguradas (sistemas/obras.js)
       let regSum = 0;
       for (const pid of P.partidos) {
         const p = E.partidos[pid];
-        const pn = E.esp.pn[prov][pid] * (ruido ? Math.exp(U.gauss(0, ruido)) : 1);
+        const pn = E.esp.pn[prov][pid] * (ob && ob[pid] || 1) * (ruido ? Math.exp(U.gauss(0, ruido)) : 1);
         if (p.amb === 'nac') {
           const def = D().partidosES.find(x => x.sigla === p.sigla);
           const m = def && def.m ? (def.m[ccaa] != null ? def.m[ccaa] : 1) : 1;

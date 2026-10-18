@@ -20,10 +20,11 @@ window.ESP = window.ESP || {};
         }).join('')}</div></div>`;
       };
       el.innerHTML = `<div class="cab"><div><h1>Agenda</h1><div class="sub">Tienes <b>${J.agenda.puntos}</b> de ${J.agenda.max} puntos de agenda esta semana · se renuevan al avanzar</div></div><div class="pips">${Array.from({ length: J.agenda.max }, (_, i) => `<span class="pip ${i < J.agenda.puntos ? 'lleno' : ''}" style="width:16px;height:16px"></span>`).join('')}</div></div>
-        <div class="grid g-dash"><div class="col">${GRUPOS.map(bloque).join('')}</div>
+        <div class="grid g-dash"><div class="col">${GRUPOS.map(bloque).join('')}${C.Obras ? `<div class="tarjeta"><h3>🏗 Obras públicas</h3><div class="fila" style="justify-content:space-between;flex-wrap:nowrap;gap:10px"><div style="min-width:0"><b style="font-size:13.5px">Carreteras, alta velocidad, aeropuertos…</b><div class="tenue" style="font-size:12px">Se trazan, se piden y se siguen sobre el mapa (${C.Obras.activas(E).length} en marcha).</div></div><button class="btn chico" data-ir-obras>Abrir el mapa</button></div></div>` : ''}</div>
         <div class="col"><div class="tarjeta"><h3>Hecho esta semana</h3>${J.agenda.hechas.length ? `<div class="lista" style="font-size:13px">${J.agenda.hechas.map(h => `<div class="it"><span>✔</span><span>${esc(h.txt)}</span></div>`).join('')}</div>` : '<div class="vacio" style="padding:12px">Nada todavía.</div>'}</div>
           <div class="tarjeta"><h3>Bitácora de carrera</h3><div class="lista" style="font-size:12.5px">${J.historial.slice(0, 10).map(h => `<div class="it"><span class="tenue" style="width:78px">${U.fmtT(h.t, true)}</span><span>${esc(h.txt)}</span></div>`).join('') || '<div class="vacio">Sin eventos</div>'}</div></div></div></div>`;
       UI.$$('[data-modal]', el).forEach(b => b.onclick = () => b.classList.contains('desact') ? UI.avisoDesact(b) : A.abrir(b.dataset.modal));
+      UI.$$('[data-ir-obras]', el).forEach(b => b.onclick = () => C.App.ir('mapa', { capa: 'obras' }));
     },
 
     abrir(id) {

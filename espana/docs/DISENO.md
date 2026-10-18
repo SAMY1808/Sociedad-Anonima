@@ -32,6 +32,7 @@
 | 12 | `ayuntamientos` | indicadores urbanos, presupuesto, pleno, proyectos, mociones locales |
 | 36–37 | `territorio_turno`, `municipios_turno` | elecciones autonómicas y municipales, procés, TC |
 | 40 | `ue` | Consejo, Parlamento Europeo, Comisión, directivas |
+| 42 | `obras` | obras públicas sobre el mapa: avance semanal, gasto, incidentes, inauguraciones, crédito electoral y obras de las administraciones que no controla el jugador |
 | 60 | `personaje_init` | crea al jugador (tras los parlamentos) |
 | 70 | `eventos` | eventos con decisiones y choques globales |
 
@@ -297,8 +298,38 @@ selector y una barra sobre el mapa lleva a la ficha.
 ámbitos), pestaña *Mapa* de Territorio, Crisis (se abre con la capa de emergencias si hay una activa), y, por el mismo camino que el mosaico antiguo,
 Creación (pulsar una provincia o una ciudad elige tu territorio), Elecciones, Noche electoral (revelado progresivo con `visible`) y Sede (implantación).
 
-**Pruebas.** `tools/mapa-es.js` (geometría, 16 capas, SVG, marcas, `Foco`) y `tools/mapa-ui.js [movil]` (Playwright: capas, selección, zoom, arrastre, teclado,
+**Pruebas.** `tools/mapa-es.js` (geometría, 17 capas, SVG, marcas, `Foco`) y `tools/mapa-ui.js [movil]` (Playwright: capas, selección, zoom, arrastre, teclado,
 ciudades, Centro de mando, Territorio, Crisis, Creación y estado serializable).
+
+## Obras sobre el mapa (`sistemas/obras.js`, capa `obras` de `ui/mapa.js`, constructor en `pantallas/mapa.js`)
+
+**Estado.** `E.esp.obras = { lista[], seq, ver, bonus{provincia:{partido:multiplicador}}, niv{ciudad:{tipo:nivel}}, hist[], cd{}, sembrado }`. Cada obra:
+`{ id, tipo, a, b|null, owner ('E' o comunidad), quien ('jug'|'pedida'|'ia'|'red'), t0, dur, prog 0-1, coste (M€), gast, km, imp, estado ('curso'|'hecha'|'cancelada'), pausa, acel, provs[[prov, peso]], t1 }`.
+`Obras.asegurar(E)` crea el estado y siembra la red existente (`RED0`, ≈ 100 tramos) la primera vez que se pide, así que las partidas antiguas la reciben al avanzar (idempotente).
+
+**Modelo.** Siete tipos en `Obras.TIPOS` (`ab` = va de una ciudad a otra): autovía, alta velocidad, línea eléctrica y, puntuales con nivel, aeropuerto, hospital, campus y parque solar.
+Los kilómetros salen de las coordenadas del mapa (1 unidad = 250 m; Madrid–Barcelona = 504 km). `calcular(E, tipo, a, b)` devuelve km, coste (tarifa por km × tortuosidad × relieve de las
+provincias que cruza; ×3,2 con cable submarino), plazo, **importancia** (modelo gravitatorio con la población de los extremos) y las provincias atravesadas (se muestrea el trazo, una Bézier
+cuadrática determinista, y se asigna cada punto a la provincia de centro más cercano: aproximación). `chequear` valida geometría (isla/Península, Canarias eléctricamente aislada,
+distancias mínima y máxima, duplicados, nivel máximo); `competencia` (quién ordena: `pm`/`vicepres` el Estado, `ministro` según su cartera, `presauto` su comunidad), `limite` (tope de obras,
+déficit excesivo, deuda > 62 %), `puedeOrdenar`, `puedePedir` y `probPedir` deciden lo que puede hacer el jugador.
+
+**Ciclo (`Obras.turno`, prioridad 42).** Cada semana avanza `1/dur`, paga (`Economia.aplicar deficit` ×`ESCALA`=4 para el Estado; deuda de la comunidad según su peso en el PIB), tiene un
+1/240 de incidente (retraso, sobrecoste o paralización) y, al llegar a 1, se inaugura: `efectos` (aprobación, agravio, relación con Moncloa, economía, voto) se aplica a quien gobierna al
+inaugurarla; `bonus[prov][partido]` (≤ 1,10, ×0,9937/semana) lo lee `Es.votosProv` (no toca `pn`, que el modo partido reescribe). La IA (`_ia`, una vez al mes) anuncia obras estatales si el jugador
+no es del Ejecutivo central y autonómicas en las comunidades que no preside. Las **propuestas** (`sugerencias`) usan su propio generador (semilla por semana) para no gastar el azar de la partida.
+
+**Acciones** (grupo `mapa`, que la Agenda no lista): `obra_lanzar` (2 ◆), `obra_pedir` (1 ◆), `obra_cancelar` (1 ◆), `obra_acelerar` (2 ◆). Al ordenar o pedir se cierra el constructor (`E.ui.mapa.obra`)
+y la obra queda seleccionada (`E.ui.mapa.sel = {t:'obra', id}`).
+
+**Interfaz.** Capa `obras` («Infraestructuras»: inversión por habitante por provincia y las líneas). El mapa dibuja los trazos en `.m-obras` (no dependen del zoom: `non-scaling-stroke`), las
+cabezas de obra y las obras puntuales con `dinamico` en `.m-marc`. El constructor es un estado de `E.ui.mapa.obra = {tipo, a, b}`: mientras existe, las ciudades se pulsan para elegir origen y destino
+(`evalObra` calcula cuáles valen y su aviso), la provincia pulsada cede su ciudad principal y el panel (`panelConstructor`) enseña previsión y botones. `panelObras` (sin selección), `panelObra` (una obra) y
+`obrasCiudad` (en la ficha de una ciudad) completan el panel. El botón 🛣 superpone la red en cualquier capa y los filtros ocultan tipos. `Pa.render` aplica `params.capa/sel` una sola vez (antes cada
+refresco devolvía el mapa a la capa de entrada).
+
+**Pruebas.** `tools/obras-es.js` (modelo, normas, competencias, ciclo, voto, topes, IA, partidas antiguas, estado guardable y tres partidas largas del piloto, que ya ordena, pide, cancela y acelera
+obras al azar) y `tools/obras-ui.js [movil]` (Playwright).
 
 ## Desatasco (`sistemas/desatasco.js`, `App.vigilar/desatascar`, Ajustes → 🛟)
 

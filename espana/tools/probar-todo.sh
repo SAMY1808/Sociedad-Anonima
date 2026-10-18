@@ -22,7 +22,7 @@ pruebas_ui() {
   carril() { for t in "$@"; do local n=${t%%:*} a=${t#*:}; [ "$a" = "$t" ] && a=""; timeout 295 node tools/$n-ui.js $a > "$OUT/ui/$n${a:+-$a}.txt" 2>&1; echo "$n${a:+ $a} exit $?" >> "$OUT/ui/_hechas"; done; }
   local L1="mapa mapa:movil pestanas pestanas:movil modopartido modopartido:movil escision crisis2 declaracion estatuto financia financia:movil constit constit:movil"
   local L2="nochepe autogob autogob:movil campana comunidad creacion equipo presupuesto declaracion:movil art155 campmun campmun:movil gobaut gobaut:movil"
-  local L3="invest leyesniv noche nocheaut parlaut estatuto:movil art155:movil crisis3 crisis3:movil oposicion oposicion:movil desatasco desatasco:movil"
+  local L3="invest leyesniv noche nocheaut parlaut estatuto:movil art155:movil crisis3 crisis3:movil oposicion oposicion:movil desatasco desatasco:movil obras obras:movil"
   local L4="provincia renuncia escenas escenas:movil barometro foco foco:movil escudos escudos:movil congreso sesion"
   if [ "$MODO" != "rapido" ]; then L1="$L1 largas:aut"; L2="$L2 largas:nac"; L3="$L3 largas:loc largas:partido"; L4="$L4 largas:base largas:movil largas:carga"; fi
   carril $L1 & carril $L2 & carril $L3 & carril $L4 & wait

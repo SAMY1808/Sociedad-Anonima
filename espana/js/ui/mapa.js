@@ -33,6 +33,7 @@ window.ESP = window.ESP || {};
   const crisisDe = (E, c) => C.Crisis ? C.Crisis.asegurar(E).activas.filter(cr => cr.fase !== 'cerrada' && cr.regs.includes(c)) : [];
   const alcaldePrincipal = (E, p) => { const m = Object.values(E.esp.muni.m).filter(x => x.prov === p).sort((a, b) => b.pob - a.pob)[0]; return m || null; };
 
+  const infra = (E, p) => (C.Obras && C.Obras.porProv(E)[p]) || { eurHab: 0, autovia: 0, ave: 0, electrica: 0, puntos: 0, curso: 0 };
   const CAPAS = [
     { id: 'voto', g: 'Política', n: 'Generales', d: 'Partido ganador en cada circunscripción; más intenso cuanto mayor la ventaja.', nivel: 'prov', etq: (E, p) => prov(p)[2],
       color(E, p) { const pr = E.esp.prov[p]; if (!pr) return { f: NEUTRO }; const o = ordenVotos(pr), m = pr.votos[o[0]] - (pr.votos[o[1]] || 0); return { f: E.partidos[pr.ganador].color, o: clamp(0.55 + m / 60, 0.55, 1) }; },
@@ -75,7 +76,12 @@ window.ESP = window.ESP || {};
       tt(E, p) { const v = C.Sede ? Math.round(C.Sede.asegurar(E).impl[p] || 0) : 0; return tt(E, p, [['Implantación de tu partido', v + ' %'], ['Diputados en juego', prov(p)[2]]]); },
       leyenda: () => ({ grad: gradCss(AZUL), de: 'Débil', a: 'Fuerte' }) },
     { id: 'pob', g: 'Partido', n: 'Peso en el Congreso', d: 'Diputados que elige cada circunscripción.', nivel: 'prov', rank: false, etq: (E, p) => prov(p)[2],
-      color: (E, p) => ({ f: rampa(AZUL, Math.sqrt(prov(p)[2] / 37)) }), tt: (E, p) => tt(E, p, [['Diputados', prov(p)[2]], ['Población (miles)', U.n(prov(p)[3])]]), leyenda: () => ({ grad: gradCss(AZUL), de: '1 diputado', a: '37' }) }
+      color: (E, p) => ({ f: rampa(AZUL, Math.sqrt(prov(p)[2] / 37)) }), tt: (E, p) => tt(E, p, [['Diputados', prov(p)[2]], ['Población (miles)', U.n(prov(p)[3])]]), leyenda: () => ({ grad: gradCss(AZUL), de: '1 diputado', a: '37' }) },
+    { id: 'obras', g: 'Obras', n: 'Infraestructuras', d: 'Inversión en obras por habitante y red de autovías, alta velocidad y líneas eléctricas. Aquí se trazan, se piden y se siguen las obras nuevas.', nivel: 'prov', ciudades: 'todas', ciuNeutra: true, obras: true, rank: false,
+      etq: (E, p) => C.Obras ? U.n(Math.round(infra(E, p).eurHab)) : null,
+      color(E, p) { return C.Obras ? { f: rampa(AZUL, 0.04 + 0.5 * Math.sqrt(clamp(infra(E, p).eurHab / 8000, 0, 1))) } : { f: NEUTRO }; },
+      tt(E, p) { const x = infra(E, p); return tt(E, p, [['Inversión en obras', U.n(Math.round(x.eurHab)) + ' €/hab.'], ['Autovías · alta velocidad · eléctricas', `${x.autovia} · ${x.ave} · ${x.electrica}`], ['Obras puntuales', x.puntos], ['En construcción', x.curso]]); },
+      leyenda: () => ({ grad: gradCss(AZUL), de: 'Menos', a: 'Más', lineas: C.Obras ? ['autovia', 'ave', 'electrica'].map(k => [C.Obras.TIPOS[k].col, C.Obras.TIPOS[k].n]) : [] }) }
   ];
   const POR_ID = Object.fromEntries(CAPAS.map(c => [c.id, c]));
 
@@ -101,7 +107,7 @@ window.ESP = window.ESP || {};
     leyenda(E, capa) {
       const L = Mapa.capa(capa), x = L.leyenda ? L.leyenda(E) : {};
       if (x.partidos) return `<div class="leyenda">${x.partidos.map(k => `<span><i style="background:${E.partidos[k].color}"></i>${esc(E.partidos[k].sigla)}</span>`).join('')}</div>`;
-      if (x.grad) return `<div class="leyenda mapa-grad"><span>${esc(x.de)}</span><i style="background:${x.grad}"></i><span>${esc(x.a)}</span></div>`;
+      if (x.grad) return `<div class="leyenda mapa-grad"><span>${esc(x.de)}</span><i style="background:${x.grad}"></i><span>${esc(x.a)}</span></div>` + (x.lineas && x.lineas.length ? `<div class="leyenda mapa-lineas">${x.lineas.map(([c, t]) => `<span><i class="sw-l" style="background:${c}"></i>${esc(t)}</span>`).join('')}<span><i class="sw-l sw-d"></i>En obras</span></div>` : '');
       if (x.items) return `<div class="leyenda">${x.items.map(([c, t]) => `<span><i style="background:${c.startsWith('url') ? 'repeating-radial-gradient(circle,#fff 0 1px,transparent 1.5px 4px)' : c}"></i>${esc(t)}</span>`).join('')}</div>`;
       return '';
     },
@@ -160,7 +166,7 @@ window.ESP = window.ESP || {};
         for (const m of Object.values(E.esp.muni.m)) { const p = M.ciu[m.id]; if (!p) continue; const sel = o.muni === m.id; cs += `<circle class="ciu${sel ? ' sel' : ''}" data-muni="${m.id}" data-tt="${esc(Mapa.avisoCiudad(E, m))}" cx="${p[0]}" cy="${p[1]}" r="${sel ? 62 : 38}" fill="${sel ? '#f2d57a' : '#f2eee0'}" vector-effect="non-scaling-stroke"/>`; }
         s += `<g class="m-ciu">${cs}</g>`;
       }
-      if (o.interactivo) s += '<g class="m-ciu"></g><g class="m-marc"></g><g class="m-etq"></g>';
+      if (o.interactivo) s += '<g class="m-obras"></g><g class="m-ciu"></g><g class="m-marc"></g><g class="m-etq"></g>';
       return s + '</svg>';
     }
   };

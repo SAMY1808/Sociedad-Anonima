@@ -52,7 +52,9 @@ module.exports = function (C) {
     if (id === 'ordenanza') args.tipo = U.pick(['vivienda', 'obras', 'turismo']);
     if (id === 'cabildear_exp') { const ab = C.UE.abiertos(E); if (ab.length) args.exp = U.pick(ab).id; }
     if (id === 'negociar_pge') { args.pid = U.pick(P.partidos); const ds = C.Presupuesto.demandas(E, args.pid); if (ds.length) args.k = U.pick(ds).k; }
-      if (id === 'proponer_exp') args.tpl = U.pick(C.DATA.expedientes.filter(x => x.tipo !== 'cumbre')).id;
+      if (id === 'obra_lanzar' || id === 'obra_pedir') { const ob = C.Obras.aleatoria(E, id === 'obra_pedir' ? 'pedir' : 'lanzar'); if (ob) Object.assign(args, ob); }
+    if (id === 'obra_cancelar' || id === 'obra_acelerar') { const mias = C.Obras.activas(E).filter(w => w.quien === 'jug'); if (mias.length) args.id = U.pick(mias).id; }
+    if (id === 'proponer_exp') args.tpl = U.pick(C.DATA.expedientes.filter(x => x.tipo !== 'cumbre')).id;
     const r = C.Acciones.ejecutar(id, args); if (r.ok !== false) hechas[id] = (hechas[id] || 0) + 1;
   }
       return hechas;

@@ -39,7 +39,7 @@ const movil = process.argv[2] === 'movil', PUERTO = movil ? 8320 : 8319;
   ok(await E(() => ESP.E.ui.pantalla === 'mapa'), 'la partida empieza en el mapa');
   ok(await E(() => !!document.querySelector('#nav button[data-p="mapa"]')) || movil, 'el menú tiene «Mapa»'); if (movil) ok(await E(() => [...document.querySelectorAll('#nav button')].some(x => /Mapa/.test(x.textContent))), 'la barra inferior del móvil tiene «Mapa»');
   const base = await E(() => ({ fichas: document.querySelectorAll('#vista svg.mapa-es .ficha').length, chips: document.querySelectorAll('#vista [data-mcapa]').length, zoom: document.querySelectorAll('#vista .mapa-zoom button').length, panel: document.querySelector('#mapa-panel h3').textContent, ley: document.querySelector('#mapa-leyenda').textContent.length, w: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
-  ok(base.fichas === 54 && base.chips === 16 && base.zoom === 4, 'el mapa trae 54 elementos pulsables, 16 capas y 4 botones de zoom');
+  ok(base.fichas === 54 && base.chips === 17 && base.zoom === 5, 'el mapa trae 54 elementos pulsables, 17 capas y 5 botones (acercar, alejar, todo, mi territorio y obras)');
   ok(/España/.test(base.panel) && base.ley > 10, 'sin selección el panel resume el país y la leyenda explica los colores');
   ok(base.w <= base.cw + 1, 'la página no se desborda en horizontal (' + base.w + ' de ' + base.cw + ')');
   ok(await E(() => document.querySelectorAll('#vista .m-etq text').length >= 8), 'se rotulan las comunidades sobre el mapa');

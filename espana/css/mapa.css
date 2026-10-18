@@ -86,3 +86,48 @@
   .mapa-resumen .btn{white-space:nowrap}
   .mapa-panel{scroll-margin-top:100px}
 }
+
+/* ── Obras públicas sobre el mapa ── */
+.mapa-es .m-obras path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mapa-es .o-h{opacity:.95}
+.mapa-es .o-h.o-red{opacity:.5}
+.mapa-es .o-c{opacity:.6;stroke-dasharray:6 5}
+.mapa-es .o-p{opacity:1}
+.mapa-es .o-h.sel,.mapa-es .o-c.sel{opacity:1;filter:drop-shadow(0 0 4px #fff)}
+.mapa-es .o-prev{stroke:#f6d365;stroke-width:3.2px;stroke-dasharray:9 6;animation:mapa-marcha 1s linear infinite}
+@keyframes mapa-marcha{to{stroke-dashoffset:-30}}
+@media (prefers-reduced-motion:reduce){.mapa-es .o-prev{animation:none}}
+.mapa-es .m-obras .o-hit{stroke:transparent;stroke-width:12px;pointer-events:stroke;cursor:pointer}
+.mapa-es.construyendo .m-obras .o-hit{pointer-events:none}
+.mapa-es.construyendo{cursor:crosshair}
+.mapa-es .ciu.ob-ok{stroke:#7fe0aa;stroke-width:2px}
+.mapa-es .ciu.ob-no{opacity:.28;stroke-width:.8px}
+.mapa-es .ciu.ob-a{stroke:var(--oro2);stroke-width:3px;fill:#f6d365}
+.mapa-es .ciu.ob-b{stroke:#7fe0aa;stroke-width:3px;fill:#d9ffe8}
+.mapa-es .obra-m .pulso{stroke:#fff}
+.mapa-pasos{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
+.mapa-pasos span{color:var(--texto2)}
+.mapa-pasos span.ahora{color:var(--oro2)}
+.mapa-pasos span.hecho{color:#7fe0aa}
+.mapa-ayuda{font-size:12.5px;color:var(--oro2);margin:6px 0 2px}
+.mapa-lab{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue)}
+.mapa-selc{background:var(--panel2);border:1px solid var(--borde);color:var(--texto);border-radius:8px;padding:7px 10px;font-size:13.5px;text-transform:none;letter-spacing:0;width:100%}
+.mapa-selc option:disabled{color:var(--tenue)}
+.m-tipo{border-color:var(--borde2)}
+.m-tipo.ord{border-color:var(--oro);color:var(--oro2)}
+.m-chip{background:var(--panel2);border:1px solid var(--borde);color:var(--texto2);border-radius:999px;padding:5px 11px;font-size:12px;white-space:nowrap}
+.m-chip.activo{background:var(--oro-tenue);border-color:var(--oro);color:var(--oro2)}
+.mapa-obrabar{display:none}
+.mapa-obrabar.ver{display:flex;align-items:center;gap:8px;position:absolute;left:10px;top:10px;max-width:calc(100% - 66px);background:rgba(10,17,29,.94);border:1px solid var(--oro);border-radius:999px;padding:4px 5px 4px 12px;font-size:13px;backdrop-filter:blur(4px);z-index:3}
+.mapa-obrabar b{white-space:nowrap}
+.mapa-obrabar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--texto2)}
+.mapa-obrabar .btn{white-space:nowrap}
+.mapa-w.construyendo .mapa-resumen{display:none!important}
+.mapa-zoom .m-btn-obras.activo{border-color:var(--oro);color:var(--oro2)}
+.mapa-lineas{display:flex;gap:4px 12px;margin-top:5px;flex-wrap:wrap;font-size:12px}
+.sw-l{display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.sw-l.sw-d{background:repeating-linear-gradient(90deg,#ccc 0 5px,transparent 5px 9px)}
+.ob-fila:hover{background:var(--oro-tenue)}
+.ob-fila:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+.mapa-obrabar em.nom{font-style:normal}
+@media (max-width:700px){.mapa-obrabar em.nom{display:none}}

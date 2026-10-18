@@ -15,10 +15,12 @@ Es una PWA: se puede instalar y jugar sin conexión.
 ## Qué hay
 
 - **El mapa de España como centro del juego** (pantalla *Mapa*, la primera al empezar): el contorno real de las 52
-  circunscripciones (Ceuta, Melilla y las Canarias en su recuadro), con **16 capas** de datos (generales, gobierno
+  circunscripciones (Ceuta, Melilla y las Canarias en su recuadro), con **17 capas** de datos (generales, gobierno
   autonómico, alcaldías, próximas autonómicas, relación con Moncloa, independentismo, autogobierno, agravio,
-  competencias, financiación, deuda, aprobación, estabilidad, emergencias, implantación de tu partido y peso en el
-  Congreso). **Zoom con la rueda o el pellizco, arrastre, doble clic y teclado**; pulsas una comunidad, una provincia
+  competencias, financiación, deuda, aprobación, estabilidad, emergencias, implantación de tu partido, peso en el
+  Congreso e infraestructuras). **Y se construye sobre él**: en la capa *Obras* trazas **carreteras, alta velocidad y
+  líneas eléctricas de una ciudad a otra** (o proyectas aeropuertos, hospitales, campus y parques solares), ves su coste,
+  su plazo y lo que darán, y las ordenas o las pides según tu cargo (véase *Obras sobre el mapa*). **Zoom con la rueda o el pellizco, arrastre, doble clic y teclado**; pulsas una comunidad, una provincia
   o una de las 66 grandes ciudades y se abre su ficha (gobierno, indicadores, resultados, alcaldía, escudo) con las
   **acciones que puedes lanzar allí** (mitin, visita, cabildeo, plan territorial, abrir sede, mudarte…). Se adapta a tu
   cargo (si presides una comunidad o una ciudad, el mapa se abre encuadrado en ella), marca el artículo 155 y las
@@ -189,8 +191,10 @@ node tools/extras-es.js                                      # tertulias, guía,
 node tools/pestanas-ui.js [movil]                            # Playwright: humo de todas las pestañas nuevas
 node tools/creacion-ui.js [movil]                            # Playwright: partido propio, escenario y código de partida
 node tools/movil-es.js nacional ES_UPC direccion u           # Playwright en formato móvil 390×844: capturas /tmp/u-*.png y comprobaciones
-node tools/mapa-es.js                                        # mapa de España: geometría (52 circunscripciones, 66 ciudades, Canarias), 16 capas, SVG, marcas y enfoque por cargo
+node tools/mapa-es.js                                        # mapa de España: geometría (52 circunscripciones, 66 ciudades, Canarias), 17 capas, SVG, marcas y enfoque por cargo
 node tools/mapa-ui.js [movil]                                # Playwright: capas, selección, zoom, arrastre, teclado, ciudades, Centro de mando, Territorio, Crisis y Creación
+node tools/obras-es.js                                       # obras públicas: coste y plazo, normas, quién ordena o pide, ciclo de vida, voto por provincia, topes, IA, partidas antiguas y piloto
+node tools/obras-ui.js [movil]                               # Playwright: capa Obras, trazar una autovía de A a B, ordenarla, verla avanzar e inaugurarse, pedir obras, ficha de ciudad, filtros y Agenda
 node tools/desatasco-es.js                                   # el debate de unas generales que un cargo autonómico no ve, la reparación al cargar y el desatasco de decisiones sin ventana
 node tools/desatasco-ui.js [movil]                           # Playwright: partida con el aviso heredado, ventana que falla o no se abre, botón de Ajustes y juego normal sin intervenciones
 node tools/largas-es.js [semanas=520] [perfil] [semillas=2]  # partidas largas en Node: 10 perfiles × 10 años con el piloto automático; sin errores, sin NaN, sin bloqueos y con guardado/carga cada año
@@ -287,3 +291,25 @@ Al crear la partida, elige **🎗 Modo Partido**: eres el líder y dirigís el p
 - **Límites conocidos**: las geometrías están simplificadas (≈ 300 m), Ceuta y Melilla se dibujan como anillos pulsables, no
   hay mapa municipal (las 66 ciudades son puntos) y las capas se calculan en el navegador cada vez que cambia la partida.
 
+## Obras sobre el mapa (`js/sistemas/obras.js`, capa «Infraestructuras» del mapa)
+
+El mapa deja de ser sólo para mirar: en la familia de capas **Obras** se trazan carreteras, líneas de alta velocidad y líneas eléctricas **de una ciudad a otra**, y se
+proyectan aeropuertos, hospitales, campus y parques solares en una ciudad.
+
+- **Cómo se usa**: elige un tipo de obra (o pulsa «Proyectar desde aquí» en la ficha de una ciudad, o «Preparar» en una propuesta), pulsa en el mapa la ciudad de origen y
+  la de destino (las que no se pueden unir se atenúan y dicen por qué; también hay selectores y se puede pulsar una provincia para elegir su ciudad principal). Aparece
+  la vista previa del trazado y la previsión: **kilómetros, coste, plazo, importancia, quién paga y qué da al inaugurarla**. Después se ordena (2 ◆) o, si tu cargo no
+  tiene la competencia, se **pide** (1 ◆) con una probabilidad que se ve de antemano.
+- **Quién puede qué**: el presidente del Gobierno ordena las obras del Estado (autovías, alta velocidad, red eléctrica, aeropuertos, parques solares); el ministro de
+  Transportes, carreteras, trenes y aeropuertos; el de Transición Ecológica o Industria, red eléctrica y energía; el presidente de una comunidad, autovías, hospitales,
+  campus y parques solares **dentro de su territorio**. Hospitales y campus son competencia autonómica (del Estado sólo en Ceuta y Melilla). Los demás cargos piden:
+  decide la administración competente y la probabilidad sube con la afinidad de su partido, tu popularidad, tu relación con Moncloa y la importancia de la obra.
+- **Qué pasa**: cada obra se anuncia, avanza semana a semana y puede sufrir retrasos, sobrecostes o hallazgos arqueológicos. Mientras se construye cuesta dinero (déficit del
+  Estado o deuda de la comunidad; con el procedimiento de déficit excesivo, Bruselas frena las de más de 1.000 M€; hay un tope de 4 obras a la vez para el Estado y 2 para cada
+  comunidad). Al **inaugurarla** sube la aprobación de quien gobierna, baja el agravio territorial (y mejora la relación con Moncloa si la hace el Estado), mueve algo la
+  economía (crecimiento, paro o inflación según el tipo) y da **crédito electoral** al partido que gobierna en cada provincia que cruza (hasta un 10 %, que se diluye en unos
+  dos años). Se puede acelerar (+8 % de avance, 5 % más cara) o cancelar (cuesta aprobación y popularidad).
+- **Un mundo que se mueve**: el Estado (si no lo presides tú) y las comunidades (las que no presides) anuncian y construyen sus propias obras, y empiezas con una red existente
+  aproximada (≈ 100 tramos).
+- **Límites honestos**: los trazos son curvas entre centros de ciudad, no trazados reales; sólo hay 66 ciudades; las provincias que atraviesa una vía se calculan por proximidad a su
+  centro; costes, plazos y efectos son aproximaciones de juego (el gasto se multiplica ×4 para que se note en el déficit).
