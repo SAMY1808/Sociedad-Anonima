@@ -193,6 +193,10 @@ node tools/mapa-es.js                                        # mapa de España: 
 node tools/mapa-ui.js [movil]                                # Playwright: capas, selección, zoom, arrastre, teclado, ciudades, Centro de mando, Territorio, Crisis y Creación
 node tools/desatasco-es.js                                   # el debate de unas generales que un cargo autonómico no ve, la reparación al cargar y el desatasco de decisiones sin ventana
 node tools/desatasco-ui.js [movil]                           # Playwright: partida con el aviso heredado, ventana que falla o no se abre, botón de Ajustes y juego normal sin intervenciones
+node tools/largas-es.js [semanas=520] [perfil] [semillas=2]  # partidas largas en Node: 10 perfiles × 10 años con el piloto automático; sin errores, sin NaN, sin bloqueos y con guardado/carga cada año
+node tools/guardados-es.js [filtro] [semanas=120]            # compatibilidad: partidas guardadas por versiones anteriores (tools/guardados) se cargan, se juegan y se vuelven a guardar con la versión actual
+node tools/largas-ui.js <aut|loc|nac|base|partido|movil|carga>   # partidas largas en el navegador: años pulsando «Trimestre»; falla si el tiempo se para, si interviene el desatasco o si hay errores
+tools/probar-todo.sh [todo|node|ui|rapido]                   # todas las pruebas (Node y navegador, sin choques de puertos) con un resumen
 ```
 
 ## Equipo, contrapesos y sociedad (pestañas propias)

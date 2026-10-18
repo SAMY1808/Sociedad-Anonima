@@ -58,4 +58,13 @@ console.log('Cuarenta semanas de campaña con un cargo autonómico, sin atascars
   ok(E.fecha.t - t0 === 40, 'el tiempo avanza las 40 semanas por las generales (' + paradas + ' decisiones de otro tipo tuvieron que resolverse con el desatasco)');
   ok(debates === 0 && camp.debate.hecho && !E.esp.pendienteDebate, 'sin ningún debate pendiente por el camino: se celebró solo');
   ok(E.esp.cortes.estado !== 'disueltas' || E.esp.cortes.proxT > E.fecha.t, 'las generales se celebran (estado: ' + E.esp.cortes.estado + ')'); }
+console.log('Cada bloqueo tiene su ventana y su desatasco');
+{ const fs = require('fs'), path = require('path'), src = f => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+  const t = src('js/core/tiempo.js'), i0 = t.indexOf('bloqueo() {'), blo = t.slice(i0, t.indexOf('\n    }', i0));
+  const flags = [...new Set([...blo.matchAll(/\.(pendiente\w*|\w+Pendiente|escandalo)\b/g)].map(m => m[1]))];
+  const app = src('js/app.js'), rev = app.slice(app.indexOf('_revisar(E) {'), app.indexOf('    ayuda() {')), des = src('js/sistemas/desatasco.js');
+  ok(flags.length >= 17, 'Tiempo.bloqueo vigila ' + flags.length + ' avisos (' + flags.join(', ') + ')');
+  const sinVentana = flags.filter(f => !rev.includes(f)); ok(!sinVentana.length, 'cada aviso que detiene el tiempo tiene su ventana en App._revisar' + (sinVentana.length ? ': faltan ' + sinVentana.join(', ') : ''));
+  const sinSalida = flags.filter(f => !des.includes(f) && !(f === 'pendientes' && des.includes('eventos.pendientes')) && !(f === 'pendiente' && des.includes('ue.pendiente'))); ok(!sinSalida.length, 'cada aviso tiene su salida en el desatasco' + (sinSalida.length ? ': faltan ' + sinSalida.join(', ') : ''));
+  ok(/pendientesJugador/.test(rev) && /urgente/.test(des), 'los asuntos urgentes del Consejo de Ministros también'); }
 console.log('errores', errores, '| fallos', fallos); process.exit(fallos || errores ? 1 : 0);

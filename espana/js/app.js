@@ -186,7 +186,11 @@ window.ESP = window.ESP || {};
        Se resuelve sola por el camino más neutro y se avisa. */
     vigilar() {
       clearTimeout(App._vig);
-      App._vig = setTimeout(() => { const E = C.E; if (E && !UI.pila.length && C.Tiempo.bloqueo()) App.desatascar('sin ventana'); }, 400);
+      App._vig = setTimeout(() => {
+        const E = C.E; if (!E || UI.pila.length || !C.Tiempo.bloqueo()) return;
+        try { App._revisar(E); } catch (e) { console.error('[App] la ventana de una decisión pendiente falló', e); return App.desatascar('ventana con error'); }   // antes de rendirse, se intenta abrir su ventana otra vez
+        if (!UI.pila.length && C.Tiempo.bloqueo()) App.desatascar('sin ventana');
+      }, 400);
     },
     desatascar(motivo, prof) {
       const E = C.E; if (!E || !C.Desatasco || (prof || 0) > 12) return;

@@ -33,6 +33,7 @@ window.ESP = window.ESP || {};
       const m = E.esp.muni.m[id], v = C.Es.votosProv(E, m.prov, 0), r = {};
       for (const k in v) {
         const p = E.partidos[k];
+        if (m.loc[k] == null) m.loc[k] = Math.exp(U.gauss(0, 0.16));      // partidos nacidos después de generar el mundo (escisiones de barones, partidos nuevos): sin este factor el voto salía NaN
         let x = v[k] * m.loc[k] * (ruido ? Math.exp(U.gauss(0, ruido)) : 1);
         if (p.amb === 'reg') x *= 1.08;
         if (m.coal && m.coal.includes(k)) x *= 1 + (m.aprob - 50) / 180;
@@ -138,6 +139,12 @@ window.ESP = window.ESP || {};
   };
 
   C.Municipios = Mu;
+  /* Partidas guardadas con votos municipales NaN (se guardaron como null): los partidos nacidos tras generar el mundo (escisiones de barones, partidos nuevos) no tenían factor local.
+     Al cargar se completan los factores y los votos que faltan pasan a 0 (la campaña municipal y los resultados parten de ahí). */
+  C.Bus.on('partida:cargada', E => {
+    try { const ps = E.paises.ES.partidos; for (const id in E.esp.muni.m) { const m = E.esp.muni.m[id]; for (const k of ps) if (m.loc[k] == null) m.loc[k] = Math.exp(U.gauss(0, 0.16)); for (const k in m.votos) if (!Number.isFinite(m.votos[k])) m.votos[k] = 0; } }
+    catch (e) { console.error('[Municipios] no se pudo sanear al cargar', e); }
+  });
   C.Tiempo.registrar('municipios', { init: Mu.init }, 12);
   C.Tiempo.registrar('municipios_turno', { turno: Mu.turno }, 37);
 })(window.ESP);

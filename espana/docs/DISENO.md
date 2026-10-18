@@ -315,3 +315,23 @@ escándalo huérfanos…), devuelve un texto y, si no basta, `limpiar(E)` borra 
 `tools/ui-es.js` falla si ocurre en el juego normal, porque entonces falta una ventana de verdad. Al añadir una decisión pendiente nueva hay que dar de alta su rama en `Tiempo.bloqueo`, en
 `App._revisar` y aquí.
 
+## Partidas largas y compatibilidad (`tools/piloto.js`, `largas-es.js`, `largas-ui.js`, `guardados-es.js`)
+
+El producto es una carrera larga: los fallos que de verdad duelen aparecen al cabo de años (un debate colgado en el año 7, votos NaN tras la escisión de un barón…). Para cazarlos antes:
+- **Piloto automático** (`tools/piloto.js`): resuelve las decisiones pendientes y ejecuta acciones con argumentos válidos al azar; lo usan `jugador-es.js`, el generador de partidas y las pruebas largas.
+  Si el piloto no sabe resolver un bloqueo lo deja al desatasco y lo anota (`piloto.desatascos`): eso es un fallo de la prueba, porque significa que falta una rama o una ventana.
+  **Al añadir una decisión pendiente nueva** hay que darla de alta en `Tiempo.bloqueo`, `App._revisar`, `Desatasco` y `piloto.resolver` (la auditoría de `desatasco-es.js` comprueba las tres primeras).
+- **`largas-es.js`**: 10 perfiles (nacional, autonómico, local y modo partido) × 2 semillas × 10 años. Cada año revisa que no haya NaN, funciones ni objetos que no sean datos, que el Congreso sume 350
+  escaños y que guardar y cargar (JSON → `Estado.migrar` → `partida:cargada`) devuelva la misma partida. `Mundo.nueva` y el piloto corren en milisegundos: 10 años ≈ 5 s.
+- **`guardados-es.js`**: cada partida de `tools/guardados/*.json.br` (generadas con `guardados/generar.js` por versiones anteriores —los commits de la etiqueta— y por la actual) debe cargarse, jugar 120 semanas
+  sin errores ni bloqueos y guardarse de nuevo. Con `EXTRA=/ruta/partida.json` se prueba una partida real de un jugador. Al publicar un cambio de estructura, genera partidas nuevas con la versión anterior
+  (`git worktree add /tmp/x <commit>`, copia `tools/{modulos,piloto}.js` y `tools/guardados/generar.js` y ejecútalo allí) y añádelas.
+- **`largas-ui.js`**: el mismo juego, pero por el navegador de verdad: partidas nuevas (autonómica que lidera un partido nacional, local, nacional, desde la base, modo partido, móvil) y las guardadas de versiones
+  anteriores, avanzando años con «Trimestre» y resolviendo las ventanas como una persona. Falla si el tiempo se para, si el desatasco interviene, si una ventana no se deja resolver o hay errores de consola.
+- **`probar-todo.sh`** lanza todo en carriles que evitan el choque de puertos entre una prueba y su versión móvil.
+
+**Reparaciones al cargar.** Una partida de una versión anterior puede traer datos que la versión nueva no esperaba. El evento `partida:cargada` (lo emite `Guardado.desdeTexto`) permite repararlos sin tocar las partidas:
+`Campana.sanearDebate` (avisos de debate huérfanos) y un oyente de `municipios.js` (partidos nacidos tras generar el mundo —escisiones de barones— sin factor local y con votos municipales NaN). Toda reparación debe ser **idempotente**:
+`largas-es.js` y `guardados-es.js` exigen que, tras la primera carga, guardar y volver a cargar no cambie nada. Además `Acciones.ejecutar` captura los fallos internos de una acción (avisa, no cobra puntos y restablece la fatiga) y los deja en
+`console.error`, que todas las pruebas cuentan.
+

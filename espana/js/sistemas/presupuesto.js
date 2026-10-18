@@ -68,7 +68,7 @@ window.ESP = window.ESP || {};
 
     /* ── Negociación: lo que pide cada grupo ── */
     demandas(E, pid) {
-      const p = E.partidos[pid], out = [];
+      const p = E.partidos[pid], out = []; if (!p) return out;
       if (p.amb === 'reg' && p.region) { const R = D().ccaa[p.region].nombre; out.push({ k: 'inv', n: `Inversión extra en ${R}`, d: `+30 % de inversión estatal regionalizada en ${R}.`, v: 0.4, ef: pr => { pr.inv[p.region] = (pr.inv[p.region] || 0) + 30; } }); }
       if (p.eco < -8) { out.push({ k: 'social', n: 'Más gasto social', d: 'Pensiones +3 %, desempleo y servicios sociales +5 %.', v: 0.38, ef: pr => { pr.lev.gas.pens = (pr.lev.gas.pens || 0) + 3; pr.lev.gas.prot = (pr.lev.gas.prot || 0) + 5; } }); out.push({ k: 'gran', n: 'Impuesto a grandes patrimonios y banca', d: 'Sube la intensidad de la tasa en 30 puntos.', v: 0.34, ef: pr => { pr.lev.gran = clamp((pr.lev.gran || 0) + 30, 0, 100); } }); }
       if (p.eco > 8) { out.push({ k: 'fisc', n: 'Rebaja fiscal', d: 'IRPF −3 % y sociedades −4 %.', v: 0.36, ef: pr => { pr.lev.ing.irpf = (pr.lev.ing.irpf || 0) - 3; pr.lev.ing.soc = (pr.lev.ing.soc || 0) - 4; } }); out.push({ k: 'def', n: 'Más gasto en Defensa y seguridad', d: 'Defensa +10 %, Justicia e Interior +4 %.', v: 0.3, ef: pr => { pr.lev.gas.def = (pr.lev.gas.def || 0) + 10; pr.lev.gas.jus = (pr.lev.gas.jus || 0) + 4; } }); }

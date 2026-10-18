@@ -8,6 +8,7 @@ const U = C.U;
 C.Personaje = { sincronizar() {}, cambiar() {}, log() {}, enParlamento: () => false, tras_generales: () => null, tras_autonomicas: () => null, tras_municipales: () => null };
 C.Eventos = { info(E, t, x) { if (process.env.V) console.log('  [info]', t); } };
 const sem = +process.argv[2] || 260;
+let errores = 0; const oe = console.error; console.error = (...a) => { errores++; oe(...a); };      // un fallo dentro de un sistema no aborta la simulación: se cuenta y la prueba falla al final
 const E = C.Mundo.nueva({ semilla: +process.argv[3] || 7, pais: 'ES' });
 const P = E.paises.ES;
 const f = o => Object.keys(o).sort((a, b) => o[b] - o[a]).map(k => (E.partidos[k] ? E.partidos[k].sigla : k) + ' ' + (Math.round(o[k] * 10) / 10)).join(' · ');
@@ -32,3 +33,5 @@ console.log('Eco:', JSON.stringify({ crec: P.ec.crec.toFixed(1), paro: P.ec.paro
 console.log('CAT indep', E.esp.ccaa.CAT.indep.toFixed(1), 'rel', E.esp.ccaa.CAT.relM.toFixed(0), 'proces', E.esp.proces.fase);
 
 if (process.env.G) todas.filter(x => new RegExp(process.env.G).test(x)).forEach(x => console.log(x));
+console.error = oe;
+console.log('errores del juego durante la simulación:', errores); if (errores) process.exitCode = 1;

@@ -25,7 +25,8 @@ window.ESP = window.ESP || {};
       // Fatiga: repetir la misma acción en una semana rinde cada vez menos
       const n = E.jugador.agenda.hechas.filter(h => h.id === id).length;
       E.jugador.fatiga = 1 / (1 + 0.6 * n) * (E._delegado || 1);
-      const r = a.ejecutar(E, args || {}) || { ok: true };
+      /* Una acción que falla por dentro no debe dejar la partida a medias (ni la fatiga puesta): se avisa y no cuesta puntos. */
+      let r; try { r = a.ejecutar(E, args || {}) || { ok: true }; } catch (e) { console.error('[Acciones] fallo en «' + id + '»', e); r = { ok: false, msg: 'No se pudo completar la acción (error interno).' }; }
       E.jugador.fatiga = 1;
       if (r.ok !== false) {
         E.jugador.agenda.puntos -= costo;

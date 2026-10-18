@@ -17,9 +17,9 @@ window.ESP = window.ESP || {};
           else { const sc = C.CrisisDirecto.cat(cr.id); while (cr.paso < sc.pasos.length) C.CrisisDirecto.elegir(E, cr, sc.pasos[cr.paso][4][0][0]); C.CrisisDirecto.cerrar(E, cr); }
         }
         else if (b === 'evento' && E.esp.pendienteDebate) { C.Campana.resolverDebates(E, 'prudente'); que = 'un debate'; }
-        else if (b === 'evento' && E.eventos.pendientes.length) { C.Eventos.resolver(E, 0, 0); que = 'un suceso'; }
+        else if (b === 'evento' && E.eventos.pendientes.length) { const ev = E.eventos.pendientes[0]; C.Eventos.resolver(E, 0, 0); que = 'un suceso («' + ev.titulo + '»)'; }
         else if (b === 'voto' && E.esp.pendienteVotoAut) { const pv = E.esp.pendienteVotoAut; C.Territorio.votarLey(E, pv.c, C.Territorio.leyAut(E, pv.c, pv.id), 'abs'); que = 'una votación autonómica'; }
-        else if (b === 'voto' && E.esp.pendienteConvAut) { E.esp.pendienteConvAut = null; que = 'la convalidación de un decreto-ley'; }
+        else if (b === 'voto' && E.esp.pendienteConvAut) { const pv = E.esp.pendienteConvAut, d = C.Territorio.rdlAut(E, pv.c, pv.id); if (!d || d.estado !== 'vigor') E.esp.pendienteConvAut = null; else C.Territorio.convalidar(E, pv.c, d, 'abs'); que = 'la convalidación de un decreto-ley autonómico'; }
         else if (b === 'voto') { const id = E.parl.pendienteVoto.shift(), p = E.proyectos[id]; if (p) C.Congreso.resolver(E, p, 'abs'); que = 'una votación en el pleno'; }
         else if (b === 'ue') { C.UE.decidir(E, 0, 'abs'); que = 'un voto en el Consejo Europeo'; }
         else if (b === 'noche') { E.elecciones.nochePendiente = null; E.elecciones.pePendiente = null; E.elecciones.presPendiente = null; que = 'una noche electoral'; }
