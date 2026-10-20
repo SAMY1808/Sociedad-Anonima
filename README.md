@@ -36,3 +36,9 @@ Parlamento Europeo y Comisión. Ver [`europa/README.md`](europa/README.md).
 
 En la carpeta [`curul/`](curul/) está **Curul**, un simulador de estrategia política de Colombia
 (independiente de Sociedad Anónima). Ver [`curul/README.md`](curul/README.md).
+
+## Calculadora Electoral (PWA)
+
+En la carpeta [`calculadora-electoral/`](calculadora-electoral/) está la **Calculadora Electoral**, un simulador de sistemas
+electorales (métodos de reparto, escenarios de Colombia, Cauca y Antioquia, capas de gobierno) instalable en iPhone.
+Ver [`calculadora-electoral/README.md`](calculadora-electoral/README.md).
