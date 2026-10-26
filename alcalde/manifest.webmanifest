@@ -1,0 +1,14 @@
+{
+  "name": "Alcalde",
+  "short_name": "Alcalde",
+  "description": "Simulador de ciudad isométrico con política satírica: gobierna, reparte favores y sobrevive a las urnas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E1A22",
+  "theme_color": "#0E1A22",
+  "icons": [
+    { "src": "../icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

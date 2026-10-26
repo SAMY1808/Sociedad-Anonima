@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0E1A22">
+<meta name="description" content="Alcalde: simulador de ciudad isométrico con política satírica, corrupción, elecciones y crisis.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<title>Alcalde · Crónica de un mandato</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="map"></canvas>
+
+<header id="top">
+  <div class="brand"><b id="cityName">Ciudad</b><span id="dateLbl">—</span></div>
+  <div class="chip" title="Caja municipal"><i>💰</i><b id="hMoney">—</b></div>
+  <div class="chip" title="Población"><i>👥</i><b id="hPop">—</b></div>
+  <div class="chip" title="Aprobación general"><i>📊</i><b id="hAppr">—</b></div>
+  <div class="chip hide-s" title="Capital político"><i>🏛️</i><b id="hCap">—</b></div>
+  <div class="chip hide-s" title="Tu fortuna personal"><i>🧳</i><b id="hOwn">—</b></div>
+  <div class="rci" title="Demanda: Residencial · Comercial · Industrial">
+    <div><span id="dR"></span></div><div><span id="dC"></span></div><div><span id="dI"></span></div>
+  </div>
+  <div class="speed">
+    <button data-sp="0" title="Pausa">⏸</button>
+    <button data-sp="1" title="Normal">▶</button>
+    <button data-sp="2" title="Rápido">⏩</button>
+    <button data-sp="3" title="Muy rápido">⏭</button>
+  </div>
+  <button id="btnMenu" class="ic" title="Menú">☰</button>
+</header>
+
+<nav id="tools"></nav>
+
+<aside id="panel">
+  <div class="tabs">
+    <button data-tab="city" class="on">Ciudad</button>
+    <button data-tab="pol">Política</button>
+    <button data-tab="fin">Finanzas</button>
+  </div>
+  <div id="panelBody"></div>
+</aside>
+<button id="btnPanel" class="ic" title="Panel">📋</button>
+
+<div id="tip"></div>
+<div id="ticker"><span>📰</span><p id="tickerTxt">Bienvenido, señor alcalde.</p></div>
+<div id="toasts"></div>
+<div id="modal" class="hidden"><div class="card" id="modalCard"></div></div>
+
+<script src="game.js"></script>
+</body>
+</html>
