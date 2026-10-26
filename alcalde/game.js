@@ -741,6 +741,13 @@ function act(a,arg){
   if(a==='skim'){ if(G.money<4000)return toast('No hay caja que desviar',1); const x=Math.round(G.money*.1);E.money(-x);E.own(x);E.susp(12);toast(`Desvías ${fmt(x)} a una cuenta lejana`) }
   if(a==='loan'){ if(G.debt>=90000)return toast('El banco ya no te presta más',1);G.money+=10000;G.debt+=10000;toast('Préstamo recibido: +$10.000') }
   if(a==='pay'){ const x=Math.min(10000,G.debt); if(G.money<x||x<=0)return toast(x<=0?'No debes nada':'Sin fondos',1);G.money-=x;G.debt-=x;toast('Abonas a la deuda') }
+  if(a==='buscolor'){
+    const b=BUSCOLS.find(x=>x.id===arg);if(!b)return;
+    G.busColor=arg;
+    for(const c of cars)if(c.bus)c.c=busColorOf();
+    toast(`Flota de buses: ${b.n}`);addLog(`🚌 Repintas la flota de buses: ahora es ${b.n.toLowerCase()}. Los pasajeros no notan la diferencia, pero tú sí.`);
+    refreshUI();return;
+  }
   if(a==='priv'){
     const sec=SECTORS[arg],st=sectorStats(arg);
     if(G.priv[arg]){
@@ -1103,15 +1110,16 @@ function drawTramBrt(i,j,idx){
   if(nb[0]||nb[1]||!any)segs.push([nb[1]||!any?0:.5,nb[0]||!any?1:.5,0]);
   if(nb[2]||nb[3])segs.push([nb[3]?0:.5,nb[2]?1:.5,1]);
   if(br){
-    for(const [a,b,ax] of segs){ax?flat(.34,a,.66,b,.15,'#b8363a'):flat(a,.34,b,.66,.15,'#b8363a')}
-    flat(.34,.34,.66,.66,.15,'#b8363a');
+    const lane=shade(brtColor(),.82);
+    for(const [a,b,ax] of segs){ax?flat(.34,a,.66,b,.15,lane):flat(a,.34,b,.66,.15,lane)}
+    flat(.34,.34,.66,.66,.15,lane);
     ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1;ctx.beginPath();
     for(const [a,b,ax] of segs)for(const o of [.34,.66]){if(ax){ctx.moveTo(X(o,a),Y(o,a)-.15);ctx.lineTo(X(o,b),Y(o,b)-.15)}else{ctx.moveTo(X(a,o),Y(a,o)-.15);ctx.lineTo(X(b,o),Y(b,o)-.15)}}
     ctx.stroke();
     if(br===2){
       prism(.22,.28,.78,.72,2,[196,200,208]);
       prism(.24,.3,.76,.7,13,[150,200,225]);
-      flat(.22,.28,.78,.72,16,'#d9373a');prism(.22,.28,.78,.72,2.5,[217,55,58],13.5);
+      flat(.22,.28,.78,.72,16,shade(brtColor(),1.05));prism(.22,.28,.78,.72,2.5,brtColor(),13.5);
       ctx.fillStyle='#fff';ctx.font='bold 7px sans-serif';ctx.textAlign='center';ctx.fillText('BRT',X(.5,.5),Y(.5,.5)-18.5);
       if(night>.15)lights.push(X(.78,.5)-6,Y(.78,.5)-12,X(.78,.5)+6,Y(.78,.5)-12,X(.78,.5)+6,Y(.78,.5)-4,X(.78,.5)-6,Y(.78,.5)-4);
     }
@@ -1303,16 +1311,23 @@ function drawVeh(v){
   L.cars.forEach((lag,idx)=>{
     const t=v.t-lag,ci=v.i+di*t,cj=v.j+dj*t;
     OX=(ci-cj)*HW;OY=(ci+cj+1)*HH;
-    const col=L.cols[idx%L.cols.length];
+    const col=v.kind==='brt'?brtColor():L.cols[idx%L.cols.length];
     if(di!==0)prism(-L.L,-L.Wd,L.L,L.Wd,L.h,col,L.z);else prism(-L.Wd,-L.L,L.Wd,L.L,L.h,col,L.z);
     if(di!==0)flat(-L.L*.9,-L.Wd,L.L*.9,L.Wd,L.z+L.h+.2,L.win);else flat(-L.Wd,-L.L*.9,L.Wd,L.L*.9,L.z+L.h+.2,L.win);
     if(v.kind==='tram'){ctx.strokeStyle='#444';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(0,0),Y(0,0)-L.z-L.h);ctx.lineTo(X(0,0),Y(0,0)-L.z-L.h-5);ctx.stroke()}
   });
 }
 /* ---------- autos y buses ---------- */
+const BUSCOLS=[
+ {id:'mix',n:'Multicolor',c:null},{id:'amarillo',n:'Amarillo',c:[240,190,40]},{id:'azul',n:'Azul',c:[60,130,210]},{id:'rojo',n:'Rojo',c:[212,48,44]},
+ {id:'verde',n:'Verde',c:[60,160,100]},{id:'naranja',n:'Naranja',c:[236,130,40]},{id:'morado',n:'Morado',c:[150,90,180]},{id:'turquesa',n:'Turquesa',c:[50,180,180]},
+ {id:'rosa',n:'Rosa',c:[235,120,170]},{id:'blanco',n:'Blanco',c:[236,236,240]},{id:'negro',n:'Negro',c:[60,62,70]},
+];
+function busColorOf(){const b=BUSCOLS.find(x=>x.id===(G.busColor||'mix'));return b&&b.c?b.c:(Math.random()<.5?[240,190,40]:[60,150,210])}
+function brtColor(){const b=BUSCOLS.find(x=>x.id===G.busColor);return b&&b.c?b.c:[212,48,44]}
 const CARCOL=[[210,70,60],[240,200,70],[70,130,200],[230,230,230],[60,160,110],[150,90,180]];
 function roadNeighbors(i,j){const o=[];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(isRoad(typeAt(i+a,j+b)))o.push([i+a,j+b]);return o}
-function spawn(roads,bus){const k=pick(roads);const i=k%N,j=(k/N)|0;const nb=roadNeighbors(i,j);if(!nb.length)return null;const n=pick(nb);return {i,j,ni:n[0],nj:n[1],t:Math.random(),sp:bus?rnd(.7,.95):rnd(.9,1.6),c:bus?(Math.random()<.5?[240,190,40]:[60,150,210]):pick(CARCOL),bus}}
+function spawn(roads,bus){const k=pick(roads);const i=k%N,j=(k/N)|0;const nb=roadNeighbors(i,j);if(!nb.length)return null;const n=pick(nb);return {i,j,ni:n[0],nj:n[1],t:Math.random(),sp:bus?rnd(.7,.95):rnd(.9,1.6),c:bus?busColorOf():pick(CARCOL),bus}}
 function updateCars(dt){
   const roads=[];for(let k=0;k<N*N;k++)if(isRoad(grid.typ[k]))roads.push(k);
   const stops=S.cnt?S.cnt[T.BUS]+S.cnt[T.METRO]*2:0;
@@ -1511,6 +1526,9 @@ function panelFin(){
   <div class="row"><span>Interés mensual</span><b>1,2%</b></div>
   <button class="btn" data-a="loan">🏦 Pedir préstamo de $10.000</button>
   <button class="btn" data-a="pay">💵 Abonar $10.000 a la deuda</button>
+  <h4>Imagen de la flota</h4>
+  <div class="sws">${BUSCOLS.map(b=>`<button class="sw ${(G.busColor||'mix')===b.id?'on':''}" data-a="buscolor" data-x="${b.id}" title="${b.n}" style="background:${b.c?`rgb(${b.c.join(',')})`:'conic-gradient(#f0be28,#3c82d2,#d4302c,#3ca064,#f0be28)'}"></button>`).join('')}</div>
+  <small style="color:var(--humo2)">Color de los buses de calle y del troncal BRT. Gratis: es un gusto del alcalde.</small>
   <h4>Tu fortuna</h4><div class="row"><span>Cuenta personal</span><b>${fmt(G.personal)}</b></div>
   <small style="color:var(--humo2)">Es lo único que te llevas al terminar el mandato.</small>`;
   return h;
@@ -1562,6 +1580,7 @@ function help(){
   <b>2.</b> Construye una <b>planta de energía</b> y una <b>torre de agua</b>: sin ellas nada crece.<br>
   <b>3.</b> Mira la <b>demanda</b> (barras arriba) y balancea la ciudad. Pon servicios: policía, clínica, hospital, colegio, biblioteca, universidad, bomberos, parques, reciclaje.<br>
   <b>3b.</b> <b>Densidad y transporte:</b> las zonas densas llegan a torres de nivel 5, pero necesitan buen suelo y <b>transporte público</b> (paradas de bus, metro). Vigila la capa 🚦 <b>Tráfico</b> (tecla T): las <b>avenidas</b>, el transporte y el pico y placa evitan el trancón. El <b>metro elevado</b>, el <b>tranvía</b> (sobre calles) y el <b>troncal BRT</b> estilo TransMilenio (carril rojo sobre avenidas) solo rinden a pleno si conectan dos estaciones o paradas. El BRT mueve multitudes pero le quita espacio a los carros. Las <b>plazas</b> suben el ánimo y el comercio.<br>
+  <b>3b2.</b> En <b>Finanzas</b> puedes escoger el <b>color de la flota de buses</b>.<br>
   <b>3c.</b> <b>Privatizaciones</b> (panel Política): venden la gestión de un servicio por plata inmediata y ahorro mensual, a costa de calidad y de la opinión de vecinos y funcionarios. Puedes licitar limpio... o adjudicar a un amigo.<br>
   <b>4.</b> Cuida a las <b>cuatro facciones</b>: vecinos, empresarios, ecologistas y funcionarios. Su opinión decide si te reeligen cada 4 años.<br>
   <b>5.</b> Gasta <b>capital político</b> en decretos que el concejo debe votar.<br>
