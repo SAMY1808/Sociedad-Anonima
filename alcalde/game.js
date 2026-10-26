@@ -26,8 +26,12 @@ const TOOLS=[
  {id:'ave',n:'Avenida',e:'🛤️',cost:45,up:.9,t:T.AVE,g:'Transporte',d:'Doble calzada: aguanta más del doble de tráfico. Se puede pintar sobre una calle.'},
  {id:'bus',n:'Parada de bus',e:'🚌',cost:350,up:35,t:T.BUS,r:6,g:'Transporte',d:'Cobertura de bus en radio 6: baja el tráfico y sube el valor del suelo. Pon varias.'},
  {id:'metro',n:'Estación de metro',e:'🚇',cost:3200,up:260,t:T.METRO,r:10,big:1,g:'Transporte',d:'Cobertura enorme (radio 10). Permite densidades altas. Obra faraónica: espera sobrecostos.'},
- {id:'rail',n:'Vía elevada',e:'🚝',cost:120,up:3,elev:1,g:'Transporte',d:'Viaducto de metro elevado: va sobre calles, terreno libre y hasta sobre el agua. Se une a otras vías por los lados.'},
- {id:'estel',n:'Estación elevada',e:'🚉',cost:2200,up:180,elev:2,r:11,big:1,g:'Transporte',d:'Se construye sobre una vía elevada. La línea solo funciona a pleno si conecta al menos DOS estaciones; con una sola rinde como un bus.'},
+ {id:'rail',n:'Vía elevada',e:'🚝',cost:120,up:3,lay:'elev',lv:1,g:'Transporte',d:'Viaducto de metro elevado: va sobre calles, terreno libre y hasta sobre el agua. Se une a otras vías por los lados.'},
+ {id:'tram',n:'Vía de tranvía',e:'🚊',cost:70,up:2.5,lay:'tram',lv:1,g:'Transporte',d:'Rieles de tranvía sobre una calle o avenida. Dos paradas conectadas hacen una línea.'},
+ {id:'tramst',n:'Parada de tranvía',e:'🚋',cost:800,up:90,lay:'tram',lv:2,r:6,g:'Transporte',d:'Se pone sobre un riel de tranvía. La línea necesita al menos dos paradas conectadas.'},
+ {id:'brt',n:'Troncal BRT',e:'🛑',cost:110,up:2,lay:'brt',lv:1,g:'Transporte',d:'Carril exclusivo rojo sobre una AVENIDA, estilo TransMilenio. Mueve multitudes, pero le quita capacidad al tráfico general.'},
+ {id:'brtst',n:'Estación BRT',e:'🚍',cost:1100,up:130,lay:'brt',lv:2,r:8,g:'Transporte',d:'Estación de troncal. Una línea necesita al menos dos estaciones conectadas. Se llena hasta reventar.'},
+ {id:'estel',n:'Estación elevada',e:'🚉',cost:2200,up:180,lay:'elev',lv:2,r:11,big:1,g:'Transporte',d:'Se construye sobre una vía elevada. La línea solo funciona a pleno si conecta al menos DOS estaciones; con una sola rinde como un bus.'},
  {id:'coal',n:'Planta de carbón',e:'⚡',cost:2200,up:220,t:T.COAL,r:9,g:'Servicios',d:'Produce 120 unidades de energía. Barata y sucia.'},
  {id:'solar',n:'Planta solar',e:'☀️',cost:2600,up:60,t:T.SOLAR,g:'Servicios',d:'Produce 45 unidades de energía. Limpia pero cara por vatio.'},
  {id:'wind',n:'Parque eólico',e:'🌬️',cost:3000,up:70,t:T.WIND,g:'Servicios',d:'Produce 70 unidades de energía limpia. Los ecologistas aplauden.'},
@@ -78,7 +82,7 @@ function newState(opts){
   return st;
 }
 function allocGrid(){
-  ['ter','typ','lvl','sub','den','elev'].forEach(k=>grid[k]=new Uint8Array(N*N));
+  ['ter','typ','lvl','sub','den','elev','tram','brt'].forEach(k=>grid[k]=new Uint8Array(N*N));
   ['police','fire','clinic','school','park','poll','crime','lv','transit','traf','clean'].forEach(k=>cov[k]=new Float32Array(N*N));
 }
 allocGrid();
@@ -151,24 +155,26 @@ const OPS=['Consorcio Hermanos Cemento','Inversiones El Cuñado S.A.','Fondo Bui
 function sectorStats(sec){
   let cost=0,n=0;
   for(let k=0;k<N*N;k++){const t=grid.typ[k];if(SECTORS[sec].types.includes(t)){cost+=BYTYPE[t].cost;n++}}
-  if(sec==='trn')for(let k=0;k<N*N;k++){const e=grid.elev[k];if(e===1){cost+=120;n++}else if(e===2){cost+=2200+120;n++}}
+  if(sec==='trn')for(let k=0;k<N*N;k++){const e=grid.elev[k];if(e===1){cost+=120;n++}else if(e===2){cost+=2200+120;n++}
+    const tr=grid.tram[k];if(tr===1){cost+=70;n++}else if(tr===2){cost+=870;n++}
+    const br=grid.brt[k];if(br===1){cost+=110;n++}else if(br===2){cost+=1210;n++}}
   return {n,value:n?Math.round(1500+cost*.9):0};
 }
 const privCount=()=>Object.keys(G.priv||{}).filter(k=>G.priv[k]).length;
 function privPick(){const ks=Object.keys(G.priv||{}).filter(k=>G.priv[k]);if(!ks.length)return null;const k=pick(ks);return {sec:k,name:SECTORS[k].n,op:G.privOp[k]||'el operador'}}
-function elevNet(){
+function lineNet(arr){
   const comp=new Int16Array(N*N).fill(-1),comps=[];let rails=0,stations=0;
   for(let k0=0;k0<N*N;k0++){
-    if(!grid.elev[k0])continue;
-    rails++;if(grid.elev[k0]===2)stations++;
+    if(!arr[k0])continue;
+    rails++;if(arr[k0]===2)stations++;
     if(comp[k0]>=0)continue;
     const id=comps.length,c={tiles:[],st:[]};comp[k0]=id;const stack=[k0];
     while(stack.length){
-      const k=stack.pop();c.tiles.push(k);if(grid.elev[k]===2)c.st.push(k);
+      const k=stack.pop();c.tiles.push(k);if(arr[k]===2)c.st.push(k);
       const i=k%N,j=(k/N)|0;
       for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){
         const x=i+a,y=j+b;if(!inb(x,y))continue;const kk=y*N+x;
-        if(grid.elev[kk]&&comp[kk]<0){comp[kk]=id;stack.push(kk)}
+        if(arr[kk]&&comp[kk]<0){comp[kk]=id;stack.push(kk)}
       }
     }
     comps.push(c);
@@ -204,7 +210,7 @@ function computeTraffic(){
   cov.traf.fill(0);
   let tot=0,w=0;
   for(const k of roads){
-    const cap=grid.typ[k]===T.AVE?22:9;
+    const cap=(grid.typ[k]===T.AVE?22:9)*(grid.brt[k]?.75:grid.tram[k]?.92:1);
     const relief=1-Math.min(.65,cov.transit[k]*.5)-(G.decrees.picoplaca?.22:0);
     const v=load[k]*Math.max(.2,relief)/cap;
     cov.traf[k]=v;tot+=v*load[k];w+=load[k];
@@ -240,7 +246,7 @@ function recalc(){
     else if(t===T.HALL){units+=2}
     if((t===T.R||t===T.C||t===T.I))zoneTiles++;
   }
-  const net=elevNet();units+=net.stations*2+Math.floor(net.rails/6);
+  const net=lineNet(grid.elev),netT=lineNet(grid.tram),netB=lineNet(grid.brt);units+=net.stations*2+Math.floor(net.rails/6)+netT.stations+netB.stations;
   const pCap=Math.round((cnt[T.COAL]*120+cnt[T.SOLAR]*45+cnt[T.WIND]*70)*(pv.ene?1.15:1)),wCap=Math.round(cnt[T.WATER]*100*(pv.agua?.92:1));
   const pRatio=units===0?1:Math.min(1,pCap/units),wRatio=zunits===0?1:Math.min(1,wCap/zunits);
   const eff=(G.money<0?.6:1)*(G.decrees.recorte?.9:1);
@@ -254,9 +260,8 @@ function recalc(){
   spread(cov.poll,src.poll,8,.7);spread(cov.clean,src.recy,8,.8);
   spread(cov.transit,src.bus,6,.75*trEff*trP);spread(cov.transit,src.metro,10,1.1*trEff*trP);
   // metro elevado: una línea solo rinde a pleno si une dos o más estaciones
-  const stA=[],stW=[];
-  for(const c of net.comps)for(const k of c.st)(c.st.length>=2?stA:stW).push([k%N,(k/N)|0,1]);
-  spread(cov.transit,stA,11,1.25*trEff*trP);spread(cov.transit,stW,5,.5*trEff*trP);
+  const addLine=(n,ra,ma,rw,mw)=>{const A=[],W=[];for(const c of n.comps)for(const k of c.st)(c.st.length>=2?A:W).push([k%N,(k/N)|0,1]);spread(cov.transit,A,ra,ma*trEff*trP);spread(cov.transit,W,rw,mw*trEff*trP)};
+  addLine(net,11,1.25,5,.5);addLine(netT,6,.95,3,.4);addLine(netB,8,1.15,4,.45);
   // parques y reciclaje limpian el aire
   for(let k=0;k<N*N;k++){cov.poll[k]=clamp(cov.poll[k]-cov.park[k]*.35-cov.clean[k]*.3,0,1)}
   const cong=computeTraffic();
@@ -280,7 +285,7 @@ function recalc(){
   let dC=clamp((pop*.2-capC)/(pop*.2+10),-1,1)*.8+(pop<20?.15:0)-tx('C');
   let dI=clamp((workers*.45-capI)/(workers*.45+12),-1,1)*.8+.12-tx('I')+(G.decrees.exencion?.2:0);
   const target=capR*(.4+.6*h);
-  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,pv,
+  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,
      dR:clamp(dR,-1,1),dC:clamp(dC,-1,1),dI:clamp(dI,-1,1),target,statue,zoneTiles};
   for(let k=0;k<N*N;k++){
     cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5,0,1);
@@ -297,25 +302,26 @@ function approval(){
 
 /* ---------- construcción ---------- */
 function toast(m,bad){const box=$('#toasts');while(box.children.length>=3)box.firstChild.remove();const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),2600)}
-function applyElev(tool,i,j,sim){
+function applyLayer(tool,i,j,sim){
   if(!inb(i,j))return 0;
-  const idx=j*N+i,cur=grid.typ[idx];
-  if(cur!==T.NONE&&!isRoad(cur))return 0;
-  if(tool.elev===1){if(grid.elev[idx])return 0}
-  else if(grid.elev[idx]!==1)return 0;
+  const idx=j*N+i,cur=grid.typ[idx],arr=grid[tool.lay];
+  if(tool.lay==='elev'){if(cur!==T.NONE&&!isRoad(cur))return 0}
+  else if(tool.lay==='tram'){if(!isRoad(cur)||grid.brt[idx])return 0}
+  else if(tool.lay==='brt'){if(cur!==T.AVE||grid.tram[idx])return 0}
+  if(tool.lv===1){if(arr[idx])return 0}else if(arr[idx]!==1)return 0;
   if(!sim){
     if(G.money<tool.cost)return -1;
-    G.money-=tool.cost;grid.elev[idx]=tool.elev;
+    G.money-=tool.cost;arr[idx]=tool.lv;
     if(tool.big)G.bigBuilds=(G.bigBuilds||0)+1;
   }
   return tool.cost;
 }
 function applyTool(tool,i,j,sim){
-  if(tool.elev)return applyElev(tool,i,j,sim);
+  if(tool.lay)return applyLayer(tool,i,j,sim);
   if(!inb(i,j))return 0;
   const idx=j*N+i;
-  if(tool.id==='bull'&&grid.elev[idx]){
-    if(!sim){if(G.money<tool.cost)return -1;G.money-=tool.cost;grid.elev[idx]=0}
+  if(tool.id==='bull'&&(grid.elev[idx]||grid.tram[idx]||grid.brt[idx])){
+    if(!sim){if(G.money<tool.cost)return -1;G.money-=tool.cost;if(grid.elev[idx])grid.elev[idx]=0;else if(grid.tram[idx])grid.tram[idx]=0;else grid.brt[idx]=0}
     return tool.cost;
   }
   if(grid.ter[idx]===1)return 0;
@@ -487,6 +493,19 @@ const EVENTS=[
  {id:'elevado_ruido',w:1.4,min:300,c:()=>S.net.rails>=8,t:'Vecinos contra el metro elevado',x:'Los vecinos de un edificio con "vista" se quejan: el metro elevado pasa a dos metros de sus ventanas y les quitó el atardecer.',
   o:[{l:'Compensarlos',s:'Pagas el atardecer',f:()=>{E.money(-$$(1500));E.fac('vec',4);return 'Les pagas una vista que nunca existió. Aceptan.'}},
      {l:'Decir que es "el sonido del progreso"',s:'Consigna oficial',f:()=>{E.fac('vec',-5);E.buzz(-1);E.fac('emp',2);return 'Te regalan tapones para los oídos. Los usas en las reuniones del concejo.'}}]},
+ {id:'brt_colados',w:1.5,min:300,c:()=>S.netB.stations>=2,t:'Colados en el troncal',x:'Cientos de personas se cuelan por las puertas del troncal masivo. El sistema pierde plata, un youtuber lo graba y el hashtag #ColadoDeHonor se vuelve tendencia.',
+  o:[{l:'Reforzar la vigilancia',s:'Costoso y antipático',f:()=>{E.money(-$$(1800));E.fac('vec',-4);E.fac('emp',2);return 'Ahora hay más guardias que pasajeros. Los colados se vuelven más creativos.'}},
+     {l:'Mirar hacia otro lado',s:'Es un subsidio informal',f:()=>{E.fac('vec',3);E.fac('fun',-2);return 'El sistema pierde plata, la gente llega a tiempo. Un empate técnico.'}},
+     {l:'Campaña "El respeto se paga"',s:'Eslogan costoso',f:()=>{E.money(-$$(900));E.buzz(1);return 'El afiche sale con un error de ortografía en "respeto". Se vuelve viral.'}}]},
+ {id:'brt_lleno',w:1.5,min:300,c:()=>S.netB.stations>=2&&G.pop>600,t:'Sardinas en el troncal',x:'Las estaciones del troncal rojo están a reventar. Un pasajero viajó seis estaciones sin tocar el piso. La prensa lo llama "el récord municipal de apretujamiento".',
+  o:[{l:'Comprar más buses articulados',s:'Costoso',f:()=>{E.money(-$$(2800));E.fac('vec',5);E.fac('eco',-1);return 'Llegan buses nuevos, con aire acondicionado... en el letrero.'}},
+     {l:'Decir que es "señal de éxito"',s:'Optimismo oficial',f:()=>{E.fac('vec',-4);E.buzz(-1);return 'Alguien te manda una foto de una lata de atún con tu cara.'}}]},
+ {id:'tram_obras',w:1.4,min:250,c:()=>S.netT.rails>=8,t:'Obras del tranvía eternas',x:'La calle del tranvía lleva tres meses abierta. Un comerciante instaló una pequeña pesquería en el hueco y dice que le va mejor que antes.',
+  o:[{l:'Acelerar con doble turno',s:'Costoso',f:()=>{E.money(-$$(1600));E.fac('emp',4);E.fac('vec',2);return 'Las obras terminan antes. La calle queda con un hueco nuevo, esta vez pintado.'}},
+     {l:'Pedir paciencia',s:'Un clásico',f:()=>{E.fac('emp',-5);E.fac('vec',-2);return 'Los comerciantes te regalan un cubo de pintura y una pala.'}}]},
+ {id:'tram_tilin',w:1.1,min:250,c:()=>S.netT.stations>=2,t:'El tranvía y el tilín',x:'El tranvía recorre la ciudad haciendo "tilín" cada cinco segundos. Los vecinos piden silencio; los turistas piden bis.',
+  o:[{l:'Mantener el tilín',s:'Es parte del encanto',f:()=>{E.fac('vec',-2);E.buzz(2);E.fac('eco',2);return 'La campanita se vuelve símbolo de la ciudad. Y de tu insomnio.'}},
+     {l:'Silenciar la campana',s:'Menos encanto',f:()=>{E.fac('vec',3);E.buzz(-1);return 'Los turistas lloran. Los vecinos, de alegría.'}}]},
 ];
 function eventFor(){
   const el=EVENTS.filter(e=>(!e.min||G.pop>=e.min)&&(!e.c||e.c())&&!G.recent.includes(e.id));
@@ -526,14 +545,14 @@ function finance(){
   const infl=1+.02*Math.floor(G.month/12);
   let up=0;const pv=G.priv||{};
   for(let k=0;k<N*N;k++){const ty=grid.typ[k],t=BYTYPE[ty];if(t&&t.up){const sc=SECOF[ty];up+=t.up*(sc&&pv[sc]?.4:1)}}
-  up+=(S.net.rails*3+S.net.stations*180)*(pv.trn?.4:1);
+  up+=(S.net.rails*3+S.net.stations*180+S.netT.rails*2.5+S.netT.stations*90+S.netB.rails*2+S.netB.stations*130)*(pv.trn?.4:1);
   let canon=0;for(const k in pv)if(pv[k])canon+=sectorStats(k).value*.012;
   const eff=S.employed*G.tax.R*.58;
   let incR=eff,incC=S.capC*G.tax.C*1.0*(.6+.4*S.h),incI=S.capI*G.tax.I*1.05;
   if(G.decrees.exencion)incI*=.6;
   incC*=1-.15*clamp(S.cong-.6,0,1);
   incC*=1+Math.min(.1,S.cnt[T.PLAZA]*.015);
-  const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.5,S.net.stations*.06));
+  const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.6,S.net.stations*.06+(S.netT.stations+S.netB.stations)*.04));
   let inc=incR+incC+incI+incT+canon;
   const admin=(110+G.pop*.55);
   let dec=0;
@@ -608,6 +627,8 @@ function newsLine(){
   if(S.cong>.8)L.push('Trancón de tres horas para avanzar dos cuadras: "es el precio del progreso", dice el alcalde (en helicóptero).');
   if(privCount())L.push('Alcalde: "Privatizar no es vender, es compartir". El contrato adjunto, en cambio, es de venta total.');
   if(S.cnt[T.PLAZA])L.push('Inauguran plaza con fuente: la fuente ya tiene su primer grafiti.');
+  if(S.netB.stations>=2)L.push('Pasajeros del troncal rojo viajan como sardinas, pero "a tiempo", dice el alcalde.');
+  if(S.netT.stations>=2)L.push('El tranvía hace "tilín" y bloquea el tráfico dos veces por hora. "Es parte de su encanto", dicen.');
   if(S.net.stations>=2)L.push('El metro elevado inaugura su segunda estación: ahora sí es una línea y no una escultura.');
   if(S.net.stations===1)L.push('Metro elevado de una sola estación: "Un metro que va de aquí a aquí", ironiza la oposición.');
   if(S.cnt[T.METRO])L.push('Alcalde se sube al metro para la foto. Se baja en la siguiente estación... que no existe.');
@@ -1073,6 +1094,40 @@ function drawElev(i,j,idx){
   }
   ctx.stroke();
 }
+function drawTramBrt(i,j,idx){
+  const tr=grid.tram[idx],br=grid.brt[idx];
+  const arr=tr?grid.tram:grid.brt;
+  const nb=[inb(i+1,j)&&arr[j*N+i+1],inb(i-1,j)&&arr[j*N+i-1],inb(i,j+1)&&arr[(j+1)*N+i],inb(i,j-1)&&arr[(j-1)*N+i]];
+  const any=nb[0]||nb[1]||nb[2]||nb[3];
+  const segs=[];
+  if(nb[0]||nb[1]||!any)segs.push([nb[1]||!any?0:.5,nb[0]||!any?1:.5,0]);
+  if(nb[2]||nb[3])segs.push([nb[3]?0:.5,nb[2]?1:.5,1]);
+  if(br){
+    for(const [a,b,ax] of segs){ax?flat(.34,a,.66,b,.15,'#b8363a'):flat(a,.34,b,.66,.15,'#b8363a')}
+    flat(.34,.34,.66,.66,.15,'#b8363a');
+    ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1;ctx.beginPath();
+    for(const [a,b,ax] of segs)for(const o of [.34,.66]){if(ax){ctx.moveTo(X(o,a),Y(o,a)-.15);ctx.lineTo(X(o,b),Y(o,b)-.15)}else{ctx.moveTo(X(a,o),Y(a,o)-.15);ctx.lineTo(X(b,o),Y(b,o)-.15)}}
+    ctx.stroke();
+    if(br===2){
+      prism(.22,.28,.78,.72,2,[196,200,208]);
+      prism(.24,.3,.76,.7,13,[150,200,225]);
+      flat(.22,.28,.78,.72,16,'#d9373a');prism(.22,.28,.78,.72,2.5,[217,55,58],13.5);
+      ctx.fillStyle='#fff';ctx.font='bold 7px sans-serif';ctx.textAlign='center';ctx.fillText('BRT',X(.5,.5),Y(.5,.5)-18.5);
+      if(night>.15)lights.push(X(.78,.5)-6,Y(.78,.5)-12,X(.78,.5)+6,Y(.78,.5)-12,X(.78,.5)+6,Y(.78,.5)-4,X(.78,.5)-6,Y(.78,.5)-4);
+    }
+  }else{
+    ctx.strokeStyle='rgba(215,220,228,.95)';ctx.lineWidth=1.1;ctx.beginPath();
+    for(const o of [.44,.56])for(const [a,b,ax] of segs){if(ax){ctx.moveTo(X(o,a),Y(o,a)-.15);ctx.lineTo(X(o,b),Y(o,b)-.15)}else{ctx.moveTo(X(a,o),Y(a,o)-.15);ctx.lineTo(X(b,o),Y(b,o)-.15)}}
+    ctx.stroke();
+    if(tr===2){
+      flat(.1,.02,.62,.2,.3,'#d0cfc4');
+      for(const u of [.14,.58]){ctx.strokeStyle='#4d5a66';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(X(u,.08),Y(u,.08));ctx.lineTo(X(u,.08),Y(u,.08)-13);ctx.stroke()}
+      prism(.1,.02,.62,.2,2,[84,168,120],13);
+      ctx.fillStyle='#2f8f55';ctx.beginPath();ctx.arc(X(.78,.1),Y(.78,.1)-18,4.5,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 6px sans-serif';ctx.textAlign='center';ctx.fillText('T',X(.78,.1),Y(.78,.1)-16);
+      ctx.strokeStyle='#666';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(.78,.1),Y(.78,.1));ctx.lineTo(X(.78,.1),Y(.78,.1)-13.5);ctx.stroke();
+    }
+  }
+}
 function drawRoad(i,j,sx,sy){
   const n=[isRoad(typeAt(i+1,j)),isRoad(typeAt(i-1,j)),isRoad(typeAt(i,j+1)),isRoad(typeAt(i,j-1))];
   const ave=grid.typ[j*N+i]===T.AVE;
@@ -1141,7 +1196,7 @@ function render(now){
     const k=cj*N+ci;let b=bucket.get(k);if(!b)bucket.set(k,b=[]);b.push(c);
   }
   const tbucket=new Map();
-  for(const tr of trains){const ci=Math.round(tr.i+(tr.ni-tr.i)*tr.t),cj=Math.round(tr.j+(tr.nj-tr.j)*tr.t);const k=cj*N+ci;let b=tbucket.get(k);if(!b)tbucket.set(k,b=[]);b.push(tr)}
+  for(const tr of vehs){const ci=Math.round(tr.i+(tr.ni-tr.i)*tr.t),cj=Math.round(tr.j+(tr.nj-tr.j)*tr.t);const k=cj*N+ci;let b=tbucket.get(k);if(!b)tbucket.set(k,b=[]);b.push(tr)}
   for(let s=0;s<=2*N-2;s++){
     for(let j=Math.max(0,s-N+1);j<=Math.min(N-1,s);j++){
       const i=s-j,sx=(i-j)*HW,sy=(i+j)*HH;
@@ -1154,7 +1209,7 @@ function render(now){
       if(typ===T.NONE&&grid.ter[idx]===2){
         const v=hsh(i,j,4);tree(.3+v*.2,.35,1.1,[56+v*30,130+v*20,70]);tree(.7,.65-v*.2,.9,[70,140,76]);
       }
-      if(isRoad(typ)){drawRoad(i,j,sx,sy);const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
+      if(isRoad(typ)){drawRoad(i,j,sx,sy);if(grid.tram[idx]||grid.brt[idx])drawTramBrt(i,j,idx);const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
       else if(typ===T.R||typ===T.C||typ===T.I){
         flat(.04,.04,.96,.96,0,ZCOL[typ]);
         if(grid.den[idx]&&lvl===0){ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(.3,.3),Y(.3,.3));ctx.lineTo(X(.7,.7),Y(.7,.7));ctx.moveTo(X(.7,.3),Y(.7,.3));ctx.lineTo(X(.3,.7),Y(.3,.7));ctx.stroke()}
@@ -1169,7 +1224,9 @@ function render(now){
       }
       const b=bucket.get(idx);
       if(b)for(const c of b)drawCar(c);
-      if(grid.elev[idx]){drawElev(i,j,idx);const tb=tbucket.get(idx);if(tb)for(const tr of tb)drawTrain(tr)}
+      const tb=tbucket.get(idx);
+      if(tb)for(const tr of tb)if(tr.kind!=='elev')drawVeh(tr);
+      if(grid.elev[idx]){drawElev(i,j,idx);if(tb)for(const tr of tb)if(tr.kind==='elev')drawVeh(tr)}
     }
   }
   drawCursor();
@@ -1207,40 +1264,50 @@ function drawCursor(){
   }
 }
 
-/* ---------- trenes del metro elevado ---------- */
-let trains=[];
-function elevNeighbors(i,j){const o=[];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(inb(i+a,j+b)&&grid.elev[(j+b)*N+i+a])o.push([i+a,j+b]);return o}
-function updateTrains(dt){
-  const comps=(S.net?S.net.comps:[]).filter(c=>c.st.length>=2);
-  const want=Math.min(10,comps.reduce((a,c)=>a+Math.min(3,1+Math.floor(c.tiles.length/10)),0));
-  while(trains.length<want){
-    const c=pick(comps),k=pick(c.st),i=k%N,j=(k/N)|0,nb=elevNeighbors(i,j);if(!nb.length)break;
-    const n=pick(nb);trains.push({i,j,ni:n[0],nj:n[1],t:0,sp:rnd(1.3,1.8),dwell:rnd(0,1.5)});
+/* ---------- vehículos de línea: metro elevado, tranvía y BRT ---------- */
+let vehs=[];
+const LINES={
+  elev:{arr:'elev',z:37,L:.15,Wd:.085,h:9,cars:[0,.3],cols:[[240,242,246],[236,238,242]],maxv:10,sp:[1.3,1.8],win:'rgba(90,150,200,.7)'},
+  tram:{arr:'tram',z:1.5,L:.1,Wd:.06,h:6,cars:[0,.25],cols:[[84,168,120],[236,226,196]],maxv:8,sp:[.8,1.1],win:'rgba(180,220,240,.7)'},
+  brt:{arr:'brt',z:1.5,L:.15,Wd:.062,h:7,cars:[0,.32],cols:[[212,48,44],[198,42,40]],maxv:12,sp:[1.2,1.6],win:'rgba(250,235,235,.65)'},
+};
+function lineNeighbors(arr,i,j){const o=[];for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]])if(inb(i+a,j+b)&&arr[(j+b)*N+i+a])o.push([i+a,j+b]);return o}
+function updateLines(dt){
+  if(!S.net)return;
+  vehs=vehs.filter(v=>{const a=grid[LINES[v.kind].arr];return a[v.j*N+v.i]&&a[v.nj*N+v.ni]});
+  for(const [kind,net] of [['elev',S.net],['tram',S.netT],['brt',S.netB]]){
+    const L=LINES[kind],arr=grid[L.arr],comps=net.comps.filter(c=>c.st.length>=2);
+    const want=Math.min(L.maxv,comps.reduce((a,c)=>a+Math.min(3,1+Math.floor(c.tiles.length/10)),0));
+    let have=vehs.filter(v=>v.kind===kind).length;
+    while(have<want){
+      const c=pick(comps),k=pick(c.st),i=k%N,j=(k/N)|0,nb=lineNeighbors(arr,i,j);if(!nb.length)break;
+      const n=pick(nb);vehs.push({kind,i,j,ni:n[0],nj:n[1],t:0,sp:rnd(L.sp[0],L.sp[1]),dwell:rnd(0,1.5)});have++;
+    }
+    while(have>want){vehs.splice(vehs.findIndex(v=>v.kind===kind),1);have--}
   }
-  while(trains.length>want)trains.pop();
-  trains=trains.filter(tr=>grid.elev[tr.j*N+tr.i]&&grid.elev[tr.nj*N+tr.ni]);
-  for(const tr of trains){
-    if(tr.dwell>0){tr.dwell-=dt;continue}
-    tr.t+=dt*tr.sp;
-    if(tr.t>=1){
-      tr.t=0;const oi=tr.i,oj=tr.j;tr.i=tr.ni;tr.j=tr.nj;
-      if(grid.elev[tr.j*N+tr.i]===2)tr.dwell=1.1;
-      let nb=elevNeighbors(tr.i,tr.j).filter(n=>!(n[0]===oi&&n[1]===oj));
+  for(const v of vehs){
+    const arr=grid[LINES[v.kind].arr];
+    if(v.dwell>0){v.dwell-=dt;continue}
+    v.t+=dt*v.sp;
+    if(v.t>=1){
+      v.t=0;const oi=v.i,oj=v.j;v.i=v.ni;v.j=v.nj;
+      if(arr[v.j*N+v.i]===2)v.dwell=1.1;
+      let nb=lineNeighbors(arr,v.i,v.j).filter(n=>!(n[0]===oi&&n[1]===oj));
       if(!nb.length)nb=[[oi,oj]];
-      const n=pick(nb);tr.ni=n[0];tr.nj=n[1];
+      const n=pick(nb);v.ni=n[0];v.nj=n[1];
     }
   }
 }
-function drawTrain(tr){
-  const di=tr.ni-tr.i,dj=tr.nj-tr.j;
-  for(const lag of [0,.3]){
-    const t=tr.t-lag;
-    const ci=tr.i+di*t,cj=tr.j+dj*t;
+function drawVeh(v){
+  const L=LINES[v.kind],di=v.ni-v.i,dj=v.nj-v.j;
+  L.cars.forEach((lag,idx)=>{
+    const t=v.t-lag,ci=v.i+di*t,cj=v.j+dj*t;
     OX=(ci-cj)*HW;OY=(ci+cj+1)*HH;
-    const L=.15,Wd=.085,col=lag?[236,238,242]:[240,242,246];
-    if(di!==0)prism(-L,-Wd,L,Wd,9,col,37);else prism(-Wd,-L,Wd,L,9,col,37);
-    if(di!==0)flat(-L*.9,-Wd,L*.9,Wd,43,'rgba(90,150,200,.7)');else flat(-Wd,-L*.9,Wd,L*.9,43,'rgba(90,150,200,.7)');
-  }
+    const col=L.cols[idx%L.cols.length];
+    if(di!==0)prism(-L.L,-L.Wd,L.L,L.Wd,L.h,col,L.z);else prism(-L.Wd,-L.L,L.Wd,L.L,L.h,col,L.z);
+    if(di!==0)flat(-L.L*.9,-L.Wd,L.L*.9,L.Wd,L.z+L.h+.2,L.win);else flat(-L.Wd,-L.L*.9,L.Wd,L.L*.9,L.z+L.h+.2,L.win);
+    if(v.kind==='tram'){ctx.strokeStyle='#444';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(0,0),Y(0,0)-L.z-L.h);ctx.lineTo(X(0,0),Y(0,0)-L.z-L.h-5);ctx.stroke()}
+  });
 }
 /* ---------- autos y buses ---------- */
 const CARCOL=[[210,70,60],[240,200,70],[70,130,200],[230,230,230],[60,160,110],[150,90,180]];
@@ -1349,6 +1416,8 @@ function showTip(px,py){
     else if(S.pRatio<.9||S.wRatio<.9)h+='<br>⚠️ Energía o agua insuficientes';
   }
   if(grid.elev[idx]){const comp=S.net.comps.find(c=>c.tiles.includes(idx));h+=grid.elev[idx]===2?`<br>🚉 Estación elevada · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra estación conectada'}`:'<br>🚝 Vía elevada'}
+  if(grid.tram[idx]){const comp=S.netT.comps.find(c=>c.tiles.includes(idx));h+=grid.tram[idx]===2?`<br>🚋 Parada de tranvía · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra parada conectada'}`:'<br>🚊 Riel de tranvía'}
+  if(grid.brt[idx]){const comp=S.netB.comps.find(c=>c.tiles.includes(idx));h+=grid.brt[idx]===2?`<br>🚍 Estación BRT · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra estación conectada'}`:'<br>🛑 Carril exclusivo BRT (menos espacio para carros)'}
   if(isRoad(t))h+=`<br>Tráfico: ${Math.round(clamp(cov.traf[idx]/1.4,0,1)*100)}%${cov.traf[idx]>1?' 🚨 trancón':''}`;
   if(ZNAME[t]&&grid.den[idx]&&t!==T.I&&l>=3&&cov.transit[idx]<.2)h+='<br>🚌 Necesita transporte público para crecer más';
   if(ZNAME[t]||BYTYPE[t]&&t!==T.PARK)h+=`<br>Transporte: ${Math.round(Math.min(1,cov.transit[idx])*100)}%`;
@@ -1474,7 +1543,7 @@ $('#btnMenu').onclick=()=>menu();
 function save(){
   if(!G||G.over)return;
   try{
-    const o={G,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev]},cam};
+    const o={G,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev],tram:[...grid.tram],brt:[...grid.brt]},cam};
     localStorage.setItem(SAVE_KEY,JSON.stringify(o));
   }catch(e){}
 }
@@ -1482,7 +1551,7 @@ function load(){
   try{
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
-    allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev'])if(o.grid[k])grid[k].set(o.grid[k]);
+    allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt'])if(o.grid[k])grid[k].set(o.grid[k]);
     G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};Object.assign(cam,o.cam||{});cam.z=cam.z||1;
     recalc();refreshUI();buildTools();return true;
   }catch(e){return false}
@@ -1492,7 +1561,7 @@ function help(){
   queueModal({kick:'Manual del alcalde',title:'Cómo gobernar (y sobrevivir)',html:`<p><b>1.</b> Traza <b>calles</b> y pinta zonas <b>residencial, comercial e industrial</b> a su lado.<br>
   <b>2.</b> Construye una <b>planta de energía</b> y una <b>torre de agua</b>: sin ellas nada crece.<br>
   <b>3.</b> Mira la <b>demanda</b> (barras arriba) y balancea la ciudad. Pon servicios: policía, clínica, hospital, colegio, biblioteca, universidad, bomberos, parques, reciclaje.<br>
-  <b>3b.</b> <b>Densidad y transporte:</b> las zonas densas llegan a torres de nivel 5, pero necesitan buen suelo y <b>transporte público</b> (paradas de bus, metro). Vigila la capa 🚦 <b>Tráfico</b> (tecla T): las <b>avenidas</b>, el transporte y el pico y placa evitan el trancón. El <b>metro elevado</b> (vía + estaciones) solo rinde a pleno si conecta dos estaciones. Las <b>plazas</b> suben el ánimo y el comercio.<br>
+  <b>3b.</b> <b>Densidad y transporte:</b> las zonas densas llegan a torres de nivel 5, pero necesitan buen suelo y <b>transporte público</b> (paradas de bus, metro). Vigila la capa 🚦 <b>Tráfico</b> (tecla T): las <b>avenidas</b>, el transporte y el pico y placa evitan el trancón. El <b>metro elevado</b>, el <b>tranvía</b> (sobre calles) y el <b>troncal BRT</b> estilo TransMilenio (carril rojo sobre avenidas) solo rinden a pleno si conectan dos estaciones o paradas. El BRT mueve multitudes pero le quita espacio a los carros. Las <b>plazas</b> suben el ánimo y el comercio.<br>
   <b>3c.</b> <b>Privatizaciones</b> (panel Política): venden la gestión de un servicio por plata inmediata y ahorro mensual, a costa de calidad y de la opinión de vecinos y funcionarios. Puedes licitar limpio... o adjudicar a un amigo.<br>
   <b>4.</b> Cuida a las <b>cuatro facciones</b>: vecinos, empresarios, ecologistas y funcionarios. Su opinión decide si te reeligen cada 4 años.<br>
   <b>5.</b> Gasta <b>capital político</b> en decretos que el concejo debe votar.<br>
@@ -1536,7 +1605,7 @@ setInterval(()=>{
   if(acc>=5000){acc=0;step()}
 },100);
 let lastR=performance.now();
-function loop(now){const dt=Math.min(.1,(now-lastR)/1000);lastR=now;if(G&&!modalOpen&&!G.over&&G.speed>0){updateCars(dt);updateTrains(dt)}render(now);requestAnimationFrame(loop)}
+function loop(now){const dt=Math.min(.1,(now-lastR)/1000);lastR=now;if(G&&!modalOpen&&!G.over&&G.speed>0){updateCars(dt);updateLines(dt)}render(now);requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 addEventListener('resize',resize);resize();
 // render() se auto-programa; evitamos doble programación
