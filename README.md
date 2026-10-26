@@ -42,3 +42,8 @@ En la carpeta [`curul/`](curul/) está **Curul**, un simulador de estrategia pol
 En la carpeta [`calculadora-electoral/`](calculadora-electoral/) está la **Calculadora Electoral**, un simulador de sistemas
 electorales (métodos de reparto, escenarios de Colombia, Cauca y Antioquia, capas de gobierno) instalable en iPhone.
 Ver [`calculadora-electoral/README.md`](calculadora-electoral/README.md).
+
+## ALCALDE (simulador de ciudad)
+
+En la carpeta [`alcalde/`](alcalde/) está **Alcalde**, un city builder isométrico con política satírica: presupuesto,
+facciones, concejo, decretos, corrupción y elecciones. Ver [`alcalde/README.md`](alcalde/README.md).
