@@ -1,5 +1,5 @@
 /* Alcalde — service worker */
-const CACHE='alcalde-v1';
+const CACHE='alcalde-v2';
 const CORE=['./','./index.html','./style.css','./game.js','./manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.all(CORE.map(u=>c.add(u).catch(()=>null)))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE&&x.startsWith('alcalde-')).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
