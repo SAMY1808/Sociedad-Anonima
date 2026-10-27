@@ -77,10 +77,11 @@ function newState(opts){
   const st={seed,name:opts.city,mayor:opts.mayor,profile:opts.profile,month:0,money:40000,debt:0,personal:0,susp:0,cap:40,loyalty:30,buzz:0,
     tax:{R:9,C:9,I:9},fac:{vec:55,emp:55,eco:55,fun:55},decrees:{},pop:0,speed:1,nextElection:48,terms:0,
     lastEvent:0,recent:[],log:[],milestones:{},opp:pick(['Evaristo Pardo','Cleotilde Ramírez','Aníbal "El Contador" Vega','Doña Mercedes Ospina']),
-    lastFiscalia:-99,over:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,weather:{type:'sol'},dry:0,flood:[],floodLeft:0,dikes:0,ration:0,rebuild:[],droughtFlag:false,bonus:{cr:0},hist:{inc:0,exp:0}};
-  if(opts.profile==='tec'){st.money+=15000;st.fac.fun=65;st.cap=30}
-  if(opts.profile==='pop'){st.fac.vec=70;st.cap=60;st.money-=8000}
-  if(opts.profile==='emp'){st.fac.emp=72;st.personal=12000;st.susp=8;st.fac.eco=45}
+    lastFiscalia:-99,over:null,blocks:{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}},oppStr:35,pact:0,media:0,cab:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,weather:{type:'sol'},dry:0,flood:[],floodLeft:0,dikes:0,ration:0,rebuild:[],droughtFlag:false,bonus:{cr:0},hist:{inc:0,exp:0}};
+  st.cab=newCab();
+  if(opts.profile==='tec'){st.money+=15000;st.fac.fun=65;st.cap=30;st.blocks.ver.loy=52}
+  if(opts.profile==='pop'){st.fac.vec=70;st.cap=60;st.money-=8000;st.blocks.pop.loy=62}
+  if(opts.profile==='emp'){st.fac.emp=72;st.personal=12000;st.susp=8;st.fac.eco=45;st.blocks.mer.loy=62}
   return st;
 }
 function allocGrid(){
@@ -129,7 +130,7 @@ const typeAt=(i,j)=>inb(i,j)?grid.typ[j*N+i]:-1;
 const isRoad=t=>t===T.ROAD||t===T.AVE||t===T.ROUND||t===T.TOLL;
 const isAveIdx=k=>grid.typ[k]===T.AVE||((grid.typ[k]===T.ROUND||grid.typ[k]===T.TOLL)&&grid.den[k]===1);
 let lastToll={rev:0,count:0};
-const toolCost=t=>Math.round(t.cost*((G&&G.corp&&G.corp.cons&&G.corp.cons.q>=50)?.88:1));
+const toolCost=t=>Math.round(t.cost*((G&&G.corp&&G.corp.cons&&G.corp.cons.q>=50)?.88:1)*(1-.06*sk('obr')));
 function roadAccess(i,j){
   for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){ if(!di&&!dj)continue; if(isRoad(typeAt(i+di,j+dj)))return true; }
   return false;
@@ -157,6 +158,31 @@ const SECTORS={
  peaje:{n:'Peajes y concesiones viales',e:'🚧',types:[T.TOLL],fx:{vec:-5,emp:6,eco:0,fun:-3},d:'Un operador cobra los peajes: tú recibes la mitad y todo el odio.'},
  trn:{n:'Transporte público',e:'🚇',types:[T.BUS,T.METRO],fx:{vec:-4,emp:5,eco:-2,fun:-6},d:'Buses, metro y metro elevado. El pasaje sube al doble.'},
 };
+/* ---------- poder: concejo, oposición, medios, gabinete ---------- */
+const BLOCKS=[{id:'ver',n:'Alianza Verde',e:'🌿',seats:4},{id:'mer',n:'Bloque del Mercado',e:'💼',seats:4},{id:'pop',n:'Frente Popular',e:'✊',seats:4},{id:'ind',n:'Independientes',e:'🪙',seats:3}];
+const BLOCK_D={ver:'Ambientalistas: les importan ciclovías, parques y energía limpia.',mer:'Empresarios y comerciantes: aman las privatizaciones y las exenciones.',pop:'Sindicatos y barrios: defienden vivienda, transporte y lo público.',ind:'Votan con quien les dé más. Siempre.'};
+const STANCE={
+ vivienda:{ver:.3,mer:-.6,pop:.9},exencion:{ver:-.7,mer:.9,pop:-.4},seca:{ver:.1,mer:-.7,pop:-.2},propaganda:{ver:-.3,mer:.3,pop:.5},
+ recorte:{ver:-.2,mer:.7,pop:-.8},ciclovia:{ver:.9,mer:-.4,pop:.4},picoplaca:{ver:.6,mer:-.7,pop:-.1},tarifa:{ver:.6,mer:-.5,pop:.8},alumbrado:{ver:-.5,mer:.8,pop:-.5},
+ priv:{ver:-.4,mer:.9,pop:-.8},priv_ene:{ver:-.8,mer:.9,pop:-.7},priv_agua:{ver:-.7,mer:.8,pop:-.9},priv_sal:{ver:-.3,mer:.8,pop:-.95},priv_edu:{ver:-.3,mer:.8,pop:-.9},priv_trn:{ver:-.5,mer:.7,pop:-.7},priv_peaje:{ver:.1,mer:.8,pop:-.9},priv_seg:{ver:-.3,mer:.8,pop:-.6},
+};
+function syncLoy(){let t=0,n=0;for(const b of BLOCKS){t+=G.blocks[b.id].loy*b.seats;n+=b.seats}G.loyalty=t/n}
+function councilVote(key){
+  const st=STANCE[key]||STANCE.priv;let yes=0;const det=[];
+  for(const b of BLOCKS){
+    const L=G.blocks[b.id].loy;
+    const p=b.id==='ind'?clamp(.28+(L-30)/110,.05,.95):clamp(.45+.4*(st[b.id]||0)+(L-50)/130+(S.approval-50)/320,.04,.96);
+    let y=0;for(let k=0;k<b.seats;k++)if(Math.random()<p)y++;
+    yes+=y;det.push(`${b.e} ${y}–${b.seats-y}`);
+  }
+  return {yes,det:det.join(' · ')};
+}
+const ROLES={fin:{n:'Hacienda',e:'💰',d:'+3% de ingresos'},seg:{n:'Seguridad',e:'🛡️',d:'-5% de criminalidad'},obr:{n:'Obras',e:'🏗️',d:'-6% de costo de obras'},cul:{n:'Cultura',e:'🎭',d:'+2 de aprobación vecinal'}};
+const TRAITS={tec:{n:'Técnico',skill:1,d:'Competente y sin compadres.'},pol:{n:'Político',skill:.5,d:'Habla bien, trabaja regular; endulza al concejo cada mes.'},ami:{n:'Amigo',skill:.3,d:'Tu compinche. Casi no sabe del cargo; sí del asado.'},cor:{n:'Corrupto',skill:.6,d:'Eficaz... y con las manos largas: te saca plata a ti, no a la ciudad. O eso dice.'}};
+const FIRST=['Marcela','Ernesto','Doña Cleotilde','Wilmer','Aníbal','Patricia','Hernán','Lucía','Don Evaristo','Mireya','Gustavo','Yolanda'],LAST=['Paredes','Ospina','Vega','Cadavid','Rendón','Arango','Londoño','Quintero','Mejía','Ramírez'];
+function genCand(){const r=Math.random();const t=r<.4?'tec':r<.7?'pol':r<.9?'ami':'cor';return {n:pick(FIRST)+' '+pick(LAST),t}}
+const sk=r=>G&&G.cab&&G.cab[r]?TRAITS[G.cab[r].t].skill:0;
+function newCab(){return {fin:genCand(),seg:genCand(),obr:genCand(),cul:genCand()}}
 /* ---------- empresas públicas ---------- */
 const MGR={
  tec:{n:'Gerente técnico',target:80,start:62,d:'20 años de experiencia, cero compadres. Aburrido y eficaz.'},
@@ -309,7 +335,7 @@ function recalc(){
   let nR=0,aPol=0,aFir=0,aCli=0,aSch=0,aPark=0,aPoll=0,aTrn=0;
   for(let k=0;k<N*N;k++){ if(grid.typ[k]===T.R&&grid.lvl[k]>0){nR++;aPol+=Math.min(1,cov.police[k]);aFir+=Math.min(1,cov.fire[k]);aCli+=Math.min(1,cov.clinic[k]);aSch+=Math.min(1,cov.school[k]);aPark+=Math.min(1,cov.park[k]);aPoll+=cov.poll[k];aTrn+=Math.min(1,cov.transit[k])} }
   if(nR){aPol/=nR;aFir/=nR;aCli/=nR;aSch/=nR;aPark/=nR;aPoll/=nR;aTrn/=nR}else{aPol=aFir=aCli=aSch=aPark=0.3;aTrn=0}
-  const decCrime=(G.decrees.seca?-.1:0)+(G.decrees.alumbrado?.07:0);
+  const decCrime=(G.decrees.seca?-.1:0)+(G.decrees.alumbrado?.07:0)-.05*sk('seg');
   const crime=clamp(.42+unemp*.5-aPol*.75+decCrime+(pop>3000?.04:0),0,1);
   const statue=cnt[T.STATUE]>0;
   const jam=clamp(cong-.5,0,1.2);
@@ -333,7 +359,7 @@ function recalc(){
 }
 function approval(){
   let a=0;for(const k in FACS)a+=G.fac[k]*FACS[k].w;
-  a+=G.buzz*.5+(G.decrees.propaganda?5:0);
+  a+=G.buzz*.5+(G.decrees.propaganda?5:0)+(G.media||0)*.12;
   if(G.susp>40)a-=(G.susp-40)*.28;
   return clamp(a,0,100);
 }
@@ -415,7 +441,7 @@ const DEC=Object.fromEntries(DECREES.map(d=>[d.id,d]));
 /* ---------- eventos ---------- */
 const sc=()=>clamp(1+G.pop/1500,1,7);
 const $$=n=>Math.round(n*sc()/50)*50;
-const E={money:n=>{G.money+=n},fac:(k,n)=>{G.fac[k]=clamp(G.fac[k]+n,0,100)},susp:n=>{G.susp=clamp(G.susp+n,0,120)},cap:n=>{G.cap=clamp(G.cap+n,0,100)},own:n=>{G.personal+=n},buzz:n=>{G.buzz=clamp(G.buzz+n,-15,25)},loy:n=>{G.loyalty=clamp(G.loyalty+n,0,100)}};
+const E={money:n=>{G.money+=n},fac:(k,n)=>{G.fac[k]=clamp(G.fac[k]+n,0,100)},susp:n=>{G.susp=clamp(G.susp+n,0,120)},cap:n=>{G.cap=clamp(G.cap+n,0,100)},own:n=>{G.personal+=n},buzz:n=>{G.buzz=clamp(G.buzz+n,-15,25)},loy:n=>{for(const b of BLOCKS)G.blocks[b.id].loy=clamp(G.blocks[b.id].loy+n,0,100);syncLoy()},loyB:(id,n)=>{G.blocks[id].loy=clamp(G.blocks[id].loy+n,0,100);syncLoy()}};
 const randTiles=(cond,n)=>{const out=[];for(let k=0;k<400&&out.length<n;k++){const i=(Math.random()*N)|0,j=(Math.random()*N)|0;if(cond(grid.typ[j*N+i],grid.lvl[j*N+i]))out.push([i,j])}return out};
 function damage(n,types){
   const t=randTiles((ty,l)=>types.includes(ty)&&l>0,n);
@@ -569,6 +595,26 @@ const EVENTS=[
  {id:'corp_exito',w:1.2,min:300,c:()=>Object.keys(G.corp).some(k=>G.corp[k].mgr==='tec'&&G.corp[k].q>72),t:'La empresa pública da utilidades',x:'__CORP__ cierra el año con ganancias. La prensa duda de los números; la contadora, también, pero están bien.',
   o:[{l:'Reinvertir en la empresa',s:'Aburrido y sensato',f:()=>{const id=Object.keys(G.corp).find(k=>G.corp[k].mgr==='tec');if(id)G.corp[id].q=clamp(G.corp[id].q+6,0,100);E.fac('emp',-1);return 'Compran camiones nuevos. Los viejos, aún con su aire acondicionado, quedan para donación.'}},
      {l:'Pasar las utilidades a la caja',s:'Aplausos y flores',f:()=>{E.money($$(2500));E.buzz(3);E.fac('vec',3);return 'Lo anuncias con globos. La empresa te mira con sospecha.'}}]},
+ {id:'opp_filtra',w:2,min:250,c:()=>G.susp>=22,t:'El rival filtra un audio',x:'__OPP__ publica un audio donde supuestamente hablas de "cuadrar" una licitación. La voz suena parecida a la tuya. Y a la de tu cuñado.',
+  o:[{l:'Decir que es inteligencia artificial',s:'La excusa del siglo',f:()=>{if(Math.random()<.5){E.susp(-4);E.fac('vec',-1);G.media=clamp(G.media+2,-50,50);return 'La gente duda. Ya ni se acuerda del audio.'}E.susp(7);E.fac('vec',-4);G.media=clamp(G.media-6,-50,50);return 'Un perito prueba que la voz es la tuya. Y la del cuñado, en segunda voz.'}},
+     {l:'Demandar por injuria',s:'Siempre da buenos titulares',f:()=>{E.cap(-5);G.oppStr=clamp(G.oppStr+3,8,95);E.susp(2);return 'La demanda dura más que tu periodo.'}},
+     {l:'Contraatacar con un video suyo',s:'Cuesta, pero duele',f:()=>{E.money(-$$(1200));G.oppStr=clamp(G.oppStr-6,8,95);E.susp(3);return 'Tu video es peor que el suyo. Pero tiene música.'}}]},
+ {id:'opp_alianza',w:1.3,min:250,t:'El rival se alía con los verdes',x:'__OPP__ aparece abrazando un árbol junto a la Alianza Verde. El árbol, según vecinos, parecía incómodo.',
+  o:[{l:'Ofrecerles un proyecto verde',s:'Cuesta caja',f:()=>{E.money(-$$(1800));E.loyB('ver',12);G.oppStr=clamp(G.oppStr-3,8,95);E.fac('eco',4);return 'Les prometes ciclovías hasta el mar. Aceptan, tras mirar el presupuesto.'}},
+     {l:'Ignorarlo',s:'Sin ruido',f:()=>{E.loyB('ver',-10);G.oppStr=clamp(G.oppStr+6,8,95);return 'Los verdes te dejan de contestar los mensajes. Hasta los de WhatsApp.'}}]},
+ {id:'meme',w:1.2,min:150,t:'Eres un meme',x:'Una foto tuya bostezando en un acto oficial se vuelve meme. El texto dice: "Cuando te cuentan el presupuesto".',
+  o:[{l:'Reírte del meme en redes',s:'Humanidad estratégica',f:()=>{G.media=clamp(G.media+5,-50,50);E.fac('vec',2);return 'Tu respuesta se hace más viral que el meme.'}},
+     {l:'Pedir que lo bajen',s:'El efecto Streisand',f:()=>{G.media=clamp(G.media-6,-50,50);E.fac('vec',-2);return 'Ahora hay doce versiones nuevas.'}}]},
+ {id:'fakenews',w:1.4,min:200,t:'Noticia falsa sobre ti',x:'Circula un mensaje de cadena que dice que vas a cobrar impuesto por respirar. Ya se dijo en misa.',
+  o:[{l:'Desmentir con datos',s:'Largo y serio',f:()=>{E.cap(-3);G.media=clamp(G.media+3,-50,50);return 'Nadie lee tu comunicado de 12 páginas. Pero queda archivado.'}},
+     {l:'Contraatacar con otra noticia falsa',s:'Mala idea, común',f:()=>{G.media=clamp(G.media-4,-50,50);E.susp(4);E.fac('vec',-2);return 'Se descubre que tu noticia es mentira. Y la anterior también.'}},
+     {l:'No decir nada',s:'Silencio institucional',f:()=>{E.fac('vec',-3);return 'El impuesto al aire ya tiene su propia página de Facebook.'}}]},
+ {id:'influencer',w:1.1,min:300,t:'Un influencer visita la ciudad',x:'Un influencer con dos millones de seguidores graba un video de la ciudad. Pide una "colaboración" y un descuento en el hotel.',
+  o:[{l:'Pagarle la colaboración',s:'Cuesta caja',f:()=>{E.money(-$$(1500));G.media=clamp(G.media+8,-50,50);E.buzz(2);return 'Dice que la ciudad es "genial, vibrante y con wifi". El wifi no funciona.'}},
+     {l:'Ofrecerle un tour oficial',s:'Barato',f:()=>{G.media=clamp(G.media+3,-50,50);return 'Le muestras el parque, la fuente y tu estatua. El video sale corto.'}}]},
+ {id:'gabinete_escandalo',w:1.8,min:250,c:()=>Object.values(G.cab).some(c=>c.t==='cor'||c.t==='ami'),t:'Escándalo en el gabinete',x:'__MIN__ aparece en un video con un maletín, una grabadora y una explicación que no convence a nadie.',
+  o:[{l:'Defenderlo en público',s:'Lealtad con costo',f:()=>{E.susp(6);E.fac('vec',-3);G.media=clamp(G.media-4,-50,50);return 'Dices que es un hombre de bien. Él te agradece con un abrazo muy mojado.'}},
+     {l:'Destituirlo ya',s:'Con cámaras',f:()=>{const r=minRole();if(r)G.cab[r]=genCand();E.cap(-3);E.fac('vec',3);E.susp(-3);return 'Lo destituyes con un comunicado de dos líneas. El reemplazo asume con tres.'}}]},
 ];
 function eventFor(){
   const el=EVENTS.filter(e=>(!e.min||G.pop>=e.min)&&(!e.c||e.c())&&!G.recent.includes(e.id));
@@ -618,7 +664,7 @@ function finance(){
   incC*=1+Math.min(.1,S.cnt[T.PLAZA]*.015);
   const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.6,S.net.stations*.06+(S.netT.stations+S.netB.stations)*.04));
   const incToll=(S.toll?S.toll.rev:0)*(pv.peaje?.5:1);
-  let inc=incR+incC+incI+incT+canon+incToll;
+  let inc=(incR+incC+incI+incT+canon+incToll)*(1+.03*sk('fin'));
   const admin=(110+G.pop*.55);
   let dec=0;
   if(G.decrees.vivienda)dec+=300+G.pop*.08;
@@ -655,8 +701,15 @@ function politics(){
   for(const sec in SECTORS){if(G.priv&&G.priv[sec]){const f=SECTORS[sec].fx;targ.vec+=f.vec;targ.emp+=f.emp;targ.eco+=f.eco;targ.fun+=f.fun}}
   for(const sec in G.cronies){if(G.cronies[sec]&&G.priv[sec]){const c=sectorStats(sec).value*.012;G.personal+=c*.4;G.susp=clamp(G.susp+.25,0,120)}}
   targ.vec+=Math.min(6,S.cnt[T.PLAZA]*1.5);
+  targ.vec+=2*sk('cul');
   for(const k in targ){G.fac[k]=clamp(G.fac[k]+(clamp(targ[k],0,100)-G.fac[k])*.14,0,100)}
   if(S.statue){G.fac.vec=clamp(G.fac.vec+.3,0,100)}
+  // concejo, oposición, medios y gabinete
+  for(const b of BLOCKS)G.blocks[b.id].loy=clamp(G.blocks[b.id].loy+(36-G.blocks[b.id].loy)*.025,0,100);
+  syncLoy();
+  G.oppStr=clamp(G.oppStr+.4+(55-S.approval)*.035+(G.susp>40?(G.susp-40)*.03:0)+rnd(-1.5,1.5)-(G.pact>0?1:0),8,95);if(G.pact>0)G.pact--;
+  G.media=clamp(G.media*.92-(G.susp>35?.3:0)+(G.decrees.propaganda?.8:0),-50,50);
+  for(const r in G.cab){const t=G.cab[r].t;if(t==='pol')E.loy(.25);if(t==='ami')G.susp=clamp(G.susp+.1,0,120);if(t==='cor'){G.personal+=Math.round((G.hist?G.hist.inc:0)*.008);G.susp=clamp(G.susp+.25,0,120)}}
   G.buzz*=.9;
   G.susp=clamp(G.susp-.7-(G.decrees.propaganda?-.5:0),0,120);
   if(G.decrees.alumbrado)G.susp=clamp(G.susp+.2,0,120);
@@ -831,7 +884,7 @@ function step(){
 function election(){
   recalc();
   const a=approval();
-  const share=clamp(a*.93+4+rnd(-5,5),15,85);
+  const share=clamp(a*.93+4+rnd(-5,5)-(G.oppStr-45)*.18,15,85);
   const win=share>=50;
   G.speed=0;
   const bar=`<div class="vote"><i style="width:${share}%"></i><u></u></div><small>Tú ${share.toFixed(1)}% · ${G.opp} ${(100-share).toFixed(1)}%</small>`;
@@ -882,9 +935,10 @@ function nextModal(){
   });
   $('#modal').classList.remove('hidden');
 }
+function minRole(){return Object.keys(G.cab).find(r=>G.cab[r].t==='cor')||Object.keys(G.cab).find(r=>G.cab[r].t==='ami')}
 function corpLow(){let b=null;for(const k in G.corp)if(!b||G.corp[k].q<G.corp[b].q)b=k;return b}
 function corpAmi(){return Object.keys(G.corp).find(k=>G.corp[k].mgr==='ami')}
-function evText(ev){let t=ev.x.replace('__OPP__',G.opp);if(t.includes('__CORP__')){const id=ev.id==='corp_rescate'?corpLow():ev.id==='corp_amigo'?corpAmi():Object.keys(G.corp).find(k=>G.corp[k].mgr==='tec');t=t.replace('__CORP__',id?CORPS[id].n:'La empresa pública')}if(t.includes('__PRIV__')){const p=privPick();t=t.replace('__PRIV__',p?`${p.name.toLowerCase()} (${p.op})`:'un servicio')}return t}
+function evText(ev){let t=ev.x.replace('__OPP__',G.opp);if(t.includes('__MIN__')){const r=minRole();t=t.replace('__MIN__',r?`${G.cab[r].n}, secretario(a) de ${ROLES[r].n}`:'Un secretario')}if(t.includes('__CORP__')){const id=ev.id==='corp_rescate'?corpLow():ev.id==='corp_amigo'?corpAmi():Object.keys(G.corp).find(k=>G.corp[k].mgr==='tec');t=t.replace('__CORP__',id?CORPS[id].n:'La empresa pública')}if(t.includes('__PRIV__')){const p=privPick();t=t.replace('__PRIV__',p?`${p.name.toLowerCase()} (${p.op})`:'un servicio')}return t}
 function showEvent(ev){
   if(ev.id==='sobrecosto')G.bigBuilds=0;
   queueModal({kick:'Despacho del alcalde',title:ev.t,text:evText(ev),event:ev,opts:ev.o.map(o=>({l:o.l,s:o.s,f:o.f}))});
@@ -899,11 +953,54 @@ function showFiscalia(){
 /* ---------- acciones del jugador (panel) ---------- */
 function act(a,arg){
   if(G.over)return;
-  if(a==='lunch'){ if(G.money<1500)return toast('Sin fondos',1); E.money(-1500);E.loy(12);E.susp(1);toast('Los concejales salen de buen humor (y con docena de empanadas)') }
+  if(a==='lunch'){ if(G.money<1500)return toast('Sin fondos',1); E.money(-1500);E.loy(6);E.susp(1);toast('Los concejales salen de buen humor (y con docena de empanadas)') }
   if(a==='press'){ if(G.cap<5)return toast('Falta capital político',1); if(G.money<800)return toast('Sin fondos',1); E.cap(-5);E.money(-800);E.buzz(6);toast('Rueda de prensa exitosa: nadie preguntó lo importante') }
   if(a==='skim'){ if(G.money<4000)return toast('No hay caja que desviar',1); const x=Math.round(G.money*.1);E.money(-x);E.own(x);E.susp(12);toast(`Desvías ${fmt(x)} a una cuenta lejana`) }
   if(a==='loan'){ if(G.debt>=90000)return toast('El banco ya no te presta más',1);G.money+=10000;G.debt+=10000;toast('Préstamo recibido: +$10.000') }
   if(a==='pay'){ const x=Math.min(10000,G.debt); if(G.money<x||x<=0)return toast(x<=0?'No debes nada':'Sin fondos',1);G.money-=x;G.debt-=x;toast('Abonas a la deuda') }
+  if(a==='block'){
+    const b=BLOCKS.find(x=>x.id===arg);
+    queueModal({kick:'Concejo municipal',title:`${b.e} ${b.n}`,html:`<p>${BLOCK_D[arg]} Lealtad actual: <b>${G.blocks[arg].loy.toFixed(0)}%</b>.</p>`,event:{t:b.n},
+     opts:[
+      {l:'Invitarlos a almorzar',s:`$1.200 · +10 de lealtad`,f:()=>{if(G.money<1200)return 'Sin fondos para el almuerzo.';E.money(-1200);E.loyB(arg,10);return 'Almuerzo de cinco horas. Aprobaron todo lo que no entendieron.'}},
+      {l:'Prometerles obras en sus barrios',s:`${fmt($$(2500))} · +22 de lealtad · +2 sospecha`,f:()=>{const c=$$(2500);if(G.money<c)return 'No alcanza la caja para las obras.';E.money(-c);E.loyB(arg,22);E.susp(2);return 'Las obras se anuncian con letreros muy grandes.'}},
+      {l:'Darles puestos en la alcaldía',s:'3 de capital político · +18 de lealtad · funcionarios molestos',f:()=>{if(G.cap<3)return 'No tienes capital político para eso.';E.cap(-3);E.loyB(arg,18);E.fac('fun',-3);E.susp(2);return 'Sus primos empiezan el lunes. La nómina, también.'}},
+      {l:'Repartir mermelada',s:`${fmt($$(3000))} · +30 de lealtad · +6 sospecha`,f:()=>{const c=$$(3000);if(G.money<c)return 'No alcanza la caja para la mermelada.';E.money(-c);E.loyB(arg,30);E.susp(6);return 'La mermelada se reparte en sobres cerrados. Nadie la ve, todos la prueban.'}},
+      {l:'Dejarlo así',f:()=>'Te contestan el teléfono con un "luego te llamo".'}]});
+    return;
+  }
+  if(a==='opp'){
+    if(arg==='disc'){
+      if(G.money<1500)return toast('Sin fondos',1);
+      E.money(-1500);E.susp(5);
+      if(Math.random()<.7){G.oppStr=clamp(G.oppStr-9,8,95);toast('Tu campaña de desprestigio funciona')}
+      else{G.oppStr=clamp(G.oppStr+5,8,95);E.fac('vec',-3);toast('Se filtra que pagaste la campaña: sale el tiro por la culata',1)}
+    }else if(arg==='post'){
+      if(G.cap<6)return toast('Necesitas 6 de capital político',1);
+      const c=$$(1000);if(G.money<c)return toast('Sin fondos',1);
+      E.cap(-6);E.money(-c);E.susp(2);G.oppStr=clamp(G.oppStr-14,8,95);toast(`${G.opp} acepta un cargo "de transición": ya no te critica tanto`);
+    }else if(arg==='pact'){
+      if(G.cap<4)return toast('Necesitas 4 de capital político',1);
+      E.cap(-4);G.oppStr=clamp(G.oppStr-18,8,95);G.pact=12;E.loyB('pop',-8);toast('Pacto con la oposición: los populares se sienten traicionados')
+    }
+    recalc();refreshUI();return;
+  }
+  if(a==='media'){
+    if(arg==='camp'){const c=$$(2500);if(G.money<c)return toast('Sin fondos',1);E.money(-c);G.media=clamp(G.media+10,-50,50);toast('Campaña pagada: sales sonriendo en todas partes')}
+    else{
+      if(G.money<800)return toast('Sin fondos',1);E.money(-800);E.susp(3);
+      if(Math.random()<.25){G.media=clamp(G.media-14,-50,50);E.fac('vec',-4);E.susp(8);toast('Descubren tu granja de trolls: el escándalo es instantáneo',1);addLog('🤖 Revelan que 400 "ciudadanos indignados a favor del alcalde" eran la misma persona.')}
+      else{G.media=clamp(G.media+6,-50,50);toast('Tus perfiles falsos arrasan en redes')}
+    }
+    recalc();refreshUI();return;
+  }
+  if(a==='cab'){
+    if(G.cap<3)return toast('Necesitas 3 de capital político',1);
+    const r=ROLES[arg],cands=[genCand(),genCand(),genCand()];
+    queueModal({kick:'Gabinete',title:`${r.e} Secretaría de ${r.n}`,html:`<p>Actual: <b>${G.cab[arg].n}</b> (${TRAITS[G.cab[arg].t].n}). Escoge un reemplazo:</p>`,event:{t:r.n},
+      opts:cands.map(c=>({l:`${c.n} · ${TRAITS[c.t].n}`,s:TRAITS[c.t].d,f:()=>{E.cap(-3);G.cab[arg]=c;addLog(`🎩 ${c.n} es el nuevo secretario de ${r.n}.`);recalc();return `${c.n} asume el cargo con foto, abrazos y un discurso muy largo.`}})).concat([{l:'Dejar al actual',f:()=>'Se alivia el actual: casi le dan un infarto.'}])});
+    return;
+  }
   if(a==='corp'){
     const d=CORPS[arg],c=G.corp[arg];
     const chooseMgr=(onPick)=>queueModal({kick:'Nombramiento',title:'¿Quién la gerencia?',html:`<p>${d.n} necesita un gerente. La hoja de vida de los tres candidatos cabe en una servilleta.</p>`,event:{t:'Gerente'},
@@ -950,9 +1047,8 @@ function act(a,arg){
     if(cid)return toast('Tu empresa pública opera ese sector: liquídala primero',1);
     if(!st.n)return toast(`Aún no tienes nada de ${sec.n.toLowerCase()} que privatizar`,1);
     if(G.cap<6)return toast('Necesitas 6 de capital político',1);
-    const p=clamp(.3+G.loyalty/220+(S.approval-50)/220,.1,.9);
-    let yes=0;for(let k=0;k<15;k++)if(Math.random()<p)yes++;
-    if(yes<8){E.cap(-3);toast(`Concejo rechaza privatizar (${yes}–${15-yes})`,1);addLog(`🗳️ El concejo frena la privatización de ${sec.n.toLowerCase()} ${yes}–${15-yes}.`);refreshUI();return}
+    const cv=councilVote('priv_'+arg),yes=cv.yes;
+    if(yes<8){E.cap(-3);toast(`Concejo rechaza privatizar (${yes}–${15-yes})`,1);addLog(`🗳️ El concejo frena la privatización de ${sec.n.toLowerCase()} ${yes}–${15-yes}: ${cv.det}.`);refreshUI();return}
     const op=pick(OPS),v=st.value;
     const done=(mult,own,susp,crony,txt,fx)=>()=>{
       E.cap(-6);E.money(Math.round(v*mult));E.own(Math.round(v*own));E.susp(susp);
@@ -976,12 +1072,11 @@ function act(a,arg){
     if(G.decrees[arg]){delete G.decrees[arg];toast(`Derogado: ${d.n}`);recalc();refreshUI();return}
     if(G.cap<d.cap)return toast(`Necesitas ${d.cap} de capital político`,1);
     // votación del concejo
-    const p=clamp(.3+G.loyalty/220+(S.approval-50)/220,.1,.9);
-    let yes=0;for(let k=0;k<15;k++)if(Math.random()<p)yes++;
-    if(yes<8){E.cap(-Math.ceil(d.cap/2));toast(`Concejo rechaza "${d.n}" (${yes}–${15-yes})`,1);addLog(`🗳️ El concejo hunde tu decreto «${d.n}» ${yes}–${15-yes}.`);refreshUI();return}
+    const cv=councilVote(arg),yes=cv.yes;
+    if(yes<8){E.cap(-Math.ceil(d.cap/2));toast(`Concejo rechaza "${d.n}" (${yes}–${15-yes})`,1);addLog(`🗳️ El concejo hunde tu decreto «${d.n}» ${yes}–${15-yes}: ${cv.det}.`);refreshUI();return}
     E.cap(-d.cap);G.decrees[arg]=1;
     if(arg==='alumbrado'){E.money(9000);E.susp(10)}
-    toast(`Aprobado (${yes}–${15-yes}): ${d.n}`);addLog(`📜 ${d.pro}`);
+    toast(`Aprobado (${yes}–${15-yes}): ${d.n}`);addLog(`📜 ${d.pro} (${cv.det})`);
   }
   recalc();refreshUI();
 }
@@ -2035,6 +2130,20 @@ function panelPol(){
   DECREES.forEach(d=>{const on=G.decrees[d.id];h+=`<button class="btn ${on?'on':''}" data-a="decree" data-x="${d.id}">${on?'✅ ':''}${d.n}<small>${d.d}${on?'':` · <b>${d.cap}</b> de capital político`}</small></button>`});
   return h;
 }
+function panelPoder(){
+  let h=`<h4>Concejo municipal (15 curules)</h4>`;
+  for(const b of BLOCKS){const L=G.blocks[b.id].loy;h+=`<div class="fac"><div class="t"><span>${b.e} ${b.n} <span class="tag">${b.seats}</span></span><b>${L.toFixed(0)}%</b></div>${bar(L)}<button class="btn" data-a="block" data-x="${b.id}">Atender al bloque<small>${BLOCK_D[b.id]}</small></button></div>`}
+  h+=`<h4>Oposición: ${G.opp}</h4><div class="row"><span>Fuerza electoral</span><b>${G.oppStr.toFixed(0)}%</b></div>${bar(G.oppStr,100,true)}${G.pact>0?`<small style="color:var(--humo2)">Pacto vigente: ${G.pact} meses.</small>`:''}
+  <button class="btn" data-a="opp" data-x="disc">🗞️ Desacreditarlo<small>$1.500 · +5 sospecha · 70% de éxito</small></button>
+  <button class="btn" data-a="opp" data-x="post">🪑 Ofrecerle un puesto<small>6 de capital político · ${fmt($$(1000))}</small></button>
+  <button class="btn" data-a="opp" data-x="pact">🤝 Pactar con la oposición<small>4 de capital político · los populares se molestan</small></button>
+  <h4>Imagen en medios</h4><div class="row"><span>Opinión de la prensa</span><b>${G.media>=0?'+':''}${G.media.toFixed(0)}</b></div>${bar(G.media+50)}
+  <button class="btn" data-a="media" data-x="camp">📺 Campaña pagada<small>${fmt($$(2500))} · +10 de imagen (se diluye con el tiempo)</small></button>
+  <button class="btn dang" data-a="media" data-x="trolls">🤖 Granja de trolls<small>$800 · +6 de imagen · 25% de riesgo de escándalo</small></button>
+  <h4>Gabinete</h4>`;
+  for(const r in ROLES){const c=G.cab[r];h+=`<button class="btn ${c.t==='cor'?'dang':''}" data-a="cab" data-x="${r}">${ROLES[r].e} ${ROLES[r].n}: ${c.n} <span class="tag">${TRAITS[c.t].n}</span><small>${ROLES[r].d} (x${TRAITS[c.t].skill}). ${TRAITS[c.t].d} Cambiar cuesta 3 de capital político.</small></button>`}
+  return h;
+}
 function panelCorp(){
   let tot=0;for(const id in G.corp)tot+=G.corp[id].last||0;
   let h=`<h4>Empresas públicas</h4><small style="color:var(--humo2)">Fundar una empresa cuesta caja y capital político. Su gerente define si da utilidades o pérdidas: ${Object.keys(G.corp).length?`hoy suman <b style="color:${tot>=0?'var(--jade)':'var(--lacre)'}">${fmt(tot)}</b> al mes.`:'aún no tienes ninguna.'}</small>`;
@@ -2091,7 +2200,7 @@ function refreshUI(light){
   if(light&&curTab==='fin')return;
   const body=$('#panelBody'),sc0=body.scrollTop;
   if(document.activeElement&&document.activeElement.type==='range')return;
-  body.innerHTML=curTab==='city'?panelCity():curTab==='pol'?panelPol():curTab==='corp'?panelCorp():panelFin();
+  body.innerHTML=curTab==='city'?panelCity():curTab==='pol'?panelPol():curTab==='corp'?panelCorp():curTab==='pow'?panelPoder():panelFin();
   body.scrollTop=sc0;
 }
 $('#panelBody').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)act(b.dataset.a,b.dataset.x)});
@@ -2115,7 +2224,7 @@ function load(){
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
     allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt'])if(o.grid[k])grid[k].set(o.grid[k]);
-    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];Object.assign(cam,o.cam||{});cam.z=cam.z||1;
+    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];G.blocks=G.blocks||{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}};if(G.oppStr==null)G.oppStr=35;G.pact=G.pact||0;G.media=G.media||0;if(!G.cab)G.cab=newCab();Object.assign(cam,o.cam||{});cam.z=cam.z||1;
     terrainMeta();floodSync();recalc();refreshUI();buildTools();return true;
   }catch(e){return false}
 }
