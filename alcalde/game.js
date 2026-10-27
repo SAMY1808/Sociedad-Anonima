@@ -11,7 +11,7 @@ const num=n=>Math.round(n).toLocaleString('es-CO');
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 /* ---------- tipos y herramientas ---------- */
-const T={NONE:0,ROAD:1,R:2,C:3,I:4,PARK:5,POLICE:6,FIRE:7,CLINIC:8,SCHOOL:9,COAL:10,SOLAR:11,WATER:12,STATUE:13,HALL:14,AVE:15,BUS:16,METRO:17,LIB:18,UNI:19,HOSP:20,STAD:21,WIND:22,RECY:23,PLAZA:24,JAIL:25};
+const T={NONE:0,ROAD:1,R:2,C:3,I:4,PARK:5,POLICE:6,FIRE:7,CLINIC:8,SCHOOL:9,COAL:10,SOLAR:11,WATER:12,STATUE:13,HALL:14,AVE:15,BUS:16,METRO:17,LIB:18,UNI:19,HOSP:20,STAD:21,WIND:22,RECY:23,PLAZA:24,JAIL:25,ROUND:26,TOLL:27};
 const TOOLS=[
  {id:'pan',n:'Mover',e:'✋',cost:0,g:'Mapa',d:'Arrastra para mover el mapa. Rueda o pellizco para acercar.'},
  {id:'bull',n:'Demoler',e:'🧨',cost:5,g:'Mapa',d:'Derriba edificios, calles y zonas.'},
@@ -24,6 +24,8 @@ const TOOLS=[
  {id:'park',n:'Parque',e:'🌳',cost:60,up:6,t:T.PARK,r:5,g:'Urbanismo',d:'Alegra a los vecinos y limpia el aire. Los ecologistas lo adoran.'},
  {id:'plaza',n:'Plaza pública',e:'⛲',cost:250,up:18,t:T.PLAZA,r:4,g:'Urbanismo',d:'Plaza con fuente y bancas: felicidad, valor del suelo y más clientes al comercio. También es el lugar favorito para protestar.'},
  {id:'ave',n:'Avenida',e:'🛤️',cost:45,up:.9,t:T.AVE,g:'Transporte',d:'Doble calzada: aguanta más del doble de tráfico. Se puede pintar sobre una calle.'},
+ {id:'round',n:'Glorieta',e:'🔄',cost:180,up:1,t:T.ROUND,g:'Transporte',d:'Rotonda sobre una calle o avenida: +60% de capacidad en el cruce y +25% en las calles pegadas. Con isla central.'},
+ {id:'toll',n:'Peaje',e:'🚧',cost:600,up:40,t:T.TOLL,g:'Transporte',d:'Caseta de cobro sobre una calle o avenida. Cobra por cada vehículo que pasa (tarifa en Finanzas), frena el tráfico y enoja a la gente.'},
  {id:'bus',n:'Parada de bus',e:'🚌',cost:350,up:35,t:T.BUS,r:6,g:'Transporte',d:'Cobertura de bus en radio 6: baja el tráfico y sube el valor del suelo. Pon varias.'},
  {id:'metro',n:'Estación de metro',e:'🚇',cost:3200,up:260,t:T.METRO,r:10,big:1,g:'Transporte',d:'Cobertura enorme (radio 10). Permite densidades altas. Obra faraónica: espera sobrecostos.'},
  {id:'rail',n:'Vía elevada',e:'🚝',cost:120,up:3,lay:'elev',lv:1,g:'Transporte',d:'Viaducto de metro elevado: va sobre calles, terreno libre y hasta sobre el agua. Se une a otras vías por los lados.'},
@@ -124,7 +126,10 @@ function setRoad(i,j){const idx=j*N+i;if(grid.ter[idx]===1)return;grid.ter[idx]=
 /* ---------- utilidades de grilla ---------- */
 const inb=(i,j)=>i>=0&&j>=0&&i<N&&j<N;
 const typeAt=(i,j)=>inb(i,j)?grid.typ[j*N+i]:-1;
-const isRoad=t=>t===T.ROAD||t===T.AVE;
+const isRoad=t=>t===T.ROAD||t===T.AVE||t===T.ROUND||t===T.TOLL;
+const isAveIdx=k=>grid.typ[k]===T.AVE||((grid.typ[k]===T.ROUND||grid.typ[k]===T.TOLL)&&grid.den[k]===1);
+let lastToll={rev:0,count:0};
+const toolCost=t=>Math.round(t.cost*((G&&G.corp&&G.corp.cons&&G.corp.cons.q>=50)?.88:1));
 function roadAccess(i,j){
   for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){ if(!di&&!dj)continue; if(isRoad(typeAt(i+di,j+dj)))return true; }
   return false;
@@ -149,6 +154,7 @@ const SECTORS={
  sal:{n:'Salud',e:'🏥',types:[T.CLINIC,T.HOSP],fx:{vec:-8,emp:6,eco:0,fun:-9},d:'Clínicas y hospitales. Cobertura algo menor; las filas, algo mayores.'},
  edu:{n:'Educación',e:'🎓',types:[T.SCHOOL,T.LIB,T.UNI],fx:{vec:-5,emp:4,eco:0,fun:-9},d:'Colegios, bibliotecas y universidad "con enfoque de mercado".'},
  agua:{n:'Agua y aseo',e:'🚰',types:[T.WATER,T.RECY],fx:{vec:-6,emp:5,eco:-3,fun:-5},d:'Torres de agua y reciclaje. Hay pérdidas en la red... y en la caja.'},
+ peaje:{n:'Peajes y concesiones viales',e:'🚧',types:[T.TOLL],fx:{vec:-5,emp:6,eco:0,fun:-3},d:'Un operador cobra los peajes: tú recibes la mitad y todo el odio.'},
  trn:{n:'Transporte público',e:'🚇',types:[T.BUS,T.METRO],fx:{vec:-4,emp:5,eco:-2,fun:-6},d:'Buses, metro y metro elevado. El pasaje sube al doble.'},
 };
 const SECOF={};for(const k in SECTORS)for(const t of SECTORS[k].types)SECOF[t]=k;
@@ -208,18 +214,28 @@ function computeTraffic(){
     }
     load.set(nl);
   }
+  const boost=new Float32Array(N*N).fill(1);
+  for(const k of roads){
+    if(grid.typ[k]!==T.ROUND)continue;
+    boost[k]=Math.max(boost[k],1.6);
+    const i=k%N,j=(k/N)|0;
+    for(const [a,b] of [[1,0],[-1,0],[0,1],[0,-1]]){const x=i+a,y=j+b;if(inb(x,y)&&isRoad(grid.typ[y*N+x]))boost[y*N+x]=Math.max(boost[y*N+x],1.25)}
+  }
+  const price=G.tollPrice==null?3:G.tollPrice;let rev=0,tc=0;
+  for(const k of roads){if(grid.typ[k]!==T.TOLL)continue;tc++;rev+=load[k]*price*22*(1-.04*price);load[k]*=1-.04*price}
+  lastToll={rev,count:tc};
   cov.traf.fill(0);
   let tot=0,w=0;
   for(const k of roads){
-    const cap=(grid.typ[k]===T.AVE?22:9)*(grid.brt[k]?.75:grid.tram[k]?.92:1);
+    const cap=(isAveIdx(k)?22:9)*boost[k]*(grid.brt[k]?.75:grid.tram[k]?.92:1);
     const relief=1-Math.min(.65,cov.transit[k]*.5)-(G.decrees.picoplaca?.22:0);
-    const v=load[k]*Math.max(.2,relief)/cap;
+    const v=load[k]*Math.max(.2,relief)/cap+(grid.typ[k]===T.TOLL?.22:0);
     cov.traf[k]=v;tot+=v*load[k];w+=load[k];
   }
   return w>0?clamp(tot/w,0,2):0;
 }
 function recalc(){
-  const cnt=new Array(28).fill(0);
+  const cnt=new Array(32).fill(0);
   let capR=0,capC=0,capI=0,units=0,zunits=0,zoneTiles=0;
   const src={police:[],fire:[],clinic:[],school:[],park:[],poll:[],lib:[],uni:[],hosp:[],stad:[],bus:[],metro:[],recy:[],plaza:[],jail:[]};
   const pv=G.priv||{};
@@ -286,7 +302,7 @@ function recalc(){
   let dC=clamp((pop*.2-capC)/(pop*.2+10),-1,1)*.8+(pop<20?.15:0)-tx('C');
   let dI=clamp((workers*.45-capI)/(workers*.45+12),-1,1)*.8+.12-tx('I')+(G.decrees.exencion?.2:0);
   const target=capR*(.4+.6*h);
-  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,
+  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,toll:lastToll,
      dR:clamp(dR,-1,1),dC:clamp(dC,-1,1),dI:clamp(dI,-1,1),target,statue,zoneTiles};
   for(let k=0;k<N*N;k++){
     cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5,0,1);
@@ -311,49 +327,54 @@ function applyLayer(tool,i,j,sim){
   else if(tool.lay==='brt'){if(cur!==T.AVE||grid.tram[idx])return 0}
   if(tool.lv===1){if(arr[idx])return 0}else if(arr[idx]!==1)return 0;
   if(!sim){
-    if(G.money<tool.cost)return -1;
-    G.money-=tool.cost;arr[idx]=tool.lv;
+    if(G.money<toolCost(tool))return -1;
+    G.money-=toolCost(tool);arr[idx]=tool.lv;
     if(tool.big)G.bigBuilds=(G.bigBuilds||0)+1;
   }
-  return tool.cost;
+  return toolCost(tool);
 }
 function applyTool(tool,i,j,sim){
   if(tool.lay)return applyLayer(tool,i,j,sim);
   if(!inb(i,j))return 0;
   const idx=j*N+i;
   if(tool.id==='bull'&&(grid.elev[idx]||grid.tram[idx]||grid.brt[idx])){
-    if(!sim){if(G.money<tool.cost)return -1;G.money-=tool.cost;if(grid.elev[idx])grid.elev[idx]=0;else if(grid.tram[idx])grid.tram[idx]=0;else grid.brt[idx]=0}
-    return tool.cost;
+    if(!sim){if(G.money<toolCost(tool))return -1;G.money-=toolCost(tool);if(grid.elev[idx])grid.elev[idx]=0;else if(grid.tram[idx])grid.tram[idx]=0;else grid.brt[idx]=0}
+    return toolCost(tool);
   }
   if(grid.ter[idx]===1)return 0;
   const cur=grid.typ[idx];
   if(cur===T.HALL)return 0;
   if(tool.id==='bull'){
     if(cur===T.NONE&&grid.ter[idx]!==2)return 0;
-    if(!sim){ if(G.money<tool.cost){return -1} G.money-=tool.cost; grid.typ[idx]=T.NONE;grid.lvl[idx]=0;grid.den[idx]=0;grid.ter[idx]=0; }
-    return tool.cost;
+    if(!sim){ if(G.money<toolCost(tool)){return -1} G.money-=toolCost(tool); grid.typ[idx]=T.NONE;grid.lvl[idx]=0;grid.den[idx]=0;grid.ter[idx]=0; }
+    return toolCost(tool);
   }
   if(!tool.t)return 0;
   const isZone=tool.t===T.R||tool.t===T.C||tool.t===T.I;
   const curZone=cur===T.R||cur===T.C||cur===T.I;
   const road=tool.t===T.ROAD||tool.t===T.AVE;
+  const onRoad=tool.t===T.ROUND||tool.t===T.TOLL;
   const den=tool.den||0;
   if(isZone&&cur===tool.t&&grid.den[idx]===den)return 0;
-  if(road&&cur===tool.t)return 0;
-  if(cur!==T.NONE&&!(isZone&&curZone)&&!(tool.t===T.AVE&&cur===T.ROAD))return 0;
+  if((road||onRoad)&&cur===tool.t)return 0;
+  if(cur!==T.NONE&&!(isZone&&curZone)&&!(tool.t===T.AVE&&cur===T.ROAD)&&!(onRoad&&(cur===T.ROAD||cur===T.AVE||cur===T.ROUND||cur===T.TOLL)))return 0;
+  if(onRoad&&cur===T.NONE)return 0;
   if(!sim){
-    if(G.money<tool.cost)return -1;
-    G.money-=tool.cost;
+    if(G.money<toolCost(tool))return -1;
+    G.money-=toolCost(tool);
     if(isZone&&curZone){
       if(cur!==tool.t)grid.lvl[idx]=0;
       grid.typ[idx]=tool.t;grid.den[idx]=den;
       if(!den||tool.t===T.I)grid.lvl[idx]=Math.min(grid.lvl[idx],3);
+    }else if(onRoad){
+      const ave=cur===T.AVE||((cur===T.ROUND||cur===T.TOLL)&&grid.den[idx]===1);
+      grid.typ[idx]=tool.t;grid.lvl[idx]=0;grid.den[idx]=ave?1:0;
     }else{
       grid.typ[idx]=tool.t;grid.lvl[idx]=0;grid.den[idx]=den;grid.ter[idx]=0;grid.sub[idx]=(Math.random()*256)|0;
     }
     if(tool.big)G.bigBuilds=(G.bigBuilds||0)+1;
   }
-  return tool.cost;
+  return toolCost(tool);
 }
 
 /* ---------- decretos ---------- */
@@ -507,6 +528,16 @@ const EVENTS=[
  {id:'tram_tilin',w:1.1,min:250,c:()=>S.netT.stations>=2,t:'El tranvía y el tilín',x:'El tranvía recorre la ciudad haciendo "tilín" cada cinco segundos. Los vecinos piden silencio; los turistas piden bis.',
   o:[{l:'Mantener el tilín',s:'Es parte del encanto',f:()=>{E.fac('vec',-2);E.buzz(2);E.fac('eco',2);return 'La campanita se vuelve símbolo de la ciudad. Y de tu insomnio.'}},
      {l:'Silenciar la campana',s:'Menos encanto',f:()=>{E.fac('vec',3);E.buzz(-1);return 'Los turistas lloran. Los vecinos, de alegría.'}}]},
+ {id:'peaje_protesta',w:1.6,min:250,c:()=>S.toll&&S.toll.count>0&&(G.tollPrice==null?3:G.tollPrice)>=4,t:'Caravana contra el peaje',x:'Cientos de conductores bloquean la caseta con pitos, banderas y algún asado. Dicen que pagan peaje "hasta por ir a la esquina".',
+  o:[{l:'Bajar la tarifa a $2',s:'La plata baja, la rabia también',f:()=>{G.tollPrice=2;E.fac('vec',5);E.cap(-2);recalc();return 'Tarifa reducida. Los pitos se convierten en aplausos de cortesía.'}},
+     {l:'Mantener la tarifa',s:'Mano firme',f:()=>{E.fac('vec',-5);E.cap(3);return 'Las casetas siguen cobrando. Los asados, también.'}},
+     {l:'Culpar al concesionario',s:'Eficaz si no lo contrataste tú',f:()=>{E.fac('vec',-1);E.fac('emp',-3);return 'El concesionario responde con un comunicado de cuatro páginas. Nadie lo lee.'}}]},
+ {id:'peaje_fantasma',w:1.2,min:250,c:()=>S.toll&&S.toll.count>0,t:'El peaje de la vía que no existe',x:'Un periodista descubre que cobras peaje en una vía "en construcción" desde hace dos años. La vía es una trocha. La caseta, de lujo.',
+  o:[{l:'Prometer terminarla "pronto"',s:'Palabra de alcalde',f:()=>{E.fac('vec',-2);E.buzz(-1);return 'La promesa se suma a las otras diecisiete.'}},
+     {l:'Devolver lo recaudado',s:'Gesto costoso',f:()=>{E.money(-$$(2000));E.fac('vec',5);E.susp(-3);return 'Los diarios lo llaman "el peaje más honrado de la historia".'}}]},
+ {id:'glorieta_estatua',w:1.1,min:250,c:()=>S.cnt[T.ROUND]>0,t:'Una estatua para la glorieta',x:'Un concejal propone un monumento al "pollo asado" en la glorieta central. Casualmente, su familia tiene un asadero.',
+  o:[{l:'Aprobar el monumento',s:'Cultura gastronómica',f:()=>{E.money(-$$(1200));E.loy(6);E.fac('vec',2);E.susp(2);return 'El pollo mide cinco metros. Los pájaros reales lo adoptan de inmediato.'}},
+     {l:'Rechazarlo',s:'Sin estatuas',f:()=>{E.loy(-4);E.cap(-1);return 'El concejal jura vengarse en la próxima votación.'}}]},
 ];
 function eventFor(){
   const el=EVENTS.filter(e=>(!e.min||G.pop>=e.min)&&(!e.c||e.c())&&!G.recent.includes(e.id));
@@ -554,7 +585,8 @@ function finance(){
   incC*=1-.15*clamp(S.cong-.6,0,1);
   incC*=1+Math.min(.1,S.cnt[T.PLAZA]*.015);
   const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.6,S.net.stations*.06+(S.netT.stations+S.netB.stations)*.04));
-  let inc=incR+incC+incI+incT+canon;
+  const incToll=(S.toll?S.toll.rev:0)*(pv.peaje?.5:1);
+  let inc=incR+incC+incI+incT+canon+incToll;
   const admin=(110+G.pop*.55);
   let dec=0;
   if(G.decrees.vivienda)dec+=300+G.pop*.08;
@@ -564,7 +596,7 @@ function finance(){
   if(G.decrees.recorte)dec-=G.pop*.12+80;
   const interest=G.debt*.012;
   const exp=(up+admin+dec)*infl+interest;
-  G.hist={inc,exp,incR,incC,incI,incT,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
+  G.hist={inc,exp,incR,incC,incI,incT,incToll,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
   G.money+=inc-exp;
 }
 function politics(){
@@ -577,6 +609,7 @@ function politics(){
   targ.eco=72-S.aPoll*140+S.aPark*30+S.cnt[T.SOLAR]*5-S.cnt[T.COAL]*7-(G.decrees.exencion?12:0)+(G.decrees.ciclovia?16:0)-(S.statue?6:0)+S.cnt[T.WIND]*5+S.cnt[T.RECY]*4+S.aTrn*10-(G.decrees.picoplaca?-3:0)-(S.capI>S.capR?6:0);
   // funcionarios
   targ.fun=45+(S.aPol+S.aFir+S.aCli+S.aSch)*13-(G.money<0?25:0)-(G.decrees.recorte?18:0)+(G.decrees.propaganda?3:0);
+  {const tl=S.toll?S.toll.count:0,tp=G.tollPrice==null?3:G.tollPrice;targ.vec-=Math.min(10,tl*tp*.4);targ.emp-=Math.min(8,tl*tp*.3)}
   for(const sec in SECTORS){if(G.priv&&G.priv[sec]){const f=SECTORS[sec].fx;targ.vec+=f.vec;targ.emp+=f.emp;targ.eco+=f.eco;targ.fun+=f.fun}}
   for(const sec in G.cronies){if(G.cronies[sec]&&G.priv[sec]){const c=sectorStats(sec).value*.012;G.personal+=c*.4;G.susp=clamp(G.susp+.25,0,120)}}
   targ.vec+=Math.min(6,S.cnt[T.PLAZA]*1.5);
@@ -1231,7 +1264,7 @@ function drawTramBrt(i,j,idx){
 }
 function drawRoad(i,j,sx,sy){
   const n=[isRoad(typeAt(i+1,j)),isRoad(typeAt(i-1,j)),isRoad(typeAt(i,j+1)),isRoad(typeAt(i,j-1))];
-  const ave=grid.typ[j*N+i]===T.AVE;
+  const ave=isAveIdx(j*N+i);
   const cnt=n.filter(Boolean).length;
   flat(0,0,1,1,0,'#c2c4bb');
   const a=ave?.06:.18,b=1-a,v=hsh(i,j,2);
@@ -1254,8 +1287,16 @@ function drawRoad(i,j,sx,sy){
   }
   ctx.stroke();ctx.setLineDash([]);
   if(ave){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=.8;ctx.beginPath();for(const o of [.14,.86]){if(n[0])seg(.5,o,1,o);if(n[1])seg(0,o,.5,o);if(n[2])seg(o,.5,o,1);if(n[3])seg(o,0,o,.5)}ctx.stroke()}
+  if(grid.typ[j*N+i]===T.ROUND){
+    const cx=X(.5,.5),cy=Y(.5,.5),k2=Math.SQRT2;
+    ctx.fillStyle='#c2c4bb';ctx.beginPath();ctx.ellipse(cx,cy,k2*.47*HW,k2*.47*HH,0,0,7);ctx.fill();
+    ctx.fillStyle=asp;ctx.beginPath();ctx.ellipse(cx,cy,k2*.44*HW,k2*.44*HH,0,0,7);ctx.fill();
+    if(DETAIL){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=.9;ctx.setLineDash([3,3]);ctx.beginPath();ctx.ellipse(cx,cy,k2*.34*HW,k2*.34*HH,0,0,7);ctx.stroke();ctx.setLineDash([])}
+    ctx.fillStyle='#d6d6cc';ctx.beginPath();ctx.ellipse(cx,cy,k2*.26*HW,k2*.26*HH,0,0,7);ctx.fill();
+    ctx.fillStyle='#78bc70';ctx.beginPath();ctx.ellipse(cx,cy,k2*.22*HW,k2*.22*HH,0,0,7);ctx.fill();
+  }
   // pasos peatonales y semaforos en cruces
-  if(cnt>=3&&DETAIL){
+  if(cnt>=3&&DETAIL&&grid.typ[j*N+i]!==T.ROUND){
     ctx.fillStyle='rgba(255,255,255,.78)';
     const zebra=(arm)=>{
       for(let k=0;k<5;k++){
@@ -1390,7 +1431,7 @@ function objH(t,l){
     case T.R:return [0,24,32,72,112,152][l]||0;case T.C:return [0,16,34,72,100,142][l]||0;case T.I:return [0,26,36,44][l]||0;
     case T.POLICE:return 24;case T.FIRE:return 26;case T.CLINIC:return 28;case T.SCHOOL:return 30;case T.COAL:return 60;case T.WATER:return 60;
     case T.STATUE:return 36;case T.HALL:return 40;case T.LIB:return 26;case T.UNI:return 46;case T.HOSP:return 42;case T.STAD:return 30;
-    case T.WIND:return 46;case T.RECY:return 22;case T.JAIL:return 38;case T.METRO:return 28;case T.BUS:return 14;default:return 0;
+    case T.WIND:return 46;case T.RECY:return 22;case T.JAIL:return 38;case T.METRO:return 28;case T.BUS:return 14;case T.TOLL:return 24;default:return 0;
   }
 }
 function drawShadows(vis){
@@ -1450,10 +1491,33 @@ function groundTile(i,j,idx){
     flat(0,0,1,1,0,(typ===T.PARK||typ===T.WIND)?'#7bc47a':'#b9bab0');
   }
 }
+function drawToll(i,j,idx){
+  const n=[isRoad(typeAt(i+1,j)),isRoad(typeAt(i-1,j)),isRoad(typeAt(i,j+1)),isRoad(typeAt(i,j-1))];
+  const alongU=(n[0]||n[1])||!(n[2]||n[3]);
+  const P=(a0,b0,a1,b1,h,c,z=0)=>alongU?prism(a0,b0,a1,b1,h,c,z):prism(b0,a0,b1,a1,h,c,z);
+  const XY=(a,b)=>alongU?[X(a,b),Y(a,b)]:[X(b,a),Y(b,a)];
+  P(.4,.04,.6,.17,11,[236,232,220]);P(.4,.83,.6,.96,11,[236,232,220]);
+  P(.4,.04,.6,.17,2,[210,60,50],11);P(.4,.83,.6,.96,2,[210,60,50],11);
+  P(.44,.03,.56,.97,2.6,[222,214,196],23);
+  P(.45,.15,.55,.22,23,[200,200,196]);P(.45,.78,.55,.85,23,[200,200,196]);
+  const [x,y]=XY(.5,.5);
+  ctx.fillStyle='#1f5fa8';ctx.fillRect(x-14,y-38,28,10);ctx.strokeStyle='#e8eef5';ctx.lineWidth=.8;ctx.strokeRect(x-14,y-38,28,10);
+  ctx.fillStyle='#fff';ctx.font='bold 6.5px sans-serif';ctx.textAlign='center';ctx.fillText('PEAJE $'+(G.tollPrice==null?3:G.tollPrice),x,y-31);
+  ctx.strokeStyle='#666';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-9,y-28);ctx.lineTo(x-9,y-23);ctx.moveTo(x+9,y-28);ctx.lineTo(x+9,y-23);ctx.stroke();
+  if(night>.15){lights.push(x-14,y-38,x+14,y-38,x+14,y-28,x-14,y-28)}
+}
+function drawRoundDeco(i,j,idx){
+  const h=hsh(i,j,12);
+  if(h<.5)tree(.5,.5,1.05,[70,150,80],0);
+  else if(h<.8){cyl(.5,.5,6,3,[190,190,184]);const fx=X(.5,.5),fy=Y(.5,.5)-3;ctx.fillStyle='#6fb8e0';ctx.beginPath();ctx.ellipse(fx,fy,4.6,2.2,0,0,7);ctx.fill();ctx.strokeStyle='rgba(220,240,255,.85)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(fx,fy);ctx.lineTo(fx,fy-8-Math.sin(TNOW/260));ctx.stroke()}
+  else{prism(.42,.42,.58,.58,5,[190,186,176]);prism(.46,.46,.54,.54,13,[230,190,80],5)}
+}
 function objectTile(i,j,idx,bucket,tbucket){
   OX=(i-j)*HW;OY=(i+j)*HH;curIdx=idx;
   const typ=grid.typ[idx],lvl=grid.lvl[idx];
   if(typ===T.NONE&&grid.ter[idx]===2)forestTile(i,j);
+  if(typ===T.TOLL)drawToll(i,j,idx);
+  if(typ===T.ROUND)drawRoundDeco(i,j,idx);
   if(typ===T.R||typ===T.C||typ===T.I||(typ!==T.NONE&&!isRoad(typ))){
     if(overlay==='traf')ctx.globalAlpha=.35;
     drawBuilding(typ,lvl,i,j,OX,OY);ctx.globalAlpha=1;
@@ -1529,7 +1593,7 @@ function render(now){
 }
 function drawCar(c){
   const di=c.ni-c.i,dj=c.nj-c.j;
-  const off=grid.typ[c.nj*N+c.ni]===T.AVE?.2:.13;
+  const off=isAveIdx(c.nj*N+c.ni)?.2:.13;
   const ci=c.i+di*c.t-dj*off,cj=c.j+dj*c.t+di*off;
   OX=(ci-cj)*HW;OY=(ci+cj+1)*HH;
   const L=c.bus?.17:.09,Wd=c.bus?.06:.045,h=c.bus?7:3.5;
@@ -1620,7 +1684,7 @@ function updateCars(dt){
   if(nc>wantCars+3||nb>wantBus){for(let k=cars.length-1;k>=0&&(nc>wantCars+3||nb>wantBus);k--){if(cars[k].bus&&nb>wantBus){cars.splice(k,1);nb--}else if(!cars[k].bus&&nc>wantCars+3){cars.splice(k,1);nc--}}}
   for(const c of cars){
     if(!isRoad(typeAt(c.i,c.j))||!isRoad(typeAt(c.ni,c.nj))){const k=pick(roads);if(k==null){cars.length=0;return}c.i=k%N;c.j=(k/N)|0;const nb2=roadNeighbors(c.i,c.j);if(nb2.length){c.ni=nb2[0][0];c.nj=nb2[0][1]}else{c.ni=c.i;c.nj=c.j}c.t=0;continue}
-    const cg=cov.traf[c.nj*N+c.ni]||0,fast=grid.typ[c.nj*N+c.ni]===T.AVE?1.25:1;
+    const cg=cov.traf[c.nj*N+c.ni]||0,fast=(isAveIdx(c.nj*N+c.ni)?1.25:1)*(grid.typ[c.nj*N+c.ni]===T.TOLL?.45:1);
     c.t+=dt*c.sp*(S.units?1:.4)*1.3*fast/(1+cg*1.6);
     if(c.t>=1){
       c.t=0;const oi=c.i,oj=c.j;c.i=c.ni;c.j=c.nj;
@@ -1700,7 +1764,7 @@ function showTip(px,py){
   if(!hover||!inb(hover[0],hover[1])||tool.id!=='pan'&&false){tip.style.display='none';return}
   const [i,j]=hover,idx=j*N+i,t=grid.typ[idx],l=grid.lvl[idx];
   let name='Terreno';
-  if(grid.ter[idx]===1)name='Agua';else if(t===T.ROAD)name='Calle';else if(t===T.AVE)name='Avenida';else if(t===T.HALL)name='Alcaldía';
+  if(grid.ter[idx]===1)name='Agua';else if(t===T.ROAD)name='Calle';else if(t===T.AVE)name='Avenida';else if(t===T.ROUND)name='Glorieta';else if(t===T.TOLL)name='Peaje';else if(t===T.HALL)name='Alcaldía';
   else if(ZNAME[t])name=`${ZNAME[t]}${grid.den[idx]&&t!==T.I?' densa':''} · nivel ${l}${l===0?' (sin construir)':''}`;
   else if(BYTYPE[t])name=BYTYPE[t].n;else if(grid.ter[idx]===2)name='Bosque';
   let h=`<b>${name}</b>`;
@@ -1792,11 +1856,13 @@ function panelFin(){
   const bal=hh.inc-hh.exp;
   let h=`<h4>Impuestos</h4>`;
   [['R','🏠 Residencial'],['C','🏬 Comercial'],['I','🏭 Industrial']].forEach(([k,n])=>{h+=`<div class="sl"><div class="t"><span>${n}</span><b>${G.tax[k]}%</b></div><input type="range" min="0" max="25" step="1" value="${G.tax[k]}" data-tax="${k}"></div>`});
-  h+=`<h4>Balance mensual (último mes)</h4>
+  h+=`<div class="sl"><div class="t"><span>🚧 Tarifa de peajes</span><b>$${G.tollPrice==null?3:G.tollPrice}</b></div><input type="range" min="0" max="10" step="1" value="${G.tollPrice==null?3:G.tollPrice}" data-toll="1"><small style="color:var(--humo2)">${S.cnt[T.TOLL]?S.cnt[T.TOLL]+' casetas. Más tarifa: más plata y más rabia.':'Aún no tienes peajes.'}</small></div>
+  <h4>Balance mensual (último mes)</h4>
   <div class="row"><span>Ingresos residenciales</span><b>${fmt(hh.incR||0)}</b></div>
   <div class="row"><span>Ingresos comerciales</span><b>${fmt(hh.incC||0)}</b></div>
   <div class="row"><span>Ingresos industriales</span><b>${fmt(hh.incI||0)}</b></div>
   <div class="row"><span>Pasajes de transporte</span><b>${fmt(hh.incT||0)}</b></div>
+  <div class="row"><span>Peajes</span><b>${fmt(hh.incToll||0)}</b></div>
   <div class="row"><span>Mantenimiento de obras</span><b>-${fmt(hh.up||0).slice(1)}</b></div>
   <div class="row"><span>Burocracia y servicios</span><b>-${fmt(hh.admin||0).slice(1)}</b></div>
   <div class="row"><span>Decretos</span><b>${hh.dec>0?'-':''}${fmt(Math.abs(hh.dec||0)).slice(1)}</b></div>
@@ -1831,7 +1897,7 @@ function refreshUI(light){
   body.scrollTop=sc0;
 }
 $('#panelBody').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)act(b.dataset.a,b.dataset.x)});
-$('#panelBody').addEventListener('input',e=>{const r=e.target;if(r.dataset.tax){G.tax[r.dataset.tax]=+r.value;r.parentNode.querySelector('b').textContent=r.value+'%';recalc();const m=document.getElementById('hAppr');if(m)m.textContent=S.approval.toFixed(0)+'%'}});
+$('#panelBody').addEventListener('input',e=>{const r=e.target;if(r.dataset.toll){G.tollPrice=+r.value;r.parentNode.querySelector('b').textContent='$'+r.value;recalc();return}if(r.dataset.tax){G.tax[r.dataset.tax]=+r.value;r.parentNode.querySelector('b').textContent=r.value+'%';recalc();const m=document.getElementById('hAppr');if(m)m.textContent=S.approval.toFixed(0)+'%'}});
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{curTab=b.dataset.tab;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));refreshUI()});
 function setSpeed(s){if(!G)return;G.speed=s;refreshUI(true)}
 document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.sp));
