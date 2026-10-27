@@ -11,7 +11,7 @@ const num=n=>Math.round(n).toLocaleString('es-CO');
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 /* ---------- tipos y herramientas ---------- */
-const T={NONE:0,ROAD:1,R:2,C:3,I:4,PARK:5,POLICE:6,FIRE:7,CLINIC:8,SCHOOL:9,COAL:10,SOLAR:11,WATER:12,STATUE:13,HALL:14,AVE:15,BUS:16,METRO:17,LIB:18,UNI:19,HOSP:20,STAD:21,WIND:22,RECY:23,PLAZA:24,JAIL:25,ROUND:26,TOLL:27};
+const T={NONE:0,ROAD:1,R:2,C:3,I:4,PARK:5,POLICE:6,FIRE:7,CLINIC:8,SCHOOL:9,COAL:10,SOLAR:11,WATER:12,STATUE:13,HALL:14,AVE:15,BUS:16,METRO:17,LIB:18,UNI:19,HOSP:20,STAD:21,WIND:22,RECY:23,PLAZA:24,JAIL:25,ROUND:26,TOLL:27,SOCIAL:28,SLUM:29,HOTEL:30,MUSEUM:31,AIRPORT:32};
 const TOOLS=[
  {id:'pan',n:'Mover',e:'✋',cost:0,g:'Mapa',d:'Arrastra para mover el mapa. Rueda o pellizco para acercar.'},
  {id:'bull',n:'Demoler',e:'🧨',cost:5,g:'Mapa',d:'Derriba edificios, calles y zonas.'},
@@ -23,6 +23,8 @@ const TOOLS=[
  {id:'I',n:'Industrial',e:'🏭',cost:8,t:T.I,den:0,g:'Urbanismo',d:'Zona industrial. Mucho empleo, mucha contaminación.'},
  {id:'park',n:'Parque',e:'🌳',cost:60,up:6,t:T.PARK,r:5,g:'Urbanismo',d:'Alegra a los vecinos y limpia el aire. Los ecologistas lo adoran.'},
  {id:'plaza',n:'Plaza pública',e:'⛲',cost:250,up:18,t:T.PLAZA,r:4,g:'Urbanismo',d:'Plaza con fuente y bancas: felicidad, valor del suelo y más clientes al comercio. También es el lugar favorito para protestar.'},
+ {id:'social',n:'Vivienda social',e:'🏘️',cost:1800,up:80,t:T.SOCIAL,g:'Urbanismo',d:'Bloques de vivienda subsidiada: alojan a 40 personas sin pagar impuestos, suben el ánimo de los vecinos y frenan las invasiones.'},
+ {id:'formal',n:'Formalizar barrio',e:'📜',cost:200,special:'formal',g:'Urbanismo',d:'Convierte una casilla de barrio informal en vivienda residencial legal.'},
  {id:'ave',n:'Avenida',e:'🛤️',cost:45,up:.9,t:T.AVE,g:'Transporte',d:'Doble calzada: aguanta más del doble de tráfico. Se puede pintar sobre una calle.'},
  {id:'round',n:'Glorieta',e:'🔄',cost:180,up:1,t:T.ROUND,g:'Transporte',d:'Rotonda sobre una calle o avenida: +60% de capacidad en el cruce y +25% en las calles pegadas. Con isla central.'},
  {id:'toll',n:'Peaje',e:'🚧',cost:600,up:40,t:T.TOLL,g:'Transporte',d:'Caseta de cobro sobre una calle o avenida. Cobra por cada vehículo que pasa (tarifa en Finanzas), frena el tráfico y enoja a la gente.'},
@@ -48,6 +50,13 @@ const TOOLS=[
  {id:'lib',n:'Biblioteca',e:'📚',cost:600,up:55,t:T.LIB,r:8,g:'Servicios',d:'Educación barata en radio 8. Nadie la usa, pero queda lindo.'},
  {id:'uni',n:'Universidad',e:'🎓',cost:4600,up:390,t:T.UNI,r:14,big:1,g:'Servicios',d:'Educación superior en radio 14: empuja el valor del suelo y las densidades altas.'},
  {id:'stad',n:'Estadio',e:'🏟️',cost:7000,up:420,t:T.STAD,r:8,big:1,g:'Vanidad',d:'Felicidad enorme alrededor. Cuesta lo del estadio... más el sobrecosto.'},
+ {id:'hotel',n:'Hotel',e:'🏨',cost:2800,up:220,t:T.HOTEL,g:'Turismo',d:'Atrae turistas y da empleo. Los turistas gastan más si hay atractivos y seguridad.'},
+ {id:'museum',n:'Museo',e:'🏛️',cost:3200,up:190,t:T.MUSEUM,r:6,g:'Turismo',d:'Atractivo cultural: vecinos y visitantes contentos.'},
+ {id:'airport',n:'Aeropuerto',e:'✈️',cost:9000,up:600,t:T.AIRPORT,big:1,g:'Turismo',d:'Enorme atractivo turístico y empleo. Obra faraónica: espera sobrecostos.'},
+ {id:'d_rosa',n:'Zona rosa',e:'🪩',cost:30,dist:1,g:'Distritos',d:'Distrito de vida nocturna: más ingresos comerciales y turismo, pero más ruido y crimen.'},
+ {id:'d_hist',n:'Barrio histórico',e:'🏺',cost:30,dist:2,g:'Distritos',d:'Protege el patrimonio: sube el valor del suelo y el turismo, pero limita las alturas a nivel 3.'},
+ {id:'d_fr',n:'Zona franca',e:'📦',cost:30,dist:3,g:'Distritos',d:'Industria exenta de impuestos: rinde más y da empleo. La evasión viene incluida.'},
+ {id:'d_clear',n:'Quitar distrito',e:'🧽',cost:5,dist:-1,g:'Distritos',d:'Borra el distrito de una casilla.'},
  {id:'statue',n:'Estatua del alcalde',e:'🗿',cost:3500,up:15,t:T.STATUE,g:'Vanidad',d:'Un monumento a tu persona. Sube tu aprobación... y las sospechas de los ecologistas y la prensa.'},
  {id:'ov_traf',n:'Tráfico',e:'🚦',ov:'traf',cost:0,g:'Capas',d:'Verde: fluido. Rojo: trancón.'},
  {id:'ov_trn',n:'Transporte',e:'🚏',ov:'trn',cost:0,g:'Capas',d:'Cobertura de bus y metro.'},
@@ -77,7 +86,7 @@ function newState(opts){
   const st={seed,name:opts.city,mayor:opts.mayor,profile:opts.profile,month:0,money:40000,debt:0,personal:0,susp:0,cap:40,loyalty:30,buzz:0,
     tax:{R:9,C:9,I:9},fac:{vec:55,emp:55,eco:55,fun:55},decrees:{},pop:0,speed:1,nextElection:48,terms:0,
     lastEvent:0,recent:[],log:[],milestones:{},opp:pick(['Evaristo Pardo','Cleotilde Ramírez','Aníbal "El Contador" Vega','Doña Mercedes Ospina']),
-    lastFiscalia:-99,over:null,blocks:{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}},oppStr:35,pact:0,media:0,cab:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,weather:{type:'sol'},dry:0,flood:[],floodLeft:0,dikes:0,ration:0,rebuild:[],droughtFlag:false,bonus:{cr:0},hist:{inc:0,exp:0}};
+    lastFiscalia:-99,over:null,gang:0,gangTruce:0,blocks:{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}},oppStr:35,pact:0,media:0,cab:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,weather:{type:'sol'},dry:0,flood:[],floodLeft:0,dikes:0,ration:0,rebuild:[],droughtFlag:false,bonus:{cr:0},hist:{inc:0,exp:0}};
   st.cab=newCab();
   if(opts.profile==='tec'){st.money+=15000;st.fac.fun=65;st.cap=30;st.blocks.ver.loy=52}
   if(opts.profile==='pop'){st.fac.vec=70;st.cap=60;st.money-=8000;st.blocks.pop.loy=62}
@@ -85,8 +94,8 @@ function newState(opts){
   return st;
 }
 function allocGrid(){
-  ['ter','typ','lvl','sub','den','elev','tram','brt'].forEach(k=>grid[k]=new Uint8Array(N*N));
-  ['police','fire','clinic','school','park','poll','crime','lv','transit','traf','clean'].forEach(k=>cov[k]=new Float32Array(N*N));
+  ['ter','typ','lvl','sub','den','elev','tram','brt','dist'].forEach(k=>grid[k]=new Uint8Array(N*N));
+  ['police','fire','clinic','school','park','poll','crime','lv','transit','traf','clean','slum'].forEach(k=>cov[k]=new Float32Array(N*N));
 }
 allocGrid();
 
@@ -240,7 +249,7 @@ function computeTraffic(){
     const idx=j*N+i,t=grid.typ[idx],l=grid.lvl[idx];
     let w=0;
     if(t===T.R)w=UNITS[l];else if(t===T.C)w=UNITS[l]*1.5;else if(t===T.I)w=UNITS[l]*1.2;
-    else if(t===T.STAD)w=6;else if(t===T.UNI||t===T.HOSP)w=3;
+    else if(t===T.STAD)w=6;else if(t===T.UNI||t===T.HOSP)w=3;else if(t===T.SOCIAL||t===T.HOTEL)w=3;else if(t===T.AIRPORT)w=8;
     if(!w)continue;
     near.length=0;
     for(let dj=-3;dj<=3;dj++)for(let di=-3;di<=3;di++){const x=i+di,y=j+dj;if(inb(x,y)&&isRoad(grid.typ[y*N+x]))near.push(y*N+x)}
@@ -280,9 +289,10 @@ function computeTraffic(){
   return w>0?clamp(tot/w,0,2):0;
 }
 function recalc(){
-  const cnt=new Array(32).fill(0);
+  const cnt=new Array(40).fill(0);
   let capR=0,capC=0,capI=0,units=0,zunits=0,zoneTiles=0;
-  const src={police:[],fire:[],clinic:[],school:[],park:[],poll:[],lib:[],uni:[],hosp:[],stad:[],bus:[],metro:[],recy:[],plaza:[],jail:[]};
+  const src={police:[],fire:[],clinic:[],school:[],park:[],poll:[],lib:[],uni:[],hosp:[],stad:[],bus:[],metro:[],recy:[],plaza:[],jail:[],slum:[]};
+  let capSoc=0,nSlum=0;const dist={rosaC:0,hist:0,frI:0};
   const pv=G.priv||{};
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){
     const idx=j*N+i,t=grid.typ[idx],l=grid.lvl[idx];
@@ -305,9 +315,14 @@ function recalc(){
     else if(t===T.RECY){src.recy.push([i,j,1]);units+=2}
     else if(t===T.PLAZA){src.plaza.push([i,j,1]);units++}
     else if(t===T.JAIL){src.jail.push([i,j,1]);units+=3}
+    else if(t===T.SOCIAL){units++;capSoc+=40}
+    else if(t===T.SLUM){nSlum++;src.slum.push([i,j,1])}
+    else if(t===T.HOTEL){units+=3}else if(t===T.MUSEUM){units+=2}else if(t===T.AIRPORT){units+=8}
     else if(t===T.HALL){units+=2}
+    {const dd=grid.dist[idx];if(dd&&l>0){if(dd===1&&t===T.C)dist.rosaC++;else if(dd===2&&(t===T.R||t===T.C))dist.hist++;else if(dd===3&&t===T.I)dist.frI++}}
     if((t===T.R||t===T.C||t===T.I))zoneTiles++;
   }
+  capR+=capSoc+nSlum*12;
   const wx=(G.weather&&G.weather.type)||'sol';
   if(wx==='calor'){units=Math.round(units*1.15);zunits=Math.round(zunits*1.12)}
   const net=lineNet(grid.elev),netT=lineNet(grid.tram),netB=lineNet(grid.brt);units+=net.stations*2+Math.floor(net.rails/6)+netT.stations+netB.stations;
@@ -315,13 +330,13 @@ function recalc(){
   const pRatio=units===0?1:Math.min(1,pCap/units),wRatio=zunits===0?1:Math.min(1,wCap/zunits);
   const eff=(G.money<0?.6:1)*(G.decrees.recorte?.9:1);
   const trEff=(G.decrees.tarifa?1.3:1)*(corpOn('trn')?1.08:1);
-  for(const k of ['police','fire','clinic','school','park','poll','crime','lv','transit','clean'])cov[k].fill(0);
+  for(const k of ['police','fire','clinic','school','park','poll','crime','lv','transit','clean','slum'])cov[k].fill(0);
   const ePol=eff*(pv.seg?.9:1),eCli=eff*(pv.sal?.85:1),eSch=eff*(pv.edu?.9:1),trP=pv.trn?.9:1;
   spread(cov.police,src.police,10,.9*ePol);spread(cov.police,src.jail,12,.7*ePol);spread(cov.fire,src.fire,10,.9*eff);
   spread(cov.clinic,src.clinic,10,.9*eCli);spread(cov.clinic,src.hosp,14,1.2*eCli);
   spread(cov.school,src.school,9,.9*eSch);spread(cov.school,src.lib,8,.5*eSch);spread(cov.school,src.uni,14,.9*eSch);
   spread(cov.park,src.park,5,1.1);spread(cov.park,src.stad,8,.7);spread(cov.park,src.plaza,4,.9);
-  spread(cov.poll,src.poll,8,.7);spread(cov.clean,src.recy,8,.8);
+  spread(cov.poll,src.poll,8,.7);spread(cov.clean,src.recy,8,.8);spread(cov.slum,src.slum,2.5,.8);
   spread(cov.transit,src.bus,6,.75*trEff*trP);spread(cov.transit,src.metro,10,1.1*trEff*trP);
   // metro elevado: una línea solo rinde a pleno si une dos o más estaciones
   const addLine=(n,ra,ma,rw,mw)=>{const A=[],W=[];for(const c of n.comps)for(const k of c.st)(c.st.length>=2?A:W).push([k%N,(k/N)|0,1]);spread(cov.transit,A,ra,ma*trEff*trP);spread(cov.transit,W,rw,mw*trEff*trP)};
@@ -330,18 +345,21 @@ function recalc(){
   for(let k=0;k<N*N;k++){cov.poll[k]=clamp(cov.poll[k]-cov.park[k]*.35-cov.clean[k]*.3,0,1)}
   const cong=computeTraffic();
 
-  const pop=G.pop,workers=pop*.5,jobs=capC+capI;
+  const pop=G.pop,workers=pop*.5,jobs=capC+capI+cnt[T.HOTEL]*20+cnt[T.MUSEUM]*8+cnt[T.AIRPORT]*60;
   const employed=Math.min(workers,jobs),unemp=workers>1?clamp(1-employed/workers,0,1):0;
   let nR=0,aPol=0,aFir=0,aCli=0,aSch=0,aPark=0,aPoll=0,aTrn=0;
   for(let k=0;k<N*N;k++){ if(grid.typ[k]===T.R&&grid.lvl[k]>0){nR++;aPol+=Math.min(1,cov.police[k]);aFir+=Math.min(1,cov.fire[k]);aCli+=Math.min(1,cov.clinic[k]);aSch+=Math.min(1,cov.school[k]);aPark+=Math.min(1,cov.park[k]);aPoll+=cov.poll[k];aTrn+=Math.min(1,cov.transit[k])} }
   if(nR){aPol/=nR;aFir/=nR;aCli/=nR;aSch/=nR;aPark/=nR;aPoll/=nR;aTrn/=nR}else{aPol=aFir=aCli=aSch=aPark=0.3;aTrn=0}
   const decCrime=(G.decrees.seca?-.1:0)+(G.decrees.alumbrado?.07:0)-.05*sk('seg');
-  const crime=clamp(.42+unemp*.5-aPol*.75+decCrime+(pop>3000?.04:0),0,1);
+  const crime=clamp(.42+unemp*.5-aPol*.75+decCrime+(pop>3000?.04:0)+(G.gang||0)*.002+nSlum*.004+Math.min(.04,dist.rosaC*.003),0,1);
   const statue=cnt[T.STATUE]>0;
   const jam=clamp(cong-.5,0,1.2);
+  const hotels=cnt[T.HOTEL],air=cnt[T.AIRPORT];
+  const attract=hotels*.2+cnt[T.MUSEUM]*.2+cnt[T.STAD]*.12+cnt[T.PLAZA]*.04+cnt[T.PARK]*.025+(statue?.03:0)+(air?.4:0)+Math.min(.15,dist.hist/15*.15)+Math.min(.1,dist.rosaC/15*.1);
+  const tour=clamp(attract*(1-crime*.6)*(1-aPoll*.5)*(1-clamp(cong-.6,0,1)*.4),0,1.5)*(hotels>0?1:.3);
   let h=.5+.14*aCli+.12*aSch+.08*aFir+.2*aPark-.32*aPoll-.3*crime-.4*unemp-(G.tax.R-9)*.02
         -(1-pRatio)*.5-(1-wRatio)*.4+(statue?.03:0)+(G.decrees.vivienda?.03:0)+(G.decrees.ciclovia?.03:0)+G.buzz*.004
-        +.05*aTrn-.2*jam+(G.decrees.tarifa?.02:0)+Math.min(.06,cnt[T.STAD]*.04)+Math.min(.06,cnt[T.PLAZA]*.015)-privCount()*.012+({lluvia:-.01,tormenta:-.025,calor:-.02,niebla:-.005}[wx]||0);
+        +.05*aTrn-.2*jam+(G.decrees.tarifa?.02:0)+Math.min(.06,cnt[T.STAD]*.04)+Math.min(.06,cnt[T.PLAZA]*.015)-privCount()*.012+Math.min(.05,capSoc/Math.max(1,capR)*.2)-Math.min(.1,nSlum*.004)+({lluvia:-.01,tormenta:-.025,calor:-.02,niebla:-.005}[wx]||0);
   if(G.decrees.recorte)h-=.03;
   h=clamp(h,0,1);
   const tx=t=>(G.tax[t]-9)*.03;
@@ -349,10 +367,10 @@ function recalc(){
   let dC=clamp((pop*.2-capC)/(pop*.2+10),-1,1)*.8+(pop<20?.15:0)-tx('C');
   let dI=clamp((workers*.45-capI)/(workers*.45+12),-1,1)*.8+.12-tx('I')+(G.decrees.exencion?.2:0);
   const target=capR*(.4+.6*h);
-  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,toll:lastToll,
+  S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,toll:lastToll,tour,capSoc,nSlum,dist,
      dR:clamp(dR,-1,1),dC:clamp(dC,-1,1),dI:clamp(dI,-1,1),target,statue,zoneTiles};
   for(let k=0;k<N*N;k++){
-    cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5+(corpOn('tel')?.04:0),0,1);
+    cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5+(corpOn('tel')?.04:0)-cov.slum[k]*.08+(grid.dist[k]===2?.08:0),0,1);
     cov.crime[k]=clamp(.45-cov.police[k]*.8+unemp*.4,0,1);
   }
   S.approval=approval();
@@ -383,6 +401,13 @@ function applyLayer(tool,i,j,sim){
 function applyTool(tool,i,j,sim){
   if(tool.lay)return applyLayer(tool,i,j,sim);
   if(!inb(i,j))return 0;
+  if(tool.dist!=null){
+    const k0=j*N+i;if(grid.ter[k0]===1)return 0;
+    const nd=tool.dist<0?0:tool.dist;if(grid.dist[k0]===nd)return 0;
+    const c0=toolCost(tool);
+    if(!sim){if(G.money<c0)return -1;G.money-=c0;grid.dist[k0]=nd}
+    return c0;
+  }
   const idx=j*N+i;
   if(tool.id==='bull'&&(grid.elev[idx]||grid.tram[idx]||grid.brt[idx])){
     if(!sim){if(G.money<toolCost(tool))return -1;G.money-=toolCost(tool);if(grid.elev[idx])grid.elev[idx]=0;else if(grid.tram[idx])grid.tram[idx]=0;else grid.brt[idx]=0}
@@ -391,6 +416,12 @@ function applyTool(tool,i,j,sim){
   if(grid.ter[idx]===1)return 0;
   const cur=grid.typ[idx];
   if(cur===T.HALL)return 0;
+  if(tool.special==='formal'){
+    if(cur!==T.SLUM)return 0;
+    const c1=toolCost(tool);
+    if(!sim){if(G.money<c1)return -1;G.money-=c1;grid.typ[idx]=T.R;grid.lvl[idx]=1;grid.den[idx]=0}
+    return c1;
+  }
   if(tool.id==='bull'){
     if(cur===T.NONE&&grid.ter[idx]!==2)return 0;
     if(!sim){ if(G.money<toolCost(tool)){return -1} G.money-=toolCost(tool); grid.typ[idx]=T.NONE;grid.lvl[idx]=0;grid.den[idx]=0;grid.ter[idx]=0; }
@@ -615,6 +646,31 @@ const EVENTS=[
  {id:'gabinete_escandalo',w:1.8,min:250,c:()=>Object.values(G.cab).some(c=>c.t==='cor'||c.t==='ami'),t:'Escándalo en el gabinete',x:'__MIN__ aparece en un video con un maletín, una grabadora y una explicación que no convence a nadie.',
   o:[{l:'Defenderlo en público',s:'Lealtad con costo',f:()=>{E.susp(6);E.fac('vec',-3);G.media=clamp(G.media-4,-50,50);return 'Dices que es un hombre de bien. Él te agradece con un abrazo muy mojado.'}},
      {l:'Destituirlo ya',s:'Con cámaras',f:()=>{const r=minRole();if(r)G.cab[r]=genCand();E.cap(-3);E.fac('vec',3);E.susp(-3);return 'Lo destituyes con un comunicado de dos líneas. El reemplazo asume con tres.'}}]},
+ {id:'extorsion',w:2,min:300,c:()=>G.gang>=25,t:'Boleteo a los comerciantes',x:'Los dueños de tiendas reciben un mensaje: "Un detalle semanal por su tranquilidad". Los mensajes llegan con la letra de un contador muy ordenado.',
+  o:[{l:'Reforzar la policía en el barrio',s:'Cuesta caja',f:()=>{E.money(-$$(1200));G.gang=clamp(G.gang-5,0,100);E.fac('emp',3);return 'Aumentan las patrullas. Los comerciantes ya se saben el nombre de los agentes.'}},
+     {l:'Pagar la "vacuna" a escondidas',s:'No se habla de esto',f:()=>{E.susp(4);G.gang=clamp(G.gang+2,0,100);E.fac('emp',2);return 'Todo se calma por un mes. Tu pago aparece en la contabilidad como "gestión de seguridad".'}},
+     {l:'Denunciarlo públicamente',s:'Valentía con riesgo',f:()=>{E.cap(-2);E.fac('vec',3);G.gang=clamp(G.gang-3,0,100);return 'Hablas con voz firme. Pasas la semana con escoltas.'}}]},
+ {id:'plata_plomo',w:1.5,min:400,c:()=>G.gang>=45,t:'Plata o plomo',x:'Un señor con camisa de seda y escoltas muy educados te saluda: "Alcalde, usted y yo podemos entendernos".',
+  o:[{l:'Aceptar el trato',s:'Plata ahora, problemas después',f:()=>{E.own($$(2500));E.susp(12);G.gang=clamp(G.gang+8,0,100);return 'Te sientes más cómodo de lo que deberías. Las paredes de tu despacho, también.'}},
+     {l:'Rechazarlo y denunciarlo',s:'Muy valiente',f:()=>{G.gang=clamp(G.gang-4,0,100);E.fac('vec',4);E.cap(2);return 'Recibes un mensaje anónimo: "Respetamos su decisión". Dormir se vuelve difícil.'}},
+     {l:'Pedir ayuda al ejército',s:'Costoso y ruidoso',f:()=>{E.cap(-5);E.money(-$$(3000));G.gang=clamp(G.gang-15,0,100);E.fac('vec',-1);return 'Llegan tropas y camionetas. Las bandas se van de paseo por unas semanas.'}}]},
+ {id:'gentrificacion',w:1.3,min:400,c:()=>S.cnt[T.METRO]+S.net.stations+S.netB.stations+S.cnt[T.PLAZA]>=3,t:'Gentrificación',x:'La cafetería de toda la vida ahora vende café "de origen" a precio de oro. El arriendo del barrio se triplicó y los vecinos de siempre empiezan a mudarse.',
+  o:[{l:'Subsidio de arriendo',s:'Cuesta caja',f:()=>{E.money(-$$(2000));E.fac('vec',5);E.fac('emp',-3);return 'Los vecinos se quedan. El café sigue caro.'}},
+     {l:'Dejar que el mercado decida',s:'Mano invisible, bolsillo visible',f:()=>{E.fac('vec',-6);E.fac('emp',5);return 'El barrio se llena de bares con nombres en inglés. Los abuelos, de postales.'}},
+     {l:'Prometer vivienda social',s:'Cinta de colores',f:()=>{E.cap(-3);E.fac('vec',3);E.buzz(2);return 'El proyecto aparece en un render precioso. Ojalá aparezca también el terreno.'}}]},
+ {id:'festival',w:1.8,min:300,c:()=>S.tour>.25,t:'Festival internacional',x:'Una organización propone un festival de cine, música y comida callejera. Piden apoyo municipal, un descuento de impuestos y un camerino con jacuzzi.',
+  o:[{l:'Patrocinarlo a lo grande',s:'Cuesta caja, da fama',f:()=>{E.money(-$$(3500));E.buzz(5);E.fac('vec',4);E.fac('emp',3);G.media=clamp(G.media+6,-50,50);return 'La ciudad sale en todas partes. En varias, por el jacuzzi.'}},
+     {l:'Apoyo simbólico',s:'Barato y discreto',f:()=>{E.money(-$$(800));E.fac('vec',1);return 'Vienen cinco mil personas. Una pierde la billetera. Es lo único que se comenta.'}},
+     {l:'Rechazarlo',s:'Ahorras y aburres',f:()=>{E.fac('vec',-2);E.fac('emp',-3);return 'El festival se va a la ciudad vecina. Con todo y jacuzzi.'}}]},
+ {id:'ranking',w:1.2,min:350,c:()=>S.tour>.15,t:'Ranking de ciudades',x:'Una revista te incluye en el ranking de "las diez ciudades más sobrevaloradas del continente". Subes del puesto doce al seis.',
+  o:[{l:'Celebrarlo en redes',s:'Se vale todo',f:()=>{G.media=clamp(G.media+4,-50,50);E.fac('vec',2);return 'Los comentarios dicen: "Estamos sobrevalorados pero felices".'}},
+     {l:'Exigir una rectificación',s:'Mejor no',f:()=>{G.media=clamp(G.media-4,-50,50);E.cap(-2);return 'La revista publica una segunda nota. Peor.'}}]},
+ {id:'huelga_hoteles',w:1.3,min:350,c:()=>S.cnt[T.HOTEL]>0,t:'Huelga de hoteleros',x:'Los empleados de los hoteles paran porque llevan meses sin pago de horas extras. Los turistas hacen fila para lavar sus propias sábanas.',
+  o:[{l:'Mediar entre las partes',s:'Gasta capital político',f:()=>{E.cap(-4);E.money(-$$(1000));E.fac('fun',2);return 'Acuerdan un incremento "responsable" que nadie entiende.'}},
+     {l:'Dejar que se arreglen solos',s:'Sin ruido',f:()=>{E.fac('emp',2);E.fac('vec',-3);return 'La huelga dura cuatro días. El ranking de turismo se resiente.'}}]},
+ {id:'aero_ruido',w:1.3,min:400,c:()=>S.cnt[T.AIRPORT]>0,t:'El ruido del aeropuerto',x:'Los vecinos de al lado del aeropuerto se quejan: los aviones pasan tan bajo que ya reconocen a los pilotos por su cara.',
+  o:[{l:'Compensar con aislamiento acústico',s:'Cuesta caja',f:()=>{E.money(-$$(2500));E.fac('vec',4);return 'Ponen ventanas dobles. El ruido se oye en doble, pero más suave.'}},
+     {l:'Decir que "el progreso suena así"',s:'Consigna clásica',f:()=>{E.fac('vec',-5);E.fac('emp',2);return 'Una vecina te manda sus tapones de oído usados.'}}]},
 ];
 function eventFor(){
   const el=EVENTS.filter(e=>(!e.min||G.pop>=e.min)&&(!e.c||e.c())&&!G.recent.includes(e.id));
@@ -640,7 +696,7 @@ function grow(){
       if(!power)continue;
       if(l===0){ if(dem>0&&Math.random()<dem*.85+.08)grid.lvl[k]=1 }
       else{
-        const maxL=(t===T.I||!grid.den[k])?3:5;
+        const maxL=(t===T.I||!grid.den[k]||grid.dist[k]===2)?3:5;
         if(l<maxL){
           const lv=cov.lv[k],thr=t===T.I?[0,.25,.35]:[0,.46,.62,.7,.8];
           const ok=l<3||(cov.transit[k]>=.2&&S.cong<1.3&&S.zunits>0);
@@ -657,14 +713,18 @@ function finance(){
   up+=(S.net.rails*3+S.net.stations*180+S.netT.rails*2.5+S.netT.stations*90+S.netB.rails*2+S.netB.stations*130)*(pv.trn?.4:1);
   let canon=0;for(const k in pv)if(pv[k])canon+=sectorStats(k).value*.012;
   const eff=S.employed*G.tax.R*.58;
-  let incR=eff,incC=S.capC*G.tax.C*1.0*(.6+.4*S.h),incI=S.capI*G.tax.I*1.05;
+  const socShare=S.capR>0?clamp((S.capSoc+S.nSlum*12)/S.capR,0,1):0;
+  let incR=eff*(1-socShare*.85),incC=S.capC*G.tax.C*1.0*(.6+.4*S.h),incI=S.capI*G.tax.I*1.05;
   if(G.decrees.exencion)incI*=.6;
   incC*=1-.15*clamp(S.cong-.6,0,1);
+  incC*=(1+Math.min(.18,S.dist.rosaC*.012))*(1-Math.min(.12,(G.gang||0)*.0012));
+  incI*=1+Math.min(.25,S.dist.frI*.02);
   if(G.weather&&G.weather.type==='tormenta')incC*=.95;
   incC*=1+Math.min(.1,S.cnt[T.PLAZA]*.015);
   const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.6,S.net.stations*.06+(S.netT.stations+S.netB.stations)*.04));
   const incToll=(S.toll?S.toll.rev:0)*(pv.peaje?.5:1);
-  let inc=(incR+incC+incI+incT+canon+incToll)*(1+.03*sk('fin'));
+  const incTour=S.tour*(500+G.pop*.35)*(S.cnt[T.AIRPORT]?1.5:1);
+  let inc=(incR+incC+incI+incT+canon+incToll+incTour)*(1+.03*sk('fin'));
   const admin=(110+G.pop*.55);
   let dec=0;
   if(G.decrees.vivienda)dec+=300+G.pop*.08;
@@ -683,7 +743,7 @@ function finance(){
   }
   const exp=(up+admin+dec)*infl+interest;
   inc+=corpP;
-  G.hist={inc,exp,corpP,incR,incC,incI,incT,incToll,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
+  G.hist={inc,exp,corpP,incTour,incR,incC,incI,incT,incToll,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
   G.money+=inc-exp;
 }
 function politics(){
@@ -701,7 +761,13 @@ function politics(){
   for(const sec in SECTORS){if(G.priv&&G.priv[sec]){const f=SECTORS[sec].fx;targ.vec+=f.vec;targ.emp+=f.emp;targ.eco+=f.eco;targ.fun+=f.fun}}
   for(const sec in G.cronies){if(G.cronies[sec]&&G.priv[sec]){const c=sectorStats(sec).value*.012;G.personal+=c*.4;G.susp=clamp(G.susp+.25,0,120)}}
   targ.vec+=Math.min(6,S.cnt[T.PLAZA]*1.5);
-  targ.vec+=2*sk('cul');
+  targ.vec+=2*sk('cul')-Math.min(3,S.dist.rosaC*.1)+Math.min(2,S.dist.hist*.08)+Math.min(3,S.capSoc/60)-Math.min(4,S.nSlum*.2);
+  targ.emp+=Math.min(3,S.dist.frI*.15)-Math.min(1,S.dist.hist*.05);
+  if(G.pop>250){
+    const g=.5+S.unemp*5+(1-S.aPol)*3+S.nSlum*.15-S.cnt[T.JAIL]*1.8-S.cnt[T.POLICE]*.45-(G.decrees.seca?.8:0)-(G.cab&&G.cab.seg.t==='tec'?.4:0)-(G.gangTruce>0?1.5:0);
+    G.gang=clamp((G.gang||0)+g*.55,0,100);
+  }else G.gang=Math.max(0,(G.gang||0)-1);
+  if(G.gangTruce>0)G.gangTruce--;
   for(const k in targ){G.fac[k]=clamp(G.fac[k]+(clamp(targ[k],0,100)-G.fac[k])*.14,0,100)}
   if(S.statue){G.fac.vec=clamp(G.fac.vec+.3,0,100)}
   // concejo, oposición, medios y gabinete
@@ -817,6 +883,25 @@ function weatherStep(){
   if(G.dry<.3)G.droughtFlag=false;
   if(G.pop>600&&Math.random()<.007)quake();
 }
+function invasion(){
+  const cand=[];
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+    const k=j*N+i;if(grid.typ[k]!==T.NONE||grid.ter[k]===1)continue;
+    let near=false;
+    for(let dj=-3;dj<=3&&!near;dj++)for(let di=-3;di<=3;di++){const x=i+di,y=j+dj;if(inb(x,y)){const t=grid.typ[y*N+x];if(t!==T.NONE&&t!==T.SLUM){near=true;break}}}
+    if(near)cand.push(k);
+  }
+  if(cand.length<4)return;
+  const tiles=[];for(let n=0;n<6&&cand.length;n++)tiles.push(cand.splice((Math.random()*cand.length)|0,1)[0]);
+  for(const k of tiles){grid.typ[k]=T.SLUM;grid.lvl[k]=1;grid.den[k]=0;grid.ter[k]=0;grid.sub[k]=(Math.random()*256)|0}
+  addLog(`🏚️ Una invasión levanta un barrio informal de ${tiles.length} casillas.`);
+  recalc();
+  queueModal({kick:'Presión de vivienda',title:'Una invasión en el terreno baldío',text:'Una mañana, doscientas familias amanecen construyendo sus casas con tablas, lonas y mucha dignidad. Los vecinos de al lado ya llamaron a tu oficina. Tres veces.',event:{t:'Invasión'},
+   opts:[
+    {l:'Desalojarlos con la policía',s:`${fmt($$(800))} · rápido y muy mediático`,f:()=>{E.money(-$$(800));for(const k of tiles)if(grid.typ[k]===T.SLUM){grid.typ[k]=T.NONE;grid.lvl[k]=0}E.fac('vec',-4);G.gang=clamp(G.gang+3,0,100);if(Math.random()<.3){E.susp(6);E.fac('vec',-3);G.media=clamp(G.media-6,-50,50);recalc();return 'El desalojo sale en video y no luce bien. Tu vocero habla de "procedimientos".'}recalc();return 'Los terrenos quedan despejados. Las familias, en el parque de al lado.'}},
+    {l:'Legalizar y llevar servicios',s:`${fmt($$(1500))} · se vuelven vivienda legal`,f:()=>{const c=$$(1500);if(G.money<c)return 'No alcanza la caja para legalizar.';E.money(-c);for(const k of tiles)if(grid.typ[k]===T.SLUM){grid.typ[k]=T.R;grid.lvl[k]=1}E.fac('vec',3);E.fac('emp',-2);recalc();return 'Llega el agua, la luz y un funcionario con sellos. El barrio se llama como tú.'}},
+    {l:'Hacer como que no pasa nada',s:'El problema se queda',f:()=>{E.fac('vec',-1);return 'El barrio informal crece. También la lista de quejas.'}}]});
+}
 function newsLine(){
   const L=[];
   const a=S.approval;
@@ -863,6 +948,7 @@ function step(){
   popUpdate();
   recalc();
   weatherStep();
+  if(G.pop>300&&S.dR>.25&&S.unemp>.08&&S.cnt[T.SLUM]<24&&Math.random()<.05*(S.capSoc>0?.5:1))invasion();
   disasters();
   milestones();
   if(G.month%2===0)addLog(newsLine());
@@ -958,6 +1044,17 @@ function act(a,arg){
   if(a==='skim'){ if(G.money<4000)return toast('No hay caja que desviar',1); const x=Math.round(G.money*.1);E.money(-x);E.own(x);E.susp(12);toast(`Desvías ${fmt(x)} a una cuenta lejana`) }
   if(a==='loan'){ if(G.debt>=90000)return toast('El banco ya no te presta más',1);G.money+=10000;G.debt+=10000;toast('Préstamo recibido: +$10.000') }
   if(a==='pay'){ const x=Math.min(10000,G.debt); if(G.money<x||x<=0)return toast(x<=0?'No debes nada':'Sin fondos',1);G.money-=x;G.debt-=x;toast('Abonas a la deuda') }
+  if(a==='gang'){
+    if(arg==='op'){
+      const c=$$(2500);if(G.money<c)return toast('Sin fondos',1);
+      E.money(-c);G.gang=clamp(G.gang-12,0,100);E.fac('vec',2);
+      if(Math.random()<.12){E.fac('vec',-5);E.susp(3);toast('Operativo con daños colaterales: se vuelve noticia',1)}else toast('Operativo exitoso: capturan a varios cabecillas');
+    }else{
+      if(G.cap<3)return toast('Necesitas 3 de capital político',1);
+      E.cap(-3);E.susp(8);G.gang=clamp(G.gang-10,0,100);G.gangTruce=6;toast('Pacto de convivencia: nadie se llama bandas, todos se llaman "gestores"');
+    }
+    recalc();refreshUI();return;
+  }
   if(a==='block'){
     const b=BLOCKS.find(x=>x.id===arg);
     queueModal({kick:'Concejo municipal',title:`${b.e} ${b.n}`,html:`<p>${BLOCK_D[arg]} Lealtad actual: <b>${G.blocks[arg].loy.toFixed(0)}%</b>.</p>`,event:{t:b.n},
@@ -1085,7 +1182,7 @@ function act(a,arg){
 const cv=$('#map'),ctx=cv.getContext('2d');
 let W=0,H=0,DPR=1;
 const cam={x:0,y:0,z:1};
-let night=0,TNOW=0,OX=0,OY=0,lights=[],curIdx=0;
+let night=0,TNOW=0,OX=0,OY=0,lights=[],curIdx=0,curDist=0;
 const X=(u,v)=>OX+(u-v)*HW,Y=(u,v)=>OY+(u+v)*HH;
 function resize(){DPR=Math.min(2,window.devicePixelRatio||1);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;shCv.width=cv.width;shCv.height=cv.height}
 const shade=(c,f)=>`rgb(${Math.min(255,c[0]*f)|0},${Math.min(255,c[1]*f)|0},${Math.min(255,c[2]*f)|0})`;
@@ -1162,7 +1259,7 @@ function windows(uA,vA,uB,vB,z,h,rows,cols,tone,seed){
     const f0=(c+.2)/cols,f1=(c+.8)/cols,g0=z+h*(r+.25)/rows,g1=z+h*(r+.7)/rows;
     const x0=X(uA+(uB-uA)*f0,vA+(vB-vA)*f0),y0=Y(uA+(uB-uA)*f0,vA+(vB-vA)*f0);
     const x1=X(uA+(uB-uA)*f1,vA+(vB-vA)*f1),y1=Y(uA+(uB-uA)*f1,vA+(vB-vA)*f1);
-    const lit=night>.15&&hsh(idx,r*9+c,seed)<.5;
+    const lit=night>.15&&hsh(idx,r*9+c,seed)<(curDist===1?.88:.5);
     if(lit)lights.push(x0,y0-g1,x1,y1-g1,x1,y1-g0,x0,y0-g0);
     else{
       poly(winTone(tone,r,c,seed),x0,y0-g1,x1,y1-g1,x1,y1-g0,x0,y0-g0);
@@ -1441,6 +1538,52 @@ function drawBuilding0(t,l,i,j,sx,sy){
     ctx.fillStyle='#454a52';ctx.beginPath();ctx.ellipse(X(.1,.14),Y(.1,.14)-38,6,3.4,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(X(.9,.86),Y(.9,.86)-38,6,3.4,0,0,7);ctx.fill();
     ctx.strokeStyle='rgba(60,64,70,.85)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(.02,.98),Y(.02,.98));ctx.lineTo(X(.98,.98),Y(.98,.98));ctx.lineTo(X(.98,.02),Y(.98,.02));ctx.stroke();
     if(night>.15)lights.push(X(.9,.86)-4,Y(.9,.86)-42,X(.9,.86)+4,Y(.9,.86)-42,X(.9,.86)+4,Y(.9,.86)-38,X(.9,.86)-4,Y(.9,.86)-38);
+  }else if(t===T.SOCIAL){
+    const pc=[[236,200,170],[190,216,230],[232,216,160]][sub%3],pc2=[[200,224,200],[236,190,190],[216,200,236]][(sub>>2)%3];
+    prism(.08,.12,.46,.88,26,pc);prism(.54,.12,.92,.88,26,pc2);
+    windows(.46,.12,.46,.88,2,22,3,3,'#3c4f64',51);windows(.08,.88,.46,.88,2,22,3,2,'#3c4f64',52);
+    windows(.92,.12,.92,.88,2,22,3,3,'#3c4f64',53);windows(.54,.88,.92,.88,2,22,3,2,'#3c4f64',54);
+    roofDeco(.1,.14,.44,.86,26,5);
+    poly('#5a3b2a',X(.92,.45),Y(.92,.45),X(.92,.55),Y(.92,.55),X(.92,.55),Y(.92,.55)-7,X(.92,.45),Y(.92,.45)-7);
+    tree(.5,.5,.8,[80,150,90]);
+  }else if(t===T.SLUM){
+    const cols=[[176,124,92],[92,132,172],[164,152,112],[132,92,72],[112,152,122]];
+    for(let k=0;k<4;k++){
+      const u=.08+(k%2)*.46+hsh(curIdx,k,31)*.06,v=.08+(k>>1)*.46+hsh(curIdx,k,32)*.06;
+      const w=.28+hsh(curIdx,k,33)*.08,h=7+hsh(curIdx,k,34)*3;
+      prism(u,v,u+w,v+w*.9,h,cols[(sub+k)%cols.length]);
+      flat(u,v,u+w,v+w*.9,h,'#9ba1a8');
+      ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=.7;ctx.beginPath();for(const f of [.25,.5,.75]){ctx.moveTo(X(u+w*f,v),Y(u+w*f,v)-h);ctx.lineTo(X(u+w*f,v+w*.9),Y(u+w*f,v+w*.9)-h)}ctx.stroke();
+    }
+    ctx.strokeStyle='#6b5a46';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(X(.2,.5),Y(.2,.5)-9);ctx.lineTo(X(.8,.5),Y(.8,.5)-9);ctx.stroke();
+    [[.3,'#d9534f'],[.45,'#f0c040'],[.6,'#4a90d9'],[.72,'#fff']].forEach(([u,c])=>{ctx.fillStyle=c;ctx.fillRect(X(u,.5),Y(u,.5)-9,2.4,4.2)});
+  }else if(t===T.HOTEL){
+    prism(.08,.08,.92,.92,12,[196,174,140]);
+    prism(.2,.2,.8,.8,66,[234,228,216],12);
+    windows(.8,.2,.8,.8,12,66,8,4,'#4e6a86',41);windows(.2,.8,.8,.8,12,66,8,4,'#4e6a86',42);
+    poly('#c8404c',X(.92,.3),Y(.92,.3)-10,X(.92,.7),Y(.92,.7)-10,X(1,.7),Y(1,.7)-6,X(1,.3),Y(1,.3)-6);
+    prism(.3,.3,.7,.7,6,[200,70,80],78);
+    const sx=X(.5,.5),sy=Y(.5,.5)-90;ctx.fillStyle='#fff';ctx.font='bold 8px sans-serif';ctx.textAlign='center';ctx.fillText('HOTEL',sx,sy);
+    if(night>.15)lights.push(sx-13,sy-8,sx+13,sy-8,sx+13,sy+2,sx-13,sy+2);
+  }else if(t===T.MUSEUM){
+    prism(.08,.12,.92,.88,22,[228,220,202]);flat(.08,.12,.92,.88,22,'#efe8d6');
+    prism(.9,.18,.98,.82,2.5,[204,196,180]);
+    for(let k=0;k<6;k++){const v=.2+k*.12;ctx.strokeStyle='#f6f0e0';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(X(.92,v),Y(.92,v));ctx.lineTo(X(.92,v),Y(.92,v)-20);ctx.stroke()}
+    poly('#bfb391',X(.93,.14),Y(.93,.14)-22,X(.93,.86),Y(.93,.86)-22,X(.93,.5),Y(.93,.5)-33);
+    pyr(.34,.34,.66,.66,22,13,[160,206,224]);
+    poly('#c0404a',X(.92,.24),Y(.92,.24)-18,X(.92,.3),Y(.92,.3)-18,X(.92,.3),Y(.92,.3)-6,X(.92,.24),Y(.92,.24)-6);
+    poly('#2f6bb0',X(.92,.7),Y(.92,.7)-18,X(.92,.76),Y(.92,.76)-18,X(.92,.76),Y(.92,.76)-6,X(.92,.7),Y(.92,.7)-6);
+  }else if(t===T.AIRPORT){
+    flat(.02,.36,.98,.64,.2,'#44494f');
+    ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(X(.04,.5),Y(.04,.5)-.2);ctx.lineTo(X(.96,.5),Y(.96,.5)-.2);ctx.stroke();ctx.setLineDash([]);
+    prism(.08,.04,.56,.28,11,[222,226,232]);flat(.08,.04,.56,.28,11,'#c9ced6');
+    windows(.56,.04,.56,.28,2,8,1,4,'#4e6a86',61);
+    cyl(.78,.14,3.2,34,[236,236,240]);prism(.72,.09,.84,.19,6,[100,150,190],34);
+    const pu=.06+((TNOW/7000)%1)*.88,pz=Math.max(0,(pu-.55)*70);
+    if(pz>0){ctx.fillStyle='rgba(10,20,30,.25)';ctx.beginPath();ctx.ellipse(X(pu,.5),Y(pu,.5),7,2.6,0,0,7);ctx.fill()}
+    flat(pu-.03,.34,pu+.03,.66,pz+1.8,'#d3d8df');
+    prism(pu-.1,.46,pu+.1,.54,3.2,[246,246,249],pz+.4);
+    prism(pu-.11,.48,pu-.07,.52,5.5,[200,52,52],pz+.4);
   }else if(t===T.HALL){
     prism(.06,.1,.94,.9,26,[238,228,205]);
     for(let k=0;k<6;k++){const v=.16+k*.13;ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X(.96,v),Y(.96,v));ctx.lineTo(X(.96,v),Y(.96,v)-24);ctx.stroke()}
@@ -1684,7 +1827,7 @@ function objH(t,l){
     case T.R:return [0,24,32,72,112,152][l]||0;case T.C:return [0,16,34,72,100,142][l]||0;case T.I:return [0,26,36,44][l]||0;
     case T.POLICE:return 24;case T.FIRE:return 26;case T.CLINIC:return 28;case T.SCHOOL:return 30;case T.COAL:return 60;case T.WATER:return 60;
     case T.STATUE:return 36;case T.HALL:return 40;case T.LIB:return 26;case T.UNI:return 46;case T.HOSP:return 42;case T.STAD:return 30;
-    case T.WIND:return 46;case T.RECY:return 22;case T.JAIL:return 38;case T.METRO:return 28;case T.BUS:return 14;case T.TOLL:return 24;default:return 0;
+    case T.WIND:return 46;case T.RECY:return 22;case T.JAIL:return 38;case T.METRO:return 28;case T.BUS:return 14;case T.TOLL:return 24;case T.SOCIAL:return 30;case T.HOTEL:return 68;case T.MUSEUM:return 24;case T.AIRPORT:return 34;case T.SLUM:return 9;default:return 0;
   }
 }
 function drawShadows(vis){
@@ -1729,6 +1872,8 @@ function groundTile(i,j,idx){
   drawSides(i,j,idx);
   drawTerrain(i,j,idx);
   if(meta.flood&&meta.flood[idx]){flat(0,0,1,1,.3,'rgba(70,140,205,.55)');ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=.9;ctx.beginPath();const o=Math.sin(TNOW/500+i+j)*.05;ctx.moveTo(X(.2,.4+o),Y(.2,.4+o));ctx.lineTo(X(.7,.45+o),Y(.7,.45+o));ctx.stroke()}
+  if(grid.dist[idx]&&grid.ter[idx]!==1){const dd=grid.dist[idx],k=(tool&&tool.dist!=null)?1.7:1;flat(0,0,1,1,.05,dd===1?`rgba(190,90,210,${.2*k})`:dd===2?`rgba(224,176,64,${.22*k})`:`rgba(60,160,210,${.2*k})`);
+    if(DETAIL||k>1){ctx.strokeStyle=dd===1?'rgba(210,120,230,.55)':dd===2?'rgba(240,200,90,.6)':'rgba(90,190,230,.55)';ctx.lineWidth=1;ctx.beginPath();const edge=(di,dj,u0,v0,u1,v1)=>{const x=i+di,y=j+dj;if(!inb(x,y)||grid.dist[y*N+x]!==dd){ctx.moveTo(X(u0,v0),Y(u0,v0));ctx.lineTo(X(u1,v1),Y(u1,v1))}};edge(1,0,1,0,1,1);edge(-1,0,0,0,0,1);edge(0,1,0,1,1,1);edge(0,-1,0,0,1,0);ctx.stroke()}}
   if(overlay&&grid.ter[idx]!==1&&!isRoad(typ)){const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
   if(isRoad(typ)){drawRoad(i,j,OX,OY);if(grid.tram[idx]||grid.brt[idx])drawTramBrt(i,j,idx);const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
   else if(typ===T.R||typ===T.C||typ===T.I){
@@ -1742,7 +1887,7 @@ function groundTile(i,j,idx){
       if(!lawn&&typ!==T.I&&DETAIL){ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=.7;ctx.beginPath();for(const u of [.2,.4,.6,.8]){ctx.moveTo(X(u,.96),Y(u,.96));ctx.lineTo(X(u,.9),Y(u,.9))}ctx.stroke()}
     }
   }else if(typ!==T.NONE){
-    flat(0,0,1,1,0,(typ===T.PARK||typ===T.WIND)?'#7bc47a':'#b9bab0');
+    flat(0,0,1,1,0,(typ===T.PARK||typ===T.WIND)?'#7bc47a':typ===T.SLUM?'#a99b7c':'#b9bab0');
   }
 }
 function drawToll(i,j,idx){
@@ -1769,6 +1914,7 @@ function drawRoundDeco(i,j,idx){
 function objectTile(i,j,idx,bucket,tbucket){
   OX=(i-j)*HW;OY=(i+j)*HH;curIdx=idx;
   const typ=grid.typ[idx],lvl=grid.lvl[idx];
+  curDist=grid.dist[idx];
   if(typ===T.NONE&&grid.ter[idx]===2)forestTile(i,j);
   if(typ===T.TOLL)drawToll(i,j,idx);
   if(typ===T.ROUND)drawRoundDeco(i,j,idx);
@@ -2043,7 +2189,7 @@ function showTip(px,py){
   if(!hover||!inb(hover[0],hover[1])||tool.id!=='pan'&&false){tip.style.display='none';return}
   const [i,j]=hover,idx=j*N+i,t=grid.typ[idx],l=grid.lvl[idx];
   let name='Terreno';
-  if(grid.ter[idx]===1)name='Agua';else if(t===T.ROAD)name='Calle';else if(t===T.AVE)name='Avenida';else if(t===T.ROUND)name='Glorieta';else if(t===T.TOLL)name='Peaje';else if(t===T.HALL)name='Alcaldía';
+  if(grid.ter[idx]===1)name='Agua';else if(t===T.ROAD)name='Calle';else if(t===T.AVE)name='Avenida';else if(t===T.ROUND)name='Glorieta';else if(t===T.SLUM)name='Barrio informal';else if(t===T.TOLL)name='Peaje';else if(t===T.HALL)name='Alcaldía';
   else if(ZNAME[t])name=`${ZNAME[t]}${grid.den[idx]&&t!==T.I?' densa':''} · nivel ${l}${l===0?' (sin construir)':''}`;
   else if(BYTYPE[t])name=BYTYPE[t].n;else if(grid.ter[idx]===2)name='Bosque';
   let h=`<b>${name}</b>`;
@@ -2055,6 +2201,7 @@ function showTip(px,py){
     else if(S.pRatio<.9||S.wRatio<.9)h+='<br>⚠️ Energía o agua insuficientes';
   }
   if(grid.elev[idx]){const comp=S.net.comps.find(c=>c.tiles.includes(idx));h+=grid.elev[idx]===2?`<br>🚉 Estación elevada · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra estación conectada'}`:'<br>🚝 Vía elevada'}
+  if(grid.dist[idx])h+=`<br>Distrito: ${['','Zona rosa','Barrio histórico','Zona franca'][grid.dist[idx]]}`;
   if(grid.tram[idx]){const comp=S.netT.comps.find(c=>c.tiles.includes(idx));h+=grid.tram[idx]===2?`<br>🚋 Parada de tranvía · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra parada conectada'}`:'<br>🚊 Riel de tranvía'}
   if(grid.brt[idx]){const comp=S.netB.comps.find(c=>c.tiles.includes(idx));h+=grid.brt[idx]===2?`<br>🚍 Estación BRT · ${comp&&comp.st.length>=2?'<b>línea activa</b>':'⚠️ sola: necesita otra estación conectada'}`:'<br>🛑 Carril exclusivo BRT (menos espacio para carros)'}
   if(isRoad(t))h+=`<br>Tráfico: ${Math.round(clamp(cov.traf[idx]/1.4,0,1)*100)}%${cov.traf[idx]>1?' 🚨 trancón':''}`;
@@ -2101,6 +2248,9 @@ function panelCity(){
   <div class="row"><span>Criminalidad</span><b>${(s.crime*100)|0}%</b></div>${bar(s.crime*100,100,true)}
   <div class="row"><span>Contaminación media</span><b>${(s.aPoll*100)|0}%</b></div>${bar(s.aPoll*100,100,true)}
   <div class="row"><span>🚦 Congestión</span><b>${Math.round(clamp(s.cong/1.4,0,1)*100)}%</b></div>${bar(s.cong/1.4*100,100,true)}
+  <div class="row"><span>🕴️ Crimen organizado</span><b>${(G.gang||0).toFixed(0)}%</b></div>${bar(G.gang||0,100,true)}
+  <div class="row"><span>🧳 Turismo</span><b>${Math.round(clamp(s.tour/.6,0,1)*100)}%</b></div>${bar(s.tour/.6*100)}
+  <div class="row"><span>🏘️ Vivienda social / informal</span><b>${s.capSoc} / ${s.nSlum*12} cupos</b></div>
   <div class="row"><span>🚌 Cobertura de transporte</span><b>${Math.round(s.aTrn*100)}%</b></div>${bar(s.aTrn*100)}
   <h4>Demanda de zonas</h4>
   <div class="row"><span>🏠 Residencial</span><b>${s.dR>0?'+':''}${(s.dR*100)|0}</b></div>
@@ -2137,6 +2287,9 @@ function panelPoder(){
   <button class="btn" data-a="opp" data-x="disc">🗞️ Desacreditarlo<small>$1.500 · +5 sospecha · 70% de éxito</small></button>
   <button class="btn" data-a="opp" data-x="post">🪑 Ofrecerle un puesto<small>6 de capital político · ${fmt($$(1000))}</small></button>
   <button class="btn" data-a="opp" data-x="pact">🤝 Pactar con la oposición<small>4 de capital político · los populares se molestan</small></button>
+  <h4>Crimen organizado</h4><div class="row"><span>Presencia de bandas</span><b>${G.gang.toFixed(0)}%</b></div>${bar(G.gang,100,true)}${G.gangTruce>0?`<small style="color:var(--humo2)">Pacto vigente: ${G.gangTruce} meses.</small>`:''}
+  <button class="btn" data-a="gang" data-x="op">🚔 Operativo policial<small>${fmt($$(2500))} · baja la presencia de bandas (12% de riesgo de escándalo)</small></button>
+  <button class="btn dang" data-a="gang" data-x="truce">🕊️ Pacto de convivencia<small>3 de capital político · +8 de sospecha · 6 meses de calma</small></button>
   <h4>Imagen en medios</h4><div class="row"><span>Opinión de la prensa</span><b>${G.media>=0?'+':''}${G.media.toFixed(0)}</b></div>${bar(G.media+50)}
   <button class="btn" data-a="media" data-x="camp">📺 Campaña pagada<small>${fmt($$(2500))} · +10 de imagen (se diluye con el tiempo)</small></button>
   <button class="btn dang" data-a="media" data-x="trolls">🤖 Granja de trolls<small>$800 · +6 de imagen · 25% de riesgo de escándalo</small></button>
@@ -2170,6 +2323,7 @@ function panelFin(){
   <div class="row"><span>Ingresos industriales</span><b>${fmt(hh.incI||0)}</b></div>
   <div class="row"><span>Pasajes de transporte</span><b>${fmt(hh.incT||0)}</b></div>
   <div class="row"><span>Peajes</span><b>${fmt(hh.incToll||0)}</b></div>
+  <div class="row"><span>Turismo</span><b>${fmt(hh.incTour||0)}</b></div>
   <div class="row"><span>Mantenimiento de obras</span><b>-${fmt(hh.up||0).slice(1)}</b></div>
   <div class="row"><span>Burocracia y servicios</span><b>-${fmt(hh.admin||0).slice(1)}</b></div>
   <div class="row"><span>Decretos</span><b>${hh.dec>0?'-':''}${fmt(Math.abs(hh.dec||0)).slice(1)}</b></div>
@@ -2215,7 +2369,7 @@ $('#btnMenu').onclick=()=>menu();
 function save(){
   if(!G||G.over)return;
   try{
-    const o={G,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev],tram:[...grid.tram],brt:[...grid.brt]},cam};
+    const o={G,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev],tram:[...grid.tram],brt:[...grid.brt],dist:[...grid.dist]},cam};
     localStorage.setItem(SAVE_KEY,JSON.stringify(o));
   }catch(e){}
 }
@@ -2223,8 +2377,8 @@ function load(){
   try{
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
-    allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt'])if(o.grid[k])grid[k].set(o.grid[k]);
-    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];G.blocks=G.blocks||{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}};if(G.oppStr==null)G.oppStr=35;G.pact=G.pact||0;G.media=G.media||0;if(!G.cab)G.cab=newCab();Object.assign(cam,o.cam||{});cam.z=cam.z||1;
+    allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt','dist'])if(o.grid[k])grid[k].set(o.grid[k]);
+    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];G.blocks=G.blocks||{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}};if(G.oppStr==null)G.oppStr=35;G.pact=G.pact||0;G.media=G.media||0;if(!G.cab)G.cab=newCab();G.gang=G.gang||0;G.gangTruce=G.gangTruce||0;Object.assign(cam,o.cam||{});cam.z=cam.z||1;
     terrainMeta();floodSync();recalc();refreshUI();buildTools();return true;
   }catch(e){return false}
 }
@@ -2235,6 +2389,7 @@ function help(){
   <b>3.</b> Mira la <b>demanda</b> (barras arriba) y balancea la ciudad. Pon servicios: policía, clínica, hospital, colegio, biblioteca, universidad, bomberos, parques, reciclaje.<br>
   <b>3b.</b> <b>Densidad y transporte:</b> las zonas densas llegan a torres de nivel 5, pero necesitan buen suelo y <b>transporte público</b> (paradas de bus, metro). Vigila la capa 🚦 <b>Tráfico</b> (tecla T): las <b>avenidas</b>, el transporte y el pico y placa evitan el trancón. El <b>metro elevado</b>, el <b>tranvía</b> (sobre calles) y el <b>troncal BRT</b> estilo TransMilenio (carril rojo sobre avenidas) solo rinden a pleno si conectan dos estaciones o paradas. El BRT mueve multitudes pero le quita espacio a los carros. Las <b>plazas</b> suben el ánimo y el comercio.<br>
   <b>3b2.</b> En <b>Finanzas</b> puedes escoger el <b>color de la flota de buses</b>.<br>
+  <b>3d.</b> <b>Turismo</b> (hotel, museo, aeropuerto) trae plata pero exige seguridad. <b>Distritos</b> (zona rosa, barrio histórico, zona franca) cambian las reglas de una zona. Cuida la vivienda: si no hay, aparecen <b>barrios informales</b> y bandas; fórmalos con la herramienta 📜.<br>
   <b>3c.</b> <b>Privatizaciones</b> (panel Política): venden la gestión de un servicio por plata inmediata y ahorro mensual, a costa de calidad y de la opinión de vecinos y funcionarios. Puedes licitar limpio... o adjudicar a un amigo.<br>
   <b>4.</b> Cuida a las <b>cuatro facciones</b>: vecinos, empresarios, ecologistas y funcionarios. Su opinión decide si te reeligen cada 4 años.<br>
   <b>5.</b> Gasta <b>capital político</b> en decretos que el concejo debe votar.<br>
