@@ -35,3 +35,5 @@ La partida se guarda sola cada año en `localStorage`.
 - **Clima y desastres:** lluvia, tormenta, niebla, ola de calor, sequía, inundaciones y terremotos.
 - **Pestaña Poder:** concejo por bloques, oposición, medios y redes, y gabinete.
 - **Ciudad:** crimen organizado, vivienda social e invasiones, turismo (hotel, museo, aeropuerto) y distritos (zona rosa, barrio histórico, zona franca).
+- **Mapas:** tres tamaños (48, 64 y 80) y cinco tipos de terreno (valle con río, isla, costa, archipiélago, lago).
+- **Logros** guardados entre partidas y **sonido** sintetizado (con botón de silencio).

@@ -1,7 +1,7 @@
 /* ALCALDE — simulador de ciudad isométrico con política satírica */
 (()=>{
 'use strict';
-const N=48,TW=64,TH=32,HW=TW/2,HH=TH/2,SAVE_KEY='alcalde-save-v1';
+let N=48;const TW=64,TH=32,HW=TW/2,HH=TH/2,SAVE_KEY='alcalde-save-v1',ACH_KEY='alcalde-ach',SND_KEY='alcalde-snd';
 const $=s=>document.querySelector(s);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -108,26 +108,40 @@ function vnoise(x,y,seed){
   const a=h(xi,yi),b=h(xi+1,yi),c=h(xi,yi+1),d=h(xi+1,yi+1);
   return a+(b-a)*s(xf)+(c-a)*s(yf)+(a-b-c+d)*s(xf)*s(yf);
 }
-function genMap(seed){
+const MAPTYPES={valle:'Valle con río',isla:'Isla',costa:'Costa',archi:'Archipiélago',lago:'Lago'};
+function genMap(seed,type='valle'){
   allocGrid();
   const c=(N-1)/2;
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){
-    const d=Math.max(Math.abs(i-c),Math.abs(j-c))/c, dd=Math.hypot(i-c,j-c)/(c*1.2);
+    const d=Math.max(Math.abs(i-c),Math.abs(j-c))/c,dd=Math.hypot(i-c,j-c)/(c*1.2);
     const n=vnoise(i*.11,j*.11,seed)*.6+vnoise(i*.25,j*.25,seed+7)*.2;
-    const v=n+Math.pow(d,3)*.55+Math.pow(dd,2)*.15;
     const idx=j*N+i;
-    let water=v>.74;
-    // río diagonal
-    const rv=Math.abs((i-j)*.7+Math.sin(i*.35+seed)*3+9);
-    if(rv<1.6 && Math.hypot(i-c,j-c)>7) water=true;
-    if(Math.hypot(i-c,j-c)<7) water=false;
+    let water=false;
+    const hc=Math.hypot(i-c,j-c);
+    if(type==='valle'){
+      water=n+Math.pow(d,3)*.55+Math.pow(dd,2)*.15>.74;
+      const rv=Math.abs((i-j)*.7+Math.sin(i*.35+seed)*3+9);
+      if(rv<1.6&&hc>7)water=true;
+    }else if(type==='isla'){
+      water=n+Math.pow(d,2.2)*.75+Math.pow(dd,2)*.3>.78;
+    }else if(type==='costa'){
+      const t=(i*.55+j*.45)/(N-1);
+      water=t>.72+(vnoise(i*.14,j*.14,seed+2)-.5)*.22;
+      if(!water&&n+Math.pow(d,4)*.5>.95)water=true;
+    }else if(type==='archi'){
+      water=n+Math.pow(dd,2)*.28>.6;
+    }else if(type==='lago'){
+      const lx=c+N*.2,ly=c-N*.17;
+      water=Math.hypot(i-lx,j-ly)<N*.17+vnoise(i*.2,j*.2,seed)*5||n+Math.pow(d,4)*.5>.88;
+    }
+    if(hc<7)water=false;
     grid.ter[idx]=water?1:0;
-    if(!water && vnoise(i*.3+40,j*.3,seed+3)>.62 && Math.random()<.85) grid.ter[idx]=2;
+    if(!water&&vnoise(i*.3+40,j*.3,seed+3)>.62&&Math.random()<.85)grid.ter[idx]=2;
     grid.sub[idx]=(Math.random()*256)|0;
   }
   const hx=Math.round(c),hy=Math.round(c);
   const hi=hy*N+hx;grid.ter[hi]=0;grid.typ[hi]=T.HALL;grid.lvl[hi]=1;
-  for(let k=-3;k<=3;k++){ if(k===0)continue; setRoad(hx+k,hy+1); }
+  for(let k=-3;k<=3;k++){if(k===0)continue;setRoad(hx+k,hy+1)}
   setRoad(hx,hy+1);
   terrainMeta();
 }
@@ -166,6 +180,94 @@ const SECTORS={
  agua:{n:'Agua y aseo',e:'🚰',types:[T.WATER,T.RECY],fx:{vec:-6,emp:5,eco:-3,fun:-5},d:'Torres de agua y reciclaje. Hay pérdidas en la red... y en la caja.'},
  peaje:{n:'Peajes y concesiones viales',e:'🚧',types:[T.TOLL],fx:{vec:-5,emp:6,eco:0,fun:-3},d:'Un operador cobra los peajes: tú recibes la mitad y todo el odio.'},
  trn:{n:'Transporte público',e:'🚇',types:[T.BUS,T.METRO],fx:{vec:-4,emp:5,eco:-2,fun:-6},d:'Buses, metro y metro elevado. El pasaje sube al doble.'},
+};
+/* ---------- logros ---------- */
+const ACH=[
+ {id:'pueblo',n:'Pueblo grande',e:'🏘️',d:'Llega a 600 habitantes.',c:()=>G.pop>=600},
+ {id:'ciudad',n:'Ciudad de verdad',e:'🏙️',d:'Llega a 2.000 habitantes.',c:()=>G.pop>=2000},
+ {id:'metropoli',n:'Metrópoli',e:'🌆',d:'Llega a 10.000 habitantes.',c:()=>G.pop>=10000},
+ {id:'reelecto',n:'Reelecto',e:'🗳️',d:'Gana unas elecciones.',c:()=>G.terms>=1},
+ {id:'dinastia',n:'Dinastía',e:'👑',d:'Gana tres elecciones seguidas.',c:()=>G.terms>=3},
+ {id:'rico',n:'Fortuna discreta',e:'🧳',d:'Acumula $100.000 en tu cuenta personal.',c:()=>G.personal>=100000},
+ {id:'millonario',n:'Cuenta en Andorra',e:'💎',d:'Acumula $1.000.000 en tu cuenta personal.',c:()=>G.personal>=1000000},
+ {id:'incorruptible',n:'Incorruptible',e:'😇',d:'Gana unas elecciones con cero fortuna personal y pocas sospechas.',c:()=>G.terms>=1&&G.personal<=0&&G.susp<15},
+ {id:'sintrancon',n:'Sin trancón',e:'🚦',d:'Ten 2.000 habitantes con una congestión menor al 15%.',c:()=>G.pop>=2000&&S.cong<.15},
+ {id:'verde',n:'Ciudad verde',e:'🌿',d:'Ecologistas al 80% con 1.500 habitantes.',c:()=>G.pop>=1500&&G.fac.eco>=80},
+ {id:'privatizador',n:'Todo se vende',e:'🏷️',d:'Privatiza tres sectores.',c:()=>privCount()>=3},
+ {id:'estatista',n:'Estado presente',e:'🏛️',d:'Ten tres empresas públicas y ningún sector privatizado, con 1.500 habitantes.',c:()=>Object.keys(G.corp).length>=3&&privCount()===0&&G.pop>=1500},
+ {id:'turistico',n:'Destino turístico',e:'🧳',d:'Dos hoteles y turismo al máximo.',c:()=>S.cnt[T.HOTEL]>=2&&S.tour>=1},
+ {id:'elevado',n:'Metro de verdad',e:'🚝',d:'Une dos estaciones de metro elevado.',c:()=>S.net.stations>=2},
+ {id:'brt',n:'Troncal rojo',e:'🚍',d:'Une dos estaciones de BRT.',c:()=>S.netB.stations>=2},
+ {id:'tranvia',n:'Tilín tilín',e:'🚊',d:'Une dos paradas de tranvía.',c:()=>S.netT.stations>=2},
+ {id:'sobreviviente',n:'Sobreviviente',e:'🌋',d:'Aguanta un terremoto.',c:()=>(G.quakes||0)>=1},
+ {id:'concejo',n:'Concejo comprado',e:'🤝',d:'Todos los bloques del concejo con más de 80% de lealtad.',c:()=>BLOCKS.every(b=>G.blocks[b.id].loy>=80)},
+ {id:'manodura',n:'Mano firme',e:'🚔',d:'Presencia de bandas bajo 5% con 2.000 habitantes.',c:()=>G.pop>=2000&&G.gang<5},
+ {id:'peajero',n:'Peajero',e:'🚧',d:'Cinco peajes funcionando.',c:()=>S.cnt[T.TOLL]>=5},
+];
+function earned(){try{return JSON.parse(localStorage.getItem(ACH_KEY)||'{}')}catch(e){return {}}}
+function checkAch(){
+  if(!G||G.over||!S.cnt)return;
+  const got=earned();let ch=false;
+  for(const a of ACH){
+    if(got[a.id])continue;
+    let ok=false;try{ok=a.c()}catch(e){}
+    if(ok){got[a.id]=G.month;ch=true;toast(`🏆 Logro: ${a.n}`);addLog(`🏆 Logro desbloqueado: ${a.e} ${a.n}.`);Snd.play('coin')}
+  }
+  if(ch)try{localStorage.setItem(ACH_KEY,JSON.stringify(got))}catch(e){}
+}
+function achievements(){
+  const got=earned(),n=Object.keys(got).length;
+  queueModal({kick:'Salón de la fama',title:`Logros (${n}/${ACH.length})`,html:`<div style="max-height:52vh;overflow:auto">${ACH.map(a=>`<div class="hist" style="opacity:${got[a.id]?1:.45}">${got[a.id]?'✅':'🔒'} <b>${a.e} ${a.n}</b><br><small>${a.d}</small></div>`).join('')}</div>`,opts:[{l:'Cerrar'}],final:true});
+}
+/* ---------- sonido ---------- */
+const Snd={ctx:null,on:true,t0:0,
+  init(){
+    if(this.ctx){if(this.ctx.state==='suspended')this.ctx.resume();return}
+    try{
+      this.on=localStorage.getItem(SND_KEY)!=='0';
+      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+      this.ctx=new AC();this.master=this.ctx.createGain();this.master.gain.value=this.on?.5:0;this.master.connect(this.ctx.destination);
+      const len=this.ctx.sampleRate*2,buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate),d=buf.getChannelData(0);
+      let last=0;for(let k=0;k<len;k++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[k]=last*3.2}
+      this.noiseBuf=buf;
+      const mk=(type,freq)=>{const src=this.ctx.createBufferSource();src.buffer=buf;src.loop=true;const f=this.ctx.createBiquadFilter();f.type=type;f.frequency.value=freq;const g=this.ctx.createGain();g.gain.value=0;src.connect(f);f.connect(g);g.connect(this.master);src.start();return g};
+      this.city=mk('lowpass',380);this.rain=mk('highpass',1800);this.wind=mk('bandpass',500);
+    }catch(e){this.ctx=null}
+  },
+  toggle(){this.on=!this.on;try{localStorage.setItem(SND_KEY,this.on?'1':'0')}catch(e){}if(this.master)this.master.gain.value=this.on?.5:0;const b=$('#btnSnd');if(b)b.textContent=this.on?'🔊':'🔇'},
+  tone(f,d,type='sine',vol=.18,slide=0,delay=0){
+    if(!this.ctx||!this.on)return;
+    const t=this.ctx.currentTime+delay,o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g);g.connect(this.master);o.start(t);o.stop(t+d+.02);
+  },
+  noise(d,vol,fc,delay=0){
+    if(!this.ctx||!this.on)return;
+    const t=this.ctx.currentTime+delay,src=this.ctx.createBufferSource();src.buffer=this.noiseBuf;
+    const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=fc;const g=this.ctx.createGain();
+    g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(f);f.connect(g);g.connect(this.master);src.start(t);src.stop(t+d+.02);
+  },
+  play(n){
+    if(!this.ctx||!this.on)return;
+    const now=performance.now();
+    if(n==='build'){if(now-this.t0<90)return;this.t0=now;this.tone(190,.09,'triangle',.16,-60);this.noise(.07,.18,900)}
+    else if(n==='click')this.tone(520,.05,'square',.05);
+    else if(n==='err'){this.tone(130,.18,'sawtooth',.12,-40)}
+    else if(n==='coin'){this.tone(880,.12,'triangle',.14);this.tone(1320,.2,'triangle',.14,0,.09)}
+    else if(n==='chime'){this.tone(660,.3,'sine',.14);this.tone(880,.4,'sine',.12,0,.12)}
+    else if(n==='fan'){[523,659,784,1047].forEach((f,k)=>this.tone(f,.3,'triangle',.16,0,k*.14))}
+    else if(n==='sad'){[392,349,311,262].forEach((f,k)=>this.tone(f,.4,'sawtooth',.09,0,k*.22))}
+    else if(n==='quake'){this.noise(1.6,.7,160);this.tone(55,1.4,'sawtooth',.18,-20)}
+    else if(n==='demo'){this.noise(.18,.25,500)}
+  },
+  amb(){
+    if(!this.ctx||!G)return;
+    const wx=(G.weather&&G.weather.type)||'sol',pop=G.pop||0,t=this.ctx.currentTime;
+    this.city.gain.setTargetAtTime(clamp(pop/9000,0,1)*.05*(1-night*.5),t,.8);
+    this.rain.gain.setTargetAtTime(wx==='lluvia'?.05:wx==='tormenta'?.1:0,t,.8);
+    this.wind.gain.setTargetAtTime(.012+(wx==='tormenta'?.03:0)+(wx==='niebla'?.01:0),t,.8);
+  }
 };
 /* ---------- poder: concejo, oposición, medios, gabinete ---------- */
 const BLOCKS=[{id:'ver',n:'Alianza Verde',e:'🌿',seats:4},{id:'mer',n:'Bloque del Mercado',e:'💼',seats:4},{id:'pop',n:'Frente Popular',e:'✊',seats:4},{id:'ind',n:'Independientes',e:'🪙',seats:3}];
@@ -383,7 +485,7 @@ function approval(){
 }
 
 /* ---------- construcción ---------- */
-function toast(m,bad){const box=$('#toasts');while(box.children.length>=3)box.firstChild.remove();const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),2600)}
+function toast(m,bad){if(bad)Snd.play('err');const box=$('#toasts');while(box.children.length>=3)box.firstChild.remove();const d=document.createElement('div');d.className='toast'+(bad?' bad':'');d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),2600)}
 function applyLayer(tool,i,j,sim){
   if(!inb(i,j))return 0;
   const idx=j*N+i,cur=grid.typ[idx],arr=grid[tool.lay];
@@ -845,7 +947,7 @@ function quake(){
   const n=Math.round(clamp((sev-4)*G.pop/160,2,40)*(1-cover*.5));
   const tiles=randTiles((ty,l)=>(ty===T.R||ty===T.C||ty===T.I)&&l>0,n);
   const dn=damageTiles(tiles,()=>1+(sev>6?1:0)+(Math.random()<.3?1:0));
-  shakeAmp=1.2;
+  shakeAmp=1.2;G.quakes=(G.quakes||0)+1;Snd.play('quake');
   E.fac('vec',Math.round(-6*(1-(S.aCli||0)*.6)));
   addLog(`🌋 Terremoto de magnitud ${sev}: ${dn} edificios dañados.`);
   const opts=[
@@ -962,6 +1064,7 @@ function step(){
   if(G.susp>=100)return endGame('destituido');
   if(G.money<-30000)return endGame('quiebra');
   if(G.month>=G.nextElection)return election();
+  checkAch();
   if(G.month%12===0){save();toast('💾 Partida guardada')}
   refreshUI();
 }
@@ -978,6 +1081,7 @@ function election(){
     G.terms++;G.nextElection+=48;E.cap(18);E.buzz(0);
     G.fac.vec=clamp(G.fac.vec+4,0,100);
     addLog(`🗳️ Reelegido con ${share.toFixed(1)}%.`);
+    Snd.play('fan');
     queueModal({kick:`Elecciones · Año ${Math.floor(G.month/12)}`,title:'¡Reelegido, señor alcalde!',html:`<div class="big">${share.toFixed(1)}%</div>${bar}<p>${G.opp} reconoce su derrota "con las reservas del caso". Obtienes +18 de capital político y otros cuatro años para gobernar.</p>`,opts:[{l:'Otros cuatro años'}]});
     refreshUI();
   }else{
@@ -985,7 +1089,7 @@ function election(){
   }
 }
 function endGame(kind,bar,share){
-  G.over=kind;G.speed=0;
+  G.over=kind;G.speed=0;Snd.play('sad');
   try{localStorage.removeItem(SAVE_KEY)}catch(e){}
   const fort=G.personal,nm=G.mayor;
   const T_={
@@ -1003,6 +1107,7 @@ function nextModal(){
   const m=modalQueue.shift();
   if(!m){modalOpen=false;$('#modal').classList.add('hidden');return}
   modalOpen=true;
+  if(m.event)Snd.play('chime');
   const card=$('#modalCard');
   card.innerHTML=`<div class="kick">${m.kick||''}</div><h2>${m.title}</h2>${m.html||`<p>${m.text||''}</p>`}${m.result?`<p class="res">${m.result}</p>`:''}<div id="mopts"></div>`;
   const box=$('#mopts');
@@ -2137,7 +2242,7 @@ function paintAt(px,py){
   const key=i+','+j;if(lastTile===key)return;lastTile=key;
   const r=applyTool(tool,i,j);
   if(r===-1){toast('Sin fondos: pide un préstamo en Finanzas',1);return}
-  if(r>0){recalc();refreshUI(true)}
+  if(r>0){recalc();refreshUI(true);Snd.play(tool.id==='bull'?'demo':'build')}
 }
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointerdown',e=>{
@@ -2364,12 +2469,14 @@ function setSpeed(s){if(!G)return;G.speed=s;refreshUI(true)}
 document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.sp));
 $('#btnPanel').onclick=()=>$('#panel').classList.toggle('open');
 $('#btnMenu').onclick=()=>menu();
+$('#btnSnd').onclick=()=>{Snd.init();Snd.toggle();Snd.play('click')};
+addEventListener('pointerdown',()=>Snd.init(),{once:true});
 
 /* ---------- guardado y menú ---------- */
 function save(){
   if(!G||G.over)return;
   try{
-    const o={G,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev],tram:[...grid.tram],brt:[...grid.brt],dist:[...grid.dist]},cam};
+    const o={G,N,grid:{ter:[...grid.ter],typ:[...grid.typ],lvl:[...grid.lvl],sub:[...grid.sub],den:[...grid.den],elev:[...grid.elev],tram:[...grid.tram],brt:[...grid.brt],dist:[...grid.dist]},cam};
     localStorage.setItem(SAVE_KEY,JSON.stringify(o));
   }catch(e){}
 }
@@ -2377,6 +2484,7 @@ function load(){
   try{
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
+    N=o.N||48;cars=[];vehs=[];
     allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt','dist'])if(o.grid[k])grid[k].set(o.grid[k]);
     G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];G.blocks=G.blocks||{ver:{loy:42},mer:{loy:42},pop:{loy:42},ind:{loy:30}};if(G.oppStr==null)G.oppStr=35;G.pact=G.pact||0;G.media=G.media||0;if(!G.cab)G.cab=newCab();G.gang=G.gang||0;G.gangTruce=G.gangTruce||0;Object.assign(cam,o.cam||{});cam.z=cam.z||1;
     terrainMeta();floodSync();recalc();refreshUI();buildTools();return true;
@@ -2389,6 +2497,7 @@ function help(){
   <b>3.</b> Mira la <b>demanda</b> (barras arriba) y balancea la ciudad. Pon servicios: policía, clínica, hospital, colegio, biblioteca, universidad, bomberos, parques, reciclaje.<br>
   <b>3b.</b> <b>Densidad y transporte:</b> las zonas densas llegan a torres de nivel 5, pero necesitan buen suelo y <b>transporte público</b> (paradas de bus, metro). Vigila la capa 🚦 <b>Tráfico</b> (tecla T): las <b>avenidas</b>, el transporte y el pico y placa evitan el trancón. El <b>metro elevado</b>, el <b>tranvía</b> (sobre calles) y el <b>troncal BRT</b> estilo TransMilenio (carril rojo sobre avenidas) solo rinden a pleno si conectan dos estaciones o paradas. El BRT mueve multitudes pero le quita espacio a los carros. Las <b>plazas</b> suben el ánimo y el comercio.<br>
   <b>3b2.</b> En <b>Finanzas</b> puedes escoger el <b>color de la flota de buses</b>.<br>
+  <b>3e.</b> Hay <b>logros</b> (menú ☰) y sonido (botón 🔊). Puedes escoger el <b>tamaño y el tipo de terreno</b> al empezar.<br>
   <b>3d.</b> <b>Turismo</b> (hotel, museo, aeropuerto) trae plata pero exige seguridad. <b>Distritos</b> (zona rosa, barrio histórico, zona franca) cambian las reglas de una zona. Cuida la vivienda: si no hay, aparecen <b>barrios informales</b> y bandas; fórmalos con la herramienta 📜.<br>
   <b>3c.</b> <b>Privatizaciones</b> (panel Política): venden la gestión de un servicio por plata inmediata y ahorro mensual, a costa de calidad y de la opinión de vecinos y funcionarios. Puedes licitar limpio... o adjudicar a un amigo.<br>
   <b>4.</b> Cuida a las <b>cuatro facciones</b>: vecinos, empresarios, ecologistas y funcionarios. Su opinión decide si te reeligen cada 4 años.<br>
@@ -2400,6 +2509,7 @@ function menu(){
   if(modalOpen)return;
   queueModal({kick:'Menú',title:G?G.name:'Alcalde',html:'<p>¿Qué hacemos, señor alcalde?</p>',opts:[
     {l:'Guardar partida',f:()=>{save();toast('💾 Partida guardada')}},
+    {l:'Logros',f:()=>{setTimeout(achievements,0)}},
     {l:'Ayuda',f:()=>{setTimeout(help,0)}},
     {l:'Nueva partida',f:()=>{setTimeout(startScreen,0)}},
     {l:'Volver al juego'}]});
@@ -2410,14 +2520,21 @@ function startScreen(){
   queueModal({kick:'Una crónica satírica del poder local',title:'ALCALDE',html:`<p>Construye una ciudad, reparte favores, cuida tu imagen... y no olvides cuánto aguanta el concejo. Tienes cuatro años antes de enfrentar a las urnas.</p>
    <label>Nombre de la ciudad</label><input type="text" id="inCity" value="Villa Anónima" maxlength="24">
    <label>Tu nombre</label><input type="text" id="inMayor" value="Don Ernesto Paredes" maxlength="28">
+   <label>Tamaño del mapa</label><div class="prof row3">
+    <label><input type="radio" name="sz" value="48" checked>Pequeño<small>48×48</small></label>
+    <label><input type="radio" name="sz" value="64">Mediano<small>64×64</small></label>
+    <label><input type="radio" name="sz" value="80">Grande<small>80×80</small></label></div>
+   <label>Tipo de terreno</label><div class="prof row3">
+    ${Object.entries(MAPTYPES).map(([k,n],ix)=>`<label><input type="radio" name="mt" value="${k}" ${ix===0?'checked':''}>${n}</label>`).join('')}</div>
    <label>Perfil político</label><div class="prof">
     <label><input type="radio" name="pf" value="tec" checked>Tecnócrata<small>+$15.000 de caja, funcionarios a favor. Pocos amigos entre el pueblo.</small></label>
     <label><input type="radio" name="pf" value="pop">Populista<small>Vecinos a tu favor y capital político. Arrancas con menos plata.</small></label>
     <label><input type="radio" name="pf" value="emp">Hombre de empresa<small>Empresarios a favor y $12.000 propios. Pero ya tienes un par de sospechas.</small></label></div>`,
-   opts:[{l:'Empezar mandato',f:()=>{
+   opts:[{l:'Empezar mandato',f:()=>{Snd.init();
      const city=($('#inCity').value||'Villa Anónima').trim(),mayor=($('#inMayor').value||'El Alcalde').trim();
      const pf=document.querySelector('input[name=pf]:checked').value;
-     G=newState({city,mayor,profile:pf});cars=[];genMap(G.seed);floodSync();
+     const sz=+document.querySelector('input[name=sz]:checked').value,mt=document.querySelector('input[name=mt]:checked').value;
+     N=sz;G=newState({city,mayor,profile:pf});cars=[];vehs=[];genMap(G.seed,mt);floodSync();
      const c=(N-1)/2;cam.x=0;cam.y=(c+c)*HH+HH;cam.z=1.05;
      S={};recalc();addLog('Bienvenido, señor alcalde. Construya energía, agua, calles y zonas.');refreshUI();buildTools();selectTool('road');save();
      setTimeout(help,0);
@@ -2426,6 +2543,7 @@ function startScreen(){
 
 /* ---------- bucle ---------- */
 let acc=0,lastT=performance.now();
+setInterval(()=>Snd.amb(),1000);
 setInterval(()=>{
   const now=performance.now(),dt=now-lastT;lastT=now;
   if(!G||modalOpen||G.over||G.speed===0)return;
@@ -2437,7 +2555,7 @@ function loop(now){const dt=Math.min(.1,(now-lastR)/1000);lastR=now;if(G&&!modal
 requestAnimationFrame(loop);
 addEventListener('resize',resize);resize();
 // render() se auto-programa; evitamos doble programación
-window.__alcalde={flood,quake,weatherStep,rebuildAll,get shCv(){return shCv},get SUN(){return SUN},get G(){return G},get S(){return S},grid,cov,step,applyTool,TOOL,recalc,act,cam,selectTool,startScreen,setSpeed,load,save,T,N,queueModal,election,endGame};
+window.__alcalde={flood,quake,weatherStep,rebuildAll,get shCv(){return shCv},get SUN(){return SUN},get G(){return G},get S(){return S},grid,cov,step,applyTool,TOOL,recalc,act,cam,selectTool,startScreen,setSpeed,load,save,T,get N(){return N},queueModal,election,endGame,checkAch,Snd,ACH};
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 startScreen();
 })();
