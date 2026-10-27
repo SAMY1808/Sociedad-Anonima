@@ -77,7 +77,7 @@ function newState(opts){
   const st={seed,name:opts.city,mayor:opts.mayor,profile:opts.profile,month:0,money:40000,debt:0,personal:0,susp:0,cap:40,loyalty:30,buzz:0,
     tax:{R:9,C:9,I:9},fac:{vec:55,emp:55,eco:55,fun:55},decrees:{},pop:0,speed:1,nextElection:48,terms:0,
     lastEvent:0,recent:[],log:[],milestones:{},opp:pick(['Evaristo Pardo','Cleotilde Ramírez','Aníbal "El Contador" Vega','Doña Mercedes Ospina']),
-    lastFiscalia:-99,over:null,priv:{},cronies:{},privOp:{},bonus:{cr:0},hist:{inc:0,exp:0}};
+    lastFiscalia:-99,over:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,bonus:{cr:0},hist:{inc:0,exp:0}};
   if(opts.profile==='tec'){st.money+=15000;st.fac.fun=65;st.cap=30}
   if(opts.profile==='pop'){st.fac.vec=70;st.cap=60;st.money-=8000}
   if(opts.profile==='emp'){st.fac.emp=72;st.personal=12000;st.susp=8;st.fac.eco=45}
@@ -157,6 +157,24 @@ const SECTORS={
  peaje:{n:'Peajes y concesiones viales',e:'🚧',types:[T.TOLL],fx:{vec:-5,emp:6,eco:0,fun:-3},d:'Un operador cobra los peajes: tú recibes la mitad y todo el odio.'},
  trn:{n:'Transporte público',e:'🚇',types:[T.BUS,T.METRO],fx:{vec:-4,emp:5,eco:-2,fun:-6},d:'Buses, metro y metro elevado. El pasaje sube al doble.'},
 };
+/* ---------- empresas públicas ---------- */
+const MGR={
+ tec:{n:'Gerente técnico',target:80,start:62,d:'20 años de experiencia, cero compadres. Aburrido y eficaz.'},
+ pol:{n:'Gerente político',target:58,start:55,d:'Gran amigo de los sindicatos y de la prensa. Ineficiente, pero popular.'},
+ ami:{n:'Gerente compadre',target:42,start:50,d:'Tu compadre de siempre. Rinde menos, pero algo te toca (y las sospechas también).'},
+};
+const CORPS={
+ ene:{n:'Empresa Municipal de Energía',e:'💡',cost:6000,cap:12,sector:'ene',need:()=>S.cnt[T.COAL]+S.cnt[T.SOLAR]+S.cnt[T.WIND]>0,needTxt:'Necesitas una planta de energía.',base:()=>S.pCap*3,d:'Opera tus plantas: +8% de energía, tarifas amigables y utilidades.',fx:{vec:3,emp:-2,eco:0,fun:2}},
+ agua:{n:'Acueducto y Aseo Municipal',e:'🚰',cost:5000,cap:10,sector:'agua',need:()=>S.cnt[T.WATER]>0,needTxt:'Necesitas una torre de agua.',base:()=>S.wCap*2.5,d:'+8% de agua y ecologistas contentos.',fx:{vec:3,emp:-2,eco:3,fun:2}},
+ trn:{n:'Empresa de Transporte Masivo',e:'🚌',cost:7000,cap:12,sector:'trn',need:()=>S.aTrn>0,needTxt:'Necesitas transporte público funcionando.',base:()=>G.pop*S.aTrn*.22,d:'+8% de cobertura de transporte y un manejo propio de los pasajes.',fx:{vec:3,emp:-3,eco:3,fun:3}},
+ banco:{n:'Banco de la Ciudad',e:'🏦',cost:9000,cap:15,need:()=>G.pop>=800,needTxt:'Necesitas 800 habitantes.',base:()=>G.pop*.35,d:'Intereses de la deuda al 0,7% mensual y microcréditos que ayudan al empleo.',fx:{vec:2,emp:4,eco:0,fun:0}},
+ tel:{n:'Conecta (internet municipal)',e:'📡',cost:5500,cap:10,need:()=>G.pop>=400,needTxt:'Necesitas 400 habitantes.',base:()=>G.pop*.25,d:'Sube el valor del suelo y el empleo. "Wifi gratis", dice el folleto.',fx:{vec:3,emp:3,eco:0,fun:0}},
+ cons:{n:'Constructora Municipal',e:'🏗️',cost:8000,cap:14,need:()=>G.pop>=500,needTxt:'Necesitas 500 habitantes.',base:()=>G.pop*.1+800,d:'Las obras salen 12% más baratas. Riesgo de sobrecostos con "amigos".',fx:{vec:0,emp:-6,eco:-2,fun:3}},
+ lot:{n:'Lotería de la Ciudad',e:'🎰',cost:3000,cap:6,need:()=>G.pop>=300,needTxt:'Necesitas 300 habitantes.',base:()=>G.pop*.3,d:'Plata fácil para la caja y los colegios. A los vecinos no les encanta.',fx:{vec:-2,emp:0,eco:0,fun:2}},
+ fun:{n:'Funeraria Municipal',e:'⚰️',cost:2000,cap:5,need:()=>G.pop>=200,needTxt:'Necesitas 200 habitantes.',base:()=>G.pop*.12,d:'La única empresa con clientela garantizada.',fx:{vec:1,emp:-1,eco:0,fun:0}},
+};
+const corpOn=id=>!!(G&&G.corp&&G.corp[id]&&G.corp[id].q>=40);
+const corpEst=(id,q)=>Math.round(CORPS[id].base()*(q/65-.55)-60);
 const SECOF={};for(const k in SECTORS)for(const t of SECTORS[k].types)SECOF[t]=k;
 const OPS=['Consorcio Hermanos Cemento','Inversiones El Cuñado S.A.','Fondo Buitre Capital','Servicios Integrales Paredes','Grupo Los Mismos de Siempre','Concesiones Andorra Ltda.'];
 function sectorStats(sec){
@@ -264,10 +282,10 @@ function recalc(){
     if((t===T.R||t===T.C||t===T.I))zoneTiles++;
   }
   const net=lineNet(grid.elev),netT=lineNet(grid.tram),netB=lineNet(grid.brt);units+=net.stations*2+Math.floor(net.rails/6)+netT.stations+netB.stations;
-  const pCap=Math.round((cnt[T.COAL]*120+cnt[T.SOLAR]*45+cnt[T.WIND]*70)*(pv.ene?1.15:1)),wCap=Math.round(cnt[T.WATER]*100*(pv.agua?.92:1));
+  const pCap=Math.round((cnt[T.COAL]*120+cnt[T.SOLAR]*45+cnt[T.WIND]*70)*(pv.ene?1.15:1)*(corpOn('ene')?1.08:1)),wCap=Math.round(cnt[T.WATER]*100*(pv.agua?.92:1)*(corpOn('agua')?1.08:1));
   const pRatio=units===0?1:Math.min(1,pCap/units),wRatio=zunits===0?1:Math.min(1,wCap/zunits);
   const eff=(G.money<0?.6:1)*(G.decrees.recorte?.9:1);
-  const trEff=G.decrees.tarifa?1.3:1;
+  const trEff=(G.decrees.tarifa?1.3:1)*(corpOn('trn')?1.08:1);
   for(const k of ['police','fire','clinic','school','park','poll','crime','lv','transit','clean'])cov[k].fill(0);
   const ePol=eff*(pv.seg?.9:1),eCli=eff*(pv.sal?.85:1),eSch=eff*(pv.edu?.9:1),trP=pv.trn?.9:1;
   spread(cov.police,src.police,10,.9*ePol);spread(cov.police,src.jail,12,.7*ePol);spread(cov.fire,src.fire,10,.9*eff);
@@ -305,7 +323,7 @@ function recalc(){
   S={cnt,capR,capC,capI,units,zunits,pCap,wCap,pRatio,wRatio,workers,jobs,employed,unemp,crime,h,aPol,aFir,aCli,aSch,aPark,aPoll,aTrn,cong,net,netT,netB,pv,toll:lastToll,
      dR:clamp(dR,-1,1),dC:clamp(dC,-1,1),dI:clamp(dI,-1,1),target,statue,zoneTiles};
   for(let k=0;k<N*N;k++){
-    cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5,0,1);
+    cov.lv[k]=clamp(.38+cov.park[k]*.28+cov.school[k]*.16+cov.clinic[k]*.1+cov.police[k]*.1+Math.min(1,cov.transit[k])*.12-cov.poll[k]*.5+(corpOn('tel')?.04:0),0,1);
     cov.crime[k]=clamp(.45-cov.police[k]*.8+unemp*.4,0,1);
   }
   S.approval=approval();
@@ -538,6 +556,16 @@ const EVENTS=[
  {id:'glorieta_estatua',w:1.1,min:250,c:()=>S.cnt[T.ROUND]>0,t:'Una estatua para la glorieta',x:'Un concejal propone un monumento al "pollo asado" en la glorieta central. Casualmente, su familia tiene un asadero.',
   o:[{l:'Aprobar el monumento',s:'Cultura gastronómica',f:()=>{E.money(-$$(1200));E.loy(6);E.fac('vec',2);E.susp(2);return 'El pollo mide cinco metros. Los pájaros reales lo adoptan de inmediato.'}},
      {l:'Rechazarlo',s:'Sin estatuas',f:()=>{E.loy(-4);E.cap(-1);return 'El concejal jura vengarse en la próxima votación.'}}]},
+ {id:'corp_rescate',w:2,min:300,c:()=>Object.keys(G.corp).some(k=>G.corp[k].q<38),t:'La empresa pública pide rescate',x:'__CORP__ está en rojo: nómina atrasada, camiones sin llantas y una caja fuerte con una nota que dice "volvemos en cinco minutos".',
+  o:[{l:'Rescatarla con caja pública',s:'Costoso',f:()=>{const id=corpLow();if(id)G.corp[id].q=clamp(G.corp[id].q+18,0,100);E.money(-$$(3000));E.fac('fun',3);return 'Se salva por ahora. La junta directiva celebra con un almuerzo que también pagas tú.'}},
+     {l:'Dejarla quebrar',s:'Liquidación sin glamour',f:()=>{const id=corpLow();if(id)delete G.corp[id];E.fac('fun',-8);E.fac('vec',-4);return 'Cierran sus puertas. El sindicato te dedica un mural poco favorecedor.'}},
+     {l:'Cambiar la junta directiva',s:'Mismos con distinto collar',f:()=>{const id=corpLow();if(id)G.corp[id].q=clamp(G.corp[id].q+8,0,100);E.cap(-4);E.susp(2);return 'La nueva junta sale de la misma cena de Navidad. La empresa mejora, un poquito.'}}]},
+ {id:'corp_amigo',w:1.5,min:300,c:()=>Object.keys(G.corp).some(k=>G.corp[k].mgr==='ami'),t:'El gerente compadre se pasó',x:'El gerente de __CORP__ compró tres camionetas "para la gestión". Una la usa su esposa. Otra su perro, por lo visto.',
+  o:[{l:'Respaldarlo en público',s:'Lealtad entre compadres',f:()=>{E.susp(6);E.own($$(800));E.fac('vec',-3);return 'Dices que "las camionetas son una inversión". Las camionetas se lo agradecen.'}},
+     {l:'Destituirlo y poner un técnico',s:'Con cámaras',f:()=>{const id=corpAmi();if(id){G.corp[id].mgr='tec';G.corp[id].q=clamp(G.corp[id].q+5,0,100)}E.cap(-3);E.fac('vec',4);E.susp(-3);return 'El compadre te deja de saludar. La empresa mejora de inmediato.'}}]},
+ {id:'corp_exito',w:1.2,min:300,c:()=>Object.keys(G.corp).some(k=>G.corp[k].mgr==='tec'&&G.corp[k].q>72),t:'La empresa pública da utilidades',x:'__CORP__ cierra el año con ganancias. La prensa duda de los números; la contadora, también, pero están bien.',
+  o:[{l:'Reinvertir en la empresa',s:'Aburrido y sensato',f:()=>{const id=Object.keys(G.corp).find(k=>G.corp[k].mgr==='tec');if(id)G.corp[id].q=clamp(G.corp[id].q+6,0,100);E.fac('emp',-1);return 'Compran camiones nuevos. Los viejos, aún con su aire acondicionado, quedan para donación.'}},
+     {l:'Pasar las utilidades a la caja',s:'Aplausos y flores',f:()=>{E.money($$(2500));E.buzz(3);E.fac('vec',3);return 'Lo anuncias con globos. La empresa te mira con sospecha.'}}]},
 ];
 function eventFor(){
   const el=EVENTS.filter(e=>(!e.min||G.pop>=e.min)&&(!e.c||e.c())&&!G.recent.includes(e.id));
@@ -594,9 +622,18 @@ function finance(){
   if(G.decrees.ciclovia)dec+=200+G.pop*.04;
   if(G.decrees.tarifa)dec+=350+G.pop*.07;
   if(G.decrees.recorte)dec-=G.pop*.12+80;
-  const interest=G.debt*.012;
+  const interest=G.debt*(corpOn('banco')?.007:.012);
+  let corpP=0;
+  for(const id in G.corp){
+    const c=G.corp[id],d=CORPS[id];if(!d)continue;
+    const base=d.base(),profit=base*(c.q/65-.55)-60;
+    corpP+=profit;c.last=profit;
+    if(c.mgr==='ami'){G.personal+=Math.max(0,base)*.05;G.susp=clamp(G.susp+.15,0,120)}
+    c.q=clamp(c.q+(MGR[c.mgr].target-c.q)*.08+rnd(-2.5,2.5),0,100);
+  }
   const exp=(up+admin+dec)*infl+interest;
-  G.hist={inc,exp,incR,incC,incI,incT,incToll,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
+  inc+=corpP;
+  G.hist={inc,exp,corpP,incR,incC,incI,incT,incToll,canon,up:up*infl,admin:admin*infl,dec:dec*infl,interest};
   G.money+=inc-exp;
 }
 function politics(){
@@ -609,6 +646,7 @@ function politics(){
   targ.eco=72-S.aPoll*140+S.aPark*30+S.cnt[T.SOLAR]*5-S.cnt[T.COAL]*7-(G.decrees.exencion?12:0)+(G.decrees.ciclovia?16:0)-(S.statue?6:0)+S.cnt[T.WIND]*5+S.cnt[T.RECY]*4+S.aTrn*10-(G.decrees.picoplaca?-3:0)-(S.capI>S.capR?6:0);
   // funcionarios
   targ.fun=45+(S.aPol+S.aFir+S.aCli+S.aSch)*13-(G.money<0?25:0)-(G.decrees.recorte?18:0)+(G.decrees.propaganda?3:0);
+  for(const id in G.corp){const c=G.corp[id];if(c.q>=40){const f=CORPS[id].fx;targ.vec+=f.vec;targ.emp+=f.emp;targ.eco+=f.eco;targ.fun+=f.fun}}
   {const tl=S.toll?S.toll.count:0,tp=G.tollPrice==null?3:G.tollPrice;targ.vec-=Math.min(10,tl*tp*.4);targ.emp-=Math.min(8,tl*tp*.3)}
   for(const sec in SECTORS){if(G.priv&&G.priv[sec]){const f=SECTORS[sec].fx;targ.vec+=f.vec;targ.emp+=f.emp;targ.eco+=f.eco;targ.fun+=f.fun}}
   for(const sec in G.cronies){if(G.cronies[sec]&&G.priv[sec]){const c=sectorStats(sec).value*.012;G.personal+=c*.4;G.susp=clamp(G.susp+.25,0,120)}}
@@ -755,7 +793,9 @@ function nextModal(){
   });
   $('#modal').classList.remove('hidden');
 }
-function evText(ev){let t=ev.x.replace('__OPP__',G.opp);if(t.includes('__PRIV__')){const p=privPick();t=t.replace('__PRIV__',p?`${p.name.toLowerCase()} (${p.op})`:'un servicio')}return t}
+function corpLow(){let b=null;for(const k in G.corp)if(!b||G.corp[k].q<G.corp[b].q)b=k;return b}
+function corpAmi(){return Object.keys(G.corp).find(k=>G.corp[k].mgr==='ami')}
+function evText(ev){let t=ev.x.replace('__OPP__',G.opp);if(t.includes('__CORP__')){const id=ev.id==='corp_rescate'?corpLow():ev.id==='corp_amigo'?corpAmi():Object.keys(G.corp).find(k=>G.corp[k].mgr==='tec');t=t.replace('__CORP__',id?CORPS[id].n:'La empresa pública')}if(t.includes('__PRIV__')){const p=privPick();t=t.replace('__PRIV__',p?`${p.name.toLowerCase()} (${p.op})`:'un servicio')}return t}
 function showEvent(ev){
   if(ev.id==='sobrecosto')G.bigBuilds=0;
   queueModal({kick:'Despacho del alcalde',title:ev.t,text:evText(ev),event:ev,opts:ev.o.map(o=>({l:o.l,s:o.s,f:o.f}))});
@@ -775,6 +815,31 @@ function act(a,arg){
   if(a==='skim'){ if(G.money<4000)return toast('No hay caja que desviar',1); const x=Math.round(G.money*.1);E.money(-x);E.own(x);E.susp(12);toast(`Desvías ${fmt(x)} a una cuenta lejana`) }
   if(a==='loan'){ if(G.debt>=90000)return toast('El banco ya no te presta más',1);G.money+=10000;G.debt+=10000;toast('Préstamo recibido: +$10.000') }
   if(a==='pay'){ const x=Math.min(10000,G.debt); if(G.money<x||x<=0)return toast(x<=0?'No debes nada':'Sin fondos',1);G.money-=x;G.debt-=x;toast('Abonas a la deuda') }
+  if(a==='corp'){
+    const d=CORPS[arg],c=G.corp[arg];
+    const chooseMgr=(onPick)=>queueModal({kick:'Nombramiento',title:'¿Quién la gerencia?',html:`<p>${d.n} necesita un gerente. La hoja de vida de los tres candidatos cabe en una servilleta.</p>`,event:{t:'Gerente'},
+      opts:['tec','pol','ami'].map(k=>({l:MGR[k].n,s:MGR[k].d,f:()=>onPick(k)}))});
+    if(!c){
+      if(d.sector&&G.priv[d.sector])return toast('El sector está concesionado: reestatiza primero',1);
+      if(!d.need())return toast(d.needTxt,1);
+      if(G.cap<d.cap)return toast(`Necesitas ${d.cap} de capital político`,1);
+      if(G.money<d.cost)return toast(`Fundarla cuesta ${fmt(d.cost)}`,1);
+      chooseMgr(k=>{
+        E.money(-d.cost);E.cap(-d.cap);G.corp[arg]={mgr:k,q:MGR[k].start,since:G.month,last:0};
+        if(k==='pol'){E.fac('fun',4);E.fac('vec',2)}
+        addLog(`🏛️ Nace ${d.n}, gerenciada por ${MGR[k].n.toLowerCase().replace('gerente ','el ')}.`);recalc();
+        return `${d.n} abre sus puertas. El corte de cinta dura más que su plan de negocios.`;
+      });
+      return;
+    }
+    queueModal({kick:'Empresa pública',title:`${d.e} ${d.n}`,html:`<p>${MGR[c.mgr].n} · calidad ${c.q.toFixed(0)}%. ${c.last>=0?'Utilidad':'Pérdida'} del último mes: <b>${fmt(c.last||0)}</b>.</p>`,event:{t:d.n},
+      opts:[
+       {l:'Capitalizar (+12 de calidad)',s:`Cuesta ${fmt(Math.round(d.cost*.25))}`,f:()=>{const x=Math.round(d.cost*.25);if(G.money<x)return 'No hay caja para capitalizarla.';E.money(-x);c.q=clamp(c.q+12,0,100);recalc();return 'La junta aplaude. Los trabajadores, un poco menos.'}},
+       {l:'Cambiar de gerente',s:'Un nuevo jefe, una nueva servilleta',f:()=>{setTimeout(()=>chooseMgr(k=>{c.mgr=k;c.q=clamp(c.q-4,0,100);recalc();return `Nuevo gerente: ${MGR[k].n.toLowerCase()}. Hay empalme de tres semanas y dos escándalos.`}),0);return 'Aceptas la renuncia del gerente. Con carta y todo.'}},
+       {l:'Liquidar y vender',s:`Recuperas ${fmt(Math.round(d.cost*.4))}. Los empleados no lo olvidan.`,f:()=>{E.money(Math.round(d.cost*.4));E.fac('fun',-6);E.fac('vec',-2);delete G.corp[arg];addLog(`🧾 Liquidas ${d.n}.`);recalc();return 'Se acaban los carnets, las camisetas y el asado de fin de año.'}},
+       {l:'Cerrar',f:()=>'Sigues con lo que hay.'}]});
+    return;
+  }
   if(a==='buscolor'){
     const b=BUSCOLS.find(x=>x.id===arg);if(!b)return;
     G.busColor=arg;
@@ -792,6 +857,8 @@ function act(a,arg){
       addLog(`🏛️ Reestatizas ${sec.n.toLowerCase()}: el operador se va con una indemnización y mala cara.`);toast(`Reestatizado: ${sec.n}`);
       recalc();refreshUI();return;
     }
+    const cid=Object.keys(CORPS).find(k=>CORPS[k].sector===arg&&G.corp[k]);
+    if(cid)return toast('Tu empresa pública opera ese sector: liquídala primero',1);
     if(!st.n)return toast(`Aún no tienes nada de ${sec.n.toLowerCase()} que privatizar`,1);
     if(G.cap<6)return toast('Necesitas 6 de capital político',1);
     const p=clamp(.3+G.loyalty/220+(S.approval-50)/220,.1,.9);
@@ -1448,7 +1515,7 @@ function drawShadows(vis){
     let h=objH(t,grid.lvl[idx]);
     if(h>0){
       const m=t===T.STAD?.02:.1;
-      const sx=SUN.dx*h*1.9,sy=SUN.dy*h*1.3-h*.12;
+      const hs=Math.min(h,70),sx=SUN.dx*hs*1.9,sy=SUN.dy*hs*1.3-hs*.12;
       const pts=[];
       for(const [u,v] of [[m,m],[1-m,m],[1-m,1-m],[m,1-m]]){
         const x=ox+(u-v)*HW,y=oy+(u+v)*HH;
@@ -1851,6 +1918,20 @@ function panelPol(){
   DECREES.forEach(d=>{const on=G.decrees[d.id];h+=`<button class="btn ${on?'on':''}" data-a="decree" data-x="${d.id}">${on?'✅ ':''}${d.n}<small>${d.d}${on?'':` · <b>${d.cap}</b> de capital político`}</small></button>`});
   return h;
 }
+function panelCorp(){
+  let tot=0;for(const id in G.corp)tot+=G.corp[id].last||0;
+  let h=`<h4>Empresas públicas</h4><small style="color:var(--humo2)">Fundar una empresa cuesta caja y capital político. Su gerente define si da utilidades o pérdidas: ${Object.keys(G.corp).length?`hoy suman <b style="color:${tot>=0?'var(--jade)':'var(--lacre)'}">${fmt(tot)}</b> al mes.`:'aún no tienes ninguna.'}</small>`;
+  for(const id in CORPS){
+    const d=CORPS[id],c=G.corp[id];
+    let sub;
+    if(c){sub=`${MGR[c.mgr].n} · calidad ${c.q.toFixed(0)}% · ${c.last>=0?'utilidad':'pérdida'} <b>${fmt(c.last||0)}</b>/mes${c.q<40?' ⚠️ sin efectos':''}`}
+    else if(d.sector&&G.priv[d.sector])sub='El sector está concesionado: reestatiza primero.';
+    else if(!d.need())sub=d.needTxt;
+    else sub=`${d.d} Costo ${fmt(d.cost)} · ${d.cap} de capital político · resultado estimado ${fmt(corpEst(id,62))}/mes.`;
+    h+=`<button class="btn ${c?'on':''}" data-a="corp" data-x="${id}">${d.e} ${d.n}<small>${sub}</small></button>`;
+  }
+  return h;
+}
 function panelFin(){
   const hh=G.hist||{inc:0,exp:0,incR:0,incC:0,incI:0,up:0,admin:0,dec:0,interest:0};
   const bal=hh.inc-hh.exp;
@@ -1893,7 +1974,7 @@ function refreshUI(light){
   if(light&&curTab==='fin')return;
   const body=$('#panelBody'),sc0=body.scrollTop;
   if(document.activeElement&&document.activeElement.type==='range')return;
-  body.innerHTML=curTab==='city'?panelCity():curTab==='pol'?panelPol():panelFin();
+  body.innerHTML=curTab==='city'?panelCity():curTab==='pol'?panelPol():curTab==='corp'?panelCorp():panelFin();
   body.scrollTop=sc0;
 }
 $('#panelBody').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)act(b.dataset.a,b.dataset.x)});
@@ -1917,7 +1998,7 @@ function load(){
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
     allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt'])if(o.grid[k])grid[k].set(o.grid[k]);
-    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};Object.assign(cam,o.cam||{});cam.z=cam.z||1;
+    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;Object.assign(cam,o.cam||{});cam.z=cam.z||1;
     terrainMeta();recalc();refreshUI();buildTools();return true;
   }catch(e){return false}
 }
