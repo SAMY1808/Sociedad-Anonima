@@ -77,7 +77,7 @@ function newState(opts){
   const st={seed,name:opts.city,mayor:opts.mayor,profile:opts.profile,month:0,money:40000,debt:0,personal:0,susp:0,cap:40,loyalty:30,buzz:0,
     tax:{R:9,C:9,I:9},fac:{vec:55,emp:55,eco:55,fun:55},decrees:{},pop:0,speed:1,nextElection:48,terms:0,
     lastEvent:0,recent:[],log:[],milestones:{},opp:pick(['Evaristo Pardo','Cleotilde Ramírez','Aníbal "El Contador" Vega','Doña Mercedes Ospina']),
-    lastFiscalia:-99,over:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,bonus:{cr:0},hist:{inc:0,exp:0}};
+    lastFiscalia:-99,over:null,priv:{},cronies:{},privOp:{},corp:{},tollPrice:3,weather:{type:'sol'},dry:0,flood:[],floodLeft:0,dikes:0,ration:0,rebuild:[],droughtFlag:false,bonus:{cr:0},hist:{inc:0,exp:0}};
   if(opts.profile==='tec'){st.money+=15000;st.fac.fun=65;st.cap=30}
   if(opts.profile==='pop'){st.fac.vec=70;st.cap=60;st.money-=8000}
   if(opts.profile==='emp'){st.fac.emp=72;st.personal=12000;st.susp=8;st.fac.eco=45}
@@ -232,6 +232,7 @@ function computeTraffic(){
     }
     load.set(nl);
   }
+  {const wm={lluvia:1.1,tormenta:1.25,niebla:1.12}[(G.weather&&G.weather.type)||'sol']||1;if(wm!==1)for(const k of roads)load[k]*=wm}
   const boost=new Float32Array(N*N).fill(1);
   for(const k of roads){
     if(grid.typ[k]!==T.ROUND)continue;
@@ -281,8 +282,10 @@ function recalc(){
     else if(t===T.HALL){units+=2}
     if((t===T.R||t===T.C||t===T.I))zoneTiles++;
   }
+  const wx=(G.weather&&G.weather.type)||'sol';
+  if(wx==='calor'){units=Math.round(units*1.15);zunits=Math.round(zunits*1.12)}
   const net=lineNet(grid.elev),netT=lineNet(grid.tram),netB=lineNet(grid.brt);units+=net.stations*2+Math.floor(net.rails/6)+netT.stations+netB.stations;
-  const pCap=Math.round((cnt[T.COAL]*120+cnt[T.SOLAR]*45+cnt[T.WIND]*70)*(pv.ene?1.15:1)*(corpOn('ene')?1.08:1)),wCap=Math.round(cnt[T.WATER]*100*(pv.agua?.92:1)*(corpOn('agua')?1.08:1));
+  const pCap=Math.round((cnt[T.COAL]*120+cnt[T.SOLAR]*45+cnt[T.WIND]*70)*(pv.ene?1.15:1)*(corpOn('ene')?1.08:1)*(wx==='tormenta'?.85:1)),wCap=Math.round(cnt[T.WATER]*100*(pv.agua?.92:1)*(corpOn('agua')?1.08:1)*(1-.3*(G.dry||0)*(G.ration>0?.5:1)));
   const pRatio=units===0?1:Math.min(1,pCap/units),wRatio=zunits===0?1:Math.min(1,wCap/zunits);
   const eff=(G.money<0?.6:1)*(G.decrees.recorte?.9:1);
   const trEff=(G.decrees.tarifa?1.3:1)*(corpOn('trn')?1.08:1);
@@ -312,7 +315,7 @@ function recalc(){
   const jam=clamp(cong-.5,0,1.2);
   let h=.5+.14*aCli+.12*aSch+.08*aFir+.2*aPark-.32*aPoll-.3*crime-.4*unemp-(G.tax.R-9)*.02
         -(1-pRatio)*.5-(1-wRatio)*.4+(statue?.03:0)+(G.decrees.vivienda?.03:0)+(G.decrees.ciclovia?.03:0)+G.buzz*.004
-        +.05*aTrn-.2*jam+(G.decrees.tarifa?.02:0)+Math.min(.06,cnt[T.STAD]*.04)+Math.min(.06,cnt[T.PLAZA]*.015)-privCount()*.012;
+        +.05*aTrn-.2*jam+(G.decrees.tarifa?.02:0)+Math.min(.06,cnt[T.STAD]*.04)+Math.min(.06,cnt[T.PLAZA]*.015)-privCount()*.012+({lluvia:-.01,tormenta:-.025,calor:-.02,niebla:-.005}[wx]||0);
   if(G.decrees.recorte)h-=.03;
   h=clamp(h,0,1);
   const tx=t=>(G.tax[t]-9)*.03;
@@ -611,6 +614,7 @@ function finance(){
   let incR=eff,incC=S.capC*G.tax.C*1.0*(.6+.4*S.h),incI=S.capI*G.tax.I*1.05;
   if(G.decrees.exencion)incI*=.6;
   incC*=1-.15*clamp(S.cong-.6,0,1);
+  if(G.weather&&G.weather.type==='tormenta')incC*=.95;
   incC*=1+Math.min(.1,S.cnt[T.PLAZA]*.015);
   const incT=G.decrees.tarifa?0:G.pop*S.aTrn*.05*(pv.trn?2:1)*(1+Math.min(.6,S.net.stations*.06+(S.netT.stations+S.netB.stations)*.04));
   const incToll=(S.toll?S.toll.rev:0)*(pv.peaje?.5:1);
@@ -669,7 +673,7 @@ function milestones(){
 }
 function addLog(m){G.log.unshift(`${MESES[G.month%12]} ${2027+Math.floor(G.month/12)}: ${m}`);G.log.length=Math.min(G.log.length,40);$('#tickerTxt').textContent=m}
 function disasters(){
-  if(Math.random()<.04&&S.units>25){
+  if(Math.random()<.04*(1+(G.dry||0)*2)&&S.units>25){
     const cover=(S.aFir||0);
     if(Math.random()>cover*.8){
       const n=damage(2+((Math.random()*3)|0),[T.R,T.C,T.I]);
@@ -677,6 +681,88 @@ function disasters(){
       if(n)E.fac('vec',-4);
     }else addLog('🚒 Un incendio fue controlado a tiempo por tus bomberos.');
   }
+}
+/* ---------- clima y desastres ---------- */
+const WX={sol:{n:'Despejado',e:'☀️'},lluvia:{n:'Lluvia',e:'🌧️'},tormenta:{n:'Tormenta',e:'⛈️'},niebla:{n:'Niebla',e:'🌫️'},calor:{n:'Ola de calor',e:'🔥'}};
+function floodSync(){meta.flood=new Uint8Array(N*N);for(const k of G.flood||[])meta.flood[k]=1}
+function rebuildCost(){let n=0;for(const [k,l] of G.rebuild)n+=l;return Math.round(120*sc())*n}
+function rebuildAll(){
+  for(const [k,l] of G.rebuild){const t=grid.typ[k];if(t===T.R||t===T.C||t===T.I)grid.lvl[k]=Math.min(grid.den[k]&&t!==T.I?5:3,grid.lvl[k]+l)}
+  G.rebuild=[];
+}
+function damageTiles(tiles,lost){
+  let n=0;
+  for(const [i,j] of tiles){const k=j*N+i,l=grid.lvl[k];if(l<=0)continue;const d=Math.min(l,lost());grid.lvl[k]=l-d;G.rebuild.push([k,d]);n++}
+  return n;
+}
+function flood(){
+  const cand=[];
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+    if(grid.ter[j*N+i]===1)continue;
+    let near=false;
+    for(let dj=-2;dj<=2&&!near;dj++)for(let di=-2;di<=2;di++){const x=i+di,y=j+dj;if(inb(x,y)&&grid.ter[y*N+x]===1){near=true;break}}
+    if(near)cand.push([i,j]);
+  }
+  if(!cand.length)return;
+  const tiles=[];for(let k=0;k<16&&cand.length;k++)tiles.push(cand.splice((Math.random()*cand.length)|0,1)[0]);
+  G.flood=tiles.map(([i,j])=>j*N+i);G.floodLeft=2;floodSync();
+  const n=damageTiles(tiles,()=>1);
+  E.fac('vec',-3);
+  addLog(`🌊 Inundación: se anegan ${tiles.length} casillas y ${n} edificios quedan dañados.`);
+  const opts=[
+   {l:'Declarar calamidad pública',s:'Piden ayuda al gobierno central',f:()=>{E.cap(-3);if(Math.random()<.65){E.money($$(3500));return 'El gobierno central gira una ayuda... con tres meses de retraso, pero llega.'}E.fac('vec',-2);return 'La ayuda se pierde en un trámite. Te mandan una carta muy amable.'}},
+   {l:'Reforzar los diques',s:`Cuesta ${fmt($$(2500))}. Protege 18 meses.`,f:()=>{E.money(-$$(2500));G.dikes=18;return 'Los diques quedan listos. Los ingenieros dicen "hasta que el río decida otra cosa".'}},
+   {l:'Culpar a La Niña',s:'Meteorología política',f:()=>{E.fac('vec',-3);return 'La Niña no responde preguntas.'}}];
+  if(G.rebuild.length)opts.unshift({l:'Reconstruir con fondos propios',s:`Cuesta ${fmt(rebuildCost())}`,f:()=>{const c=rebuildCost();if(G.money<c)return 'No alcanza la caja para reconstruir.';E.money(-c);rebuildAll();E.fac('vec',4);recalc();return 'Se reconstruye todo. Las fotos de los albañiles salen muy bien.'}});
+  queueModal({kick:'Emergencia',title:'Inundación',text:'Las lluvias desbordan el río. El agua entra a los barrios cercanos y las ratas, curiosamente, ya sabían.',event:{t:'Inundación'},opts});
+}
+function maybeFlood(){
+  if(G.dikes>0){addLog('🛡️ Los diques aguantan la tormenta. Primera vez que sirven para algo.');return}
+  if(Math.random()<.4)flood();
+}
+function quake(){
+  const sev=+(4.5+Math.random()*2.8).toFixed(1);
+  const cover=(S.aFir||0)*.5+(S.aCli||0)*.3;
+  const n=Math.round(clamp((sev-4)*G.pop/160,2,40)*(1-cover*.5));
+  const tiles=randTiles((ty,l)=>(ty===T.R||ty===T.C||ty===T.I)&&l>0,n);
+  const dn=damageTiles(tiles,()=>1+(sev>6?1:0)+(Math.random()<.3?1:0));
+  shakeAmp=1.2;
+  E.fac('vec',Math.round(-6*(1-(S.aCli||0)*.6)));
+  addLog(`🌋 Terremoto de magnitud ${sev}: ${dn} edificios dañados.`);
+  const opts=[
+   {l:'Visitar a los damnificados con casco y cámaras',s:'Foto con pala',f:()=>{E.fac('vec',4);E.buzz(3);return 'Palas relucientes, casco impecable, discurso emotivo. Todo grabado.'}},
+   {l:'Pedir ayuda al gobierno central',s:'Se acepta cualquier cosa',f:()=>{E.cap(-2);if(Math.random()<.55){E.money($$(4000));return 'Llega ayuda... y una nota que pide "buen uso de los recursos".'}return 'La ayuda queda "en estudio". Probablemente para siempre.'}}];
+  if(G.rebuild.length)opts.unshift({l:'Reconstruir con fondos propios',s:`Cuesta ${fmt(rebuildCost())}`,f:()=>{const c=rebuildCost();if(G.money<c)return 'No alcanza la caja para reconstruir.';E.money(-c);rebuildAll();E.fac('vec',5);recalc();return 'La ciudad se levanta rápido. Los contratos, aún más rápido.'}});
+  queueModal({kick:'Emergencia',title:`Terremoto de magnitud ${sev}`,text:`La tierra tiembla durante once segundos eternos. ${dn} edificios quedan dañados. ${S.aFir>.4?'Tus bomberos responden rápido.':'Sin bomberos suficientes, la respuesta es lenta.'}`,event:{t:'Terremoto'},opts});
+}
+function heatEvent(){
+  queueModal({kick:'Ola de calor',title:'Sofocante',text:'La temperatura se dispara. Los ventiladores se agotan, los helados se disparan y hay quien intenta freír un huevo en el capó del carro oficial.',event:{t:'Ola de calor'},
+   opts:[{l:'Abrir centros de hidratación',s:`Cuesta ${fmt($$(1200))}`,f:()=>{E.money(-$$(1200));E.fac('vec',4);return 'Los centros se llenan de gente y de dominó.'}},
+         {l:'Decretar medio día festivo',s:'Muy popular, poco productivo',f:()=>{E.fac('vec',4);E.fac('emp',-4);return 'La ciudad se va al río. Los empresarios, a ninguna parte.'}},
+         {l:'Recomendar tomar mucha agua',s:'Gratis',f:()=>{E.fac('vec',-3);return 'Los vecinos te recomiendan, a su vez, un buen lugar donde irte.'}}]});
+}
+function droughtEvent(){
+  queueModal({kick:'Sequía',title:'La tierra se agrieta',text:'Llevas semanas sin una gota. Los pastos amarillean, el embalse es un charco y alguien propone una procesión con santos.',event:{t:'Sequía'},
+   opts:[{l:'Racionar el agua',s:'Impopular, efectivo 6 meses',f:()=>{G.ration=6;E.fac('vec',-5);E.fac('emp',-3);return 'Los turnos de agua causan más conversación que la selección de fútbol.'}},
+         {l:'Contratar camiones cisterna',s:`Cuesta ${fmt($$(2500))}`,f:()=>{E.money(-$$(2500));G.ration=4;E.fac('vec',2);return 'Los camiones llegan, vacían medio embalse privado y se van.'}},
+         {l:'Organizar una procesión',s:'Fe municipal',f:()=>{E.buzz(2);E.fac('vec',1);return 'Llueve a los tres días. Dices que fue gracias a ti. El cura también.'}}]});
+}
+function weatherStep(){
+  const m=G.month%12,wet=[2,3,4,8,9,10].includes(m);
+  const r=Math.random();let type='sol';
+  if(wet){if(r<.3)type='lluvia';else if(r<.42)type='tormenta';else if(r<.48)type='niebla'}
+  else{if(r<.14)type='calor';else if(r<.2)type='niebla';else if(r<.3)type='lluvia'}
+  const prev=G.weather.type;G.weather={type};
+  G.dry=clamp((G.dry||0)+(wet?-.18:.1)+(type==='lluvia'||type==='tormenta'?-.15:0)+(type==='calor'?.12:0),0,1);
+  if(G.dikes>0)G.dikes--;
+  if(G.ration>0)G.ration--;
+  if(G.floodLeft>0){G.floodLeft--;if(!G.floodLeft){G.flood=[];floodSync()}}
+  if(type!=='sol'&&type!==prev)addLog(`${WX[type].e} ${WX[type].n}${type==='tormenta'?': el cielo se cae':type==='calor'?': hasta las sombras sudan':type==='niebla'?': no se ve ni la alcaldía':': la ciudad huele a tierra mojada'}.`);
+  if(type==='tormenta'&&G.pop>200)maybeFlood();
+  if(type==='calor'&&G.pop>300&&Math.random()<.45)heatEvent();
+  if(G.dry>.7&&!G.droughtFlag&&G.pop>300){G.droughtFlag=true;droughtEvent()}
+  if(G.dry<.3)G.droughtFlag=false;
+  if(G.pop>600&&Math.random()<.007)quake();
 }
 function newsLine(){
   const L=[];
@@ -698,6 +784,8 @@ function newsLine(){
   if(S.cnt[T.COAL]>0)L.push('Chimenea de la termoeléctrica es declarada "monumento al progreso" por el alcalde.');
   if(S.cong>.8)L.push('Trancón de tres horas para avanzar dos cuadras: "es el precio del progreso", dice el alcalde (en helicóptero).');
   if(privCount())L.push('Alcalde: "Privatizar no es vender, es compartir". El contrato adjunto, en cambio, es de venta total.');
+  if(G.dry>.5)L.push('Pastos amarillos y embalses bajos: el alcalde propone "reciclar la lluvia".');
+  if(G.weather.type==='lluvia')L.push('Llueve y el tráfico aprende a llorar: tres horas para cruzar la ciudad.');
   if(S.cnt[T.PLAZA])L.push('Inauguran plaza con fuente: la fuente ya tiene su primer grafiti.');
   if(S.netB.stations>=2)L.push('Pasajeros del troncal rojo viajan como sardinas, pero "a tiempo", dice el alcalde.');
   if(S.netT.stations>=2)L.push('El tranvía hace "tilín" y bloquea el tráfico dos veces por hora. "Es parte de su encanto", dicen.');
@@ -721,6 +809,7 @@ function step(){
   politics();
   popUpdate();
   recalc();
+  weatherStep();
   disasters();
   milestones();
   if(G.month%2===0)addLog(newsLine());
@@ -1492,6 +1581,8 @@ function ovTint(idx,typ){
   return `hsla(${hue|0},80%,50%,${al*.8})`;
 }
 const OVNAME={traf:'Tráfico (verde fluido, rojo trancón)',trn:'Cobertura de transporte público',poll:'Contaminación',lv:'Valor del suelo',crime:'Riesgo de crimen'};
+let shakeAmp=0,shakeX=0,shakeY=0,rain=[],bolt={t:0},lastRender=0;
+function setCam(c){c.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.x*cam.z+shakeX),DPR*(H/2-cam.y*cam.z+shakeY))}
 const shCv=document.createElement('canvas'),shCtx=shCv.getContext('2d');
 function objH(t,l){
   switch(t){
@@ -1506,7 +1597,7 @@ function drawShadows(vis){
   if(al<.02)return;
   const c=shCtx;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,shCv.width,shCv.height);
-  c.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.x*cam.z),DPR*(H/2-cam.y*cam.z));
+  setCam(c);
   c.fillStyle='#0a1420';
   const fill=pts=>{const hl=hull(pts);if(hl.length<3)return;c.beginPath();c.moveTo(hl[0][0],hl[0][1]);for(let k=1;k<hl.length;k++)c.lineTo(hl[k][0],hl[k][1]);c.closePath();c.fill()};
   for(const idx of vis){
@@ -1542,6 +1633,7 @@ function groundTile(i,j,idx){
   const typ=grid.typ[idx],lvl=grid.lvl[idx];
   drawSides(i,j,idx);
   drawTerrain(i,j,idx);
+  if(meta.flood&&meta.flood[idx]){flat(0,0,1,1,.3,'rgba(70,140,205,.55)');ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=.9;ctx.beginPath();const o=Math.sin(TNOW/500+i+j)*.05;ctx.moveTo(X(.2,.4+o),Y(.2,.4+o));ctx.lineTo(X(.7,.45+o),Y(.7,.45+o));ctx.stroke()}
   if(overlay&&grid.ter[idx]!==1&&!isRoad(typ)){const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
   if(isRoad(typ)){drawRoad(i,j,OX,OY);if(grid.tram[idx]||grid.brt[idx])drawTramBrt(i,j,idx);const tn=ovTint(idx,typ);if(tn)flat(0,0,1,1,0,tn)}
   else if(typ===T.R||typ===T.C||typ===T.I){
@@ -1595,6 +1687,28 @@ function objectTile(i,j,idx,bucket,tbucket){
   if(tb)for(const tr of tb)if(tr.kind!=='elev')drawVeh(tr);
   if(grid.elev[idx]){drawElev(i,j,idx);if(tb)for(const tr of tb)if(tr.kind==='elev')drawVeh(tr)}
 }
+function weatherFx(dt){
+  const wx=G.weather?G.weather.type:'sol';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(wx==='lluvia'||wx==='tormenta'){
+    const n=wx==='tormenta'?420:220;
+    ctx.fillStyle=`rgba(24,34,52,${wx==='tormenta'?.3:.17})`;ctx.fillRect(0,0,W,H);
+    while(rain.length<n)rain.push({x:Math.random()*W,y:Math.random()*H,v:600+Math.random()*300});
+    while(rain.length>n)rain.pop();
+    ctx.strokeStyle=`rgba(195,214,238,${wx==='tormenta'?.55:.4})`;ctx.lineWidth=1;ctx.beginPath();
+    for(const d of rain){d.y+=d.v*dt;d.x-=d.v*dt*.18;if(d.y>H){d.y=-20;d.x=Math.random()*W+60}ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+3.5,d.y-18)}
+    ctx.stroke();
+    if(wx==='tormenta'){
+      if(bolt.t<=0&&Math.random()<.004)bolt.t=1;
+      if(bolt.t>0){ctx.fillStyle=`rgba(255,255,255,${Math.min(.5,bolt.t*.5)})`;ctx.fillRect(0,0,W,H);bolt.t-=dt*4}
+    }
+  }else rain.length=0;
+  if(wx==='niebla'){
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(222,232,238,.5)');g.addColorStop(1,'rgba(204,218,226,.36)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  }
+  if(wx==='calor'){ctx.fillStyle='rgba(255,160,50,.1)';ctx.fillRect(0,0,W,H)}
+}
 function atmosphere(now){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const day=1-night;
@@ -1617,6 +1731,8 @@ function atmosphere(now){
 }
 function render(now){
   TNOW=now;
+  const dtR=Math.min(.1,(now-(lastRender||now))/1000);lastRender=now;
+  shakeAmp*=Math.pow(.18,dtR);if(shakeAmp<.02)shakeAmp=0;shakeX=(Math.random()-.5)*shakeAmp*14;shakeY=(Math.random()-.5)*shakeAmp*10;
   ctx.setTransform(DPR,0,0,DPR,0,0);
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#2a6076');sky.addColorStop(1,'#123446');
   ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
@@ -1626,7 +1742,7 @@ function render(now){
   if(window.__night!=null)night=window.__night;
   updateSun(t);
   DETAIL=cam.z>.72;
-  ctx.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.x*cam.z),DPR*(H/2-cam.y*cam.z));
+  setCam(ctx);
   const x0=cam.x-W/2/cam.z-70,x1=cam.x+W/2/cam.z+70,y0=cam.y-H/2/cam.z-40,y1=cam.y+H/2/cam.z+190;
   lights=[];
   const bucket=new Map();
@@ -1646,13 +1762,14 @@ function render(now){
   }
   for(const idx of vis)groundTile(idx%N,(idx/N)|0,idx);
   drawShadows(vis);
-  ctx.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.x*cam.z),DPR*(H/2-cam.y*cam.z));
+  setCam(ctx);
   for(const idx of vis)objectTile(idx%N,(idx/N)|0,idx,bucket,tbucket);
   drawCursor();
   atmosphere(now);
+  weatherFx(dtR);
   if(night>0){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle=`rgba(8,14,46,${night*.5})`;ctx.fillRect(0,0,W,H)}
   if(night>.1&&lights.length){
-    ctx.setTransform(DPR*cam.z,0,0,DPR*cam.z,DPR*(W/2-cam.x*cam.z),DPR*(H/2-cam.y*cam.z));
+    setCam(ctx);
     ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(255,214,120,${night*.9})`;ctx.beginPath();
     for(let k=0;k<lights.length;k+=8){ctx.moveTo(lights[k],lights[k+1]);ctx.lineTo(lights[k+2],lights[k+3]);ctx.lineTo(lights[k+4],lights[k+5]);ctx.lineTo(lights[k+6],lights[k+7]);ctx.closePath()}
     ctx.fill();ctx.globalCompositeOperation='source-over';
@@ -1964,7 +2081,7 @@ function panelFin(){
 function refreshUI(light){
   if(!G)return;
   $('#cityName').textContent=G.name;
-  $('#dateLbl').textContent=`${MESES[G.month%12]} ${2027+Math.floor(G.month/12)} · ${G.mayor}`;
+  $('#dateLbl').textContent=`${WX[(G.weather&&G.weather.type)||'sol'].e} ${MESES[G.month%12]} ${2027+Math.floor(G.month/12)} · ${G.mayor}`;
   const m=$('#hMoney');m.textContent=fmt(G.money);m.parentNode.className='chip '+(G.money<0?'bad':'');
   $('#hPop').textContent=num(G.pop);
   const a=S.approval||0;const ap=$('#hAppr');ap.textContent=a.toFixed(0)+'%';ap.parentNode.className='chip '+(a<45?'bad':a>62?'good':'');
@@ -1998,8 +2115,8 @@ function load(){
     const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;
     const o=JSON.parse(raw);
     allocGrid();for(const k of ['ter','typ','lvl','sub','den','elev','tram','brt'])if(o.grid[k])grid[k].set(o.grid[k]);
-    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;Object.assign(cam,o.cam||{});cam.z=cam.z||1;
-    terrainMeta();recalc();refreshUI();buildTools();return true;
+    G=o.G;G.speed=1;G.priv=G.priv||{};G.cronies=G.cronies||{};G.privOp=G.privOp||{};G.corp=G.corp||{};if(G.tollPrice==null)G.tollPrice=3;G.weather=G.weather||{type:'sol'};G.dry=G.dry||0;G.flood=G.flood||[];G.floodLeft=G.floodLeft||0;G.dikes=G.dikes||0;G.ration=G.ration||0;G.rebuild=G.rebuild||[];Object.assign(cam,o.cam||{});cam.z=cam.z||1;
+    terrainMeta();floodSync();recalc();refreshUI();buildTools();return true;
   }catch(e){return false}
 }
 function hasSave(){try{return !!localStorage.getItem(SAVE_KEY)}catch(e){return false}}
@@ -2036,7 +2153,7 @@ function startScreen(){
    opts:[{l:'Empezar mandato',f:()=>{
      const city=($('#inCity').value||'Villa Anónima').trim(),mayor=($('#inMayor').value||'El Alcalde').trim();
      const pf=document.querySelector('input[name=pf]:checked').value;
-     G=newState({city,mayor,profile:pf});cars=[];genMap(G.seed);
+     G=newState({city,mayor,profile:pf});cars=[];genMap(G.seed);floodSync();
      const c=(N-1)/2;cam.x=0;cam.y=(c+c)*HH+HH;cam.z=1.05;
      S={};recalc();addLog('Bienvenido, señor alcalde. Construya energía, agua, calles y zonas.');refreshUI();buildTools();selectTool('road');save();
      setTimeout(help,0);
@@ -2056,7 +2173,7 @@ function loop(now){const dt=Math.min(.1,(now-lastR)/1000);lastR=now;if(G&&!modal
 requestAnimationFrame(loop);
 addEventListener('resize',resize);resize();
 // render() se auto-programa; evitamos doble programación
-window.__alcalde={get shCv(){return shCv},get SUN(){return SUN},get G(){return G},get S(){return S},grid,cov,step,applyTool,TOOL,recalc,act,cam,selectTool,startScreen,setSpeed,load,save,T,N,queueModal,election,endGame};
+window.__alcalde={flood,quake,weatherStep,rebuildAll,get shCv(){return shCv},get SUN(){return SUN},get G(){return G},get S(){return S},grid,cov,step,applyTool,TOOL,recalc,act,cam,selectTool,startScreen,setSpeed,load,save,T,N,queueModal,election,endGame};
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 startScreen();
 })();
