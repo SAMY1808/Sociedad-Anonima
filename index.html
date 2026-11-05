@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v79</div>
+<div class="version-badge" id="versionBadge">v81</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -16246,6 +16246,295 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init79,220);
   setTimeout(init79,650);
   window.__SA79={version:V79};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v80 · EL MAPA ORBITAL — LA CASA COMO SISTEMA, NO COMO LISTA DE PESTAÑAS
+   Prototipo pedido explícitamente: una interfaz "geoplanetal" para
+   organizar las distintas áreas del juego de forma más intuitiva que
+   nueve pestañas de texto. Tu escudo de casa queda en el centro, y a su
+   alrededor orbitan los mismos destinos de siempre (negocios,
+   patrimonio, hogar, familia, legado, crónica) más, en la órbita más
+   externa, las piezas que solo existen a veces (casas rivales, tu
+   carrera política, tu imperio mediático, el mapa del mundo). Tocar un
+   planeta no abre nada nuevo: cambia de pestaña o dispara exactamente la
+   misma acción que ya existía en el menú de siempre, buscada por su
+   título en listaAcciones() — así el mapa nunca puede quedar
+   desincronizado de lo que el juego ya permite hacer, sin necesitar
+   exponer ninguna función privada de versiones anteriores.
+   ========================================================================== */
+(function(){
+  const V80='v80';
+  const W=600,H=640,CX=300,CY=300;
+
+  function girar80(r,grados){ const rad=grados*Math.PI/180; return {x:CX+r*Math.cos(rad), y:CY+r*Math.sin(rad)}; }
+  function nodoHub80(pos,radio,iconoPath,label,key,destacado){
+    return '<g data-hub="'+key+'" transform="translate('+pos.x+','+pos.y+')" style="cursor:pointer">'
+      +'<circle r="'+radio+'" fill="rgba(0,0,0,.4)" stroke="'+(destacado?'#E0B84A':'#8A6D2E')+'" stroke-width="'+(destacado?2.2:1.4)+'"/>'
+      +iconoPath
+      +'<text y="'+(radio+15)+'" text-anchor="middle" fill="#F0E7D5" font-size="10.5" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(label)+'</text>'
+      +'</g>';
+  }
+  const ICONOS_HUB_80={
+    negocios:'<path d="M-7 3v-6a2 2 0 012-2h10a2 2 0 012 2v6M-9 -3h18v9a1.4 1.4 0 01-1.4 1.4h-15.2A1.4 1.4 0 01-9 6z" fill="none" stroke="#D6A648" stroke-width="1.5"/>',
+    patrimonio:'<ellipse cx="0" cy="3" rx="7.5" ry="2.6" fill="none" stroke="#D6A648" stroke-width="1.4"/><ellipse cx="0" cy="-2" rx="7.5" ry="2.6" fill="none" stroke="#D6A648" stroke-width="1.4"/>',
+    hogar:'<path d="M-8 2L0 -7l8 9v6h-16z" fill="none" stroke="#D6A648" stroke-width="1.5"/>',
+    familia:'<circle cx="-3.4" cy="-2" r="3.2" fill="none" stroke="#D6A648" stroke-width="1.3"/><circle cx="3.8" cy="-1" r="2.6" fill="none" stroke="#D6A648" stroke-width="1.3"/><path d="M-8 7c0-3 2-5 4.6-5s4.6 2 4.6 5M0 7c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" fill="none" stroke="#D6A648" stroke-width="1.2"/>',
+    legado:'<path d="M0 -8l2.2 4.6 5 .7-3.6 3.6.9 5L0 3.4l-4.5 2.5.9-5-3.6-3.6 5-.7z" fill="none" stroke="#D6A648" stroke-width="1.3"/>',
+    cronica:'<path d="M-7 -5h5.5a2 2 0 012 2v9.5a2 2 0 00-2-1.2h-5.5zM7 -5h-5.5a2 2 0 00-2 2v9.5a2 2 0 012-1.2h5.5z" fill="none" stroke="#D6A648" stroke-width="1.3"/>',
+    mundo:'<circle r="7.6" fill="none" stroke="#D6A648" stroke-width="1.3"/><ellipse rx="3" ry="7.6" fill="none" stroke="#D6A648" stroke-width="1.2"/><line x1="-7.6" x2="7.6" stroke="#D6A648" stroke-width="1.2"/>',
+    politica:'<path d="M-7 4h14l-1.2-7.4-3.8 3-2-5.6-2 5.6-3.8-3z" fill="none" stroke="#D6A648" stroke-width="1.4" stroke-linejoin="round"/>',
+    medios:'<circle r="1.8" fill="#D6A648"/><path d="M-5.2 -5.2a8 8 0 010 11.4M5.2 -5.2a8 8 0 000 11.4M-2.6 -2.6a4 4 0 000 5.7M2.6 -2.6a4 4 0 010 5.7" fill="none" stroke="#D6A648" stroke-width="1.2"/>'
+  };
+
+  function ring80(r){ return '<circle cx="'+CX+'" cy="'+CY+'" r="'+r+'" fill="none" stroke="rgba(138,109,46,.3)" stroke-dasharray="2 4"/>'; }
+
+  function hubCasasSVG80(){
+    const A=(function(){ try{ return listaAcciones(); }catch(e){ return []; } })();
+    const enNegocios=!!S.emp;
+    const r1=90,r2=155,r3=220;
+    const P=[];
+    P.push(ring80(r1),ring80(r2),ring80(r3));
+    // centro: escudo de la casa
+    const escudo=escudoSVG(S.dinastia,56).replace('<svg class="cara"','<svg');
+    P.push('<g data-hub="tab:familia" transform="translate('+CX+','+(CY-28)+')" style="cursor:pointer">'
+      +'<g transform="translate(-28,-28)">'+escudo+'</g>'
+      +'<text y="42" text-anchor="middle" fill="#F0E7D5" font-size="13" font-family="Bodoni 72,Didot,Georgia,serif">Casa '+esc(S.dinastia)+'</text>'
+      +'</g>');
+    // órbita 1
+    [[0,enNegocios?'Negocios':'Trabajo','negocios','tab:'+(enNegocios?'compania':'empleo')],
+     [120,'Patrimonio','patrimonio','tab:mercado'],
+     [240,'Hogar','hogar','tab:casa']
+    ].forEach(([ang,label,icono,key])=>{
+      P.push(nodoHub80(girar80(r1,ang-90),24,ICONOS_HUB_80[icono],label,key,tab===key.replace('tab:','')));
+    });
+    // órbita 2
+    [[30,'Familia','familia','tab:familia'],
+     [150,'Legado','legado','tab:legado'],
+     [270,'Crónica','cronica','tab:acta']
+    ].forEach(([ang,label,icono,key])=>{
+      P.push(nodoHub80(girar80(r2,ang-90),23,ICONOS_HUB_80[icono],label,key,tab===key.replace('tab:','')));
+    });
+    // órbita 3: solo lo que de verdad está disponible ahora mismo
+    const ring3=[{key:'mundo',label:'El mundo',icono:ICONOS_HUB_80.mundo}];
+    if(A.some(x=>x.t==='Las casas rivales del país')) ring3.push({key:'rivales',label:'Casas rivales',icono:'<g transform="translate(-14,-14)">'+escudoSVG('rivales'+S.dinastia,28).replace('<svg class="cara"','<svg')+'</g>'});
+    if(A.some(x=>/^(Entrar en política|Gestionar carrera política|Gobernar el país|Gobernar la alcaldía|Gobernar la gobernación)/.test(x.t))) ring3.push({key:'politica',label:'Política',icono:ICONOS_HUB_80.politica});
+    if(A.some(x=>x.t==='Tu imperio mediático')) ring3.push({key:'medios',label:'Imperio mediático',icono:ICONOS_HUB_80.medios});
+    const paso=360/ring3.length;
+    ring3.forEach((n,i)=>{ P.push(nodoHub80(girar80(r3,i*paso-90),22,n.icono,n.label,n.key,false)); });
+    return '<div class="seccion"><h3>El mapa de la casa<em>toca un planeta para ir ahí</em></h3>'
+      +'<div style="background:radial-gradient(ellipse at center,rgba(138,109,46,.08),rgba(0,0,0,.22));border:1px solid rgba(138,109,46,.35);border-radius:10px;padding:10px">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto">'+P.join('')+'</svg></div>'
+      +'<div class="apunte" style="margin-top:8px">Las pestañas de abajo siguen funcionando igual; esto es otra puerta a lo mismo.</div></div>';
+  }
+
+  function abrirAccionHub80(key){
+    try{
+      const A=listaAcciones();
+      let a=null;
+      if(key==='rivales') a=A.find(x=>x.t==='Las casas rivales del país');
+      else if(key==='politica') a=A.find(x=>/^(Entrar en política|Gestionar carrera política|Gobernar el país|Gobernar la alcaldía|Gobernar la gobernación)/.test(x.t));
+      else if(key==='medios') a=A.find(x=>x.t==='Tu imperio mediático');
+      if(a){ if(a.dis||(a.mov||0)>S.mov) return; a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1)); render(); }
+    }catch(e){}
+  }
+  function conectarHub80(){
+    document.querySelectorAll('[data-hub]').forEach(el=>{
+      el.onclick=()=>{
+        const key=el.dataset.hub;
+        if(key.indexOf('tab:')===0){ tab=key.slice(4); renderPestanas(); renderLienzo(); try{window.scrollTo({top:0,behavior:quieto?'auto':'smooth'});}catch(e){} }
+        else if(key==='mundo'){ if(typeof window.irAlMapa59==='function') window.irAlMapa59(); }
+        else abrirAccionHub80(key);
+      };
+    });
+  }
+
+  function wrapRenderHub80(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA80_RENDER) return;
+    window.renderLienzo=function(){
+      const ret=old.apply(this,arguments);
+      try{
+        if(tab==='mesa'){
+          const host=document.querySelector('#lienzoJuego');
+          if(host){
+            const previo=host.querySelector('.hub80'); if(previo) previo.remove();
+            const html=hubCasasSVG80();
+            host.insertAdjacentHTML('afterbegin','<div class="hub80">'+html+'</div>');
+            conectarHub80();
+          }
+        }
+      }catch(e){}
+      return ret;
+    };
+    window.__SA80_RENDER=true;
+  }
+  function init80(){ wrapRenderHub80(); }
+  setTimeout(init80,40);
+  setTimeout(init80,220);
+  setTimeout(init80,650);
+  window.__SA80={version:V80};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v81 · PERFIL AUTÓNOMO POR COMPAÑÍA, Y MÉTODOS DE PRODUCCIÓN (AL ESTILO
+   VICTORIA III)
+   Hasta ahora, con varias compañías en el grupo (companias()/S.grupo),
+   la única forma de decidir algo para una de ellas era "sentarte" en
+   ella (sentarseEn) y mirar la pestaña Negocios genérica — no había una
+   ficha propia por compañía. Esta entrega agrega dos cosas que se piden
+   juntas porque se apoyan la una en la otra:
+   1) Un perfil autónomo por compañía: una tarjeta con escudo propio por
+      cada una en "Mis compañías", y una ficha de gestión dedicada que
+      reúne sus números, su cadena de producción (v79) y sus acciones de
+      expansión — sin inventar ninguna mecánica de expansión nueva, solo
+      reuniendo en un solo lugar las que ya existían sueltas en la
+      pestaña Negocios (buscadas por título en listaAcciones(), mismo
+      patrón que el mapa orbital de v80).
+   2) Métodos de producción: una "mejora" que se elige por compañía y que
+      cambia cómo rinde cada año (eficiencia, marca, empleados) — el
+      mismo tipo de decisión persistente que en Victoria III define cómo
+      opera un edificio, con métodos más avanzados disponibles solo a
+      partir de cierta década.
+   ========================================================================== */
+(function(){
+  const V81='v81';
+
+  const METODOS_PRODUCCION_81=[
+    {id:'artesanal',n:'Producción artesanal',anio:0,d:'Mano de obra intensiva y casi nada que instalar. Calidad variable, pero no hay inversión que recuperar.',costo:()=>0,eficienciaTick:-.3,marcaTick:.25,empleadosAnual:1.01},
+    {id:'estandar',n:'Línea estándar',anio:1900,d:'Procesos definidos y maquinaria básica: el punto medio de toda la vida.',costo:e=>Math.max(30,e.ingresos*.10),eficienciaTick:.15,marcaTick:0,empleadosAnual:1.0},
+    {id:'semiauto',n:'Semiautomatizada',anio:1950,d:'Maquinaria que reemplaza parte de la mano de obra. Sube la eficiencia, baja el empleo relativo.',costo:e=>Math.max(60,e.ingresos*.25),eficienciaTick:.5,marcaTick:-.1,empleadosAnual:.985},
+    {id:'automatizada',n:'Automatizada',anio:1990,d:'Líneas automáticas y control de calidad centralizado. Cara de instalar, barata de operar después.',costo:e=>Math.max(120,e.ingresos*.45),eficienciaTick:.9,marcaTick:0,empleadosAnual:.965},
+    {id:'inteligente',n:'Producción inteligente (datos y IA)',anio:2010,d:'Sensores, datos en tiempo real y mantenimiento predictivo. El tope de la eficiencia.',costo:e=>Math.max(220,e.ingresos*.75),eficienciaTick:1.3,marcaTick:.15,empleadosAnual:.95}
+  ];
+  function metodoDe81(e){ return METODOS_PRODUCCION_81.find(m=>m.id===(e.metodoProduccion||'artesanal'))||METODOS_PRODUCCION_81[0]; }
+  function metodosDisponibles81(){ return METODOS_PRODUCCION_81.filter(m=>m.anio<=S.anio); }
+
+  function wrapCorrerEmpresaMetodo81(){
+    const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA81_EMPRESA) return;
+    window.correrEmpresa=function(res,cual){
+      const e=cual||S.emp;
+      const ret=old.apply(this,arguments);
+      try{
+        if(e){
+          const m=metodoDe81(e);
+          e.eficiencia=clamp(e.eficiencia+m.eficienciaTick,0,100);
+          e.marca=clamp(e.marca+m.marcaTick,0,100);
+          if(isFinite(e.empleados)) e.empleados=Math.max(1,Math.round(e.empleados*m.empleadosAnual));
+        }
+      }catch(err){}
+      return ret;
+    };
+    window.__SA81_EMPRESA=true;
+  }
+
+  function abrirAccionDeCompania81(e,titulo){
+    try{
+      sentarseEn(companias().indexOf(e));
+      const A=listaAcciones();
+      const a=A.find(x=>x.t===titulo);
+      if(!a) return false;
+      if(a.dis||(a.mov||0)>S.mov) return false;
+      a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
+      return true;
+    }catch(err){ return false; }
+  }
+
+  function escenaMetodoProduccion81(e){
+    const actual=metodoDe81(e);
+    escena({rubro:'Perfil de compañía',titulo:'Método de producción de '+esc(e.nombre),ancho:true,
+      cuerpo:'Hoy opera con <b>'+esc(actual.n)+'</b>. Cambiar de método es una decisión de largo plazo: se nota poco a poco, año tras año, no de un día para otro.',
+      opciones:metodosDisponibles81().map(m=>{
+        const costo=m.costo(e);
+        return {t:m.n+(m.id===actual.id?' (actual)':''),cat:'compania',d:m.d+(costo>0?' Cuesta '+fmt(costo)+' de la caja de la compañía.':' Sin costo de instalación.'),
+          dis:m.id===actual.id?'Ya es el método actual':(e.caja<costo?'No hay caja suficiente en '+e.nombre:null),cerrar:false,
+          run:()=>{
+            e.caja-=costo; e.metodoProduccion=m.id;
+            log('<b>'+esc(e.nombre)+'</b> pasó a '+esc(m.n.toLowerCase())+'.','hito');
+            S.mov--; cerrarModal(); render();
+          }};
+      }).concat([{t:'Dejarlo como está',cat:'legado',cerrar:false,run:()=>{}}]),
+      cerrable:true});
+  }
+
+  function escenaPerfilCompania81(e){
+    const s=sectorDe(e), m=metodoDe81(e);
+    const escudo=escudoSVG(e.nombre,56).replace('<svg class="cara"','<svg');
+    const expansiones=[
+      {t:'Expandirte a otra región',cond:true},
+      {t:'Construir una planta nueva',cond:true},
+      {t:'Adquirir un competidor',cond:valuar(e)>4000},
+      {t:'Abrir filial en el exterior',cond:true}
+    ];
+    const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
+    const opciones=[];
+    opciones.push({t:'Cambiar método de producción',cat:'compania',d:'Método actual: '+esc(m.n)+'.',cerrar:false,run:()=>escenaMetodoProduccion81(e)});
+    if(e.cadenaCon) opciones.push({t:'Ver su cadena de producción',cat:'compania',d:'Vinculada con '+esc(e.cadenaCon)+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),cerrar:false,run:()=>{ sentarseEn(companias().indexOf(e)); ACC=listaAcciones(); const a=ACC.find(x=>x.t==='Cadena de producción'); if(a) a.run(); }});
+    expansiones.forEach(x=>{
+      if(!x.cond) return;
+      const disp=ACC_e.find(a=>a.t===x.t);
+      if(!disp) return;
+      opciones.push({t:x.t,cat:'compania',d:disp.d,dis:disp.dis,cerrar:false,run:()=>{
+        const abreOtraEscena=(x.t==='Abrir filial en el exterior');
+        abrirAccionDeCompania81(e,x.t);
+        if(!abreOtraEscena){ cerrarModal(); render(); }
+      }});
+    });
+    opciones.push({t:'Más decisiones para '+esc(e.nombre),cat:'compania',cerrar:false,run:()=>{ sentarseEn(companias().indexOf(e)); tab='compania'; cerrarModal(); renderPestanas(); renderLienzo(); }});
+    opciones.push({t:'Volver a mis compañías',cat:'legado',cerrar:false,run:()=>escenaMisCompanias81()});
+    escena({rubro:'Negocios',titulo:e.nombre,ancho:true,
+      html:'<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">'+escudo
+        +'<div><div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+'</div>'
+        +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>'
+        +medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100),
+      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':''),
+      opciones,cerrable:true});
+  }
+
+  function escenaMisCompanias81(){
+    const todas=companias();
+    if(!todas.length){
+      escena({rubro:'Negocios',titulo:'Mis compañías',ancho:true,cuerpo:'Todavía no fundaste ninguna compañía.',opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
+      return;
+    }
+    escena({rubro:'Negocios',titulo:'Mis compañías',ancho:true,
+      cuerpo:'Cada compañía se gestiona por separado: su propio método de producción, su cadena de proveedores y sus propias decisiones de expansión.',
+      opciones:todas.map(e=>({
+        t:'<span class="op-cara">'+escudoSVG(e.nombre,30)+'<span>'+esc(e.nombre)+'</span></span>',cat:'compania',
+        d:esc(sectorDe(e).n)+' · '+fmt(e.ingresos)+' de ingresos · eficiencia '+Math.round(e.eficiencia)+'/100'+(e.cadenaCon?' · encadenada con '+esc(e.cadenaCon):''),
+        cerrar:false,run:()=>escenaPerfilCompania81(e)
+      })).concat([{t:'Cerrar',cat:'legado',cerrar:false,run:()=>{}}]),
+      cerrable:true});
+  }
+
+  function wrapListaAccionesPerfiles81(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA81_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        if(companias().length>=1&&!A.some(x=>x.t==='Mis compañías')){
+          A.push({t:'Mis compañías',cat:'compania',d:'El perfil autónomo de cada una de tus compañías: método de producción, cadena de proveedores y expansión.',mov:0,modal:true,run:()=>escenaMisCompanias81()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA81_LISTA=true;
+  }
+  function wrapCatDe81(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA81_CATDE) return;
+    window.catDe=function(t){
+      if(/^Mis compañías$|^Cambiar método de producción$/.test(t)) return 'compania';
+      return old.apply(this,arguments);
+    };
+    window.__SA81_CATDE=true;
+  }
+
+  function init81(){ wrapCorrerEmpresaMetodo81(); wrapListaAccionesPerfiles81(); wrapCatDe81(); }
+  setTimeout(init81,40);
+  setTimeout(init81,220);
+  setTimeout(init81,650);
+  window.__SA81={version:V81};
 })();
 </script>
 
