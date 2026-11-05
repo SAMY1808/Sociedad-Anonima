@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v81</div>
+<div class="version-badge" id="versionBadge">v82</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -14710,6 +14710,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         +'Domina el <b>'+pc(cuotaDeRival64(r))+'</b> del sector en el país. '
         +'Patrimonio estimado '+fmt(r.patrimonio)+' · prestigio '+Math.round(r.prestigio)+'/100. '
         +'Relación con tu casa: <b>'+relacionTexto64(r)+'</b>.'+(r.agresiva?' Tiene fama de agresiva en los negocios.':'')
+        +(r.ramaFamiliar?' Esta casa la fundó <b>'+esc(r.deQuien||'un pariente')+'</b> al romper con tu propia familia.':'')
         +(r.generacion>1?' Va en su <b>generación '+r.generacion+'</b>, hoy encabezada por '+esc(r.heredero||'un sucesor')+'.':''),
       opciones:[
         {t:'Ver el reparto del sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(r.sector)},
@@ -15160,8 +15161,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(r.cotiza) opciones.push({t:'Lanzar una toma hostil',cat:'capital',d:'La jugada final: comprarles la compañía por encima del mercado.',cerrar:true,
       run:()=>{ escenaOPA(r); }});
     if(typeof window.opcionPoderPublico71==='function') opciones.push.apply(opciones,window.opcionPoderPublico71(r,g));
+    if(typeof window.opcionGuerraFinanciera82==='function') opciones.push.apply(opciones,window.opcionGuerraFinanciera82(r,g));
     opciones.push({t:'Proponer una tregua',cat:'legado',cerrar:false,run:()=>{
       r.relacionCasa=clamp((r.relacionCasa||10)+20,0,100);
+      if(g.corto&&typeof window.cerrarCortoGuerra82==='function') window.cerrarCortoGuerra82(r,g);
       log('Propusiste una tregua a los <b>'+esc(r.apellido)+'</b>. La guerra terminó sin vencedor claro.','hito');
       hito('Hizo las paces con los '+r.apellido+' tras la guerra empresarial');
       S.guerraEmpresarial=null;
@@ -16535,6 +16538,147 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init81,220);
   setTimeout(init81,650);
   window.__SA81={version:V81};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v82 · INTRIGA DE SUCESIÓN, Y GUERRA FINANCIERA
+   Dos piezas pedidas juntas, las dos sobre infraestructura que ya
+   existía:
+   1) El temperamento "independiente" ya decía desde antes de esta
+      sesión: "Tarde o temprano monta lo suyo, y puede que te compita."
+      Esa promesa nunca se cumplía — como mucho, el heredero fundaba un
+      negocito propio de valor flojo (empresaProfesional/montoLoSuyo),
+      nunca una casa rival de verdad. Ahora, un hijo independiente o
+      ambicioso con vínculo bajo puede romper del todo con la familia y
+      fundar su propia casa en S.rivales, con cuota de mercado, guerra
+      empresarial y todo lo que ya tienen las demás casas.
+   2) Guerra financiera: si la casa con la que estás en guerra
+      empresarial (v70) cotiza en bolsa, puedes abrir una posición en
+      corto contra su acción — una táctica más del frente de guerra,
+      reutilizando precioRival() y el mismo sistema de bolsa que ya
+      existía, sin inventar una bolsa paralela.
+   ========================================================================== */
+(function(){
+  const V82='v82';
+
+  /* ==========================================================================
+     #1 un heredero rompe con la familia y funda su propia casa
+     ========================================================================== */
+  function crearCasaDisidente82(h){
+    const apellidoCasa=h.nombre+' '+S.p.apellido;
+    const patrimonioInicial=Math.max(300,(h.formacion||30)*rnd(8,20));
+    const sector=pick(sectoresDisponibles()).id;
+    S.rivales=S.rivales||[];
+    S.rivales.push({
+      rid:'r'+ri(1000,9999)+'h', apellido:apellidoCasa, prestigio:clamp(30+(h.atr.carisma||5)*4,10,70),
+      patrimonio:patrimonioInicial, sector, compania:apellidoCasa+' S.A.S.',
+      capaz:clamp(h.atr.disciplina||5,1,10), agresiva:(h.temperamento==='ambicioso'),
+      viva:true, ciudad:h.ciudad||S.hogar.ciudad, relacionCasa:12, generacion:1, heredero:null,
+      ramaFamiliar:true, deQuien:h.nombre
+    });
+    S.familia.hijos=S.familia.hijos.filter(x=>x!==h);
+    moverPrestigio(-6,'tu propio hijo rompió con la casa');
+    hito(h.nombre+' rompió con la familia y fundó su propia casa');
+    log('<b>'+esc(h.nombre)+'</b> rompió con la familia y fundó su propia casa: los <b>'+esc(apellidoCasa)+'</b>. Ya no cuenta para la sucesión.','mal');
+  }
+  function instalarEventoRuptura82(){
+    if(window.__SA82_EVENTO) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    EVENTOS_LOCALES.push({
+      p:1.0,
+      c:()=>S.familia&&Array.isArray(S.familia.hijos)&&S.familia.hijos.some(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&['independiente','ambicioso'].includes(h.temperamento)),
+      t:()=>{
+        const cands=S.familia.hijos.filter(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&['independiente','ambicioso'].includes(h.temperamento));
+        if(!cands.length) return null;
+        const h=pick(cands); S._rupturaHijo=h.nombre;
+        return (h.temperamento==='ambicioso'
+          ?'<b>'+esc(h.nombre)+'</b> está harto de esperar su turno y amenaza con irse a competir por su cuenta.'
+          :'<b>'+esc(h.nombre)+'</b> nunca quiso el apellido colgado al cuello, y ahora tiene con qué irse a fundar lo suyo.');
+      },
+      o:[
+        {t:'Intentar reconciliar',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._rupturaHijo); if(!h) return 'Ya no aplicaba.';
+          if(chance(.35+(h.vinculo||0)/200)){ h.vinculo=clamp(h.vinculo+18,0,100); return 'Lograste calmarlo. Por ahora, la familia sigue entera.'; }
+          crearCasaDisidente82(h);
+          return 'No alcanzó: de todas formas rompió con la familia.';
+        }},
+        {t:'Dejarlo ir',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._rupturaHijo); if(!h) return 'Ya no aplicaba.';
+          crearCasaDisidente82(h);
+          return 'Dejaste que se fuera. La casa pierde un heredero y gana una rival.';
+        }}
+      ]
+    });
+    window.__SA82_EVENTO=true;
+  }
+
+  /* ==========================================================================
+     #2 guerra financiera: shortear la acción de una casa en guerra contigo
+     ========================================================================== */
+  function abrirCortoGuerra82(r,g){
+    const monto=Math.max(20,Math.min(S.efectivo*.4,r.patrimonio*.15));
+    const margen=monto*.3;
+    if(S.efectivo<margen) return;
+    S.efectivo-=margen;
+    g.corto={rid:r.rid,monto,margen,precioEntrada:precioRival(r)};
+    log('Abriste una posición en corto contra los <b>'+esc(r.apellido)+'</b> por '+fmt(monto)+', con '+fmt(margen)+' de margen.','hito');
+  }
+  function cerrarCortoGuerra82(r,g){
+    const c=g.corto; if(!c) return;
+    const precioActual=precioRival(r);
+    const cambio=(c.precioEntrada-precioActual)/Math.max(1e-9,c.precioEntrada);
+    const resultado=clamp(c.monto*cambio,-c.margen,c.margen*3);
+    S.efectivo=Math.max(0,S.efectivo+c.margen+resultado);
+    if(resultado>=0) log('Cerraste el corto contra los <b>'+esc(r.apellido)+'</b>: ganaste '+fmt(resultado)+'.','bien');
+    else log('Cerraste el corto contra los <b>'+esc(r.apellido)+'</b>: perdiste '+fmt(-resultado)+'.','mal');
+    g.corto=null;
+  }
+  function opcionGuerraFinanciera82(r,g){
+    if(!r.cotiza) return [];
+    if(!g.corto){
+      const monto=Math.max(20,Math.min(S.efectivo*.4,r.patrimonio*.15)), margen=monto*.3;
+      return [{t:'Abrir una posición en corto',cat:'capital',
+        d:'Apuestas '+fmt(monto)+' a que su acción cae mientras dure la guerra. Pones '+fmt(margen)+' de margen; si su patrimonio sube en vez de caer, lo pierdes.',
+        dis:S.efectivo<margen?'No te alcanza el margen':null,cerrar:false,
+        run:()=>{ abrirCortoGuerra82(r,g); S.mov--; cerrarModal(); render(); }}];
+    }
+    return [{t:'Cerrar la posición en corto',cat:'capital',d:'Liquida la apuesta contra los '+esc(r.apellido)+' al precio de hoy.',cerrar:false,
+      run:()=>{ cerrarCortoGuerra82(r,g); S.mov--; cerrarModal(); render(); }}];
+  }
+  window.opcionGuerraFinanciera82=opcionGuerraFinanciera82;
+  window.cerrarCortoGuerra82=cerrarCortoGuerra82;
+
+  function wrapRevisarResolucion82(){
+    const old=window.revisarResolucionGuerra70; if(typeof old!=='function'||window.__SA82_RESOL) return;
+    window.revisarResolucionGuerra70=function(){
+      try{
+        const g=S.guerraEmpresarial;
+        if(g&&g.corto){
+          const r=(S.rivales||[]).find(x=>x.rid===g.rid);
+          if(r) cerrarCortoGuerra82(r,g);
+          else { S.efectivo+=g.corto.margen; g.corto=null; }
+        }
+      }catch(e){}
+      return old.apply(this,arguments);
+    };
+    window.__SA82_RESOL=true;
+  }
+
+  function wrapCatDe82(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA82_CATDE) return;
+    window.catDe=function(t){
+      if(/^Abrir una posición en corto$|^Cerrar la posición en corto$/.test(t)) return 'capital';
+      return old.apply(this,arguments);
+    };
+    window.__SA82_CATDE=true;
+  }
+
+  function init82(){ instalarEventoRuptura82(); wrapRevisarResolucion82(); wrapCatDe82(); }
+  setTimeout(init82,40);
+  setTimeout(init82,220);
+  setTimeout(init82,650);
+  window.__SA82={version:V82};
 })();
 </script>
 
