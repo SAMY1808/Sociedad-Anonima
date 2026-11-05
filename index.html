@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v78</div>
+<div class="version-badge" id="versionBadge">v79</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2123,7 +2123,46 @@ function abrirCasoPenal(motivo){
 }
 function escenaProcesoPenal(){
   asegurarPenal();const j=jurisdiccionActual(),g=gravedadPenal();
-  if(S.penal.prisionRestante>0){escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones:[{t:'Aceptar la condena',cat:'riesgo',cerrar:false,run:()=>{cerrarModal();render();}}],cerrable:true});return;}
+  if(S.penal.prisionRestante>0){
+    const costoCondiciones=Math.max(10,patrimonio()*.01), costoGestion=Math.max(15,patrimonio()*.015);
+    const opciones=[
+      {t:'Comportarte bien',cat:'riesgo',d:'Buena conducta puede adelantarte un año de condena. No siempre funciona.',cerrar:false,run:()=>{
+        if(chance(.4+(S.p.atr.disciplina-5)/40)){
+          S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1);
+          log('Buena conducta: te adelantaron un año de condena.','bien');
+          if(S.penal.prisionRestante===0){ S.penal.condena=null; log('Terminaste de cumplir la condena.','bien'); }
+        } else { S.p.salud=clamp(S.p.salud-3,0,100); log('Lo intentaste, pero no cambió nada. El encierro pesa.','mal'); }
+        cerrarModal(); render();
+      }},
+      {t:'Pagar por mejores condiciones',cat:'riesgo',d:'Cuesta '+fmt(costoCondiciones)+'. Mejora tu salud y tu ánimo este año; si te descubren, pierdes prestigio.',dis:S.efectivo<costoCondiciones?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoCondiciones; S.p.salud=clamp(S.p.salud+8,0,100); S.p.felicidad=clamp(S.p.felicidad+6,0,100);
+        if(chance(.25)){ moverPrestigio(-5,'se supo que pagaste por privilegios en la cárcel'); log('Te descubrieron pagando por mejores condiciones.','mal'); }
+        else log('Compraste algo de comodidad dentro de la condena.','bien');
+        cerrarModal(); render();
+      }},
+      ...(S.emp?[{t:'Mantener el negocio a distancia',cat:'riesgo',d:'Cuesta '+fmt(costoGestion)+'. Evita que '+esc(S.emp.nombre)+' se resienta mientras no estás este año.',dis:S.efectivo<costoGestion?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoGestion; S.penal.gestionRemota=true;
+        log('Seguiste el negocio desde adentro: '+esc(S.emp.nombre)+' no se resentirá este año.','bien');
+        cerrarModal(); render();
+      }}]:[]),
+      {t:'Intentar fugarte',cat:'riesgo',d:'Apuesta todo. Si sale bien, la condena termina ahora mismo; si sale mal, la gravedad del caso se dispara'+(j.penaCapital?' — y en esta jurisdicción eso puede costarte la vida':'')+'.',cerrar:false,run:()=>{
+        if(chance(.12)){
+          S.penal.prisionRestante=0; S.penal.condena=null; S.penal.fugado=true;
+          moverPrestigio(-6,'se supo que te fugaste');
+          log('Te fugaste. La condena quedó atrás, pero tu nombre ya no es el mismo.','hito');
+        } else {
+          registrarDelito('fuga frustrada',6,'intento de fuga durante la condena');
+          S.penal.prisionRestante+=ri(3,8);
+          if(j.penaCapital&&chance(.15)){ cerrarModal(); morir(); return; }
+          log('La fuga salió mal. Te agregaron años a la condena.','mal');
+        }
+        cerrarModal(); render();
+      }},
+      {t:'Aceptar la condena',cat:'riesgo',cerrar:false,run:()=>{cerrarModal();render();}}
+    ];
+    escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones,cerrable:true});
+    return;
+  }
   if(S.penal.penaMuerte){escena({rubro:'Sentencia',titulo:'Pena capital dictada',ancho:true,cuerpo:'El tribunal de '+esc(j.jurisdiccion)+' dictó pena capital por la gravedad acumulada del caso. Aún existe una etapa final de revisión dentro de la simulación.',opciones:[
     {t:'Apelar la sentencia',cat:'riesgo',cerrar:false,run:()=>{if(chance(.45)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(18,35);S.penal.condena='prisión';log('La apelación cambió la pena capital por una condena de prisión.','bien');}else log('La apelación no cambió la sentencia.','mal');cerrarModal();render();}},
     {t:'Agotar los recursos',cat:'riesgo',cerrar:false,run:()=>{if(chance(.22)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(12,28);S.penal.condena='prisión';log('Un recurso extraordinario evitó la ejecución y dejó una condena de prisión.','bien');cerrarModal();render();}else{cerrarModal();morir();}}}
@@ -16076,6 +16115,137 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init78,220);
   setTimeout(init78,650);
   window.__SA78={version:V78};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v79 · CADENAS DE PRODUCCIÓN ENTRE TUS EMPRESAS, Y UNA CÁRCEL QUE YA NO
+   ES SOLO ESPERAR
+   El juego ya tenía "Integración vertical" (v51), pero esa pieza conecta
+   bienes agrícolas muy específicos entre sí (una viñedo con su
+   vinícola, una finca con su procesadora) — no las compañías reales del
+   grupo empresarial (companias()/S.grupo) que el jugador funda una tras
+   otra desde v57. Esta entrega le da a ESAS compañías una cadena de
+   producción propia: cualquier par de empresas de tu casa se puede
+   encadenar como proveedor→comprador, con un bono permanente para las
+   dos. Además, cumplir condena dejó de ser un solo botón de "aceptar":
+   ahora hay decisiones de verdad mientras estás adentro.
+   ========================================================================== */
+(function(){
+  const V79='v79';
+
+  /* ==========================================================================
+     #1 cadenas de producción entre compañías propias
+     ========================================================================== */
+  function escenaCadenaProduccion79(){
+    const todas=companias();
+    if(todas.length<2){
+      escena({rubro:'Cadena de producción',titulo:'Vincular la producción',ancho:true,
+        cuerpo:'Necesitas al menos dos compañías propias para encadenar su producción.',
+        opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
+      return;
+    }
+    const opciones=[];
+    todas.forEach((a,i)=>{
+      if(a.cadenaCon) return;
+      todas.forEach((b,j)=>{
+        if(j<=i||b.cadenaCon) return;
+        const costo=Math.max(20,(valuar(a)+valuar(b))*.02);
+        opciones.push({t:esc(a.nombre)+' → '+esc(b.nombre),cat:'compania',
+          d:esc(a.nombre)+' ('+sectorDe(a).n+') le vende insumos a '+esc(b.nombre)+' ('+sectorDe(b).n+'). Cuesta '+fmt(costo)+' en integrar procesos.',
+          dis:S.efectivo<costo?'Necesitas al menos '+fmt(costo):null,cerrar:false,
+          run:()=>{
+            S.efectivo-=costo;
+            a.cadenaCon=b.nombre; a.cadenaRol='proveedor';
+            b.cadenaCon=a.nombre; b.cadenaRol='comprador';
+            a.ingresos*=1.04; b.eficiencia=clamp(b.eficiencia+6,0,100);
+            log('Encadenaste <b>'+esc(a.nombre)+'</b> como proveedor de <b>'+esc(b.nombre)+'</b>: el margen de los dos extremos se queda en la casa.','hito');
+            hito('Encadenó '+a.nombre+' con '+b.nombre);
+            S.mov--; cerrarModal(); render();
+          }});
+      });
+    });
+    todas.filter(e=>e.cadenaRol==='proveedor').forEach(e=>{
+      opciones.push({t:'Romper la cadena: '+esc(e.nombre)+' → '+esc(e.cadenaCon),cat:'riesgo',cerrar:false,
+        d:'Deja de venderle insumos a '+esc(e.cadenaCon)+'. Ambas compañías pierden el bono de la cadena.',
+        run:()=>{
+          const otroNombre=e.cadenaCon, otra=todas.find(x=>x.nombre===otroNombre);
+          e.cadenaCon=null; e.cadenaRol=null;
+          if(otra){ otra.cadenaCon=null; otra.cadenaRol=null; }
+          log('Rompiste la cadena de producción entre '+esc(e.nombre)+' y '+esc(otroNombre)+'.','mal');
+          S.mov--; cerrarModal(); render();
+        }});
+    });
+    opciones.push({t:'Dejarlo así',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Cadena de producción',titulo:'Vincular la producción entre tus compañías',ancho:true,
+      cuerpo:'Cuando una de tus empresas le vende a otra, el margen de los dos extremos se queda en la casa: el proveedor gana un comprador fijo, el comprador gana insumos más baratos y confiables.',
+      opciones,cerrable:true});
+  }
+  function wrapListaAccionesCadena79(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA79_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        if(companias().length>=2&&!A.some(x=>x.t==='Cadena de producción')){
+          A.push({t:'Cadena de producción',cat:'compania',d:'Encadena tus propias compañías como proveedor y comprador entre ellas.',mov:1,modal:true,run:()=>escenaCadenaProduccion79()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA79_LISTA=true;
+  }
+  function wrapCorrerEmpresaCadena79(){
+    const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA79_EMPRESA) return;
+    window.correrEmpresa=function(res,cual){
+      const e=cual||S.emp;
+      const ret=old.apply(this,arguments);
+      try{
+        if(e&&e.cadenaCon&&companias().some(x=>x.nombre===e.cadenaCon)){
+          if(e.cadenaRol==='proveedor') e.ingresos=Math.max(1,e.ingresos*1.006);
+          else if(e.cadenaRol==='comprador') e.eficiencia=clamp(e.eficiencia+.3,0,100);
+        }
+      }catch(err){}
+      return ret;
+    };
+    window.__SA79_EMPRESA=true;
+  }
+
+  /* ==========================================================================
+     #2 la cárcel, mientras cumples condena, no se resiente la empresa si pagas
+     ========================================================================== */
+  function wrapPasarAnioCarcel79(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA79_CARCEL) return;
+    window.pasarAnio=function(){
+      const enPrision=!!(S&&S.penal&&S.penal.prisionRestante>0);
+      const gestionRemota=!!(S&&S.penal&&S.penal.gestionRemota);
+      const ret=old.apply(this,arguments);
+      try{
+        if(enPrision&&!gestionRemota&&S.emp){
+          S.emp.ingresos=Math.max(1,S.emp.ingresos*rnd(.97,.995));
+          S.emp.eficiencia=clamp(S.emp.eficiencia-ri(1,3),0,100);
+        }
+        if(S.penal) S.penal.gestionRemota=false;
+      }catch(e){}
+      return ret;
+    };
+    window.__SA79_CARCEL=true;
+  }
+
+  function wrapCatDe79(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA79_CATDE) return;
+    window.catDe=function(t){
+      if(/^Cadena de producción$/.test(t)) return 'compania';
+      if(/^Romper la cadena:/.test(t)) return 'riesgo';
+      return old.apply(this,arguments);
+    };
+    window.__SA79_CATDE=true;
+  }
+
+  function init79(){ wrapListaAccionesCadena79(); wrapCorrerEmpresaCadena79(); wrapPasarAnioCarcel79(); wrapCatDe79(); }
+  setTimeout(init79,40);
+  setTimeout(init79,220);
+  setTimeout(init79,650);
+  window.__SA79={version:V79};
 })();
 </script>
 
