@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v75</div>
+<div class="version-badge" id="versionBadge">v76</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -15830,6 +15830,88 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init75,220);
   setTimeout(init75,650);
   window.__SA75={version:V75};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v76 · TABLERO DE LA FAMILIA — PROTOTIPO
+   La pestaña "Familia" ya dejaba tocar a cada persona (pareja, hijos,
+   nietos, parientes) para abrirle su propia pantalla de decisiones
+   (abrirPersona + data-per, código ya existente): el juego YA tenía la
+   mecánica de "interactuar con individuos" que se le pedía a este
+   prototipo. Lo que le faltaba era la presentación: la familia se veía
+   como una lista vertical de fichas de texto con un avatar chico, no
+   como un tablero de retratos que se pueda recorrer de un vistazo, al
+   estilo de la corte de Crusader Kings. Esta entrega es exactamente eso:
+   un tablero nuevo, arriba de la pestaña Familia, con retratos grandes en
+   cuadrícula y el vínculo con cada persona como color del marco — sin
+   tocar ni la lista detallada de abajo ni ninguna de las pantallas de
+   interacción que ya existían.
+   ========================================================================== */
+(function(){
+  const V76='v76';
+
+  function colorRelacion76(v){
+    if(!isFinite(v)) return '#8A6D2E';
+    if(v>=68) return '#4F8F5B';
+    if(v<=32) return '#A6453C';
+    return '#8A6D2E';
+  }
+  function tarjetaTablero76(avatarHtml,nombre,rol,dataPer,color){
+    return '<button type="button" data-per="'+dataPer+'" class="clicable" '
+      +'style="display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(0,0,0,.25);'
+      +'border:1px solid '+color+';border-radius:10px;padding:10px 6px;cursor:pointer;width:100%;font-family:inherit;color:inherit">'
+      +'<div style="border-radius:50%;overflow:hidden;border:2px solid '+color+';line-height:0">'+avatarHtml+'</div>'
+      +'<div style="font-size:12.5px;font-weight:600;text-align:center;line-height:1.25">'+esc(nombre)+'</div>'
+      +'<div style="font-size:10.5px;color:#C9BBA0;text-align:center;line-height:1.25">'+esc(rol)+'</div>'
+      +'</button>';
+  }
+  function tableroFamiliar76(){
+    const pareja=S.familia&&S.familia.pareja, hijos=(S.familia&&S.familia.hijos)||[];
+    const par=parientesVivos().slice().sort((a,b)=>b.afecto-a.afecto).slice(0,8);
+    let tarjetas='';
+    if(pareja){
+      tarjetas+=tarjetaTablero76(avatarSVG(pareja.nombre,{sexo:pareja.sexo,edad:pareja.edad,tam:60}),
+        pareja.nombre,(pareja.casados?'Cónyuge':'Pareja')+' · '+pareja.edad+' años','pareja::x',colorRelacion76(pareja.paciencia));
+    }
+    hijos.forEach(hh=>{
+      tarjetas+=tarjetaTablero76(avatarSVG(hh.nombre+' '+apellidoCompletoDeHijo(hh),{sexo:hh.sexo,edad:hh.edad,tam:60}),
+        hh.nombre,etiquetaHijo(hh).charAt(0).toUpperCase()+etiquetaHijo(hh).slice(1)+' · '+hh.edad+' años',
+        'hijo::'+esc(hh.nombre),colorRelacion76(hh.vinculo));
+    });
+    par.forEach(pa=>{
+      tarjetas+=tarjetaTablero76(avatarSVG(nombrePariente(pa),{sexo:pa.sexo,edad:pa.edad,tam:60}),
+        nombrePariente(pa),esc(pa.rel)+' · '+pa.edad+' años','pariente::'+esc(pa.pid),colorRelacion76(pa.afecto));
+    });
+    if(!tarjetas) return '';
+    return '<div class="seccion"><h3>Tablero de la familia<em>toca a alguien para interactuar</em></h3>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;margin-top:10px">'+tarjetas+'</div>'
+      +'<div class="apunte" style="margin-top:8px">El color del marco es el vínculo contigo: verde cercano, dorado neutral, rojo tenso.</div>'
+      +'</div>';
+  }
+  function wrapRenderTablero76(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA76_RENDER) return;
+    window.renderLienzo=function(){
+      const ret=old.apply(this,arguments);
+      try{
+        if(tab==='familia'){
+          const host=document.querySelector('#lienzoJuego .wrap');
+          if(host){
+            const previo=host.querySelector('.tablero76'); if(previo) previo.remove();
+            const html=tableroFamiliar76();
+            if(html){ host.insertAdjacentHTML('afterbegin','<div class="tablero76">'+html+'</div>'); conectarCartas(); }
+          }
+        }
+      }catch(e){}
+      return ret;
+    };
+    window.__SA76_RENDER=true;
+  }
+  function init76(){ wrapRenderTablero76(); }
+  setTimeout(init76,40);
+  setTimeout(init76,220);
+  setTimeout(init76,650);
+  window.__SA76={version:V76};
 })();
 </script>
 
