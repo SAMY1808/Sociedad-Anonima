@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v82</div>
+<div class="version-badge" id="versionBadge">v83</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -16432,18 +16432,6 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.__SA81_EMPRESA=true;
   }
 
-  function abrirAccionDeCompania81(e,titulo){
-    try{
-      sentarseEn(companias().indexOf(e));
-      const A=listaAcciones();
-      const a=A.find(x=>x.t===titulo);
-      if(!a) return false;
-      if(a.dis||(a.mov||0)>S.mov) return false;
-      a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
-      return true;
-    }catch(err){ return false; }
-  }
-
   function escenaMetodoProduccion81(e){
     const actual=metodoDe81(e);
     escena({rubro:'Perfil de compañía',titulo:'Método de producción de '+esc(e.nombre),ancho:true,
@@ -16461,37 +16449,50 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       cerrable:true});
   }
 
+  const DECISIONES_COMPANIA_83=[
+    'Lanzar un producto','Invertir en producto y tecnología','Campaña de marca',
+    'Contratar talento sénior','Recortar costos','Renovar la maquinaria',
+    'Expandirte a otra región','Construir una planta nueva','Adquirir un competidor','Abrir filial en el exterior',
+    'Firmar un contrato de exportación','Cadena de producción',
+    'Aportar capital personal a la compañía','Asignarte un salario como presidente',
+    'Dividendo extraordinario','Split de acciones',
+    'Marcas','Fusiones y adquisiciones','Integración vertical',
+    'Mejorar la sede corporativa','Trasladar la sede corporativa',
+    'Ir al mapa de la compañía','Cuota de mercado de tu sector'
+  ];
+  function ejecutarAccionCompania83(e,titulo){
+    const idx=companias().indexOf(e);
+    if(idx<0) return false;
+    sentarseEn(idx);
+    const A=listaAcciones();
+    const a=A.find(x=>x.t===titulo);
+    if(!a||a.dis||(a.mov||0)>S.mov) return false;
+    if(a.modal){ a.run(); return true; }
+    a.run();
+    S.mov=Math.max(0,S.mov-(a.mov||1));
+    escenaPerfilCompania81(e);
+    return true;
+  }
   function escenaPerfilCompania81(e){
     const s=sectorDe(e), m=metodoDe81(e);
     const escudo=escudoSVG(e.nombre,56).replace('<svg class="cara"','<svg');
-    const expansiones=[
-      {t:'Expandirte a otra región',cond:true},
-      {t:'Construir una planta nueva',cond:true},
-      {t:'Adquirir un competidor',cond:valuar(e)>4000},
-      {t:'Abrir filial en el exterior',cond:true}
-    ];
     const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
     const opciones=[];
     opciones.push({t:'Cambiar método de producción',cat:'compania',d:'Método actual: '+esc(m.n)+'.',cerrar:false,run:()=>escenaMetodoProduccion81(e)});
-    if(e.cadenaCon) opciones.push({t:'Ver su cadena de producción',cat:'compania',d:'Vinculada con '+esc(e.cadenaCon)+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),cerrar:false,run:()=>{ sentarseEn(companias().indexOf(e)); ACC=listaAcciones(); const a=ACC.find(x=>x.t==='Cadena de producción'); if(a) a.run(); }});
-    expansiones.forEach(x=>{
-      if(!x.cond) return;
-      const disp=ACC_e.find(a=>a.t===x.t);
+    if(e.cadenaCon) opciones.push({t:'Ver su cadena de producción',cat:'compania',d:'Vinculada con '+esc(e.cadenaCon)+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),cerrar:false,run:()=>ejecutarAccionCompania83(e,'Cadena de producción')});
+    DECISIONES_COMPANIA_83.forEach(titulo=>{
+      if(titulo==='Cadena de producción'&&e.cadenaCon) return;
+      const disp=ACC_e.find(a=>a.t===titulo);
       if(!disp) return;
-      opciones.push({t:x.t,cat:'compania',d:disp.d,dis:disp.dis,cerrar:false,run:()=>{
-        const abreOtraEscena=(x.t==='Abrir filial en el exterior');
-        abrirAccionDeCompania81(e,x.t);
-        if(!abreOtraEscena){ cerrarModal(); render(); }
-      }});
+      opciones.push({t:titulo,cat:'compania',d:disp.d,dis:disp.dis,cerrar:false,run:()=>ejecutarAccionCompania83(e,titulo)});
     });
-    opciones.push({t:'Más decisiones para '+esc(e.nombre),cat:'compania',cerrar:false,run:()=>{ sentarseEn(companias().indexOf(e)); tab='compania'; cerrarModal(); renderPestanas(); renderLienzo(); }});
     opciones.push({t:'Volver a mis compañías',cat:'legado',cerrar:false,run:()=>escenaMisCompanias81()});
     escena({rubro:'Negocios',titulo:e.nombre,ancho:true,
       html:'<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">'+escudo
         +'<div><div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+'</div>'
         +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>'
         +medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100),
-      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':''),
+      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+' Todas sus decisiones se toman desde aquí, sin salir de su perfil.',
       opciones,cerrable:true});
   }
 
