@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v77</div>
+<div class="version-badge" id="versionBadge">v79</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -628,7 +628,10 @@ const SECTORES=[
   {id:'retail',n:'Comercio y retail',g:.045,m:.075,mult:6.4,vol:.11,cap:1279,d:'Volumen puro. Un punto de margen es una fortuna.'},
   {id:'medios',n:'Medios y entretenimiento',g:.062,m:.14,mult:9.2,vol:.30,cap:566,d:'Influencia política de regalo, resultados impredecibles.'},
   {id:'mineria',n:'Minería y materiales',g:.036,m:.20,mult:5.5,vol:.32,cap:4592,d:'Ciclos brutales, conflicto social, caja cuando sube el ciclo.'},
-  {id:'juridico',n:'Servicios jurídicos',g:.045,m:.22,mult:8.8,vol:.12,cap:360,d:'Bufetes y asesoría profesional. El activo principal es el conocimiento y la reputación.'}
+  {id:'juridico',n:'Servicios jurídicos',g:.045,m:.22,mult:8.8,vol:.12,cap:360,d:'Bufetes y asesoría profesional. El activo principal es el conocimiento y la reputación.'},
+  {id:'seguros',n:'Seguros y reaseguro',g:.05,m:.19,mult:9.5,vol:.10,cap:1900,d:'Pólizas y manejo de riesgo ajeno. Aburrido y rentable, hasta que llega el desastre que nadie calculó.'},
+  {id:'turismo',n:'Turismo y hotelería',g:.06,m:.14,mult:7.8,vol:.21,cap:720,d:'Hoteles, agencias y experiencias. Vive de la confianza del país y se cae rápido con cualquier crisis.'},
+  {id:'juegos',n:'Videojuegos y entretenimiento digital',g:.15,m:.17,mult:13,vol:.26,cap:420,d:'Streaming y videojuegos. Todo depende de si algo pega de verdad, y casi nunca se sabe antes.'}
 ];
 
 const ARQUETIPOS=[
@@ -1161,17 +1164,17 @@ const EPOCAS=[
    fel:0, redes:-6, reto:'Lento, duro y sin atajos. Cuatro generaciones para llegar a algo.'},
   {id:'1970', anio:1970, n:'1970 · la industria protegida',
    d:'Aranceles altos, industria nacional consentida y una clase media que empieza a comprar. Fabricar en Colombia nunca fue tan cómodo.',
-   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia'],
+   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia','seguros'],
    macro:{inflacion:.14,tasa:.18,usd:18,ciclo:.06,colcap:180},
    fel:0, redes:-3, reto:'El proteccionismo te regala márgenes, pero en 1991 se acaba de golpe.'},
   {id:'1990', anio:1990, n:'1990 · la apertura',
    d:'Se abre el país a la competencia de afuera y medio empresariado no está listo. El que se moderniza crece; el que no, cierra.',
-   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia','salud'],
+   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia','salud','seguros','turismo'],
    macro:{inflacion:.29,tasa:.36,usd:510,ciclo:.02,colcap:420},
    fel:-2, redes:0, reto:'Apertura, bonanza y luego la crisis del 99. Tres sacudidas en diez años.'},
   {id:'2010', anio:2010, n:'2010 · el auge minero-energético',
    d:'El petróleo alto llena de dólares al país, la construcción no para y los grupos empresariales salen a comprar afuera.',
-   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia','salud','tech'],
+   sectores:['moda','alimentos','agro','construccion','retail','logistica','medios','mineria','financiero','energia','salud','tech','seguros','turismo','juegos'],
    macro:{inflacion:.032,tasa:.045,usd:1900,ciclo:.09,colcap:1500},
    fel:1, redes:3, reto:'Plata fácil mientras dure el barril. En 2014 se acaba la fiesta.'},
   {id:'2026', anio:2026, n:'2026 · hoy',
@@ -2120,7 +2123,46 @@ function abrirCasoPenal(motivo){
 }
 function escenaProcesoPenal(){
   asegurarPenal();const j=jurisdiccionActual(),g=gravedadPenal();
-  if(S.penal.prisionRestante>0){escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones:[{t:'Aceptar la condena',cat:'riesgo',cerrar:false,run:()=>{cerrarModal();render();}}],cerrable:true});return;}
+  if(S.penal.prisionRestante>0){
+    const costoCondiciones=Math.max(10,patrimonio()*.01), costoGestion=Math.max(15,patrimonio()*.015);
+    const opciones=[
+      {t:'Comportarte bien',cat:'riesgo',d:'Buena conducta puede adelantarte un año de condena. No siempre funciona.',cerrar:false,run:()=>{
+        if(chance(.4+(S.p.atr.disciplina-5)/40)){
+          S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1);
+          log('Buena conducta: te adelantaron un año de condena.','bien');
+          if(S.penal.prisionRestante===0){ S.penal.condena=null; log('Terminaste de cumplir la condena.','bien'); }
+        } else { S.p.salud=clamp(S.p.salud-3,0,100); log('Lo intentaste, pero no cambió nada. El encierro pesa.','mal'); }
+        cerrarModal(); render();
+      }},
+      {t:'Pagar por mejores condiciones',cat:'riesgo',d:'Cuesta '+fmt(costoCondiciones)+'. Mejora tu salud y tu ánimo este año; si te descubren, pierdes prestigio.',dis:S.efectivo<costoCondiciones?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoCondiciones; S.p.salud=clamp(S.p.salud+8,0,100); S.p.felicidad=clamp(S.p.felicidad+6,0,100);
+        if(chance(.25)){ moverPrestigio(-5,'se supo que pagaste por privilegios en la cárcel'); log('Te descubrieron pagando por mejores condiciones.','mal'); }
+        else log('Compraste algo de comodidad dentro de la condena.','bien');
+        cerrarModal(); render();
+      }},
+      ...(S.emp?[{t:'Mantener el negocio a distancia',cat:'riesgo',d:'Cuesta '+fmt(costoGestion)+'. Evita que '+esc(S.emp.nombre)+' se resienta mientras no estás este año.',dis:S.efectivo<costoGestion?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoGestion; S.penal.gestionRemota=true;
+        log('Seguiste el negocio desde adentro: '+esc(S.emp.nombre)+' no se resentirá este año.','bien');
+        cerrarModal(); render();
+      }}]:[]),
+      {t:'Intentar fugarte',cat:'riesgo',d:'Apuesta todo. Si sale bien, la condena termina ahora mismo; si sale mal, la gravedad del caso se dispara'+(j.penaCapital?' — y en esta jurisdicción eso puede costarte la vida':'')+'.',cerrar:false,run:()=>{
+        if(chance(.12)){
+          S.penal.prisionRestante=0; S.penal.condena=null; S.penal.fugado=true;
+          moverPrestigio(-6,'se supo que te fugaste');
+          log('Te fugaste. La condena quedó atrás, pero tu nombre ya no es el mismo.','hito');
+        } else {
+          registrarDelito('fuga frustrada',6,'intento de fuga durante la condena');
+          S.penal.prisionRestante+=ri(3,8);
+          if(j.penaCapital&&chance(.15)){ cerrarModal(); morir(); return; }
+          log('La fuga salió mal. Te agregaron años a la condena.','mal');
+        }
+        cerrarModal(); render();
+      }},
+      {t:'Aceptar la condena',cat:'riesgo',cerrar:false,run:()=>{cerrarModal();render();}}
+    ];
+    escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones,cerrable:true});
+    return;
+  }
   if(S.penal.penaMuerte){escena({rubro:'Sentencia',titulo:'Pena capital dictada',ancho:true,cuerpo:'El tribunal de '+esc(j.jurisdiccion)+' dictó pena capital por la gravedad acumulada del caso. Aún existe una etapa final de revisión dentro de la simulación.',opciones:[
     {t:'Apelar la sentencia',cat:'riesgo',cerrar:false,run:()=>{if(chance(.45)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(18,35);S.penal.condena='prisión';log('La apelación cambió la pena capital por una condena de prisión.','bien');}else log('La apelación no cambió la sentencia.','mal');cerrarModal();render();}},
     {t:'Agotar los recursos',cat:'riesgo',cerrar:false,run:()=>{if(chance(.22)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(12,28);S.penal.condena='prisión';log('Un recurso extraordinario evitó la ejecución y dejó una condena de prisión.','bien');cerrarModal();render();}else{cerrarModal();morir();}}}
@@ -3026,12 +3068,14 @@ function avatarSVG(nombre,op){
 function escudoSVG(apellido,tam){
   const d=dadoDe(semillaDe(apellido));
   const col=ROPAS[d(ROPAS.length)];
-  const fig=d(4), t=tam||36;
+  const fig=d(6), t=tam||36;
   let dentro='';
   if(fig===0) dentro='<path d="M32 18l4.2 8.6 9.4 1.3-6.8 6.6L40.4 44 32 39.5 23.6 44l1.6-9.5-6.8-6.6 9.4-1.3z" fill="#E9C25C"/>';
   else if(fig===1) dentro='<path d="M19 40c4-13 8-18 13-18s9 5 13 18z" fill="#E9C25C"/>';
   else if(fig===2) dentro='<circle cx="32" cy="31" r="9" fill="none" stroke="#E9C25C" stroke-width="3"/>';
-  else dentro='<path d="M21 21h22v5H21zM21 29h22v5H21zM21 37h22v5H21z" fill="#E9C25C" opacity=".85"/>';
+  else if(fig===3) dentro='<path d="M21 21h22v5H21zM21 29h22v5H21zM21 37h22v5H21z" fill="#E9C25C" opacity=".85"/>';
+  else if(fig===4) dentro='<path d="M14 15l18 13 18-13M14 29l18 13 18-13" stroke="#E9C25C" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+  else dentro='<path d="M32 15c-5 0-8 4-8 8 0 3 2 5 4 6-3 1-6 4-6 8h20c0-4-3-7-6-8 2-1 4-3 4-6 0-4-3-8-8-8z" fill="#E9C25C"/><rect x="29.5" y="37" width="5" height="7" fill="#E9C25C"/>';
   return '<svg class="cara" viewBox="0 0 64 64" width="'+t+'" height="'+t+'" aria-hidden="true">'
     +'<path d="M10 9h44v27c0 11-11 18-22 22-11-4-22-11-22-22z" fill="'+col+'" stroke="#C9A33F" stroke-width="1.6"/>'
     +dentro+'</svg>';
@@ -5119,6 +5163,21 @@ const PRODUCTOS_SECTOR={
     {id:'corporativo',n:'Asesoría corporativa',d:'Clientes empresariales, contratos y gobierno corporativo.',min:30,inv:.035,ventas:.62,margen:.36,crec:.09,marca:5,riesgo:.04},
     {id:'litigios',n:'Práctica de litigios',d:'Casos complejos. Buen margen, resultados inciertos.',min:45,inv:.045,ventas:.58,margen:.40,crec:.07,marca:6,riesgo:.08},
     {id:'ma',n:'Fusiones y adquisiciones',d:'Mandatos grandes y ocasionales. Mucho conocimiento, mucha responsabilidad.',min:60,inv:.055,ventas:.70,margen:.44,crec:.12,marca:8,riesgo:.10}
+  ],
+  seguros:[
+    {id:'vida',n:'Seguros de vida',d:'Pólizas individuales de largo plazo. Crecimiento lento, cartera fiel.',min:50,inv:.05,ventas:.6,margen:.22,crec:.05,marca:4,riesgo:.03},
+    {id:'generales',n:'Seguros generales',d:'Autos, hogar y empresas. Más rotación de clientes, más competencia.',min:40,inv:.045,ventas:.85,margen:.16,crec:.07,marca:5,riesgo:.06},
+    {id:'reaseguro',n:'Reaseguro corporativo',d:'Cubres el riesgo de otras aseguradoras: pocos clientes, tickets enormes, un desastre te puede costar caro.',min:120,inv:.09,ventas:.4,margen:.28,crec:.06,marca:3,riesgo:.17}
+  ],
+  turismo:[
+    {id:'hotel',n:'Cadena de hoteles boutique',d:'Pocas habitaciones, tarifas altas y mucho cuidado en el detalle.',min:90,inv:.08,ventas:.55,margen:.2,crec:.07,marca:8,riesgo:.09},
+    {id:'agencia',n:'Agencia de viajes y experiencias',d:'Paquetes turísticos y tours. Barato de montar, fácil de copiar.',min:30,inv:.04,ventas:.9,margen:.13,crec:.08,marca:4,riesgo:.07},
+    {id:'resort',n:'Resort todo incluido',d:'Apuesta grande a una sola propiedad. Si pega es una máquina de caja; si no, un hueco fijo.',min:160,inv:.1,ventas:.5,margen:.19,crec:.09,marca:9,riesgo:.15}
+  ],
+  juegos:[
+    {id:'movil',n:'Estudio de juegos móviles',d:'Títulos gratuitos con compras dentro de la app. Barato de lanzar, difícil de pegar.',min:35,inv:.05,ventas:.85,margen:.22,crec:.14,marca:5,riesgo:.19},
+    {id:'aaa',n:'Título premium para consolas y PC',d:'Una apuesta grande a un solo juego. Si pega es una mina de oro; si no, un hueco.',min:90,inv:.11,ventas:.4,margen:.32,crec:.17,marca:9,riesgo:.27},
+    {id:'esports',n:'Liga de esports propia',d:'Torneos, patrocinios y audiencia joven. Construye marca más de lo que deja en caja.',min:50,inv:.07,ventas:.55,margen:.14,crec:.13,marca:9,riesgo:.16}
   ]
 };
 
@@ -5724,6 +5783,21 @@ function listaAcciones(){
     A.push({t:'Asumir una operación ilegal',cat:'riesgo',d:'Una decisión extrema que puede producir dinero o poder, pero crea riesgo penal.',mov:1,modal:true,dis:(S.penal&&S.penal.prisionRestante>0)?'No puedes hacerlo mientras cumples condena.':null,run:()=>escena({rubro:'Riesgo penal',titulo:'Una decisión que puede salir muy mal',ancho:true,cuerpo:'Una persona te propone participar en una operación ilícita. El juego no detalla métodos ni instrucciones: solo modela las consecuencias.',opciones:[
       {t:'Rechazar',cat:'legado',d:'Te vas sin ganar ni perder dinero.',run:()=>{S.mov--;log('Rechazaste una operación ilegal.','bien');}},
       {t:'Aceptar por dinero',cat:'riesgo',d:'Ganas efectivo y registras un fraude económico de gravedad media.',run:()=>{const x=Math.max(80,patrimonio()*.035);S.efectivo+=x;registrarDelito('fraude económico',3,'operación ilegal con beneficio patrimonial');S.p.escandalos++;log('Aceptaste una operación ilegal por '+fmt(x)+'. El riesgo penal quedó registrado.','mal');S.mov--;if(chance(.28+(S.penal.riesgo||0)/300))abrirCasoPenal('fraude económico');}},
+      {t:'Montar un esquema piramidal',cat:'riesgo',d:'Prometes rendimientos que no existen y cobras de los nuevos para pagarle a los de antes. Da plata rápido; tarde o temprano se cae.',run:()=>{
+        const x=Math.max(120,patrimonio()*.06); S.efectivo+=x;
+        registrarDelito('esquema piramidal',6,'captación ilegal de dinero con promesa de rendimientos');
+        S.p.escandalos++; moverPrestigio(-8,'empezó a sonar lo de la pirámide');
+        log('Montaste un esquema piramidal y recogiste '+fmt(x)+' mientras duró. El rumor ya empezó a correr.','mal');
+        S.mov--; if(chance(.35+(S.penal.riesgo||0)/280)) abrirCasoPenal('esquema piramidal');
+      }},
+      ...(S.emp&&(S.emp.holders||[]).some(h=>h.id!=='tu')?[{t:'Estafar a los socios de tu empresa',cat:'riesgo',d:'Desvías recursos de '+esc(S.emp.nombre)+' en perjuicio de los demás accionistas. La junta, si se entera, no lo va a olvidar.',run:()=>{
+        const x=Math.max(60,valuar(S.emp)*.04); S.efectivo+=x; S.emp.caja=Math.max(0,S.emp.caja-x*.6);
+        registrarDelito('fraude societario',5,'desvío de recursos en perjuicio de los demás accionistas');
+        S.p.escandalos++; moverPrestigio(-10,'corrió el rumor de que les sacaste plata a tus socios');
+        (S.junta||[]).forEach(j=>j.lealtad=clamp(j.lealtad-15,0,100));
+        log('Desviaste '+fmt(x)+' de <b>'+esc(S.emp.nombre)+'</b> en perjuicio de tus socios. La junta ya sospecha.','mal');
+        S.mov--; if(chance(.3+(S.penal.riesgo||0)/280)) abrirCasoPenal('fraude societario');
+      }}]:[]),
       {t:'Aceptar algo gravísimo',cat:'riesgo',d:'La gravedad más alta del juego y posibilidad de una condena severa.',run:()=>{registrarDelito('delito grave',8,'hecho de máxima gravedad dentro de la simulación');S.p.escandalos+=2;moverPrestigio(-16,'un delito gravísimo');log('Te involucraste en un delito de máxima gravedad.','mal');S.mov--;abrirCasoPenal('delito grave');}}
     ],cerrable:true})});
   }
@@ -7328,7 +7402,7 @@ function lugarDashboard(){
 }
 function dashboardFamilia(){
   const hijos=Array.isArray(S.familia?.hijos)?S.familia.hijos:[], pareja=S.familia?.pareja;
-  let h='<div class="dash-family-head"><div><div class="dash-kicker">TU FAMILIA</div><h3>La casa '+esc(S.dinastia)+'</h3></div><span class="dash-badge">'+hijos.length+' '+(hijos.length===1?'hijo':'hijos')+'</span></div>';
+  let h='<div class="dash-family-head"><div class="op-cara">'+escudoSVG(S.dinastia,34)+'<div><div class="dash-kicker">TU FAMILIA</div><h3>La casa '+esc(S.dinastia)+'</h3></div></div><span class="dash-badge">'+hijos.length+' '+(hijos.length===1?'hijo':'hijos')+'</span></div>';
   const fert=Math.round(fertilidadActual(S.p)), amantes=(S.familia?.amantes||[]).filter(a=>a.activo!==false).length; h+='<div class="sa35-pillrow"><span class="sa35-pill"><strong>Fertilidad</strong> '+fert+'/100</span><span class="sa35-pill"><strong>Relaciones privadas</strong> '+amantes+'</span></div>';
   h+='<div class="family-strip">';
   if(pareja){
@@ -14631,6 +14705,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const miSector=!!(S.emp&&S.emp.sector===r.sector);
     const costoAlianza=Math.max(15,patrimonio()*.01);
     escena({rubro:'Las otras casas',titulo:'Los '+esc(r.apellido),ancho:true,
+      html:'<div style="display:flex;justify-content:center;margin:10px 0">'+escudoSVG(r.apellido,72)+'</div>',
       cuerpo:'Casa con base en <b>'+esc(r.ciudad||'Colombia')+'</b>, dedicada a '+(s?s.n.toLowerCase():esc(r.sector))+'. '
         +'Domina el <b>'+pc(cuotaDeRival64(r))+'</b> del sector en el país. '
         +'Patrimonio estimado '+fmt(r.patrimonio)+' · prestigio '+Math.round(r.prestigio)+'/100. '
@@ -14681,7 +14756,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       opciones:vivas.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{
         const s=SECTORES.find(x=>x.id===r.sector);
         const enGuerra=window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r);
-        return {t:(enGuerra?'⚔ ':'')+'Los '+r.apellido,cat:'compania',
+        return {t:'<span class="op-cara">'+escudoSVG(r.apellido,30)+'<span>'+(enGuerra?'⚔ ':'')+'Los '+esc(r.apellido)+'</span></span>',cat:'compania',
           d:esc(r.ciudad||'Colombia')+' · '+(s?s.n:esc(r.sector))+' · '+pc(cuotaDeRival64(r))+' del sector · '+fmt(r.patrimonio)+' · relación: '+relacionTexto64(r)+(enGuerra?' · en guerra':''),
           cerrar:false, run:()=>escenaRivalDetalle64(r)};
       }).concat(S.emp?[{t:'Cuota de mercado de tu sector',cat:'compania',cerrar:false,run:()=>escenaCuotaMercado64(S.emp.sector)}]:[])
@@ -15940,6 +16015,237 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init76,220);
   setTimeout(init76,650);
   window.__SA76={version:V76};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v78 · ESCUDOS DE CASA, CONTACTOS DE NEGOCIOS, NUEVOS SECTORES Y MÁS
+   RIESGO PENAL
+   Cuatro piezas en una sola entrega:
+   1) escudoSVG() ya existía en el código desde antes de esta sesión pero
+      nunca se usaba en ninguna pantalla: ahora identifica a cada casa
+      rival en su ficha y en la lista "Las otras casas", y también a tu
+      propia casa en el panel de familia. Se le sumaron dos patrones más
+      (antes solo tenía 4).
+   2) Tres eventos nuevos de networking empresarial: conocer a un
+      inversionista, un dato de gremio y una propuesta de sociedad
+      estratégica — formas de que el mundo te ofrezca cosas a ti, no solo
+      al revés.
+   3) Tres sectores de negocio nuevos (seguros, turismo, videojuegos),
+      cada uno con su propio catálogo de productos, ubicados en las
+      épocas donde tienen sentido histórico.
+   4) Dos esquemas ilegales con nombre propio (pirámide, estafa a los
+      socios) dentro de "Asumir una operación ilegal", que antes solo
+      tenía opciones genéricas.
+   Las piezas 1, 3 y 4 son ediciones directas y quirúrgicas sobre datos y
+   pantallas ya existentes (mismo criterio que v66/v77); esta pieza (2)
+   es la única que necesita su propio módulo, porque empuja contenido
+   nuevo a EVENTOS_LOCALES.
+   ========================================================================== */
+(function(){
+  const V78='v78';
+
+  function instalarEventosNetworking78(){
+    if(window.__SA78_EVENTOS) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    EVENTOS_LOCALES.push({
+      p:1.2,
+      c:()=>S.p.edad>=22,
+      t:()=>{
+        const ap=pick(APELLIDOS.filter(a=>a!==S.p.apellido));
+        S._networkAp=ap;
+        return 'En una comida de negocios conoces a un inversionista de la familia <b>'+esc(ap)+'</b> que se interesa en lo tuyo.';
+      },
+      o:[
+        {t:'Aceptar su capital',f:()=>{
+          const x=Math.max(60,patrimonio()*.05);
+          if(S.emp){
+            const total=totalAcciones(S.emp), n=Math.round(total*.05);
+            const mio=S.emp.holders.find(h=>h.id==='tu'); if(mio) mio.n=Math.max(0,mio.n-n);
+            S.emp.holders.push({id:'inv'+ri(1,999),nombre:S._networkAp,tipo:'socio',n});
+            S.emp.caja+=x;
+            return 'Aceptaste '+fmt(x)+' de capital de '+esc(S._networkAp)+' a cambio de una pequeña participación en '+esc(S.emp.nombre)+'.';
+          }
+          S.efectivo+=x;
+          return 'Aceptaste '+fmt(x)+' de '+esc(S._networkAp)+' como un préstamo informal entre conocidos.';
+        }},
+        {t:'Declinar, prefieres manejarte solo',f:()=>{ S.p.redes=clamp(S.p.redes+2,0,100); return 'Declinaste, pero quedaron en buenos términos.'; }}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:1.1,
+      c:()=>!!S.emp,
+      t:()=>'Un colega del gremio te pasa un dato que puede valer oro para <b>'+esc(S.emp?S.emp.nombre:'tu negocio')+'</b>.',
+      o:[
+        {t:'Actuar sobre el dato',f:()=>{
+          if(chance(.65)){
+            const x=rnd(.04,.09); S.emp.ingresos*=1+x; S.emp.marca=clamp(S.emp.marca+ri(2,5),0,100);
+            return 'El dato era bueno: '+esc(S.emp.nombre)+' se movió a tiempo y ganó terreno.';
+          }
+          const costo=Math.max(15,S.emp.ingresos*.03); S.emp.caja=Math.max(0,S.emp.caja-costo);
+          return 'El dato resultó exagerado. Perseguirlo costó '+fmt(costo)+' sin nada que mostrar.';
+        }},
+        {t:'Dejarlo pasar',f:()=>'Preferiste no apostarle a un rumor de pasillo.'}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:1.0,
+      c:()=>!!(S.emp&&S.emp.ingresos>800),
+      t:()=>{
+        const ap=pick(APELLIDOS.filter(a=>a!==S.p.apellido));
+        S._socioAp=ap;
+        return 'Un empresario de tu mismo sector, de apellido <b>'+esc(ap)+'</b>, te propone una sociedad estratégica para crecer más rápido.';
+      },
+      o:[
+        {t:'Aceptar la sociedad',f:()=>{
+          const total=totalAcciones(S.emp), n=Math.round(total*.07);
+          const mio=S.emp.holders.find(h=>h.id==='tu'); if(mio) mio.n=Math.max(0,mio.n-n);
+          S.emp.holders.push({id:'socio'+ri(1,999),nombre:S._socioAp,tipo:'socio',n});
+          S.emp.ingresos*=1+rnd(.05,.11); S.emp.marca=clamp(S.emp.marca+ri(3,7),0,100);
+          return 'Sellaste una sociedad estratégica con '+esc(S._socioAp)+': '+esc(S.emp.nombre)+' creció, pero ya no es solo tuya.';
+        }},
+        {t:'Mantener el control total',f:()=>'Preferiste quedarte con el 100% y crecer a tu propio ritmo.'}
+      ]
+    });
+    window.__SA78_EVENTOS=true;
+  }
+
+  function init78(){ instalarEventosNetworking78(); }
+  setTimeout(init78,40);
+  setTimeout(init78,220);
+  setTimeout(init78,650);
+  window.__SA78={version:V78};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v79 · CADENAS DE PRODUCCIÓN ENTRE TUS EMPRESAS, Y UNA CÁRCEL QUE YA NO
+   ES SOLO ESPERAR
+   El juego ya tenía "Integración vertical" (v51), pero esa pieza conecta
+   bienes agrícolas muy específicos entre sí (una viñedo con su
+   vinícola, una finca con su procesadora) — no las compañías reales del
+   grupo empresarial (companias()/S.grupo) que el jugador funda una tras
+   otra desde v57. Esta entrega le da a ESAS compañías una cadena de
+   producción propia: cualquier par de empresas de tu casa se puede
+   encadenar como proveedor→comprador, con un bono permanente para las
+   dos. Además, cumplir condena dejó de ser un solo botón de "aceptar":
+   ahora hay decisiones de verdad mientras estás adentro.
+   ========================================================================== */
+(function(){
+  const V79='v79';
+
+  /* ==========================================================================
+     #1 cadenas de producción entre compañías propias
+     ========================================================================== */
+  function escenaCadenaProduccion79(){
+    const todas=companias();
+    if(todas.length<2){
+      escena({rubro:'Cadena de producción',titulo:'Vincular la producción',ancho:true,
+        cuerpo:'Necesitas al menos dos compañías propias para encadenar su producción.',
+        opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
+      return;
+    }
+    const opciones=[];
+    todas.forEach((a,i)=>{
+      if(a.cadenaCon) return;
+      todas.forEach((b,j)=>{
+        if(j<=i||b.cadenaCon) return;
+        const costo=Math.max(20,(valuar(a)+valuar(b))*.02);
+        opciones.push({t:esc(a.nombre)+' → '+esc(b.nombre),cat:'compania',
+          d:esc(a.nombre)+' ('+sectorDe(a).n+') le vende insumos a '+esc(b.nombre)+' ('+sectorDe(b).n+'). Cuesta '+fmt(costo)+' en integrar procesos.',
+          dis:S.efectivo<costo?'Necesitas al menos '+fmt(costo):null,cerrar:false,
+          run:()=>{
+            S.efectivo-=costo;
+            a.cadenaCon=b.nombre; a.cadenaRol='proveedor';
+            b.cadenaCon=a.nombre; b.cadenaRol='comprador';
+            a.ingresos*=1.04; b.eficiencia=clamp(b.eficiencia+6,0,100);
+            log('Encadenaste <b>'+esc(a.nombre)+'</b> como proveedor de <b>'+esc(b.nombre)+'</b>: el margen de los dos extremos se queda en la casa.','hito');
+            hito('Encadenó '+a.nombre+' con '+b.nombre);
+            S.mov--; cerrarModal(); render();
+          }});
+      });
+    });
+    todas.filter(e=>e.cadenaRol==='proveedor').forEach(e=>{
+      opciones.push({t:'Romper la cadena: '+esc(e.nombre)+' → '+esc(e.cadenaCon),cat:'riesgo',cerrar:false,
+        d:'Deja de venderle insumos a '+esc(e.cadenaCon)+'. Ambas compañías pierden el bono de la cadena.',
+        run:()=>{
+          const otroNombre=e.cadenaCon, otra=todas.find(x=>x.nombre===otroNombre);
+          e.cadenaCon=null; e.cadenaRol=null;
+          if(otra){ otra.cadenaCon=null; otra.cadenaRol=null; }
+          log('Rompiste la cadena de producción entre '+esc(e.nombre)+' y '+esc(otroNombre)+'.','mal');
+          S.mov--; cerrarModal(); render();
+        }});
+    });
+    opciones.push({t:'Dejarlo así',cat:'legado',cerrar:false,run:()=>{S.mov--;cerrarModal();render();}});
+    escena({rubro:'Cadena de producción',titulo:'Vincular la producción entre tus compañías',ancho:true,
+      cuerpo:'Cuando una de tus empresas le vende a otra, el margen de los dos extremos se queda en la casa: el proveedor gana un comprador fijo, el comprador gana insumos más baratos y confiables.',
+      opciones,cerrable:true});
+  }
+  function wrapListaAccionesCadena79(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA79_LISTA) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments)||[];
+      try{
+        if(companias().length>=2&&!A.some(x=>x.t==='Cadena de producción')){
+          A.push({t:'Cadena de producción',cat:'compania',d:'Encadena tus propias compañías como proveedor y comprador entre ellas.',mov:1,modal:true,run:()=>escenaCadenaProduccion79()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA79_LISTA=true;
+  }
+  function wrapCorrerEmpresaCadena79(){
+    const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA79_EMPRESA) return;
+    window.correrEmpresa=function(res,cual){
+      const e=cual||S.emp;
+      const ret=old.apply(this,arguments);
+      try{
+        if(e&&e.cadenaCon&&companias().some(x=>x.nombre===e.cadenaCon)){
+          if(e.cadenaRol==='proveedor') e.ingresos=Math.max(1,e.ingresos*1.006);
+          else if(e.cadenaRol==='comprador') e.eficiencia=clamp(e.eficiencia+.3,0,100);
+        }
+      }catch(err){}
+      return ret;
+    };
+    window.__SA79_EMPRESA=true;
+  }
+
+  /* ==========================================================================
+     #2 la cárcel, mientras cumples condena, no se resiente la empresa si pagas
+     ========================================================================== */
+  function wrapPasarAnioCarcel79(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA79_CARCEL) return;
+    window.pasarAnio=function(){
+      const enPrision=!!(S&&S.penal&&S.penal.prisionRestante>0);
+      const gestionRemota=!!(S&&S.penal&&S.penal.gestionRemota);
+      const ret=old.apply(this,arguments);
+      try{
+        if(enPrision&&!gestionRemota&&S.emp){
+          S.emp.ingresos=Math.max(1,S.emp.ingresos*rnd(.97,.995));
+          S.emp.eficiencia=clamp(S.emp.eficiencia-ri(1,3),0,100);
+        }
+        if(S.penal) S.penal.gestionRemota=false;
+      }catch(e){}
+      return ret;
+    };
+    window.__SA79_CARCEL=true;
+  }
+
+  function wrapCatDe79(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA79_CATDE) return;
+    window.catDe=function(t){
+      if(/^Cadena de producción$/.test(t)) return 'compania';
+      if(/^Romper la cadena:/.test(t)) return 'riesgo';
+      return old.apply(this,arguments);
+    };
+    window.__SA79_CATDE=true;
+  }
+
+  function init79(){ wrapListaAccionesCadena79(); wrapCorrerEmpresaCadena79(); wrapPasarAnioCarcel79(); wrapCatDe79(); }
+  setTimeout(init79,40);
+  setTimeout(init79,220);
+  setTimeout(init79,650);
+  window.__SA79={version:V79};
 })();
 </script>
 
