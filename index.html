@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v76</div>
+<div class="version-badge" id="versionBadge">v77</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2912,6 +2912,7 @@ function conPuertas(acciones){
    ========================================================================== */
 const PIELES=['#F2C99B','#E5B183','#D19A6C','#BD8156','#9C6440','#7B4B2E','#F7DCC0'];
 const PELOS=['#231A12','#3B2716','#5E3A1E','#8B5A2B','#B8863F','#D9C08A','#8E8E8E','#D8D5D0','#7A2F1E'];
+const OJOS=['#2B1C10','#4A3221','#2F6B4A','#2E5A8C','#6B5A3F','#3F2E1A'];
 const ROPAS=['#B2413A','#24432F','#2B3A5A','#5C4820','#4A2B4E','#1E4A4A','#6B3A2A','#3A4A2B'];
 const FONDOS_CARA=['#2A3F4F','#3F2A3A','#2F3F2A','#42351F','#25303F','#3A2A2A'];
 
@@ -2940,9 +2941,10 @@ function avatarSVG(nombre,op){
   if(edad>58&&d(3)!==0) pelo=PELOS[6];
   if(edad>72) pelo=d(2)?PELOS[7]:PELOS[6];
   const calvo=!mujer&&edad>48&&d(3)===0;
-  const estilo=mujer?d(5):3+d(2);   // ellas con más variedad de peinado
+  const estilo=mujer?d(5):3+d(4);   // ellas con más variedad de peinado, ellos ya no van solo entre dos
+  const iris=OJOS[d(OJOS.length)];
   const gafas=d(5)===0;
-  const barba=!mujer&&edad>22&&!nino&&d(3)===0;
+  const vello=(!mujer&&edad>22&&!nino)?d(6):-1;  // 0 barba, 1 bigote, 2 perilla, 3-5 nada
   const sonrisa=d(3);
   const P=[];
 
@@ -2970,6 +2972,12 @@ function avatarSVG(nombre,op){
       else P.push('<circle cx="17.4" cy="20" r="4.6" fill="'+pelo+'"/><circle cx="46.6" cy="20" r="4.6" fill="'+pelo+'"/>');
     } else if(estilo===4){
       P.push('<path d="M16.4 27c0-10 7-16 15.6-16s15.6 6 15.6 16c-1.6-6-5-8.6-8.6-9.2-4.8-.8-7.6 1.6-12 1-3.6-.5-6.4 1.4-8.2 4.6-1 1.8-1.8 2.8-2.4 3.6z" fill="'+pelo+'"/>');
+    } else if(estilo===5){
+      P.push('<path d="M16.6 26c1-9 7-15 15.4-15 5 0 9 2 11.6 6-3-1.6-6-2-9-1.4-5.6 1.2-10 .4-14.2-2-3 3-3.6 7.6-3.8 12.4z" fill="'+pelo+'"/>');
+    } else if(estilo===6){
+      P.push('<g fill="'+pelo+'"><circle cx="18" cy="16" r="3.4"/><circle cx="23" cy="12.6" r="3.6"/><circle cx="29" cy="11" r="3.8"/>'
+        +'<circle cx="35" cy="11" r="3.8"/><circle cx="41" cy="12.6" r="3.6"/><circle cx="46" cy="16" r="3.4"/>'
+        +'<circle cx="21" cy="19.6" r="3"/><circle cx="43" cy="19.6" r="3"/></g>');
     } else {
       P.push('<path d="M16.6 28c-.6-11 6-18 15.4-18s16 7 15.4 18c0-6.6-3.2-9.8-6.8-10.6-4.4-1-6.4 1.4-11 1-3.6-.4-6.6 1.2-8.6 4.4-1.4 2.2-2.2 3.8-2.4 5.2z" fill="'+pelo+'"/>');
     }
@@ -2978,11 +2986,12 @@ function avatarSVG(nombre,op){
   }
   // cejas
   P.push('<path d="M23.4 22.6q3-2 6 0M34.6 22.6q3-2 6 0" stroke="'+pelo+'" stroke-width="1.7" fill="none" stroke-linecap="round"/>');
-  // ojos grandes con brillo
+  // ojos grandes con brillo, con color de iris propio
   const oy=bebe?28.4:27.6;
   [26.2,37.8].forEach(ox=>{
     P.push('<ellipse cx="'+ox+'" cy="'+oy+'" rx="'+(bebe?3.6:3.2)+'" ry="'+(bebe?3.8:3.4)+'" fill="#FFFFFF"/>');
-    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?2.1:1.8)+'" fill="#2B1C10"/>');
+    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?2.1:1.8)+'" fill="'+iris+'"/>');
+    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?.9:.75)+'" fill="#120B07"/>');
     P.push('<circle cx="'+(ox-.7)+'" cy="'+(oy-.9)+'" r=".75" fill="#FFFFFF"/>');
   });
   // nariz
@@ -2997,14 +3006,20 @@ function avatarSVG(nombre,op){
     P.push('<ellipse cx="22.4" cy="33.6" rx="2.8" ry="1.8" fill="#D9736A" opacity=".3"/>');
     P.push('<ellipse cx="41.6" cy="33.6" rx="2.8" ry="1.8" fill="#D9736A" opacity=".3"/>');
   }
-  // barba
-  if(barba) P.push('<path d="M17.2 30c.6 9.6 6.2 14.6 14.8 14.6S46.2 39.6 46.8 30c-1.4 6.4-6.6 9.4-14.8 9.4S18.6 36.4 17.2 30z" fill="'+pelo+'" opacity=".95"/>');
+  // vello facial: barba completa, bigote o perilla
+  if(vello===0) P.push('<path d="M17.2 30c.6 9.6 6.2 14.6 14.8 14.6S46.2 39.6 46.8 30c-1.4 6.4-6.6 9.4-14.8 9.4S18.6 36.4 17.2 30z" fill="'+pelo+'" opacity=".95"/>');
+  else if(vello===1) P.push('<path d="M25.6 35.4q6.4-2.4 12.8 0c-1.2 1.6-3 2.4-6.4 2.4s-5.2-.8-6.4-2.4z" fill="'+pelo+'" opacity=".9"/>');
+  else if(vello===2) P.push('<path d="M25.6 35.4q6.4-2.4 12.8 0c-1.2 1.6-3 2.4-6.4 2.4s-5.2-.8-6.4-2.4z" fill="'+pelo+'" opacity=".9"/>'
+    +'<path d="M27 40.4q5 4 10 0 .6 4.6-5 5.4-5.6-.8-5-5.4z" fill="'+pelo+'" opacity=".9"/>');
   // arrugas
   if(edad>62) P.push('<path d="M20.6 31.6q1.8 1.2 0 2.4M43.4 31.6q-1.8 1.2 0 2.4" stroke="rgba(90,56,30,.35)" stroke-width="1" fill="none"/>');
   // gafas
   if(gafas&&!bebe) P.push('<g stroke="#2B1C10" stroke-width="1.5" fill="none" opacity=".85">'
     +'<circle cx="26.2" cy="'+oy+'" r="5"/><circle cx="37.8" cy="'+oy+'" r="5"/>'
     +'<path d="M31.2 '+oy+'h1.6M21.2 '+(oy-1.6)+'l-4 .8M42.8 '+(oy-1.6)+'l4 .8"/></g>');
+  // un toque de luz y de sombra para que no quede tan plano
+  P.push('<ellipse cx="'+(32-rx*.35)+'" cy="'+(27-ry*.4)+'" rx="'+(rx*.55)+'" ry="'+(ry*.4)+'" fill="#FFFFFF" opacity=".08"/>');
+  P.push('<ellipse cx="32" cy="'+(27+ry*.55)+'" rx="'+(rx*.9)+'" ry="'+(ry*.32)+'" fill="#000000" opacity=".07"/>');
   return '<svg class="cara" viewBox="0 0 64 64" width="'+tam+'" height="'+tam+'" aria-hidden="true">'+P.join('')+'</svg>';
 }
 
@@ -3037,14 +3052,16 @@ const ICONOS_BIEN={
   local:'<rect x="7" y="18" width="34" height="26" rx="1" fill="url(#gStone)" stroke="#C9A33F" stroke-width="1"/><path d="M6 18l5-9h26l5 9" fill="#8B6A4A" stroke="#E4C66A" stroke-width="1.2"/><rect x="12" y="27" width="10" height="17" fill="#5A4330"/><rect x="27" y="26" width="9" height="9" fill="#DCE6EA"/><path d="M27 38h9M9 44h30" stroke="#E4C66A" stroke-width="1.4"/>',
   bodega:'<path d="M5 20l19-11 19 11v24H5z" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><path d="M10 22h28v22H10z" fill="#505963"/><path d="M13 27h22M13 33h22M13 39h22" stroke="#9EA8AF" stroke-width="1.5"/><path d="M5 20l19-11 19 11" fill="none" stroke="#E4C66A" stroke-width="1.5"/>',
   oficina:'<rect x="9" y="6" width="30" height="38" rx="1" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><g fill="#B9DCE6"><rect x="13" y="10" width="6" height="7"/><rect x="21" y="10" width="6" height="7"/><rect x="29" y="10" width="6" height="7"/><rect x="13" y="20" width="6" height="7"/><rect x="21" y="20" width="6" height="7"/><rect x="29" y="20" width="6" height="7"/><rect x="13" y="30" width="6" height="7"/><rect x="21" y="30" width="6" height="7"/></g><path d="M9 44h30" stroke="#E4C66A" stroke-width="1.5"/>',
-  mausoleo:'<path d="M9 43V21h30v22z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M6 21L24 7l18 14" fill="#8E887F" stroke="#E4C66A" stroke-width="1.5"/><path d="M16 43V27h16v16" fill="#6C665E"/><path d="M19 43V33h10v10" fill="#3B342E"/><path d="M20 23h8M13 27h22M13 32h7M28 32h7" stroke="#E6D7B0" stroke-width="1.2"/><path d="M4 43h40" stroke="#E4C66A" stroke-width="1.6"/><path d="M22 13h4v5h-4z" fill="#E8D38A"/>'
+  mausoleo:'<path d="M9 43V21h30v22z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M6 21L24 7l18 14" fill="#8E887F" stroke="#E4C66A" stroke-width="1.5"/><path d="M16 43V27h16v16" fill="#6C665E"/><path d="M19 43V33h10v10" fill="#3B342E"/><path d="M20 23h8M13 27h22M13 32h7M28 32h7" stroke="#E6D7B0" stroke-width="1.2"/><path d="M4 43h40" stroke="#E4C66A" stroke-width="1.6"/><path d="M22 13h4v5h-4z" fill="#E8D38A"/>',
+  penthouse:'<rect x="14" y="2" width="20" height="42" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><g fill="#B9DCE6" opacity=".9"><rect x="17" y="6" width="5" height="6"/><rect x="26" y="6" width="5" height="6"/><rect x="17" y="15" width="5" height="6"/><rect x="26" y="15" width="5" height="6"/><rect x="17" y="24" width="5" height="6"/><rect x="26" y="24" width="5" height="6"/></g><path d="M10 44V34h28v10z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M13 34v-5M35 34v-5" stroke="#E4C66A" stroke-width="1.3"/><path d="M13 29h22" stroke="#E4C66A" stroke-width="1.3"/><circle cx="24" cy="33" r="2.4" fill="#4A7A52"/><path d="M6 44h36" stroke="#E4C66A" stroke-width="1.6"/>',
+  vinedo:'<path d="M4 44q4-20 20-20t20 20z" fill="url(#gGreen)"/><path d="M8 40q4-13 16-13M14 42q3-11 10-11M20 43q2-9 8-9" stroke="#8C6B2C" stroke-width="1.4" fill="none"/><circle cx="36" cy="10" r="5" fill="#E8D38A" opacity=".9"/><path d="M6 44h36" stroke="#E4C66A" stroke-width="1.5"/>'
 };
 function iconoBien(tipo,clase,tam,seed){
   let id=tipo;
   if(!ICONOS_BIEN[id]){
-    if(clase==='finca') id= tipo==='cafe'?'cafe':(tipo==='ganaderia'||tipo==='ganado'?'ganado':'finca');
+    if(clase==='finca') id= tipo==='cafe'?'cafe':(tipo==='ganaderia'||tipo==='ganado'?'ganado':(tipo==='vinedo'?'vinedo':'finca'));
     else if(clase==='renta') id= /bodega/.test(tipo||'')?'bodega':(/oficina/.test(tipo||'')?'oficina':'local');
-    else if(/mansion|mansión/.test(tipo||'')) id='mansion'; else if(/grande/.test(tipo||'')) id='casa_grande'; else if(/pequeña|pequena/.test(tipo||'')) id='casa_pequena'; else id= /casa/.test(tipo||'')?'casa':'apartamento';
+    else if(/penthouse/i.test(tipo||'')) id='penthouse'; else if(/mansion|mansión/.test(tipo||'')) id='mansion'; else if(/grande/.test(tipo||'')) id='casa_grande'; else if(/pequeña|pequena/.test(tipo||'')) id='casa_pequena'; else id= /casa/.test(tipo||'')?'casa':'apartamento';
   }
   const t=tam||40;
   const filtro=seed?(' style="filter:hue-rotate('+(semillaDe(String(seed))%360)+'deg) saturate('+(0.85+(semillaDe(String(seed)+'s')%30)/100).toFixed(2)+')"'):'';
@@ -4456,7 +4473,7 @@ function escenaTestamento(){
    EL ÁRBOL — dibujado como un árbol, con sus líneas
    ========================================================================== */
 function arbolSVG(){
-  const AN=96, ALTO=86, GAPY=54, CARA=40;
+  const AN=104, ALTO=94, GAPY=56, CARA=50;
   const LINEA='#4A3C28', LINEA2='#8A6D2E';
 
   /* ---- quién va en cada fila ---- */
@@ -4547,12 +4564,12 @@ function arbolSVG(){
       const x=xDe(f,i), col=tono[n.tono]||LINEA;
       const cara=avatarSVG(n.nom+' '+(n.ap||''),{sexo:n.sexo,edad:n.edad,tam:CARA})
         .replace('<svg class="cara"','<svg');
+      P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+4)+'" fill="rgba(0,0,0,.18)"/>');
       P.push('<g transform="translate('+(x-CARA/2)+','+y+')">'+cara+'</g>');
-      if(n.tono==='yo'||n.tono==='hijo')
-        P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+2)+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>');
-      P.push('<text x="'+x+'" y="'+(y+CARA+13)+'" text-anchor="middle" fill="#F0E7D5" font-size="10.5" '
+      P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+2)+'" fill="none" stroke="'+col+'" stroke-width="'+(n.tono==='yo'||n.tono==='hijo'?2.4:1.4)+'"/>');
+      P.push('<text x="'+x+'" y="'+(y+CARA+15)+'" text-anchor="middle" fill="#F0E7D5" font-size="11" '
         +'font-family="Bodoni 72,Didot,Georgia,serif">'+esc(String(n.nom).slice(0,13))+'</text>');
-      P.push('<text x="'+x+'" y="'+(y+CARA+25)+'" text-anchor="middle" fill="#9C8F7C" font-size="8.5" '
+      P.push('<text x="'+x+'" y="'+(y+CARA+27)+'" text-anchor="middle" fill="#9C8F7C" font-size="9" '
         +'font-family="Optima,sans-serif">'+esc(String(n.pie).slice(0,18))+'</text>');
     });
   });
@@ -4566,7 +4583,7 @@ function arbolSVG(){
         +(hh.empresaProfesional?' · tiene empresa propia':'')
         +'. Orden de nacimiento '+(hh.orden||i+1)+'.</div></div></div></div>';});
     ficha+='</div>'; }
-  return '<div style="overflow-x:auto;margin-top:12px;padding-bottom:6px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:'+Math.min(W,600)+'px;height:auto">'+P.join('')+'</svg></div><div class="apunte"><b>Casa '+esc(S.dinastia)+'</b>. El aro dorado marca tu tronco; los nodos laterales son parentela.</div>'+ficha;
+  return '<div style="overflow-x:auto;margin-top:12px;padding-bottom:6px;background:radial-gradient(ellipse at center,rgba(138,109,46,.08),rgba(0,0,0,.22));border:1px solid rgba(138,109,46,.35);border-radius:10px;padding:14px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:'+Math.min(W,600)+'px;height:auto">'+P.join('')+'</svg></div><div class="apunte"><b>Casa '+esc(S.dinastia)+'</b>. El aro dorado marca tu tronco; los nodos laterales son parentela.</div>'+ficha;
 }
 
 /* ==========================================================================
@@ -12613,9 +12630,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(edad>58&&d(3)!==0) pelo=PELOS[6];
     if(edad>72) pelo=d(2)?PELOS[7]:PELOS[6];
     const calvo=!mujer&&edad>48&&d(3)===0;
-    const estilo=mujer?d(5):3+d(2);
+    const estilo=mujer?d(5):3+d(4);
     const gafas=d(5)===0;
-    const barba=!mujer&&edad>22&&!nino&&d(3)===0;
+    const vello=(!mujer&&edad>22&&!nino)?d(6):-1;
     const sonrisa=d(3);
     const iris=IRIS_52[d(IRIS_52.length)];
     const P=[];
@@ -12640,6 +12657,12 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         else P.push('<circle cx="17.4" cy="20" r="4.6" fill="'+pelo+'"/><circle cx="46.6" cy="20" r="4.6" fill="'+pelo+'"/>');
       } else if(estilo===4){
         P.push('<path d="M16.4 27c0-10 7-16 15.6-16s15.6 6 15.6 16c-1.6-6-5-8.6-8.6-9.2-4.8-.8-7.6 1.6-12 1-3.6-.5-6.4 1.4-8.2 4.6-1 1.8-1.8 2.8-2.4 3.6z" fill="'+pelo+'"/>');
+      } else if(estilo===5){
+        P.push('<path d="M16.6 26c1-9 7-15 15.4-15 5 0 9 2 11.6 6-3-1.6-6-2-9-1.4-5.6 1.2-10 .4-14.2-2-3 3-3.6 7.6-3.8 12.4z" fill="'+pelo+'"/>');
+      } else if(estilo===6){
+        P.push('<g fill="'+pelo+'"><circle cx="18" cy="16" r="3.6"/><circle cx="23" cy="12.4" r="3.8"/><circle cx="29" cy="10.8" r="4"/>'
+          +'<circle cx="35" cy="10.8" r="4"/><circle cx="41" cy="12.4" r="3.8"/><circle cx="46" cy="16" r="3.6"/>'
+          +'<circle cx="21" cy="19.8" r="3.2"/><circle cx="43" cy="19.8" r="3.2"/></g>');
       } else {
         P.push('<path d="M16.6 28c-.6-11 6-18 15.4-18s16 7 15.4 18c0-6.6-3.2-9.8-6.8-10.6-4.4-1-6.4 1.4-11 1-3.6-.4-6.6 1.2-8.6 4.4-1.4 2.2-2.2 3.8-2.4 5.2z" fill="'+pelo+'"/>');
       }
@@ -12662,11 +12685,16 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       P.push('<ellipse cx="22.6" cy="34" rx="3" ry="1.9" fill="#E8897C" opacity=".28"/>');
       P.push('<ellipse cx="41.4" cy="34" rx="3" ry="1.9" fill="#E8897C" opacity=".28"/>');
     }
-    if(barba) P.push('<path d="M17.6 30.4c.6 9.4 6.1 14.2 14.4 14.2s13.8-4.8 14.4-14.2c-1.4 6.2-6.4 9.1-14.4 9.1s-13-2.9-14.4-9.1z" fill="'+pelo+'" opacity=".9"/>');
+    if(vello===0) P.push('<path d="M17.6 30.4c.6 9.4 6.1 14.2 14.4 14.2s13.8-4.8 14.4-14.2c-1.4 6.2-6.4 9.1-14.4 9.1s-13-2.9-14.4-9.1z" fill="'+pelo+'" opacity=".9"/>');
+    else if(vello===1) P.push('<path d="M26 35.6q6.2-2.3 12.4 0c-1.2 1.5-2.9 2.3-6.2 2.3s-5-.8-6.2-2.3z" fill="'+pelo+'" opacity=".9"/>');
+    else if(vello===2) P.push('<path d="M26 35.6q6.2-2.3 12.4 0c-1.2 1.5-2.9 2.3-6.2 2.3s-5-.8-6.2-2.3z" fill="'+pelo+'" opacity=".9"/>'
+      +'<path d="M27.4 40.6q4.6 3.8 9.2 0 .6 4.4-4.6 5.2-5.2-.8-4.6-5.2z" fill="'+pelo+'" opacity=".9"/>');
     if(edad>62) P.push('<path d="M21 32q1.6 1.1 0 2.2M43 32q-1.6 1.1 0 2.2" stroke="rgba(90,56,30,.3)" stroke-width="1" fill="none"/>');
     if(gafas&&!bebe) P.push('<g stroke="#2B1C10" stroke-width="1.4" fill="none" opacity=".8">'
       +'<circle cx="26.4" cy="'+oy+'" r="5.2"/><circle cx="37.6" cy="'+oy+'" r="5.2"/>'
       +'<path d="M31.6 '+oy+'h.8M21 '+(oy-1.6)+'l-3.8 .8M43 '+(oy-1.6)+'l3.8 .8"/></g>');
+    P.push('<ellipse cx="'+(32-rx*.35)+'" cy="'+(28-ry*.4)+'" rx="'+(rx*.55)+'" ry="'+(ry*.4)+'" fill="#FFFFFF" opacity=".08"/>');
+    P.push('<ellipse cx="32" cy="'+(28+ry*.55)+'" rx="'+(rx*.9)+'" ry="'+(ry*.32)+'" fill="#000000" opacity=".07"/>');
     return '<svg class="cara" viewBox="0 0 64 64" width="'+tam+'" height="'+tam+'" aria-hidden="true">'+P.join('')+'</svg>';
   }
   function wrapAvatarSVG52(){
@@ -13206,7 +13234,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function recorte56(arr,max){ return arr.length>max?arr.slice(0,max):arr; }
   function arbolAmplioSVG56(){
     asegurarDescendenciaColateral56();
-    const AN=88, ALTO=86, GAPY=54, CARA=40;
+    const AN=96, ALTO=94, GAPY=56, CARA=50;
     const LINEA='#4A3C28', LINEA2='#8A6D2E';
     const tono={yo:'#D6A648',pareja:'#6CC08F',hijo:'#D6A648',padre:'#B8863F',ancestro:'#8A6D2E',lado:'#4A3C28'};
     const vivos=parientesVivos();
@@ -13297,13 +13325,13 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       f.nodos.forEach((n,i)=>{
         const x=xDe(f,i), col=tono[n.tono]||LINEA;
         const cara=avatarSVG(n.nom+' '+(n.ap||''),{sexo:n.sexo,edad:n.edad,tam:CARA}).replace('<svg class="cara"','<svg');
+        P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+4)+'" fill="rgba(0,0,0,.18)"/>');
         P.push('<g transform="translate('+(x-CARA/2)+','+y+')">'+cara+'</g>');
-        if(n.tono==='yo'||n.tono==='hijo')
-          P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+2)+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>');
+        P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+2)+'" fill="none" stroke="'+col+'" stroke-width="'+(n.tono==='yo'||n.tono==='hijo'?2.4:1.4)+'"/>');
         if(n.consagrada)
-          P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+5)+'" fill="none" stroke="#E0B84A" stroke-width="1.4" stroke-dasharray="2 2"/>');
-        P.push('<text x="'+x+'" y="'+(y+CARA+13)+'" text-anchor="middle" fill="#F0E7D5" font-size="10.5" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(String(n.nom).slice(0,13))+'</text>');
-        P.push('<text x="'+x+'" y="'+(y+CARA+25)+'" text-anchor="middle" fill="#9C8F7C" font-size="8.5" font-family="Optima,sans-serif">'+esc(String(n.pie).slice(0,22))+'</text>');
+          P.push('<circle cx="'+x+'" cy="'+(y+CARA/2)+'" r="'+(CARA/2+6)+'" fill="none" stroke="#E0B84A" stroke-width="1.4" stroke-dasharray="2 2"/>');
+        P.push('<text x="'+x+'" y="'+(y+CARA+15)+'" text-anchor="middle" fill="#F0E7D5" font-size="11" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(String(n.nom).slice(0,13))+'</text>');
+        P.push('<text x="'+x+'" y="'+(y+CARA+27)+'" text-anchor="middle" fill="#9C8F7C" font-size="9" font-family="Optima,sans-serif">'+esc(String(n.pie).slice(0,22))+'</text>');
       });
     });
 
@@ -13327,7 +13355,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       });
       ficha+='</div>';
     }
-    return '<div style="overflow-x:auto;margin-top:12px;padding-bottom:6px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:'+Math.min(W,600)+'px;height:auto">'+P.join('')+'</svg></div>'
+    return '<div style="overflow-x:auto;margin-top:12px;padding-bottom:6px;background:radial-gradient(ellipse at center,rgba(138,109,46,.08),rgba(0,0,0,.22));border:1px solid rgba(138,109,46,.35);border-radius:10px;padding:14px"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:'+Math.min(W,600)+'px;height:auto">'+P.join('')+'</svg></div>'
       +'<div class="apunte"><b>Casa '+esc(S.dinastia)+'</b>. El aro dorado marca tu tronco; el aro punteado, una rama consagrada. Toca "Consagrar una rama colateral" para reconocer formalmente a un tío o primo y su descendencia.</div>'+ficha;
   }
 
@@ -14667,7 +14695,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     {id:'casa',n:'Casa',tipo:'casa',base:.95,fel:7,d:'La casa clásica de una familia acomodada, con patio propio.'},
     {id:'duplex',n:'Dúplex',tipo:'casa_grande',base:1.15,fel:8,d:'Dos plantas, más espacio para la familia y las visitas.'},
     {id:'mansion',n:'Mansión',tipo:'mansion',base:1.55,fel:11,d:'La casa que sale en las revistas: servicio, jardín y espacio de sobra.'},
-    {id:'penthouse',n:'Penthouse',tipo:'mansion',base:1.70,fel:13,d:'El último piso del mejor edificio, con vista y nombre propio.'}
+    {id:'penthouse',n:'Penthouse',tipo:'penthouse',base:1.70,fel:13,d:'El último piso del mejor edificio, con vista y nombre propio.'}
   ];
   const escenaComprarViviendaOriginal64=escenaComprarVivienda;
   escenaComprarVivienda=function(){
