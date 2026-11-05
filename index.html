@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v79</div>
+<div class="version-badge" id="versionBadge">v80</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -16246,6 +16246,134 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init79,220);
   setTimeout(init79,650);
   window.__SA79={version:V79};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v80 · EL MAPA ORBITAL — LA CASA COMO SISTEMA, NO COMO LISTA DE PESTAÑAS
+   Prototipo pedido explícitamente: una interfaz "geoplanetal" para
+   organizar las distintas áreas del juego de forma más intuitiva que
+   nueve pestañas de texto. Tu escudo de casa queda en el centro, y a su
+   alrededor orbitan los mismos destinos de siempre (negocios,
+   patrimonio, hogar, familia, legado, crónica) más, en la órbita más
+   externa, las piezas que solo existen a veces (casas rivales, tu
+   carrera política, tu imperio mediático, el mapa del mundo). Tocar un
+   planeta no abre nada nuevo: cambia de pestaña o dispara exactamente la
+   misma acción que ya existía en el menú de siempre, buscada por su
+   título en listaAcciones() — así el mapa nunca puede quedar
+   desincronizado de lo que el juego ya permite hacer, sin necesitar
+   exponer ninguna función privada de versiones anteriores.
+   ========================================================================== */
+(function(){
+  const V80='v80';
+  const W=600,H=640,CX=300,CY=300;
+
+  function girar80(r,grados){ const rad=grados*Math.PI/180; return {x:CX+r*Math.cos(rad), y:CY+r*Math.sin(rad)}; }
+  function nodoHub80(pos,radio,iconoPath,label,key,destacado){
+    return '<g data-hub="'+key+'" transform="translate('+pos.x+','+pos.y+')" style="cursor:pointer">'
+      +'<circle r="'+radio+'" fill="rgba(0,0,0,.4)" stroke="'+(destacado?'#E0B84A':'#8A6D2E')+'" stroke-width="'+(destacado?2.2:1.4)+'"/>'
+      +iconoPath
+      +'<text y="'+(radio+15)+'" text-anchor="middle" fill="#F0E7D5" font-size="10.5" font-family="Bodoni 72,Didot,Georgia,serif">'+esc(label)+'</text>'
+      +'</g>';
+  }
+  const ICONOS_HUB_80={
+    negocios:'<path d="M-7 3v-6a2 2 0 012-2h10a2 2 0 012 2v6M-9 -3h18v9a1.4 1.4 0 01-1.4 1.4h-15.2A1.4 1.4 0 01-9 6z" fill="none" stroke="#D6A648" stroke-width="1.5"/>',
+    patrimonio:'<ellipse cx="0" cy="3" rx="7.5" ry="2.6" fill="none" stroke="#D6A648" stroke-width="1.4"/><ellipse cx="0" cy="-2" rx="7.5" ry="2.6" fill="none" stroke="#D6A648" stroke-width="1.4"/>',
+    hogar:'<path d="M-8 2L0 -7l8 9v6h-16z" fill="none" stroke="#D6A648" stroke-width="1.5"/>',
+    familia:'<circle cx="-3.4" cy="-2" r="3.2" fill="none" stroke="#D6A648" stroke-width="1.3"/><circle cx="3.8" cy="-1" r="2.6" fill="none" stroke="#D6A648" stroke-width="1.3"/><path d="M-8 7c0-3 2-5 4.6-5s4.6 2 4.6 5M0 7c0-2.6 1.8-4.4 4-4.4s4 1.8 4 4.4" fill="none" stroke="#D6A648" stroke-width="1.2"/>',
+    legado:'<path d="M0 -8l2.2 4.6 5 .7-3.6 3.6.9 5L0 3.4l-4.5 2.5.9-5-3.6-3.6 5-.7z" fill="none" stroke="#D6A648" stroke-width="1.3"/>',
+    cronica:'<path d="M-7 -5h5.5a2 2 0 012 2v9.5a2 2 0 00-2-1.2h-5.5zM7 -5h-5.5a2 2 0 00-2 2v9.5a2 2 0 012-1.2h5.5z" fill="none" stroke="#D6A648" stroke-width="1.3"/>',
+    mundo:'<circle r="7.6" fill="none" stroke="#D6A648" stroke-width="1.3"/><ellipse rx="3" ry="7.6" fill="none" stroke="#D6A648" stroke-width="1.2"/><line x1="-7.6" x2="7.6" stroke="#D6A648" stroke-width="1.2"/>',
+    politica:'<path d="M-7 4h14l-1.2-7.4-3.8 3-2-5.6-2 5.6-3.8-3z" fill="none" stroke="#D6A648" stroke-width="1.4" stroke-linejoin="round"/>',
+    medios:'<circle r="1.8" fill="#D6A648"/><path d="M-5.2 -5.2a8 8 0 010 11.4M5.2 -5.2a8 8 0 000 11.4M-2.6 -2.6a4 4 0 000 5.7M2.6 -2.6a4 4 0 010 5.7" fill="none" stroke="#D6A648" stroke-width="1.2"/>'
+  };
+
+  function ring80(r){ return '<circle cx="'+CX+'" cy="'+CY+'" r="'+r+'" fill="none" stroke="rgba(138,109,46,.3)" stroke-dasharray="2 4"/>'; }
+
+  function hubCasasSVG80(){
+    const A=(function(){ try{ return listaAcciones(); }catch(e){ return []; } })();
+    const enNegocios=!!S.emp;
+    const r1=90,r2=155,r3=220;
+    const P=[];
+    P.push(ring80(r1),ring80(r2),ring80(r3));
+    // centro: escudo de la casa
+    const escudo=escudoSVG(S.dinastia,56).replace('<svg class="cara"','<svg');
+    P.push('<g data-hub="tab:familia" transform="translate('+CX+','+(CY-28)+')" style="cursor:pointer">'
+      +'<g transform="translate(-28,-28)">'+escudo+'</g>'
+      +'<text y="42" text-anchor="middle" fill="#F0E7D5" font-size="13" font-family="Bodoni 72,Didot,Georgia,serif">Casa '+esc(S.dinastia)+'</text>'
+      +'</g>');
+    // órbita 1
+    [[0,enNegocios?'Negocios':'Trabajo','negocios','tab:'+(enNegocios?'compania':'empleo')],
+     [120,'Patrimonio','patrimonio','tab:mercado'],
+     [240,'Hogar','hogar','tab:casa']
+    ].forEach(([ang,label,icono,key])=>{
+      P.push(nodoHub80(girar80(r1,ang-90),24,ICONOS_HUB_80[icono],label,key,tab===key.replace('tab:','')));
+    });
+    // órbita 2
+    [[30,'Familia','familia','tab:familia'],
+     [150,'Legado','legado','tab:legado'],
+     [270,'Crónica','cronica','tab:acta']
+    ].forEach(([ang,label,icono,key])=>{
+      P.push(nodoHub80(girar80(r2,ang-90),23,ICONOS_HUB_80[icono],label,key,tab===key.replace('tab:','')));
+    });
+    // órbita 3: solo lo que de verdad está disponible ahora mismo
+    const ring3=[{key:'mundo',label:'El mundo',icono:ICONOS_HUB_80.mundo}];
+    if(A.some(x=>x.t==='Las casas rivales del país')) ring3.push({key:'rivales',label:'Casas rivales',icono:'<g transform="translate(-14,-14)">'+escudoSVG('rivales'+S.dinastia,28).replace('<svg class="cara"','<svg')+'</g>'});
+    if(A.some(x=>/^(Entrar en política|Gestionar carrera política|Gobernar el país|Gobernar la alcaldía|Gobernar la gobernación)/.test(x.t))) ring3.push({key:'politica',label:'Política',icono:ICONOS_HUB_80.politica});
+    if(A.some(x=>x.t==='Tu imperio mediático')) ring3.push({key:'medios',label:'Imperio mediático',icono:ICONOS_HUB_80.medios});
+    const paso=360/ring3.length;
+    ring3.forEach((n,i)=>{ P.push(nodoHub80(girar80(r3,i*paso-90),22,n.icono,n.label,n.key,false)); });
+    return '<div class="seccion"><h3>El mapa de la casa<em>toca un planeta para ir ahí</em></h3>'
+      +'<div style="background:radial-gradient(ellipse at center,rgba(138,109,46,.08),rgba(0,0,0,.22));border:1px solid rgba(138,109,46,.35);border-radius:10px;padding:10px">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:560px;height:auto;display:block;margin:0 auto">'+P.join('')+'</svg></div>'
+      +'<div class="apunte" style="margin-top:8px">Las pestañas de abajo siguen funcionando igual; esto es otra puerta a lo mismo.</div></div>';
+  }
+
+  function abrirAccionHub80(key){
+    try{
+      const A=listaAcciones();
+      let a=null;
+      if(key==='rivales') a=A.find(x=>x.t==='Las casas rivales del país');
+      else if(key==='politica') a=A.find(x=>/^(Entrar en política|Gestionar carrera política|Gobernar el país|Gobernar la alcaldía|Gobernar la gobernación)/.test(x.t));
+      else if(key==='medios') a=A.find(x=>x.t==='Tu imperio mediático');
+      if(a){ if(a.dis||(a.mov||0)>S.mov) return; a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1)); render(); }
+    }catch(e){}
+  }
+  function conectarHub80(){
+    document.querySelectorAll('[data-hub]').forEach(el=>{
+      el.onclick=()=>{
+        const key=el.dataset.hub;
+        if(key.indexOf('tab:')===0){ tab=key.slice(4); renderPestanas(); renderLienzo(); try{window.scrollTo({top:0,behavior:quieto?'auto':'smooth'});}catch(e){} }
+        else if(key==='mundo'){ if(typeof window.irAlMapa59==='function') window.irAlMapa59(); }
+        else abrirAccionHub80(key);
+      };
+    });
+  }
+
+  function wrapRenderHub80(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA80_RENDER) return;
+    window.renderLienzo=function(){
+      const ret=old.apply(this,arguments);
+      try{
+        if(tab==='mesa'){
+          const host=document.querySelector('#lienzoJuego');
+          if(host){
+            const previo=host.querySelector('.hub80'); if(previo) previo.remove();
+            const html=hubCasasSVG80();
+            host.insertAdjacentHTML('afterbegin','<div class="hub80">'+html+'</div>');
+            conectarHub80();
+          }
+        }
+      }catch(e){}
+      return ret;
+    };
+    window.__SA80_RENDER=true;
+  }
+  function init80(){ wrapRenderHub80(); }
+  setTimeout(init80,40);
+  setTimeout(init80,220);
+  setTimeout(init80,650);
+  window.__SA80={version:V80};
 })();
 </script>
 
