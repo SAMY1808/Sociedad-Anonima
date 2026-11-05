@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v83</div>
+<div class="version-badge" id="versionBadge">v84</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7531,17 +7531,18 @@ function renderLienzo(){
     const s=sectorDe(e), v=valuar(e), sn=S.snap||{};
     h+='<div class="wrap">';
     const g=companias();
-    if(g.length>1||hayMatriz()){
+    if(g.length>=1){
       h+='<div class="seccion"><h3>'+(hayMatriz()?esc(S.holding.nombre):'Tus compañías')
-        +'<em>'+g.length+' compañías · '+fmt(valorGrupo())+' tuyos</em></h3>';
-      if(!hayMatriz()) h+='<div class="apunte" style="margin-bottom:10px">Están sueltas. Una matriz las juntaría: '
-        +'el mercado las leería como un grupo y podrían apoyarse entre ellas.</div>';
-      g.forEach(x=>{
+        +'<em>'+g.length+(g.length===1?' compañía':' compañías')+' · '+fmt(valorGrupo())+' tuyos</em></h3>';
+      h+='<div class="apunte" style="margin-bottom:10px">Cada compañía se gestiona por separado. '
+        +'Toca cualquiera para abrir su propio panel de decisiones: producto, marca, personal, plantas, M&amp;A, todo.'
+        +(!hayMatriz()&&g.length>1?' Están sueltas; una matriz las juntaría y el mercado las leería como un grupo.':'')+'</div>';
+      g.forEach((x,i)=>{
         const sx=sectorDe(x), al=presides(x)?'La presides tú':(x.presidente?'La preside '+x.presidente.nombre:'Sin presidente');
-        h+='<div class="retrato '+(presides(x)?'propio':(x.presidente?'leal':'hostil'))+'">'
+        h+='<div class="retrato clicable '+(presides(x)?'propio':(x.presidente?'leal':'hostil'))+'" data-emp="'+i+'">'
           +'<div class="nom">'+esc(x.nombre)+'</div>'
           +'<div class="rol">'+esc(sx.n)+' · ingresos '+fmt(x.ingresos)+' · vale '+fmt(valuar(x))+' · tu '+pc(miPct(x))+'</div>'
-          +'<div class="det">'+esc(al)+'. Utilidad del año '+fmt(x.utilidad)+', deuda '+fmt(x.deuda)+'.</div></div>';
+          +'<div class="det">'+esc(al)+'. Utilidad del año '+fmt(x.utilidad)+', deuda '+fmt(x.deuda)+'.'+(x===e?' Es la que ves en detalle más abajo.':'')+'</div></div>';
       });
       h+='</div>';
     }
@@ -16534,7 +16535,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.__SA81_CATDE=true;
   }
 
-  function init81(){ wrapCorrerEmpresaMetodo81(); wrapListaAccionesPerfiles81(); wrapCatDe81(); }
+  function init81(){ wrapCorrerEmpresaMetodo81(); wrapListaAccionesPerfiles81(); wrapCatDe81(); window.escenaPerfilCompania81=escenaPerfilCompania81; }
   setTimeout(init81,40);
   setTimeout(init81,220);
   setTimeout(init81,650);
@@ -16680,6 +16681,29 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init82,220);
   setTimeout(init82,650);
   window.__SA82={version:V82};
+})();
+</script>
+<script>
+(function(){
+  const V84='v84';
+  function conectarCompanias84(){
+    document.querySelectorAll('[data-emp]').forEach(el=>{
+      el.onclick=()=>{
+        const g=companias(), x=g[+el.dataset.emp];
+        if(x&&typeof window.escenaPerfilCompania81==='function') window.escenaPerfilCompania81(x);
+      };
+    });
+  }
+  function wrapConectarCartas84(){
+    const old=window.conectarCartas; if(typeof old!=='function'||window.__SA84_CARTAS) return;
+    window.conectarCartas=function(){ const r=old.apply(this,arguments); try{ conectarCompanias84(); }catch(e){} return r; };
+    window.__SA84_CARTAS=true;
+  }
+  function init84(){ wrapConectarCartas84(); }
+  setTimeout(init84,40);
+  setTimeout(init84,220);
+  setTimeout(init84,650);
+  window.__SA84={version:V84};
 })();
 </script>
 
