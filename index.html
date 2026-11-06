@@ -166,6 +166,31 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.01e
 .retrato.hostil{border-left:2px solid var(--lacre)}
 .retrato.propio{border-left:2px solid var(--laton)}
 
+.neg86-layout{display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:start}
+@media(max-width:700px){.neg86-layout{grid-template-columns:1fr}}
+.neg86-lista{display:flex;flex-direction:column;gap:6px}
+@media(max-width:700px){.neg86-lista{flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:6px}}
+.neg86-fila{display:flex;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--ui-line);border-radius:10px;background:linear-gradient(160deg,#192B22,#15251D);cursor:pointer;transition:border-color .15s,background .15s}
+.neg86-fila:hover{border-color:rgba(214,166,72,.4)}
+.neg86-fila.activo{border-color:var(--laton);background:linear-gradient(160deg,#20362A,#182920)}
+.neg86-fila svg{flex:0 0 auto;border-radius:50%}
+@media(max-width:700px){.neg86-fila{flex-direction:column;text-align:center;min-width:94px;padding:8px}}
+.neg86-fila-info{min-width:0}
+.neg86-fila-info .nom{font-family:var(--display);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.neg86-fila-info .rol{font-size:10.5px;color:var(--humo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.neg86-otras .nom{color:var(--humo2)}
+.neg86-detalle{min-width:0}
+.neg86-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 12px}
+.neg86-tab{border:1px solid var(--ui-line);background:transparent;color:var(--humo);border-radius:999px;padding:6px 13px;font-size:12px;cursor:pointer;font-family:inherit}
+.neg86-tab:hover{border-color:rgba(214,166,72,.4)}
+.neg86-tab.activo{background:var(--laton);border-color:var(--laton);color:#1a1a1a}
+.neg86-acciones{display:flex;flex-direction:column;gap:7px}
+.neg86-accion{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--ui-line);border-radius:10px;background:linear-gradient(160deg,#1C2D24,#16261E);cursor:pointer;transition:border-color .15s,background .15s}
+.neg86-accion:hover{border-color:rgba(214,166,72,.42)}
+.neg86-accion.dis{opacity:.5;cursor:not-allowed;pointer-events:none}
+.neg86-accion-info .nom{font-size:13.5px;font-family:var(--display)}
+.neg86-accion-info .txt{font-size:11.5px;color:var(--humo2);margin-top:2px}
+
 .aviso{border:1px solid var(--lacre);border-radius:3px;padding:12px 13px;margin-bottom:12px;background:rgba(178,65,58,.09);font-size:13px;line-height:1.5}
 .aviso b{color:var(--marfil)}
 .aviso.oro{border-color:var(--laton-op);background:rgba(214,166,72,.07)}
@@ -478,7 +503,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v85</div>
+<div class="version-badge" id="versionBadge">v86</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4919,7 +4944,7 @@ function escenaQuiebra(luego){
     ]});
 }
 
-let S=null, cola=[], tab='mesa';
+let S=null, cola=[], tab='mesa', negSel=null, negCat='resumen';
 
 function nuevoPersonaje(cfg,legado){
   const or=ORIGENES.find(o=>o.id===cfg.origen)||ORIGENES.find(o=>o.id==='media')||ORIGENES[0];
@@ -7530,21 +7555,21 @@ function renderLienzo(){
   if(tab==='compania'&&e){
     h+='<div class="wrap">';
     const g=companias();
-    h+='<div class="seccion"><h3>'+(hayMatriz()?esc(S.holding.nombre):'Tus compañías')
-      +'<em>'+g.length+(g.length===1?' compañía':' compañías')+' · '+fmt(valorGrupo())+' tuyos</em></h3>';
-    h+='<div class="apunte" style="margin-bottom:10px">Cada compañía se gestiona por separado. '
-      +'Toca cualquiera para abrir su propio perfil completo: información, indicadores y todas sus decisiones.'
+    if(negSel==='otras'){ /* selección válida, se mantiene */ }
+    else if(typeof negSel!=='number'||negSel<0||negSel>=g.length){ negSel=Math.max(0,g.indexOf(e)); }
+    h+='<div class="seccion"><h3>'+(hayMatriz()?esc(S.holding.nombre):'Negocios')
+      +'<em>'+g.length+(g.length===1?' compañía':' compañías')+' · '+fmt(valorGrupo())+' tuyos</em></h3>'
+      +'<div class="apunte" style="margin-bottom:12px">Elige una compañía para ver su perfil completo y decidir, todo en el mismo lugar.'
       +(!hayMatriz()&&g.length>1?' Están sueltas; una matriz las juntaría y el mercado las leería como un grupo.':'')+'</div>';
+    h+='<div class="neg86-layout"><div class="neg86-lista">';
     g.forEach((x,i)=>{
-      const sx=sectorDe(x), al=presides(x)?'La presides tú':(x.presidente?'La preside '+x.presidente.nombre:'Sin presidente');
-      h+='<div class="retrato clicable '+(presides(x)?'propio':(x.presidente?'leal':'hostil'))+'" data-emp="'+i+'">'
-        +'<div class="nom">'+esc(x.nombre)+'</div>'
-        +'<div class="rol">'+esc(sx.n)+' · ingresos '+fmt(x.ingresos)+' · vale '+fmt(valuar(x))+' · tu '+pc(miPct(x))+'</div>'
-        +'<div class="det">'+esc(al)+'. Utilidad del año '+fmt(x.utilidad)+', deuda '+fmt(x.deuda)+'.'+(x===e?' Es tu compañía activa ahora mismo.':'')+'</div></div>';
+      const sx=sectorDe(x);
+      h+='<div class="neg86-fila'+(negSel===i?' activo':'')+'" data-neg-emp="'+i+'">'
+        +escudoSVG(x.nombre,34).replace('<svg class="cara"','<svg')
+        +'<div class="neg86-fila-info"><div class="nom">'+esc(x.nombre)+'</div><div class="rol">'+esc(sx.n)+' · '+fmt(x.ingresos)+'</div></div></div>';
     });
-    h+='</div>';
-    const otras=ACC.filter(a=>['compania','capital','mercado'].includes(catDe(a.t))&&!(window.DECISIONES_COMPANIA_83||[]).includes(a.t)&&a.t!=='Mis compañías');
-    if(otras.length) h+='<div class="seccion"><h3>Otras decisiones<em>no son de una compañía en particular</em></h3>'+baraja(otras,false)+'</div>';
+    h+='<div class="neg86-fila neg86-otras'+(negSel==='otras'?' activo':'')+'" data-neg-emp="otras"><div class="neg86-fila-info"><div class="nom">Otras decisiones</div><div class="rol">No son de una sola compañía</div></div></div>';
+    h+='</div><div class="neg86-detalle">'+(negSel==='otras'?(window.panelOtras86?window.panelOtras86():''):(window.panelCompania86?window.panelCompania86(g[negSel]):''))+'</div></div>';
     h+='</div>';
   }
 
@@ -16394,12 +16419,25 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     'Aportar capital personal a la compañía','Asignarte un salario como presidente',
     'Tomar deuda bancaria','Abonar a la deuda',
     'Repartir dividendos','Dividendo extraordinario','Split de acciones','Ronda de capital privado',
-    'Recompra de acciones','Vender parte de tus acciones','Vender la compañía',
+    'Recompra de acciones','Vender parte de tus acciones','Vender la compañía','Sacar la compañía a bolsa',
     'Marcas','Fusiones y adquisiciones','Integración vertical',
     'Mejorar la sede corporativa','Trasladar la sede corporativa',
     'Ir al mapa de la compañía','Cuota de mercado de tu sector'
   ];
   window.DECISIONES_COMPANIA_83=DECISIONES_COMPANIA_83;
+  const CATEGORIAS_86=[['resumen','Resumen'],['produccion','Producción'],['personal','Personal'],['finanzas','Finanzas'],['mercadeo','Mercadeo'],['expansion','Expansión']];
+  const CATEGORIA_DECISION_86={
+    'Lanzar un producto':'produccion','Invertir en producto y tecnología':'produccion','Renovar la maquinaria':'produccion','Integración vertical':'produccion',
+    'Contratar talento sénior':'personal','Recortar costos':'personal','Asignarte un salario como presidente':'personal',
+    'Aportar capital personal a la compañía':'finanzas','Tomar deuda bancaria':'finanzas','Abonar a la deuda':'finanzas',
+    'Repartir dividendos':'finanzas','Dividendo extraordinario':'finanzas','Split de acciones':'finanzas','Ronda de capital privado':'finanzas',
+    'Recompra de acciones':'finanzas','Vender parte de tus acciones':'finanzas','Vender la compañía':'finanzas','Sacar la compañía a bolsa':'finanzas',
+    'Campaña de marca':'mercadeo','Marcas':'mercadeo','Cuota de mercado de tu sector':'mercadeo',
+    'Expandirte a otra región':'expansion','Construir una planta nueva':'expansion','Adquirir un competidor':'expansion',
+    'Abrir filial en el exterior':'expansion','Firmar un contrato de exportación':'expansion','Mejorar la sede corporativa':'expansion',
+    'Trasladar la sede corporativa':'expansion','Fusiones y adquisiciones':'expansion','Ir al mapa de la compañía':'expansion'
+  };
+  const GLIFO_CAT_86={produccion:'compania',personal:'empleo',finanzas:'capital',mercadeo:'mercado',expansion:'casa'};
   function ejecutarAccionCompania83(e,titulo){
     const idx=companias().indexOf(e);
     if(idx<0) return false;
@@ -16410,30 +16448,15 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(a.modal){ a.run(); return true; }
     a.run();
     S.mov=Math.max(0,S.mov-(a.mov||1));
-    escenaPerfilCompania81(e);
+    renderPestanas(); renderLienzo();
     return true;
   }
-  function escenaPerfilCompania81(e){
-    const s=sectorDe(e), m=metodoDe81(e), v=valuar(e);
-    const escudo=escudoSVG(e.nombre,56).replace('<svg class="cara"','<svg');
-    const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
-    const opciones=[];
-    opciones.push({t:'Cambiar método de producción',cat:'compania',d:'Método actual: '+esc(m.n)+'.',cerrar:false,run:()=>escenaMetodoProduccion81(e)});
-    if(e.cadenaCon) opciones.push({t:'Ver su cadena de producción',cat:'compania',d:'Vinculada con '+esc(e.cadenaCon)+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),cerrar:false,run:()=>ejecutarAccionCompania83(e,'Cadena de producción')});
-    DECISIONES_COMPANIA_83.forEach(titulo=>{
-      if(titulo==='Cadena de producción'&&e.cadenaCon) return;
-      const disp=ACC_e.find(a=>a.t===titulo);
-      if(!disp) return;
-      opciones.push({t:titulo,cat:'compania',d:disp.d,dis:disp.dis,cerrar:false,run:()=>ejecutarAccionCompania83(e,titulo)});
-    });
-    opciones.push({t:'Volver a mis compañías',cat:'legado',cerrar:false,run:()=>escenaMisCompanias81()});
+  function panelResumen86(e){
+    const m=metodoDe81(e), v=valuar(e);
     asegurarProductos(e);
-    let html='<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">'+escudo
-      +'<div><div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+(e.publica?', cotiza como '+e.ticker:'')+'</div>'
-      +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>';
-    if(e.ceoExterno) html+='<div class="aviso"><b>La presidencia la tiene '+esc(e.ceoExterno)+'.</b> Te sacaron, pero las acciones siguen siendo tuyas. Para volver necesitas mayoría o que la junta te acepte.</div>';
-    html+=medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100)+medida('moral interna',e.moral,100,e.moral<40?'r':'v');
-    html+='<table class="libro" style="margin-top:12px">'
+    let html=medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100)+medida('moral interna',e.moral,100,e.moral<40?'r':'v');
+    html+='<div class="apunte" style="margin:10px 0">Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+'</div>';
+    html+='<table class="libro">'
       +'<tr><td>Ingresos del año</td><td>'+fmt(e.ingresos)+'</td></tr>'
       +'<tr><td>Costos y gastos</td><td class="mal">'+fmt(-e.costos)+'</td></tr>'
       +'<tr><td>Utilidad neta</td><td class="'+(e.utilidad>=0?'bien':'mal')+'">'+fmt(e.utilidad)+'</td></tr>'
@@ -16485,50 +16508,77 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           :sd.fuerza>55?'Están organizados y la convención pesa.':'Por ahora no hay ruido.')
         +(sd.formalizada?' La nómina está formalizada completa.':'')+'</div></div></div>';
     }
-    escena({rubro:'Negocios',titulo:e.nombre,ancho:true,html,
-      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+' Todo sobre esta compañía —su información y sus decisiones— se maneja desde aquí.',
-      opciones,cerrable:true});
+    return html;
   }
-
-  function escenaMisCompanias81(){
-    const todas=companias();
-    if(!todas.length){
-      escena({rubro:'Negocios',titulo:'Mis compañías',ancho:true,cuerpo:'Todavía no fundaste ninguna compañía.',opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
+  function panelDecisiones86(e,categoria){
+    const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
+    const filas=[];
+    if(categoria==='produccion'){
+      const m=metodoDe81(e);
+      filas.push({t:'Cambiar método de producción',d:'Método actual: '+m.n+'.',especial:'metodo'});
+      if(e.cadenaCon) filas.push({t:'Ver su cadena de producción',d:'Vinculada con '+e.cadenaCon+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),especial:'cadena-ver'});
+    }
+    DECISIONES_COMPANIA_83.forEach(titulo=>{
+      if(CATEGORIA_DECISION_86[titulo]!==categoria) return;
+      if(titulo==='Cadena de producción'&&e.cadenaCon) return;
+      const disp=ACC_e.find(a=>a.t===titulo);
+      if(!disp) return;
+      filas.push({t:titulo,d:disp.d,dis:disp.dis});
+    });
+    if(!filas.length) return '<div class="vacio">Sin decisiones de este tipo por ahora.</div>';
+    const glifo=GLIFO_CAT_86[categoria]||'compania';
+    return '<div class="neg86-acciones">'+filas.map(f=>
+      '<div class="neg86-accion'+(f.dis?' dis':'')+'" data-neg-accion="'+esc(f.t)+'"'+(f.especial?' data-neg-especial="'+f.especial+'"':'')+'>'
+        +sello(glifo)+'<div class="neg86-accion-info"><div class="nom">'+esc(f.t)+'</div><div class="txt">'+esc(f.dis||f.d||'')+'</div></div></div>'
+    ).join('')+'</div>';
+  }
+  function panelCompania86(e){
+    if(!e) return '<div class="vacio">Elige una compañía de la lista.</div>';
+    const s=sectorDe(e);
+    const escudo=escudoSVG(e.nombre,52).replace('<svg class="cara"','<svg');
+    let html='<div style="display:flex;gap:14px;align-items:center;margin-bottom:6px">'+escudo
+      +'<div><div style="font-size:16px;font-family:var(--display)">'+esc(e.nombre)+'</div>'
+      +'<div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+(e.publica?', cotiza como '+e.ticker:'')+'</div>'
+      +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>';
+    if(e.ceoExterno) html+='<div class="aviso"><b>La presidencia la tiene '+esc(e.ceoExterno)+'.</b> Te sacaron, pero las acciones siguen siendo tuyas. Para volver necesitas mayoría o que la junta te acepte.</div>';
+    html+='<div class="neg86-tabs">'+CATEGORIAS_86.map(([id,n])=>'<button type="button" class="neg86-tab'+(negCat===id?' activo':'')+'" data-neg-cat="'+id+'">'+n+'</button>').join('')+'</div>';
+    html+=(negCat==='resumen')?panelResumen86(e):panelDecisiones86(e,negCat);
+    return html;
+  }
+  function panelOtras86(){
+    const filas=(ACC||[]).filter(a=>['compania','capital','mercado'].includes(catDe(a.t))&&!DECISIONES_COMPANIA_83.includes(a.t)&&a.t!=='Mis compañías');
+    if(!filas.length) return '<div class="vacio">Nada por ahora.</div>';
+    return '<div class="apunte" style="margin-bottom:10px">Decisiones personales, familiares o de mercado que no son de una sola compañía.</div>'
+      +'<div class="neg86-acciones">'+filas.map(a=>{
+        const dis=a.dis||((a.mov||0)>S.mov?'Te quedan '+S.mov+' movidas':null);
+        return '<div class="neg86-accion'+(dis?' dis':'')+'" data-neg-accion="'+esc(a.t)+'">'+sello(catDe(a.t))
+          +'<div class="neg86-accion-info"><div class="nom">'+esc(a.t)+'</div><div class="txt">'+esc(dis||a.d||'')+'</div></div></div>';
+      }).join('')+'</div>';
+  }
+  function manejarClickNegEmp86(v){ negSel=v; negCat='resumen'; renderPestanas(); renderLienzo(); }
+  function manejarClickNegCat86(cat){ negCat=cat; renderPestanas(); renderLienzo(); }
+  function manejarClickNegAccion86(titulo,especial){
+    if(negSel==='otras'){
+      const A=listaAcciones(); const a=A.find(x=>x.t===titulo);
+      if(!a||a.dis||(a.mov||0)>S.mov) return;
+      a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
+      renderPestanas(); renderLienzo();
       return;
     }
-    escena({rubro:'Negocios',titulo:'Mis compañías',ancho:true,
-      cuerpo:'Cada compañía se gestiona por separado: su propio método de producción, su cadena de proveedores y sus propias decisiones de expansión.',
-      opciones:todas.map(e=>({
-        t:'<span class="op-cara">'+escudoSVG(e.nombre,30)+'<span>'+esc(e.nombre)+'</span></span>',cat:'compania',
-        d:esc(sectorDe(e).n)+' · '+fmt(e.ingresos)+' de ingresos · eficiencia '+Math.round(e.eficiencia)+'/100'+(e.cadenaCon?' · encadenada con '+esc(e.cadenaCon):''),
-        cerrar:false,run:()=>escenaPerfilCompania81(e)
-      })).concat([{t:'Cerrar',cat:'legado',cerrar:false,run:()=>{}}]),
-      cerrable:true});
+    const e=companias()[negSel]; if(!e) return;
+    if(especial==='metodo'){ escenaMetodoProduccion81(e); return; }
+    if(especial==='cadena-ver'){ ejecutarAccionCompania83(e,'Cadena de producción'); return; }
+    ejecutarAccionCompania83(e,titulo);
   }
 
-  function wrapListaAccionesPerfiles81(){
-    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA81_LISTA) return;
-    window.listaAcciones=function(){
-      const A=old.apply(this,arguments)||[];
-      try{
-        if(companias().length>=1&&!A.some(x=>x.t==='Mis compañías')){
-          A.push({t:'Mis compañías',cat:'compania',d:'El perfil autónomo de cada una de tus compañías: método de producción, cadena de proveedores y expansión.',mov:0,modal:true,run:()=>escenaMisCompanias81()});
-        }
-      }catch(e){}
-      return A;
-    };
-    window.__SA81_LISTA=true;
+  function init81(){
+    wrapCorrerEmpresaMetodo81();
+    window.panelCompania86=panelCompania86;
+    window.panelOtras86=panelOtras86;
+    window.manejarClickNegEmp86=manejarClickNegEmp86;
+    window.manejarClickNegCat86=manejarClickNegCat86;
+    window.manejarClickNegAccion86=manejarClickNegAccion86;
   }
-  function wrapCatDe81(){
-    const old=window.catDe; if(typeof old!=='function'||window.__SA81_CATDE) return;
-    window.catDe=function(t){
-      if(/^Mis compañías$|^Cambiar método de producción$/.test(t)) return 'compania';
-      return old.apply(this,arguments);
-    };
-    window.__SA81_CATDE=true;
-  }
-
-  function init81(){ wrapCorrerEmpresaMetodo81(); wrapListaAccionesPerfiles81(); wrapCatDe81(); window.escenaPerfilCompania81=escenaPerfilCompania81; }
   setTimeout(init81,40);
   setTimeout(init81,220);
   setTimeout(init81,650);
@@ -16680,11 +16730,17 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 (function(){
   const V84='v84';
   function conectarCompanias84(){
-    document.querySelectorAll('[data-emp]').forEach(el=>{
+    document.querySelectorAll('[data-neg-emp]').forEach(el=>{
       el.onclick=()=>{
-        const g=companias(), x=g[+el.dataset.emp];
-        if(x&&typeof window.escenaPerfilCompania81==='function') window.escenaPerfilCompania81(x);
+        const v=el.dataset.negEmp;
+        if(typeof window.manejarClickNegEmp86==='function') window.manejarClickNegEmp86(v==='otras'?'otras':+v);
       };
+    });
+    document.querySelectorAll('[data-neg-cat]').forEach(el=>{
+      el.onclick=()=>{ if(typeof window.manejarClickNegCat86==='function') window.manejarClickNegCat86(el.dataset.negCat); };
+    });
+    document.querySelectorAll('[data-neg-accion]').forEach(el=>{
+      el.onclick=()=>{ if(typeof window.manejarClickNegAccion86==='function') window.manejarClickNegAccion86(el.dataset.negAccion,el.dataset.negEspecial); };
     });
   }
   function wrapConectarCartas84(){
