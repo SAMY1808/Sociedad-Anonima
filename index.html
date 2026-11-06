@@ -478,7 +478,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v84</div>
+<div class="version-badge" id="versionBadge">v85</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7528,88 +7528,24 @@ function renderLienzo(){
   }
 
   if(tab==='compania'&&e){
-    const s=sectorDe(e), v=valuar(e), sn=S.snap||{};
     h+='<div class="wrap">';
     const g=companias();
-    if(g.length>=1){
-      h+='<div class="seccion"><h3>'+(hayMatriz()?esc(S.holding.nombre):'Tus compañías')
-        +'<em>'+g.length+(g.length===1?' compañía':' compañías')+' · '+fmt(valorGrupo())+' tuyos</em></h3>';
-      h+='<div class="apunte" style="margin-bottom:10px">Cada compañía se gestiona por separado. '
-        +'Toca cualquiera para abrir su propio panel de decisiones: producto, marca, personal, plantas, M&amp;A, todo.'
-        +(!hayMatriz()&&g.length>1?' Están sueltas; una matriz las juntaría y el mercado las leería como un grupo.':'')+'</div>';
-      g.forEach((x,i)=>{
-        const sx=sectorDe(x), al=presides(x)?'La presides tú':(x.presidente?'La preside '+x.presidente.nombre:'Sin presidente');
-        h+='<div class="retrato clicable '+(presides(x)?'propio':(x.presidente?'leal':'hostil'))+'" data-emp="'+i+'">'
-          +'<div class="nom">'+esc(x.nombre)+'</div>'
-          +'<div class="rol">'+esc(sx.n)+' · ingresos '+fmt(x.ingresos)+' · vale '+fmt(valuar(x))+' · tu '+pc(miPct(x))+'</div>'
-          +'<div class="det">'+esc(al)+'. Utilidad del año '+fmt(x.utilidad)+', deuda '+fmt(x.deuda)+'.'+(x===e?' Es la que ves en detalle más abajo.':'')+'</div></div>';
-      });
-      h+='</div>';
-    }
-    h+='<div class="seccion"><h3>'+esc(e.nombre)+'<em>'+esc(s.n)+', desde '+e.fundada+(e.publica?', cotiza como '+e.ticker:'')+'</em></h3>';
-    if(e.ceoExterno) h+='<div class="aviso"><b>La presidencia la tiene '+esc(e.ceoExterno)+'.</b> Te sacaron, pero las acciones siguen siendo tuyas. Para volver necesitas mayoría o que la junta te acepte.</div>';
-    h+='<table class="libro">'
-      +'<tr><td>Ingresos del año</td><td>'+fmt(e.ingresos)+'</td></tr>'
-      +'<tr><td>Costos y gastos</td><td class="mal">'+fmt(-e.costos)+'</td></tr>'
-      +'<tr><td>Utilidad neta</td><td class="'+(e.utilidad>=0?'bien':'mal')+'">'+fmt(e.utilidad)+'</td></tr>'
-      +'<tr><td>Crecimiento</td><td class="'+(e.crecimiento>=0?'bien':'mal')+'">'+pc(e.crecimiento)+'</td></tr>'
-      +'<tr><td>Caja</td><td>'+fmt(e.caja)+'</td></tr>'
-      +'<tr><td>Deuda financiera</td><td class="'+(e.deuda>0?'mal':'')+'">'+fmt(e.deuda)+'</td></tr>'
-      +'<tr><td>Empleados</td><td>'+e.empleados.toLocaleString('es-CO')+'</td></tr>'
-      +'<tr><td>Múltiplo del mercado</td><td>'+multiplo(e).toFixed(1)+'x</td></tr>'
-      +'<tr class="suma"><td>Cuánto vale</td><td>'+fmt(v)+'</td></tr></table>';
-    asegurarProductos(e);
-    if(e.productos.length){
-      h+='<div class="seccion" style="margin-top:15px"><h3>Productos y servicios<em>'+e.productos.length+' en catálogo</em></h3><table class="libro">';
-      e.productos.forEach(pr=>{
-        const dv=productoDef(e,pr.id);
-        h+='<tr><td><b>'+esc(pr.nombre)+'</b><span style="color:var(--humo2)"> · '+(pr.fin?'producto financiero':'producto comercial')+'</span></td><td>'
-          +(pr.fin?'Cartera '+fmt(pr.cartera||0)+(isFinite(pr.moraActual)?' · mora '+pc(pr.moraActual):''):'Ventas '+fmt(pr.ventasUltimo||pr.ventasAnuales||0))+' </td></tr>';
-      });
-      h+='</table><div class="apunte">El catálogo es propio del sector: cada lanzamiento puede crecer, fallar o necesitar una decisión especial durante el año.</div></div>';
-    }
-    h+='<div class="aviso oro"><b>Huella internacional:</b> '+nivelInternacional(e)
-      +(e.exportaciones?' · exportaciones '+fmt(e.exportaciones):'')
-      +(filiales(e).length?' · '+filiales(e).length+' filial'+(filiales(e).length>1?'es':''):'')
-      +((e.jv||[]).length?' · '+e.jv.length+' joint venture'+(e.jv.length>1?'s':''):'')+'</div>';
-    h+='<div class="dos" style="margin-top:15px"><div>'
-      +medida('innovación',e.innovacion,100)+medida('marca',e.marca,100)+'</div><div>'
-      +medida('eficiencia',e.eficiencia,100)+medida('moral interna',e.moral,100,e.moral<40?'r':'v')+'</div></div>';
-    if(e.historia.length>2) h+=grafico(e);
-    h+='</div>';
-    h+='<div class="seccion"><h3>Quién es dueño<em>'+totalAcciones(e).toLocaleString('es-CO')+' acciones a '+fmt(precioAccion(e))+'</em></h3><table class="libro">';
-    e.holders.slice().sort((a,b)=>b.n-a.n).forEach(hh=>{
-      h+='<tr><td>'+(hh.id==='tu'?'Tú':esc(hh.nombre)+' <span style="color:var(--humo2)">('+hh.tipo+')</span>')+'</td><td>'+pc(hh.n/totalAcciones(e))+'</td></tr>';
+    h+='<div class="seccion"><h3>'+(hayMatriz()?esc(S.holding.nombre):'Tus compañías')
+      +'<em>'+g.length+(g.length===1?' compañía':' compañías')+' · '+fmt(valorGrupo())+' tuyos</em></h3>';
+    h+='<div class="apunte" style="margin-bottom:10px">Cada compañía se gestiona por separado. '
+      +'Toca cualquiera para abrir su propio perfil completo: información, indicadores y todas sus decisiones.'
+      +(!hayMatriz()&&g.length>1?' Están sueltas; una matriz las juntaría y el mercado las leería como un grupo.':'')+'</div>';
+    g.forEach((x,i)=>{
+      const sx=sectorDe(x), al=presides(x)?'La presides tú':(x.presidente?'La preside '+x.presidente.nombre:'Sin presidente');
+      h+='<div class="retrato clicable '+(presides(x)?'propio':(x.presidente?'leal':'hostil'))+'" data-emp="'+i+'">'
+        +'<div class="nom">'+esc(x.nombre)+'</div>'
+        +'<div class="rol">'+esc(sx.n)+' · ingresos '+fmt(x.ingresos)+' · vale '+fmt(valuar(x))+' · tu '+pc(miPct(x))+'</div>'
+        +'<div class="det">'+esc(al)+'. Utilidad del año '+fmt(x.utilidad)+', deuda '+fmt(x.deuda)+'.'+(x===e?' Es tu compañía activa ahora mismo.':'')+'</div></div>';
     });
-    h+='<tr class="suma"><td>Tu control</td><td>'+pc(miPct(e))+'</td></tr></table>'
-      +'<div class="apunte">'+(miPct(e)>=.5?'Con mayoría nadie puede sacarte de la presidencia.':'Por debajo del 50% la junta puede votar tu salida si el negocio se tuerce.')+'</div></div>';
-    if(gremios().length||sind(e).fuerza>18){
-      h+='<div class="seccion"><h3>Gremio y sindicato</h3>';
-      if(gremios().length){
-        gremios().forEach(id=>{ const G=gremioDe(id); if(!G) return;
-          h+='<div class="retrato leal"><div class="nom">'+esc(G.n)+'</div>'
-            +'<div class="rol">afiliado · cuota '+pc(G.cuota)+' de las ventas</div>'
-            +'<div class="det">'+esc(G.d)+'</div></div>';
-        });
-        h+='<div class="apunte">En cuotas se van '+fmt(cuotaGremial())+' al año. A cambio: '
-          +[bonoGremio('crecimiento')?'crecimiento +'+pc(bonoGremio('crecimiento')):'',
-             bonoGremio('lobby')?'leyes +'+pc(bonoGremio('lobby')):'',
-             bonoGremio('credito')?'crédito +'+pc(bonoGremio('credito')):'',
-             bonoGremio('laboral')?'respaldo en el pliego':'',
-             bonoGremio('piso')?'precio de sustentación como piso':''].filter(Boolean).join(', ')+'.</div>';
-      } else h+='<div class="vacio">No estás en ningún gremio. Cuando se discutan las reglas del sector, nadie va a hablar por ti.</div>';
-      const sd=sind(e), cen=centralDe(e);
-      h+='<div class="retrato '+(sd.huelga>0?'hostil':(sd.fuerza>55?'':'leal'))+'" style="margin-top:12px">'
-        +'<div class="nom">'+esc(nombreSindicato(e))+'</div>'
-        +'<div class="rol">'+(cen?'afiliado a '+esc(cen.n):'sin central')
-        +(sd.convencion&&sd.convencion.vence>S.anio?' · convención hasta '+sd.convencion.vence:' · sin convención vigente')+'</div>'
-        +medida('fuerza',sd.fuerza,100,sd.fuerza>58?'r':'v')
-        +'<div class="det">'+(sd.huelga>0?'<b>En huelga: '+sd.huelga+' año'+(sd.huelga>1?'s':'')+' más.</b>'
-          :sd.fuerza>55?'Están organizados y la convención pesa.':'Por ahora no hay ruido.')
-        +(sd.formalizada?' La nómina está formalizada completa.':'')+'</div></div>';
-      h+='</div>';
-    }
-    h+='<div class="seccion"><h3>Decisiones</h3>'+baraja(ACC.filter(a=>['compania','capital','mercado'].includes(catDe(a.t))),false)+'</div></div>';
+    h+='</div>';
+    const otras=ACC.filter(a=>['compania','capital','mercado'].includes(catDe(a.t))&&!(window.DECISIONES_COMPANIA_83||[]).includes(a.t)&&a.t!=='Mis compañías');
+    if(otras.length) h+='<div class="seccion"><h3>Otras decisiones<em>no son de una compañía en particular</em></h3>'+baraja(otras,false)+'</div>';
+    h+='</div>';
   }
 
   if(tab==='junta'&&e){
@@ -16456,11 +16392,14 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     'Expandirte a otra región','Construir una planta nueva','Adquirir un competidor','Abrir filial en el exterior',
     'Firmar un contrato de exportación','Cadena de producción',
     'Aportar capital personal a la compañía','Asignarte un salario como presidente',
-    'Dividendo extraordinario','Split de acciones',
+    'Tomar deuda bancaria','Abonar a la deuda',
+    'Repartir dividendos','Dividendo extraordinario','Split de acciones','Ronda de capital privado',
+    'Recompra de acciones','Vender parte de tus acciones','Vender la compañía',
     'Marcas','Fusiones y adquisiciones','Integración vertical',
     'Mejorar la sede corporativa','Trasladar la sede corporativa',
     'Ir al mapa de la compañía','Cuota de mercado de tu sector'
   ];
+  window.DECISIONES_COMPANIA_83=DECISIONES_COMPANIA_83;
   function ejecutarAccionCompania83(e,titulo){
     const idx=companias().indexOf(e);
     if(idx<0) return false;
@@ -16475,7 +16414,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     return true;
   }
   function escenaPerfilCompania81(e){
-    const s=sectorDe(e), m=metodoDe81(e);
+    const s=sectorDe(e), m=metodoDe81(e), v=valuar(e);
     const escudo=escudoSVG(e.nombre,56).replace('<svg class="cara"','<svg');
     const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
     const opciones=[];
@@ -16488,12 +16427,66 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       opciones.push({t:titulo,cat:'compania',d:disp.d,dis:disp.dis,cerrar:false,run:()=>ejecutarAccionCompania83(e,titulo)});
     });
     opciones.push({t:'Volver a mis compañías',cat:'legado',cerrar:false,run:()=>escenaMisCompanias81()});
-    escena({rubro:'Negocios',titulo:e.nombre,ancho:true,
-      html:'<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">'+escudo
-        +'<div><div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+'</div>'
-        +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>'
-        +medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100),
-      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+' Todas sus decisiones se toman desde aquí, sin salir de su perfil.',
+    asegurarProductos(e);
+    let html='<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">'+escudo
+      +'<div><div style="font-size:12px;color:#9C8F7C">'+esc(s.n)+(e.ciudad?' · '+esc(e.ciudad):'')+' · fundada en '+e.fundada+(e.publica?', cotiza como '+e.ticker:'')+'</div>'
+      +'<div style="font-size:12.5px;margin-top:4px">'+fmt(e.ingresos)+' de ingresos · '+fmt(e.caja)+' en caja'+(e.deuda>0?' · '+fmt(e.deuda)+' en deuda':'')+'</div></div></div>';
+    if(e.ceoExterno) html+='<div class="aviso"><b>La presidencia la tiene '+esc(e.ceoExterno)+'.</b> Te sacaron, pero las acciones siguen siendo tuyas. Para volver necesitas mayoría o que la junta te acepte.</div>';
+    html+=medida('eficiencia',e.eficiencia,100,e.eficiencia<35?'r':'v')+medida('marca',e.marca,100)+medida('innovación',e.innovacion,100)+medida('moral interna',e.moral,100,e.moral<40?'r':'v');
+    html+='<table class="libro" style="margin-top:12px">'
+      +'<tr><td>Ingresos del año</td><td>'+fmt(e.ingresos)+'</td></tr>'
+      +'<tr><td>Costos y gastos</td><td class="mal">'+fmt(-e.costos)+'</td></tr>'
+      +'<tr><td>Utilidad neta</td><td class="'+(e.utilidad>=0?'bien':'mal')+'">'+fmt(e.utilidad)+'</td></tr>'
+      +'<tr><td>Crecimiento</td><td class="'+(e.crecimiento>=0?'bien':'mal')+'">'+pc(e.crecimiento)+'</td></tr>'
+      +'<tr><td>Empleados</td><td>'+e.empleados.toLocaleString('es-CO')+'</td></tr>'
+      +'<tr><td>Múltiplo del mercado</td><td>'+multiplo(e).toFixed(1)+'x</td></tr>'
+      +'<tr class="suma"><td>Cuánto vale</td><td>'+fmt(v)+'</td></tr></table>';
+    if(e.productos.length){
+      html+='<div style="margin-top:14px"><b>Productos y servicios</b><em style="color:#9C8F7C;font-size:11.5px"> · '+e.productos.length+' en catálogo</em><table class="libro">';
+      e.productos.forEach(pr=>{
+        html+='<tr><td><b>'+esc(pr.nombre)+'</b><span style="color:var(--humo2)"> · '+(pr.fin?'producto financiero':'producto comercial')+'</span></td><td>'
+          +(pr.fin?'Cartera '+fmt(pr.cartera||0)+(isFinite(pr.moraActual)?' · mora '+pc(pr.moraActual):''):'Ventas '+fmt(pr.ventasUltimo||pr.ventasAnuales||0))+' </td></tr>';
+      });
+      html+='</table></div>';
+    }
+    html+='<div class="aviso oro" style="margin-top:14px"><b>Huella internacional:</b> '+nivelInternacional(e)
+      +(e.exportaciones?' · exportaciones '+fmt(e.exportaciones):'')
+      +(filiales(e).length?' · '+filiales(e).length+' filial'+(filiales(e).length>1?'es':''):'')
+      +((e.jv||[]).length?' · '+e.jv.length+' joint venture'+(e.jv.length>1?'s':''):'')+'</div>';
+    if(e.historia.length>2) html+=grafico(e);
+    html+='<div style="margin-top:14px"><b>Quién es dueño</b><em style="color:#9C8F7C;font-size:11.5px"> · '+totalAcciones(e).toLocaleString('es-CO')+' acciones a '+fmt(precioAccion(e))+'</em><table class="libro">';
+    e.holders.slice().sort((a,b)=>b.n-a.n).forEach(hh=>{
+      html+='<tr><td>'+(hh.id==='tu'?'Tú':esc(hh.nombre)+' <span style="color:var(--humo2)">('+hh.tipo+')</span>')+'</td><td>'+pc(hh.n/totalAcciones(e))+'</td></tr>';
+    });
+    html+='<tr class="suma"><td>Tu control</td><td>'+pc(miPct(e))+'</td></tr></table>'
+      +'<div class="apunte">'+(miPct(e)>=.5?'Con mayoría nadie puede sacarte de la presidencia.':'Por debajo del 50% la junta puede votar tu salida si el negocio se tuerce.')+'</div></div>';
+    if(gremios().length||sind(e).fuerza>18){
+      html+='<div style="margin-top:14px"><b>Gremio y sindicato</b>';
+      if(gremios().length){
+        gremios().forEach(id=>{ const G=gremioDe(id); if(!G) return;
+          html+='<div class="retrato leal" style="margin-top:8px"><div class="nom">'+esc(G.n)+'</div>'
+            +'<div class="rol">afiliado · cuota '+pc(G.cuota)+' de las ventas</div>'
+            +'<div class="det">'+esc(G.d)+'</div></div>';
+        });
+        html+='<div class="apunte">En cuotas se van '+fmt(cuotaGremial())+' al año. A cambio: '
+          +[bonoGremio('crecimiento')?'crecimiento +'+pc(bonoGremio('crecimiento')):'',
+             bonoGremio('lobby')?'leyes +'+pc(bonoGremio('lobby')):'',
+             bonoGremio('credito')?'crédito +'+pc(bonoGremio('credito')):'',
+             bonoGremio('laboral')?'respaldo en el pliego':'',
+             bonoGremio('piso')?'precio de sustentación como piso':''].filter(Boolean).join(', ')+'.</div>';
+      } else html+='<div class="vacio">No está en ningún gremio. Cuando se discutan las reglas del sector, nadie va a hablar por ella.</div>';
+      const sd=sind(e), cen=centralDe(e);
+      html+='<div class="retrato '+(sd.huelga>0?'hostil':(sd.fuerza>55?'':'leal'))+'" style="margin-top:12px">'
+        +'<div class="nom">'+esc(nombreSindicato(e))+'</div>'
+        +'<div class="rol">'+(cen?'afiliado a '+esc(cen.n):'sin central')
+        +(sd.convencion&&sd.convencion.vence>S.anio?' · convención hasta '+sd.convencion.vence:' · sin convención vigente')+'</div>'
+        +medida('fuerza',sd.fuerza,100,sd.fuerza>58?'r':'v')
+        +'<div class="det">'+(sd.huelga>0?'<b>En huelga: '+sd.huelga+' año'+(sd.huelga>1?'s':'')+' más.</b>'
+          :sd.fuerza>55?'Están organizados y la convención pesa.':'Por ahora no hay ruido.')
+        +(sd.formalizada?' La nómina está formalizada completa.':'')+'</div></div></div>';
+    }
+    escena({rubro:'Negocios',titulo:e.nombre,ancho:true,html,
+      cuerpo:'Opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+' Todo sobre esta compañía —su información y sus decisiones— se maneja desde aquí.',
       opciones,cerrable:true});
   }
 
