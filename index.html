@@ -166,6 +166,24 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.01e
 .retrato.hostil{border-left:2px solid var(--lacre)}
 .retrato.propio{border-left:2px solid var(--laton)}
 
+.rasgo88{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;line-height:1;border-radius:999px;padding:5px 9px;border:1px solid var(--ui-line);white-space:nowrap;font-family:var(--ui)}
+.rasgo88:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
+.rasgo88.virtud{color:#BFE3CB;background:rgba(108,192,143,.09);border-color:rgba(108,192,143,.38)}
+.rasgo88.defecto{color:#EDB7B0;background:rgba(208,106,96,.09);border-color:rgba(208,106,96,.38)}
+.dash-chips .rasgo88.virtud{color:#BFE3CB;background:rgba(108,192,143,.09);border-color:rgba(108,192,143,.38);padding:5px 9px}
+.dash-chips .rasgo88.defecto{color:#EDB7B0;background:rgba(208,106,96,.09);border-color:rgba(208,106,96,.38);padding:5px 9px}
+[data-rasgo-ver]{cursor:pointer}
+[data-rasgo-ver]:hover{filter:brightness(1.18)}
+.rasgos88-fila{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:7px 0 4px}
+.rasgo88-ver{background:transparent;border:0;color:var(--laton);font-size:11px;cursor:pointer;padding:4px 2px;font-family:var(--ui);text-decoration:underline;text-underline-offset:3px}
+.rasgos88-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:6px 0 4px}
+.rasgo88-ficha{border:1px solid var(--ui-line);border-left:3px solid var(--jade);border-radius:10px;padding:12px 13px;background:rgba(240,231,213,.03)}
+.rasgo88-ficha.defecto{border-left-color:var(--ui-red)}
+.rasgo88-ficha .tipo{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--humo2)}
+.rasgo88-ficha h4{font-family:var(--display);font-size:18px;margin:3px 0 5px;color:var(--marfil);font-weight:400}
+.rasgo88-ficha p{font-size:12.5px;color:var(--humo);margin:0 0 7px;line-height:1.5}
+.rasgo88-ficha ul{margin:0;padding-left:16px;font-size:11.5px;color:#C8CEC5;line-height:1.55}
+.rasgo88-ficha .origen{font-size:10.5px;color:var(--humo2);margin-top:7px;font-style:italic}
 .neg86-layout{display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:start}
 @media(max-width:700px){.neg86-layout{grid-template-columns:1fr}}
 .neg86-lista{display:flex;flex-direction:column;gap:6px}
@@ -503,7 +521,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v87</div>
+<div class="version-badge" id="versionBadge">v88</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3828,10 +3846,13 @@ function escenaConHijo(h){
       {t:'Hablarle claro de lo que espera de él',cat:'familia',
        d:'Sube disciplina y formación; según el carácter, puede salir mal.',
        dis:h.edad<12?'Está muy chico para esa conversación':null,
-       run:()=>{ if(h.temperamento==='ambicioso'||h.temperamento==='independiente'){
-           h.vinculo=clamp(h.vinculo-10,0,100); log('La conversación con '+esc(h.nombre)+' terminó mal.','mal'); }
+       run:()=>{ const rebelde=Array.isArray(h.rasgos)&&h.rasgos.includes('rebelde');
+         if(h.temperamento==='ambicioso'||h.temperamento==='independiente'||rebelde){
+           h.vinculo=clamp(h.vinculo-(rebelde?14:10),0,100); log('La conversación con '+esc(h.nombre)+' terminó mal.','mal'); }
          else { h.atr.disciplina=clamp(h.atr.disciplina+1,1,10); h.formacion=clamp(h.formacion+7,0,100);
-           log(esc(h.nombre)+' entendió el mensaje.','bien'); }
+           log(esc(h.nombre)+' entendió el mensaje.','bien');
+           if(typeof window.darRasgo88==='function'&&h.edad<=25&&chance(.2)&&window.darRasgo88(h,'disciplinado','Una conversación seria a tiempo ('+S.anio+')'))
+             log('Esa conversación lo marcó: '+esc(h.nombre)+' ahora es <b>disciplinado</b>.','bien'); }
          S.mov--; }}
     ],cerrable:true});
 }
@@ -7106,7 +7127,7 @@ function heredar(h,frac,vivo,pleito){
   ['intelecto','carisma','disciplina','suerte'].forEach(k=>{ if(!isFinite(h.atr[k])) h.atr[k]=ri(3,8); });
   if(!isFinite(h.formacion)) h.formacion=h.edad<18?ri(10,40):ri(35,75);
   if(!isFinite(h.vinculo)) h.vinculo=55;
-  if(!h.temperamento) h.temperamento='prudente';
+  if(!h.temperamento) h.temperamento='heredero';
   if(!h.rumbo) h.rumbo='vida profesional';
   h.carreraEstudio=h.carreraEstudio||null; h.carreraProf=h.carreraProf||null;
   const cfg={nombre:h.nombre,apellido:apellido,sexo:h.sexo,ciudad:S.p.ciudad,origen:'elite'};
@@ -7509,7 +7530,7 @@ function dashboardPersona(){
     +'<section class="dash-hero"><div class="dash-profile">'+avatarSVG(p.nombre+' '+p.apellido,{sexo:p.sexo,edad:p.edad,tam:112,anillo:'#D6A648'})
       +'<div class="dash-profile-copy"><div class="dash-kicker">GENERACIÓN '+genLabel(S.gen)+'</div><h1>'+esc(p.nombre)+' '+esc(p.apellido)+'</h1>'
       +'<div class="dash-sub">'+etapaDashboard(p.edad)+' · '+esc(rolActualDashboard())+'</div><div class="dash-place">⌖ '+esc(lugarDashboard())+' · '+esc((zonaActual()&&zonaActual().n)||'sin zona')+'</div>'
-      +'<div class="dash-chips"><span>'+esc(S.dinastia||p.apellido)+'</span><span>'+esc(educacion)+'</span>'+(viv?'<span>Vivienda propia</span>':'<span>Vivienda arrendada</span>')+'</div></div></div>'
+      +'<div class="dash-chips"><span>'+esc(S.dinastia||p.apellido)+'</span><span>'+esc(educacion)+'</span>'+(viv?'<span>Vivienda propia</span>':'<span>Vivienda arrendada</span>')+(typeof window.chipsRasgos88==='function'?window.chipsRasgos88(p,'yo'):'')+'</div></div></div>'
       +'<div class="dash-year"><div>AHORA</div><strong>'+S.anio+'</strong><span>'+S.mov+' '+(S.mov===1?'movida disponible':'movidas disponibles')+'</span></div></section>'
     +'<section class="dash-kpis"><div class="dash-kpi"><span>Patrimonio</span><b>'+fmt(patrimonio())+'</b><small>'+(e?nEmp+' compañ'+(nEmp===1?'ía':'ías'):'sin compañía')+'</small></div>'
     +'<div class="dash-kpi"><span>En caja</span><b>'+fmt(S.efectivo)+'</b><small>'+((S.deuda||0)>0?'Deuda '+fmt(S.deuda):'Sin deuda personal')+'</small></div>'
@@ -7796,6 +7817,7 @@ function renderLienzo(){
         +avatarSVG(hh.nombre+' '+S.p.apellido,{sexo:hh.sexo,edad:hh.edad,tam:44})
         +'<div class="quien"><div class="nom">'+esc(hh.nombre)+' '+esc(apellidoCompletoDeHijo(hh))+'</div>'
         +'<div class="rol">'+(etiquetaHijo(hh).charAt(0).toUpperCase()+etiquetaHijo(hh).slice(1))+' · '+hh.edad+' años'+(hh.rumbo?', '+esc(hh.rumbo):'')+(hh.independiente?', no quiere el negocio':'')+'</div>'
+        +(typeof window.chipsRasgos88==='function'?'<div class="rasgos88-fila">'+window.chipsRasgos88(hh)+'</div>':'')
         +medida('formación',hh.formacion,100)+medida('vínculo',hh.vinculo,100,hh.vinculo<35?'r':'v')
         +'<div class="det">'+(hh.temperamento?'<b style="color:var(--marfil)">'+esc(tempDe(hh).n.charAt(0).toUpperCase()+tempDe(hh).n.slice(1))+'.</b> '+esc(tempDe(hh).d)+' ':'')
         +'Intelecto '+hh.atr.intelecto+', carisma '+hh.atr.carisma+', disciplina '+hh.atr.disciplina
@@ -8730,6 +8752,7 @@ function pantallaSucesion(vivo){
     opciones:herederos.map(h=>({t:'<span class="op-cara">'+avatarSVG(h.nombre+' '+S.p.apellido,{sexo:h.sexo,edad:h.edad,tam:34})
         +'<span>'+esc(h.nombre+' '+apellidoCompletoDeHijo(h))+', '+h.edad+' años · '+esc(relacionPorSexo(h._sucesorRel||'hijo',h.sexo))+'</span></span>',cat:'familia',
       d:(h.temperamento?tempDe(h).n.charAt(0).toUpperCase()+tempDe(h).n.slice(1)+'. ':'')
+        +(typeof window.textoRasgos88==='function'?window.textoRasgos88(h):'')
         +'Intelecto '+h.atr.intelecto+', carisma '+h.atr.carisma+', disciplina '+h.atr.disciplina
         +'. Formación '+(h.formacion>60?'excelente':h.formacion>25?'media':'básica')
         +', vínculo contigo '+Math.round(h.vinculo||55)+'.'
@@ -12949,6 +12972,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       +'<div style="border-top:1px solid rgba(255,255,255,.12);margin:6px 0 2px"></div>'
       +medida('Salud',p.salud,100)+medida('Ánimo',p.felicidad,100)+medida('Redes',p.redes,100)
       +medida('Reputación',p.reputacion,100)+medida('Fertilidad',fertilidadActual(p),100)
+      +(typeof window.htmlRasgosResumen88==='function'?window.htmlRasgosResumen88():'')
       +'</div>';
     const opcionDe=k=>{
       const v=p.atr[k], costo=costoDeEntrenar54(v);
@@ -12974,7 +12998,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     };
     escena({rubro:'Quién eres',titulo:'Facultades personales',ancho:true,
       cuerpo:'Lo que traes por dentro: cuánto pesa en tu vida y qué tanto se puede seguir cultivando.',
-      html,opciones:[opcionDe('intelecto'),opcionDe('carisma'),opcionDe('disciplina')],cerrable:true});
+      html,opciones:[opcionDe('intelecto'),opcionDe('carisma'),opcionDe('disciplina')].concat(typeof window.opcionCaracter88==='function'?[window.opcionCaracter88()]:[]),cerrable:true});
   }
   function accionFacultades54(A){
     A.push({t:'Facultades personales',cat:'formacion',d:'Quién eres por dentro: tus atributos, y qué tanto los puedes seguir cultivando.',mov:0,modal:true,run:()=>escenaFacultades54()});
@@ -15030,7 +15054,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     g.golpes=(g.golpes||[]).concat([{anio:S.anio,texto,quien}]).slice(-10);
   }
   function bonoAliados70(g){
-    return clamp(((g.aliadosMios||[]).length-(g.aliadosRival||[]).length)*.04,-.2,.2);
+    return clamp(((g.aliadosMios||[]).length-(g.aliadosRival||[]).length)*.04,-.2,.2)+(typeof window.bonoRasgoGuerra88==='function'?window.bonoRasgoGuerra88():0);
   }
   function enGuerraCon70(r){ return !!(S.guerraEmpresarial && r && S.guerraEmpresarial.rid===r.rid); }
 
@@ -16649,9 +16673,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
     EVENTOS_LOCALES.push({
       p:1.0,
-      c:()=>S.familia&&Array.isArray(S.familia.hijos)&&S.familia.hijos.some(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&['independiente','ambicioso'].includes(h.temperamento)),
+      c:()=>S.familia&&Array.isArray(S.familia.hijos)&&S.familia.hijos.some(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&(typeof window.propensoRuptura88==='function'?window.propensoRuptura88(h):['independiente','ambicioso'].includes(h.temperamento))),
       t:()=>{
-        const cands=S.familia.hijos.filter(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&['independiente','ambicioso'].includes(h.temperamento));
+        const cands=S.familia.hijos.filter(h=>h.edad>=24&&h.vinculo<30&&!h.montoLoSuyo&&(typeof window.propensoRuptura88==='function'?window.propensoRuptura88(h):['independiente','ambicioso'].includes(h.temperamento)));
         if(!cands.length) return null;
         const h=pick(cands); S._rupturaHijo=h.nombre;
         return (h.temperamento==='ambicioso'
@@ -16661,7 +16685,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       o:[
         {t:'Intentar reconciliar',f:()=>{
           const h=S.familia.hijos.find(x=>x.nombre===S._rupturaHijo); if(!h) return 'Ya no aplicaba.';
-          if(chance(.35+(h.vinculo||0)/200)){ h.vinculo=clamp(h.vinculo+18,0,100); return 'Lograste calmarlo. Por ahora, la familia sigue entera.'; }
+          if(chance(.35+(h.vinculo||0)/200+(typeof window.bonoReconciliar88==='function'?window.bonoReconciliar88():0))){ h.vinculo=clamp(h.vinculo+18,0,100); return 'Lograste calmarlo. Por ahora, la familia sigue entera.'; }
           crearCasaDisidente82(h);
           return 'No alcanzó: de todas formas rompió con la familia.';
         }},
@@ -16881,7 +16905,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const miPat=patrimonio();
     const dote=Math.max(10,Math.round(Math.min(miPat,r.patrimonio||1)*.08));
     const tePagan=miPat>=(r.patrimonio||0);
-    const prob=clamp(.35+(r.relacionCasa||50)/100*.55,.1,.92);
+    const prob=clamp(.35+(r.relacionCasa||50)/100*.55+(typeof window.bonoRasgoAlianza88==='function'?window.bonoRasgoAlianza88():0),.1,.92);
     escena({rubro:'Las otras casas',titulo:'Alianza matrimonial con los '+esc(r.apellido),ancho:true,
       cuerpo:'Ofrecer un matrimonio sella la relación entre las dos casas, pero no todas las propuestas se aceptan. '
         +'Con la relación actual ('+relacionTexto64(r)+'), tienes <b>'+pc(prob)+'</b> de que la acepten. '
@@ -16959,6 +16983,624 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init87,220);
   setTimeout(init87,650);
   window.__SA87={version:V87};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v88 · RASGOS DE PERSONALIDAD
+   Cada persona carga rasgos (virtudes y defectos en pares opuestos) que se
+   heredan, se forman con la crianza, cambian con la vida y mueven de verdad
+   las mecánicas: rastro penal, prestigio, salud, guerra, rupturas, alianzas.
+   ========================================================================== */
+(function(){
+  const V88='v88';
+
+  const RASGOS_88=[
+    {id:'astuto',n:'Astuto',op:'ingenuo',tipo:'virtud',atr:{intelecto:1},
+     d:'Lee la jugada antes que los demás. Deja menos rastro y pelea mejor.',
+     ef:['+1 intelecto','Las operaciones ilegales dejan 30% menos rastro penal','+5% en cada táctica de guerra empresarial']},
+    {id:'ingenuo',n:'Ingenuo',op:'astuto',tipo:'defecto',
+     d:'Cree en la palabra de los demás. A veces es una virtud; en los negocios casi nunca.',
+     ef:['Las operaciones ilegales dejan 30% más rastro penal','−5% en la guerra empresarial','+1 de reputación al año: la gente confía en él']},
+    {id:'encantador',n:'Encantador',op:'hosco',tipo:'virtud',atr:{carisma:1},
+     d:'Entra a un salón y el salón cambia. Las otras casas lo quieren cerca.',
+     ef:['+1 carisma','Las relaciones con las otras casas mejoran solas cada año','+8% en alianzas matrimoniales y al reconciliar a un hijo','Sube la moral de la compañía que presides']},
+    {id:'hosco',n:'Hosco',op:'encantador',tipo:'defecto',atr:{carisma:-1},
+     d:'Habla poco y mal. Le temen más de lo que lo quieren.',
+     ef:['−1 carisma','Las buenas relaciones con otras casas se desgastan','−8% en alianzas matrimoniales y reconciliaciones','Baja la moral de la compañía que presides']},
+    {id:'disciplinado',n:'Disciplinado',op:'perezoso',tipo:'virtud',atr:{disciplina:1},
+     d:'Se levanta a la misma hora desde los catorce años.',
+     ef:['+1 disciplina','La compañía que presides gana eficiencia cada año','Acumula menos estrés']},
+    {id:'perezoso',n:'Perezoso',op:'disciplinado',tipo:'defecto',atr:{disciplina:-1},
+     d:'Todo puede esperar a mañana, y mañana también.',
+     ef:['−1 disciplina','La compañía que presides pierde eficiencia cada año','Un poco más de ánimo: la vida le pesa menos']},
+    {id:'honrado',n:'Honrado',op:'sin_escrupulos',tipo:'virtud',
+     d:'Su palabra vale un contrato. Cruzar la línea le quita el sueño.',
+     ef:['+1 de reputación al año','Cada delito le cuesta estrés y ánimo; al segundo, deja de ser honrado','−2% en la guerra empresarial: no sabe jugar sucio']},
+    {id:'sin_escrupulos',n:'Sin escrúpulos',op:'honrado',tipo:'defecto',
+     d:'El fin justifica cualquier medio, y casi siempre encuentra uno.',
+     ef:['+5% en la guerra empresarial','Los delitos no le quitan el sueño','−1 de reputación al año']},
+    {id:'familiar',n:'Familiar',op:'frio',tipo:'virtud',
+     d:'El domingo es sagrado. Se sabe el cumpleaños de cada sobrino.',
+     ef:['El vínculo con cada hijo sube solo cada año','Un poco más de ánimo']},
+    {id:'frio',n:'Frío',op:'familiar',tipo:'defecto',
+     d:'Quiere a los suyos a su manera, que casi nunca se nota.',
+     ef:['El vínculo con cada hijo se desgasta cada año','Acumula menos estrés: casi nada lo afecta']},
+    {id:'sereno',n:'Sereno',op:'ansioso',tipo:'virtud',
+     d:'Las crisis le bajan las pulsaciones en vez de subirlas.',
+     ef:['El estrés baja solo cada año','Riesgo de muerte 8% menor']},
+    {id:'ansioso',n:'Ansioso',op:'sereno',tipo:'defecto',
+     d:'Duerme con el teléfono al lado y revisa la caja tres veces.',
+     ef:['El estrés sube solo cada año','Riesgo de muerte 12% mayor','Se le quita con varios años tranquilos']},
+    {id:'robusto',n:'Robusto',op:'enfermizo',tipo:'virtud',
+     d:'Nunca le da gripa. Su abuelo llegó a los noventa y cinco.',
+     ef:['La salud se recupera un poco cada año','Riesgo de muerte 25% menor']},
+    {id:'enfermizo',n:'Enfermizo',op:'robusto',tipo:'defecto',
+     d:'Un catarro le dura un mes y los médicos ya lo conocen por el nombre.',
+     ef:['La salud se desgasta cada año','Riesgo de muerte 35% mayor']},
+    {id:'vanidoso',n:'Vanidoso',op:'discreto',tipo:'defecto',
+     d:'Necesita que lo vean. Su nombre en la prensa le importa más que la plata.',
+     ef:['Cada cambio de prestigio de la casa pesa 30% más, para bien y para mal','Gasta todos los años en lucirse']},
+    {id:'discreto',n:'Discreto',op:'vanidoso',tipo:'virtud',
+     d:'Nadie sabe cuánto tiene, y así le gusta.',
+     ef:['Las caídas de prestigio pesan 35% menos','Las subidas pesan 15% menos']},
+    {id:'derrochador',n:'Derrochador',op:'austero',tipo:'defecto',
+     d:'La plata es para gastarla, y la gasta.',
+     ef:['Se le va cerca del 1% del patrimonio cada año','Un poco más de ánimo']},
+    {id:'austero',n:'Austero',op:'derrochador',tipo:'virtud',
+     d:'Usa el mismo reloj hace treinta años.',
+     ef:['La compañía que presides gana eficiencia, aunque la moral baja un poco','Un poco menos de ánimo']},
+    {id:'rencoroso',n:'Rencoroso',op:'magnanimo',tipo:'defecto',
+     d:'No olvida. Las cuentas pendientes las cobra, aunque sea tarde.',
+     ef:['Las malas relaciones con otras casas se hunden más','+4% en la guerra empresarial','−10% al intentar reconciliar a un hijo']},
+    {id:'magnanimo',n:'Magnánimo',op:'rencoroso',tipo:'virtud',
+     d:'Perdona rápido, y eso desarma a sus enemigos.',
+     ef:['Las malas relaciones con otras casas se reparan solas','+12% al intentar reconciliar a un hijo']},
+    {id:'leal',n:'Leal',op:'rebelde',tipo:'virtud',
+     d:'El apellido es lo primero. Nunca se le pasaría por la cabeza irse.',
+     ef:['En un hijo: nunca rompe con la familia y su vínculo contigo sube solo','En ti: tu junta te es más leal cada año']},
+    {id:'rebelde',n:'Rebelde',op:'leal',tipo:'defecto',
+     d:'Nada lo convence tanto como que le digan que no.',
+     ef:['En un hijo: puede romper con la familia aunque su carácter no lo empuje, y la conversación seria casi siempre sale mal','En ti: tu junta te es menos leal cada año']},
+    {id:'visionario',n:'Visionario',op:null,tipo:'virtud',
+     d:'Ve el negocio que va a existir en diez años.',
+     ef:['La compañía que presides gana innovación y marca cada año']}
+  ];
+  const R88={}; RASGOS_88.forEach(r=>{ R88[r.id]=r; });
+  const MAX_RASGOS_88=5;
+  function patSeguro88(){ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } }
+
+  /* --- núcleo: leer, dar y quitar rasgos (solo se guardan ids) --- */
+  function aplicarAtr88(p,id,signo){
+    const r=R88[id]; if(!r||!r.atr||!p||!p.atr) return;
+    for(const k in r.atr) if(isFinite(p.atr[k])) p.atr[k]=clamp(p.atr[k]+r.atr[k]*signo,1,10);
+  }
+  function compatibles88(p){
+    return RASGOS_88.filter(r=>!p.rasgos.includes(r.id)&&!(r.op&&p.rasgos.includes(r.op)));
+  }
+  function sortearRasgos88(p,n,origen){
+    let intentos=0;
+    while(p.rasgos.length<n&&intentos<40){
+      intentos++;
+      const libres=compatibles88(p); if(!libres.length) break;
+      const a=p.atr||{}, bolsa=[];
+      libres.forEach(r=>{
+        let w=10;
+        if(r.id==='astuto'&&a.intelecto>=7) w=18;
+        if(r.id==='disciplinado'&&a.disciplina>=7) w=18;
+        if(r.id==='perezoso'&&a.disciplina<=4) w=18;
+        if(r.id==='encantador'&&a.carisma>=7) w=18;
+        if(r.id==='hosco'&&a.carisma<=4) w=18;
+        for(let i=0;i<w;i++) bolsa.push(r.id);
+      });
+      darRasgo88(p,pick(bolsa),origen);
+    }
+  }
+  function rasgosDe88(p){
+    if(!p||typeof p!=='object') return [];
+    if(!Array.isArray(p.rasgos)){
+      if(window.__heredando88) return [];
+      p.rasgos=[]; p.rasgosOrigen=p.rasgosOrigen||{};
+      sortearRasgos88(p,2,'De nacimiento');
+    }
+    return p.rasgos;
+  }
+  function tiene88(p,id){ return rasgosDe88(p).includes(id); }
+  function yo88(id){ return !!(typeof S!=='undefined'&&S&&S.p&&tiene88(S.p,id)); }
+  function darRasgo88(p,id,origen){
+    const r=R88[id]; if(!r||!p) return false;
+    if(!Array.isArray(p.rasgos)){ p.rasgos=[]; p.rasgosOrigen=p.rasgosOrigen||{}; }
+    if(p.rasgos.includes(id)) return false;
+    if(r.op&&p.rasgos.includes(r.op)) quitarRasgo88(p,r.op);
+    p.rasgos.push(id);
+    p.rasgosOrigen=p.rasgosOrigen||{}; p.rasgosOrigen[id]=origen||'';
+    aplicarAtr88(p,id,1);
+    return true;
+  }
+  function quitarRasgo88(p,id){
+    if(!p||!Array.isArray(p.rasgos)||!p.rasgos.includes(id)) return false;
+    p.rasgos=p.rasgos.filter(x=>x!==id);
+    if(p.rasgosOrigen) delete p.rasgosOrigen[id];
+    aplicarAtr88(p,id,-1);
+    return true;
+  }
+  function nombreRasgo88(id){ return R88[id]?R88[id].n:id; }
+
+  /* --- presentación --- */
+  function tituloRasgo88(r){ return r.n+' ('+r.tipo+'): '+r.d+' '+r.ef.join(' · '); }
+  function chipsRasgos88(p,ver){
+    const ids=rasgosDe88(p); if(!ids.length) return '';
+    return ids.map(id=>{
+      const r=R88[id]; if(!r) return '';
+      return '<span class="rasgo88 '+r.tipo+'"'+(ver?' data-rasgo-ver="'+esc(ver)+'" role="button" tabindex="0"':'')+' title="'+esc(tituloRasgo88(r))+'">'+esc(r.n)+'</span>';
+    }).join('');
+  }
+  function textoRasgos88(p){
+    const ids=rasgosDe88(p); if(!ids.length) return '';
+    return 'Rasgos: '+ids.map(id=>nombreRasgo88(id).toLowerCase()).join(', ')+'. ';
+  }
+  function fichasRasgos88(p){
+    const ids=rasgosDe88(p);
+    if(!ids.length) return '<div class="vacio">Todavía no se le nota ningún rasgo marcado.</div>';
+    return '<div class="rasgos88-grid">'+ids.map(id=>{
+      const r=R88[id]; if(!r) return '';
+      const org=(p.rasgosOrigen||{})[id];
+      return '<div class="rasgo88-ficha '+r.tipo+'"><div class="tipo">'+(r.tipo==='virtud'?'Virtud':'Defecto')+(r.op?' · lo contrario de '+esc(nombreRasgo88(r.op).toLowerCase()):'')+'</div>'
+        +'<h4>'+esc(r.n)+'</h4><p>'+esc(r.d)+'</p><ul>'+r.ef.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'
+        +(org?'<div class="origen">'+esc(org)+'</div>':'')+'</div>';
+    }).join('')+'</div>';
+  }
+  function htmlRasgosResumen88(){
+    return '<div style="border-top:1px solid rgba(255,255,255,.12);margin:6px 0 2px"></div>'
+      +'<div class="apunte">TU CARÁCTER</div><div class="rasgos88-fila">'+chipsRasgos88(S.p,'yo')+'</div>'
+      +'<div class="apunte">Los rasgos pesan en tus negocios, tu salud y tu familia. Los defectos se pueden trabajar; las virtudes, cultivar.</div>';
+  }
+
+  /* --- escenas --- */
+  function costoTrabajo88(){ return Math.max(5,Math.round(patSeguro88()*.01)); }
+  function probTrabajo88(id,virtud){
+    const p=S.p, prog=((p.trabajo88||{})[id])||0, dis=(p.atr&&p.atr.disciplina)||5;
+    return virtud?clamp(.22+(dis-5)*.04+prog*.12,.08,.75):clamp(.3+(dis-5)*.04+prog*.15,.1,.85);
+  }
+  function intentarTrabajo88(id,virtud){
+    const p=S.p, costo=costoTrabajo88();
+    if(S.mov<1||S.efectivo<costo) return;
+    S.efectivo-=costo; S.mov--;
+    p.trabajo88=p.trabajo88||{};
+    const prob=probTrabajo88(id,virtud);
+    if(chance(prob)){
+      delete p.trabajo88[id];
+      if(virtud){ darRasgo88(p,id,'Lo cultivaste a pulso ('+S.anio+')'); log('Te costó, pero lo lograste: ahora eres <b>'+esc(nombreRasgo88(id).toLowerCase())+'</b>.','bien'); }
+      else { quitarRasgo88(p,id); log('Le ganaste la pelea a tu propio carácter: ya no eres '+esc(nombreRasgo88(id).toLowerCase())+'.','bien'); }
+      p.felicidad=clamp(p.felicidad+5,0,100);
+    } else {
+      p.trabajo88[id]=(p.trabajo88[id]||0)+1;
+      log('Le metiste '+fmt(costo)+' y un año de esfuerzo a '+(virtud?'volverte ':'dejar de ser ')+esc(nombreRasgo88(id).toLowerCase())+'. Todavía no, pero vas avanzando.','mal');
+    }
+    cerrarModal(); render();
+  }
+  function escenaTrabajar88(virtud){
+    const p=S.p, ids=rasgosDe88(p), costo=costoTrabajo88();
+    const lista=virtud
+      ?RASGOS_88.filter(r=>r.tipo==='virtud'&&!ids.includes(r.id)&&!(r.op&&ids.includes(r.op)))
+      :ids.map(id=>R88[id]).filter(r=>r&&r.tipo==='defecto');
+    const lleno=virtud&&ids.length>=MAX_RASGOS_88;
+    const opciones=lista.map(r=>{
+      const prog=((p.trabajo88||{})[r.id])||0;
+      return {t:(virtud?'Cultivar: ':'Dejar de ser ')+(virtud?r.n:r.n.toLowerCase()),cat:'formacion',
+        d:'Cuesta '+fmt(costo)+' y una movida. Probabilidad '+pc(probTrabajo88(r.id,virtud))+(prog?' (llevas '+prog+' intento'+(prog===1?'':'s')+', cada uno acerca)':'')+'. '+r.d,
+        dis:lleno?'Ya tienes '+MAX_RASGOS_88+' rasgos: no cabe uno más':(S.mov<1?'No te quedan movidas':(S.efectivo<costo?'Necesitas '+fmt(costo):null)),
+        cerrar:false,run:()=>intentarTrabajo88(r.id,virtud)};
+    });
+    opciones.push({t:'Volver',cat:'formacion',cerrar:false,run:()=>escenaRasgos88(S.p,true)});
+    escena({rubro:'Tu carácter',titulo:virtud?'Cultivar una virtud':'Trabajar un defecto',ancho:true,
+      cuerpo:virtud
+        ?(lista.length?'Nadie cambia de la noche a la mañana. Cada intento cuesta plata y un año de esfuerzo; si falla, el siguiente es más fácil. Tu disciplina ayuda.':'Ya tienes todas las virtudes a tu alcance, o un defecto que les cierra la puerta. Trabaja primero tus defectos.')
+        :(lista.length?'Los defectos se pueden trabajar. Cada intento cuesta plata y un año de esfuerzo; si falla, el siguiente es más fácil. Tu disciplina ayuda.':'No tienes defectos marcados que trabajar. Por ahora.'),
+      opciones,cerrable:true});
+  }
+  function escenaRasgos88(p,esYo,hijo){
+    const opciones=[];
+    if(esYo){
+      opciones.push({t:'Trabajar un defecto',cat:'formacion',d:'Pagar terapia, un coach o simplemente apretar los dientes para dejar atrás un defecto.',cerrar:false,run:()=>escenaTrabajar88(false)});
+      opciones.push({t:'Cultivar una virtud',cat:'formacion',d:'Volverte la persona que la casa necesita. Más difícil que quitar un defecto.',cerrar:false,run:()=>escenaTrabajar88(true)});
+    } else if(hijo){
+      opciones.push({t:'Volver con '+esc(hijo.nombre),cat:'familia',cerrar:false,run:()=>escenaConHijo(hijo)});
+    }
+    escena({rubro:esYo?'Quién eres':'En familia',titulo:esYo?'Tu carácter':'El carácter de '+esc(p.nombre),ancho:true,
+      cuerpo:esYo
+        ?'Lo que eres pesa en todo: en cuánto rastro dejas, en cómo te ven las otras casas, en tu salud y en tu familia. Algunos rasgos vienen de nacimiento; otros te los va dejando la vida.'
+        :'Algunos rasgos los sacó de la familia y otros se los dio la crianza. <b>Si lo eliges como heredero, estos rasgos pasan a ser los tuyos.</b>',
+      html:fichasRasgos88(p),opciones,cerrable:true});
+  }
+  function abrirRasgos88(clave){
+    const [tipo,id]=String(clave||'').split('::');
+    if(tipo==='yo') return escenaRasgos88(S.p,true);
+    if(tipo==='hijo'){ const h=((S.familia&&S.familia.hijos)||[]).find(x=>x.nombre===id); if(h) return escenaRasgos88(h,false,h); }
+  }
+  function opcionCaracter88(){
+    return {t:'Tu carácter',cat:'formacion',d:'Ver tus rasgos, de dónde vienen y qué mueven. Aquí puedes trabajar un defecto o cultivar una virtud.',
+      cerrar:false,run:()=>escenaRasgos88(S.p,true)};
+  }
+  function conectarRasgos88(raiz){
+    (raiz||document).querySelectorAll('[data-rasgo-ver]').forEach(el=>{
+      if(el.__r88) return; el.__r88=true;
+      const abrir=ev=>{ ev.preventDefault(); ev.stopPropagation(); abrirRasgos88(el.getAttribute('data-rasgo-ver')); };
+      el.addEventListener('click',abrir);
+      el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' ') abrir(ev); });
+    });
+  }
+
+  /* --- ganchos mecánicos que leen otras versiones --- */
+  function bonoRasgoGuerra88(){
+    let b=0;
+    if(yo88('astuto')) b+=.05; if(yo88('sin_escrupulos')) b+=.05; if(yo88('rencoroso')) b+=.04;
+    if(yo88('ingenuo')) b-=.05; if(yo88('honrado')) b-=.02;
+    return b;
+  }
+  function bonoRasgoAlianza88(){ return (yo88('encantador')?.08:0)-(yo88('hosco')?.08:0); }
+  function bonoReconciliar88(){
+    return (yo88('magnanimo')?.12:0)+(yo88('encantador')?.08:0)-(yo88('rencoroso')?.1:0)-(yo88('hosco')?.08:0);
+  }
+  function propensoRuptura88(h){
+    if(tiene88(h,'leal')) return false;
+    return ['independiente','ambicioso'].includes(h.temperamento)||tiene88(h,'rebelde');
+  }
+
+  /* --- wraps --- */
+  function wrapNuevoHijo88(){
+    const old=window.nuevoHijo; if(typeof old!=='function'||window.__SA88_HIJO) return;
+    window.nuevoHijo=function(){
+      const h=old.apply(this,arguments);
+      try{
+        if(h&&!Array.isArray(h.rasgos)&&typeof S!=='undefined'&&S&&S.p){
+          h.rasgos=[]; h.rasgosOrigen={};
+          rasgosDe88(S.p).slice().forEach(id=>{ if(h.rasgos.length<2&&chance(.3)) darRasgo88(h,id,'Lo sacó de ti'); });
+          sortearRasgos88(h,2,'De nacimiento');
+        }
+      }catch(e){}
+      return h;
+    };
+    window.__SA88_HIJO=true;
+  }
+  function wrapHeredar88(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA88_HEREDAR) return;
+    window.heredar=function(h){
+      let rs=null, org=null;
+      try{ if(h&&typeof h==='object'){ rasgosDe88(h); rs=h.rasgos.slice(); org=Object.assign({},h.rasgosOrigen||{}); } }catch(e){}
+      window.__heredando88=true;
+      let r;
+      try{ r=old.apply(this,arguments); } finally { window.__heredando88=false; }
+      try{
+        if(rs&&typeof S!=='undefined'&&S&&S.p){
+          S.p.rasgos=rs; S.p.rasgosOrigen=org;
+          if(rs.length) log('Llegas al mando con lo que eres: <b>'+rs.map(id=>nombreRasgo88(id).toLowerCase()).join(', ')+'</b>.','hito');
+          render(); guardar(true);
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA88_HEREDAR=true;
+  }
+  function wrapDelito88(){
+    const old=window.registrarDelito; if(typeof old!=='function'||window.__SA88_DELITO) return;
+    window.registrarDelito=function(){
+      let antes=null;
+      try{ asegurarPenal(); antes=S.penal.riesgo; }catch(e){}
+      const r=old.apply(this,arguments);
+      try{
+        if(antes!==null){
+          let f=1; if(yo88('astuto')) f*=.7; if(yo88('ingenuo')) f*=1.3;
+          if(f!==1) S.penal.riesgo=clamp(antes+(S.penal.riesgo-antes)*f,0,100);
+        }
+        const p=S.p;
+        if(yo88('honrado')){
+          p.estres=clamp((isFinite(p.estres)?p.estres:30)+12,0,100);
+          p.felicidad=clamp(p.felicidad-8,0,100);
+          p.culpas88=(p.culpas88||0)+1;
+          if(p.culpas88>=2){ quitarRasgo88(p,'honrado'); log('Ya no te reconoces en el espejo: dejaste de ser <b>honrado</b>.','mal'); }
+          else log('Te cuesta dormir: cruzar la línea no va contigo.','mal');
+        } else {
+          const n=((S.penal&&S.penal.crimes)||[]).length;
+          if(n>=3&&!yo88('sin_escrupulos')&&darRasgo88(p,'sin_escrupulos','Lo ganaste con '+n+' delitos a cuestas ('+S.anio+')'))
+            log('Ya no te tiembla la mano: ahora eres <b>sin escrúpulos</b>.','mal');
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA88_DELITO=true;
+  }
+  function wrapPrestigio88(){
+    const old=window.moverPrestigio; if(typeof old!=='function'||window.__SA88_PRESTIGIO) return;
+    window.moverPrestigio=function(n,motivo){
+      let f=1;
+      try{ if(isFinite(n)&&n!==0){ if(yo88('vanidoso')) f*=1.3; if(yo88('discreto')) f*=(n<0?.65:.85); } }catch(e){}
+      const args=Array.prototype.slice.call(arguments);
+      if(f!==1) args[0]=n*f;
+      return old.apply(this,args);
+    };
+    window.__SA88_PRESTIGIO=true;
+  }
+  function wrapMuerte88(){
+    const old=window.probMuerte; if(typeof old!=='function'||window.__SA88_MUERTE) return;
+    window.probMuerte=function(){
+      let p=old.apply(this,arguments);
+      try{
+        let f=1;
+        if(yo88('robusto')) f*=.75; if(yo88('enfermizo')) f*=1.35;
+        if(yo88('sereno')) f*=.92; if(yo88('ansioso')) f*=1.12;
+        if(f!==1&&isFinite(p)) p=clamp(p*f,0,.9);
+      }catch(e){}
+      return p;
+    };
+    window.__SA88_MUERTE=true;
+  }
+
+  /* --- la crianza termina de formar a cada hijo a los 16 --- */
+  function formarCaracter88(h){
+    rasgosDe88(h); if(h.rasgos.length>=4) return null;
+    const v=isFinite(h.vinculo)?h.vinculo:55, f=isFinite(h.formacion)?h.formacion:30;
+    let cands, por;
+    if(v>=70){ cands=['leal','familiar']; por='creció cerca de ti'; }
+    else if(v<35){ cands=['rebelde','rencoroso','frio']; por='creció lejos de ti'; }
+    else if(f>=60){ cands=['disciplinado','astuto']; por='su formación lo marcó'; }
+    else { cands=compatibles88(h).map(r=>r.id); por='la vida lo fue formando'; }
+    cands=cands.filter(id=>!h.rasgos.includes(id));
+    if(!cands.length) return null;
+    const id=pick(cands);
+    darRasgo88(h,id,'A los 16: '+por);
+    log('A los 16, <b>'+esc(h.nombre)+'</b> ya muestra quién va a ser: <b>'+esc(nombreRasgo88(id).toLowerCase())+'</b> ('+por+').',R88[id].tipo==='virtud'?'bien':'mal');
+    return id;
+  }
+
+  /* --- lo que hace cada rasgo año a año --- */
+  function correrRasgos88(){
+    if(typeof S==='undefined'||!S||!S.p||S.muerto) return;
+    const p=S.p; rasgosDe88(p);
+    const est=d=>{ p.estres=clamp((isFinite(p.estres)?p.estres:30)+d,0,100); };
+    if(yo88('sereno')) est(-4); if(yo88('ansioso')) est(5);
+    if(yo88('disciplinado')) est(-1.5); if(yo88('frio')) est(-1.5);
+    if(yo88('robusto')) p.salud=clamp(p.salud+1.5,0,100);
+    if(yo88('enfermizo')) p.salud=clamp(p.salud-1.5,0,100);
+    if(yo88('perezoso')||yo88('derrochador')||yo88('familiar')) p.felicidad=clamp(p.felicidad+2,0,100);
+    if(yo88('austero')) p.felicidad=clamp(p.felicidad-1,0,100);
+    if(isFinite(p.reputacion)){
+      if(yo88('honrado')||yo88('ingenuo')) p.reputacion=clamp(p.reputacion+1,0,100);
+      if(yo88('sin_escrupulos')) p.reputacion=clamp(p.reputacion-1,0,100);
+    }
+    if(yo88('derrochador')&&S.efectivo>0){
+      const x=Math.min(S.efectivo,Math.max(2,patSeguro88()*.01)); S.efectivo-=x;
+      log('Tu gusto por gastar se llevó '+fmt(x)+' este año.','mal');
+    }
+    if(yo88('vanidoso')&&S.efectivo>0){ S.efectivo-=Math.min(S.efectivo,Math.max(1,patSeguro88()*.004)); }
+    const e=S.emp;
+    if(e&&typeof presides==='function'&&presides(e)){
+      const ad=(k,d)=>{ if(isFinite(e[k])) e[k]=clamp(e[k]+d,0,100); };
+      if(yo88('disciplinado')) ad('eficiencia',1.2); if(yo88('perezoso')) ad('eficiencia',-1.2);
+      if(yo88('austero')){ ad('eficiencia',1); ad('moral',-.6); }
+      if(yo88('encantador')) ad('moral',1); if(yo88('hosco')) ad('moral',-1);
+      if(yo88('visionario')){ ad('innovacion',2); ad('marca',.5); }
+    }
+    if(Array.isArray(S.junta)){
+      const dj=(yo88('leal')?1:0)-(yo88('rebelde')?1:0);
+      if(dj) S.junta.forEach(j=>{ if(isFinite(j.lealtad)) j.lealtad=clamp(j.lealtad+dj,0,100); });
+    }
+    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{
+      const nuevo=!Array.isArray(h.rasgos);
+      rasgosDe88(h);
+      if(nuevo&&h.edad>16) h.rasgoJuventud88=true; // partidas viejas: no se dispara de golpe
+      let dv=0;
+      if(yo88('familiar')) dv+=1.5; if(yo88('frio')) dv-=1;
+      if(tiene88(h,'leal')) dv+=1; if(tiene88(h,'rebelde')) dv-=1.5;
+      if(tiene88(h,'familiar')) dv+=.8; if(tiene88(h,'frio')) dv-=.8;
+      if(dv&&isFinite(h.vinculo)) h.vinculo=clamp(h.vinculo+dv,0,100);
+      if(h.edad>=16&&!h.rasgoJuventud88){ h.rasgoJuventud88=true; formarCaracter88(h); }
+    });
+    (S.rivales||[]).forEach(r=>{
+      if(!r||!r.viva||!isFinite(r.relacionCasa)) return;
+      let d=0;
+      if(yo88('encantador')) d+=.8;
+      if(yo88('hosco')&&r.relacionCasa>50) d-=.8;
+      if(yo88('rencoroso')&&r.relacionCasa<40) d-=2;
+      if(yo88('magnanimo')&&r.relacionCasa<50) d+=1.5;
+      if(d) r.relacionCasa=clamp(r.relacionCasa+d,0,100);
+    });
+    /* la vida también cambia el carácter */
+    if(p.estres>=85) p.estresAlto88=(p.estresAlto88||0)+1; else p.estresAlto88=0;
+    if(p.estresAlto88>=2&&!yo88('ansioso')){
+      darRasgo88(p,'ansioso','Años de tensión sin respiro ('+S.anio+')'); p.estresAlto88=0;
+      log('Tantos años bajo presión te dejaron marca: ahora eres <b>ansioso</b>.','mal');
+    }
+    if(yo88('ansioso')&&p.estres<=25){
+      p.calma88=(p.calma88||0)+1;
+      if(p.calma88>=3){ quitarRasgo88(p,'ansioso'); p.calma88=0; log('Varios años tranquilos te devolvieron el sueño: ya no eres ansioso.','bien'); }
+    } else p.calma88=0;
+    if(prestigio()>=80&&!yo88('vanidoso')&&!yo88('discreto')&&p.rasgos.length<MAX_RASGOS_88&&chance(.06)){
+      darRasgo88(p,'vanidoso','Se te subió el apellido a la cabeza ('+S.anio+')');
+      log('Tanta figuración te cambió: ahora eres <b>vanidoso</b>.','mal');
+    }
+  }
+  function wrapPaso88(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA88_PASO) return;
+    window.pasarAnio=function(){
+      const r=old.apply(this,arguments);
+      try{ correrRasgos88(); }catch(e){}
+      return r;
+    };
+    window.__SA88_PASO=true;
+  }
+
+  /* --- fichas dentro de la escena de cada hijo --- */
+  function wrapEscenaHijo88(){
+    const old=window.escenaConHijo; if(typeof old!=='function'||window.__SA88_ESCHIJO) return;
+    window.escenaConHijo=function(h){
+      const r=old.apply(this,arguments);
+      try{
+        const host=document.getElementById('escenaHost');
+        const rel=host&&host.querySelector('.relato');
+        if(rel&&h){
+          const sig=rel.nextElementSibling, ancla=(sig&&!sig.classList.contains('elecciones')&&!sig.querySelector('.carta'))?sig:rel;
+          ancla.insertAdjacentHTML('afterend','<div class="rasgos88-fila">'+chipsRasgos88(h,'hijo::'+h.nombre)
+            +'<button type="button" class="rasgo88-ver" data-rasgo-ver="hijo::'+esc(h.nombre)+'">ver su carácter</button></div>');
+          conectarRasgos88(host);
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA88_ESCHIJO=true;
+  }
+  function wrapConectar88(){
+    const old=window.conectarCartas; if(typeof old!=='function'||window.__SA88_CONECTAR) return;
+    window.conectarCartas=function(){ const r=old.apply(this,arguments); try{ conectarRasgos88(); }catch(e){} return r; };
+    window.__SA88_CONECTAR=true;
+  }
+
+  /* --- momentos que forjan (o ponen a prueba) el carácter --- */
+  const VICIOS_88={
+    perezoso:{t:'Tu junta ya no disimula: las decisiones se te acumulan en el escritorio y otros están llenando el vacío.',
+      ayuda:'Contratar un coach y ordenarte',asi:()=>{ if(S.emp) S.emp.eficiencia=clamp(S.emp.eficiencia-3,0,100); return 'Seguiste igual. La compañía lo notó: la eficiencia bajó.'; }},
+    derrochador:{t:'Tu contador te sienta a mostrarte en qué se fue la plata este año. Ni tú mismo lo recuerdas.',
+      ayuda:'Ponerte un presupuesto en serio',asi:()=>{ const x=Math.min(S.efectivo,Math.max(2,patSeguro88()*.01)); S.efectivo-=x; return 'Rompiste el informe y te fuiste de viaje: '+fmt(x)+' más.'; }},
+    ansioso:{t:'Llevas semanas sin dormir más de cuatro horas. Tu médico te pide que pares.',
+      ayuda:'Bajar el ritmo y hacer terapia',asi:()=>{ S.p.salud=clamp(S.p.salud-4,0,100); return 'No paraste. Tu salud lo resintió.'; }},
+    rencoroso:{t:'Una vieja ofensa te tiene obsesionado. Tu familia te ruega que la dejes ir.',
+      ayuda:'Perdonar y pasar la página',asi:()=>{ (S.rivales||[]).forEach(r=>{ if(r.viva&&isFinite(r.relacionCasa)&&r.relacionCasa<40) r.relacionCasa=clamp(r.relacionCasa-5,0,100); }); return 'No perdonaste. Las casas que ya te odiaban, ahora te odian más.'; }},
+    hosco:{t:'Tu mano derecha renunció, y en la carta dice que nadie aguanta tu trato.',
+      ayuda:'Pedirle perdón y cambiar el trato',asi:()=>{ if(S.emp) S.emp.moral=clamp(S.emp.moral-4,0,100); return 'Lo dejaste ir sin una palabra. La moral de la compañía cayó.'; }},
+    vanidoso:{t:'Una revista te ofrece su portada a cambio de una entrevista larga y una pauta publicitaria generosa.',
+      ayuda:'Rechazar la portada',asi:()=>{ const x=Math.min(S.efectivo,Math.max(3,patSeguro88()*.006)); S.efectivo-=x; moverPrestigio(3,'salió en portada'); return 'Saliste en portada. Costó '+fmt(x)+', pero el apellido brilló.'; }}
+  };
+  function instalarEventos88(){
+    if(window.__SA88_EVENTOS) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    const NOMBRES_SOCIO=['Ernesto Villamizar','Gloria Uribe','Hernán Caicedo','Beatriz Londoño','Álvaro Pombo','Marta Zuluaga'];
+    EVENTOS_LOCALES.push({
+      p:.7,
+      c:()=>S.p&&S.p.edad>=25&&S.efectivo>=20,
+      t:()=>{
+        S._socio88=pick(NOMBRES_SOCIO);
+        return 'Un viejo socio tuyo, <b>'+esc(S._socio88)+'</b>, quebró y te pide ayuda para no perder la casa. Lo que hagas va a decir quién eres. '
+          +'(Ayudarlo cuesta cerca de '+fmt(Math.max(10,patSeguro88()*.015))+'.)';
+      },
+      o:[
+        {t:'Ayudarlo sin pedir nada a cambio',f:()=>{
+          const x=Math.max(10,patSeguro88()*.015);
+          if(S.efectivo<x) return 'Quisiste ayudarlo, pero no tenías con qué.';
+          S.efectivo-=x; S.p.reputacion=clamp(S.p.reputacion+3,0,100);
+          const nuevo=darRasgo88(S.p,'magnanimo','Ayudaste a un socio caído ('+S.anio+')');
+          return 'Le diste '+fmt(x)+' y no le pediste nada.'+(nuevo?' La gente lo comenta: eres <b>magnánimo</b>.':'');
+        }},
+        {t:'Comprarle el negocio por centavos',f:()=>{
+          const x=Math.max(6,patSeguro88()*.01); S.efectivo+=x; S.p.reputacion=clamp(S.p.reputacion-4,0,100);
+          if(yo88('honrado')){ quitarRasgo88(S.p,'honrado'); return 'Te quedaste con su negocio y una ganancia de '+fmt(x)+'. Ya no te puedes llamar honrado.'; }
+          const nuevo=darRasgo88(S.p,'sin_escrupulos','Te aprovechaste de un socio caído ('+S.anio+')');
+          return 'Te quedaste con su negocio y una ganancia de '+fmt(x)+'.'+(nuevo?' Ahora eres <b>sin escrúpulos</b>.':'');
+        }},
+        {t:'Desearle suerte y seguir',f:()=>'No te metiste. La vida siguió.'}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:.6,
+      c:()=>S.p&&S.p.edad>=22&&S.p.edad<=55&&patSeguro88()>=50,
+      t:()=>'Te invitan a la vida nocturna de los que mandan en '+esc(S.p.ciudad||'la ciudad')+': fiestas, viajes, apuestas. Ahí se cierran negocios, y también se pierde la cabeza.',
+      o:[
+        {t:'Meterte de lleno',f:()=>{
+          S.p.felicidad=clamp(S.p.felicidad+8,0,100); S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)-6,0,100);
+          if(isFinite(S.p.redes)) S.p.redes=clamp(S.p.redes+5,0,100);
+          const nuevo=darRasgo88(S.p,'derrochador','La noche te cambió ('+S.anio+')');
+          return 'Fue el mejor año de tu vida, o eso recuerdas.'+(nuevo?' Ahora eres <b>derrochador</b>.':'');
+        }},
+        {t:'Ir de vez en cuando',f:()=>{ if(isFinite(S.p.redes)) S.p.redes=clamp(S.p.redes+2,0,100); return 'Fuiste a las que valían la pena. Hiciste un par de contactos.'; }},
+        {t:'Quedarte en casa con lo tuyo',f:()=>{
+          if(yo88('derrochador')){ if(chance(.4)){ quitarRasgo88(S.p,'derrochador'); return 'Decir que no te costó, pero te demostró algo: ya no eres derrochador.'; } return 'Te quedaste, pero las ganas no se fueron.'; }
+          if(chance(.5)&&darRasgo88(S.p,'austero','Le dijiste que no a la noche ('+S.anio+')')) return 'Te quedaste en casa. Los demás te ven como alguien <b>austero</b>.';
+          return 'Te quedaste en casa. Nadie te extrañó demasiado.';
+        }}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:1.0,
+      c:()=>S.p&&rasgosDe88(S.p).some(id=>VICIOS_88[id]),
+      t:()=>{
+        const vs=rasgosDe88(S.p).filter(id=>VICIOS_88[id]); if(!vs.length) return null;
+        const id=pick(vs); S._vicio88=id;
+        return '<b>'+esc(nombreRasgo88(id))+'.</b> '+VICIOS_88[id].t+(id==='vanidoso'?'':' (Buscar ayuda cuesta '+fmt(costoTrabajo88())+'.)');
+      },
+      o:[
+        {t:'Buscar ayuda de verdad',f:()=>{
+          const id=S._vicio88; if(!id||!yo88(id)) return 'Ya no aplicaba.';
+          const costo=id==='vanidoso'?0:costoTrabajo88();
+          if(S.efectivo<costo) return 'Quisiste hacerlo, pero no tenías con qué pagarlo.';
+          S.efectivo-=costo;
+          const prob=clamp(.45+((S.p.atr&&S.p.atr.disciplina||5)-5)*.04+(((S.p.trabajo88||{})[id])||0)*.15,.15,.9);
+          if(chance(prob)){ quitarRasgo88(S.p,id); if(S.p.trabajo88) delete S.p.trabajo88[id]; return VICIOS_88[id].ayuda+': funcionó. Ya no eres '+esc(nombreRasgo88(id).toLowerCase())+'.'; }
+          S.p.trabajo88=S.p.trabajo88||{}; S.p.trabajo88[id]=(S.p.trabajo88[id]||0)+1;
+          return VICIOS_88[id].ayuda+': todavía no, pero algo cambió. La próxima vez será más fácil.';
+        }},
+        {t:'Así soy',f:()=>{ const id=S._vicio88; if(!id||!VICIOS_88[id]||!yo88(id)) return 'Ya no aplicaba.'; return VICIOS_88[id].asi(); }}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:1.0,
+      c:()=>((S.familia&&S.familia.hijos)||[]).some(h=>h.edad>=14&&h.edad<=28&&!h.montoLoSuyo&&tiene88(h,'rebelde')),
+      t:()=>{
+        const cs=S.familia.hijos.filter(h=>h.edad>=14&&h.edad<=28&&!h.montoLoSuyo&&tiene88(h,'rebelde')); if(!cs.length) return null;
+        const h=pick(cs); S._rebelde88=h.nombre;
+        return '<b>'+esc(h.nombre)+'</b> se desapareció tres días y volvió como si nada. Dice que no le debe explicaciones a nadie, y menos al apellido.';
+      },
+      o:[
+        {t:'Darle espacio y escucharlo',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._rebelde88); if(!h) return 'Ya no aplicaba.';
+          h.vinculo=clamp(h.vinculo+8,0,100);
+          if(chance(.3)){ quitarRasgo88(h,'rebelde'); return 'Lo escuchaste de verdad, quizás por primera vez. '+esc(h.nombre)+' ya no es el rebelde de antes.'; }
+          return 'Lo escuchaste. No cambió de un día para otro, pero el vínculo mejoró.';
+        }},
+        {t:'Ponerle mano dura',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._rebelde88); if(!h) return 'Ya no aplicaba.';
+          h.vinculo=clamp(h.vinculo-10,0,100); if(h.atr) h.atr.disciplina=clamp(h.atr.disciplina+1,1,10);
+          if(chance(.2)){ h.vinculo=clamp(h.vinculo-10,0,100); return 'La mano dura lo alejó todavía más. '+esc(h.nombre)+' casi no te habla.'; }
+          if(chance(.25)&&darRasgo88(h,'disciplinado','La mano dura le dejó marca ('+S.anio+')')) return 'Le costó, pero se enderezó: '+esc(h.nombre)+' ahora es <b>disciplinado</b>.';
+          return 'Le pusiste reglas. Las cumple, a regañadientes.';
+        }}
+      ]
+    });
+    EVENTOS_LOCALES.push({
+      p:.8,
+      c:()=>(S.rivales||[]).some(r=>r.viva)&&((S.familia&&S.familia.hijos)||[]).some(h=>h.edad>=20&&!h.montoLoSuyo&&tiene88(h,'leal')),
+      t:()=>{
+        const cs=S.familia.hijos.filter(h=>h.edad>=20&&!h.montoLoSuyo&&tiene88(h,'leal')); if(!cs.length) return null;
+        const h=pick(cs), r=pick(rivalesVivas()); S._leal88=h.nombre;
+        return 'Los <b>'+esc(r?r.apellido:'rivales')+'</b> le ofrecieron a <b>'+esc(h.nombre)+'</b> una fortuna por irse a trabajar con ellos. Dijo que no sin pensarlo dos veces.';
+      },
+      o:[
+        {t:'Reconocérselo frente a todos',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._leal88); if(!h) return 'Ya no aplicaba.';
+          h.vinculo=clamp(h.vinculo+8,0,100); moverPrestigio(1,'un hijo que no se vende');
+          return 'Lo dijiste en la mesa grande, delante de todos. '+esc(h.nombre)+' no lo va a olvidar.';
+        }},
+        {t:'Darlo por sentado',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._leal88); if(!h) return 'Ya no aplicaba.';
+          h.vinculo=clamp(h.vinculo-4,0,100);
+          return 'No dijiste nada. A '+esc(h.nombre)+' le dolió un poco.';
+        }}
+      ]
+    });
+    window.__SA88_EVENTOS=true;
+  }
+
+  function init88(){
+    wrapNuevoHijo88(); wrapHeredar88(); wrapDelito88(); wrapPrestigio88(); wrapMuerte88();
+    wrapPaso88(); wrapEscenaHijo88(); wrapConectar88(); instalarEventos88();
+    Object.assign(window,{RASGOS_88,rasgosDe88,darRasgo88,quitarRasgo88,chipsRasgos88,textoRasgos88,htmlRasgosResumen88,
+      opcionCaracter88,escenaRasgos88,abrirRasgos88,bonoRasgoGuerra88,bonoRasgoAlianza88,bonoReconciliar88,
+      propensoRuptura88,correrRasgos88,formarCaracter88});
+    try{ conectarRasgos88(); }catch(e){}
+  }
+  setTimeout(init88,40);
+  setTimeout(init88,220);
+  setTimeout(init88,650);
+  window.__SA88={version:V88};
 })();
 </script>
 
