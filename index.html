@@ -533,10 +533,85 @@ html{scroll-behavior:smooth}
 @media(prefers-reduced-motion:reduce){.sa35-person,.sa35-btn{transition:none!important;transform:none!important}}
 
 </style>
+<style id="estilos-v90">
+/* ==========================================================================
+   v90 · PASE VISUAL: tablas, eventos con identidad, periódico, informe
+   ========================================================================== */
+/* --- tablas .libro: líneas del tema actual, filas con aire, fila de suma destacada --- */
+.libro td{padding:9px 6px;border-bottom:1px solid var(--ui-line);vertical-align:middle;line-height:1.35}
+.libro td:first-child{padding-left:2px}
+.libro td:last-child{padding-right:2px}
+.libro tr:last-child td{border-bottom:0}
+.libro tr:hover td{background:rgba(240,231,213,.025)}
+.libro tr.suma td{border-top:1px solid rgba(214,166,72,.38);background:rgba(214,166,72,.05);padding-top:11px;padding-bottom:11px}
+.libro tr.suma td:first-child{border-radius:8px 0 0 8px;padding-left:10px}
+.libro tr.suma td:last-child{border-radius:0 8px 8px 0;padding-right:10px}
+.libro-ordenes{border-color:var(--ui-line);border-radius:10px}
+.medida .pista{background:rgba(240,231,213,.08)}
+.aviso{border-radius:10px}
+.informe .linea{border-bottom-color:var(--ui-line)}
+@media (max-width:700px){
+  table.libro{min-width:0;font-size:12.5px}
+  .libro td{padding:8px 4px}
+  .libro td:first-child{white-space:normal}
+}
+
+/* --- eventos del año con identidad por categoría --- */
+.lienzo.evento90{position:relative;border-top:3px solid var(--c90,var(--laton))}
+.lienzo.evento90 .rubro{color:var(--c90,var(--laton-op));letter-spacing:.06em}
+.lienzo.evento90 .rubro,.lienzo.evento90 h2{padding-right:60px}
+.lienzo.evento90 .relato{font-size:15px;color:#CFC6B4}
+.evento90-sello{position:absolute;top:22px;right:24px;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--c90,var(--laton));display:flex;align-items:center;justify-content:center;background:rgba(240,231,213,.03);animation:sello90 .45s cubic-bezier(.2,.8,.3,1.2) both}
+.evento90-sello svg{width:22px;height:22px;stroke:var(--c90,var(--laton));fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+@keyframes sello90{from{opacity:0;transform:scale(.6) rotate(-12deg)}to{opacity:1;transform:none}}
+.lienzo.ev90-justicia{--c90:#D06A60}
+.lienzo.ev90-familia{--c90:#79C897}
+.lienzo.ev90-politica{--c90:#B79BE0}
+.lienzo.ev90-salud{--c90:#E8A26B}
+.lienzo.ev90-mercado{--c90:#7FB4D9}
+.lienzo.ev90-compania{--c90:#D6A648}
+
+/* --- los hitos históricos llegan como primera página de periódico --- */
+.lienzo.periodico90{background:linear-gradient(180deg,#F2EAD8,#E6DCC6);color:#1F1A13;border:1px solid #CDBF9F;border-top:1px solid #CDBF9F}
+.periodico90 .relato,.periodico90 .rubro{display:none}
+.p90-cab{text-align:center;border-bottom:3px double #3A3226;padding-bottom:7px;margin-bottom:14px}
+.p90-medio{font-family:var(--display);font-size:clamp(28px,6.5vw,42px);line-height:1;color:#1F1A13;letter-spacing:.01em}
+.p90-linea{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5A4E3C;border-top:1px solid #3A3226;margin-top:9px;padding-top:6px}
+.p90-titular{font-family:var(--display);font-size:clamp(23px,4.4vw,33px);line-height:1.13;color:#1F1A13;margin:2px 0 10px;font-weight:400}
+.p90-bajada{font-size:13px;color:#5A4E3C;font-style:italic;border-bottom:1px solid #CDBF9F;padding-bottom:12px;line-height:1.5}
+.periodico90 .carta{background:rgba(31,26,19,.045);border-color:rgba(31,26,19,.2);color:#1F1A13}
+.periodico90 .carta:hover{border-color:#8A6D2E;background:rgba(31,26,19,.07)}
+.periodico90 .carta .nom{color:#1F1A13}
+.periodico90 .carta .txt{color:#5A4E3C}
+.periodico90 .carta .glifo{border-color:#8A6D2E}
+.periodico90 .carta .glifo svg{stroke:#6B5222}
+
+/* --- informe de cierre de año: cifras clave, curva del patrimonio, recortes de prensa --- */
+.informe90-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.informe90-kpis .k{border:1px solid var(--ui-line);border-radius:10px;padding:10px 12px;background:rgba(240,231,213,.03);opacity:0;animation:asoma .35s ease-out forwards}
+.informe90-kpis .k>span{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2)}
+.informe90-kpis .k b{display:block;font-family:var(--display);font-weight:400;font-size:19px;color:var(--marfil);margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.informe90-kpis .k small{display:block;font-size:11px;color:var(--humo);margin-top:2px}
+.informe90-kpis .sube{color:var(--jade)}.informe90-kpis .baja{color:var(--ui-red)}
+@media (max-width:520px){.informe90-kpis{grid-template-columns:1fr 1fr}.informe90-kpis .k:last-child{grid-column:1 / -1}}
+.informe90-curva-caja{margin-top:16px}
+.informe90-curva-caja .et b{float:right;font-family:var(--display);font-size:14px;letter-spacing:0;text-transform:none;color:var(--marfil);font-weight:400}
+.informe90-curva-caja .ejes{display:flex;justify-content:space-between;font-size:10.5px;color:var(--humo2);margin-top:4px}
+.informe90-curva-caja .et{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2);margin-bottom:4px}
+.informe90-curva{display:block;width:100%;height:auto;overflow:visible}
+.informe90-curva .trazo{stroke-dasharray:1400;stroke-dashoffset:1400;animation:trazo90 1.1s .25s ease-out forwards}
+@keyframes trazo90{to{stroke-dashoffset:0}}
+.informe90-curva rect.toque:hover{fill:rgba(240,231,213,.06)}
+.informe .prensa{border-top:0;padding-top:4px;margin-top:16px}
+.informe .prensa:before{content:"La prensa del año";display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2);margin-bottom:8px}
+.informe .prensa .titular{background:rgba(240,231,213,.04);border-left:3px solid var(--laton-op);border-radius:0 8px 0 0;padding:11px 13px 3px;margin:0;font-size:17px}
+.periodico90 .p90-titular{padding-right:0}
+.informe .prensa .medio{background:rgba(240,231,213,.04);border-left:3px solid var(--laton-op);border-radius:0 0 8px 0;padding:2px 13px 10px;margin:0 0 9px;font-style:italic}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v89</div>
+<div class="version-badge" id="versionBadge">v90</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -18214,6 +18289,161 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init89,220);
   setTimeout(init89,650);
   window.__SA89={version:V89};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v90 · PASE VISUAL
+   Los eventos del año dejan de ser "Se presenta algo": cada uno llega con
+   su categoría, su color y su sello; los hitos históricos llegan como
+   primera página de periódico; el informe de cierre gana cifras clave y
+   la curva del patrimonio año a año.
+   ========================================================================== */
+(function(){
+  const V90='v90';
+  const CATS_90={
+    justicia:{n:'La justicia',t:'Un asunto legal',g:'riesgo',
+      re:/fiscal|juez|juzgad|demand[aó]|DIAN|delito|abogad|cárcel|condena|tribunal|soborn|extors|ilegal|investigaci|veredicto|fallo:|juicio/i},
+    familia:{n:'En familia',t:'Asuntos de familia',g:'familia',
+      re:/\bhij[oa]s?\b|niet[oa]|boda|casarse|pareja|espos[oa]|matrimoni|famili|herman[oa]|apellido|embaraz|sobrin|suegr|cuñad/i},
+    politica:{n:'La política',t:'La política toca a la puerta',g:'junta',
+      re:/elecci|alcald|ministr|gobierno|congres|senad|partido|campaña política|candidat|decreto/i},
+    salud:{n:'Tu cuerpo',t:'Un aviso de la salud',g:'salud',
+      re:/salud|médic|enferm|hospital|doctor|dormir|infarto|clínica/i},
+    mercado:{n:'Los mercados',t:'Se mueve el mercado',g:'mercado',
+      re:/bolsa|acciones|dólar|tasa de interés|inflaci|banco|crédito|inversionista|cotiza/i},
+    compania:{n:'Los negocios',t:'En la compañía',g:'compania',re:null}
+  };
+  const ORDEN_90=['justicia','familia','politica','salud','mercado'];
+  const plano=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+  function categoriaEvento90(html){
+    const t=plano(html);
+    for(const k of ORDEN_90) if(CATS_90[k].re.test(t)) return k;
+    return 'compania';
+  }
+  function hitoDe90(html){
+    if(typeof HISTORIA==='undefined'||!Array.isArray(HISTORIA)) return null;
+    const t=plano(html);
+    return HISTORIA.find(h=>h&&h.t&&t.indexOf(h.t)>=0)||null;
+  }
+  function selloSVG90(g){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+((typeof GLIFOS!=='undefined'&&(GLIFOS[g]||GLIFOS.compania))||'')+'</svg>'; }
+  function decorarEvento90(o){
+    const anio=(S&&S.anio)||'';
+    const hito=hitoDe90(o.cuerpo);
+    if(hito){
+      const medios=(typeof MEDIOS!=='undefined'&&MEDIOS.length)?MEDIOS:['El Observador'];
+      const medio=medios[Math.abs(Number(anio)||0)%medios.length];
+      return {clase:'evento90 periodico90',ancho:true,opciones:o.opciones,cerrable:o.cerrable,
+        html:'<div class="p90-cab"><div class="p90-medio">'+esc(medio)+'</div>'
+          +'<div class="p90-linea"><span>'+esc((S&&S.p&&S.p.ciudad)||'Bogotá')+', '+anio+'</span><span>Edición extraordinaria</span></div></div>'
+          +'<h2 class="p90-titular">'+esc(hito.t)+'</h2>'
+          +'<div class="p90-bajada">Es lo único de lo que se habla en el país. La pregunta en tu casa es qué hacer.</div>'};
+    }
+    const k=categoriaEvento90(o.cuerpo), c=CATS_90[k];
+    return {rubro:'Año '+anio+' · '+c.n,titulo:c.t,cuerpo:o.cuerpo,clase:'evento90 ev90-'+k,
+      html:'<span class="evento90-sello" title="'+esc(c.n)+'">'+selloSVG90(c.g)+'</span>',
+      opciones:(o.opciones||[]).map(x=>Object.assign({cat:c.g},x)),cerrable:o.cerrable};
+  }
+  function wrapModal90(){
+    const old=window.modal; if(typeof old!=='function'||window.__SA90_MODAL) return;
+    window.modal=function(o){
+      try{
+        if(o&&/^Año -?\d+$/.test(String(o.kicker||''))&&o.titulo==='Se presenta algo'&&typeof o.cuerpo==='string'){
+          const d=decorarEvento90(o); if(d) return escena(d);
+        }
+      }catch(e){}
+      return old.apply(this,arguments);
+    };
+    window.__SA90_MODAL=true;
+  }
+
+  /* --- historia del patrimonio, para la curva del informe --- */
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?x:0; }catch(e){ return 0; } };
+  function anotarAnio90(){
+    if(typeof S==='undefined'||!S||!S.p) return;
+    const h=Array.isArray(S.hist90)?S.hist90:(S.hist90=[]);
+    const fila={a:S.anio,p:Math.round(pat()*10)/10,pr:Math.round(prestigio())};
+    if(h.length&&h[h.length-1].a===fila.a) h[h.length-1]=fila; else h.push(fila);
+    if(h.length>60) h.splice(0,h.length-60);
+  }
+  function wrapPaso90(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA90_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anotarAnio90(); }catch(e){} return r; };
+    window.__SA90_PASO=true;
+  }
+  function wrapHeredar90(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA90_HEREDAR) return;
+    window.heredar=function(){
+      const h=(S&&Array.isArray(S.hist90))?S.hist90.slice():null;
+      const r=old.apply(this,arguments);
+      try{ if(h&&S) S.hist90=h.concat(Array.isArray(S.hist90)?S.hist90.filter(x=>!h.some(y=>y.a===x.a)):[]); }catch(e){}
+      return r;
+    };
+    window.__SA90_HEREDAR=true;
+  }
+
+  /* --- la curva: una sola serie, línea de 2px, punto final marcado, tooltip por año --- */
+  function curva90(hist){
+    const pts=(hist||[]).slice(-24); if(pts.length<2) return '';
+    const W=560,H=96,pl=6,pr=8,pt=10,pb=6;
+    const vals=pts.map(x=>x.p), mn=Math.min(...vals), mx=Math.max(...vals);
+    const span=(mx-mn)||Math.max(1,Math.abs(mx)*.1);
+    const X=i=>pl+i*(W-pl-pr)/(pts.length-1), Y=v=>pt+(1-(v-mn)/span)*(H-pt-pb);
+    const d=pts.map((x,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(x.p).toFixed(1)).join(' ');
+    const base=H-pb;
+    const area=d+' L'+X(pts.length-1).toFixed(1)+' '+base+' L'+X(0).toFixed(1)+' '+base+' Z';
+    const ult=pts[pts.length-1], ancho=(W-pl-pr)/(pts.length-1);
+    const toques=pts.map((x,i)=>'<rect class="toque" x="'+(X(i)-ancho/2).toFixed(1)+'" y="0" width="'+ancho.toFixed(1)+'" height="'+base+'" fill="transparent"><title>'+x.a+': '+fmt(x.p)+'</title></rect>').join('');
+    return '<div class="informe90-curva-caja"><div class="et">Tu patrimonio, año a año <b>'+esc(fmt(ult.p))+'</b></div>'
+      +'<svg class="informe90-curva" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Patrimonio de '+pts[0].a+' a '+ult.a+': de '+esc(fmt(pts[0].p))+' a '+esc(fmt(ult.p))+'">'
+      +'<defs><linearGradient id="g90area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6A648" stop-opacity=".22"/><stop offset="1" stop-color="#D6A648" stop-opacity="0"/></linearGradient></defs>'
+      +'<line x1="'+pl+'" y1="'+base+'" x2="'+(W-pr)+'" y2="'+base+'" style="stroke:rgba(240,231,213,.1)" stroke-width="1"/>'
+      +'<path d="'+area+'" fill="url(#g90area)"/>'
+      +'<path class="trazo" d="'+d+'" fill="none" stroke="#D6A648" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+      +'<circle cx="'+X(pts.length-1).toFixed(1)+'" cy="'+Y(ult.p).toFixed(1)+'" r="4.5" fill="#D6A648" style="stroke:#17281f" stroke-width="2"/>'
+      +toques+'</svg><div class="ejes"><span>'+pts[0].a+'</span><span>'+ult.a+'</span></div></div>';
+  }
+  function kpis90(){
+    const patr=pat(), dl=isFinite(S.ultimoDelta)?S.ultimoDelta:0, antes=patr-dl;
+    const pctD=Math.abs(antes)>.5?dl/Math.abs(antes):0;
+    const h=Array.isArray(S.hist90)?S.hist90:[], prev=h.length>1?h[h.length-2]:null;
+    const pr=Math.round(prestigio()), dpr=prev?pr-prev.pr:0;
+    const flecha=(v,txt)=>Math.abs(v)<1e-9?'<small>sin cambio</small>'
+      :'<small><span class="'+(v>0?'sube':'baja')+'">'+(v>0?'▲':'▼')+'</span> '+txt+'</small>';
+    return '<div class="informe90-kpis">'
+      +'<div class="k" style="animation-delay:60ms"><span>Patrimonio</span><b>'+fmt(patr)+'</b>'+flecha(dl,(dl>0?'+':'−')+fmt(Math.abs(dl))+(pctD?' ('+(dl>0?'+':'−')+pc(Math.abs(pctD))+')':''))+'</div>'
+      +'<div class="k" style="animation-delay:120ms"><span>Prestigio</span><b>'+pr+'/100</b>'+flecha(dpr,(dpr>0?'+':'−')+Math.abs(dpr)+' en el año')+'</div>'
+      +'<div class="k" style="animation-delay:180ms"><span>En caja</span><b>'+fmt(S.efectivo)+'</b><small>'+((S.deuda||0)>0?'debes '+fmt(S.deuda):'sin deuda personal')+'</small></div>'
+      +'</div>';
+  }
+  function enriquecerInforme90(){
+    const caja=document.querySelector('#escenaHost .lienzo.informe'); if(!caja||caja.__v90) return;
+    caja.__v90=true;
+    const baj=caja.querySelector('.bajada');
+    if(baj) baj.insertAdjacentHTML('afterend',kpis90());
+    const curva=curva90(S.hist90);
+    if(curva){ const pr=caja.querySelector('.prensa'); if(pr) pr.insertAdjacentHTML('beforebegin',curva); }
+  }
+  function wrapInforme90(){
+    const old=window.escenaInforme; if(typeof old!=='function'||window.__SA90_INFORME) return;
+    window.escenaInforme=function(){
+      try{ anotarAnio90(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ enriquecerInforme90(); }catch(e){}
+      return r;
+    };
+    window.__SA90_INFORME=true;
+  }
+
+  function init90(){
+    wrapModal90(); wrapPaso90(); wrapHeredar90(); wrapInforme90();
+    Object.assign(window,{categoriaEvento90,decorarEvento90,curva90,anotarAnio90});
+  }
+  setTimeout(init90,40);
+  setTimeout(init90,220);
+  setTimeout(init90,650);
+  window.__SA90={version:V90};
 })();
 </script>
 
