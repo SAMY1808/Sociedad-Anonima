@@ -503,7 +503,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v86</div>
+<div class="version-badge" id="versionBadge">v87</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2266,6 +2266,13 @@ function etiquetaViento(v){
   if(v>-.2) return {t:'sin novedad',c:'var(--humo)'};
   if(v>-.55) return {t:'en contra',c:'var(--lacre)'};
   return {t:'muy golpeado',c:'var(--lacre)'};
+}
+function etiquetaCiclo87(c){
+  if(c>=.08) return {t:'en auge',c:'var(--jade)'};
+  if(c>=.02) return {t:'creciendo',c:'var(--jade)'};
+  if(c>-.02) return {t:'estable',c:'var(--humo)'};
+  if(c>-.08) return {t:'enfriándose',c:'var(--lacre)'};
+  return {t:'en crisis',c:'var(--lacre)'};
 }
 
 /* ==========================================================================
@@ -7625,6 +7632,8 @@ function renderLienzo(){
       +'<div class="aviso '+(S.tension>62?'':'oro')+'"><b>'+esc(gg.n.charAt(0).toUpperCase()+gg.n.slice(1))+'.</b> '+esc(gg.d)
       +(S.gobierno.apoyado?' <b>Tú lo apoyaste.</b>':'')+'</div>'
       +medida('tensión',S.tension,100,S.tension>62?'r':'v')
+      +'<div class="apunte">El ciclo económico está <b style="color:'+etiquetaCiclo87(S.macro.ciclo).c+'">'+etiquetaCiclo87(S.macro.ciclo).t+'</b>. '
+      +'Tasa de interés '+pc(S.macro.tasa)+' · inflación '+pc(S.macro.inflacion)+' · dólar $'+Math.round(S.macro.usd)+'.</div>'
       +'<div class="apunte">Con el país tensionado la bolsa paga menos por todo. '
       +'Renta '+pc(tarifaRenta())+' · sucesiones '+pc(fisco().sucesion)+' · patrimonio '+pc(fisco().patrimonio)+'. '
       +(hayElecciones()?'<b>Hay elecciones este año.</b>':'Próximas elecciones en '+Math.max(0,4-(S.anio-S.gobierno.desde))+' años.')+'</div>';
@@ -14640,6 +14649,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(v>=15) return 'tensa';
     return 'rival declarada';
   }
+  window.relacionTexto64=relacionTexto64;
   /* cuota de mercado: mide cada casa del sector con la misma vara que ya usa
      el juego para comparar rivales (patrimonio) contra tu compañía (valuar). */
   function sectorMarketShare64(sectorId){
@@ -14683,6 +14693,13 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            log('Propusiste una alianza comercial a los <b>'+esc(r.apellido)+'</b>. La relación entre las casas mejoró.','bien');
            S.mov--; cerrarModal(); render();
          }},
+        {t:'Proponer una alianza matrimonial',cat:'familia',
+         d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'En guerra no se negocia una boda: propón una tregua primero.'
+           :(!(S.familia&&S.familia.hijos&&S.familia.hijos.some(h=>h.edad>=18&&h.edad<=45&&!h.pareja))?'No tienes ningún heredero soltero disponible ahora mismo.'
+           :'Casar a un heredero con esta casa sella la relación de por vida, con dote de por medio. No siempre la aceptan.'),
+         dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Estás en guerra con ellos'
+           :(!(S.familia&&S.familia.hijos&&S.familia.hijos.some(h=>h.edad>=18&&h.edad<=45&&!h.pareja))?'No tienes heredero disponible':null),
+         cerrar:false,run:()=>{ if(typeof window.escenaAlianzaMatrimonial87==='function') window.escenaAlianzaMatrimonial87(r); }},
         {t:'Buscar la confrontación',cat:'riesgo',
          d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra empresarial con ellos: usa el frente de guerra.':(miSector?'Les disputas mercado en '+(s?s.n:r.sector)+'. Puede salir bien o mal.':'Solo tiene sentido si compites en su mismo sector.'),
          dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra con ellos':(!miSector?'No estás en el mismo negocio que ellos':null),cerrar:false,
@@ -16753,6 +16770,195 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init84,220);
   setTimeout(init84,650);
   window.__SA84={version:V84};
+})();
+</script>
+<script>
+/* ==========================================================================
+   v87 · HITOS CON DECISIÓN REAL, ALIANZAS MATRIMONIALES, CICLO VISIBLE
+   ========================================================================== */
+(function(){
+  const V87='v87';
+
+  /* --- #1 cada hito histórico suma una decisión proactiva real, además de "Seguir" --- */
+  const OPCIONES_HITO_87={
+    0:()=>{ const costo=Math.max(60,Math.round(S.efectivo*.015));
+      return [{t:'Buscarte un padrino en los dos partidos (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.efectivo<costo) return 'Quisiste buscar un padrino político, pero no tenías con qué.';
+          S.efectivo-=costo; S.p.redes=clamp(S.p.redes+10,0,100); return 'Pagaste tu entrada al reparto bipartidista: conexiones en los dos partidos.'; }}];
+    },
+    1:()=>{ const monto=Math.max(100,Math.round(S.efectivo*.08));
+      return [{t:'Meterle a la bonanza ahora mismo (pones '+fmt(monto)+')',
+        f:()=>{ if(S.efectivo<monto) return 'Quisiste entrarle a la bonanza, pero no tenías con qué.';
+          S.efectivo-=monto; const gan=Math.round(monto*.65); S.efectivo+=monto+gan; return 'Compraste y vendiste rápido en plena bonanza: ganaste '+fmt(gan)+'.'; }}];
+    },
+    2:()=>{ if(!S.emp||!(S.emp.deuda>0)) return [];
+      const costo=Math.round(S.emp.deuda*.05);
+      return [{t:'Refinanciar la deuda ya, antes de que se encarezca más (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste refinanciar a tiempo, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; return 'Refinanciaste a tiempo: tu deuda no subió con la crisis.'; }}];
+    },
+    3:()=>{ if(!S.emp) return [];
+      const s=sectorDe(S.emp); if(!['moda','retail','alimentos'].includes(s.id)) return [];
+      const costo=Math.round(S.emp.ingresos*.3);
+      return [{t:'Modernizar la planta antes de que llegue la competencia (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste modernizar a tiempo, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; S.emp.eficiencia=clamp(S.emp.eficiencia+10,0,100); return 'Modernizaste a tiempo: '+esc(S.emp.nombre)+' no perdió mercado con la apertura.'; }}];
+    },
+    4:()=>{ const tieneBienes=(S.bienes||[]).some(b=>b.clase!=='finca');
+      if(!tieneBienes) return [];
+      return [{t:'Vender la finca raíz ya, antes del derrumbe completo',
+        f:()=>{ let total=0; (S.bienes||[]).forEach(b=>{ if(b.clase!=='finca') total+=b.valor*.9; });
+          S.bienes=(S.bienes||[]).filter(b=>b.clase==='finca'); S.efectivo+=total;
+          S.macro.tasa=clamp(S.macro.tasa+.08,0,.45); S.macro.ciclo=-.17;
+          if(S.emp){ S.emp.ingresos*=.85; S.emp.aniosMalos++; }
+          return 'Vendiste antes del derrumbe: te quedaste con '+fmt(total)+' en vez de perder casi un tercio de su valor.'; }}];
+    },
+    5:()=>{ if(!S.emp) return [];
+      const expuesto=(S.emp.exportaciones>0)||(typeof filiales==='function'&&filiales(S.emp).length>0);
+      if(!expuesto) return [];
+      const costo=Math.round(S.emp.ingresos*.1);
+      return [{t:'Cubrirte en dólares antes de que se cierren los mercados (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste cubrirte en dólares, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; return 'La cobertura amortiguó el golpe de la crisis mundial sobre tus ingresos de afuera.'; }}];
+    },
+    6:()=>{ if(!S.emp||sectorDe(S.emp).id!=='mineria') return [];
+      const costo=Math.round(S.emp.ingresos*.25);
+      return [{t:'Diversificar rápido fuera del petróleo (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste diversificar a tiempo, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; S.macro.usd*=1.55; S.macro.ciclo=-.08; S.emp.ingresos*=.92;
+          return 'Diversificaste a tiempo: tu negocio minero-energético perdió solo un 8%, no un 30%.'; }}];
+    },
+    7:()=>{ if(!S.emp) return [];
+      const s=sectorDe(S.emp).id; if(!['retail','moda','logistica'].includes(s)) return [];
+      const costo=Math.round(S.emp.ingresos*.15);
+      return [{t:'Pivotar a ventas digitales y domicilios (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste pivotar a tiempo, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; S.emp.ingresos*=.92; S.p.salud=clamp(S.p.salud-3,0,100);
+          return 'El pivote a digital amortiguó el golpe: solo perdiste un 8%, no un 26%.'; }}];
+    },
+    8:()=>{ if(!S.emp) return [];
+      const costo=Math.round(S.emp.ingresos*.08);
+      return [{t:'Adelantar una reestructuración tributaria (cuesta '+fmt(costo)+')',
+        f:()=>{ if(S.emp.caja<costo) return 'Quisiste adelantarte, pero no había caja suficiente en '+esc(S.emp.nombre)+'.';
+          S.emp.caja-=costo; S.macro.ciclo=.07; S.macro.inflacion=clamp(S.macro.inflacion+.02,0,.35);
+          return 'La reestructuración suavizó el golpe de la reforma: la inflación te pegó menos.'; }}];
+    }
+  };
+  function wrapCorrerHistoria87(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA87_HISTORIA) return;
+    window.correrHistoria=function(){
+      const antes=cola.length;
+      const r=old.apply(this,arguments);
+      try{
+        HISTORIA.forEach((ev,i)=>{
+          if(ev.anio!==S.anio) return;
+          const extra=OPCIONES_HITO_87[i]; if(!extra) return;
+          for(let k=antes;k<cola.length;k++){
+            if(cola[k].__hito87) continue;
+            if(cola[k].t().indexOf(esc(ev.t))>=0){
+              const base=cola[k].o[0];
+              cola[k].o=[{t:'Seguir el rumbo normal',f:base.f}].concat(extra());
+              cola[k].__hito87=true;
+              break;
+            }
+          }
+        });
+      }catch(e){}
+      return r;
+    };
+    window.__SA87_HISTORIA=true;
+  }
+  /* --- #2 alianzas matrimoniales propuestas por el jugador contra una casa rival real --- */
+  function escenaAlianzaMatrimonial87(r){
+    const elegibles=(S.familia&&S.familia.hijos||[]).filter(h=>h.edad>=18&&h.edad<=45&&!h.pareja);
+    const enGuerra=window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r);
+    if(enGuerra||!elegibles.length){
+      escena({rubro:'Las otras casas',titulo:'Alianza matrimonial con los '+esc(r.apellido),ancho:true,
+        cuerpo:enGuerra?'En guerra no se negocia una boda: propón una tregua primero.':'No tienes ningún heredero soltero en edad de casarse ahora mismo.',
+        opciones:[{t:'Volver',cat:'legado',cerrar:false,run:()=>window.escenaRivalDetalle64(r)}],cerrable:true});
+      return;
+    }
+    const miPat=patrimonio();
+    const dote=Math.max(10,Math.round(Math.min(miPat,r.patrimonio||1)*.08));
+    const tePagan=miPat>=(r.patrimonio||0);
+    const prob=clamp(.35+(r.relacionCasa||50)/100*.55,.1,.92);
+    escena({rubro:'Las otras casas',titulo:'Alianza matrimonial con los '+esc(r.apellido),ancho:true,
+      cuerpo:'Ofrecer un matrimonio sella la relación entre las dos casas, pero no todas las propuestas se aceptan. '
+        +'Con la relación actual ('+relacionTexto64(r)+'), tienes <b>'+pc(prob)+'</b> de que la acepten. '
+        +(tePagan?'Como tu casa pesa más, si aceptan ellos ponen la dote: '+fmt(dote)+' para ti.':'Como su casa pesa más, si aceptan tu casa pone la dote: '+fmt(dote)+'.'),
+      opciones:elegibles.map(h=>({
+        t:'Ofrecer a '+esc(h.nombre)+' ('+h.edad+' años)',cat:'familia',
+        d:'Vínculo con la familia: '+Math.round(h.vinculo||60)+'/100.',cerrar:false,
+        dis:(!tePagan&&S.efectivo<dote)?'No te alcanza para la dote':null,
+        run:()=>{
+          const acepta=chance(prob);
+          if(acepta){
+            const sexoBuscado=h.sexo==='h'?'m':'h';
+            h.pareja={nombre:nombreLocal(h.ciudad||S.p.ciudad,sexoBuscado)+' '+r.apellido,apellido:r.apellido,sexo:sexoBuscado,
+              edad:clamp(h.edad+ri(-4,4),18,65),casados:true,afecto:ri(55,90),paciencia:ri(55,85),
+              ciudad:h.ciudad||S.p.ciudad,casa:{apellido:r.apellido,prestigio:r.prestigio,patrimonio:r.patrimonio,rid:r.rid},alianza:true,desde:S.anio};
+            h.vinculo=clamp((h.vinculo||60)+8,0,100);
+            r.relacionCasa=clamp((r.relacionCasa||50)+28,0,100);
+            if(tePagan) S.efectivo+=dote; else S.efectivo-=dote;
+            if(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r)) S.guerraEmpresarial=null;
+            hito(esc(h.nombre)+' selló una alianza matrimonial con los '+r.apellido);
+            log('Los <b>'+esc(r.apellido)+'</b> aceptaron: <b>'+esc(h.nombre)+'</b> se casó y la alianza quedó sellada'+(tePagan?' con una dote de '+fmt(dote)+' a tu favor.':'.'),'bien');
+          } else {
+            r.relacionCasa=clamp((r.relacionCasa||50)-8,0,100);
+            log('Los <b>'+esc(r.apellido)+'</b> rechazaron la propuesta de matrimonio con '+esc(h.nombre)+'. No cayó bien que lo intentaras.','mal');
+          }
+          S.mov=Math.max(0,S.mov-1); cerrarModal(); render();
+        }
+      })).concat([{t:'Volver',cat:'legado',cerrar:false,run:()=>window.escenaRivalDetalle64(r)}]),
+      cerrable:true});
+  }
+
+  /* --- la alianza puede enfriarse: tensión ocasional con una decisión real --- */
+  function instalarEventoTensionAlianza87(){
+    if(window.__SA87_EVENTO) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    EVENTOS_LOCALES.push({
+      p:.6,
+      c:()=>S.familia&&Array.isArray(S.familia.hijos)&&S.familia.hijos.some(h=>h.pareja&&h.pareja.alianza&&h.pareja.casa&&(S.rivales||[]).some(x=>x.rid===h.pareja.casa.rid&&x.viva)),
+      t:()=>{
+        const candidatos=S.familia.hijos.filter(h=>h.pareja&&h.pareja.alianza&&h.pareja.casa&&(S.rivales||[]).some(x=>x.rid===h.pareja.casa.rid&&x.viva));
+        if(!candidatos.length) return null;
+        const h=pick(candidatos);
+        S._alianzaTension87=h.nombre;
+        return 'La alianza matrimonial de <b>'+esc(h.nombre)+'</b> con los '+esc(h.pareja.apellido)+' se está enfriando: hay un desacuerdo de negocios entre las dos casas.';
+      },
+      o:[
+        {t:'Suavizarlo con un gesto caro',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._alianzaTension87);
+          if(!h||!h.pareja||!h.pareja.alianza) return 'La tensión ya se había resuelto sola.';
+          const r=(S.rivales||[]).find(x=>x.rid===h.pareja.casa.rid);
+          const costo=Math.max(20,Math.round(S.efectivo*.03));
+          if(S.efectivo<costo) return 'Quisiste gestionarlo, pero no tenías con qué.';
+          S.efectivo-=costo;
+          if(r) r.relacionCasa=clamp((r.relacionCasa||50)+6,0,100);
+          return 'Un gesto de '+fmt(costo)+' bastó para calmar las aguas. La alianza sigue en pie.';
+        }},
+        {t:'Dejar que se enfríe',f:()=>{
+          const h=S.familia.hijos.find(x=>x.nombre===S._alianzaTension87);
+          if(!h||!h.pareja||!h.pareja.alianza) return 'La tensión ya se había resuelto sola.';
+          const r=(S.rivales||[]).find(x=>x.rid===h.pareja.casa.rid);
+          h.pareja.alianza=false;
+          if(r) r.relacionCasa=clamp((r.relacionCasa||50)-18,0,100);
+          return 'No hiciste nada y la alianza con los '+esc(h.pareja.apellido)+' se enfrió de verdad. El matrimonio sigue, pero ya no es la alianza de antes.';
+        }}
+      ]
+    });
+    window.__SA87_EVENTO=true;
+  }
+
+  function init87(){
+    wrapCorrerHistoria87(); instalarEventoTensionAlianza87();
+    window.escenaAlianzaMatrimonial87=escenaAlianzaMatrimonial87;
+  }
+  setTimeout(init87,40);
+  setTimeout(init87,220);
+  setTimeout(init87,650);
+  window.__SA87={version:V87};
 })();
 </script>
 
