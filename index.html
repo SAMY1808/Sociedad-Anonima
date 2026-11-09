@@ -150,7 +150,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.01e
 .medida{display:flex;align-items:center;gap:9px;margin:7px 0;font-size:12.5px}
 .medida .et{flex:0 0 96px;color:var(--humo)}
 .medida .pista{flex:1;height:6px;background:#241D14;border-radius:3px;overflow:hidden}
-.medida .lleno{height:100%;background:var(--laton);border-radius:3px;transition:width .6s cubic-bezier(.2,.8,.3,1)}
+.medida .lleno{display:block;height:100%;background:var(--laton);border-radius:3px;transition:width .6s cubic-bezier(.2,.8,.3,1)}
 .medida .lleno.v{background:var(--jade)}.medida .lleno.r{background:var(--lacre)}
 .medida .n{flex:0 0 30px;text-align:right;font-family:var(--display);font-size:12.5px;color:var(--humo)}
 
@@ -166,6 +166,21 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.01e
 .retrato.hostil{border-left:2px solid var(--lacre)}
 .retrato.propio{border-left:2px solid var(--laton)}
 
+.juicio89{display:flex;flex-direction:column;gap:8px;margin:4px 0 2px}
+.juicio89-cab{display:flex;flex-wrap:wrap;gap:6px}
+.juicio89-cab span{font-size:10.5px;letter-spacing:.04em;color:var(--humo);border:1px solid var(--ui-line);border-radius:999px;padding:4px 9px}
+.juicio89-monto{font-family:var(--display);font-size:20px;color:var(--marfil)}.juicio89-monto b{color:var(--laton);font-weight:400}
+.juicio89-abogado{font-size:12.5px;color:var(--humo)}.juicio89-abogado b{color:var(--marfil);font-weight:500}
+.juicio89-bitacora{border-left:2px solid var(--laton-tenue);padding:2px 0 2px 10px;font-size:11.5px;color:var(--humo2);display:flex;flex-direction:column;gap:3px}.juicio89-bitacora b{color:var(--laton-op);font-weight:500}
+.pleito89{display:flex;gap:11px;align-items:center;padding:10px 12px;border:1px solid var(--ui-line);border-radius:10px;background:rgba(240,231,213,.03);margin-bottom:7px}
+.pleito89.penal{border-color:rgba(178,65,58,.42);background:rgba(178,65,58,.07)}
+.pleito89>svg,.pleito89>.glifo{flex:0 0 auto}
+.pleito89>.glifo{width:30px;height:30px;border:1px solid rgba(178,65,58,.55);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pleito89>.glifo svg{width:15px;height:15px;stroke:#E7BDB8;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.pleito89-info{flex:1;min-width:0}.pleito89-info .nom{font-family:var(--display);font-size:15px;color:var(--marfil)}.pleito89-info .det{font-size:11.5px;color:var(--humo);margin-top:2px}
+.pleito89-prob{font-family:var(--display);font-size:19px;text-align:right;line-height:1;flex:0 0 auto}.pleito89-prob small{display:block;font-family:var(--ui);font-size:9.5px;color:var(--humo2);margin-top:3px}
+.pleito89-prob.v{color:var(--jade)}.pleito89-prob.r{color:var(--ui-red)}
+.veredicto89 h2{font-size:44px;letter-spacing:.01em}.veredicto89.bien h2{color:var(--jade)}.veredicto89.mal h2{color:var(--ui-red)}
 .rasgo88{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;line-height:1;border-radius:999px;padding:5px 9px;border:1px solid var(--ui-line);white-space:nowrap;font-family:var(--ui)}
 .rasgo88:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
 .rasgo88.virtud{color:#BFE3CB;background:rgba(108,192,143,.09);border-color:rgba(108,192,143,.38)}
@@ -521,7 +536,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v88</div>
+<div class="version-badge" id="versionBadge">v89</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7966,7 +7981,12 @@ function finDeAnio(){
         escenaSucesionAjena({pid:x.pid,nombre:x.nombre,rel:relacionPorSexo(x.rel,x.sexo),sexo:x.sexo,caudal:x.caudal,rama:x.rama,afecto:pa?pa.afecto:x.afecto},()=>{ cerrarModal(); sucesion(); });
       } else universidad();
     };
-    const justicia=()=>{ asegurarPenal(); if(S.penal.penaMuerte||S.penal.caso||S.penal.prisionRestante>0) escenaProcesoPenal(); else seguir(); };
+    const justicia=()=>{ asegurarPenal();
+      if(S.penal.penaMuerte||S.penal.caso||S.penal.prisionRestante>0){
+        /* la votación pendiente del año ya no se pierde: va primero y luego el juzgado */
+        if(S.votacionPendiente&&S.emp){ S.votacionPendiente=false; escenaVotacion(()=>escenaProcesoPenal()); }
+        else escenaProcesoPenal();
+      } else seguir(); };
     const universidad=()=>{
       const h=S.familia.hijos.find(x=>x.edad>=17&&x.edad<=19&&!x.universidad);
       if(h) escenaUniversidad(h);
@@ -14724,6 +14744,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
          dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Estás en guerra con ellos'
            :(!(S.familia&&S.familia.hijos&&S.familia.hijos.some(h=>h.edad>=18&&h.edad<=45&&!h.pareja))?'No tienes heredero disponible':null),
          cerrar:false,run:()=>{ if(typeof window.escenaAlianzaMatrimonial87==='function') window.escenaAlianzaMatrimonial87(r); }},
+        ...(typeof window.opcionDemandarRival89==='function'?[window.opcionDemandarRival89(r)]:[]),
         {t:'Buscar la confrontación',cat:'riesgo',
          d:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra empresarial con ellos: usa el frente de guerra.':(miSector?'Les disputas mercado en '+(s?s.n:r.sector)+'. Puede salir bien o mal.':'Solo tiene sentido si compites en su mismo sector.'),
          dis:(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r))?'Ya estás en guerra con ellos':(!miSector?'No estás en el mismo negocio que ellos':null),cerrar:false,
@@ -15165,6 +15186,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       run:()=>{ escenaOPA(r); }});
     if(typeof window.opcionPoderPublico71==='function') opciones.push.apply(opciones,window.opcionPoderPublico71(r,g));
     if(typeof window.opcionGuerraFinanciera82==='function') opciones.push.apply(opciones,window.opcionGuerraFinanciera82(r,g));
+    if(typeof window.opcionGuerraJudicial89==='function') opciones.push.apply(opciones,window.opcionGuerraJudicial89(r,g));
     opciones.push({t:'Proponer una tregua',cat:'legado',cerrar:false,run:()=>{
       r.relacionCasa=clamp((r.relacionCasa||10)+20,0,100);
       if(g.corto&&typeof window.cerrarCortoGuerra82==='function') window.cerrarCortoGuerra82(r,g);
@@ -17601,6 +17623,597 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init88,220);
   setTimeout(init88,650);
   window.__SA88={version:V88};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v89 · SISTEMA JUDICIAL REAL
+   Juicios penales por etapas (abogado, pruebas, soborno, preacuerdo,
+   veredicto incierto, apelación) y pleitos entre casas (demandar, ser
+   demandado, peritos, arreglos, fallo, apelación), con la guerra
+   empresarial, los rasgos (v88) y la sucesión conectados.
+   ========================================================================== */
+(function(){
+  const V89='v89';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&S&&S.p&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const enGuerra=r=>!!(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r));
+  const golpe=(t,q)=>{ try{ if(typeof window.golpeGuerra70==='function') window.golpeGuerra70(t,q); }catch(e){} };
+
+  /* --- abogados --- */
+  const ABOGADOS_89={
+    oficio:{id:'oficio',q:0,np:'Defensor de oficio',nc:'Tu abogado de planta',
+      d:'No cuesta nada. Tiene doscientos expedientes y el tuyo es uno más.',fee:()=>0},
+    reconocido:{id:'reconocido',q:1,np:'Un penalista reconocido',nc:'Una firma reconocida',
+      d:'Conoce a los jueces y sabe dónde están los huecos del expediente.',fee:()=>Math.max(8,Math.round(pat()*.008))},
+    estrella:{id:'estrella',q:2,np:'El bufete más caro del país',nc:'El bufete más caro del país',
+      d:'Gana casos que nadie más gana, y cobra como si lo supiera.',fee:()=>Math.max(25,Math.round(pat()*.025))}
+  };
+  function qFO89(){
+    try{ const a=S.familyOffice&&S.familyOffice.staff&&S.familyOffice.staff.abogado; if(!a) return 0; return (a.capaz||5)>=8?2:1; }catch(e){ return 0; }
+  }
+  function qDe89(x){ return Math.max((ABOGADOS_89[x&&x.abogado]||ABOGADOS_89.oficio).q,qFO89()); }
+  function feeDe89(x){ const a=ABOGADOS_89[x&&x.abogado]||ABOGADOS_89.oficio; return a.q>qFO89()?a.fee():0; }
+  function nombreAbogado89(x,penal){
+    const a=ABOGADOS_89[x&&x.abogado]||ABOGADOS_89.oficio, fo=qFO89();
+    if(fo>=a.q&&fo>0) return 'El abogado de tu family office';
+    return penal?a.np:a.nc;
+  }
+  const bonoJuridico89=()=>(Array.isArray(S.junta)&&S.junta.some(j=>j.arq==='juridico'))?.04:0;
+  const bonoJudicatura89=()=>{ const j=S.carrera&&S.carrera.judicatura; return (j&&j.activo)?((j.nivel||0)>=2?.08:.05):0; };
+  function bitacora89(x,txt){ x.bitacora=(x.bitacora||[]).concat([{anio:S.anio,txt}]).slice(-8); }
+  function htmlBitacora89(x){
+    const b=(x.bitacora||[]).slice(-4).reverse(); if(!b.length) return '';
+    return '<div class="juicio89-bitacora">'+b.map(e=>'<div><b>'+e.anio+'</b> '+esc(e.txt)+'</div>').join('')+'</div>';
+  }
+
+  /* ==================== PROCESO PENAL ==================== */
+  function asegurarCaso89(){
+    asegurarPenal(); const c=S.penal.caso; if(!c) return null;
+    if(!isFinite(c.evidencia)){
+      const g=gravedadPenal();
+      c.evidencia=clamp(Math.round(28+g*4+(S.p.escandalos||0)*3+(S.penal.riesgo||0)/6+rnd(-6,6)),15,92);
+    }
+    c.abogado=ABOGADOS_89[c.abogado]?c.abogado:'oficio';
+    if(!isFinite(c.plazo)) c.plazo=(c.inicio||S.anio)+3;
+    if(!isFinite(c.gastado)) c.gastado=0;
+    c.bitacora=c.bitacora||[];
+    return c;
+  }
+  function probCondena89(c){
+    return clamp(.08+c.evidencia/110-qDe89(c)*.09-bonoJuridico89()-bonoJudicatura89()
+      +(S.p.escandalos||0)*.02-(yo('encantador')?.03:0),.04,.93);
+  }
+  function penaRango89(){ const g=gravedadPenal(); return [Math.max(1,2+g*2),Math.max(8,8+g*3)]; }
+  function ofertaPreacuerdo89(c){
+    const g=gravedadPenal();
+    if(c.evidencia<45) return {tipo:'multa',monto:Math.max(20,Math.round(pat()*(.02+g*.004)))};
+    const [lo,hi]=penaRango89(); return {tipo:'prision',anios:Math.max(1,Math.round((lo+hi)/2*.35))};
+  }
+  function veredictoPenal89(){
+    const c=asegurarCaso89(); if(!c) return null;
+    const g=gravedadPenal(), j=jurisdiccionActual(), q=qDe89(c), p=probCondena89(c);
+    if(!chance(p)){
+      S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-18,0,100);
+      moverPrestigio(3,'quedó absuelto');
+      log('<b>Absuelto.</b> El tribunal de '+esc(j.jurisdiccion)+' no encontró pruebas suficientes. El caso quedó cerrado.','bien');
+      return {absuelto:true,prob:p};
+    }
+    if(j.penaCapital&&g>=8&&chance(clamp(.34+g*.018-q*.06,.05,.9))){
+      S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia';
+      log('El tribunal impuso pena capital por la gravedad del caso.','mal');
+      return {capital:true,prob:p};
+    }
+    const [lo,hi]=penaRango89();
+    const anios=Math.max(1,Math.round(ri(lo,hi)*(1-q*.15)));
+    S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios;
+    moverPrestigio(-3,'fue condenado');
+    log('<b>Culpable.</b> El tribunal impuso una condena de '+anios+' año'+(anios===1?'':'s')+' de prisión.','mal');
+    return {anios,prob:p};
+  }
+  function costoApelacion89(){ return Math.max(15,Math.round(pat()*.02)); }
+  function apelarPenal89(){
+    const anios=S.penal.apelable89; if(!anios||S.penal.prisionRestante<=0) return 'Ya no había nada que apelar.';
+    const costo=costoApelacion89(); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
+    S.efectivo-=costo; S.penal.apelable89=0;
+    if(chance(.3+qFO89()*.05+(yo('astuto')?.05:0))){
+      S.penal.prisionRestante=Math.max(1,Math.round(S.penal.prisionRestante/2));
+      return 'La apelación prosperó: el tribunal superior rebajó la condena a '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+'.';
+    }
+    return 'El tribunal superior confirmó la condena. Gastaste '+fmt(costo)+' en la apelación.';
+  }
+  function escenaVeredicto89(res){
+    if(!res){ cerrarModal(); render(); return; }
+    const relato='La sala se pone de pie. El juez lee durante cuarenta minutos sin levantar la vista. Tu familia está en la segunda fila. '
+      +'Las probabilidades estaban en '+pc(res.prob)+' de condena.<br><br>';
+    if(res.absuelto){
+      escena({rubro:'Tribunal',titulo:'Absuelto',ancho:true,clase:'veredicto89 bien',
+        cuerpo:relato+'<b>No culpable.</b> Las pruebas no alcanzaron. Sales por la puerta grande y el apellido respira.',
+        opciones:[{t:'Salir del juzgado',cat:'legado',run:()=>{}}]});
+      return;
+    }
+    if(res.capital){
+      escena({rubro:'Tribunal',titulo:'Pena capital',ancho:true,clase:'veredicto89 mal',
+        cuerpo:relato+'<b>Culpable.</b> El tribunal dictó la pena más alta que existe en esta jurisdicción. Todavía quedan recursos.',
+        opciones:[{t:'Enfrentar lo que viene',cat:'riesgo',cerrar:false,run:()=>escenaProcesoPenal()}]});
+      return;
+    }
+    const costo=costoApelacion89();
+    escena({rubro:'Tribunal',titulo:'Culpable',ancho:true,clase:'veredicto89 mal',
+      cuerpo:relato+'<b>Culpable.</b> '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión. Tu abogado te dice al oído que se puede apelar.',
+      opciones:[
+        {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Si prospera, el tribunal superior rebaja la condena a la mitad.',
+         dis:S.efectivo<costo?'No te alcanza':null,cerrar:false,run:()=>{ const m=apelarPenal89(); log(m,/prosperó/.test(m)?'bien':'mal'); cerrarModal(); render(); }},
+        {t:'Aceptar la condena',cat:'riesgo',run:()=>{ S.penal.apelable89=0; }}
+      ]});
+  }
+  function escenaAbogado89(x,penal,volver){
+    const fo=qFO89();
+    const opciones=['oficio','reconocido','estrella'].map(id=>{
+      const a=ABOGADOS_89[id], fee=a.q>fo?a.fee():0, actual=x.abogado===id;
+      return {t:(penal?a.np:a.nc)+(actual?' (el actual)':''),cat:'riesgo',
+        d:a.d+' '+(fee?'Honorarios: '+fmt(fee)+' al año, el primero por adelantado.':(a.q&&fo>=a.q?'Lo cubre el abogado de tu family office.':'Sin costo.')),
+        dis:actual?'Ya es tu abogado':(fee&&S.efectivo<fee?'No te alcanza para el primer año':null),cerrar:false,
+        run:()=>{
+          if(fee){ S.efectivo-=fee; x.gastado=(x.gastado||0)+fee; }
+          x.abogado=id; bitacora89(x,'Cambiaste de abogado: '+(penal?a.np:a.nc).toLowerCase()+'.');
+          log('Ahora te defiende '+(penal?a.np:a.nc).toLowerCase()+'.');
+          volver();
+        }};
+    });
+    opciones.push({t:'Volver',cat:'riesgo',cerrar:false,run:volver});
+    escena({rubro:penal?'Tu defensa':'El pleito',titulo:'Elegir abogado',ancho:true,
+      cuerpo:'Un buen abogado no hace milagros, pero baja la probabilidad de perder y hace posibles cosas que el de oficio ni intenta.'
+        +(fo?' <b>Tu family office tiene abogado propio</b>: cubre gratis hasta '+(fo>=2?'el mejor nivel':'un abogado reconocido')+'.':''),
+      opciones,cerrable:true});
+  }
+  function costoDefensa89(){ return Math.max(6,Math.round(pat()*.008)); }
+  function costoSoborno89(){ return Math.max(20,Math.round(pat()*.04)); }
+  function probSoborno89(){ return clamp(.42+(yo('astuto')?.08:0)+(yo('sin_escrupulos')?.05:0)+Math.min(.08,(S.sobornos||0)*.01),.2,.75); }
+  function escenaJuicio89(){
+    const c=asegurarCaso89(); if(!c){ cerrarModal(); render(); return; }
+    const j=jurisdiccionActual(), q=qDe89(c), p=probCondena89(c), fee=feeDe89(c);
+    const cDef=costoDefensa89(), cSob=costoSoborno89(), oferta=ofertaPreacuerdo89(c);
+    const sinNegociar=c.preacuerdoRechazado||c.estado==='sentencia';
+    const html='<div class="juicio89">'
+      +'<div class="juicio89-cab"><span>Fiscalía de '+esc(j.jurisdiccion)+'</span><span>Abierto en '+(c.inicio||S.anio)+'</span><span>Juicio a más tardar en '+c.plazo+'</span></div>'
+      +medida('Pruebas en tu contra',Math.round(c.evidencia),100,c.evidencia>=60?'r':'')
+      +medida('Riesgo de condena',Math.round(p*100),100,'r')
+      +'<div class="juicio89-abogado"><b>'+esc(nombreAbogado89(c,true))+'</b> · '+(fee?fmt(fee)+' al año':'sin honorarios')+(c.gastado?' · llevas '+fmt(c.gastado)+' gastados en tu defensa':'')+'</div>'
+      +(sinNegociar?'<div class="apunte" style="color:var(--ui-red)">La fiscalía ya no quiere negociar contigo.</div>':'')
+      +htmlBitacora89(c)+'</div>';
+    escena({rubro:'Tribunal',titulo:'Tu proceso penal',ancho:true,
+      cuerpo:'Te investigan por <b>'+esc(c.motivo||'una investigación penal')+'</b>. Cada año que pasa, la fiscalía arma mejor el expediente; '
+        +'cada peso que pongas en tu defensa lo desarma un poco. Lo que pasa en este juzgado decide si sigues al mando de tu casa o desde una celda.',
+      html,cerrable:true,opciones:[
+        {t:'Cambiar de abogado',cat:'riesgo',d:'Hoy te defiende '+nombreAbogado89(c,true).toLowerCase()+'. Un mejor abogado baja el riesgo de condena y abre jugadas que el de oficio no hace.',
+         cerrar:false,run:()=>escenaAbogado89(c,true,escenaJuicio89)},
+        {t:'Atacar las pruebas',cat:'riesgo',d:'Peritos, recusaciones, pruebas ilegales. Cuesta '+fmt(cDef)+' y una movida. Funciona '+pc(clamp(.45+q*.15+(yo('astuto')?.05:0),.1,.9))+' de las veces.',
+         dis:q<1?'Necesitas un abogado de verdad: el de oficio no hace esto':(c.defensaAnio===S.anio?'Ya lo intentaste este año':(S.mov<1?'No te quedan movidas':(S.efectivo<cDef?'No te alcanza':null))),
+         cerrar:false,run:()=>{
+           S.efectivo-=cDef; c.gastado+=cDef; c.defensaAnio=S.anio; S.mov--;
+           if(chance(clamp(.45+q*.15+(yo('astuto')?.05:0),.1,.9))){ const d=ri(8,16); c.evidencia=clamp(c.evidencia-d,0,100); bitacora89(c,'Tu abogado tumbó pruebas clave (−'+d+').'); log('Tu abogado tumbó pruebas clave del expediente.','bien'); }
+           else { bitacora89(c,'El juez rechazó tus recusaciones.'); log('El juez rechazó los argumentos de tu defensa.','mal'); }
+           escenaJuicio89(); render();
+         }},
+        {t:'Arreglar el caso por debajo de la mesa',cat:'riesgo',d:'Un testigo que cambia la versión, un fiscal que pierde un folio. Cuesta '+fmt(cSob)+' y una movida. Sale bien '+pc(probSoborno89())+' de las veces; si te descubren, el caso empeora y sumas un delito.',
+         dis:c.sobornoAnio===S.anio?'Ya lo intentaste este año':(S.mov<1?'No te quedan movidas':(S.efectivo<cSob?'No te alcanza':null)),
+         cerrar:false,run:()=>{
+           S.efectivo-=cSob; c.sobornoAnio=S.anio; S.mov--; S.sobornos=(S.sobornos||0)+1;
+           if(chance(probSoborno89())){ const d=ri(18,30); c.evidencia=clamp(c.evidencia-d,0,100); bitacora89(c,'Un testigo clave cambió su versión (−'+d+').'); log('Un testigo clave de la fiscalía cambió su versión.','bien'); }
+           else { const d=ri(12,20); c.evidencia=clamp(c.evidencia+d,0,100); S.p.escandalos=(S.p.escandalos||0)+1;
+             registrarDelito('soborno judicial',4,'intentaste comprar un testigo'); bitacora89(c,'Te descubrieron intentando comprar un testigo (+'+d+').');
+             log('Te descubrieron intentando comprar un testigo. El expediente se agravó.','mal'); }
+           escenaJuicio89(); render();
+         }},
+        {t:'Negociar un preacuerdo',cat:'riesgo',
+         d:oferta.tipo==='multa'?'Con las pruebas que hay, la fiscalía aceptaría cerrar el caso con una multa de '+fmt(oferta.monto)+'.'
+           :'Con las pruebas que hay, la fiscalía ofrece '+oferta.anios+' año'+(oferta.anios===1?'':'s')+' de prisión a cambio de declararte culpable, en vez de arriesgarte a una condena completa.',
+         dis:sinNegociar?'La fiscalía ya no negocia':null,cerrar:false,run:()=>escenaPreacuerdo89()},
+        {t:'Ir a juicio ya',cat:'riesgo',d:'Que lo decida el juez hoy. Hoy el riesgo de condena es '+pc(p)+'.',
+         cerrar:false,run:()=>escenaVeredicto89(veredictoPenal89())},
+        {t:'Dejar que el proceso siga',cat:'riesgo',d:'La fiscalía seguirá armando el caso. A más tardar en '+c.plazo+' llega el juicio, quieras o no.',run:()=>{}}
+      ].concat(litigios89().length?[{t:'Ver tus pleitos empresariales',cat:'compania',cerrar:false,run:()=>escenaJuzgados89()}]:[])});
+  }
+  function escenaPreacuerdo89(){
+    const c=asegurarCaso89(); if(!c){ cerrarModal(); render(); return; }
+    const o=ofertaPreacuerdo89(c);
+    escena({rubro:'Fiscalía',titulo:'La oferta de la fiscalía',ancho:true,
+      cuerpo:(o.tipo==='multa'
+        ?'El fiscal sabe que su caso es flojo. Te ofrece cerrarlo todo con una <b>multa de '+fmt(o.monto)+'</b> y una declaración que nadie va a leer.'
+        :'El fiscal tiene con qué. Te ofrece <b>'+o.anios+' año'+(o.anios===1?'':'s')+' de prisión</b> si te declaras culpable. Si vas a juicio y pierdes, la condena puede ser de '+penaRango89().join(' a ')+' años.')
+        +' Si la rechazas, no vuelve a ofrecer nada.',
+      opciones:[
+        {t:'Aceptar la oferta',cat:'riesgo',dis:(o.tipo==='multa'&&S.efectivo<o.monto)?'No te alcanza para la multa':null,run:()=>{
+          if(o.tipo==='multa'){ S.efectivo-=o.monto; S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-25,0,100); moverPrestigio(-2,'aceptó un preacuerdo');
+            log('Aceptaste el preacuerdo: pagaste '+fmt(o.monto)+' y el caso quedó cerrado.','bien'); }
+          else { S.penal.prisionRestante=o.anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-20,0,100); moverPrestigio(-3,'se declaró culpable');
+            log('Te declaraste culpable: '+o.anios+' año'+(o.anios===1?'':'s')+' de prisión, en vez de arriesgarte a más.','mal'); }
+        }},
+        {t:'Rechazarla',cat:'riesgo',cerrar:false,run:()=>{ c.preacuerdoRechazado=true; c.evidencia=clamp(c.evidencia+3,0,100); bitacora89(c,'Rechazaste el preacuerdo. El fiscal se lo tomó personal.'); escenaJuicio89(); }}
+      ]});
+  }
+  function eventoJuicioPenal89(){
+    const ev={p:9,__juicio89:true,
+      c:()=>!!(S.penal&&S.penal.caso&&!S.penal.penaMuerte&&!(S.penal.prisionRestante>0)),
+      o:[{t:'Seguir',f:()=>''}],
+      t:()=>{
+        const c=asegurarCaso89(); if(!c) return null;
+        const res=veredictoPenal89(); if(!res) return null;
+        const intro='<b>Llegó el día del juicio.</b> Se acabaron los aplazamientos: el juez de '+esc(jurisdiccionActual().jurisdiccion)+' leyó el veredicto. ';
+        if(res.absuelto){ ev.o=[{t:'Salir del juzgado',f:()=>''}]; return intro+'<b>No culpable.</b> Sales libre y el caso queda cerrado.'; }
+        if(res.capital){ ev.o=[{t:'Enfrentar lo que viene',f:()=>''}]; return intro+'<b>Culpable.</b> Pena capital. Todavía quedan recursos.'; }
+        ev.o=[{t:'Apelar (cuesta '+fmt(costoApelacion89())+')',f:()=>apelarPenal89()},{t:'Aceptar la condena',f:()=>{ S.penal.apelable89=0; return 'Aceptaste la condena.'; }}];
+        return intro+'<b>Culpable.</b> '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión.';
+      }};
+    return ev;
+  }
+
+  /* ==================== PLEITOS ENTRE CASAS ==================== */
+  function litigios89(){ if(!S) return []; if(!Array.isArray(S.litigios)) S.litigios=[]; return S.litigios; }
+  const rivalDe89=l=>(S.rivales||[]).find(r=>r.rid===l.rid);
+  const pleitoCon89=r=>litigios89().find(l=>l.rid===r.rid);
+  const MOTIVOS_89=[
+    {id:'desleal',n:'Competencia desleal',base:42,pct:.07,req:r=>!!(S.emp&&S.emp.sector===r.sector),falta:'Solo si compiten en el mismo sector',
+     d:'Precios por debajo del costo, clientes robados, empleados que se llevaron secretos. Si compiten en lo mismo, siempre hay algo.'},
+    {id:'patente',n:'Copia de un producto',base:50,pct:.06,req:()=>!!(S.emp&&(S.emp.productos||[]).length),falta:'Necesitas productos propios',
+     d:'Tienen algo demasiado parecido a lo tuyo, y tienes cómo probar que lo tuyo llegó primero.'},
+    {id:'contrato',n:'Incumplimiento de contrato',base:38,pct:.04,req:()=>!!S.emp,falta:'Necesitas una compañía',
+     d:'Un contrato viejo, una entrega que no llegó, una cláusula que nadie leyó con cuidado.'},
+    {id:'difamacion',n:'Difamación',base:32,pct:.025,req:r=>enGuerra(r)||(r.relacionCasa||50)<40,falta:'Solo con casas con las que ya hay mala sangre',
+     d:'Lo que han dicho de tu casa en la prensa tiene un precio, y un juez puede ponérselo.'}
+  ];
+  const motivo89=id=>MOTIVOS_89.find(m=>m.id===id)||{n:id};
+  function probGanar89(l){ return clamp(l.fuerza/100+(qDe89(l)-1)*.05+bonoJuridico89()*.5,.05,.95); }
+  function fuerzaInicial89(m,q){
+    const a=(S.p&&S.p.atr)||{};
+    return clamp(Math.round(m.base+((a.intelecto||5)-5)*2+q*8+(bonoJuridico89()?5:0)+(yo('astuto')?4:0)+rnd(-8,8)),10,90);
+  }
+  function abrirPleito89(r,m,abogado){
+    const a=ABOGADOS_89[abogado]||ABOGADOS_89.oficio, fee=a.q>qFO89()?a.fee():0, radicar=Math.max(3,Math.round(pat()*.002));
+    S.efectivo-=fee+radicar; S.mov--;
+    const l={id:'L'+S.anio+'_'+ri(100,999),rid:r.rid,apellido:r.apellido,rol:'demandante',motivo:m.id,
+      monto:Math.max(10,Math.round((r.patrimonio||100)*m.pct)),abogado:a.id,fuerza:0,inicio:S.anio,plazo:S.anio+ri(2,3),gastado:fee+radicar,bitacora:[]};
+    l.fuerza=fuerzaInicial89(m,Math.max(a.q,qFO89()));
+    bitacora89(l,'Radicaste la demanda por '+m.n.toLowerCase()+'.');
+    litigios89().push(l);
+    r.relacionCasa=clamp((r.relacionCasa||50)-10,0,100);
+    if(enGuerra(r)){ golpe('Los demandaste por '+m.n.toLowerCase()+' y les pides '+fmt(l.monto)+'.','tu'); if(S.guerraEmpresarial) S.guerraEmpresarial.intensidad=clamp((S.guerraEmpresarial.intensidad||15)+6,0,100); }
+    log('Demandaste a los <b>'+esc(r.apellido)+'</b> por '+esc(m.n.toLowerCase())+'. Pides '+fmt(l.monto)+'. El fallo llegaría hacia '+l.plazo+'.','hito');
+    return l;
+  }
+  function escenaDemandar89(r){
+    const ya=pleitoCon89(r);
+    if(ya){ escenaPleito89(ya); return; }
+    const opciones=MOTIVOS_89.map(m=>{
+      const ok=m.req(r), monto=Math.max(10,Math.round((r.patrimonio||100)*m.pct));
+      return {t:m.n,cat:'riesgo',d:m.d+' Pedirías cerca de '+fmt(monto)+'. Caso de arranque: '+(m.base>=45?'sólido':m.base>=38?'discutible':'flojo')+'.',
+        dis:!ok?m.falta:(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>escenaDemandaAbogado89(r,m)};
+    });
+    opciones.push({t:'Volver',cat:'riesgo',cerrar:false,run:()=>{ if(typeof window.escenaRivalDetalle64==='function') window.escenaRivalDetalle64(r); else escenaJuzgados89(); }});
+    escena({rubro:'Juzgados',titulo:'Demandar a los '+esc(r.apellido),ancho:true,
+      html:'<div style="display:flex;justify-content:center;margin:6px 0 2px">'+escudoSVG(r.apellido,56)+'</div>',
+      cuerpo:'Un pleito tarda dos o tres años, cuesta abogados todos los años y no siempre se gana. Pero si se gana, el juez les cobra por ti. '
+        +'¿Por qué los demandas?'+(enGuerra(r)?' <b>Están en guerra: el pleito cuenta como un frente más.</b>':''),
+      opciones,cerrable:true});
+  }
+  function escenaDemandaAbogado89(r,m){
+    const fo=qFO89(), radicar=Math.max(3,Math.round(pat()*.002));
+    const opciones=['oficio','reconocido','estrella'].map(id=>{
+      const a=ABOGADOS_89[id], fee=a.q>fo?a.fee():0, total=fee+radicar;
+      return {t:a.nc,cat:'riesgo',d:a.d+' '+(fee?'Honorarios: '+fmt(fee)+' al año.':(a.q&&fo>=a.q?'Lo cubre tu family office.':'Sin honorarios.'))+' Radicar cuesta '+fmt(radicar)+'.',
+        dis:S.efectivo<total?'Necesitas '+fmt(total):(S.mov<1?'No te quedan movidas':null),cerrar:false,
+        run:()=>{ const l=abrirPleito89(r,m,id); escenaPleito89(l); render(); }};
+    });
+    opciones.push({t:'Volver',cat:'riesgo',cerrar:false,run:()=>escenaDemandar89(r)});
+    escena({rubro:'Juzgados',titulo:'¿Quién lleva el pleito?',ancho:true,
+      cuerpo:'Demanda por <b>'+esc(m.n.toLowerCase())+'</b> contra los '+esc(r.apellido)+'. Radicarla cuesta una movida. Un mejor abogado arranca con un caso más fuerte y lo fortalece cada año.',
+      opciones,cerrable:true});
+  }
+  function montoArreglo89(l){ return l.rol==='demandante'?Math.round(l.monto*l.fuerza/100*.85):Math.round(l.monto*(1-l.fuerza/100)*.9); }
+  function probArreglo89(l){ const r=rivalDe89(l); return clamp(.2+(l.fuerza-50)/70+(((r&&r.relacionCasa)||50)-50)/200,.05,.9); }
+  function cerrarPleito89(l){ S.litigios=litigios89().filter(x=>x!==l); }
+  function escenaPleito89(l){
+    if(!litigios89().includes(l)){ escenaJuzgados89(); return; }
+    const r=rivalDe89(l), m=motivo89(l.motivo), q=qDe89(l), fee=feeDe89(l), pg=probGanar89(l);
+    const cRef=costoDefensa89(), cSob=costoSoborno89(), arr=montoArreglo89(l), pa=probArreglo89(l);
+    const demandante=l.rol==='demandante';
+    const html='<div class="juicio89">'
+      +'<div class="juicio89-cab"><span>'+(demandante?esc(S.dinastia||S.p.apellido)+' contra '+esc(l.apellido):esc(l.apellido)+' contra '+esc(S.dinastia||S.p.apellido))+'</span><span>'+esc(m.n)+'</span><span>Fallo hacia '+l.plazo+'</span></div>'
+      +'<div class="juicio89-monto">'+(demandante?'Les pides ':'Te piden ')+'<b>'+fmt(l.monto)+'</b></div>'
+      +medida('Fuerza de tu caso',Math.round(l.fuerza),100,l.fuerza>=55?'v':(l.fuerza<40?'r':''))
+      +medida('Probabilidad de ganar',Math.round(pg*100),100,pg>=.5?'v':'r')
+      +'<div class="juicio89-abogado"><b>'+esc(nombreAbogado89(l,false))+'</b> · '+(fee?fmt(fee)+' al año':'sin honorarios')+(l.gastado?' · llevas '+fmt(l.gastado)+' gastados':'')+'</div>'
+      +htmlBitacora89(l)+'</div>';
+    escena({rubro:'Juzgados',titulo:(demandante?'Tu demanda contra los ':'La demanda de los ')+esc(l.apellido),ancho:true,html,cerrable:true,
+      cuerpo:demandante?'Si ganas, el juez les cobra lo que pides. Si pierdes, pagas las costas del proceso.'
+        :'Si pierdes, pagas lo que te piden. Si ganas, ellos pagan las costas y quedan mal parados.',
+      opciones:[
+        {t:'Reforzar el caso',cat:'riesgo',d:'Peritos, testigos, auditorías. Cuesta '+fmt(cRef)+' y una movida. Funciona '+pc(clamp(.55+q*.12,.1,.92))+' de las veces.',
+         dis:l.refuerzoAnio===S.anio?'Ya lo hiciste este año':(S.mov<1?'No te quedan movidas':(S.efectivo<cRef?'No te alcanza':null)),cerrar:false,
+         run:()=>{ S.efectivo-=cRef; l.gastado+=cRef; l.refuerzoAnio=S.anio; S.mov--;
+           if(chance(clamp(.55+q*.12,.1,.92))){ const d=ri(6,12); l.fuerza=clamp(l.fuerza+d,5,95); bitacora89(l,'Tus peritos encontraron algo (+'+d+').'); log('Tus peritos encontraron algo que fortalece el pleito con los '+esc(l.apellido)+'.','bien'); }
+           else { bitacora89(l,'Los peritos no encontraron nada nuevo.'); log('Pagaste peritos para el pleito con los '+esc(l.apellido)+', pero no encontraron nada nuevo.','mal'); }
+           escenaPleito89(l); render(); }},
+        {t:'Cambiar de abogado',cat:'riesgo',d:'Hoy lo lleva '+nombreAbogado89(l,false).toLowerCase()+'.',cerrar:false,run:()=>escenaAbogado89(l,false,()=>escenaPleito89(l))},
+        {t:'Proponer un arreglo',cat:'riesgo',
+         d:(demandante?'Que te paguen '+fmt(arr)+' y se acaba el pleito.':'Pagarles '+fmt(arr)+' y se acaba el pleito.')+' Con la fuerza de tu caso, lo aceptarían '+pc(pa)+' de las veces. Una movida.',
+         dis:S.mov<1?'No te quedan movidas':(!demandante&&S.efectivo<arr?'No te alcanza':null),cerrar:false,
+         run:()=>{ S.mov--;
+           if(chance(pa)){
+             if(demandante){ S.efectivo+=arr; if(r) r.patrimonio=Math.max(1,(r.patrimonio||0)-arr); }
+             else S.efectivo-=arr;
+             if(r) r.relacionCasa=clamp((r.relacionCasa||50)+6,0,100);
+             cerrarPleito89(l);
+             log('Arreglaste el pleito con los <b>'+esc(l.apellido)+'</b>: '+(demandante?'te pagaron ':'les pagaste ')+fmt(arr)+'.','bien');
+             escenaJuzgados89();
+           } else { l.arreglosRechazados=(l.arreglosRechazados||0)+1; bitacora89(l,'Rechazaron tu propuesta de arreglo.'); log('Los '+esc(l.apellido)+' rechazaron tu propuesta de arreglo.','mal'); escenaPleito89(l); }
+           render(); }},
+        {t:'Arreglar al juez',cat:'riesgo',d:'Cuesta '+fmt(cSob)+' y una movida. Sale bien '+pc(probSoborno89())+' de las veces; si te descubren, tu caso se cae y sumas un delito.',
+         dis:l.sobornoAnio===S.anio?'Ya lo intentaste este año':(S.mov<1?'No te quedan movidas':(S.efectivo<cSob?'No te alcanza':null)),cerrar:false,
+         run:()=>{ S.efectivo-=cSob; l.sobornoAnio=S.anio; S.mov--; S.sobornos=(S.sobornos||0)+1;
+           if(chance(probSoborno89())){ const d=ri(15,25); l.fuerza=clamp(l.fuerza+d,5,95); bitacora89(l,'El juez parece más receptivo (+'+d+').'); log('El juez del pleito con los '+esc(l.apellido)+' se volvió sorprendentemente receptivo.','bien'); }
+           else { const d=ri(10,18); l.fuerza=clamp(l.fuerza-d,5,95); S.p.escandalos=(S.p.escandalos||0)+1; registrarDelito('soborno judicial',4,'intentaste comprar a un juez');
+             bitacora89(l,'Te descubrieron intentando comprar al juez (−'+d+').'); log('Te descubrieron intentando comprar al juez del pleito con los '+esc(l.apellido)+'.','mal'); }
+           escenaPleito89(l); render(); }},
+        demandante
+          ?{t:'Retirar la demanda',cat:'riesgo',d:'Se acaba el pleito sin ganar nada. La relación con los '+esc(l.apellido)+' mejora un poco.',cerrar:false,
+            run:()=>{ cerrarPleito89(l); if(r) r.relacionCasa=clamp((r.relacionCasa||50)+4,0,100); moverPrestigio(-1,'retiró una demanda'); log('Retiraste la demanda contra los '+esc(l.apellido)+'.'); escenaJuzgados89(); render(); }}
+          :{t:'Allanarte y pagar',cat:'riesgo',d:'Pagar los '+fmt(l.monto)+' que piden y acabar con esto.',dis:S.efectivo<l.monto?'No te alcanza':null,cerrar:false,
+            run:()=>{ S.efectivo-=l.monto; if(r) r.patrimonio=(r.patrimonio||0)+l.monto; cerrarPleito89(l); moverPrestigio(-2,'pagó una demanda'); log('Pagaste los '+fmt(l.monto)+' que pedían los '+esc(l.apellido)+'.','mal'); escenaJuzgados89(); render(); }},
+        {t:'Volver a los juzgados',cat:'riesgo',cerrar:false,run:()=>escenaJuzgados89()}
+      ]});
+  }
+  function falloPleito89(l){
+    const r=rivalDe89(l), gana=chance(probGanar89(l)), demandante=l.rol==='demandante', guerra=r&&enGuerra(r);
+    cerrarPleito89(l);
+    let txt;
+    if(demandante&&gana){
+      S.efectivo+=l.monto; if(r){ r.patrimonio=Math.max(1,(r.patrimonio||0)-l.monto); r.prestigio=clamp((r.prestigio||30)-3,0,100); r.relacionCasa=clamp((r.relacionCasa||50)-8,0,100); }
+      moverPrestigio(2,'ganó un pleito');
+      if(guerra){ golpe('Ganaste el pleito: el juez les cobró '+fmt(l.monto)+'.','tu'); if(S.guerraEmpresarial) S.guerraEmpresarial.intensidad=clamp((S.guerraEmpresarial.intensidad||15)+8,0,100); }
+      txt='<b>Ganaste.</b> El juez condenó a los '+esc(l.apellido)+' a pagarte '+fmt(l.monto)+'.';
+    } else if(demandante){
+      const costas=Math.round(l.monto*.15); S.efectivo-=costas; moverPrestigio(-2,'perdió un pleito');
+      if(guerra) golpe('Perdiste el pleito contra ellos y pagaste las costas.','rival');
+      txt='<b>Perdiste.</b> El juez no les dio la razón a tus abogados. Pagas '+fmt(costas)+' en costas.';
+    } else if(gana){
+      const costas=Math.round(l.monto*.1); S.efectivo+=costas; if(r){ r.prestigio=clamp((r.prestigio||30)-2,0,100); }
+      moverPrestigio(2,'ganó un pleito');
+      if(guerra) golpe('Su demanda se cayó en los juzgados.','tu');
+      txt='<b>Ganaste.</b> La demanda de los '+esc(l.apellido)+' se cayó. Te pagan '+fmt(costas)+' en costas.';
+    } else {
+      S.efectivo-=l.monto; if(r) r.patrimonio=(r.patrimonio||0)+l.monto; moverPrestigio(-2,'perdió un pleito');
+      if(guerra) golpe('Te ganaron un pleito: pagaste '+fmt(l.monto)+'.','rival');
+      txt='<b>Perdiste.</b> El juez te condenó a pagarles '+fmt(l.monto)+' a los '+esc(l.apellido)+'.';
+    }
+    try{ if(typeof window.revisarResolucionGuerra70==='function') window.revisarResolucionGuerra70(); }catch(e){}
+    return {gana,txt};
+  }
+  function apelarPleito89(l,res){
+    const costo=costoApelacion89(); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
+    S.efectivo-=costo;
+    if(!chance(.3+qDe89(l)*.08)) return 'El tribunal superior confirmó el fallo. Gastaste '+fmt(costo)+' en la apelación.';
+    const r=rivalDe89(l);
+    if(l.rol==='demandante'){ S.efectivo+=Math.round(l.monto*1.15); if(r) r.patrimonio=Math.max(1,(r.patrimonio||0)-l.monto); }
+    else { S.efectivo+=l.monto; if(r) r.patrimonio=Math.max(1,(r.patrimonio||0)-l.monto); }
+    moverPrestigio(2,'ganó en segunda instancia');
+    return 'La apelación prosperó: el tribunal superior revocó el fallo y te dio la razón.';
+  }
+  function eventoFallo89(id){
+    const ev={p:9,__fallo89:true,
+      c:()=>litigios89().some(l=>l.id===id),
+      o:[{t:'Seguir',f:()=>''}],
+      t:()=>{
+        const l=litigios89().find(x=>x.id===id); if(!l) return null;
+        const m=motivo89(l.motivo), res=falloPleito89(l);
+        const intro='<b>Fallo: '+(l.rol==='demandante'?esc(S.dinastia||S.p.apellido)+' contra '+esc(l.apellido):esc(l.apellido)+' contra '+esc(S.dinastia||S.p.apellido))+'</b> por '+esc(m.n.toLowerCase())+'. ';
+        ev.o=res.gana?[{t:'Seguir',f:()=>''}]
+          :[{t:'Apelar (cuesta '+fmt(costoApelacion89())+')',f:()=>apelarPleito89(l,res)},{t:'Aceptar el fallo',f:()=>'Aceptaste el fallo.'}];
+        return intro+res.txt;
+      }};
+    return ev;
+  }
+
+  /* --- las otras casas también demandan --- */
+  function instalarDemandaRival89(){
+    if(window.__SA89_EVENTO) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    const cands=()=>rivalesVivas().filter(r=>!pleitoCon89(r)&&(enGuerra(r)||r.agresiva||(r.relacionCasa||50)<40));
+    EVENTOS_LOCALES.push({
+      p:.9,
+      c:()=>!!S.emp&&litigios89().filter(l=>l.rol==='demandado').length<2&&cands().length>0,
+      t:()=>{
+        const cs=cands(); if(!cs.length) return null;
+        const r=cs.find(enGuerra)||pick(cs);
+        const m=pick(MOTIVOS_89.filter(x=>x.id!=='patente'));
+        const monto=Math.max(15,Math.round(pat()*rnd(.03,.07)));
+        S._demanda89={rid:r.rid,motivo:m.id,monto};
+        return 'Los <b>'+esc(r.apellido)+'</b> te demandaron por <b>'+esc(m.n.toLowerCase())+'</b> y piden <b>'+fmt(monto)+'</b>.'
+          +(enGuerra(r)?' Es otro frente de la guerra que tienen abierta.':'')+' Tus abogados dicen que hay con qué defenderse, pero nada es seguro.';
+      },
+      o:[
+        {t:'Defenderte en los juzgados',f:()=>{
+          const d=S._demanda89; const r=d&&(S.rivales||[]).find(x=>x.rid===d.rid); if(!r) return 'La demanda se archivó sola.';
+          const fee=ABOGADOS_89.reconocido.q>qFO89()?ABOGADOS_89.reconocido.fee():0;
+          const ab=S.efectivo>=fee?'reconocido':'oficio'; if(ab==='reconocido') S.efectivo-=fee;
+          const a=(S.p&&S.p.atr)||{};
+          const l={id:'L'+S.anio+'_'+ri(100,999),rid:r.rid,apellido:r.apellido,rol:'demandado',motivo:d.motivo,monto:d.monto,abogado:ab,
+            fuerza:clamp(Math.round(50+((a.intelecto||5)-5)*2-((r.capaz||5)-5)*3+(bonoJuridico89()?5:0)+rnd(-10,10)),10,90),
+            inicio:S.anio,plazo:S.anio+ri(2,3),gastado:ab==='reconocido'?fee:0,bitacora:[]};
+          bitacora89(l,'Te notificaron la demanda.');
+          litigios89().push(l);
+          return 'Contrataste '+(ab==='reconocido'?'una firma reconocida':'a tu abogado de planta')+' para defenderte de los '+esc(r.apellido)+'. Lo puedes seguir en Pleitos y demandas.';
+        }},
+        {t:'Arreglar ya, pagando el 40%',f:()=>{
+          const d=S._demanda89; if(!d) return 'Ya no aplicaba.'; const r=(S.rivales||[]).find(x=>x.rid===d.rid);
+          const x=Math.round(d.monto*.4); S.efectivo-=x; if(r){ r.patrimonio=(r.patrimonio||0)+x; r.relacionCasa=clamp((r.relacionCasa||50)+3,0,100); }
+          return 'Les pagaste '+fmt(x)+' y retiraron la demanda.';
+        }},
+        {t:'Ignorarla',f:()=>{
+          const d=S._demanda89; if(!d) return 'Ya no aplicaba.'; const r=(S.rivales||[]).find(x=>x.rid===d.rid);
+          if(chance(.55)){ S.efectivo-=d.monto; if(r) r.patrimonio=(r.patrimonio||0)+d.monto; moverPrestigio(-3,'perdió un pleito sin defenderse');
+            return 'No te presentaste y el juez falló en tu contra: pagaste '+fmt(d.monto)+'.'; }
+          return 'No te presentaste y, por suerte, el juez archivó la demanda por un error de forma.';
+        }}
+      ]
+    });
+    window.__SA89_EVENTO=true;
+  }
+
+  /* --- el centro de juzgados --- */
+  function tarjetaPleito89(l){
+    const m=motivo89(l.motivo), pg=probGanar89(l);
+    return '<div class="pleito89">'+escudoSVG(l.apellido,30)
+      +'<div class="pleito89-info"><div class="nom">'+(l.rol==='demandante'?'Demandas a los ':'Te demandan los ')+esc(l.apellido)+'</div>'
+      +'<div class="det">'+esc(m.n)+' · '+fmt(l.monto)+' · fallo hacia '+l.plazo+'</div></div>'
+      +'<div class="pleito89-prob '+(pg>=.5?'v':'r')+'">'+pc(pg)+'<small>de ganar</small></div></div>';
+  }
+  function escenaJuzgados89(){
+    asegurarPenal();
+    const L=litigios89(), c=S.penal.caso, preso=S.penal.prisionRestante>0;
+    let html='';
+    if(c||preso||S.penal.penaMuerte){
+      html+='<div class="pleito89 penal">'+'<span class="glifo"><svg viewBox="0 0 24 24">'+(GLIFOS.riesgo||'')+'</svg></span>'
+        +'<div class="pleito89-info"><div class="nom">'+esc(resumenLegalBase89())+'</div><div class="det">'+(c?esc(c.motivo||'investigación penal'):'Situación penal')+'</div></div>'
+        +(c&&!preso&&!S.penal.penaMuerte?'<div class="pleito89-prob r">'+pc(probCondena89(asegurarCaso89()))+'<small>de condena</small></div>':'')+'</div>';
+    }
+    html+=L.length?L.map(tarjetaPleito89).join(''):'<div class="vacio">No tienes pleitos abiertos con otras casas.</div>';
+    const opciones=[];
+    if(c||preso||S.penal.penaMuerte) opciones.push({t:'Tu proceso penal',cat:'riesgo',cerrar:false,run:()=>escenaProcesoPenal()});
+    L.forEach(l=>opciones.push({t:(l.rol==='demandante'?'Tu demanda contra los ':'La demanda de los ')+esc(l.apellido),cat:'riesgo',d:esc(motivo89(l.motivo).n)+'. Fuerza de tu caso '+Math.round(l.fuerza)+'/100.',cerrar:false,run:()=>escenaPleito89(l)}));
+    opciones.push({t:'Demandar a otra casa',cat:'riesgo',d:'Llevar a los juzgados a una casa rival: competencia desleal, copia de un producto, un contrato incumplido o difamación.',
+      dis:!rivalesVivas().length?'No hay otras casas a quién demandar':(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>escenaElegirRival89()});
+    escena({rubro:'Juzgados',titulo:'Pleitos y demandas',ancho:true,clase:'juzgados89',
+      cuerpo:'Todo lo que tu casa tiene en los juzgados: lo penal y lo civil, lo que demandas y lo que te demandan.',html,opciones,cerrable:true});
+  }
+  function escenaElegirRival89(){
+    const rs=rivalesVivas().slice().sort((a,b)=>(enGuerra(b)?1:0)-(enGuerra(a)?1:0)||(a.relacionCasa||50)-(b.relacionCasa||50)).slice(0,8);
+    escena({rubro:'Juzgados',titulo:'¿A quién demandas?',ancho:true,
+      cuerpo:'Primero las casas con las que estás en guerra o peor te llevas.',
+      opciones:rs.map(r=>({t:'Los '+esc(r.apellido)+(enGuerra(r)?' (en guerra)':''),cat:'riesgo',
+        d:'Patrimonio '+fmt(r.patrimonio||0)+' · relación '+Math.round(r.relacionCasa||50)+'/100.',
+        dis:pleitoCon89(r)?'Ya tienes un pleito con ellos':null,cerrar:false,run:()=>escenaDemandar89(r)}))
+        .concat([{t:'Volver',cat:'riesgo',cerrar:false,run:()=>escenaJuzgados89()}]),cerrable:true});
+  }
+  function opcionDemandarRival89(r){
+    const ya=pleitoCon89(r);
+    return {t:ya?'Ver el pleito con los '+esc(r.apellido):'Demandar a los '+esc(r.apellido),cat:'riesgo',
+      d:ya?'Ya tienen un pleito abierto. Entra para ver cómo va.':'Llevarlos a los juzgados. Tarda años y cuesta abogados, pero si ganas, el juez les cobra por ti.',
+      dis:!ya&&S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>ya?escenaPleito89(ya):escenaDemandar89(r)};
+  }
+  function opcionGuerraJudicial89(r,g){
+    const ya=pleitoCon89(r);
+    return [{t:ya?'Ver el pleito en curso':'Demandarlos',cat:'riesgo',
+      d:ya?'El pleito con ellos sigue en los juzgados.':'Abrir un frente en los juzgados. Si ganas el fallo, además de cobrarles es un golpe en la guerra.',
+      dis:!ya&&S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>ya?escenaPleito89(ya):escenaDemandar89(r)}];
+  }
+
+  /* --- paso del año: honorarios, el expediente se mueve, fallos que llegan --- */
+  function cobrarHonorarios89(x,penal){
+    const fee=feeDe89(x); if(!fee) return;
+    if(S.efectivo>=fee){ S.efectivo-=fee; x.gastado=(x.gastado||0)+fee; }
+    else { x.abogado='oficio'; bitacora89(x,'Tu abogado renunció: no le pagaste.'); log('Tu abogado'+(penal?'':' del pleito con los '+esc(x.apellido))+' renunció porque no le pagaste. Te queda el de oficio.','mal'); }
+  }
+  function correrJusticia89(){
+    if(typeof S==='undefined'||!S||!S.p||S.muerto) return;
+    asegurarPenal();
+    const c=S.penal.caso;
+    if(c&&!S.penal.penaMuerte&&!(S.penal.prisionRestante>0)){
+      asegurarCaso89(); cobrarHonorarios89(c,true);
+      const d=Math.max(-3,ri(2,7)-qDe89(c)*2); c.evidencia=clamp(c.evidencia+d,0,100);
+      if(d>0) bitacora89(c,'La fiscalía sumó pruebas al expediente (+'+d+').');
+    }
+    litigios89().slice().forEach(l=>{
+      const r=rivalDe89(l);
+      if(!r||!r.viva){ cerrarPleito89(l); log('La casa '+esc(l.apellido)+' desapareció; el pleito se archivó.'); return; }
+      cobrarHonorarios89(l,false);
+      l.fuerza=clamp(l.fuerza+rnd(-4,4)+(qDe89(l)-1)*1.5-((r.capaz||5)-5)*.6,5,95);
+    });
+  }
+  function wrapPaso89(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA89_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrJusticia89(); }catch(e){} return r; };
+    window.__SA89_PASO=true;
+  }
+  function wrapHistoria89(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA89_HIST) return;
+    window.correrHistoria=function(){
+      const r=old.apply(this,arguments);
+      try{
+        if(typeof S!=='undefined'&&S&&S.p){
+          asegurarPenal(); const c=S.penal.caso;
+          if(c&&!S.penal.penaMuerte&&!(S.penal.prisionRestante>0)){ asegurarCaso89(); if(S.anio>=c.plazo) cola.push(eventoJuicioPenal89()); }
+          litigios89().forEach(l=>{ if(S.anio>=l.plazo) cola.push(eventoFallo89(l.id)); });
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA89_HIST=true;
+  }
+
+  /* --- wraps de integración --- */
+  let resumenBase89=null;
+  function resumenLegalBase89(){ try{ return (resumenBase89?resumenBase89():'')||'Proceso penal abierto'; }catch(e){ return 'Proceso penal abierto'; } }
+  function wrapResumenLegal89(){
+    const old=window.resumenLegalActual; if(typeof old!=='function'||window.__SA89_RESUMEN) return;
+    resumenBase89=old;
+    window.resumenLegalActual=function(){
+      const base=old.apply(this,arguments);
+      try{
+        if(base==='Proceso penal abierto'||base==='Investigación penal'){
+          const c=S.penal&&S.penal.caso; if(c&&isFinite(c.evidencia)) return base+' · '+pc(probCondena89(c))+' de condena';
+        }
+        const n=(S&&Array.isArray(S.litigios))?S.litigios.length:0; if(!n) return base;
+        const t=n+' pleito'+(n>1?'s':'')+' con otras casas';
+        return base?base+' · '+t:t;
+      }catch(e){ return base; }
+    };
+    window.__SA89_RESUMEN=true;
+  }
+  function wrapProcesoPenal89(){
+    const old=window.escenaProcesoPenal; if(typeof old!=='function'||window.__SA89_PENAL) return;
+    window.escenaProcesoPenal=function(){
+      try{ asegurarPenal(); if(S.penal.caso&&!S.penal.penaMuerte&&!(S.penal.prisionRestante>0)) return escenaJuicio89(); }catch(e){}
+      return old.apply(this,arguments);
+    };
+    window.__SA89_PENAL=true;
+  }
+  function wrapAcciones89(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA89_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{
+        if(Array.isArray(A)&&S&&(S.emp||litigios89().length)&&!A.some(a=>a.t==='Pleitos y demandas')){
+          const n=litigios89().length;
+          A.push({t:'Pleitos y demandas',d:n?'Tienes '+n+' pleito'+(n>1?'s':'')+' abierto'+(n>1?'s':'')+' con otras casas. Entra para mover tus fichas.':'Demandar a otra casa, o ver lo que tienes en los juzgados.',mov:0,modal:true,run:()=>escenaJuzgados89()});
+        }
+      }catch(e){}
+      return A;
+    };
+    window.__SA89_ACC=true;
+  }
+  function wrapHeredar89(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA89_HEREDAR) return;
+    window.heredar=function(){
+      const L=(S&&Array.isArray(S.litigios))?JSON.parse(JSON.stringify(S.litigios)):null;
+      const r=old.apply(this,arguments);
+      try{ if(L&&L.length&&S){ S.litigios=L; log('Heredas también los pleitos de la casa: '+L.length+' sigue'+(L.length>1?'n':'')+' en los juzgados.'); guardar(true); } }catch(e){}
+      return r;
+    };
+    window.__SA89_HEREDAR=true;
+  }
+
+  function init89(){
+    wrapPaso89(); wrapHistoria89(); wrapResumenLegal89(); wrapProcesoPenal89(); wrapAcciones89(); wrapHeredar89(); instalarDemandaRival89();
+    Object.assign(window,{ABOGADOS_89,MOTIVOS_89,escenaJuicio89,escenaJuzgados89,escenaPleito89,escenaDemandar89,opcionDemandarRival89,opcionGuerraJudicial89,
+      veredictoPenal89,probCondena89,asegurarCaso89,falloPleito89,probGanar89,correrJusticia89,eventoJuicioPenal89,eventoFallo89,abrirPleito89});
+  }
+  setTimeout(init89,40);
+  setTimeout(init89,220);
+  setTimeout(init89,650);
+  window.__SA89={version:V89};
 })();
 </script>
 
