@@ -608,10 +608,24 @@ html{scroll-behavior:smooth}
 .periodico90 .p90-titular{padding-right:0}
 .informe .prensa .medio{background:rgba(240,231,213,.04);border-left:3px solid var(--laton-op);border-radius:0 0 8px 0;padding:2px 13px 10px;margin:0 0 9px;font-style:italic}
 </style>
+<style id="estilos-v91">
+.form91{display:flex;flex-direction:column;gap:10px;margin:6px 0 2px}
+.campo91{display:flex;flex-direction:column;gap:5px}
+.campo91>span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2)}
+.campo91 select{appearance:none;-webkit-appearance:none;width:100%;background:#1B3025 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23D6A648' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid rgba(240,231,213,.14);border-radius:9px;color:var(--marfil);font:inherit;font-size:14px;padding:11px 36px 11px 12px;cursor:pointer}
+.campo91 select:focus{outline:2px solid var(--laton);outline-offset:1px}
+.campo91 option:disabled{color:#7d8579}
+.form91-desc{font-size:12.5px;color:var(--humo);line-height:1.5;min-height:18px}
+.form91-desc b{color:#CFC6B4;font-weight:500}
+.form91-boda{display:flex;flex-direction:column;gap:10px;padding:10px 12px;border:1px solid var(--ui-line);border-radius:10px;background:rgba(240,231,213,.025)}
+.form91-aplicar{align-self:flex-start;background:var(--laton);color:#1A1408;border:0;border-radius:9px;padding:10px 16px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.form91-aplicar:hover{filter:brightness(1.08)}
+@media (max-width:700px){.form91-aplicar{align-self:stretch}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v90</div>
+<div class="version-badge" id="versionBadge">v91</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -15262,6 +15276,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(typeof window.opcionPoderPublico71==='function') opciones.push.apply(opciones,window.opcionPoderPublico71(r,g));
     if(typeof window.opcionGuerraFinanciera82==='function') opciones.push.apply(opciones,window.opcionGuerraFinanciera82(r,g));
     if(typeof window.opcionGuerraJudicial89==='function') opciones.push.apply(opciones,window.opcionGuerraJudicial89(r,g));
+    if(typeof window.opcionGuerraViolenta91==='function') opciones.push.apply(opciones,window.opcionGuerraViolenta91(r,g));
     opciones.push({t:'Proponer una tregua',cat:'legado',cerrar:false,run:()=>{
       r.relacionCasa=clamp((r.relacionCasa||10)+20,0,100);
       if(g.corto&&typeof window.cerrarCortoGuerra82==='function') window.cerrarCortoGuerra82(r,g);
@@ -16651,11 +16666,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function panelDecisiones86(e,categoria){
     const ACC_e=(function(){ const antes=S.emp; try{ sentarseEn(companias().indexOf(e)); return listaAcciones(); } finally { if(antes) sentarseEn(companias().indexOf(antes)); } })();
     const filas=[];
-    if(categoria==='produccion'){
-      const m=metodoDe81(e);
-      filas.push({t:'Cambiar método de producción',d:'Método actual: '+m.n+'.',especial:'metodo'});
-      if(e.cadenaCon) filas.push({t:'Ver su cadena de producción',d:'Vinculada con '+e.cadenaCon+' como '+(e.cadenaRol==='proveedor'?'proveedor.':'comprador.'),especial:'cadena-ver'});
-    }
+    if(categoria==='produccion') return formularioProduccion91(e,ACC_e);
     DECISIONES_COMPANIA_83.forEach(titulo=>{
       if(CATEGORIA_DECISION_86[titulo]!==categoria) return;
       if(titulo==='Cadena de producción'&&e.cadenaCon) return;
@@ -16669,6 +16680,23 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       '<div class="neg86-accion'+(f.dis?' dis':'')+'" data-neg-accion="'+esc(f.t)+'"'+(f.especial?' data-neg-especial="'+f.especial+'"':'')+'>'
         +sello(glifo)+'<div class="neg86-accion-info"><div class="nom">'+esc(f.t)+'</div><div class="txt">'+esc(f.dis||f.d||'')+'</div></div></div>'
     ).join('')+'</div>';
+  }
+  /* v91: la producción es un solo plan con desplegables, no una lista de botones sueltos */
+  function formularioProduccion91(e,ACC_e){
+    const idx=companias().indexOf(e), m=metodoDe81(e);
+    const invs=['Lanzar un producto','Invertir en producto y tecnología','Renovar la maquinaria','Integración vertical'].concat(e.cadenaCon?[]:['Cadena de producción'])
+      .map(t=>({t,a:ACC_e.find(x=>x.t===t)})).filter(x=>x.a);
+    const opM=metodosDisponibles81().map(x=>{ const c=x.costo(e);
+      return '<option value="'+esc(x.id)+'"'+(x.id===m.id?' selected':'')+(x.id!==m.id&&e.caja<c?' disabled':'')+'>'+esc(x.n)+(x.id===m.id?' (el actual)':(c>0?' · '+fmt(c):' · sin costo'))+(x.id!==m.id&&e.caja<c?' · sin caja':'')+'</option>'; }).join('');
+    const opI='<option value="">Nada más este año</option>'+invs.map(x=>'<option value="'+esc(x.t)+'"'+(x.a.dis?' disabled':'')+'>'+esc(x.t)+(x.a.dis?' · '+esc(x.a.dis):'')+'</option>').join('');
+    return '<div class="form91 form91-panel">'
+      +'<div class="apunte" style="margin-bottom:8px">Hoy '+esc(e.nombre)+' opera con <b>'+esc(m.n.toLowerCase())+'</b>.'+(e.cadenaCon?' Encadenada con <b>'+esc(e.cadenaCon)+'</b> como '+(e.cadenaRol==='proveedor'?'proveedor':'comprador')+'.':'')+'</div>'
+      +'<label class="campo91"><span>Método de producción</span><select id="f91-metodo">'+opM+'</select></label>'
+      +'<label class="campo91"><span>Inversión de este año</span><select id="f91-inversion">'+opI+'</select></label>'
+      +'<div class="apunte">Cada cambio cuesta una movida. El método se paga con la caja de la compañía; se nota poco a poco, año tras año.</div>'
+      +'<button type="button" class="btn form91-aplicar" data-neg-plan="'+idx+'">Aplicar el plan de producción</button>'
+      +(e.cadenaCon?'<div class="neg86-acciones" style="margin-top:12px"><div class="neg86-accion" data-neg-accion="Ver su cadena de producción" data-neg-especial="cadena-ver">'+sello('compania')+'<div class="neg86-accion-info"><div class="nom">Ver su cadena de producción</div><div class="txt">Vinculada con '+esc(e.cadenaCon)+'.</div></div></div></div>':'')
+      +'</div>';
   }
   function panelCompania86(e){
     if(!e) return '<div class="vacio">Elige una compañía de la lista.</div>';
@@ -16716,6 +16744,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.manejarClickNegEmp86=manejarClickNegEmp86;
     window.manejarClickNegCat86=manejarClickNegCat86;
     window.manejarClickNegAccion86=manejarClickNegAccion86;
+    window.metodosProduccion81=metodosDisponibles81; window.metodoDe81=metodoDe81; window.ejecutarAccionCompania83=ejecutarAccionCompania83;
   }
   setTimeout(init81,40);
   setTimeout(init81,220);
@@ -18444,6 +18473,667 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init90,220);
   setTimeout(init90,650);
   window.__SA90={version:V90};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v91 · MENOS DISPERSIÓN, MÁS MUNDO
+   - Acciones agrupadas en formularios con desplegables: matrimonio y
+     pareja, casar a un hijo, propiedades y el plan de producción.
+   - Catálogo amplio de delitos, con escala y consecuencias propias.
+   - Cuando la guerra entre casas se sale de control y hay manos sucias:
+     amenazas y atentados, de ida y de vuelta.
+   - El conflicto armado colombiano por época: extorsiones, secuestros,
+     atentados y tomas de fincas por parte de cada grupo.
+   - Más eventos sorpresa y más hitos históricos.
+   El juego modela consecuencias, nunca métodos.
+   ========================================================================== */
+(function(){
+  const V91='v91';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&S&&S.p&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const enGuerra=r=>!!(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r));
+  const golpe=(t,q)=>{ try{ if(typeof window.golpeGuerra70==='function') window.golpeGuerra70(t,q); }catch(e){} };
+  const cap91=x=>String(x).charAt(0).toUpperCase()+String(x).slice(1);
+  const vb91=(g,sg,pl)=>/^(las|los) /.test(g.n)?pl:sg;
+  const val91=id=>{ const el=document.getElementById(id); return el?el.value:''; };
+
+  /* ==================== FORMULARIOS ==================== */
+  function selectHTML91(id,etiqueta,opts){
+    let h='<label class="campo91"><span>'+esc(etiqueta)+'</span><select id="'+id+'">', g=null, marcado=false;
+    opts.forEach(o=>{
+      if(o.grupo!==undefined&&o.grupo!==g){ if(g!==null) h+='</optgroup>'; g=o.grupo; h+='<optgroup label="'+esc(g)+'">'; }
+      const sel=!marcado&&!o.dis&&(o.sel||!opts.some(x=>x.sel&&!x.dis));
+      if(sel) marcado=true;
+      h+='<option value="'+esc(o.v)+'"'+(o.dis?' disabled':'')+(sel?' selected':'')+'>'+esc(o.t)+(o.dis?' · '+esc(o.dis):'')+'</option>';
+    });
+    if(g!==null) h+='</optgroup>';
+    return h+'</select></label>';
+  }
+  function accionesCrudas91(){
+    window.__crudo91=true;
+    try{ return listaAcciones(); } finally { window.__crudo91=false; }
+  }
+  function ejecutarAccion91(a){
+    if(!a||a.dis||(a.mov||0)>S.mov) return false;
+    a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
+    render(); return true;
+  }
+
+  const GRUPOS_91=[
+    {id:'matrimonio',t:'Matrimonio y pareja',cat:'familia',
+     d:'Casarte (con quién, con qué régimen y con qué boda), conocer a alguien, tus capitulaciones o un divorcio: todo en un solo lugar.',
+     miembros:[['Casarse','Casarte'],['Casarse','Buscar un buen matrimonio'],['Casarse','Casarse dentro de la familia'],
+       ['Conocer a alguien','Salir a conocer gente'],['Conocer a alguien','Buscar intimidad'],
+       ['Tu matrimonio','Vida sentimental y relaciones'],['Tu matrimonio','Negociar capitulaciones matrimoniales'],['Tu matrimonio','Divorciarte']]},
+    {id:'hijos',t:'Casar a un hijo',cat:'familia',
+     d:'Elegir a cuál de tus hijos casar y con qué casa: dote, contactos y prestigio para el apellido.',
+     prefijos:[['Tus hijos','Casar a ']]},
+    {id:'propiedades',t:'Propiedades',cat:'casa',
+     d:'Comprar vivienda, finca, terreno, viñedo o inmuebles para arrendar; vender, mejorar o abonar a la hipoteca.',
+     miembros:[['Comprar','Comprar vivienda'],['Comprar','Comprar otro tipo de vivienda'],['Comprar','Comprar finca'],['Comprar','Comprar para arrendar'],
+       ['Comprar','Comprar un terreno'],['Comprar','Comprar un viñedo'],
+       ['Lo que ya tienes','Vender una propiedad'],['Lo que ya tienes','Mejorar una propiedad'],['Lo que ya tienes','Abonar a la hipoteca']],
+     prefijos:[['Lo que ya tienes','Desarrollar '],['Lo que ya tienes','Cambiar el uso de ']]}
+  ];
+  function miembrosDe91(g,A){
+    const out=[];
+    (g.miembros||[]).forEach(([grupo,t])=>{ const a=A.find(x=>x.t===t); if(a) out.push({grupo,a}); });
+    (g.prefijos||[]).forEach(([grupo,pre])=>{ A.filter(x=>typeof x.t==='string'&&x.t.indexOf(pre)===0&&!out.some(o=>o.a===x)).forEach(a=>out.push({grupo,a})); });
+    return out;
+  }
+  const esBoda91=t=>['Casarte','Buscar un buen matrimonio','Casarse dentro de la familia'].includes(t);
+  function bodaOpts91(){
+    const p=pat();
+    return [{v:'intima',t:'Íntima, solo la familia ('+fmt(Math.max(2,p*.002))+')'},
+      {v:'social',t:'Una boda como se debe ('+fmt(Math.max(6,p*.008))+')',sel:true},
+      {v:'gala',t:'Boda de sociedad, con prensa ('+fmt(Math.max(20,p*.025))+')'}];
+  }
+  function aplicarBoda91(tipo,pa){
+    const p=pat(), costos={intima:Math.max(2,p*.002),social:Math.max(6,p*.008),gala:Math.max(20,p*.025)};
+    if(!costos[tipo]) tipo='social';
+    if(S.efectivo<costos[tipo]) tipo='intima';
+    S.efectivo-=Math.min(S.efectivo,costos[tipo]);
+    if(tipo==='intima'){ S.p.felicidad=clamp(S.p.felicidad+2,0,100); }
+    if(tipo==='social'){ S.p.felicidad=clamp(S.p.felicidad+4,0,100); moverPrestigio(1,'una boda como se debe'); if(isFinite(S.p.redes)) S.p.redes=clamp(S.p.redes+2,0,100); }
+    if(tipo==='gala'){ S.p.felicidad=clamp(S.p.felicidad+5,0,100); moverPrestigio(3,'boda de sociedad'); if(isFinite(S.p.redes)) S.p.redes=clamp(S.p.redes+5,0,100);
+      if(pa) pa.afecto=clamp((pa.afecto||60)+4,0,100); }
+    log('La boda fue '+({intima:'íntima, solo con la familia',social:'como se debe, con toda la gente que importa',gala:'de sociedad: salió en todas las revistas'})[tipo]+'.','bien');
+  }
+  function casarConPareja91(reg,boda){
+    const pa=S.familia&&S.familia.pareja; if(!pa||pa.casados) return;
+    pa.casados=true; pa.pref91=true;
+    if(reg==='separacion'){ pa.separacionBienes=true; pa.paciencia=clamp(pa.paciencia-8,0,100); S.p.felicidad=clamp(S.p.felicidad+6,0,100); }
+    else { pa.paciencia=clamp(pa.paciencia+20,0,100); S.p.felicidad=clamp(S.p.felicidad+12,0,100); }
+    log('Te casaste con <b>'+esc(pa.nombre)+'</b>'+(reg==='separacion'?', con capitulaciones firmadas en notaría':', en sociedad conyugal')+'.','hito');
+    hito('Se casó con '+pa.nombre); aplicarBoda91(boda,pa); S.mov=Math.max(0,S.mov-1);
+    if(typeof escenaLunaDeMiel==='function') setTimeout(()=>escenaLunaDeMiel(pa),0);
+  }
+  function aplicarPreferencia91(){
+    const pref=S&&S._pref91; if(!pref) return;
+    const pa=S.familia&&S.familia.pareja;
+    if(pa&&pa.casados&&!pa.pref91){
+      pa.pref91=true;
+      if(pref.reg==='separacion'&&!pa.separacionBienes){ pa.separacionBienes=true; log('Como lo decidiste, el matrimonio quedó con separación de bienes.'); }
+      aplicarBoda91(pref.boda,pa); delete S._pref91;
+    } else if(pref.anio<S.anio-1) delete S._pref91;
+  }
+  function escenaGrupo91(gid){
+    const g=GRUPOS_91.find(x=>x.id===gid); if(!g) return;
+    const lista=miembrosDe91(g,accionesCrudas91());
+    if(!lista.length){ escena({rubro:'Tu vida',titulo:g.t,cuerpo:'Ahora mismo no hay nada que hacer aquí.',opciones:[],cerrable:true}); return; }
+    const opts=lista.map((m,i)=>({v:String(i),t:m.a.t,grupo:m.grupo,dis:m.a.dis||((m.a.mov||0)>S.mov?'sin movidas':null)}));
+    let html='<div class="form91">'+selectHTML91('f91-accion','¿Qué quieres hacer?',opts)+'<div class="form91-desc" id="f91-desc"></div>';
+    if(gid==='matrimonio'){
+      html+='<div class="form91-boda" id="f91-boda">'
+        +selectHTML91('f91-regimen','Régimen de bienes',[{v:'sociedad',t:'Sociedad conyugal, sin más papeles'},{v:'separacion',t:'Con capitulaciones (separación de bienes)'}])
+        +selectHTML91('f91-celebracion','La boda',bodaOpts91())+'</div>';
+    }
+    html+='</div>';
+    escena({rubro:'Tu vida',titulo:g.t,ancho:true,cuerpo:esc(g.d),html,cerrable:true,
+      opciones:[{t:'Seguir',cat:g.cat,cerrar:false,run:()=>{
+        const m=lista[parseInt(val91('f91-accion'),10)]; if(!m) return;
+        const a=m.a; if(a.dis||(a.mov||0)>S.mov) return;
+        const reg=val91('f91-regimen')||'sociedad', boda=val91('f91-celebracion')||'social';
+        cerrarModal();
+        if(gid==='matrimonio'&&a.t==='Casarte'){ casarConPareja91(reg,boda); render(); return; }
+        if(gid==='matrimonio'&&esBoda91(a.t)) S._pref91={reg,boda,anio:S.anio};
+        ejecutarAccion91(a);
+      }}]});
+    const sel=document.getElementById('f91-accion');
+    const pintar=()=>{
+      const m=lista[parseInt(sel.value,10)], d=document.getElementById('f91-desc'), b=document.getElementById('f91-boda');
+      if(d) d.textContent=m?(m.a.dis||m.a.d||''):'';
+      if(b) b.style.display=(m&&esBoda91(m.a.t))?'':'none';
+    };
+    if(sel){ sel.addEventListener('change',pintar); pintar(); }
+  }
+
+  /* --- plan de producción (Negocios → Producción) --- */
+  function aplicarPlanProduccion91(idx){
+    const e=companias()[idx]; if(!e) return;
+    const metodo=val91('f91-metodo'), inv=val91('f91-inversion');
+    let cambios=0;
+    if(metodo&&typeof window.metodosProduccion81==='function'){
+      const ms=window.metodosProduccion81(), actual=window.metodoDe81(e), m=ms.find(x=>x.id===metodo);
+      if(m&&m.id!==actual.id&&S.mov>=1){
+        const costo=m.costo(e);
+        if(e.caja>=costo){ e.caja-=costo; e.metodoProduccion=m.id; S.mov--; cambios++; log('<b>'+esc(e.nombre)+'</b> pasó a '+esc(m.n.toLowerCase())+'.','hito'); }
+        else log('No hay caja en '+esc(e.nombre)+' para cambiar el método.','mal');
+      }
+    }
+    if(inv&&typeof window.ejecutarAccionCompania83==='function'&&S.mov>=1){
+      if(window.ejecutarAccionCompania83(e,inv)) cambios++;
+    }
+    if(!cambios) log('El plan de producción de '+esc(e.nombre)+' quedó igual.');
+    renderPestanas(); renderLienzo();
+  }
+
+  /* ==================== DELITOS ==================== */
+  const CRIMENES_91=[
+    {id:'evasion',n:'Evadir impuestos',tipo:'evasión fiscal',sev:2,gan:.015,desc:.14,esc:0,
+     d:'Ocultar utilidades y declarar menos. Es el delito más común de los ricos, y el más perseguido por la DIAN.'},
+    {id:'contrabando',n:'Meter mercancía de contrabando',tipo:'contrabando',sev:3,gan:.022,desc:.2,esc:0,
+     d:'Mercancía que entra sin pagar aranceles y se vende más barata que la de los demás.',
+     extra:()=>{ if(S.emp) S.emp.ingresos*=1.03; }},
+    {id:'cartel',n:'Ponerte de acuerdo en precios con la competencia',tipo:'cartelización',sev:3,gan:.01,desc:.18,esc:1,
+     req:()=>S.emp&&rivalesVivas().some(r=>r.sector===S.emp.sector)?null:'Necesitas competidores en tu mismo sector',
+     d:'Un almuerzo discreto y todos suben precios al tiempo. La Superintendencia vive buscando estos almuerzos.',
+     extra:()=>{ if(S.emp){ S.emp.caja=(S.emp.caja||0)+S.emp.ingresos*.05; rivalesVivas().filter(r=>r.sector===S.emp.sector).forEach(r=>r.relacionCasa=clamp((r.relacionCasa||50)+8,0,100)); } }},
+    {id:'balances',n:'Maquillar los balances',tipo:'falsedad en balances',sev:4,gan:.012,desc:.24,esc:1,
+     req:()=>S.emp&&S.emp.publica?null:'Solo tiene sentido si tu compañía cotiza en bolsa',
+     d:'Resultados que se ven mejor de lo que son. La acción sube; el día que se sepa, se desploma.',
+     extra:()=>{ if(S.emp) S.emp.primaMercado=Math.max(S.emp.primaMercado||1,1.15); }},
+    {id:'privilegiada',n:'Operar con información privilegiada',tipo:'uso de información privilegiada',sev:3,gan:.03,desc:.24,esc:1,
+     req:()=>(S.emp&&S.emp.publica)||(S.portafolio||[]).length?null:'Necesitas acceso a la bolsa',
+     d:'Comprar o vender sabiendo lo que el mercado todavía no sabe.'},
+    {id:'contratos',n:'Quedarte con un contrato público',tipo:'fraude en contratación',sev:4,gan:.04,desc:.26,esc:1,
+     req:()=>((S.p.redes||0)>=35||(S.carrera&&S.carrera.politica&&S.carrera.politica.activo))?null:'Necesitas contactos en el Estado (redes 35+)',
+     d:'Un pliego hecho a la medida, una licitación con un solo oferente.'},
+    {id:'estafa',n:'Estafar a tus socios',tipo:'fraude societario',sev:5,gan:.04,desc:.3,esc:1,
+     d:'Sacar plata de la sociedad por la puerta de atrás. Los socios siempre terminan sacando cuentas.',
+     extra:()=>{ (S.junta||[]).forEach(j=>{ if(isFinite(j.lealtad)) j.lealtad=clamp(j.lealtad-8,0,100); }); }},
+    {id:'lavado',n:'Lavar plata ajena',tipo:'lavado de activos',sev:5,gan:.05,desc:.24,esc:1,desde:1975,
+     d:'Tu compañía hace pasar por limpia plata que no lo es, a cambio de una comisión. Quien te la trae no perdona errores.',
+     extra:()=>{ conf91().vinculos.cartel=S.anio; }},
+    {id:'piramide',n:'Montar un esquema piramidal',tipo:'esquema piramidal',sev:6,gan:.06,desc:.35,esc:1,
+     d:'Prometer rendimientos imposibles y pagarles a los viejos con la plata de los nuevos. Da plata rápido; siempre se cae.'},
+    {id:'despojo',n:'Quedarte con tierras ajenas',tipo:'despojo de tierras',sev:6,gan:.04,desc:.2,esc:1,desde:1950,
+     d:'Tierras que sus dueños dejaron por la violencia, compradas a precio de huida y escrituradas a tu nombre.'},
+    {id:'flota',n:'Prestar tus camiones para un cargamento',tipo:'narcotráfico',sev:7,gan:.08,desc:.3,esc:2,desde:1976,
+     d:'No preguntas qué llevan. Te pagan muy bien precisamente por no preguntar.',
+     extra:()=>{ conf91().vinculos.cartel=S.anio; }},
+    {id:'grupo',n:'Pagarle a un grupo armado',tipo:'financiación de grupo armado',sev:5,gan:0,desc:.18,esc:1,desde:1964,
+     req:()=>gruposActivos91().length?null:'No hay grupos armados activos en esta época',
+     d:'Un pago a cambio de que dejen en paz tus fincas, tu planta y tu familia. Los del otro bando lo van a saber.',
+     elegirGrupo:true},
+    {id:'intimidar',n:'Mandar a intimidar a una casa rival',tipo:'constreñimiento ilegal',sev:5,gan:0,desc:.26,esc:1,
+     req:()=>rivalesVivas().length?null:'No hay casas rivales',
+     d:'Una visita, una llamada a medianoche. Bajan el tono, o suben la apuesta.',
+     extra:()=>{ const r=rivalesVivas().slice().sort((a,b)=>(a.relacionCasa||50)-(b.relacionCasa||50))[0]; if(!r) return;
+       r.relacionCasa=clamp((r.relacionCasa||50)-15,0,100); r.patrimonio=Math.max(1,(r.patrimonio||0)*.97);
+       if(enGuerra(r)&&S.guerraEmpresarial){ S.guerraEmpresarial.intensidad=clamp((S.guerraEmpresarial.intensidad||15)+10,0,100); golpe('Mandaste a intimidarlos.','tu'); } }},
+    {id:'gravisimo',n:'Aceptar algo gravísimo',tipo:'delito grave',sev:8,gan:.12,desc:1,esc:2,
+     d:'Mucha plata, y ninguna salida limpia. La fiscalía va a abrir un caso, eso es seguro.'}
+  ];
+  const ESCALAS_91={discreto:{n:'Discreto',g:.5,s:-1,p:.7},normal:{n:'Normal',g:1,s:0,p:1},grande:{n:'A lo grande',g:2,s:1,p:1.4}};
+  function gananciaCrimen91(c,esc_){ return c.gan?Math.max(10,Math.round(pat()*c.gan*esc_.g)):0; }
+  function probDescubierto91(c,esc_){
+    if(c.desc>=1) return 1;
+    return clamp(c.desc*esc_.p+((S.penal&&S.penal.riesgo)||0)/350-(yo('astuto')?.05:0)-(yo('ingenuo')?-.05:0),.03,.92);
+  }
+  function cometerCrimen91(cid,eid,gid){
+    asegurarPenal();
+    const c=CRIMENES_91.find(x=>x.id===cid), e=ESCALAS_91[eid]||ESCALAS_91.normal; if(!c) return null;
+    const x=gananciaCrimen91(c,e), sev=Math.max(1,c.sev+e.s), pd=probDescubierto91(c,e);
+    if(c.elegirGrupo){
+      const g=GRUPOS_ARMADOS_91.find(y=>y.id===gid)||gruposActivos91()[0]; if(!g) return null;
+      const costo=Math.max(10,Math.round(pat()*.02*e.g)); S.efectivo-=costo;
+      const cf=conf91(); cf.pactos[g.id]=S.anio+(eid==='grande'?6:eid==='discreto'?2:4);
+      grupoEnemigo91(g).forEach(o=>{ cf.amenazas[o.id]=S.anio+3; });
+      registrarDelito(c.tipo,sev,'pagos a '+g.n);
+      log('Le pagaste '+fmt(costo)+' a '+esc(g.n)+'. Por un tiempo tus tierras quedan en paz; sus enemigos ya lo saben.','mal');
+    } else {
+      if(x) S.efectivo+=x;
+      registrarDelito(c.tipo,sev,c.n.toLowerCase());
+      try{ if(c.extra) c.extra(); }catch(err){}
+      log((x?'Ganaste '+fmt(x)+': ':'')+esc(c.n.toLowerCase())+'.','mal');
+    }
+    if(c.esc&&chance(.5+(eid==='grande'?.25:0))) S.p.escandalos=(S.p.escandalos||0)+c.esc;
+    let caso=false;
+    if(chance(pd)&&!S.penal.caso){ abrirCasoPenal(c.tipo); caso=true; }
+    S.mov=Math.max(0,S.mov-1);
+    return {ganancia:x,caso,sev};
+  }
+  function escenaCrimenes91(){
+    asegurarPenal();
+    const preso=S.penal.prisionRestante>0;
+    const opts=CRIMENES_91.map(c=>{
+      const era=c.desde&&S.anio<c.desde?'todavía no existe en '+S.anio:null;
+      return {v:c.id,t:c.n,dis:era||(c.req?c.req():null)};
+    });
+    const grupos=gruposActivos91();
+    const html='<div class="form91">'
+      +selectHTML91('f91-crimen','¿Qué vas a hacer?',opts)
+      +selectHTML91('f91-escala','Escala',[{v:'discreto',t:'Discreto: menos plata, menos rastro'},{v:'normal',t:'Normal',sel:true},{v:'grande',t:'A lo grande: el doble, y se nota'}])
+      +'<div id="f91-grupo-caja">'+selectHTML91('f91-grupo','¿A cuál grupo?',grupos.length?grupos.map(g=>({v:g.id,t:g.n})):[{v:'',t:'Ninguno activo',dis:'—'}])+'</div>'
+      +'<div class="form91-desc" id="f91-crimen-desc"></div></div>';
+    escena({rubro:'Por debajo de la mesa',titulo:'Operaciones ilegales',ancho:true,cerrable:true,
+      cuerpo:'Plata rápida a cambio de riesgo penal. El juego no detalla métodos: solo modela las consecuencias. Cada delito suma al expediente, y la fiscalía no olvida.',
+      html,opciones:[{t:'Hacerlo',cat:'riesgo',dis:preso?'No mientras cumples condena':(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>{
+        const cid=val91('f91-crimen'), c=CRIMENES_91.find(x=>x.id===cid); if(!c) return;
+        if((c.desde&&S.anio<c.desde)||(c.req&&c.req())) return;
+        const r=cometerCrimen91(cid,val91('f91-escala')||'normal',val91('f91-grupo'));
+        cerrarModal(); render();
+        if(r&&r.caso) log('La fiscalía abrió un caso en tu contra.','mal');
+      }}]});
+    const sel=document.getElementById('f91-crimen');
+    const pintar=()=>{
+      const c=CRIMENES_91.find(x=>x.id===sel.value), e=ESCALAS_91[val91('f91-escala')]||ESCALAS_91.normal, d=document.getElementById('f91-crimen-desc');
+      const caja=document.getElementById('f91-grupo-caja'); if(caja) caja.style.display=c&&c.elegirGrupo?'':'none';
+      if(d&&c) d.innerHTML=esc(c.d)+'<br><b>'+(c.gan?'Ganancia: cerca de '+fmt(gananciaCrimen91(c,e))+'. ':'')+'Gravedad '+Math.max(1,c.sev+e.s)+'/10. Riesgo de que abran un caso ya: '+pc(probDescubierto91(c,e))+'.</b>';
+    };
+    if(sel){ sel.addEventListener('change',pintar); const es=document.getElementById('f91-escala'); if(es) es.addEventListener('change',pintar); pintar(); }
+  }
+
+  /* ==================== CONFLICTO ARMADO ==================== */
+  const GRUPOS_ARMADOS_91=[
+    {id:'farc',n:'las FARC',tipo:'guerrilla',desde:1964,hasta:2016},
+    {id:'eln',n:'el ELN',tipo:'guerrilla',desde:1964,hasta:9999},
+    {id:'m19',n:'el M-19',tipo:'guerrilla',desde:1974,hasta:1990},
+    {id:'medellin',n:'el cartel de Medellín',tipo:'cartel',desde:1978,hasta:1993,ciudad:'Medellín'},
+    {id:'cali',n:'el cartel de Cali',tipo:'cartel',desde:1980,hasta:1995,ciudad:'Cali'},
+    {id:'auc',n:'los paramilitares',tipo:'paramilitar',desde:1982,hasta:2006},
+    {id:'clan',n:'el Clan del Golfo',tipo:'banda',desde:2006,hasta:9999},
+    {id:'disidencias',n:'las disidencias',tipo:'guerrilla',desde:2017,hasta:9999}
+  ];
+  function conf91(){
+    if(!S.conflicto91||typeof S.conflicto91!=='object') S.conflicto91={vacunas:{},pactos:{},amenazas:{},vinculos:{},cautivo:null,ultimo:null,seguridad:0};
+    const c=S.conflicto91; ['vacunas','pactos','amenazas','vinculos'].forEach(k=>{ if(!c[k]||typeof c[k]!=='object') c[k]={}; });
+    if(!isFinite(c.seguridad)) c.seguridad=0;
+    return c;
+  }
+  function enColombia91(){ try{ return jurisdiccionActual().pais==='Colombia'; }catch(e){ return true; } }
+  function intensidad91(a){ a=a||S.anio; if(a<1964) return 0; if(a<1980) return .35; if(a<1985) return .6; if(a<=2002) return 1; if(a<=2010) return .6; if(a<=2016) return .35; return .2; }
+  function gruposActivos91(){ return GRUPOS_ARMADOS_91.filter(g=>S.anio>=g.desde&&S.anio<=g.hasta); }
+  function grupoEnemigo91(g){ return gruposActivos91().filter(o=>(g.tipo==='paramilitar'&&o.tipo==='guerrilla')||(g.tipo==='guerrilla'&&o.tipo==='paramilitar')); }
+  const fincas91=()=>(S.bienes||[]).filter(b=>b.clase==='finca');
+  function exposicion91(){
+    const p=pat();
+    return .45+(p>500?.25:0)+(p>5000?.3:0)+Math.min(.6,fincas91().length*.15)+(S.emp&&['mineria','agro','energia'].includes(S.emp.sector)?.3:0);
+  }
+  const PROTECCION_91=[1,.6,.35];
+  const proteccion91=()=>PROTECCION_91[clamp(conf91().seguridad||0,0,2)];
+  const protegidoDe91=g=>{ const c=conf91(); return (c.vacunas[g.id]||0)>=S.anio||(c.pactos[g.id]||0)>=S.anio; };
+  const amenazado91=g=>(conf91().amenazas[g.id]||0)>=S.anio;
+  function candidatosConflicto91(filtro){
+    return gruposActivos91().filter(g=>!protegidoDe91(g)&&(!filtro||filtro(g)));
+  }
+  function elegirGrupo91(filtro){
+    const cs=candidatosConflicto91(filtro); if(!cs.length) return null;
+    const bolsa=[]; cs.forEach(g=>{ let w=amenazado91(g)?3:1; if(g.ciudad&&S.p&&S.p.ciudad===g.ciudad) w*=2; for(let i=0;i<w;i++) bolsa.push(g); });
+    return pick(bolsa);
+  }
+  function puedeConflicto91(){ const c=conf91(); return !!(S&&S.p&&enColombia91()&&gruposActivos91().length&&c.ultimo!==S.anio&&!c.cautivo); }
+  const NIVELES_SEG_91=[
+    {n:'Sin esquema de seguridad',costo:()=>0,d:'Vives como cualquiera. Nadie te protege.'},
+    {n:'Escoltas',costo:()=>Math.max(4,Math.round(pat()*.004)),d:'Dos escoltas y un conductor que sabe cambiar de ruta. Los ataques salen bien la mitad de veces menos.'},
+    {n:'Esquema completo: escoltas y blindaje',costo:()=>Math.max(12,Math.round(pat()*.012)),d:'Carros blindados, casa vigilada, rutas que cambian cada día. Muy caro, pero casi nadie se atreve.'}
+  ];
+  function escenaSeguridad91(){
+    const c=conf91();
+    escena({rubro:'Seguridad',titulo:'La seguridad de la familia',ancho:true,cerrable:true,
+      cuerpo:'Hoy tienes: <b>'+esc(NIVELES_SEG_91[c.seguridad].n.toLowerCase())+'</b>. La seguridad se paga cada año y protege contra secuestros, atentados y amenazas, vengan de un grupo armado o de otra casa.'
+        +(enColombia91()?' Intensidad del conflicto en '+S.anio+': <b>'+(intensidad91()>=.9?'altísima':intensidad91()>=.5?'alta':intensidad91()>0?'baja':'ninguna')+'</b>.':''),
+      html:'<div class="form91">'+selectHTML91('f91-seguridad','Esquema',NIVELES_SEG_91.map((n,i)=>({v:String(i),t:n.n+(i?' ('+fmt(n.costo())+' al año)':''),sel:i===c.seguridad})))+'</div>',
+      opciones:[{t:'Dejarlo así',cat:'riesgo',cerrar:false,run:()=>{
+        const n=parseInt(val91('f91-seguridad'),10); if(!isFinite(n)) return;
+        if(n!==c.seguridad){ c.seguridad=clamp(n,0,2); log(c.seguridad?'Contrataste '+NIVELES_SEG_91[c.seguridad].n.toLowerCase()+'.':'Quitaste el esquema de seguridad.'); }
+        cerrarModal(); render();
+      }}]});
+  }
+  function liberar91(motivo){
+    const c=conf91(), k=c.cautivo; if(!k) return;
+    c.cautivo=null;
+    if(k.quien==='tu'){ S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+10,0,100); log('<b>Quedaste libre</b> después de '+(k.anios||1)+' año'+((k.anios||1)>1?'s':'')+' en manos de '+esc(k.grupo)+'. '+(motivo||''),'hito'); }
+    else { const h=(S.familia.hijos||[]).find(x=>x.nombre===k.nombre); if(h) h.vinculo=clamp((h.vinculo||60)+10,0,100);
+      log('<b>'+esc(k.nombre)+'</b> volvió a casa después de '+(k.anios||1)+' año'+((k.anios||1)>1?'s':'')+' de secuestro. '+(motivo||''),'hito'); }
+  }
+  function muereVictima91(k){
+    if(k.quien==='tu'){ S.p.salud=0; log('El secuestro terminó de la peor manera.','mal'); return; }
+    if(k.quien==='pareja'&&S.familia.pareja){ const pa=S.familia.pareja; S.familia.pareja=null;
+      asegurarColasFamilia(); S.funeralPendientes.push({quien:pa.nombre,rel:'pareja',sexo:pa.sexo}); }
+    else { const h=(S.familia.hijos||[]).find(x=>x.nombre===k.nombre);
+      if(h){ S.familia.hijos=S.familia.hijos.filter(x=>x!==h); asegurarColasFamilia(); S.funeralPendientes.push({quien:h.nombre+' '+S.p.apellido,rel:'hijo',sexo:h.sexo}); } }
+    S.p.felicidad=clamp(S.p.felicidad-30,0,100);
+    log('<b>'+esc(k.nombre)+'</b> no volvió del secuestro.','mal');
+  }
+  function victimaSecuestro91(){
+    const vs=[{quien:'tu',nombre:S.p.nombre+' '+S.p.apellido,w:3}];
+    if(S.familia.pareja) vs.push({quien:'pareja',nombre:S.familia.pareja.nombre,w:2});
+    (S.familia.hijos||[]).filter(h=>h.edad>=8&&!h.montoLoSuyo).forEach(h=>vs.push({quien:'hijo',nombre:h.nombre,w:1.5}));
+    const bolsa=[]; vs.forEach(v=>{ for(let i=0;i<v.w*2;i++) bolsa.push(v); }); return pick(bolsa);
+  }
+  function instalarConflicto91(){
+    if(window.__SA91_CONFLICTO) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    /* extorsión ("vacuna") */
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return 1.3*intensidad91()*exposicion91(); }catch(e){ return 0; } },
+      c:()=>puedeConflicto91()&&(S.emp||fincas91().length)&&!!elegirGrupo91(g=>g.tipo!=='cartel'||S.anio<=1995),
+      t:()=>{
+        const g=elegirGrupo91(g=>g.tipo!=='cartel'||S.anio<=1995); if(!g) return null;
+        const x=Math.max(8,Math.round(pat()*rnd(.008,.02))); conf91().ultimo=S.anio;
+        S._ext91={g:g.id,x};
+        return '<b>Una carta sin firma.</b> Es de '+esc(g.n)+': te exigen una "vacuna" de <b>'+fmt(x)+'</b> al año para dejar en paz '
+          +(fincas91().length?'tus fincas':'tu compañía')+'. Saben dónde vives y a qué colegio van tus hijos.';
+      },
+      o:[
+        {t:'Pagar',f:()=>{ const d=S._ext91, g=d&&GRUPOS_ARMADOS_91.find(x=>x.id===d.g); if(!g) return 'Ya no aplicaba.';
+          S.efectivo-=d.x; conf91().vacunas[g.id]=S.anio+3; return 'Pagaste. Por ahora, '+esc(g.n)+' te '+vb91(g,'deja','dejan')+' en paz. El año que viene vendrán por más.'; }},
+        {t:'Negarte',f:()=>{ const d=S._ext91, g=d&&GRUPOS_ARMADOS_91.find(x=>x.id===d.g); if(!g) return 'Ya no aplicaba.';
+          conf91().amenazas[g.id]=S.anio+3; S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+8,0,100);
+          return 'Te negaste. Desde ahora eres un objetivo de '+esc(g.n)+'.'; }},
+        {t:'Denunciar ante el Ejército',f:()=>{ const d=S._ext91, g=d&&GRUPOS_ARMADOS_91.find(x=>x.id===d.g); if(!g) return 'Ya no aplicaba.';
+          if(chance(.4+conf91().seguridad*.08)){ conf91().vacunas[g.id]=S.anio+2; moverPrestigio(1,'denunció una extorsión'); return 'El Ejército desarticuló a los que te extorsionaban. Por un tiempo, nadie se acerca.'; }
+          conf91().amenazas[g.id]=S.anio+4; if(S.emp) S.emp.eficiencia=clamp(S.emp.eficiencia-5,0,100);
+          return 'La denuncia no sirvió de nada y '+esc(g.n)+' se enteró. Ya te mandaron un mensaje.'; }}
+      ]
+    });
+    /* secuestro */
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return .8*intensidad91()*exposicion91()*proteccion91(); }catch(e){ return 0; } },
+      c:()=>puedeConflicto91()&&pat()>=60&&!!elegirGrupo91(),
+      t:()=>{
+        const g=elegirGrupo91(); if(!g) return null;
+        const v=victimaSecuestro91(), rescate=Math.max(20,Math.round(pat()*rnd(.05,.12)));
+        conf91().ultimo=S.anio; S._sec91={g:g.id,quien:v.quien,nombre:v.nombre,rescate};
+        const sx=v.quien==='hijo'?((S.familia.hijos.find(h=>h.nombre===v.nombre)||{}).sexo):(v.quien==='pareja'&&S.familia.pareja?S.familia.pareja.sexo:'h');
+        return '<b>'+(v.quien==='tu'?'Te secuestraron.':esc(v.nombre)+' fue secuestrad'+(sx==='m'?'a':'o')+'.')+'</b> '
+          +(v.quien==='tu'?'Un retén en la carretera, hombres armados y una caminata de días por la montaña. ':'')+esc(cap91(g.n))+' '+vb91(g,'pide','piden')+' <b>'+fmt(rescate)+'</b>.';
+      },
+      o:[
+        {t:'Pagar el rescate',f:()=>{ const d=S._sec91; if(!d) return 'Ya no aplicaba.';
+          S.efectivo-=d.rescate;
+          if(d.quien==='tu'){ S.p.salud=clamp(S.p.salud-8,0,100); S.p.felicidad=clamp(S.p.felicidad-10,0,100); S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+15,0,100); }
+          else S.p.felicidad=clamp(S.p.felicidad-6,0,100);
+          return 'Pagaste '+fmt(d.rescate)+'. '+(d.quien==='tu'?'Volviste a casa en dos semanas, más flaco y sin dormir.':esc(d.nombre)+' volvió a casa en dos semanas.'); }},
+        {t:'Negociar por menos',f:()=>{ const d=S._sec91; if(!d) return 'Ya no aplicaba.'; const g=GRUPOS_ARMADOS_91.find(x=>x.id===d.g);
+          S.efectivo-=Math.round(d.rescate*.5);
+          conf91().cautivo={quien:d.quien,nombre:d.nombre,grupo:g?g.n:'el grupo',restante:ri(1,2),anios:0,rescate:Math.round(d.rescate*.5),negado:false};
+          return 'Pagaste la mitad y empezó una negociación larga. Puede tardar uno o dos años.'; }},
+        {t:'Pedir un rescate militar',f:()=>{ const d=S._sec91; if(!d) return 'Ya no aplicaba.'; const g=GRUPOS_ARMADOS_91.find(x=>x.id===d.g);
+          if(chance(.5+conf91().seguridad*.08)){ if(g) conf91().amenazas[g.id]=S.anio+4; moverPrestigio(2,'un rescate militar exitoso');
+            return 'El Ejército entró a la montaña y '+(d.quien==='tu'?'te sacó con vida.':'sacó con vida a '+esc(d.nombre)+'.')+' '+(g?esc(cap91(g.n))+' no lo '+vb91(g,'va','van')+' a olvidar.':''); }
+          if(chance(.45)){ muereVictima91({quien:d.quien,nombre:d.nombre}); return 'El rescate salió mal.'; }
+          conf91().cautivo={quien:d.quien,nombre:d.nombre,grupo:g?g.n:'el grupo',restante:ri(2,3),anios:0,rescate:d.rescate,negado:true};
+          if(d.quien==='tu') S.p.salud=clamp(S.p.salud-15,0,100);
+          return 'El rescate fracasó y se los llevaron más adentro de la selva.'; }},
+        {t:'Negarte a pagar',f:()=>{ const d=S._sec91; if(!d) return 'Ya no aplicaba.'; const g=GRUPOS_ARMADOS_91.find(x=>x.id===d.g);
+          conf91().cautivo={quien:d.quien,nombre:d.nombre,grupo:g?g.n:'el grupo',restante:ri(2,4),anios:0,rescate:d.rescate,negado:true};
+          return 'No pagaste. El cautiverio va para largo.'; }}
+      ]
+    });
+    /* atentado */
+    EVENTOS_LOCALES.push({
+      get p(){ try{ const narco=S.anio>=1984&&S.anio<=1994?1.6:1; return .6*intensidad91()*narco*proteccion91(); }catch(e){ return 0; } },
+      c:()=>puedeConflicto91()&&!!S.emp&&!!elegirGrupo91(),
+      t:()=>{
+        const g=elegirGrupo91(); if(!g) return null; conf91().ultimo=S.anio;
+        const danio=Math.round(Math.max(5,(S.emp.caja||0)*.05+S.emp.ingresos*.04)); S._ate91={g:g.id,danio};
+        S.emp.eficiencia=clamp(S.emp.eficiencia-8,0,100); S.emp.moral=clamp(S.emp.moral-10,0,100);
+        return '<b>Una bomba estalló frente a '+esc(S.emp.nombre)+'.</b> '+(g.tipo==='cartel'?'La reivindicó '+esc(g.n)+' en un comunicado contra todos los que «colaboran».'
+          :esc(cap91(g.n))+' la '+vb91(g,'puso','pusieron')+' contra la infraestructura de la zona.')+' Los daños suman cerca de '+fmt(danio)+'.';
+      },
+      o:[
+        {t:'Reconstruir de inmediato',f:()=>{ const d=S._ate91; if(!d) return 'Ya no aplicaba.'; S.emp.caja=(S.emp.caja||0)-d.danio; S.emp.moral=clamp(S.emp.moral+6,0,100);
+          return 'Reconstruiste en semanas. Los empleados lo notaron.'; }},
+        {t:'Reconstruir y montar un esquema de seguridad',f:()=>{ const d=S._ate91; if(!d) return 'Ya no aplicaba.'; S.emp.caja=(S.emp.caja||0)-d.danio;
+          const c=conf91(); if(c.seguridad<1) c.seguridad=1; return 'Reconstruiste y ahora andas con escoltas.'; }},
+        {t:'Dejarlo así por ahora',f:()=>{ if(S.emp){ S.emp.ingresos*=.94; S.emp.marca=clamp(S.emp.marca-3,0,100); } return 'La planta siguió a media marcha todo el año.'; }}
+      ]
+    });
+    /* toma de finca */
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return .7*intensidad91()*Math.min(2,fincas91().length)*proteccion91(); }catch(e){ return 0; } },
+      c:()=>puedeConflicto91()&&fincas91().length>0&&!!elegirGrupo91(g=>g.tipo!=='cartel'),
+      t:()=>{
+        const g=elegirGrupo91(x=>x.tipo!=='cartel'); if(!g) return null; const f=pick(fincas91()); conf91().ultimo=S.anio;
+        S._toma91={g:g.id,uid:f.uid,nombre:f.nombre,valor:f.valor};
+        return '<b>'+esc(cap91(g.n))+' se '+vb91(g,'tomó','tomaron')+' '+esc(f.nombre||'tu finca')+'.</b> Sacaron al mayordomo, se quedaron con el ganado y dicen que esa tierra ahora es de ellos.';
+      },
+      o:[
+        {t:'Darla por perdida',f:()=>{ const d=S._toma91; if(!d) return 'Ya no aplicaba.'; S.bienes=(S.bienes||[]).filter(b=>b.uid!==d.uid);
+          return 'Perdiste '+esc(d.nombre||'la finca')+'. Vale '+fmt(d.valor||0)+' que ya no son tuyos.'; }},
+        {t:'Pagar para recuperarla',f:()=>{ const d=S._toma91; if(!d) return 'Ya no aplicaba.'; const x=Math.round((d.valor||50)*.25); S.efectivo-=x; conf91().vacunas[d.g]=S.anio+2;
+          return 'Pagaste '+fmt(x)+' y te devolvieron la finca. Ahora saben que pagas.'; }},
+        {t:'Pedirles ayuda a los del otro bando',f:()=>{ const d=S._toma91; if(!d) return 'Ya no aplicaba.'; const g=GRUPOS_ARMADOS_91.find(x=>x.id===d.g);
+          const otros=g?grupoEnemigo91(g):[]; if(!otros.length){ S.bienes=(S.bienes||[]).filter(b=>b.uid!==d.uid); return 'No había a quién pedirle ayuda. Perdiste la finca.'; }
+          const o=otros[0]; registrarDelito('alianza con grupo armado',6,'pediste ayuda a '+o.n); conf91().pactos[o.id]=S.anio+4; if(g) conf91().amenazas[g.id]=S.anio+5;
+          S.p.escandalos=(S.p.escandalos||0)+1;
+          return 'Llamaste a '+esc(o.n)+'. Recuperaron la finca a sangre y fuego. Eso queda en el expediente y en la memoria de la zona.'; }}
+      ]
+    });
+    window.__SA91_CONFLICTO=true;
+  }
+
+  /* ==================== GUERRA ENTRE CASAS QUE SE SALE DE CONTROL ==================== */
+  function manosSucias91(){ return gravedadPenal()>=4||yo('sin_escrupulos')||(S.p.escandalos||0)>=3; }
+  function opcionGuerraViolenta91(r,g){
+    const alta=(g.intensidad||0)>=70, sucio=manosSucias91();
+    const dis=!alta?'La guerra todavía no llega a ese punto (intensidad '+Math.round(g.intensidad||0)+'/100; hace falta 70)':(!sucio?'Tu familia no ha cruzado esa línea: no tiene historial sucio':null);
+    const cA=Math.max(10,Math.round(pat()*.01)), cB=Math.max(30,Math.round(pat()*.03));
+    return [
+      {t:'Mandar a amenazar a su familia',cat:'riesgo',d:'Cuesta '+fmt(cA)+' y una movida. Es un delito grave. Los asusta, o los vuelve más peligrosos.',
+       dis:dis||(S.mov<1?'No te quedan movidas':(S.efectivo<cA?'No te alcanza':null)),cerrar:false,run:()=>{
+        S.efectivo-=cA; S.mov--; registrarDelito('amenazas',5,'contra la familia '+r.apellido);
+        r.relacionCasa=clamp((r.relacionCasa||50)-20,0,100); r.patrimonio=Math.max(1,(r.patrimonio||0)*.97); r.venganza91=S.anio+3;
+        g.intensidad=clamp((g.intensidad||0)+8,0,100); golpe('Mandaste a amenazar a su familia.','tu');
+        if(chance(.3)&&!S.penal.caso) abrirCasoPenal('amenazas contra la familia '+r.apellido);
+        log('Mandaste a amenazar a los '+esc(r.apellido)+'. Ahora andan con escoltas, y con rabia.','mal'); cerrarModal(); render(); }},
+      {t:'Un atentado contra su sede',cat:'riesgo',d:'Cuesta '+fmt(cB)+' y una movida. Es de los delitos más graves que existen. Si sale bien los golpea en serio; si sale mal, todo el país sabrá quién fue.',
+       dis:dis||(S.mov<1?'No te quedan movidas':(S.efectivo<cB?'No te alcanza':null)),cerrar:false,run:()=>{
+        S.efectivo-=cB; S.mov--; registrarDelito('atentado',8,'contra la sede de los '+r.apellido); S.p.escandalos=(S.p.escandalos||0)+1;
+        r.venganza91=S.anio+5; g.intensidad=clamp((g.intensidad||0)+15,0,100);
+        if(chance(.6)){ const d=r.patrimonio*rnd(.12,.2); r.patrimonio=Math.max(1,r.patrimonio-d); r.prestigio=clamp((r.prestigio||30)-6,0,100);
+          golpe('Un atentado destruyó su sede: '+fmt(d)+' en daños.','tu'); log('El atentado contra la sede de los '+esc(r.apellido)+' les costó '+fmt(d)+'.','mal');
+          if(chance(.35)&&!S.penal.caso) abrirCasoPenal('atentado contra la sede de los '+r.apellido); }
+        else { if(!S.penal.caso) abrirCasoPenal('atentado frustrado contra los '+r.apellido); moverPrestigio(-6,'un atentado frustrado');
+          log('El atentado salió mal y te señalan a ti. La fiscalía ya abrió un caso.','mal'); }
+        try{ if(typeof window.revisarResolucionGuerra70==='function') window.revisarResolucionGuerra70(); }catch(e){}
+        cerrarModal(); render(); }}
+    ];
+  }
+  function instalarRepresalias91(){
+    if(window.__SA91_REPRESALIAS) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    const rivalVengativo=()=>{ const g=S.guerraEmpresarial; if(!g||(g.intensidad||0)<70) return null;
+      const r=(S.rivales||[]).find(x=>x.rid===g.rid&&x.viva); if(!r) return null;
+      return (r.agresiva||(r.venganza91||0)>=S.anio||manosSucias91())?r:null; };
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return rivalVengativo()?2.2*proteccion91():0; }catch(e){ return 0; } },
+      c:()=>!!rivalVengativo()&&conf91().ultimo!==S.anio,
+      t:()=>{
+        const r=rivalVengativo(); if(!r) return null; conf91().ultimo=S.anio;
+        const tipo=pick(S.emp?['sede','familia','tu']:['familia','tu']); S._rep91={rid:r.rid,tipo};
+        if(tipo==='sede'){ const d=Math.round(Math.max(5,(S.emp.caja||0)*.06+S.emp.ingresos*.05)); S.emp.caja=(S.emp.caja||0)-d; S.emp.eficiencia=clamp(S.emp.eficiencia-10,0,100);
+          golpe('Atentaron contra tu sede: '+fmt(d)+' en daños.','rival');
+          return '<b>Atentado contra '+esc(S.emp.nombre)+'.</b> Nadie lo reivindicó, pero todo el mundo sabe que fueron los '+esc(r.apellido)+'. Los daños: '+fmt(d)+'.'; }
+        if(tipo==='familia'){ golpe('Amenazaron a tu familia.','rival');
+          return '<b>Amenazas a tu familia.</b> Una corona fúnebre llegó a tu casa con el nombre de uno de tus hijos. La guerra con los '+esc(r.apellido)+' ya no es de negocios.'; }
+        const herida=Math.round(rnd(18,34)*proteccion91()); S.p.salud=clamp(S.p.salud-herida,0,100); golpe('Atentaron contra ti.','rival');
+        return '<b>Atentaron contra ti.</b> Dispararon contra tu carro a la salida de la oficina. '+(herida<12?'Los escoltas reaccionaron a tiempo y saliste casi ileso.':'Pasaste semanas en la clínica.')+' Todos saben de dónde vino.';
+      },
+      o:[
+        {t:'Reforzar la seguridad',f:()=>{ const c=conf91(); c.seguridad=Math.min(2,c.seguridad+1); return 'Subiste el esquema: ahora tienes '+NIVELES_SEG_91[c.seguridad].n.toLowerCase()+'.'; }},
+        {t:'Sacar a la familia del país un tiempo',f:()=>{ const x=Math.max(10,Math.round(pat()*.015)); S.efectivo-=x; S.p.felicidad=clamp(S.p.felicidad-6,0,100);
+          (S.familia.hijos||[]).forEach(h=>h.vinculo=clamp((h.vinculo||60)-3,0,100)); return 'Mandaste a la familia afuera. Cuesta '+fmt(x)+' y las cenas en casa se acabaron por un tiempo.'; }},
+        {t:'Denunciarlos ante la fiscalía',f:()=>{ const r=(S.rivales||[]).find(x=>x.rid===(S._rep91||{}).rid); if(!r) return 'Ya no aplicaba.';
+          if(chance(.4)){ r.prestigio=clamp((r.prestigio||30)-10,0,100); r.patrimonio=Math.max(1,(r.patrimonio||0)*.9); golpe('La fiscalía los investiga por el atentado.','tu');
+            return 'La fiscalía les abrió un caso a los '+esc(r.apellido)+'. Su prestigio se vino abajo.'; }
+          return 'La denuncia no prosperó. Tienen buenos abogados, y mejores amigos.'; }},
+        {t:'Prometer venganza',f:()=>{ const g=S.guerraEmpresarial; if(g) g.intensidad=clamp((g.intensidad||0)+8,0,100); S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+6,0,100);
+          return 'Juraste que esto no se queda así. La guerra sube otro escalón.'; }}
+      ]
+    });
+    window.__SA91_REPRESALIAS=true;
+  }
+
+  /* ==================== EVENTOS SORPRESA ==================== */
+  function instalarSorpresas91(){
+    if(window.__SA91_SORPRESAS) return;
+    if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
+    const E=(o)=>EVENTOS_LOCALES.push(o);
+    E({p:.6,c:()=>!!S.p,t:()=>{ const x=Math.max(15,Math.round(pat()*rnd(.02,.06))); S._her91=x;
+        return 'Murió un tío lejano del que casi nadie se acordaba. Para sorpresa de todos, te dejó <b>'+fmt(x)+'</b> en el testamento, y una nota: "al único que me visitó".'; },
+      o:[{t:'Recibirlo con gratitud',f:()=>{ S.efectivo+=S._her91||0; S.p.felicidad=clamp(S.p.felicidad+4,0,100); return 'Recibiste '+fmt(S._her91||0)+'.'; }},
+         {t:'Repartirlo con los primos',f:()=>{ S.efectivo+=(S._her91||0)*.4; (S.parientes||[]).forEach(pa=>pa.afecto=clamp((pa.afecto||50)+8,0,100)); moverPrestigio(1,'repartió una herencia'); return 'Te quedaste con una parte y repartiste el resto. La familia lo agradece.'; }}]});
+    E({p:.55,c:()=>!!S.emp,t:()=>'<b>Incendio en '+esc(S.emp.nombre)+'.</b> Un corto circuito en la madrugada y media planta se quemó. '+(seguros().empresa?'Tienes póliza.':'No tenías póliza.'),
+      o:[{t:'Reconstruir rápido, cueste lo que cueste',f:()=>{ const x=Math.round(S.emp.ingresos*(seguros().empresa?.03:.12)); S.emp.caja=(S.emp.caja||0)-x; return 'Reconstruiste en dos meses. Costó '+fmt(x)+'.'; }},
+         {t:'Reconstruir con calma',f:()=>{ S.emp.ingresos*=seguros().empresa?.95:.85; S.emp.eficiencia=clamp(S.emp.eficiencia-6,0,100); return 'La planta trabajó a media máquina buena parte del año.'; }}]});
+    E({p:.4,c:()=>fincas91().length>0,t:()=>{ const f=pick(fincas91()); S._hallazgo91=f.uid; return 'En '+esc(f.nombre||'tu finca')+' encontraron <b>'+pick(['oro','petróleo','carbón','esmeraldas'])+'</b> en el subsuelo. Ya llegaron dos multinacionales a preguntar.'; },
+      o:[{t:'Vender los derechos',f:()=>{ const x=Math.max(30,Math.round(pat()*rnd(.03,.07))); S.efectivo+=x; return 'Vendiste los derechos por '+fmt(x)+'.'; }},
+         {t:'Explotarlo por tu cuenta',f:()=>{ const f=(S.bienes||[]).find(b=>b.uid===S._hallazgo91); if(f) f.valor=(f.valor||0)*2.2; conf91().amenazas.eln=S.anio+3; return 'La finca ahora vale más del doble. También atrae a gente armada que quiere su parte.'; }},
+         {t:'No decir nada',f:()=>'Lo dejaste bajo tierra. Algún nieto lo encontrará.'}]});
+    E({p:.35,c:()=>S.p&&S.p.edad>=35&&(S.familia.hijos||[]).length<9,t:()=>{ const sx91=chance(.5)?'h':'m'; S._hijo91={sexo:sx91,nombre:pick(sx91==='h'?NOM_H:NOM_M),edad:ri(14,24)};
+        return (S._hijo91.sexo==='m'?'Una muchacha':'Un muchacho')+' de '+S._hijo91.edad+' años toca la puerta: dice que es tu '+(S._hijo91.sexo==='m'?'hija':'hijo')+', de una relación de hace mucho tiempo, y trae una prueba de ADN.'; },
+      o:[{t:'Reconocerlo como tuyo',f:()=>{ const d=S._hijo91; if(!d) return 'Ya no aplicaba.'; const h=nuevoHijo(d.nombre,d.sexo,d.edad); h.vinculo=30; h.origen='reconocido'; S.familia.hijos.push(h);
+           if(S.familia.pareja) S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)-15,0,100); return 'Reconociste a '+esc(d.nombre)+'. La familia lo recibió con frialdad, pero ya es uno más.'; }},
+         {t:'Pagar para que no se sepa',f:()=>{ const x=Math.max(10,Math.round(pat()*.02)); S.efectivo-=x; if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; return 'Pagaste '+fmt(x)+', pero igual salió en las revistas.'; } return 'Pagaste '+fmt(x)+' y no se volvió a hablar del tema.'; }},
+         {t:'Negarlo todo',f:()=>{ if(chance(.5)){ S.p.escandalos=(S.p.escandalos||0)+1; moverPrestigio(-3,'negó a un hijo'); return 'Lo negaste, y la prueba salió en la prensa.'; } return 'Lo negaste. No volvió.'; }}]});
+    E({p:.45,c:()=>!!S.emp,t:()=>'Tu gerente financiero de confianza llevaba años sacando plata a escondidas. El hueco: <b>'+fmt(Math.max(5,Math.round((S.emp.caja||0)*.08+S.emp.ingresos*.03)))+'</b>.',
+      o:[{t:'Denunciarlo',f:()=>{ const x=Math.max(5,Math.round((S.emp.caja||0)*.08+S.emp.ingresos*.03)); S.emp.caja=(S.emp.caja||0)-x*(chance(.5)?.4:1); return 'Lo denunciaste. Se recuperó una parte en el juicio, el resto se perdió.'; }},
+         {t:'Arreglarlo en silencio',f:()=>{ const x=Math.max(5,Math.round((S.emp.caja||0)*.08+S.emp.ingresos*.03)); S.emp.caja=(S.emp.caja||0)-x; S.emp.marca=clamp(S.emp.marca+1,0,100); return 'Lo sacaste sin ruido. Pierdes la plata, pero nadie se enteró.'; }}]});
+    E({p:.5,c:()=>!!S.emp,t:()=>'Uno de tus productos se volvió una moda de un día para otro. Las tiendas no dan abasto y todo el país lo quiere.',
+      o:[{t:'Ampliar la producción ya',f:()=>{ const x=Math.round(S.emp.ingresos*.05); S.emp.caja=(S.emp.caja||0)-x; S.emp.ingresos*=1.18; return 'Invertiste '+fmt(x)+' y aprovechaste la ola: ingresos +18%.'; }},
+         {t:'Subir el precio',f:()=>{ S.emp.ingresos*=1.08; S.emp.marca=clamp(S.emp.marca-3,0,100); return 'Ganaste más por unidad. A la gente no le gustó del todo.'; }},
+         {t:'No hacer nada: ya pasará',f:()=>'La moda pasó tan rápido como llegó.'}]});
+    E({p:.4,c:()=>!!S.emp&&S.anio>=2005,t:()=>'<b>Hackeo.</b> Se metieron a los sistemas de '+esc(S.emp.nombre)+' y piden un rescate en criptomonedas para devolver los datos de los clientes.',
+      o:[{t:'Pagar el rescate',f:()=>{ const x=Math.max(5,Math.round(S.emp.ingresos*.02)); S.emp.caja=(S.emp.caja||0)-x; return 'Pagaste '+fmt(x)+' y devolvieron los datos. O eso dicen.'; }},
+         {t:'No pagar y reconstruir',f:()=>{ S.emp.marca=clamp(S.emp.marca-6,0,100); S.emp.eficiencia=clamp(S.emp.eficiencia-4,0,100); return 'No pagaste. Los datos se publicaron y la marca lo resintió.'; }}]});
+    E({p:.45,c:()=>!!S.p&&((S.p.escandalos||0)>=1||((S.penal&&S.penal.crimes)||[]).length>0),t:()=>'Un periodista de investigación está preguntando por tu familia: tus negocios, tus socios, de dónde sale la plata.',
+      o:[{t:'Darle una entrevista y aguantar',f:()=>{ if(chance(.5)){ S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'La entrevista salió bien: quedaste como alguien que no tiene nada que esconder.'; } S.p.escandalos=(S.p.escandalos||0)+1; return 'El reportaje salió, y no salió bien.'; }},
+         {t:'Comprar su silencio',f:()=>{ const x=Math.max(8,Math.round(pat()*.012)); S.efectivo-=x; registrarDelito('soborno',3,'a un periodista'); return 'Pagaste '+fmt(x)+'. El reportaje nunca salió.'; }},
+         {t:'Mandarlo a callar',f:()=>{ registrarDelito('amenazas',5,'contra un periodista'); S.p.escandalos=(S.p.escandalos||0)+1; moverPrestigio(-4,'amenazó a un periodista'); return 'El periodista se fue del país y publicó todo desde afuera. Ahora también te acusan de amenazarlo.'; }}]});
+    E({p:.35,c:()=>!!S.p&&S.p.edad>=25,t:()=>'Un accidente de tránsito en la vía al aeropuerto. El carro quedó destruido.',
+      o:[{t:'Ir a la clínica y descansar',f:()=>{ S.p.salud=clamp(S.p.salud-ri(4,12)*(yo('robusto')?.5:1),0,100); return 'Pasaste unas semanas recuperándote.'; }},
+         {t:'Volver al trabajo al otro día',f:()=>{ S.p.salud=clamp(S.p.salud-ri(8,16),0,100); S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+5,0,100); return 'Volviste al día siguiente. El cuerpo te lo cobró después.'; }}]});
+    E({p:.3,c:()=>!!S.p,t:()=>'Compraste un billete de lotería por costumbre, como cada semana. Esta vez salió.',
+      o:[{t:'Cobrarlo',f:()=>{ const x=Math.max(2,Math.round(20*(S.p.atr.suerte||5)/5)); S.efectivo+=x; S.p.felicidad=clamp(S.p.felicidad+6,0,100); return 'Te ganaste '+fmt(x)+'. Lo mejor fue la cara de todos.'; }},
+         {t:'Donarlo a una obra social',f:()=>{ moverPrestigio(2,'donó un premio de lotería'); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Donaste el premio. Salió en el periódico local.'; }}]});
+    window.__SA91_SORPRESAS=true;
+  }
+  function instalarHitos91(){
+    if(window.__SA91_HITOS||typeof HISTORIA==='undefined') return;
+    const H=[
+      {anio:1985,t:'Toma del Palacio de Justicia: un comando guerrillero entra al Palacio y la retoma militar deja más de cien muertos.',
+       f:()=>{ S.tension=clamp((S.tension||40)+15,0,100); return 'El país quedó en shock. Los jueces trabajan con miedo y los procesos se demoran.'; }},
+      {anio:1989,t:'Asesinan a un candidato presidencial en plena plaza pública y el narcoterrorismo llena las ciudades de bombas.',
+       f:()=>{ S.tension=clamp((S.tension||40)+12,0,100); S.macro.ciclo=Math.min(S.macro.ciclo,-.05); if(S.emp){ S.emp.ingresos*=.95; return 'Nadie sale de noche. Las ventas de '+esc(S.emp.nombre)+' bajaron un 5%.'; } return 'Nadie sale de noche.'; }},
+      {anio:1990,t:'El M-19 entrega las armas y firma la paz; meses después nace la Constituyente.',
+       f:()=>{ S.tension=clamp((S.tension||40)-8,0,100); return 'Por primera vez en años, alguien habla de paz en serio.'; }},
+      {anio:1993,t:'Cae abatido en un tejado de Medellín el jefe del cartel más poderoso del mundo.',
+       f:()=>{ S.tension=clamp((S.tension||40)-10,0,100); S.macro.ciclo=Math.max(S.macro.ciclo,.03); return 'Las ciudades respiran. Las bombas paran.'; }},
+      {anio:2002,t:'El nuevo gobierno lanza la seguridad democrática: vuelven las caravanas por las carreteras.',
+       f:()=>{ S.tension=clamp((S.tension||40)-6,0,100); (S.bienes||[]).forEach(b=>{ if(b.clase==='finca') b.valor*=1.12; }); return 'Las fincas valen más: otra vez se puede ir al campo.'; }},
+      {anio:2016,t:'Se firma el acuerdo de paz con las FARC después de más de cincuenta años de guerra.',
+       f:()=>{ S.tension=clamp((S.tension||40)-10,0,100); S.macro.ciclo=Math.max(S.macro.ciclo,.02); return 'El país se divide entre los que celebran y los que desconfían. Pero las armas se entregan.'; }}
+    ];
+    H.forEach(h=>{ if(!HISTORIA.some(x=>x.anio===h.anio&&x.t===h.t)) HISTORIA.push(h); });
+    window.__SA91_HITOS=true;
+  }
+
+  /* ==================== WRAPS ==================== */
+  const QUITAR_91=new Set(['Asumir una operación ilegal']);
+  const CAT_91={'Matrimonio y pareja':'familia','Casar a un hijo':'familia','Propiedades':'casa','Operaciones ilegales':'riesgo','Seguridad de la familia':'riesgo','Negociar la liberación':'riesgo'};
+  function wrapAcciones91(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA91_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      if(window.__crudo91||!Array.isArray(A)) return A;
+      try{
+        aplicarPreferencia91();
+        const quitar=new Set();
+        GRUPOS_91.forEach(g=>{
+          const ms=miembrosDe91(g,A); if(!ms.length) return;
+          ms.forEach(m=>quitar.add(m.a));
+          const libres=ms.filter(m=>!m.a.dis).length;
+          A.push({t:g.t,cat:g.cat,d:g.d+' ('+ms.length+' opci'+(ms.length===1?'ón':'ones')+')',mov:1,modal:true,
+            dis:libres?null:'Ahora mismo ninguna está disponible',run:()=>escenaGrupo91(g.id)});
+        });
+        const B=A.filter(a=>!quitar.has(a)&&!QUITAR_91.has(a.t));
+        A.length=0; B.forEach(a=>A.push(a));
+        A.push({t:'Operaciones ilegales',cat:'riesgo',d:'Evasión, contrabando, carteles de precios, lavado, contratos públicos, tierras… plata rápida a cambio de riesgo penal.',mov:1,modal:true,
+          dis:(S.penal&&S.penal.prisionRestante>0)?'No mientras cumples condena':null,run:()=>escenaCrimenes91()});
+        if(enColombia91()&&(intensidad91()>0||conf91().seguridad>0||(S.guerraEmpresarial&&(S.guerraEmpresarial.intensidad||0)>=50)))
+          A.push({t:'Seguridad de la familia',cat:'riesgo',d:'Hoy: '+NIVELES_SEG_91[conf91().seguridad].n.toLowerCase()+'. Escoltas y blindaje contra secuestros y atentados.',mov:0,modal:true,run:()=>escenaSeguridad91()});
+        const k=conf91().cautivo;
+        if(k) A.push({t:'Negociar la liberación',cat:'riesgo',d:(k.quien==='tu'?'Estás':esc(k.nombre)+' está')+' en manos de '+k.grupo+'. Pagar lo que piden ('+fmt(Math.round(k.rescate*.6))+') lo termina ya.',mov:0,modal:true,
+          dis:S.efectivo<Math.round(k.rescate*.6)?'No te alcanza':null,run:()=>{
+            escena({rubro:'Secuestro',titulo:'Negociar la liberación',cuerpo:'Pagar '+fmt(Math.round(k.rescate*.6))+' para que '+(k.quien==='tu'?'te liberen':'liberen a '+esc(k.nombre))+' ya.',
+              opciones:[{t:'Pagar',cat:'riesgo',run:()=>{ S.efectivo-=Math.round(k.rescate*.6); liberar91('Pagaste lo que pedían.'); }}],cerrable:true}); }});
+      }catch(e){}
+      return A;
+    };
+    window.__SA91_ACC=true;
+  }
+  function wrapCatDe91(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA91_CAT) return;
+    window.catDe=function(t){ if(CAT_91[t]) return CAT_91[t]; return old.apply(this,arguments); };
+    window.__SA91_CAT=true;
+  }
+  function correrConflicto91(){
+    if(typeof S==='undefined'||!S||!S.p||S.muerto) return;
+    const c=conf91();
+    const costo=NIVELES_SEG_91[c.seguridad].costo();
+    if(costo){ S.efectivo-=costo; }
+    const k=c.cautivo;
+    if(k){
+      k.anios=(k.anios||0)+1; k.restante=(k.restante||1)-1;
+      if(k.quien==='tu'){ S.mov=0; S.p.salud=clamp(S.p.salud-6,0,100); S.p.felicidad=clamp(S.p.felicidad-8,0,100); }
+      else S.p.felicidad=clamp(S.p.felicidad-6,0,100);
+      if(k.negado&&k.quien!=='tu'&&chance(.12)){ c.cautivo=null; muereVictima91(k); return; }
+      if(k.restante<=0) liberar91(k.negado?'Al final los soltaron sin que pagaras.':'La negociación terminó.');
+      else log((k.quien==='tu'?'Sigues':esc(k.nombre)+' sigue')+' en cautiverio. No te quedan movidas este año'+(k.quien==='tu'?'.':' para pensar en otra cosa.'),'mal');
+    }
+  }
+  function wrapPaso91(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA91_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrConflicto91(); }catch(e){} return r; };
+    window.__SA91_PASO=true;
+  }
+  function wrapResumen91(){
+    const old=window.resumenLegalActual; if(typeof old!=='function'||window.__SA91_RES) return;
+    window.resumenLegalActual=function(){
+      const b=old.apply(this,arguments);
+      try{ const k=S&&S.conflicto91&&S.conflicto91.cautivo; if(k){ const t=(k.quien==='tu'?'Secuestrado':esc(k.nombre)+' secuestrado')+' por '+k.grupo; return b?t+' · '+b:t; } }catch(e){}
+      return b;
+    };
+    window.__SA91_RES=true;
+  }
+  function conectar91(){
+    document.querySelectorAll('[data-neg-plan]').forEach(b=>{
+      if(b.__f91) return; b.__f91=true;
+      b.addEventListener('click',ev=>{ ev.preventDefault(); ev.stopPropagation(); aplicarPlanProduccion91(parseInt(b.getAttribute('data-neg-plan'),10)); });
+    });
+  }
+  function wrapConectar91(){
+    const old=window.conectarCartas; if(typeof old!=='function'||window.__SA91_CON) return;
+    window.conectarCartas=function(){ const r=old.apply(this,arguments); try{ conectar91(); }catch(e){} return r; };
+    window.__SA91_CON=true;
+  }
+
+  function init91(){
+    wrapAcciones91(); wrapCatDe91(); wrapPaso91(); wrapResumen91(); wrapConectar91();
+    instalarConflicto91(); instalarRepresalias91(); instalarSorpresas91(); instalarHitos91();
+    Object.assign(window,{GRUPOS_91,CRIMENES_91,GRUPOS_ARMADOS_91,escenaGrupo91,escenaCrimenes91,cometerCrimen91,escenaSeguridad91,
+      opcionGuerraViolenta91,intensidad91,gruposActivos91,conf91,correrConflicto91,liberar91,aplicarPlanProduccion91,conectar91,accionesCrudas91});
+  }
+  setTimeout(init91,40);
+  setTimeout(init91,220);
+  setTimeout(init91,650);
+  window.__SA91={version:V91};
 })();
 </script>
 
