@@ -829,10 +829,24 @@ html{scroll-behavior:smooth}
 .op-delfin102{display:inline-block;margin-left:6px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#1b1408;background:var(--laton);border-radius:999px;padding:1px 7px;vertical-align:2px}
 @media (max-width:520px){.suc102 .amb{width:84px;flex-basis:84px}}
 </style>
+<style id="estilos-v103">
+.vida103 .hijo{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.vida103 .hijo:last-child{border-bottom:0}
+.vida103 .cab{display:flex;gap:10px;align-items:center}
+.vida103 .cab b{font-weight:500;color:var(--marfil);font-size:14.5px}
+.vida103 .cab span{font-size:12.5px;color:var(--humo)}
+.vida103 .fama{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#1b1408;background:#b9a2e6;border-radius:999px;padding:2px 8px}
+.vida103 ul{list-style:none;margin:8px 0 0 50px;padding:0;border-left:1px solid rgba(214,166,72,.25)}
+.vida103 li{position:relative;padding:3px 0 3px 14px;font-size:13px;color:var(--humo)}
+.vida103 li:before{content:"";position:absolute;left:-4px;top:10px;width:7px;height:7px;border-radius:50%;background:var(--humo2)}
+.vida103 li.bien:before{background:var(--jade,#6CC08F)}
+.vida103 li.mal:before{background:var(--ui-red,#d06a5a)}
+.vida103 li em{font-style:normal;color:var(--laton);margin-right:6px;font-variant-numeric:tabular-nums}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v102</div>
+<div class="version-badge" id="versionBadge">v103</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -21653,6 +21667,148 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init102,40); setTimeout(init102,220); setTimeout(init102,650);
   window.__SA102={version:V102};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v103 · TUS HIJOS TIENEN VIDA PROPIA
+   Se meten en problemas, piden plata para negocios que salen bien o
+   quiebran, se casan con quien no te gusta, se vuelven famosos. Todo queda
+   en su biografía, que ves en Familia y al leer el testamento: eliges
+   heredero por lo que viste, no solo por sus números.
+   ========================================================================== */
+(function(){
+  const V103='v103';
+  const o=h=>h.sexo==='m'?'a':'o', el=h=>h.sexo==='m'?'ella':'él', lo=h=>h.sexo==='m'?'la':'lo', hijoA=h=>h.sexo==='m'?'hija':'hijo';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const hijos=(a,b)=>((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=a&&h.edad<=b);
+  const porNombre=n=>((S.familia&&S.familia.hijos)||[]).find(h=>h.nombre===n);
+  function anotar(h,txt,tono){ if(!h) return; h.vida103=(h.vida103||[]).concat([{anio:S.anio,txt,tono:tono||''}]).slice(-10); }
+  const vinc=(h,d)=>{ h.vinculo=clamp((h.vinculo||55)+d,0,100); };
+  const atr=(h,k,d)=>{ if(h.atr) h.atr[k]=clamp((h.atr[k]||5)+d,1,10); };
+  const elegir=(a,b,f)=>{ const L=hijos(a,b).filter(f||(()=>true)); return L.length?pick(L):null; };
+  const OFICIOS_FAMA=[{id:'cantante',n:'cantante',t:'llena estadios'},{id:'futbolista',n:'futbolista',t:'juega en la selección'},{id:'actor',n:'actor',na:'actriz',t:'protagoniza la telenovela del momento'},{id:'escritor',n:'escritor',na:'escritora',t:'tiene la novela más vendida del país'}];
+  const ofi=(h,x)=>h.sexo==='m'&&x.na?x.na:x.n;
+
+  function instalarEventos103(){
+    if(window.__SA103_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    const sel=(k,a,b,f)=>()=>{ const h=elegir(a,b,f); S[k]=h?h.nombre:null; return !!h; };
+    const H=k=>porNombre(S[k]);
+
+    // adolescentes
+    E({p:1,c:()=>hijos(14,19).length>0,
+      t:()=>{ const h=pick(hijos(14,19)); S._a103=h.nombre; return 'Te llamaron del colegio: pillaron a <b>'+esc(h.nombre)+'</b> tomando trago con los amigos detrás del coliseo.'; },
+      o:[{t:'Castigo ejemplar',f:()=>{ const h=H('_a103'); vinc(h,-8); atr(h,'disciplina',1); anotar(h,'Lo pillaron tomando en el colegio; lo castigaste duro.','mal'); return esc(h.nombre)+' no salió en tres meses. No te habla, pero aprendió.'; }},
+         {t:'Hablar con calma',f:()=>{ const h=H('_a103'); vinc(h,6); anotar(h,'Lo pillaron tomando en el colegio; hablaron con calma.',''); return 'Hablaron largo. Te contó cosas que no sabías.'; }},
+         {t:'Pagar para que no quede en el registro',f:()=>{ const h=H('_a103'); const c=Math.max(3,Math.round(pat()*.003)); S.efectivo-=Math.min(S.efectivo,c); anotar(h,'Lo pillaron tomando en el colegio; la casa lo tapó.','mal'); return 'Con '+fmt(c)+' en "donaciones" el colegio olvidó todo.'; }}]});
+    E({p:.8,c:()=>hijos(12,19).length>0,
+      t:()=>{ const h=pick(hijos(12,19)); const f=pick(OFICIOS_FAMA); S._t103=[h.nombre,f.id]; return 'Un profesor te busca: dice que <b>'+esc(h.nombre)+'</b> tiene un talento raro, de los que no se ven, para ser '+esc(ofi(h,f))+'.'; },
+      o:[{t:()=>{ const h=porNombre((S._t103||[])[0]); return 'Apoyarl'+(h&&h.sexo==='m'?'a':'o')+' con todo'; },f:()=>{ const h=porNombre(S._t103[0]); const c=Math.max(5,Math.round(pat()*.01)); S.efectivo-=Math.min(S.efectivo,c); h.talento103=S._t103[1]; h.fama103=(h.fama103||0)+1; vinc(h,10);
+           anotar(h,'Descubrieron su talento para ser '+ofi(h,OFICIOS_FAMA.find(x=>x.id===S._t103[1]))+'; la casa l'+o(h)+' apoyó.','bien'); return 'Clases, viajes, el mejor profesor. '+fmt(c)+' bien gastados, si sale.'; }},
+         {t:'Primero el estudio',f:()=>{ const h=porNombre(S._t103[0]); vinc(h,-10); atr(h,'intelecto',1); anotar(h,'Tenía talento artístico; le pediste que se concentrara en el estudio.',''); return esc(h.nombre)+' lo dejó. A veces lo menciona en la cena.'; }}]});
+
+    // jóvenes y adultos
+    E({p:1.2,c:()=>hijos(21,45).length>0&&pat()>50,
+      t:()=>{ const h=pick(hijos(21,45)); const m=Math.max(10,Math.round(pat()*rnd(.02,.06))); S._n103=[h.nombre,m];
+        const idea=pick(['un restaurante de comida de autor','una aplicación','una marca de ropa','una tostadora de café especial','una productora de cine','una agencia de viajes']);
+        S._n103.push(idea); return '<b>'+esc(h.nombre)+'</b> llega con un plan: quiere montar '+idea+'. Necesita '+fmt(m)+' y jura que en tres años te los devuelve.'; },
+      o:[{t:()=>'Darle los '+fmt((S._n103||[])[1]||0),f:()=>{ const [n,m,idea]=S._n103; const h=porNombre(n); S.efectivo-=Math.min(S.efectivo,m); vinc(h,10);
+           h.negocio103={monto:m,anio:S.anio,idea}; anotar(h,'Le prestaste '+fmt(m)+' para montar '+idea+'.',''); return 'Le diste la plata. Ahora es su problema… y un poco el tuyo.'; }},
+         {t:'Que lo monte con su plata',f:()=>{ const h=porNombre(S._n103[0]); vinc(h,-10); anotar(h,'Le negaste la plata para su negocio.','mal'); return esc(h.nombre)+' se fue dando un portazo.'; }},
+         {t:'Dársela, pero con un contador tuyo encima',f:()=>{ const [n,m,idea]=S._n103; const h=porNombre(n); S.efectivo-=Math.min(S.efectivo,m); vinc(h,-2); h.negocio103={monto:m,anio:S.anio,idea,vigilado:true}; anotar(h,'Le financiaste '+idea+', con un contador de la casa vigilando.',''); return 'Aceptó, de mala gana.'; }}]});
+    E({p:1,c:()=>hijos(18,40).length>0,
+      t:()=>{ const h=pick(hijos(18,40)); S._c103=h.nombre; return 'A las tres de la mañana suena el teléfono: <b>'+esc(h.nombre)+'</b> chocó el carro saliendo de una fiesta. Está bien, pero el otro carro quedó destruido y hay policía.'; },
+      o:[{t:'Mover influencias para que no salga en prensa',f:()=>{ const h=H('_c103'); const c=Math.max(5,Math.round(pat()*.006)); S.efectivo-=Math.min(S.efectivo,c);
+           if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; S.p.reputacion=clamp(S.p.reputacion-5,0,100); anotar(h,'Chocó borracho; la casa intentó taparlo y salió en la prensa.','mal'); return 'Igual se filtró. Ahora el titular es el choque Y el intento de taparlo.'; }
+           anotar(h,'Chocó saliendo de una fiesta; la casa lo tapó.','mal'); return 'Con '+fmt(c)+' y dos llamadas, no pasó nada. Oficialmente.'; }},
+         {t:'Que responda como cualquiera',f:()=>{ const h=H('_c103'); vinc(h,-12); atr(h,'disciplina',1); S.p.reputacion=clamp(S.p.reputacion+2,0,100); anotar(h,'Chocó saliendo de una fiesta y respondió ante la ley.',''); return esc(h.nombre)+' pagó la multa y perdió el pase un año. La ciudad lo nota: aquí no hay privilegios.'; }}]});
+    E({p:.7,c:()=>hijos(18,40).length>0&&S.anio>=1965,
+      t:()=>{ const h=pick(hijos(18,40)); S._d103=h.nombre; return 'Detuvieron a <b>'+esc(h.nombre)+'</b> en un allanamiento a una fiesta. Encontraron cocaína y alguien ya le tomó fotos saliendo esposad'+o(h)+'.'; },
+      o:[{t:'El mejor abogado y una clínica de rehabilitación',f:()=>{ const h=H('_d103'); const c=Math.max(8,Math.round(pat()*.012)); S.efectivo-=Math.min(S.efectivo,c); vinc(h,8); anotar(h,'Lo detuvieron con drogas; la casa pagó abogado y rehabilitación.','mal'); return 'Seis meses en una clínica en Estados Unidos. Volvió distinto.'; }},
+         {t:'Dejar que pase la noche en la estación',f:()=>{ const h=H('_d103'); vinc(h,-15); atr(h,'disciplina',1); S.p.escandalos=(S.p.escandalos||0)+1; anotar(h,'Lo detuvieron con drogas; pasó la noche detenido.','mal'); return 'Salió al otro día. Las fotos ya estaban en todas partes.'; }}]});
+    E({p:1,c:()=>hijos(22,45).some(h=>!h.pareja&&!h.casadoCon),
+      t:()=>{ const h=pick(hijos(22,45).filter(x=>!x.pareja&&!x.casadoCon)); const sexo=h.sexo==='m'?'h':'m';
+        let nom=nombreLocal(S.p.ciudad,sexo); for(let i=0;i<10&&((S.familia.hijos||[]).some(x=>x.nombre===nom)||nom===S.p.nombre);i++) nom=nombreLocal(S.p.ciudad,sexo);
+        const pr={nombre:nom+' '+apellidoCiudad(S.p.ciudad),sexo,oficio:pick(sexo==='h'?['DJ','instructor de surf','músico sin disco','vendedor de seguros','exconvicto en libertad condicional']:['DJ','instructora de yoga','cantante de bar','vendedora de seguros','modelo de catálogo'])};
+        S._p103=[h.nombre,pr]; return '<b>'+esc(h.nombre)+'</b> se va a casar con <b>'+esc(pr.nombre)+'</b>, '+esc(pr.oficio)+'. '+(pr.sexo==='m'?'La':'Lo')+' conoció hace cuatro meses. En tu casa nadie '+lo(pr)+' había visto.'; },
+      o:[{t:'Dar la bendición',f:()=>{ const [n,pr]=S._p103; const h=porNombre(n); h.pareja={nombre:pr.nombre,sexo:pr.sexo,edad:h.edad+ri(-3,5),casados:true,afecto:80,ciudad:h.ciudad||S.p.ciudad}; h.casadoCon='por amor'; vinc(h,12); moverPrestigio(-1,'');
+           anotar(h,'Se casó con '+pr.nombre+', '+pr.oficio+', con tu bendición.','bien'); return 'La boda fue pequeña y feliz. Las otras casas hicieron comentarios.'; }},
+         {t:'Exigir capitulaciones',f:()=>{ const [n,pr]=S._p103; const h=porNombre(n); h.pareja={nombre:pr.nombre,sexo:pr.sexo,edad:h.edad+ri(-3,5),casados:true,afecto:60,separacionBienes:true,ciudad:h.ciudad||S.p.ciudad}; h.casadoCon='por amor'; vinc(h,-4);
+           anotar(h,'Se casó con '+pr.nombre+', con capitulaciones exigidas por la casa.',''); return 'Firmaron en la notaría la víspera de la boda. Nadie sonrió en la foto.'; }},
+         {t:'Oponerte',f:()=>{ const [n,pr]=S._p103; const h=porNombre(n);
+           if(chance(.45)){ h.pareja={nombre:pr.nombre,sexo:pr.sexo,edad:h.edad,casados:true,afecto:85,ciudad:h.ciudad||S.p.ciudad}; h.casadoCon='por amor'; vinc(h,-25); anotar(h,'Se casó con '+pr.nombre+' a escondidas, contra tu voluntad.','mal'); return 'Se casaron a escondidas en una notaría de pueblo. Te enteraste por Facebook… o por el chisme del club.'; }
+           vinc(h,-12); anotar(h,'Canceló su boda con '+pr.nombre+' porque te opusiste.','mal'); return 'Cancelaron. '+esc(h.nombre)+' no te lo perdona, pero no hubo boda.'; }}]});
+    E({p:.6,c:()=>hijos(20,60).some(h=>(h.fama103||0)>=1&&!h.famoso103)||hijos(22,45).some(h=>h.atr&&h.atr.carisma>=8&&!h.famoso103),
+      t:()=>{ const L=hijos(20,60).filter(h=>!h.famoso103&&((h.fama103||0)>=1||(h.atr&&h.atr.carisma>=8))); const h=pick(L); const f=OFICIOS_FAMA.find(x=>x.id===h.talento103)||pick(OFICIOS_FAMA); S._f103=[h.nombre,f.id];
+        return '<b>'+esc(h.nombre)+'</b> es famos'+o(h)+': como '+esc(ofi(h,f))+' '+f.t+', sale en revistas y la gente l'+o(h)+' para en la calle. Ya no es "'+hijoA(h)+' de", ahora tú eres "'+(S.p.sexo==='m'?'la mamá':'el papá')+' de".'; },
+      o:[{t:'Celebrarlo en público',f:()=>{ const [n,fid]=S._f103; const h=porNombre(n); h.famoso103=fid; vinc(h,10); moverPrestigio(3,'un'+(h.sexo==='m'?'a':'')+' hij'+o(h)+' famos'+o(h)); S.p.redes=clamp(S.p.redes+6,0,100);
+           if(S.prensa105) S.prensa105.imagen=clamp(S.prensa105.imagen+6,0,100); anotar(h,'Se volvió famos'+o(h)+' como '+ofi(h,OFICIOS_FAMA.find(x=>x.id===fid))+'.','bien'); return 'La familia sale en las revistas. Por primera vez, por algo bueno.'; }},
+         {t:'Pedirle que no use el apellido',f:()=>{ const [n,fid]=S._f103; const h=porNombre(n); h.famoso103=fid; vinc(h,-10); anotar(h,'Se volvió famos'+o(h)+'; le pediste que no usara el apellido.',''); return 'Ahora firma con un nombre artístico. En las entrevistas habla poco de su familia.'; }}]});
+    E({p:.6,c:()=>hijos(16,30).some(h=>h.atr&&h.atr.intelecto>=7),
+      t:()=>{ const h=pick(hijos(16,30).filter(x=>x.atr&&x.atr.intelecto>=7)); S._b103=h.nombre; return '<b>'+esc(h.nombre)+'</b> ganó una beca completa '+pick(['para un doctorado en el exterior','en un concurso nacional de ciencias','por mérito, sin que nadie moviera una palanca'])+'.'; },
+      o:[{t:'Hacer una comida para celebrarlo',f:()=>{ const h=H('_b103'); vinc(h,8); h.formacion=clamp((h.formacion||0)+8,0,100); anotar(h,'Ganó una beca por mérito propio.','bien'); return 'Por una vez, la plata no tuvo nada que ver.'; }}]});
+    window.__SA103_EV=true;
+  }
+
+  /* --- los negocios de los hijos maduran --- */
+  function correrHijos103(){
+    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{
+      const n=h.negocio103; if(!n||n.cerrado) return;
+      if(S.anio-n.anio<2||!chance(.5)) return;
+      n.cerrado=true;
+      const pr=clamp(.35+((h.atr&&h.atr.intelecto)||5)/30+((h.atr&&h.atr.disciplina)||5)/30+(n.vigilado?.12:0)-(h.temperamento==='prodigo'?.15:0),.15,.85);
+      if(chance(pr)){ const x=Math.round(n.monto*rnd(1.5,3.2)); S.efectivo+=Math.round(x*.5); h.efectivo=(h.efectivo||0)+Math.round(x*.5); vinc(h,6); atr(h,'disciplina',1);
+        anotar(h,'El negocio que montó ('+n.idea+') salió bien: te devolvió la plata con creces.','bien'); log('A <b>'+esc(h.nombre)+'</b> le funcionó el negocio ('+esc(n.idea)+'). Te devolvió '+fmt(Math.round(x*.5))+'.','bien'); }
+      else { vinc(h,-4); anotar(h,'El negocio que montó ('+n.idea+') quebró. Se perdió la plata.','mal'); log('Quebró el negocio de <b>'+esc(h.nombre)+'</b> ('+esc(n.idea)+'). La plata no volvió.','mal'); }
+    });
+  }
+
+  /* --- vistas: biografía en Familia y en el testamento --- */
+  function resumenVida103(h){
+    const v=(h.vida103||[]); if(!v.length) return '';
+    return v.slice(-3).map(x=>x.anio+': '+x.txt.replace(/\.$/,'')).join(' · ')+'.';
+  }
+  function seccionVida103(){
+    const L=((S.familia&&S.familia.hijos)||[]).filter(h=>(h.vida103||[]).length||h.famoso103);
+    if(!L.length) return '';
+    return '<div class="seccion vida103" id="vida103"><h3>Lo que han vivido tus hijos<em>esto es lo que vas a recordar el día del testamento</em></h3>'
+      +L.map(h=>'<div class="hijo"><div class="cab">'+avatarSVG(h.nombre+' '+S.p.apellido,{sexo:h.sexo,edad:h.edad,tam:40})+'<div><b>'+esc(h.nombre)+'</b> '
+        +(h.famoso103?'<span class="fama">'+esc(ofi(h,OFICIOS_FAMA.find(x=>x.id===h.famoso103)||OFICIOS_FAMA[0]))+'</span> ':'')+'<span>'+h.edad+' años · vínculo '+Math.round(h.vinculo||55)+'</span></div></div>'
+        +'<ul>'+(h.vida103||[]).slice().reverse().map(x=>'<li class="'+x.tono+'"><em>'+x.anio+'</em>'+esc(x.txt)+'</li>').join('')+'</ul></div>').join('')+'</div>';
+  }
+  function wrapLienzo103(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA103_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='familia'&&S&&S.p&&!document.getElementById('vida103')){ const html=seccionVida103(); if(html){
+        const host=$('lienzoJuego'); const ancla=document.getElementById('suc102')||Array.from(host.querySelectorAll('.seccion')).find(x=>/Descendencia directa/.test(x.textContent));
+        if(ancla) ancla.insertAdjacentHTML(ancla.id==='suc102'?'afterend':'beforebegin',html); } } }catch(e){}
+      return r; };
+    window.__SA103_LIENZO=true;
+  }
+  function wrapSucesion103(){
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA103_PS) return;
+    window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
+      try{ document.querySelectorAll('#escenaHost .carta').forEach(b=>{ const nom=b.querySelector('.nom'); if(!nom) return;
+        const h=((S.familia&&S.familia.hijos)||[]).find(x=>nom.textContent.indexOf(x.nombre+' ')>=0); if(!h) return;
+        const res=resumenVida103(h); if(!res||b.querySelector('.vida103-res')) return;
+        const tx=b.querySelector('.txt'); const html='<div class="txt vida103-res" style="margin-top:4px;font-style:italic">Lo que recuerdas: '+esc(res)+'</div>';
+        if(tx) tx.insertAdjacentHTML('afterend',html); else b.insertAdjacentHTML('beforeend',html); }); }catch(e){}
+      return r; };
+    window.__SA103_PS=true;
+  }
+  function wrapPaso103(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA103_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrHijos103(); }catch(e){} return r; };
+    window.__SA103_PASO=true;
+  }
+  function init103(){
+    instalarEventos103(); wrapLienzo103(); wrapSucesion103(); wrapPaso103();
+    Object.assign(window,{anotarHijo103:anotar,correrHijos103,resumenVida103});
+  }
+  setTimeout(init103,40); setTimeout(init103,220); setTimeout(init103,650);
+  window.__SA103={version:V103};
 })();
 </script>
 
