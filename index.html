@@ -785,10 +785,40 @@ html{scroll-behavior:smooth}
 .puntaje99 b{display:block;font-family:var(--display,serif);font-size:26px;color:var(--laton,#D6A648);font-weight:400}
 .puntaje99 span{font-size:12px;color:var(--humo,#a9b3ab)}
 </style>
+<style id="estilos-v100">
+.ranuras100{margin:26px 0 0;max-width:560px;text-align:left}
+.ranuras100 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.ranura100{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(214,166,72,.22);border-radius:12px;background:rgba(255,255,255,.02);margin-bottom:8px}
+.ranura100.libre{border-style:dashed;opacity:.6}
+.ranura100 .num{flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--laton,#D6A648);color:var(--laton,#D6A648);font-size:13px}
+.ranura100 .info{flex:1;min-width:0}
+.ranura100 .info b{display:block;font-weight:500;color:var(--marfil,#F0E7D5);font-size:15px}
+.ranura100 .info span{display:block;font-size:12.5px;color:var(--humo,#a9b3ab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ranura100 button{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid rgba(214,166,72,.4);background:transparent;color:var(--marfil,#F0E7D5);cursor:pointer}
+.ranura100 button.seguir{background:var(--laton,#D6A648);color:#1b1408;border-color:var(--laton,#D6A648)}
+.ranura100 button.borrar{border-color:rgba(255,255,255,.12);color:var(--humo,#a9b3ab)}
+.ranura100 button.borrar.confirmar{border-color:var(--ui-red,#d06a5a);color:var(--ui-red,#d06a5a)}
+.salon100{margin:22px 0 0;max-width:560px;text-align:left}
+.salon100 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.salon100 table{width:100%;border-collapse:collapse;font-size:13px}
+.salon100 td{padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--humo,#a9b3ab)}
+.salon100 td:first-child{color:var(--marfil,#F0E7D5)}
+.salon100 td:last-child{text-align:right;color:var(--laton,#D6A648);white-space:nowrap}
+.tuto100{position:fixed;left:50%;bottom:104px;transform:translateX(-50%);width:min(460px,calc(100vw - 32px));z-index:96;background:#1d2a22;border:1px solid var(--laton,#D6A648);border-radius:14px;padding:16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.55);color:var(--marfil,#F0E7D5)}
+.tuto100 .paso{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--laton,#D6A648)}
+.tuto100 h4{font-family:var(--display,serif);font-weight:400;font-size:19px;margin:6px 0 6px}
+.tuto100 p{margin:0;font-size:14px;line-height:1.5;color:var(--humo,#c4ccc5)}
+.tuto100 .bot{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.tuto100 button{font:inherit;font-size:13.5px;padding:8px 14px;border-radius:9px;border:1px solid rgba(214,166,72,.4);background:transparent;color:var(--marfil,#F0E7D5);cursor:pointer}
+.tuto100 button.sig{background:var(--laton,#D6A648);color:#1b1408;border-color:var(--laton,#D6A648)}
+.tuto100-foco{outline:2px solid var(--laton,#D6A648)!important;outline-offset:3px;border-radius:10px;animation:tuto100pulso 1.4s ease-in-out infinite}
+@keyframes tuto100pulso{0%,100%{outline-color:rgba(214,166,72,1)}50%{outline-color:rgba(214,166,72,.25)}}
+@media (max-width:560px){.ranura100{flex-wrap:wrap}.ranura100 .info{flex-basis:calc(100% - 44px)}.ranura100 button{flex:1}.tuto100{bottom:96px}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v99</div>
+<div class="version-badge" id="versionBadge">v100</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -20878,7 +20908,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     {id:'coleccion',n:'Gran coleccionista',d:'Ocho piezas de colección a la vez.',pts:20,ok:()=>coleccion().length>=8},
     {id:'gen3',n:'Tres generaciones',d:'El apellido pasa a la tercera generación.',pts:15,ok:()=>S.gen>=3},
     {id:'gen5',n:'Cinco generaciones',d:'Pocas casas del país llegan hasta aquí.',pts:35,ok:()=>S.gen>=5},
-    {id:'siglo',n:'Un siglo de historia',d:'Cien años desde que nació el fundador.',pts:30,ok:()=>S.anio-M().desde>=100},
+    {id:'siglo',n:'Un siglo de historia',d:'Cien años desde que nació el fundador.',pts:30,ok:()=>S.anio-fundacion99()>=100},
     {id:'noventa',n:'Noventa velas',d:'Alguien de la casa cumple 90 años.',pts:15,ok:()=>S.p.edad>=90},
     {id:'prole',n:'Casa llena',d:'Seis hijos en una misma generación.',pts:15,ok:()=>hijos()>=6},
     {id:'infancia',n:'Desde la cuna',d:'Vivir la infancia completa y cumplir 18.',pts:10,ok:()=>!!(S.infancia94&&S.infancia94.terminada)},
@@ -20889,6 +20919,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     {id:'prontuario',n:'Prontuario',d:'Cinco delitos en la cuenta de una misma persona.',pts:5,oscuro:true,ok:()=>crimenes().length>=5},
     {id:'carcel',n:'Tras las rejas',d:'Alguien de la casa pisó la cárcel.',pts:5,oscuro:true,ok:()=>!!(S.penal&&S.penal.prisionRestante>0)}
   ];
+  function fundacion99(){ const m=M(); let x=Math.min(isFinite(m.desde)?m.desde:Infinity,S.anio-(S.p&&S.p.edad||0));
+    (S.legado.ancestros||[]).forEach(a=>{ if(a.muerte&&isFinite(a.edad)) x=Math.min(x,a.muerte-a.edad); });
+    if(x<m.desde||!isFinite(m.desde)) m.desde=x; return x; }
   function revisarLogros99(){
     const m=M(), nuevos=[]; if(!S.p) return nuevos;
     LOGROS_99.forEach(l=>{ if(m.logros[l.id]) return; let ok=false; try{ ok=l.ok(); }catch(e){}
@@ -20944,7 +20977,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   /* --- puntaje --- */
   function puntaje99(){
     const m=M(); const pl=LOGROS_99.filter(l=>m.logros[l.id]).reduce((a,l)=>a+l.pts,0);
-    return {logros:Object.keys(m.logros).length,total:LOGROS_99.length,metas:m.cumplidas||0,puntos:pl+(m.cumplidas||0)*5+Math.max(0,S.gen-1)*10};
+    return {logros:Object.keys(m.logros).length,total:LOGROS_99.length,metas:m.cumplidas||0,puntos:Math.round((pl+(m.cumplidas||0)*5+Math.max(0,S.gen-1)*10)*(typeof window.multPuntaje100==='function'?window.multPuntaje100():1))};
   }
 
   /* --- vistas --- */
@@ -21038,12 +21071,237 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   function init99(){
     wrapLienzo99(); wrapPaso99(); wrapMorir99(); wrapHeredar99(); wrapFinal99();
-    Object.assign(window,{METAS_99,LOGROS_99,RECORDS_99,metas99:M,asignarMetas99,revisarMetas99,revisarLogros99,revisarRecords99,epitafio99,fraseEpitafio99,puntaje99});
+    Object.assign(window,{METAS_99,LOGROS_99,RECORDS_99,metas99:M,fundacion99,asignarMetas99,revisarMetas99,revisarLogros99,revisarRecords99,epitafio99,fraseEpitafio99,puntaje99});
   }
   setTimeout(init99,40);
   setTimeout(init99,220);
   setTimeout(init99,650);
   window.__SA99={version:V99};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v100 · CALIDAD DE VIDA
+   Tres ranuras de partida (con migración de la partida guardada de antes),
+   Salón de la fama de dinastías terminadas, niveles de dificultad y un
+   tutorial corto para la primera partida.
+   ========================================================================== */
+(function(){
+  const V100='v100';
+  const PREF='sociedad-anonima:', NR=3;
+  const claveR=n=>PREF+'ranura:'+n, SALON=PREF+'salon', TUTO=PREF+'tutorial';
+  const ls={get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+
+  /* --- ranuras --- */
+  function leerRanura(n){ const raw=ls.get(claveR(n)); if(!raw) return null; try{ const o=JSON.parse(raw); return o&&o.p?o:null; }catch(e){ return null; } }
+  function ranuras(){ return Array.from({length:NR},(_,i)=>({n:i+1,g:leerRanura(i+1)})); }
+  const primeraLibre=()=>{ const r=ranuras().find(x=>!x.g); return r?r.n:null; };
+  const masVieja=()=>ranuras().filter(x=>x.g).sort((a,b)=>(a.g.guardado100||0)-(b.g.guardado100||0))[0].n;
+  const nuevoId=()=>'d'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+  function migrar100(){
+    const raw=ls.get(CLAVE); if(!raw) return;
+    try{ const o=JSON.parse(raw); if(!o||!o.p){ ls.del(CLAVE); return; }
+      const n=primeraLibre(); if(!n) return;
+      o.ranura100=n; o.id100=o.id100||nuevoId(); o.guardado100=o.guardado100||Date.now();
+      if(ls.set(claveR(n),JSON.stringify(o))) ls.del(CLAVE);
+    }catch(e){}
+  }
+  function ranuraPara(){
+    let n=S.ranura100||window.__ranuraForzada100||primeraLibre()||masVieja();
+    const ex=leerRanura(n);
+    if(ex&&ex.id100&&S.id100&&ex.id100!==S.id100&&!window.__ranuraForzada100){ n=primeraLibre()||masVieja(); }
+    return n;
+  }
+  function wrapGuardar100(){
+    const old=window.guardar; if(typeof old!=='function'||window.__SA100_GUARDAR) return;
+    window.guardar=async function(silencio){
+      if(!S||!S.p) return old.apply(this,arguments);
+      if(!S.id100) S.id100=nuevoId();
+      S.ranura100=ranuraPara(); S.guardado100=Date.now();
+      if(!ls.set(claveR(S.ranura100),JSON.stringify(S))) return old.apply(this,arguments);
+      if(!silencio) aviso('Partida guardada en la ranura '+S.ranura100+'.');
+    };
+    window.__SA100_GUARDAR=true;
+  }
+  function wrapBorrar100(){
+    const old=window.localBorrar; if(typeof old!=='function'||window.__SA100_BORRAR) return;
+    window.localBorrar=async function(){ try{ if(S&&S.ranura100) ls.del(claveR(S.ranura100)); }catch(e){} return old.apply(this,arguments); };
+    window.__SA100_BORRAR=true;
+  }
+  function cargarRanura100(n){
+    const g=leerRanura(n); if(!g) return false;
+    S=g; S.ranura100=n; S.patrPintado=undefined;
+    try{ migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); }catch(e){}
+    window.__ranuraForzada100=n;
+    render(); return true;
+  }
+  function resumenRanura(g){
+    const casa=g.dinastia||(g.p&&g.p.apellido)||'sin nombre';
+    let pat=''; try{ const pc=g.legado&&g.legado.pico||0; if(pc>0) pat=fmt(pc); }catch(e){}
+    const dif=DIF_100[g.dificultad100||'normal'];
+    return {casa,det:'generación '+(typeof genLabel==='function'?genLabel(g.gen||1):(g.gen||1))+' · '+g.anio+' · '+(g.p.nombre+' '+g.p.apellido)+', '+g.p.edad+' años'+(dif&&g.dificultad100&&g.dificultad100!=='normal'?' · '+dif.n.toLowerCase():'')+(pat?' · pico '+pat:'')};
+  }
+  function pintarPortada100(){
+    const port=document.getElementById('portada'); if(!port) return;
+    const bc=document.getElementById('btnCargar'); if(bc) bc.classList.add('oculto');
+    let box=document.getElementById('ranuras100');
+    if(!box){ box=document.createElement('div'); box.id='ranuras100'; box.className='ranuras100'; const ent=port.querySelector('.entrada'); (ent||port).insertAdjacentElement('afterend',box); }
+    const R=ranuras();
+    box.innerHTML=R.some(r=>r.g)?'<div class="t">Tus partidas</div>'+R.map(r=>{
+      if(!r.g) return '<div class="ranura100 libre"><div class="num">'+r.n+'</div><div class="info"><b>Ranura libre</b><span>Funda una dinastía y se guarda aquí.</span></div></div>';
+      const x=resumenRanura(r.g);
+      return '<div class="ranura100" data-r100="'+r.n+'"><div class="num">'+r.n+'</div><div class="info"><b>Casa '+esc(x.casa)+'</b><span>'+esc(x.det)+'</span></div><button class="seguir" data-seguir100="'+r.n+'">Seguir</button><button class="borrar" data-borrar100="'+r.n+'">Borrar</button></div>';
+    }).join(''):'';
+    box.querySelectorAll('[data-seguir100]').forEach(b=>b.onclick=()=>cargarRanura100(+b.dataset.seguir100));
+    box.querySelectorAll('[data-borrar100]').forEach(b=>b.onclick=()=>{
+      if(!b.classList.contains('confirmar')){ b.classList.add('confirmar'); b.textContent='¿Seguro?'; return; }
+      ls.del(claveR(+b.dataset.borrar100)); pintarPortada100(); });
+    // salón de la fama
+    let sal=document.getElementById('salon100'); const L=salon();
+    if(L.length){
+      if(!sal){ sal=document.createElement('div'); sal.id='salon100'; sal.className='salon100'; box.insertAdjacentElement('afterend',sal); }
+      sal.innerHTML='<div class="t">Salón de la fama</div><table>'+L.slice(0,5).map((d,i)=>'<tr><td>'+(i+1)+'. Casa '+esc(d.casa)+'</td><td>'+d.gens+' generaci'+(d.gens===1?'ón':'ones')+' · '+d.desde+'–'+d.hasta+(d.dif&&d.dif!=='normal'?' · '+esc(DIF_100[d.dif].n.toLowerCase()):'')+'</td><td>'+d.puntos+' pts</td></tr>').join('')+'</table>';
+    } else if(sal) sal.remove();
+  }
+  function salon(){ try{ const L=JSON.parse(ls.get(SALON)||'[]'); return Array.isArray(L)?L:[]; }catch(e){ return []; } }
+  function registrarDinastia100(p){
+    if(!S) return; const L=salon().filter(x=>x.id!==S.id100);
+    const desde=typeof window.fundacion99==='function'?window.fundacion99():(S.anio-S.p.edad);
+    L.push({id:S.id100||nuevoId(),casa:S.dinastia||S.p.apellido,gens:S.gen,puntos:p&&p.puntos||0,desde,hasta:S.anio,dif:S.dificultad100||'normal',fecha:Date.now()});
+    L.sort((a,b)=>b.puntos-a.puntos); ls.set(SALON,JSON.stringify(L.slice(0,20)));
+  }
+  function botonNueva100(){
+    const bn=document.getElementById('btnNueva'); if(!bn) return;
+    bn.onclick=()=>{
+      const libre=primeraLibre();
+      if(libre){ window.__ranuraNueva100=libre; window.pantallaCreacion(); return; }
+      escena({rubro:'Tus partidas',titulo:'Las tres ranuras están ocupadas',cerrable:true,
+        cuerpo:'Para fundar otra dinastía tienes que reemplazar una de las partidas guardadas. La que elijas se borra.',
+        opciones:ranuras().map(r=>{ const x=resumenRanura(r.g); return {t:'Reemplazar la casa '+esc(x.casa),cat:'legado',d:esc(x.det),cerrar:false,run:()=>{ cerrarModal(); window.__ranuraNueva100=r.n; window.pantallaCreacion(); }}; })});
+    };
+  }
+  function botonSalir100(){
+    if(document.getElementById('btnSalir100')) return;
+    const g=document.getElementById('btnGuardar'); if(!g) return;
+    const b=document.createElement('button'); b.className='btn lisa'; b.id='btnSalir100'; b.textContent='Partidas';
+    b.title='Guardar y volver a la portada';
+    b.onclick=async()=>{ try{ if(S&&S.p&&!S.muerto) await guardar(true); }catch(e){} location.reload(); };
+    g.insertAdjacentElement('beforebegin',b);
+  }
+
+  /* --- dificultad --- */
+  const DIF_100={
+    facil:{n:'Fácil',d:'Arrancas con más plata, tienes una movida extra cada año, la muerte tarda más y la justicia es lenta. El puntaje vale ×0,75.',ef:1.6,muerte:.7,delito:.7,mov:1,pts:.75},
+    normal:{n:'Normal',d:'El juego como fue pensado.',ef:1,muerte:1,delito:1,mov:0,pts:1},
+    dificil:{n:'Difícil',d:'Arrancas con menos plata, la salud cobra más y la justicia no perdona. El puntaje vale ×1,5.',ef:.6,muerte:1.3,delito:1.35,mov:0,pts:1.5}
+  };
+  const dif=()=>DIF_100[(S&&S.dificultad100)||'normal']||DIF_100.normal;
+  function wrapCreacion100(){
+    const old=window.pantallaCreacion; if(typeof old!=='function'||window.__SA100_CREA) return;
+    window.pantallaCreacion=function(){
+      const r=old.apply(this,arguments);
+      try{
+        window.__dif100='normal'; window.__tuto100=!ls.get(TUTO);
+        const host=document.getElementById('escenaHost'); const ancla=host&&host.querySelector('#cOriD');
+        if(ancla){
+          const g=(id,arr,val)=>'<div class="fichas-sel" id="'+id+'">'+arr.map(a=>'<button type="button" class="opcion" data-v="'+a.v+'" aria-pressed="'+(a.v===val?'true':'false')+'">'+a.t+'</button>').join('')+'</div>';
+          ancla.insertAdjacentHTML('afterend','<label class="campo">Dificultad</label>'+g('cDif100',Object.keys(DIF_100).map(k=>({v:k,t:DIF_100[k].n})),'normal')+'<div class="apunte" id="cDif100D">'+esc(DIF_100.normal.d)+'</div>'
+            +'<label class="campo">Tutorial</label>'+g('cTuto100',[{v:'1',t:'Mostrarme cómo se juega'},{v:'0',t:'Ya sé jugar'}],window.__tuto100?'1':'0'));
+          const sel=(id,cb)=>host.querySelectorAll('#'+id+' .opcion').forEach(b=>b.onclick=()=>{ host.querySelectorAll('#'+id+' .opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); cb(b.dataset.v); });
+          sel('cDif100',v=>{ window.__dif100=v; const d=host.querySelector('#cDif100D'); if(d) d.textContent=DIF_100[v].d; });
+          sel('cTuto100',v=>{ window.__tuto100=v==='1'; });
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA100_CREA=true;
+  }
+  function wrapIniciar100(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA100_INI) return;
+    window.iniciar=function(cfg,legado){
+      const prev=S&&S.p?{ranura:S.ranura100,id:S.id100,dif:S.dificultad100,tuto:S.tuto100}:null;
+      const heredando=!!(legado&&prev);
+      window.__ranuraForzada100=heredando?prev.ranura:(window.__ranuraNueva100||primeraLibre()||masVieja());
+      const r=old.apply(this,arguments);
+      try{
+        if(S&&S.p){
+          S.ranura100=window.__ranuraForzada100;
+          if(heredando){ S.id100=prev.id; S.dificultad100=prev.dif||'normal'; }
+          else{
+            S.id100=S.id100||nuevoId(); S.dificultad100=window.__dif100||'normal';
+            const f=dif().ef; if(f!==1&&isFinite(S.efectivo)){ S.efectivo=Math.round(S.efectivo*f*100)/100; S.patrPintado=undefined; try{ render(); }catch(e){} }
+            window.__ranuraNueva100=null;
+            if(window.__tuto100) setTimeout(()=>tutorial100(),700);
+          }
+          if(!S.muerto) guardar(true);
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA100_INI=true;
+  }
+  function wrapMuerte100(){
+    const old=window.probMuerte; if(typeof old!=='function'||window.__SA100_MUERTE) return;
+    window.probMuerte=function(){ const p=old.apply(this,arguments); try{ const f=dif().muerte; if(f!==1&&isFinite(p)) return clamp(p*f,0,1); }catch(e){} return p; };
+    window.__SA100_MUERTE=true;
+  }
+  function wrapDelito100(){
+    const old=window.registrarDelito; if(typeof old!=='function'||window.__SA100_DEL) return;
+    window.registrarDelito=function(tipo,sev){ const r=old.apply(this,arguments); try{ const f=dif().delito; if(f!==1&&S.penal) S.penal.riesgo=clamp(S.penal.riesgo+(f-1)*(sev||0)*14,0,100); }catch(e){} return r; };
+    window.__SA100_DEL=true;
+  }
+  function wrapMovidas100(){
+    const old=window.movidasBase; if(typeof old!=='function'||window.__SA100_MOV) return;
+    window.movidasBase=function(){ const n=old.apply(this,arguments); try{ if(!nino()) return n+dif().mov; }catch(e){} return n; };
+    window.__SA100_MOV=true;
+  }
+
+  /* --- tutorial --- */
+  const tabBtn=t=>Array.from(document.querySelectorAll('#pestanas button')).find(b=>b.textContent.trim().indexOf(t)===0);
+  const PASOS_100=[
+    {t:'Tu crónica',x:'Inicio es tu diario: cada año se escribe aquí lo que te pasó, lo bueno y lo malo.',el:()=>tabBtn('Inicio'),tab:'mesa'},
+    {t:'Tu vida, en una lista',x:'En Perfil está todo lo que puedes hacer: estudiar, trabajar, enamorarte, comprar lujos… o meterte en problemas.',el:()=>tabBtn('Perfil'),tab:'perfil'},
+    {t:'Las movidas',x:()=>nino()?'Cada año te alcanza para unas pocas movidas. Estudiar, hacer amigos o una travesura cuesta una. Escoge bien.':'Cada año te alcanza para unas pocas movidas. Estudiar, fundar una empresa o casarte cuesta una. Escoge bien.',el:()=>document.getElementById('mano')},
+    {t:'Cerrar el año',x:'Cuando termines, cierra el año. Pasan cosas: eventos, elecciones, enfermedades, gente del pasado que vuelve.',el:()=>document.getElementById('btnAnio')},
+    {t:'Metas y logros',x:'Cada generación tiene tres metas y la casa colecciona logros y récords. Los ves en Perfil y en Legado.',el:()=>tabBtn('Legado')},
+    {t:'El apellido sigue',x:'Cuando mueras no se acaba: se lee el testamento y sigues con un heredero. El reto es que el apellido dure generaciones. ¡Suerte!',el:()=>null}
+  ];
+  function tutorial100(desde){
+    if(!S||!S.p) return;
+    const host=document.getElementById('escenaHost');
+    if(host&&host.children.length&&!desde){ setTimeout(()=>tutorial100(),800); return; }
+    let i=desde||0; let card=document.getElementById('tuto100');
+    if(!card){ card=document.createElement('div'); card.id='tuto100'; card.className='tuto100'; document.body.appendChild(card); }
+    const limpiar=()=>document.querySelectorAll('.tuto100-foco').forEach(e=>e.classList.remove('tuto100-foco'));
+    const cerrar=()=>{ limpiar(); card.remove(); ls.set(TUTO,'1'); };
+    const pinta=()=>{
+      limpiar(); const p=PASOS_100[i];
+      if(p.tab&&typeof tab!=='undefined'&&tab!==p.tab){ tab=p.tab; try{ renderPestanas(); renderLienzo(); }catch(e){} }
+      const el=p.el(); if(el){ el.classList.add('tuto100-foco'); try{ el.scrollIntoView({block:'nearest'}); }catch(e){} }
+      const ult=i===PASOS_100.length-1;
+      card.innerHTML='<div class="paso">Cómo se juega · '+(i+1)+' de '+PASOS_100.length+'</div><h4>'+esc(p.t)+'</h4><p>'+esc(typeof p.x==='function'?p.x():p.x)+'</p><div class="bot"><button class="saltar">'+(ult?'Cerrar':'Saltar')+'</button><button class="sig">'+(ult?'A jugar':'Siguiente')+'</button></div>';
+      card.querySelector('.saltar').onclick=cerrar;
+      card.querySelector('.sig').onclick=()=>{ if(ult) return cerrar(); i++; pinta(); };
+    };
+    pinta();
+  }
+
+  function wrapPuntaje100(){ window.multPuntaje100=()=>dif().pts; }
+
+  function init100(){
+    migrar100(); wrapGuardar100(); wrapBorrar100(); wrapCreacion100(); wrapIniciar100(); wrapMuerte100(); wrapDelito100(); wrapMovidas100(); wrapPuntaje100();
+    botonNueva100(); botonSalir100();
+    if(!S||!S.p) pintarPortada100();
+    Object.assign(window,{DIF_100,ranuras100:ranuras,cargarRanura100,pintarPortada100,registrarDinastia100,salon100:salon,tutorial100,PASOS_100});
+  }
+  setTimeout(init100,40);
+  setTimeout(init100,220);
+  setTimeout(init100,650);
+  window.__SA100={version:V100};
 })();
 </script>
 
