@@ -894,10 +894,24 @@ html{scroll-behavior:smooth}
 .linea107 li.mal:before{border-color:#d06a5a}
 .linea107 li b{color:var(--laton);font-weight:500;margin-right:8px;font-variant-numeric:tabular-nums}
 </style>
+<style id="estilos-v108">
+.cand108{display:flex;gap:12px;align-items:center}
+.pareja108{display:flex;gap:14px;align-items:center;margin:8px 0 6px;padding:12px 14px;border:1px solid rgba(214,166,72,.25);border-radius:12px;background:rgba(214,166,72,.04)}
+.pareja108 .q{flex:1;min-width:0}
+.pareja108 .q b{display:block;font-weight:500;color:var(--marfil);font-size:15.5px}
+.pareja108 .q span{display:block;font-size:12.5px;color:var(--humo)}
+.pareja108 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pareja108 .chips i{font-style:normal;font-size:11.5px;color:var(--laton);border:1px solid rgba(214,166,72,.35);border-radius:6px;padding:1px 7px}
+.fallecidos108 .f{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.fallecidos108 .f:last-child{border-bottom:0}
+.fallecidos108 .f svg{filter:grayscale(1) brightness(.85)}
+.fallecidos108 .f b{display:block;font-weight:500;color:var(--marfil);font-size:14px}
+.fallecidos108 .f span{font-size:12.5px;color:var(--humo)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v107</div>
+<div class="version-badge" id="versionBadge">v108</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4734,6 +4748,7 @@ function reacomodarParentela(heredero){
   // Si hereda una rama colateral, los hijos del difunto se reubican como sobrinos o primos.
   const relCol=heredero&&heredero._sucesorRel;
   const esHijoDirecto=!!(heredero&&!heredero._sucesorColateral&&!relCol);
+  const esNieto=/^niet/.test(relCol||'');
   (S.parientes||[]).forEach(p=>{
     if(!p.vivo) return;
     // quien hereda deja de ser pariente de sí mismo
@@ -4744,7 +4759,7 @@ function reacomodarParentela(heredero){
     else if(p.rel==='sobrino'||p.rel==='sobrina') rel=p.rel==='sobrino'?'primo':'prima';
     // los padres del difunto son los abuelos de su hijo; los abuelos del difunto ya serían bisabuelos
     else if(p.rel==='padre'||p.rel==='madre') rel=esHijoDirecto?(p.rel==='padre'?'abuelo':'abuela'):null;
-    else if(p.rel==='abuelo'||p.rel==='abuela') rel=esHijoDirecto?null:p.rel;
+    else if(p.rel==='abuelo'||p.rel==='abuela') rel=(esHijoDirecto||esNieto)?null:p.rel;
     if(rel) nuevos.push({...p,rel:relacionPorSexo(rel,p.sexo)});
   });
   let relHijo=esHijoDirecto?'hermano':'tío';
@@ -4753,7 +4768,8 @@ function reacomodarParentela(heredero){
     else if(relCol==='sobrino'||relCol==='sobrina'||relCol==='primo'||relCol==='prima'||relCol==='primo segundo'||relCol==='prima segunda') relHijo='primo';
   }
   S.familia.hijos.filter(h=>h!==heredero).forEach(h=>{
-    nuevos.push({ pid:'p'+(UIDP++), rel:relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
+    const esSuPadre=esNieto&&heredero._padre108===h.nombre;
+    nuevos.push({ pid:'p'+(UIDP++), rel:esSuPadre?(h.sexo==='m'?'madre':'padre'):relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
       nombre:h.nombre, oficio:h.rumbo||pick(OFICIOS_FAM), afecto:clamp(h.vinculo||55,0,100),
       capaz:clamp(Math.round(((h.atr&&h.atr.intelecto)||5+(h.atr&&h.atr.disciplina)||5)/2),1,10),
       honrado:ri(3,9), rama:'paterna', vivo:true, deLaCasa:true });
@@ -4761,7 +4777,7 @@ function reacomodarParentela(heredero){
   // la viuda o el viudo del difunto
   if(S.familia.pareja){
     const pz=S.familia.pareja, partes=String(pz.nombre||'').split(' ');
-    const relViuda=esHijoDirecto?(pz.sexo==='m'?'madre':'padre'):(pz.sexo==='m'?'tía':'tío');
+    const relViuda=esHijoDirecto?(pz.sexo==='m'?'madre':'padre'):esNieto?(pz.sexo==='m'?'abuela':'abuelo'):(pz.sexo==='m'?'tía':'tío');
     nuevos.push({ pid:'p'+(UIDP++), rel:relViuda, apellido:partes.slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||undefined,
       sexo:pz.sexo, edad:pz.edad, nombre:partes[0],
       oficio:S.familia.pareja.rol, afecto:75, capaz:ri(3,8), honrado:ri(4,9), rama:'materna', vivo:true });
@@ -9134,7 +9150,10 @@ function morir(){
     opciones:[{t:'Leer el testamento',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]});
 }
 function pantallaSucesion(vivo){
-  const directos=S.familia.hijos.filter(h=>h.edad>=0);
+  const propios=S.familia.hijos.filter(h=>h.edad>=0);
+  // v108: los nietos (sobre todo los de un hijo que murió antes) y los sobrinos también pueden heredar
+  const extras=(typeof window.herederosExtra108==='function')?window.herederosExtra108():[];
+  const directos=propios.concat(extras.filter(x=>propios.length||/niet/.test(x._sucesorRel||'')));
   const herederos=directos.length?directos:sucesoresColaterales();
   const patr=patrimonio();
   if(!herederos.length){
@@ -9147,9 +9166,10 @@ function pantallaSucesion(vivo){
     return;
   }
   const colateral=!directos.length;
+  const soloNietos=!propios.length&&directos.length>0;
   escena({rubro:vivo?'Sucesión en vida':'Lectura del testamento',titulo:vivo?'Entregar el mando':'¿Con quién sigue la casa?',ancho:true,
     cuerpo:'Hay <b>'+fmt(patr)+'</b> para repartir'+(S.emp?', incluyendo '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')+'. '
-      +(colateral?'No hay hijos disponibles: la continuidad pasa a una rama colateral de la familia. ':'')
+      +(colateral?'No hay hijos disponibles: la continuidad pasa a una rama colateral de la familia. ':'')+(soloNietos?'No te sobrevive ningún hijo: la casa pasa a tus nietos. ':'')
       +'Con quien elijas sigues jugando: sus atributos pasan a ser los tuyos. Los demás reciben su parte y salen de la historia.',
     opciones:herederos.map(h=>({t:'<span class="op-cara">'+avatarSVG(h.nombre+' '+S.p.apellido,{sexo:h.sexo,edad:h.edad,tam:34})
         +'<span>'+esc(h.nombre+' '+apellidoCompletoDeHijo(h))+', '+h.edad+' años · '+esc(relacionPorSexo(h._sucesorRel||'hijo',h.sexo))+'</span></span>',cat:'familia',
@@ -21847,6 +21867,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA103_PS) return;
     window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
       try{ document.querySelectorAll('#escenaHost .carta').forEach(b=>{ const nom=b.querySelector('.nom'); if(!nom) return;
+        if(/· (niet|sobrin|herman|prim)/.test(nom.textContent)) return;
         const h=((S.familia&&S.familia.hijos)||[]).find(x=>nom.textContent.indexOf(x.nombre+' ')>=0); if(!h) return;
         const res=resumenVida103(h); if(!res||b.querySelector('.vida103-res')) return;
         const tx=b.querySelector('.txt'); const html='<div class="txt vida103-res" style="margin-top:4px;font-style:italic">Lo que recuerdas: '+esc(res)+'</div>';
@@ -22255,7 +22276,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const herm=(S.parientes||[]).filter(x=>/^herman/.test(x.rel)).map(x=>({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,muerto:!x.vivo,nac:S.anio-(x.edad||0)}));
     return {gen:S.gen,nombre:p.nombre,apellido:p.apellido,sexo:p.sexo,nac:S.anio-p.edad,fin:S.anio,murio:!vivo,edad:p.edad,causa:S.causaMuerte97||'',
       pareja:pz?{nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||'',sexo:pz.sexo,casados:!!pz.casados}:null,
-      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>({nombre:h.nombre,sexo:h.sexo,nac:S.anio-(h.edad||0),heredero:h===heredero,famoso:!!h.famoso103})),
+      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>({nombre:h.nombre,sexo:h.sexo,nac:S.anio-(h.edad||0),heredero:h===heredero,famoso:!!h.famoso103})).concat(((S.familia&&S.familia.fallecidos108)||[]).map(f=>({nombre:f.nombre,sexo:f.sexo,nac:f.nac,fin:f.muerte,muerto:true}))),
       colateral:!!(heredero&&heredero._sucesorColateral), herederoNombre:heredero&&heredero.nombre, herederoRel:heredero&&heredero._sucesorRel, padres, hermanos:herm, pico:Math.round((S.legado&&S.legado.pico)||0)};
   }
   function wrapHeredar107(){
@@ -22283,7 +22304,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(padres&&padres.length) F.push({et:'Antes de la casa',nodos:padres.map(x=>nodo({nombre:x.nombre,apellido:x.apellido,sexo:x.sexo,rol:x.sexo==='m'?'madre del fundador':'padre del fundador',muerto:x.muerto,edad:70})),pareja:true});
     R.forEach((r,i)=>{
       const prev=R[i-1];
-      const herm=prev?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==r.nombre).map(h=>nodo({nombre:h.nombre,apellido:prev.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:h.nac?'n. '+h.nac:'',edad:50,famoso:h.famoso})):(r.hermanos||[]).map(h=>nodo({nombre:h.nombre,apellido:h.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',muerto:h.muerto,edad:50}));
+      const herm=prev?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==r.nombre).map(h=>nodo({nombre:h.nombre,apellido:prev.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:h.fin?h.nac+'–'+h.fin:h.nac?'n. '+h.nac:'',edad:h.fin?Math.max(1,h.fin-h.nac):50,famoso:h.famoso,muerto:h.muerto})):(r.hermanos||[]).map(h=>nodo({nombre:h.nombre,apellido:h.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',muerto:h.muerto,edad:50}));
       F.push({et:'Generación '+roman(r.gen),sub:(r.nac?r.nac:'?')+'–'+(r.fin||''),
         cabeza:nodo({nombre:r.nombre,apellido:r.apellido,sexo:r.sexo,rol:(r.murio?'murió':'se retiró')+(r.edad?' a los '+r.edad:''),anios:(r.nac||'?')+'–'+(r.fin||'?'),muerto:r.murio,edad:Math.min(80,r.edad||70),tam:62,cabeza:true,colateral:prev&&prev.colateral,causa:r.causa}),
         pareja:r.pareja?nodo({nombre:r.pareja.nombre,apellido:r.pareja.apellido,sexo:r.pareja.sexo,rol:r.pareja.casados?(r.pareja.sexo==='m'?'esposa':'esposo'):'pareja',edad:Math.min(80,r.edad||60)}):null,
@@ -22300,7 +22321,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       pareja:pz?nodo({nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' '),sexo:pz.sexo,rol:pz.casados?(pz.sexo==='m'?'esposa':'esposo'):'pareja',edad:pz.edad||S.p.edad}):null,
       hermanos:herm.slice(0,4),masHermanos:Math.max(0,herm.length-4),
       hijos:((S.familia&&S.familia.hijos)||[]).map(h=>Object.assign(nodo({nombre:h.nombre,apellido:S.p.apellido,sexo:h.sexo,rol:(h.sexo==='m'?'hija':'hijo')+' · '+h.edad,edad:h.edad,sucesor:suc===h.nombre,famoso:!!h.famoso103,tam:50}),
-        {nietos:(h.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:'nieto',edad:g.edad||5,tam:36}))}))});
+        {nietos:(h.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:g.sexo==='m'?'nieta':'nieto',edad:g.edad||5,tam:36}))}))
+        .concat(((S.familia&&S.familia.fallecidos108)||[]).map(f=>Object.assign(nodo({nombre:f.nombre,apellido:f.apellido,sexo:f.sexo,rol:'†',anios:f.nac+'–'+f.muerte,edad:Math.max(1,f.edad),muerto:true,tam:50}),{nietos:(f.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:g.sexo==='m'?'nieta':'nieto',edad:g.edad||5,tam:36}))})))});
     return F;
   }
 
@@ -22466,6 +22488,284 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init107,40); setTimeout(init107,220); setTimeout(init107,650);
   window.__SA107={version:V107};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v108 · RELACIONES, HIJOS Y PÉRDIDAS
+   Conocer pareja deja de ser un sorteo: eliges dónde buscar y a quién.
+   La relación tiene carácter, compatibilidad y decisiones (citas, viajes,
+   hablar de hijos, proponer matrimonio). Los hijos se pueden buscar,
+   esperar o evitar; hay gemelos y embarazos que no llegan. Los amantes
+   exigen y amenazan; la pareja también puede ser infiel. Y un hijo puede
+   morir antes que tú: entonces sus hijos (tus nietos) o tus sobrinos
+   pueden heredar la casa.
+   ========================================================================== */
+(function(){
+  const V108='v108';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const costo=(f,min)=>Math.max(min||2,Math.round(pat()*f));
+  const pz=()=>S.familia&&S.familia.pareja;
+  const P1=n=>String(n||'').split(' ')[0];
+  const o=x=>x&&x.sexo==='m'?'a':'o', elx=x=>x&&x.sexo==='m'?'ella':'él';
+  const amantes=()=>((S.familia&&S.familia.amantes)||[]).filter(a=>a.activo!==false);
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const RASGOS_108={carinoso:{n:'cariñoso',na:'cariñosa',d:'Perdona fácil y pide tiempo juntos.',pac:1.3},ambicioso:{n:'ambicioso',na:'ambiciosa',d:'Le importa que a la casa le vaya bien.',pac:1},
+    celoso:{n:'celoso',na:'celosa',d:'Nota todo. Una infidelidad le duele el doble.',pac:1},independiente:{n:'independiente',na:'independiente',d:'Tiene su propia vida; no necesita que estés encima.',pac:.7},
+    tradicional:{n:'tradicional',na:'tradicional',d:'Quiere matrimonio, hijos y misa los domingos.',pac:1},fiestero:{n:'fiestero',na:'fiestera',d:'Se aburre en casa. Hay que salir.',pac:1.15}};
+  const rasgoTxt=q=>{ const r=RASGOS_108[q.rasgo108]; return r?(q.sexo==='m'?r.na:r.n):''; };
+  const LUGARES_108=[
+    {id:'fiesta',n:'En una fiesta del club',d:'Gente de casas conocidas. Hace falta tener contactos.',si:()=>S.p.redes>=40,dis:'Te faltan contactos (redes 40)',bono:0,casa:true},
+    {id:'trabajo',n:'En el trabajo o la universidad',d:'Alguien que ya te conoce en tu día a día. Más compatibilidad.',si:()=>true,bono:12},
+    {id:'familia',n:'Que te presente la familia',d:'Tu mamá y tus tías llevan años con candidatos listos. Gente tradicional.',si:()=>true,bono:4,rasgo:'tradicional'},
+    {id:'viaje',n:'En un viaje',d:'Lejos de casa pasan cosas. Menos seguro, más emocionante.',si:()=>S.efectivo>=20,dis:'No te alcanza para el viaje',bono:-4,costo:20,fel:6},
+    {id:'app',n:'Por una aplicación de citas',d:'Muchas opciones, poca paciencia.',si:()=>S.anio>=2013,bono:-8}
+  ];
+  function candidato(l){
+    const sx=S.p.sexo==='h'?'m':'h'; let nom=nombreLocal(S.p.ciudad,sx); const usados=(S.familia.hijos||[]).map(h=>h.nombre).concat((S.parientes||[]).map(p=>p.nombre));
+    for(let i=0;i<8&&usados.includes(nom);i++) nom=nombreLocal(S.p.ciudad,sx);
+    const casa=l.casa&&typeof casaParaPretendiente==='function'?casaParaPretendiente():null;
+    const ap=casa?casa.a:apellidoCiudad(S.p.ciudad);
+    const w=r=>String(r).split(' ')[0]; const roles=PAREJAS_ROL.filter(r=>/ista$/.test(w(r))||(sx==='h'?!/a$/.test(w(r)):!/(o|or)$/.test(w(r))));
+    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:pick(roles.length?roles:PAREJAS_ROL),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
+      compat:clamp(ri(30,85)+l.bono+Math.round((S.p.atr.carisma-5)*2),10,98),quiereHijos:chance(.7),casa:casa?{apellido:casa.a,prestigio:casa.p}:null};
+  }
+  const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
+  function escenaConocer108(){
+    escena({rubro:'Tu vida',titulo:'¿Dónde quieres conocer a alguien?',cerrable:true,cuerpo:'Cuesta una movida. Donde busques cambia a quién encuentras.',
+      opciones:LUGARES_108.filter(l=>l.id!=='app'||S.anio>=2013).map(l=>({t:l.n,cat:'familia',d:l.d+(l.costo?' Cuesta '+fmt(l.costo)+'.':''),dis:l.si()?(S.mov<1?'No te quedan movidas':null):(l.dis||'No disponible'),cerrar:false,run:()=>{
+        S.mov=Math.max(0,S.mov-1); if(l.costo) S.efectivo-=Math.min(S.efectivo,l.costo); if(l.fel) S.p.felicidad=clamp(S.p.felicidad+l.fel,0,100);
+        const C=[candidato(l),candidato(l),candidato(l)]; cerrarModal(); escenaCandidatos108(l,C); }}))});
+  }
+  function escenaCandidatos108(l,C){
+    escena({rubro:l.n,titulo:'Tres personas te llamaron la atención',ancho:true,cerrable:true,cuerpo:'Fíjate en el carácter y en qué tan bien se entienden: de eso depende cuánto dura.',
+      opciones:C.map(c=>({t:'<span class="op-cara">'+avatarSVG(c.nombre,{sexo:c.sexo,edad:c.edad,tam:34})+'<span>'+esc(c.nombre)+', '+c.edad+' años</span></span>',cat:'familia',
+        d:esc(c.rol.charAt(0).toUpperCase()+c.rol.slice(1))+'. '+esc((c.sexo==='m'?RASGOS_108[c.rasgo].na:RASGOS_108[c.rasgo].n).replace(/^./,x=>x.toUpperCase()))+': '+RASGOS_108[c.rasgo].d.toLowerCase()+' Compatibilidad: '+compatTxt(c.compat)+'. '+(c.quiereHijos?'Quiere hijos.':'No quiere hijos.')+(c.casa?' De los '+esc(c.casa.apellido)+'.':''),
+        run:()=>{ if(chance(clamp(.35+c.compat/160+S.p.atr.carisma/40,.25,.95))){
+            S.familia.pareja={nombre:c.nombre,rol:c.rol,sexo:c.sexo,edad:c.edad,casados:false,paciencia:clamp(50+c.compat*.3,0,100),exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),afecto:clamp(40+c.compat*.5,0,100),
+              rasgo108:c.rasgo,compat108:c.compat,quiereHijos108:c.quiereHijos,desde108:S.anio,conocio108:l.id,casa:c.casa||undefined};
+            S.p.felicidad=clamp(S.p.felicidad+12,0,100); log('Conociste a <b>'+esc(c.nombre)+'</b>, '+esc(c.rol)+', '+l.n.charAt(0).toLowerCase()+l.n.slice(1)+'. Empezaron a salir.','bien'); hito('Conoció a '+c.nombre);
+          } else { S.p.felicidad=clamp(S.p.felicidad-3,0,100); log('Saliste un par de veces con '+esc(c.nombre)+'. No pasó de ahí.'); } }}))
+        .concat([{t:'Nadie me convence',cat:'legado',run:()=>{ log('Conociste gente, pero nadie te movió el piso.'); }}])});
+  }
+
+  /* --- la relación --- */
+  function plan(){ return (S.familia&&S.familia.plan108)||'natural'; }
+  const PLAN_TXT={buscar:'buscando un hijo',natural:'lo que venga',cuidarse:'sin hijos por ahora'};
+  function escenaPareja108(){
+    const q=pz(); if(!q) return;
+    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25);
+    const html='<div class="pareja108">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:60})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años · '+esc(q.rol||'')+' · '+(q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja')+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
+      +'<div class="chips">'+(q.rasgo108?'<i>'+esc(rasgoTxt(q))+'</i>':'')+(isFinite(q.compat108)?'<i>'+compatTxt(q.compat108)+'</i>':'')+'<i>hijos: '+PLAN_TXT[plan()]+'</i>'+(q.separacionBienes?'<i>con capitulaciones</i>':'')+'</div></div></div>'
+      +medida('la relación',Math.round(q.paciencia||0),100,(q.paciencia||0)<35?'r':'v');
+    const yaCita=S.cita108===S.anio;
+    const op=[
+      {t:'Un plan juntos',cat:'familia',d:'Cena, cine o un paseo. '+fmt(cCita)+' y una movida. Una vez al año.',dis:yaCita?'Ya lo hiciste este año':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.cita108=S.anio; S.mov--; S.efectivo-=Math.min(S.efectivo,cCita); const d=Math.round(ri(8,14)*((RASGOS_108[q.rasgo108]||{pac:1}).pac)); q.paciencia=clamp((q.paciencia||60)+d,0,100); S.p.felicidad=clamp(S.p.felicidad+5,0,100);
+        log('Sacaste tiempo para '+esc(P1(q.nombre))+'. Se nota.','bien'); cerrarModal(); render(); }},
+      {t:'Un viaje los dos solos',cat:'familia',d:fmt(cViaje)+' y una movida. Arregla casi todo.',dis:S.efectivo<cViaje?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.mov--; S.efectivo-=cViaje; q.paciencia=clamp((q.paciencia||60)+ri(16,24),0,100); S.p.felicidad=clamp(S.p.felicidad+10,0,100); if(isFinite(S.p.estres)) S.p.estres=clamp(S.p.estres-10,0,100);
+        log('Te fuiste de viaje con '+esc(P1(q.nombre))+'. Volvieron como recién conocidos.','bien'); cerrarModal(); render(); }},
+      {t:'Hablar de tener hijos',cat:'familia',d:'Hoy: '+PLAN_TXT[plan()]+'.',cerrar:false,run:()=>{ cerrarModal(); escenaPlanHijos108(); }}
+    ];
+    if(S.anio>=1985&&plan()==='buscar') op.push({t:'Tratamiento de fertilidad',cat:'salud',d:fmt(cFert)+'. Sube mucho la probabilidad de embarazo por dos años.',dis:S.efectivo<cFert?'No te alcanza':(S.familia.fert108&&S.anio-S.familia.fert108<2)?'Ya están en tratamiento':null,cerrar:false,run:()=>{
+        S.efectivo-=cFert; S.familia.fert108=S.anio; log('Empezaron un tratamiento de fertilidad ('+fmt(cFert)+').'); cerrarModal(); render(); }});
+    if(!q.casados) op.push({t:'Proponer matrimonio',cat:'familia',d:(q.paciencia||0)<45?'La relación todavía no está para eso.':'Si dice que sí, eliges el régimen de bienes.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ cerrarModal(); modalMatrimonio(); }},
+      {t:'Terminar la relación',cat:'riesgo',d:'Cada uno por su lado.',cerrar:false,run:()=>{ log('Terminaste tu relación con <b>'+esc(q.nombre)+'</b>.'); S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-6,0,100); cerrarModal(); render(); }});
+    escena({rubro:'Tu vida',titulo:'Tu pareja',ancho:true,cerrable:true,cuerpo:'Una relación se cuida o se gasta. Si la descuidas varios años, se acaba.',html,opciones:op});
+  }
+  function escenaPlanHijos108(){
+    const q=pz(); const quiere=q&&q.quiereHijos108;
+    const set=(p,txt)=>{ S.familia.plan108=p; if(q&&q.quiereHijos108!==undefined){ if(p==='cuidarse'&&quiere){ q.paciencia=clamp((q.paciencia||60)-10,0,100); txt+=' '+P1(q.nombre)+' quería otra cosa: quedó dolid'+o(q)+'.'; } if(p==='buscar'&&quiere) q.paciencia=clamp((q.paciencia||60)+6,0,100); if(p==='buscar'&&quiere===false){ q.paciencia=clamp((q.paciencia||60)-8,0,100); txt+=' '+P1(q.nombre)+' no está convencid'+o(q)+'.'; } } log(txt); };
+    escena({rubro:'Tu familia',titulo:'¿Quieren tener hijos?',cerrable:true,cuerpo:(q&&q.quiereHijos108!==undefined?esc(P1(q.nombre))+(quiere?' quiere hijos.':' no quiere hijos.')+' ':'')+(S.anio<1965?'Todavía no existe la píldora: cuidarse ayuda, pero no es seguro.':'Hoy la decisión es de ustedes.'),
+      opciones:[{t:'Buscar un hijo',cat:'familia',d:'Sube bastante la probabilidad de embarazo cada año.',run:()=>set('buscar','Decidieron buscar un hijo.')},
+        {t:'Que llegue cuando llegue',cat:'familia',d:'Como ha sido siempre.',run:()=>set('natural','Los hijos llegarán cuando lleguen.')},
+        {t:'Cuidarse: sin hijos por ahora',cat:'familia',d:S.anio<1965?'Baja la probabilidad a la mitad.':'Baja la probabilidad casi a cero.',run:()=>set('cuidarse','Decidieron no tener hijos por ahora.')}]});
+  }
+  function wrapConcepcion108(){
+    const old=window.probConcepcion; if(typeof old!=='function'||window.__SA108_CON) return;
+    window.probConcepcion=function(){ let p=old.apply(this,arguments);
+      try{ const pl=plan(); p*=pl==='buscar'?1.9:pl==='cuidarse'?(S.anio<1965?.5:.07):1; if(S.familia.fert108&&S.anio-S.familia.fert108<2) p*=1.8; p=clamp(p,0,.5); }catch(e){}
+      return p; };
+    window.__SA108_CON=true;
+  }
+  function wrapNacimientos108(){
+    const old=window.resolverConcepcionesNaturales; if(typeof old!=='function'||window.__SA108_NAC) return;
+    window.resolverConcepcionesNaturales=function(res){
+      let antes=null;
+      try{ antes=new Set((S.familia.hijos||[]).map(h=>h.fid));
+        const edadMadre=S.p.sexo==='m'?S.p.edad:((pz()&&pz().edad)||30);
+        S.familia.embarazos=(S.familia.embarazos||[]).filter(e=>{ if(e.naceEn<=S.anio&&chance(edadMadre>=40?.12:.04)){ S.p.felicidad=clamp(S.p.felicidad-12,0,100); if(pz()) pz().paciencia=clamp((pz().paciencia||60)+4,0,100);
+          log('El embarazo no llegó a término. Fueron meses difíciles en la casa.','mal'); return false; } return true; });
+      }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ const nuevos=(S.familia.hijos||[]).filter(h=>!antes.has(h.fid)&&h.edad===0&&h.origen==='biologico');
+        if(nuevos.length===1&&S.familia.hijos.length<12&&chance(.025)){ const a=nuevos[0], sx=chance(.5)?'h':'m'; const libres=nombresCiudad(S.p.ciudad,sx).filter(n=>!S.familia.hijos.some(h=>h.nombre===n)); const nom=libres.length?pick(libres):nombreLocal(S.p.ciudad,sx);
+          const g=nuevoHijo(nom,sx,0); g.apellido=a.apellido; g.madre=a.madre; g.padre=a.padre; g.gemelo108=a.nombre; a.gemelo108=g.nombre; g.vinculo=60; S.familia.hijos.push(g);
+          log('¡Sorpresa en la clínica: eran dos! Junto con '+esc(a.nombre)+' nació <b>'+esc(g.nombre)+'</b>.','hito'); hito('Nacieron gemelos: '+a.nombre+' y '+g.nombre); } }catch(e){}
+      return r; };
+    window.__SA108_NAC=true;
+  }
+  function wrapMatrimonio108(){
+    const old=window.modalMatrimonio; if(typeof old!=='function'||window.__SA108_MAT) return;
+    window.modalMatrimonio=function(){ const q=pz();
+      if(q&&q.rasgo108&&(q.paciencia||0)<45){ q.paciencia=clamp((q.paciencia||0)-4,0,100);
+        escena({rubro:'La propuesta',titulo:esc(P1(q.nombre))+' dijo que todavía no',cuerpo:'"Te quiero, pero así como estamos no." La relación tiene que estar mejor antes de hablar de matrimonio.',opciones:[{t:'Entendido',cat:'familia',run:()=>{}}]});
+        log(esc(P1(q.nombre))+' no aceptó tu propuesta de matrimonio. Todavía no.','mal'); return; }
+      return old.apply(this,arguments); };
+    window.__SA108_MAT=true;
+  }
+
+  /* --- la muerte de un hijo --- */
+  function fallecidos(){ if(!Array.isArray(S.familia.fallecidos108)) S.familia.fallecidos108=[]; return S.familia.fallecidos108; }
+  function morirHijo108(h,causa){
+    const i=S.familia.hijos.indexOf(h); if(i<0) return false;
+    S.familia.hijos.splice(i,1);
+    fallecidos().push({nombre:h.nombre,sexo:h.sexo,apellido:h.apellido||S.p.apellido,nac:S.anio-(h.edad||0),muerte:S.anio,edad:h.edad||0,causa,hijos:(h.hijos||[]).slice(),pareja:h.pareja?h.pareja.nombre:null,famoso103:h.famoso103,fid:h.fid});
+    S.p.felicidad=clamp(S.p.felicidad-30,0,100); if(isFinite(S.p.estres)) S.p.estres=clamp(S.p.estres+25,0,100); S.p.salud=clamp(S.p.salud-5,0,100);
+    S.familia.hijos.forEach(x=>{ x.vinculo=clamp((x.vinculo||55)+4,0,100); });
+    if(pz()) pz().paciencia=clamp((pz().paciencia||60)+(chance(.6)?8:-12),0,100);
+    if(S.suc102&&S.suc102.delfin===h.nombre){ S.suc102.delfin=null; log('La casa se quedó sin sucesor designado.','mal'); }
+    if(S.testamento&&S.testamento.nombre===h.nombre){ S.testamento=null; log('Tu testamento quedó sin efecto: nombraba a '+esc(h.nombre)+'.','mal'); }
+    if(Array.isArray(S.junta)) S.junta=S.junta.filter(j=>j.hijo!==h.nombre);
+    S.familia.ultMuerteHijo108=S.anio;
+    const nietos=(h.hijos||[]).length;
+    log('Murió tu '+(h.sexo==='m'?'hija':'hijo')+' <b>'+esc(h.nombre)+'</b>, a los '+(h.edad||0)+' años, de '+esc(causa)+'. Ningún padre debería enterrar a un hijo.'+(nietos?' Deja '+nietos+' hijo'+(nietos===1?'':'s')+', que quedan bajo el amparo de la casa.':''),'mal');
+    hito('Murió '+h.nombre+', a los '+(h.edad||0)+' años');
+    try{ asegurarColasFamilia(); S.funeralPendientes.push({quien:h.nombre+' '+(h.apellido||S.p.apellido),rel:'hijo',sexo:h.sexo,anio:S.anio}); }catch(e){}
+    return true;
+  }
+  function causaHijo(h){
+    const e=h.edad||0, violencia=S.anio>=1948&&S.anio<=2008;
+    if(e<5) return pick(S.anio<1950?['una fiebre que no cedió','una infección','tosferina','difteria']:['una infección','una enfermedad congénita','una neumonía']);
+    if(e<15) return pick(['un accidente en un río','una meningitis','un accidente','una enfermedad de la sangre']);
+    if(e<36) return pick(['un accidente de carretera','un accidente de moto','un accidente de carretera'].concat(violencia?['una bala perdida','la violencia']:[]).concat(S.anio>=1930?['un accidente aéreo']:['una caída de caballo']));
+    return pick(['un infarto','cáncer','un accidente de carretera','un derrame cerebral']);
+  }
+  function riesgoHijo(h){
+    const e=h.edad||0, a=S.anio; const inf=a<1930?.012:a<1960?.006:a<1990?.002:.0006;
+    if(e<5) return inf; if(e<15) return inf*.2+.0003; if(e<36) return .0012+(a>=1985&&a<=2005?.0008:0)+(h.temperamento==='prodigo'?.0006:0);
+    return .001+(e-36)*.0004+(e>=60?.01:0);
+  }
+  function correrHijos108(){
+    if(!S.familia) return;
+    // los nietos huérfanos siguen creciendo
+    fallecidos().forEach(f=>(f.hijos||[]).forEach(g=>{ g.edad=(g.edad||0)+1; }));
+    const hace=S.anio-(S.familia.ultMuerteHijo108||-99);
+    (S.familia.hijos||[]).slice().forEach(h=>{ if(hace<12&&(h.edad||0)<60) return; if(S.familia.ultMuerteHijo108===S.anio) return;
+      if(chance(riesgoHijo(h))) morirHijo108(h,causaHijo(h)); });
+    // la pareja se enfría sola si no se cuida (solo relaciones nuevas)
+    const q=pz(); if(q&&q.rasgo108&&isFinite(q.compat108)){ q.paciencia=clamp((q.paciencia||60)+(q.compat108-55)/14,0,100); }
+    amantes().forEach(a=>{ a.exige108=(a.exige108||0)+((a.afecto||50)>=60?1:0); });
+  }
+
+  /* --- herederos: nietos y sobrinos --- */
+  function herederosExtra108(){
+    const out=[]; if(typeof prepararSucesorColateral!=='function') return out;
+    const prep=(g,rel,huerfano,padre)=>{ const h=prepararSucesorColateral({pid:g.gid||g.pid||('n'+ri(10000,99999)),rel,sexo:g.sexo,edad:g.edad||0,nombre:g.nombre,oficio:g.oficio,afecto:g.vinculo||g.afecto||60,capaz:g.capaz||6});
+      if(!h) return; if(g.atr) h.atr=Object.assign({},h.atr,g.atr); h._extra108=true; h._huerfano108=!!huerfano; h._padre108=padre||null; h._sucesorRel=rel; out.push(h); };
+    fallecidos().forEach(f=>(f.hijos||[]).forEach(g=>prep(g,g.sexo==='m'?'nieta':'nieto',true,f.nombre)));
+    (S.familia.hijos||[]).forEach(hj=>(hj.hijos||[]).filter(g=>(g.edad||0)>=18).forEach(g=>prep(g,g.sexo==='m'?'nieta':'nieto',false,hj.nombre)));
+    (S.parientes||[]).filter(p=>p.vivo&&/^sobrin/.test(p.rel)&&(p.edad||0)>=18).sort((a,b)=>(b.afecto||0)-(a.afecto||0)).slice(0,2).forEach(p=>prep(p,p.sexo==='m'?'sobrina':'sobrino',false,null));
+    return out.slice(0,5);
+  }
+  function wrapSucesion108(){
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA108_PS) return;
+    window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
+      try{ const E=herederosExtra108(); document.querySelectorAll('#escenaHost .carta').forEach(b=>{ const nom=b.querySelector('.nom'); if(!nom||b.querySelector('.extra108')) return;
+        const h=E.find(x=>nom.textContent.indexOf(x.nombre+' ')>=0&&/niet|sobrin/.test(nom.textContent)); if(!h) return;
+        const txt=h._huerfano108?'Hereda en lugar de '+h._padre108+', que murió antes que tú.':/niet/.test(h._sucesorRel)?(h.sexo==='m'?'Hija':'Hijo')+' de '+h._padre108+'. Saltarías una generación.':'De la rama de tus hermanos.';
+        const tx=b.querySelector('.txt'); const html='<div class="txt extra108" style="margin-top:4px;color:var(--laton)">'+esc(txt)+'</div>'; if(tx) tx.insertAdjacentHTML('afterend',html); else b.insertAdjacentHTML('beforeend',html); }); }catch(e){}
+      return r; };
+    window.__SA108_PS=true;
+  }
+
+  /* --- eventos --- */
+  function instalarEventos108(){
+    if(window.__SA108_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    const A=()=>amantes().find(a=>a.id===S._am108)||amantes()[0];
+    E({p:1,c:()=>!!pz()&&amantes().some(a=>(a.afecto||0)>=60&&(a.exige108||0)>=2),
+      t:()=>{ const a=amantes().filter(a=>(a.afecto||0)>=60).sort((x,y)=>(y.exige108||0)-(x.exige108||0))[0]; S._am108=a.id; a.exige108=0;
+        return '<b>'+esc(a.nombre)+'</b> ya no quiere seguir escondid'+o(a)+'. "O dejas a '+esc(P1(pz().nombre))+', o esto se acaba. Y no te prometo quedarme callad'+o(a)+'."'; },
+      o:[{t:'Prometerle que pronto',f:()=>{ const a=A(); if(a){ a.afecto=clamp(a.afecto+6,0,100); a.promesa108=(a.promesa108||0)+1; } return a&&a.promesa108>=2?'Es la segunda vez que se lo prometes. Ya no te cree.':'Te creyó. Por ahora.'; }},
+         {t:'Terminar con esa relación',f:()=>{ const a=A(); if(!a) return ''; a.activo=false; a.fin=S.anio; if(chance(.35+(100-(a.discrecion||50))/250)){ pz().paciencia=clamp((pz().paciencia||60)-(pz().rasgo108==='celoso'?40:28),0,100); S.p.escandalos=(S.p.escandalos||0)+1; return 'Terminaste. A la semana, '+esc(P1(pz().nombre))+' recibió una carta con fechas, hoteles y fotos.'; } return 'Lloró, gritó y se fue. No dijo nada a nadie.'; }},
+         {t:'Dejar a tu pareja',f:()=>{ const a=A(), q=pz(); if(!a||!q) return ''; if(q.casados){ q.paciencia=0; a.afecto=clamp(a.afecto+20,0,100); return 'Se lo dijiste a '+esc(P1(q.nombre))+'. Esa misma noche llamó a un abogado.'; }
+           S.familia.pareja={nombre:a.nombre,rol:a.rol,sexo:a.sexo,edad:a.edad,casados:false,paciencia:70,exigencia:1,rasgo108:pick(Object.keys(RASGOS_108)),compat108:ri(50,85),quiereHijos108:chance(.6),desde108:S.anio,conocio108:'amante'}; a.activo=false;
+           return 'Dejaste a '+esc(P1(q.nombre))+'. Ahora '+esc(P1(a.nombre))+' es tu pareja, a la vista de todos.'; }}]});
+    E({p:.8,c:()=>!!pz()&&amantes().some(a=>(a.discrecion||50)<50),
+      t:()=>{ const a=amantes().filter(a=>(a.discrecion||50)<50)[0]; S._am108=a.id; const c=costo(.01,8); S._c108=c; return '<b>'+esc(a.nombre)+'</b> necesita plata. Mucha: '+fmt(c)+'. No lo dice, pero lo deja claro: si no aparece, '+esc(P1(pz().nombre))+' se entera de todo.'; },
+      o:[{t:()=>'Pagar los '+fmt(S._c108||0),f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c108||0); const a=A(); if(a) a.discrecion=clamp((a.discrecion||40)+10,0,100); return 'Pagaste. Sabes que va a volver a pedir.'; }},
+         {t:'Que cuente lo que quiera',f:()=>{ const a=A(), q=pz(); if(a){ a.activo=false; a.fin=S.anio; } if(q) q.paciencia=clamp((q.paciencia||60)-30,0,100); S.p.escandalos=(S.p.escandalos||0)+1; if(typeof window.moverImagen105==='function') window.moverImagen105(-5); return 'Lo contó. A tu pareja, y a media ciudad.'; }}]});
+    E({p:1,c:()=>!!pz()&&amantes().length>0,
+      t:()=>{ const q=pz(); return '<b>'+esc(P1(q.nombre))+'</b> encontró '+pick(['un recibo de hotel en tu chaqueta','un mensaje que no era para '+elx(q),'una foto que alguien le mandó'])+'. Te está esperando en la sala, con la luz apagada.'; },
+      o:[{t:'Pedir perdón y terminar con lo otro',f:()=>{ const q=pz(); amantes().forEach(a=>{ a.activo=false; a.fin=S.anio; }); q.paciencia=clamp((q.paciencia||60)-(q.rasgo108==='celoso'?28:q.rasgo108==='carinoso'?10:16),0,100); return 'Lloraron los dos. Dijo que lo va a intentar, pero que no es lo mismo.'; }},
+         {t:'Negarlo todo',f:()=>{ const q=pz(); if(chance(.45)){ q.paciencia=clamp((q.paciencia||60)-5,0,100); return 'Te creyó. O decidió creerte.'; } q.paciencia=clamp((q.paciencia||60)-36,0,100); return 'No te creyó. Y ahora, además, sabe que le mientes en la cara.'; }},
+         {t:'Admitirlo y no cambiar nada',f:()=>{ const q=pz(); q.paciencia=clamp((q.paciencia||60)-42,0,100); return 'Se lo dijiste sin adornos. Esa noche durmió en otro cuarto. Tal vez para siempre.'; }}]});
+    E({p:.8,c:()=>!!pz()&&(pz().paciencia||60)<42&&!pz().infiel108,
+      t:()=>{ const q=pz(); q.infiel108=S.anio; return 'Te lo dijo alguien del club, con cara de lástima: <b>'+esc(P1(q.nombre))+'</b> se está viendo con otra persona. Llevan meses.'; },
+      o:[{t:'Hablarlo y perdonar',f:()=>{ const q=pz(); q.paciencia=clamp((q.paciencia||40)+12,0,100); S.p.felicidad=clamp(S.p.felicidad-10,0,100); return 'Hablaron hasta el amanecer. Dijo que se sentía sol'+o(q)+'. Decidieron seguir.'; }},
+         {t:'Terapia de pareja',f:()=>{ const q=pz(), c=costo(.003,3); S.efectivo-=Math.min(S.efectivo,c); if(chance(.6)){ q.paciencia=clamp((q.paciencia||40)+26,0,100); return 'Seis meses de terapia ('+fmt(c)+'). Contra todo pronóstico, funcionó.'; } q.paciencia=clamp((q.paciencia||40)-6,0,100); return 'Fueron a terapia ('+fmt(c)+'). Sirvió para entender que el problema era más hondo.'; }},
+         {t:'Esto se acabó',f:()=>{ const q=pz(); if(q.casados){ q.paciencia=0; return 'Le pediste que se fuera. Los abogados harán el resto.'; } S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-8,0,100); return 'Terminaron esa misma noche.'; }}]});
+    E({p:.9,c:()=>!!pz()&&pz().casados&&isFinite(pz().desde108)&&S.anio-pz().desde108>=5&&(S.anio-pz().desde108)%5===0,
+      t:()=>{ const q=pz(); return 'Se cumplen <b>'+(S.anio-q.desde108)+' años</b> desde que conociste a '+esc(P1(q.nombre))+'.'; },
+      o:[{t:'Celebrarlo en grande',f:()=>{ const c=costo(.006,6); S.efectivo-=Math.min(S.efectivo,c); pz().paciencia=clamp((pz().paciencia||60)+18,0,100); S.p.felicidad=clamp(S.p.felicidad+8,0,100); return 'Fiesta, serenata y toda la familia ('+fmt(c)+'). '+esc(P1(pz().nombre))+' lloró en el brindis.'; }},
+         {t:'Una cena los dos',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)+9,0,100); return 'El mismo restaurante de la primera cita. Seguía igual.'; }},
+         {t:'Se te pasó la fecha',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)-12,0,100); return 'Te acordaste tres días después. No dijo nada. Eso fue lo peor.'; }}]});
+    E({p:.8,c:()=>!!pz()&&pz().quiereHijos108===true&&plan()==='cuidarse'&&pz().edad<45,
+      t:()=>'<b>'+esc(P1(pz().nombre))+'</b> lo dice sin rodeos: quiere un hijo. Y no va a esperar toda la vida.',
+      o:[{t:'Está bien: busquemos un hijo',f:()=>{ S.familia.plan108='buscar'; pz().paciencia=clamp((pz().paciencia||60)+15,0,100); return 'Lo abrazaste. Empezaron a buscarlo.'; }},
+         {t:'Todavía no',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)-14,0,100); return 'Aceptó. Pero algo se quedó en el aire.'; }}]});
+    // un hijo gravemente enfermo
+    E({p:.5,c:()=>(S.familia.hijos||[]).length>0&&S.anio-(S.familia.ultMuerteHijo108||-99)>=12&&S.anio-(S._enf108||-99)>=15,
+      t:()=>{ const h=pick(S.familia.hijos); S._hj108=h.fid; S._enf108=S.anio; const enf=(h.edad||0)<16?pick(['leucemia','meningitis','una enfermedad del corazón']):pick(['un cáncer agresivo','una enfermedad del corazón','una infección que no cede']); S._enfN108=enf;
+        return 'Los médicos no le dan vueltas: <b>'+esc(h.nombre)+'</b>, de '+(h.edad||0)+' años, tiene '+enf+'. Hay que decidir ya.'; },
+      o:[{t:'El mejor tratamiento, en el exterior',f:()=>curar(.86,costo(.04,30),'en el exterior')},
+         {t:'Tratarlo aquí',f:()=>curar(S.anio<1950?.4:S.anio<1990?.6:.75,costo(.008,6),'aquí')},
+         {t:'Rezar y esperar',f:()=>curar(.3,0,'en casa')}]});
+    window.__SA108_EV=true;
+  }
+  function curar(prob,c,donde){
+    const h=(S.familia.hijos||[]).find(x=>x.fid===S._hj108); if(!h) return 'Ya no aplicaba.';
+    if(c>S.efectivo){ prob*=.75; c=S.efectivo; } S.efectivo-=c;
+    if(chance(prob)){ h.vinculo=clamp((h.vinculo||55)+12,0,100); h.salud=clamp((h.salud||70)-10,30,100); if(window.anotarHijo103) window.anotarHijo103(h,'Sobrevivió a '+S._enfN108+'.','bien');
+      return esc(h.nombre)+' se salvó. Fueron los meses más largos de tu vida'+(c?' ('+fmt(c)+')':'')+'.'; }
+    morirHijo108(h,S._enfN108); return 'Se hizo lo que se pudo, '+donde+'. '+esc(h.nombre)+' no lo logró.';
+  }
+
+  /* --- integración --- */
+  function wrapAcciones108(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA108_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!S||!S.p||nino()) return A;
+        A.forEach(a=>{ if(a.t==='Salir a conocer gente'&&!a.__108){ a.__108=true; a.modal=true; a.d='Eliges dónde buscar y con quién salir.'; a.run=()=>escenaConocer108(); } });
+        if(pz()&&!A.some(a=>a.t==='Tu pareja')) A.push({t:'Tu pareja',cat:'familia',d:P1(pz().nombre)+': la relación está en '+Math.round(pz().paciencia||0)+'/100. Planes juntos, hijos'+(pz().casados?'':' y matrimonio')+'.',mov:0,modal:true,run:()=>escenaPareja108()});
+      }catch(e){}
+      return A; };
+    window.__SA108_ACC=true;
+  }
+  function wrapCat108(){ const old=window.catDe; if(typeof old!=='function'||window.__SA108_CAT) return; window.catDe=function(t){ return t==='Tu pareja'?'familia':old.apply(this,arguments); }; window.__SA108_CAT=true; }
+  function wrapPaso108(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA108_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrHijos108(); }catch(e){} return r; };
+    window.__SA108_PASO=true;
+  }
+  function wrapLienzo108(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA108_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='familia'&&S&&S.familia&&fallecidos().length&&!document.getElementById('fallecidos108')){ const host=$('lienzoJuego');
+        const html='<div class="seccion fallecidos108" id="fallecidos108"><h3>Los que se fueron antes<em>hijos que la casa perdió</em></h3>'+fallecidos().map(f=>'<div class="f">'+avatarSVG(f.nombre+' '+f.apellido,{sexo:f.sexo,edad:Math.max(1,f.edad),tam:42})+'<div><b>'+esc(f.nombre+' '+f.apellido)+' †</b><span>'+f.nac+'–'+f.muerte+' · '+esc(f.causa)+((f.hijos||[]).length?' · dejó '+f.hijos.length+' hijo'+(f.hijos.length===1?'':'s')+': '+esc(f.hijos.map(g=>g.nombre+' ('+(g.edad||0)+')').join(', ')):'')+'</span></div></div>').join('')+'</div>';
+        const ancla=Array.from(host.querySelectorAll('.seccion')).find(x=>/Descendencia directa/.test(x.textContent)); if(ancla) ancla.insertAdjacentHTML('afterend',html); else { const w=host.querySelector('.wrap'); if(w) w.insertAdjacentHTML('beforeend',html); } } }catch(e){}
+      return r; };
+    window.__SA108_LIENZO=true;
+  }
+  function init108(){
+    wrapConcepcion108(); wrapNacimientos108(); wrapMatrimonio108(); wrapSucesion108(); instalarEventos108(); wrapAcciones108(); wrapCat108(); wrapPaso108(); wrapLienzo108();
+    Object.assign(window,{RASGOS_108,escenaConocer108,escenaCandidatos108,escenaPareja108,escenaPlanHijos108,morirHijo108,correrHijos108,herederosExtra108,fallecidos108:fallecidos,riesgoHijo108:riesgoHijo});
+  }
+  setTimeout(init108,40); setTimeout(init108,220); setTimeout(init108,650);
+  window.__SA108={version:V108};
 })();
 </script>
 
