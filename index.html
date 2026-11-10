@@ -858,10 +858,20 @@ html{scroll-behavior:smooth}
 .rel104{height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}
 .rel104 i{display:block;height:100%}
 </style>
+<style id="estilos-v105">
+.imagen105{display:flex;gap:16px;align-items:center;margin:10px 0 14px}
+.imagen105 .num{font-family:var(--display);font-size:40px;line-height:1;color:var(--laton);min-width:70px}
+.imagen105 .num small{display:block;font-family:var(--sans,inherit);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2);margin-top:4px}
+.imagen105 svg{flex:1;height:54px;min-width:0}
+.imagen105 .et{font-size:13px;color:var(--humo)}
+.recorte105{border-left:3px solid var(--laton-op,#8A6D2E);background:rgba(240,231,213,.04);border-radius:0 8px 8px 0;padding:9px 12px;margin:6px 0}
+.recorte105 b{display:block;font-family:var(--display);font-weight:400;font-size:16px;color:var(--marfil)}
+.recorte105 span{font-size:11.5px;color:var(--humo2);font-style:italic}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v104</div>
+<div class="version-badge" id="versionBadge">v105</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -21946,6 +21956,154 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init104,40); setTimeout(init104,220); setTimeout(init104,650);
   window.__SA104={version:V104};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v105 · LA PRENSA Y LA OPINIÓN PÚBLICA
+   La familia tiene una imagen pública que sube y baja con lo que hace y lo
+   que se sabe. Los titulares de fin de año hablan de tu casa; puedes dar
+   entrevistas, contratar comunicadores, comprar un medio para controlar
+   lo que se publica… o pelear con el periodista que te investiga.
+   ========================================================================== */
+(function(){
+  const V105='v105';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const MEDIOS_PERIODISTA=['Revista Semana Andina','El Observador','Noticiero de las Siete','Diario del Aburrá','La Silla Pública'];
+  function P(){ if(!S.prensa105) S.prensa105={imagen:clamp(Math.round(((S.p&&S.p.reputacion)||50)*.6+20),0,100),hist:[],medio:null,periodista:null,anioAgencia:null,esc0:(S.p&&S.p.escandalos)||0};
+    const p=S.prensa105; if(!Array.isArray(p.hist)) p.hist=[]; return p; }
+  const mover=(d,motivo)=>{ const p=P(); p.imagen=clamp(p.imagen+d,0,100); if(motivo) p.ultimo=motivo; };
+  const etiqueta=v=>v>=80?'admirada':v>=62?'bien vista':v>=42?'sin mucho ruido':v>=25?'cuestionada':'impresentable';
+
+  /* --- el año en la opinión pública --- */
+  function correrPrensa105(){
+    if(!S||!S.p||(window.esNino94&&window.esNino94())) return;
+    const p=P(); const L=(S.log||[]).filter(x=>x.anio===S.anio);
+    let d=0;
+    const bien=L.filter(x=>x.clase==='hito'||x.clase==='bien').length, mal=L.filter(x=>x.clase==='mal').length;
+    d+=Math.min(3,bien*.4)-Math.min(5,mal*.5);
+    const nEsc=(S.p.escandalos||0)-(p.esc0||0); if(nEsc>0) d-=nEsc*6; p.esc0=S.p.escandalos||0;
+    if(p.medio) d+=2;
+    if(p.periodista){ d-=1.5; if(chance(.25)){ S.p.escandalos=(S.p.escandalos||0)+1; p.esc0=S.p.escandalos; d-=4;
+      log('<b>'+esc(p.periodista.nombre)+'</b> publicó en '+esc(p.periodista.medio)+' otra entrega de su investigación sobre tu familia.','mal'); } }
+    d+=(50-p.imagen)*.04;  // la memoria pública se diluye
+    mover(Math.round(d*10)/10);
+    if(p.imagen>=70){ S.p.reputacion=clamp(S.p.reputacion+1,0,100); if(chance(.3)) moverPrestigio(1,''); }
+    else if(p.imagen<30){ S.p.reputacion=clamp(S.p.reputacion-1,0,100); }
+    p.hist.push({anio:S.anio,v:Math.round(p.imagen)}); p.hist=p.hist.slice(-40);
+  }
+
+  /* --- titulares de fin de año: hablan de tu casa --- */
+  function wrapTitulares105(){
+    const old=window.titulares; if(typeof old!=='function'||window.__SA105_TIT) return;
+    window.titulares=function(){
+      let T=old.apply(this,arguments)||[];
+      try{ if(!S||!S.p) return T; const p=P(); const fam=S.dinastia||S.p.apellido;
+        const extra=[];
+        if(p.medio) extra.push({t:pick(['La familia '+fam+' cierra otro año de trabajo por el país','Los '+fam+', ejemplo de empresa y de familia','Un año de logros para la casa '+fam]),medio:p.medio.nombre+' (tuyo)'});
+        if(p.periodista) extra.push({t:'Investigación: lo que no se sabe de los negocios de los '+fam,medio:p.periodista.medio+' · '+p.periodista.nombre});
+        const prev=p.hist.length>1?p.hist[p.hist.length-2].v:null;
+        if(prev!==null&&Math.abs(p.imagen-prev)>=4) extra.push({t:'Encuesta: '+(p.imagen>prev?'mejora':'empeora')+' la imagen de la familia '+fam+' ('+Math.round(p.imagen)+'/100)',medio:'Encuestadora Nacional'});
+        T=extra.concat(T).slice(0,4);
+      }catch(e){}
+      return T;
+    };
+    window.__SA105_TIT=true;
+  }
+
+  /* --- el periodista que te investiga --- */
+  function instalarEventos105(){
+    if(window.__SA105_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    EVENTOS_LOCALES.push({p:1,c:()=>!!S.p&&S.p.edad>=25&&!P().periodista&&((S.p.escandalos||0)>0||((S.penal&&S.penal.crimes)||[]).length>0||P().imagen<40),
+      t:()=>{ const sx=chance(.5)?'h':'m'; const pr={nombre:nombreLocal(S.p.ciudad,sx)+' '+apellidoCiudad(S.p.ciudad),sexo:sx,medio:pick(MEDIOS_PERIODISTA),desde:S.anio}; S._per105=pr;
+        return (sx==='m'?'Una periodista':'Un periodista')+' de <b>'+esc(pr.medio)+'</b>, <b>'+esc(pr.nombre)+'</b>, está haciendo preguntas sobre tu familia: llamó a exempleados, pidió documentos en la Cámara de Comercio y quiere una entrevista contigo.'; },
+      o:[{t:()=>'Recibirl'+(S._per105&&S._per105.sexo==='m'?'a':'o')+' y hablar off the record',f:()=>{ const pr=S._per105; if(chance(.5)){ mover(2); return 'Fue una buena conversación. Publicó algo equilibrado y siguió con otro tema.'; }
+           P().periodista=pr; mover(-3); return 'Te escuchó, tomó notas… y siguió investigando. Ahora tiene más preguntas.'; }},
+         {t:'Cerrarle la puerta',f:()=>{ const pr=S._per105; P().periodista=pr; mover(-4); return 'No le diste nada. '+(pr.sexo==='m'?'Ella':'Él')+' tomó eso como una confirmación.'; }},
+         {t:'Llamar a su jefe',f:()=>{ const pr=S._per105; if(P().medio&&chance(.6)||chance(.3)){ mover(-1); return 'Una llamada y la investigación se "congeló". Por ahora.'; }
+           P().periodista=pr; mover(-8); S.p.escandalos=(S.p.escandalos||0)+1; return 'Mala idea: publicó que intentaste callarl'+(pr.sexo==='m'?'a':'o')+'. Ese es ahora el titular.'; }}]});
+    window.__SA105_EV=true;
+  }
+
+  /* --- la escena --- */
+  function sparkline(){
+    const H=P().hist.slice(-25); if(H.length<2) return '<svg viewBox="0 0 200 54"></svg>';
+    const w=200,h=54, xs=i=>i*(w/(H.length-1)), ys=v=>h-4-(v/100)*(h-8);
+    const d=H.map((x,i)=>(i?'L':'M')+xs(i).toFixed(1)+' '+ys(x.v).toFixed(1)).join(' ');
+    return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none"><line x1="0" x2="'+w+'" y1="'+ys(50)+'" y2="'+ys(50)+'" stroke="rgba(255,255,255,.12)" stroke-dasharray="3 3"/><path d="'+d+'" fill="none" stroke="#D6A648" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+  }
+  function escenaPrensa105(){
+    const p=P(); const costoMedio=Math.max(300,Math.round(pat()*.15)), costoAg=Math.max(15,Math.round(pat()*.01));
+    const recortes=(S.periodicoCasa&&S.periodicoCasa.titulares||[]).slice(-3).reverse();
+    const html='<div class="imagen105"><div class="num">'+Math.round(p.imagen)+'<small>imagen</small></div>'+sparkline()+'</div>'
+      +'<div class="et">La familia hoy es <b>'+etiqueta(p.imagen)+'</b>.'+(p.medio?' Tienes '+esc(p.medio.nombre)+' desde '+p.medio.desde+'.':'')+(p.periodista?' <b>'+esc(p.periodista.nombre)+'</b> ('+esc(p.periodista.medio)+') sigue investigándote.':'')+'</div>'
+      +(recortes.length?'<div style="margin-top:12px">'+recortes.map(r=>'<div class="recorte105"><b>'+esc(r.titular)+'</b><span>'+r.anio+'</span></div>').join('')+'</div>':'');
+    const op=[
+      {t:'Dar una entrevista',cat:'legado',d:'Una movida. Sale bien si tienes carisma; si no, puede volverse un chiste nacional.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.mov--; const pr=.45+((S.p.atr&&S.p.atr.carisma)||5)/20; if(chance(pr)){ const d=ri(4,9); mover(d); log('Diste una entrevista larga y salió bien: la imagen de la familia subió '+d+' puntos.','bien'); }
+        else { mover(-6); log('La entrevista salió mal: una frase tuya se volvió meme.','mal'); } cerrarModal(); render(); }},
+      {t:'Contratar una agencia de comunicaciones',cat:'legado',d:'Cuesta '+fmt(costoAg)+'. Mejora la imagen todo el año. Una vez al año.',dis:p.anioAgencia===S.anio?'Ya la contrataste este año':S.efectivo<costoAg?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoAg; p.anioAgencia=S.anio; mover(6); log('Contrataste una agencia de comunicaciones ('+fmt(costoAg)+'). La familia sale mejor en las fotos.','bien'); cerrarModal(); render(); }}
+    ];
+    if(!p.medio) op.push({t:'Comprar un medio de comunicación',cat:'capital',d:'Cuesta '+fmt(costoMedio)+'. Lo que publique tu medio te favorece cada año. La competencia lo nota.',dis:pat()<2000?'Hace falta una fortuna mayor (patrimonio de $2.000 M)':S.efectivo<costoMedio?'No te alcanza':null,cerrar:false,run:()=>{
+        S.efectivo-=costoMedio; const tipo=pick(['Diario','Revista','Radio','Noticiero']); const nom=tipo+' '+pick(['del Valle','La Opinión','Nacional','El Faro','Capital','de la Tarde']);
+        p.medio={nombre:nom,desde:S.anio}; if(Array.isArray(MEDIOS)&&!MEDIOS.includes(nom)) MEDIOS.push(nom); mover(4); moverPrestigio(2,'compró '+nom);
+        log('Compraste <b>'+esc(nom)+'</b> por '+fmt(costoMedio)+'. Ahora la familia tiene su propia voz.','hito'); hito('Compró '+nom); cerrarModal(); render(); }});
+    else op.push({t:'Usar tu medio contra una casa rival',cat:'riesgo',d:'Una movida. Les baja el prestigio, pero la gente nota de dónde viene el golpe.',dis:!rivalesVivas().length?'No hay casas rivales':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        const r=rivalesVivas().slice().sort((a,b)=>b.patrimonio-a.patrimonio)[0]; S.mov--; r.prestigio=clamp(r.prestigio-ri(4,9),0,100); r.patrimonio*=rnd(.96,.99); mover(-2);
+        if(typeof window.recordarRival104==='function') window.recordarRival104(r,'Tu medio publicó una campaña contra su casa.',-3);
+        log(esc(p.medio.nombre)+' publicó una serie sobre los negocios de los <b>'+esc(r.apellido)+'</b>. Les dolió.','hito'); cerrarModal(); render(); }});
+    if(p.periodista){
+      op.push({t:'Demandar a '+p.periodista.nombre,cat:'riesgo',d:'Abogados contra el periodista. Si gana, se retracta; si pierde, el escándalo crece.',cerrar:false,run:()=>{
+        const c=Math.max(8,Math.round(pat()*.008)); S.efectivo-=Math.min(S.efectivo,c);
+        if(chance(.45)){ log(esc(p.periodista.nombre)+' tuvo que rectificar. Le costó el puesto en '+esc(p.periodista.medio)+'.','bien'); p.periodista=null; mover(4); }
+        else { S.p.escandalos=(S.p.escandalos||0)+1; mover(-7); log('La demanda contra '+esc(p.periodista.nombre)+' se volvió noticia nacional: "la familia que quiere callar a la prensa".','mal'); }
+        cerrarModal(); render(); }});
+      op.push({t:'Darle una exclusiva para que cambie de tema',cat:'legado',d:'Le cuentas algo de verdad, a cambio de que suelte lo otro.',cerrar:false,run:()=>{
+        if(chance(.55)){ log(esc(p.periodista.nombre)+' publicó tu exclusiva y dejó la investigación quieta.','bien'); p.periodista=null; mover(2); }
+        else { log(esc(p.periodista.nombre)+' publicó tu exclusiva… y siguió investigando.','mal'); mover(-2); } cerrarModal(); render(); }});
+    }
+    escena({rubro:'Opinión pública',titulo:'Prensa e imagen',ancho:true,cerrable:true,cuerpo:'Lo que el país piensa de tu familia. Sube con lo bueno que se sabe y baja con cada escándalo.',html,opciones:op});
+  }
+  function wrapAcciones105(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA105_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){ const p=P();
+        A.push({t:'Prensa e imagen',cat:'legado',d:'Imagen '+Math.round(p.imagen)+'/100: '+etiqueta(p.imagen)+'.'+(p.periodista?' Te investiga '+p.periodista.nombre+'.':'')+(p.medio?' Tienes '+p.medio.nombre+'.':''),mov:0,modal:true,run:()=>escenaPrensa105()}); } }catch(e){}
+      return A; };
+    window.__SA105_ACC=true;
+  }
+  function wrapCat105(){ const old=window.catDe; if(typeof old!=='function'||window.__SA105_CAT) return; window.catDe=function(t){ return t==='Prensa e imagen'?'familia':old.apply(this,arguments); }; window.__SA105_CAT=true; }
+  function seccionPerfil105(){
+    const sec=window.SECCIONES_93; if(!Array.isArray(sec)) return; const tu=sec.find(s=>s.id==='tu'); if(!tu||tu.__105) return;
+    const f0=tu.f; tu.f=a=>a.t==='Prensa e imagen'||f0(a); tu.__105=true;
+  }
+  function wrapLienzo105(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA105_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='perfil'&&S&&S.p&&!(window.esNino94&&window.esNino94())){ const st=document.querySelector('#lienzoJuego .perfil93-stats'); if(st&&!st.querySelector('.img105')){
+        const v=Math.round(P().imagen); st.insertAdjacentHTML('beforeend','<div class="img105" style="display:contents">'+medida('imagen pública',v,100,v<30?'r':'v')+'</div>'); } } }catch(e){}
+      return r; };
+    window.__SA105_LIENZO=true;
+  }
+  function wrapPaso105(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA105_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrPrensa105(); }catch(e){} return r; };
+    window.__SA105_PASO=true;
+  }
+  function wrapHeredar105(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA105_HER) return;
+    window.heredar=function(){ const prev=S&&S.prensa105?JSON.parse(JSON.stringify(S.prensa105)):null; const r=old.apply(this,arguments);
+      try{ if(prev&&S){ prev.imagen=clamp(50+(prev.imagen-50)*.6,0,100); prev.esc0=S.p.escandalos||0; S.prensa105=prev; } }catch(e){} return r; };
+    window.__SA105_HER=true;
+  }
+  function init105(){
+    instalarEventos105(); wrapTitulares105(); wrapAcciones105(); wrapCat105(); seccionPerfil105(); wrapLienzo105(); wrapPaso105(); wrapHeredar105();
+    Object.assign(window,{prensa105:P,moverImagen105:mover,correrPrensa105,escenaPrensa105});
+  }
+  setTimeout(init105,40); setTimeout(init105,220); setTimeout(init105,650);
+  window.__SA105={version:V105};
 })();
 </script>
 
