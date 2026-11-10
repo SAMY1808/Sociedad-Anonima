@@ -759,7 +759,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v94</div>
+<div class="version-badge" id="versionBadge">v95</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -19975,6 +19975,244 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init94,220);
   setTimeout(init94,650);
   window.__SA94={version:V94};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v95 · GENTE QUE VUELVE
+   Amigos, enemigos, mentor, primer amor: personas con nombre que hacen su
+   propia carrera, ganan poder, recuerdan lo que les hiciste y vuelven a tu
+   crónica años después a cobrártelo o a ayudarte.
+   ========================================================================== */
+(function(){
+  const V95='v95';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const nombreDe=sx=>{ try{ return nombreLocal(S.p.ciudad,sx); }catch(e){ return pick(sx==='h'?NOM_H:NOM_M); } };
+  const OFICIOS_95=[
+    {id:'politico',n:['concejal','representante a la Cámara','senador','ministro'],w:1.2},
+    {id:'periodista',n:['reportero','columnista','director de noticiero','dueño de un periódico'],w:1},
+    {id:'juez',n:['abogado litigante','juez','magistrado','presidente de la Corte'],w:.8},
+    {id:'banquero',n:['analista de banco','gerente de sucursal','vicepresidente de banco','presidente de banco'],w:.9},
+    {id:'militar',n:['teniente','mayor','coronel','general'],w:.7},
+    {id:'medico',n:['médico residente','especialista','jefe de cirugía','dueño de una clínica'],w:.8},
+    {id:'empresario',n:['vendedor','dueño de un negocio','empresario','magnate'],w:1.2},
+    {id:'cura',n:['seminarista','párroco','vicario','obispo'],w:.4},
+    {id:'narco',n:['"comerciante"','traqueto','capo','patrón'],w:.5,desde:1975,hasta:2005}
+  ];
+  const ROLES_95={amigo:'Amigo',enemigo:'Enemigo',mentor:'Mentor',primerAmor:'Primer amor',exsocio:'Exsocio'};
+  function gente(){ if(!Array.isArray(S.gente95)) S.gente95=[]; return S.gente95; }
+  const vivos=()=>gente().filter(g=>g.vivo!==false);
+  const oficio=g=>OFICIOS_95.find(o=>o.id===g.oficio)||OFICIOS_95[6];
+  const CARGOS_F_95={politico:['concejala','representante a la Cámara','senadora','ministra'],periodista:['reportera','columnista','directora de noticiero','dueña de un periódico'],
+    juez:['abogada litigante','jueza','magistrada','presidenta de la Corte'],banquero:['analista de banco','gerente de sucursal','vicepresidenta de banco','presidenta de banco'],
+    medico:['médica residente','especialista','jefa de cirugía','dueña de una clínica'],empresario:['vendedora','dueña de un negocio','empresaria','magnate'],
+    cura:['novicia','monja','madre superiora','abadesa'],narco:['"comerciante"','traqueta','jefa de una red','patrona']};
+  const cargo=g=>{ const o=oficio(g), k=clamp(Math.floor((g.poder||0)/26),0,3); return (g.sexo==='m'&&CARGOS_F_95[o.id])?CARGOS_F_95[o.id][k]:o.n[k]; };
+  const rolTxt=g=>{ const m=g.sexo==='m'; return ({amigo:m?'amiga':'amigo',enemigo:m?'enemiga':'enemigo',mentor:m?'mentora':'mentor',primerAmor:'primer amor',exsocio:m?'exsocia':'exsocio'})[g.rol]||'conocido'; };
+  const fem=g=>g.sexo==='m';
+  const art=g=>fem(g)?'a':'o';
+  function recordar(g,txt,peso){ g.memoria=(g.memoria||[]).concat([{anio:S.anio,txt,peso:peso||0}]).slice(-8); }
+  function afecto(g,d){ g.afecto=clamp((isFinite(g.afecto)?g.afecto:0)+d,-100,100); }
+  function elegirOficio95(){
+    const ok=OFICIOS_95.filter(o=>(!o.desde||S.anio+10>=o.desde)&&(!o.hasta||S.anio<=o.hasta+10));
+    const bolsa=[]; ok.forEach(o=>{ for(let i=0;i<o.w*10;i++) bolsa.push(o.id); }); return pick(bolsa);
+  }
+  function nuevaPersona95(rol,datos){
+    const sx=(datos&&datos.sexo)||(chance(.5)?'h':'m');
+    const g=Object.assign({id:'g'+S.anio+'_'+ri(1000,9999),rol,nombre:nombreDe(sx),apellido:pick(APELLIDOS),sexo:sx,
+      edad:Math.max(0,(S.p.edad||18)+ri(-1,1)),desde:S.anio,afecto:rol==='enemigo'?-ri(30,60):ri(40,75),poder:ri(0,8),oficio:elegirOficio95(),vivo:true,memoria:[],ultimaVez:S.anio},datos||{});
+    if(rol==='mentor'){ g.edad=(S.p.edad||18)+ri(22,35); g.poder=Math.max(g.poder,ri(35,60)); }
+    gente().push(g); return g;
+  }
+
+  /* --- de dónde sale tu gente --- */
+  function sembrar95(){
+    if(!S||!S.p) return;
+    const I=S.infancia94;
+    if(I){
+      (I.amigos||[]).forEach(a=>{ if(!gente().some(g=>g.origenId===a.id)) nuevaPersona95('amigo',{origenId:a.id,nombre:a.nombre,apellido:a.apellido,sexo:a.sexo,desde:a.desde,afecto:a.afecto||60,memoria:[{anio:a.desde,txt:'Se hicieron amigos en el colegio.',peso:1}]}); });
+      if(I.mentor&&!gente().some(g=>g.rol==='mentor')){ const [n,...ap]=String(I.mentor.nombre).split(' '); nuevaPersona95('mentor',{nombre:n,apellido:ap.join(' ')||pick(APELLIDOS),sexo:I.mentor.sexo,desde:I.mentor.desde,oficio:'medico',memoria:[{anio:I.mentor.desde,txt:'Te dio clases después del colegio.',peso:2}]}).oficio=pick(['juez','banquero','politico','medico']); }
+      if(I.primerAmor&&!gente().some(g=>g.rol==='primerAmor')) nuevaPersona95('primerAmor',{nombre:I.primerAmor.nombre,sexo:I.primerAmor.sexo,desde:I.primerAmor.anio,afecto:70,memoria:[{anio:I.primerAmor.anio,txt:'Fue tu primer amor.',peso:2}]});
+      if(I.maton&&!gente().some(g=>g.rol==='enemigo')) nuevaPersona95('enemigo',{memoria:[{anio:I.maton,txt:'Te hacía la vida imposible en el colegio.',peso:-2}]});
+    }
+    if(!S.gente95Sembrada&&S.p.edad>=18){
+      S.gente95Sembrada=true;
+      if(!I){
+        for(let i=0;i<2;i++) recordar(nuevaPersona95('amigo'),'Se conocen desde el colegio.',1);
+        recordar(nuevaPersona95('enemigo'),'Desde el colegio no se soportan.',-1);
+      } else if(!gente().some(g=>g.rol==='enemigo')&&chance(.6)) recordar(nuevaPersona95('enemigo'),'Te tenía envidia desde el colegio.',-1);
+    }
+  }
+
+  /* --- cada persona vive su vida --- */
+  function correrGente95(){
+    if(typeof S==='undefined'||!S||!S.p||S.muerto) return;
+    sembrar95();
+    vivos().forEach(g=>{
+      g.edad=(g.edad||0)+1;
+      if(g.edad>=20) g.poder=clamp((g.poder||0)+(g.edad<55?rnd(1,4.5):rnd(-2,1)),0,100);
+      if(g.edad>=20&&g.oficio==='narco'&&S.anio>2005&&chance(.25)){ g.vivo=false; log(esc(g.nombre+' '+g.apellido)+', tu '+rolTxt(g)+' de otros tiempos, cayó en un operativo.','mal'); return; }
+      const pm=g.edad<50?.003:Math.pow((g.edad-45)/50,3)*.5;
+      if(chance(pm)){ g.vivo=false; log('Murió <b>'+esc(g.nombre+' '+g.apellido)+'</b>, '+(g.rol==='enemigo'?'tu '+rolTxt(g)+' de toda la vida':'tu '+rolTxt(g))+'.',g.rol==='enemigo'?'':'mal');
+        if(g.rol!=='enemigo') S.p.felicidad=clamp(S.p.felicidad-(g.rol==='mentor'?8:5),0,100); return; }
+      if(g.rol!=='enemigo') afecto(g,(S.anio-(g.ultimaVez||S.anio))>4?-2:0);
+      if(g.rol==='amigo'&&g.afecto<=-20){ g.rol='enemigo'; recordar(g,'La amistad se volvió rencor.',-2); log(esc(g.nombre)+' ya no te considera su amig'+art(g)+'.','mal'); }
+      if(g.rol==='enemigo'&&g.afecto>=30){ g.rol='amigo'; recordar(g,'Hicieron las paces.',2); }
+    });
+  }
+
+  /* --- cuando vuelven --- */
+  function candidatoReaparicion95(){
+    if(S.p.edad<18||(window.esNino94&&window.esNino94())) return null;
+    const cs=vivos().filter(g=>g.edad>=18&&(S.anio-(g.ultimaVez||0))>=2);
+    if(!cs.length) return null;
+    const bolsa=[]; cs.forEach(g=>{ const w=1+(g.poder||0)/30+(Math.abs(g.afecto||0)>50?1:0); for(let i=0;i<Math.round(w*3);i++) bolsa.push(g); });
+    return pick(bolsa);
+  }
+  function opcionesReaparicion95(g){
+    const nom='<b>'+esc(g.nombre+' '+g.apellido)+'</b>', c=cargo(g), cerca=rolTxt(g);
+    const memo=(g.memoria||[]).filter(m=>m.peso).slice(-1)[0];
+    const recuerdo=memo?' No se le olvida que en '+memo.anio+': '+memo.txt.charAt(0).toLowerCase()+memo.txt.slice(1):'';
+    g.ultimaVez=S.anio;
+    if(g.rol==='mentor'){
+      return {t:'Tu '+rolTxt(g)+', '+nom+', hoy '+esc(c)+', te invita a almorzar como en los viejos tiempos. Quiere darte un consejo.',
+        o:[{t:'Escucharlo con atención',f:()=>{ const k=pick(['intelecto','disciplina','carisma']); if(S.p.atr[k]<10) S.p.atr[k]++; afecto(g,8); recordar(g,'Le pediste consejo y lo seguiste.',1); return 'Te dio el mejor consejo de tu vida. Tu '+k+' subió.'; }},
+           {t:'Decirle que ya no necesitas consejos',f:()=>{ afecto(g,-15); recordar(g,'Le dijiste que ya no necesitabas sus consejos.',-1); return 'Se quedó callado. No volvió a invitarte.'; }}]};
+    }
+    if(g.rol==='primerAmor'){
+      const libre=!S.familia.pareja;
+      return {t:nom+', tu primer amor, apareció en una reunión de excompañeros. Hoy es '+esc(c)+'. Se te acerca como si no hubieran pasado los años.',
+        o:libre?[{t:'Invitarl'+art(g)+' a salir',f:()=>{ if(chance(.55+(g.afecto||0)/250)){ S.familia.pareja={nombre:g.nombre+' '+g.apellido,rol:c,sexo:g.sexo,edad:g.edad,casados:false,paciencia:75,afecto:80,exigencia:2}; g.rol='amigo'; recordar(g,'Volvieron después de tantos años.',3); S.p.felicidad=clamp(S.p.felicidad+12,0,100); return 'Volvieron. Como si el tiempo no hubiera pasado.'; } afecto(g,-5); return 'Fue una noche bonita, pero cada uno siguió por su lado.'; }},
+                 {t:'Saludar y seguir',f:()=>{ recordar(g,'Se saludaron de lejos.',0); return 'Se saludaron. Nada más.'; }}]
+             :[{t:'Recordar viejos tiempos… y algo más',f:()=>{ (S.familia.amantes=S.familia.amantes||[]).push({nombre:g.nombre+' '+g.apellido,sexo:g.sexo,desde:S.anio}); S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)-10,0,100); recordar(g,'Se volvieron a ver a escondidas.',2); return 'Volvieron a verse a escondidas. Esto puede salir muy caro.'; }},
+               {t:'Saludar con cariño y volver a casa',f:()=>{ recordar(g,'Se saludaron con cariño.',1); return 'Fue lindo verl'+art(g)+'. Volviste a casa.'; }}]};
+    }
+    if(g.rol==='enemigo'){
+      const golpe={
+        periodista:()=>{ S.p.escandalos=(S.p.escandalos||0)+1; return 'publicó una investigación contra tu familia'; },
+        politico:()=>{ if(S.penal) S.penal.riesgo=clamp((S.penal.riesgo||0)+10,0,100); return 'pidió que la Fiscalía revisara tus negocios'; },
+        juez:()=>{ if(S.penal&&S.penal.caso&&isFinite(S.penal.caso.evidencia)) S.penal.caso.evidencia=clamp(S.penal.caso.evidencia+10,0,100); return 'se está moviendo para que tu expediente no se cierre'; },
+        empresario:()=>{ if(S.emp) S.emp.ingresos*=.96; return 'abrió un negocio para quitarte clientes'; },
+        banquero:()=>{ if(S.emp) S.emp.deuda=(S.emp.deuda||0)*1.03; return 'te subió las tasas de todos tus créditos'; },
+        narco:()=>{ if(window.conf91) window.conf91().seguridad=Math.max(0,window.conf91().seguridad); S.p.estres=clamp((S.p.estres||30)+10,0,100); return 'te mandó un mensaje que es mejor no repetir'; }
+      };
+      const f=golpe[g.oficio]||(()=>{ moverPrestigio(-2,'habladurías'); return 'anda hablando mal de ti en todos los clubes'; });
+      const que=f();
+      return {t:nom+', '+esc(c)+', '+que+'.'+recuerdo,
+        o:[{t:'Buscarl'+art(g)+' para hacer las paces',f:()=>{ if(chance(.35)){ afecto(g,40); recordar(g,'Le buscaste para hacer las paces.',2); return 'Hablaron. No serán amigos, pero la guerra se acabó.'; } afecto(g,-5); return 'No quiso ni recibirte.'; }},
+           {t:'Devolverle el golpe',f:()=>{ afecto(g,-15); recordar(g,'Le devolviste el golpe.',-2); g.poder=clamp((g.poder||0)-ri(5,12),0,100); return 'Le devolviste el golpe. Ahora es personal.'; }},
+           {t:'Ignorarl'+art(g),f:()=>'Lo dejaste pasar.'}]};
+    }
+    if((g.poder||0)>=50&&(g.afecto||0)>=40){
+      const favor={
+        politico:{t:'te ofrece un contrato con el Estado, "sin tanta licitación"',ok:()=>{ const x=Math.max(20,Math.round(pat()*.04)); S.efectivo+=x; if(chance(.4)) registrarDelito('fraude en contratación',3,'contrato con '+g.nombre); return 'Te quedaste con el contrato: '+fmt(x)+'.'; }},
+        periodista:{t:'te avisa que en su medio iban a publicar algo de tu familia, y lo frenó',ok:()=>{ S.p.escandalos=Math.max(0,(S.p.escandalos||0)-1); return 'La nota nunca salió.'; }},
+        juez:{t:'te dice que puede "ayudarte" con cualquier lío que tengas',ok:()=>{ if(S.penal&&S.penal.caso&&isFinite(S.penal.caso.evidencia)){ S.penal.caso.evidencia=clamp(S.penal.caso.evidencia-15,0,100); registrarDelito('tráfico de influencias',3,'con '+g.nombre); return 'Algo cambió en tu expediente.'; } S.p.redes=clamp(S.p.redes+4,0,100); return 'Por ahora no tienes líos, pero queda la puerta abierta.'; }},
+        banquero:{t:'te ofrece un crédito en condiciones que nadie más consigue',ok:()=>{ const x=Math.max(30,Math.round(pat()*.06)); if(S.emp){ S.emp.caja=(S.emp.caja||0)+x; S.emp.deuda=(S.emp.deuda||0)+x*.8; } else S.efectivo+=x*.5; return 'Te prestaron '+fmt(x)+' casi regalado.'; }},
+        militar:{t:'te ofrece que su gente vigile tus fincas y tu familia',ok:()=>{ if(window.conf91){ const c=window.conf91(); c.seguridad=Math.max(c.seguridad,1); } return 'Ahora tienes protección de verdad.'; }},
+        medico:{t:'te consigue una cita con el mejor especialista del país',ok:()=>{ S.p.salud=clamp(S.p.salud+10,0,100); return 'Te hicieron un chequeo completo. Tu salud mejoró.'; }},
+        empresario:{t:'te propone un negocio juntos',ok:()=>{ const x=Math.max(15,Math.round(pat()*.03)); S.efectivo+=x; return 'El negocio salió bien: '+fmt(x)+' para ti.'; }},
+        cura:{t:'te ofrece casar a tus hijos en la catedral y bendecir tu casa',ok:()=>{ moverPrestigio(2,'la bendición del obispo'); return 'Toda la ciudad vio la bendición.'; }},
+        narco:{t:'te propone que "le ayudes a mover unos asuntos"',ok:()=>{ const x=Math.max(40,Math.round(pat()*.08)); S.efectivo+=x; registrarDelito('lavado de activos',6,'negocios con '+g.nombre); S.p.escandalos=(S.p.escandalos||0)+1; return 'Te pagaron '+fmt(x)+'. Ahora le debes algo a gente que no perdona.'; }}
+      }[g.oficio]||{t:'quiere ayudarte',ok:()=>{ S.p.redes=clamp(S.p.redes+5,0,100); return 'Te abrió varias puertas.'; }};
+      return {t:'Tu '+cerca+' '+nom+', hoy '+esc(c)+', '+favor.t+'.',
+        o:[{t:'Aceptar',f:()=>{ afecto(g,6); recordar(g,'Aceptaste su ayuda.',1); return favor.ok(); }},
+           {t:'Agradecer y no aceptar',f:()=>{ afecto(g,-3); recordar(g,'Rechazaste su ayuda con cortesía.',0); return 'Le diste las gracias. Entendió.'; }}]};
+    }
+    const monto=Math.max(5,Math.round(pat()*rnd(.005,.015)));
+    return {t:'Tu '+cerca+' '+nom+' te llama. Las cosas no le han salido bien y te pide prestados '+fmt(monto)+'.'+(recuerdo&&memo.peso<0?recuerdo:''),
+      o:[{t:'Prestárselos',f:()=>{ S.efectivo-=monto; afecto(g,20); g.poder=clamp((g.poder||0)+5,0,100); g.deuda95=(g.deuda95||0)+monto; recordar(g,'Le prestaste plata cuando más lo necesitaba.',3); return 'Le prestaste '+fmt(monto)+'. No lo va a olvidar.'; }},
+         {t:'Decirle que no',f:()=>{ afecto(g,-25); recordar(g,'Le negaste la ayuda cuando más lo necesitaba.',-3); return 'Le dijiste que no. Algo se rompió.'; }}]};
+  }
+  function instalarEvento95(){
+    if(window.__SA95_EVENTO||typeof EVENTOS_LOCALES==='undefined') return;
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return S&&S.p&&S.p.edad>=18?Math.min(3,vivos().length*.45):0; }catch(e){ return 0; } },
+      c:()=>!!candidatoReaparicion95(),
+      t:()=>{ const g=candidatoReaparicion95(); if(!g) return null; const r=opcionesReaparicion95(g); S._g95=r; return r.t; },
+      o:[{t:'—',f:()=>''}]
+    });
+    const ev=EVENTOS_LOCALES[EVENTOS_LOCALES.length-1];
+    const tOrig=ev.t; ev.t=function(){ const x=tOrig(); if(x&&S._g95) ev.o=S._g95.o; return x; };
+    window.__SA95_EVENTO=true;
+  }
+
+  /* --- tu gente en el Perfil --- */
+  function filaPersona95(g){
+    const c=g.vivo===false?'murió':cargo(g);
+    const col=g.afecto>=50?'#79C897':g.afecto<=-20?'#D06A60':'#D6A648';
+    return '<button type="button" class="carta gente95" data-gente95="'+esc(g.id)+'"><span class="fichas"></span><div class="encabezado">'
+      +'<span class="glifo" style="overflow:hidden;border:0">'+avatarSVG(g.nombre+' '+g.apellido,{sexo:g.sexo,edad:g.edad,tam:28})+'</span>'
+      +'<span class="nom">'+esc(g.nombre+' '+g.apellido)+' <small style="color:'+col+'">· '+esc(rolTxt(g))+'</small></span></div>'
+      +'<div class="txt">'+(g.vivo===false?'Ya no está.':esc(c)+' · '+g.edad+' años · '+((g.afecto||0)>=0?'aprecio '+Math.round(g.afecto||0):'rencor '+Math.round(-(g.afecto||0))))+'</div></button>';
+  }
+  function seccionGente95(){
+    const G=gente(); if(!G.length) return '';
+    const orden=G.slice().sort((a,b)=>(a.vivo===false)-(b.vivo===false)||(b.poder||0)-(a.poder||0));
+    return '<div class="perfil93-sec" id="gente95"><h3>Tu gente<em>amigos, enemigos y los que vuelven</em></h3><div class="baraja">'+orden.map(filaPersona95).join('')+'</div></div>';
+  }
+  function escenaPersona95(g){
+    const memo=(g.memoria||[]).slice().reverse();
+    const vivo=g.vivo!==false, puedeFavor=vivo&&(g.poder||0)>=40&&(g.afecto||0)>=40&&g.rol!=='enemigo'&&(g.ultimoFavor||0)<=S.anio-3;
+    escena({rubro:'Tu gente',titulo:esc(g.nombre+' '+g.apellido),ancho:true,
+      html:'<div style="display:flex;gap:14px;align-items:center;margin:4px 0 10px">'+avatarSVG(g.nombre+' '+g.apellido,{sexo:g.sexo,edad:g.edad,tam:64})
+        +'<div><div style="font-size:13.5px;color:var(--humo)">'+esc(rolTxt(g).charAt(0).toUpperCase()+rolTxt(g).slice(1))+' · '+(vivo?g.edad+' años · '+esc(cargo(g)):'murió')+'</div>'
+        +((g.afecto||0)>=0?medida('aprecio',g.afecto||0,100,'v'):medida('rencor',-(g.afecto||0),100,'r'))+medida('poder',g.poder||0,100)+'</div></div>'
+        +(memo.length?'<div class="juicio89-bitacora">'+memo.map(m=>'<div><b>'+m.anio+'</b> '+esc(m.txt)+'</div>').join('')+'</div>':''),
+      cuerpo:vivo?'Se conocen desde '+g.desde+'.':'Se conocieron en '+g.desde+'. Ya no está.',
+      opciones:vivo?[
+        {t:'Llamar y ponerse al día',cat:'familia',d:'Una movida. Mantiene viva la relación.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ afecto(g,g.rol==='enemigo'?3:10); g.ultimaVez=S.anio; recordar(g,'Lo llamaste para ponerse al día.',0); S.mov--; log('Te pusiste al día con '+esc(g.nombre)+'.'); }},
+        {t:'Pedirle un favor',cat:'riesgo',d:puedeFavor?'Hoy es '+cargo(g)+': puede ayudarte. Una movida; no abuses.':'Necesita poder (40+) y aprecio (40+), y no haberle pedido nada en 3 años.',
+         dis:!puedeFavor?(g.rol==='enemigo'?'Es tu enemig'+art(g):(g.poder||0)<40?'Todavía no tiene poder para ayudarte':(g.afecto||0)<40?'No te aprecia lo suficiente ('+Math.round(g.afecto||0)+'/40)':'Ya le pediste algo hace poco'):(S.mov<1?'No te quedan movidas':null),run:()=>{ g.ultimoFavor=S.anio; S.mov--; const r=opcionesReaparicion95(Object.assign({},g,{rol:g.rol==='mentor'?'mentor':'amigo',poder:Math.max(50,g.poder),afecto:Math.max(40,g.afecto)})); const msg=r.o[0].f(); afecto(g,-6); recordar(g,'Le pediste un favor.',0); log(msg); }},
+        g.rol==='enemigo'
+          ?{t:'Hacer las paces',cat:'familia',d:'Cuesta '+fmt(Math.max(5,Math.round(pat()*.01)))+' en un gesto y una movida. No siempre funciona.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ S.efectivo-=Math.max(5,Math.round(pat()*.01)); S.mov--; if(chance(.45)){ afecto(g,45); recordar(g,'Hicieron las paces.',2); log('Hiciste las paces con '+esc(g.nombre)+'.','bien'); } else { afecto(g,5); log(esc(g.nombre)+' no quiso hacer las paces.','mal'); } }}
+          :{t:'Cortar el contacto',cat:'riesgo',d:'Se acaba la relación. Puede volverse rencor.',run:()=>{ afecto(g,-40); recordar(g,'Le cortaste el contacto.',-2); log('Cortaste el contacto con '+esc(g.nombre)+'.'); }}
+      ]:[],cerrable:true});
+  }
+  function wrapLienzo95(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA95_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{
+        if(typeof tab!=='undefined'&&tab==='perfil'&&S&&S.p){
+          sembrar95();
+          const host=$('lienzoJuego'), html=seccionGente95(); if(!html) return r;
+          const secs=Array.from(host.querySelectorAll('.perfil93-sec'));
+          const ancla=secs.find(s=>/Amor y familia|Tu infancia/.test(s.querySelector('h3')?s.querySelector('h3').textContent:''))||secs[secs.length-1];
+          if(ancla) ancla.insertAdjacentHTML('afterend',html); else host.querySelector('.wrap')&&host.querySelector('.wrap').insertAdjacentHTML('beforeend',html);
+          host.querySelectorAll('[data-gente95]').forEach(b=>b.onclick=()=>{ const g=gente().find(x=>x.id===b.dataset.gente95); if(g) escenaPersona95(g); });
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA95_LIENZO=true;
+  }
+  function wrapPaso95(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA95_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrGente95(); }catch(e){} return r; };
+    window.__SA95_PASO=true;
+  }
+  function wrapHeredar95(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA95_HER) return;
+    window.heredar=function(){ const r=old.apply(this,arguments); try{ if(S){ S.gente95=[]; S.gente95Sembrada=false; sembrar95(); } }catch(e){} return r; };
+    window.__SA95_HER=true;
+  }
+  /* el matón del colegio (v94) se vuelve tu enemigo de por vida */
+  function marcarMaton95(){
+    const ev=(window.EVENTOS_INFANCIA_94||[]).find(e=>e.o&&e.o.some(o=>o.t==='Dejarlo así')&&e.min===7);
+    if(!ev||ev.__v95) return; ev.__v95=true;
+    ev.o.forEach(o=>{ const f=o.f; o.f=function(){ try{ if(S.infancia94&&!S.infancia94.maton) S.infancia94.maton=S.anio; }catch(e){} return f.apply(this,arguments); }; });
+  }
+
+  function init95(){
+    wrapLienzo95(); wrapPaso95(); wrapHeredar95(); instalarEvento95(); marcarMaton95();
+    Object.assign(window,{gente95:gente,sembrar95,correrGente95,nuevaPersona95,escenaPersona95,opcionesReaparicion95,candidatoReaparicion95,cargo95:cargo});
+  }
+  setTimeout(init95,40);
+  setTimeout(init95,220);
+  setTimeout(init95,650);
+  window.__SA95={version:V95};
 })();
 </script>
 
