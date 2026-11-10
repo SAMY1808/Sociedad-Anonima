@@ -759,7 +759,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v96</div>
+<div class="version-badge" id="versionBadge">v97</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6455,8 +6455,9 @@ function pasarAnio(){
       const cercano=(pa.rel==='padre'||pa.rel==='madre');
       S.p.felicidad=clamp(S.p.felicidad-(cercano?14:4),0,100);
       pa.rel=relacionPorSexo(pa.rel,pa.sexo);
-      if(cercano) log('Murió tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>, que dejó '+fmt(pa.caudal||0)+'. La herencia queda pendiente de solicitud y reparto.','mal');
-      else log('Murió tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>.','mal');
+      const causaPa=(typeof window.causaPariente97==='function')?' de '+window.causaPariente97(pa):'';
+      if(cercano) log('Murió'+causaPa+' tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>, que dejó '+fmt(pa.caudal||0)+'. La herencia queda pendiente de solicitud y reparto.','mal');
+      else log('Murió'+causaPa+' tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>.','mal');
       if(['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)) encolarFuneral(pa);
       if((pa.caudal||0)>5 && ['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)) encolarSucesion(pa);
       if(pa.gerenciaDe){ const so=sociedades().find(x=>x.sid===pa.gerenciaDe); if(so) so.gerente=null; }
@@ -8966,10 +8967,11 @@ function escenaAbonarHipoteca(){
 function morir(){
   S.muerto=true;
   const patr=patrimonio();
-  log('<b>'+esc(S.p.nombre+' '+S.p.apellido)+'</b> murió a los '+S.p.edad+' años, en '+S.anio+'. Patrimonio al morir: '+fmt(patr)+'.','hito');
+  const causa=(typeof window.causaMuerte97==='function')?window.causaMuerte97():''; S.causaMuerte97=causa;
+  log('<b>'+esc(S.p.nombre+' '+S.p.apellido)+'</b> murió'+(causa?' de '+esc(causa):'')+' a los '+S.p.edad+' años, en '+S.anio+'. Patrimonio al morir: '+fmt(patr)+'.','hito');
   hito('Murió a los '+S.p.edad+' años con '+fmt(patr));
   escena({rubro:'Fin de una vida',titulo:S.p.nombre+' '+S.p.apellido+', '+(S.anio-S.p.edad)+'–'+S.anio,
-    cuerpo:'Murió a los <b>'+S.p.edad+'</b> años. Deja '+fmt(patr)+(S.emp?', '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')
+    cuerpo:'Murió'+(causa?' de '+esc(causa):'')+' a los <b>'+S.p.edad+'</b> años. Deja '+fmt(patr)+(S.emp?', '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')
       +' y '+(S.familia.hijos.length?S.familia.hijos.length+' hijo'+(S.familia.hijos.length===1?'':'s'):'ningún heredero')+'. '
       +'Lo que sigue lo decide el testamento.',
     opciones:[{t:'Leer el testamento',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]});
@@ -20393,6 +20395,208 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init96,220);
   setTimeout(init96,650);
   window.__SA96={version:V96};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v97 · SALUD DE VERDAD
+   Enfermedades con nombre (agudas y crónicas), diagnósticos con decisiones
+   de tratamiento, vicios que se adquieren y se pueden dejar, y muertes con
+   causa: la tuya y la de tu familia.
+   ========================================================================== */
+(function(){
+  const V97='v97';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const prepagada=()=>{ try{ return !!(S.seguros&&S.seguros.salud); }catch(e){ return false; } };
+  function sal(){
+    if(!S.salud97||typeof S.salud97!=='object') S.salud97={enfermedades:[],vicios:{tabaco:0,alcohol:0,juego:0,drogas:0}};
+    const s=S.salud97; s.enfermedades=s.enfermedades||[]; if(!s.vicios||typeof s.vicios!=='object') s.vicios={};
+    ['tabaco','alcohol','juego','drogas'].forEach(k=>{ if(!isFinite(s.vicios[k])) s.vicios[k]=0; });
+    if(S.infancia94&&S.infancia94.fuma&&!s.__fumaInfancia){ s.__fumaInfancia=true; s.vicios.tabaco=Math.max(s.vicios.tabaco,35); }
+    return s;
+  }
+  const VICIOS_97={tabaco:'el cigarrillo',alcohol:'el trago',juego:'las apuestas',drogas:'la cocaína'};
+  const ENF_97=[
+    {id:'gripa',n:'una gripa fuerte',min:0,p:.07,aguda:true,dano:4,costo:.001,cura:.95},
+    {id:'hipertension',n:'hipertensión',min:35,p:.045,cronica:true,dano:1.5,muerte:.006,costo:.003,cura:0},
+    {id:'diabetes',n:'diabetes',min:40,p:.03,cronica:true,dano:2,muerte:.01,costo:.004,cura:0},
+    {id:'infarto',n:'un infarto',min:42,p:.018,aguda:true,dano:25,muerte:.18,costo:.02,cura:.8,vicio:'tabaco',estres:true},
+    {id:'cancer',n:'cáncer',min:38,p:.011,grave:true,dano:14,muerte:.32,costo:.035,cura:.55,vicio:'tabaco'},
+    {id:'cirrosis',n:'cirrosis',min:35,p:0,grave:true,dano:10,muerte:.2,costo:.025,cura:.35,vicio:'alcohol',soloVicio:60},
+    {id:'depresion',n:'depresión',min:14,p:.02,cronica:true,dano:1,felicidad:-8,costo:.004,cura:.5,animo:true},
+    {id:'alzheimer',n:'alzhéimer',min:68,p:.03,cronica:true,dano:2,muerte:.02,costo:.006,cura:0,mente:true},
+    {id:'accidente',n:'un accidente de tránsito',min:16,p:.012,aguda:true,dano:18,muerte:.05,costo:.01,cura:.9,vicio:'alcohol'}
+  ];
+  const enf=id=>ENF_97.find(e=>e.id===id);
+  const activa=id=>sal().enfermedades.some(x=>x.id===id&&!x.curada);
+  function probEnfermar97(e){
+    const p=S.p, s=sal(), ed=p.edad;
+    if(ed<e.min) return 0;
+    let pr=e.p;
+    if(e.soloVicio) pr=(s.vicios[e.vicio]||0)>=e.soloVicio?.05:0;
+    if(e.vicio) pr*=1+(s.vicios[e.vicio]||0)/40;
+    if(e.estres) pr*=1+Math.max(0,((p.estres||30)-50))/50;
+    if(e.animo) pr*=(p.felicidad<30||(p.estres||0)>80)?3:1;
+    if(!e.aguda&&!e.animo) pr*=1+Math.max(0,ed-50)/30;
+    if(yo('enfermizo')) pr*=1.5; if(yo('robusto')) pr*=.6;
+    if(prepagada()) pr*=.85;
+    return clamp(pr,0,.5);
+  }
+
+  /* --- diagnósticos --- */
+  function diagnosticar97(){
+    if(!S||!S.p||S.muerto) return null;
+    for(const e of ENF_97){
+      if(activa(e.id)) continue;
+      if(chance(probEnfermar97(e))){
+        const d={id:e.id,desde:S.anio,tratada:false,curada:false};
+        sal().enfermedades.push(d);
+        S.p.salud=clamp(S.p.salud-e.dano,0,100);
+        if(e.felicidad) S.p.felicidad=clamp(S.p.felicidad+e.felicidad,0,100);
+        return d;
+      }
+    }
+    return null;
+  }
+  function costoTrat97(e,mejor){ return Math.max(mejor?8:2,Math.round(pat()*e.costo*(mejor?2.5:1)*(prepagada()?.4:1))); }
+  function tratar97(d,mejor){
+    const e=enf(d.id), c=costoTrat97(e,mejor); S.efectivo-=c; d.tratada=true;
+    if(e.cronica){ d.controlada=true; S.p.salud=clamp(S.p.salud+(mejor?6:3),0,100);
+      if(e.cura&&chance(e.cura*(mejor?1.2:.8))){ d.curada=true; return 'El tratamiento funcionó: superaste la '+e.n+'. Costó '+fmt(c)+'.'; }
+      return 'Ahora tu '+e.n+' está bajo control. Cuesta '+fmt(c)+' y hay que seguir el tratamiento cada año.'; }
+    if(chance(clamp(e.cura+(mejor?.15:0)+(prepagada()?.08:0),0,.97))){ d.curada=true; S.p.salud=clamp(S.p.salud+(mejor?8:4),0,100); return 'Te recuperaste de '+e.n+'. Costó '+fmt(c)+'.'; }
+    S.p.salud=clamp(S.p.salud-6,0,100); return 'El tratamiento no fue suficiente. Sigues luchando contra '+e.n+'. Costó '+fmt(c)+'.';
+  }
+  function eventoDiagnostico97(d){
+    const e=enf(d.id);
+    const cb=costoTrat97(e,false), cm=costoTrat97(e,true);
+    return {p:9,__salud97:true,c:()=>true,
+      t:()=>'<b>'+(e.aguda?'Sufriste '+e.n:'Te diagnosticaron '+e.n)+'.</b> '+(e.grave?'Es grave. Los médicos hablan despacio y no te miran a los ojos.':e.cronica?'No se cura del todo, pero se puede controlar.':'Te tocó pasar unas semanas en la clínica.')
+        +(prepagada()?' Tu medicina prepagada cubre buena parte.':''),
+      o:[{t:'El mejor especialista ('+fmt(cm)+')',f:()=>tratar97(d,true)},
+         {t:'El tratamiento básico ('+fmt(cb)+')',f:()=>tratar97(d,false)},
+         {t:'No hacer nada',f:()=>{ if(e.grave) S.p.salud=clamp(S.p.salud-10,0,100); return e.grave?'Decidiste no tratarte. Tu cuerpo lo va a cobrar.':'Lo dejaste pasar.'; }}]};
+  }
+  function wrapHistoria97(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA97_HIST) return;
+    window.correrHistoria=function(){
+      const r=old.apply(this,arguments);
+      try{ if(!(window.esNino94&&window.esNino94())){ const d=diagnosticar97(); if(d) cola.push(eventoDiagnostico97(d)); } }catch(e){}
+      return r;
+    };
+    window.__SA97_HIST=true;
+  }
+
+  /* --- cada año: enfermedades crónicas y vicios --- */
+  function correrSalud97(){
+    if(!S||!S.p||S.muerto) return;
+    const s=sal(), p=S.p;
+    s.enfermedades.forEach(d=>{
+      if(d.curada) return; const e=enf(d.id); if(!e) return;
+      if(e.aguda){ if(S.anio>d.desde){ d.curada=true; } return; }
+      if(d.controlada){ const c=Math.max(1,Math.round(pat()*e.costo*(prepagada()?.4:1))); S.efectivo-=c; p.salud=clamp(p.salud-e.dano*.3,0,100); }
+      else { p.salud=clamp(p.salud-e.dano,0,100); if(e.felicidad) p.felicidad=clamp(p.felicidad-3,0,100); if(e.mente&&p.atr) p.atr.intelecto=clamp(p.atr.intelecto-(chance(.3)?1:0),1,10); }
+    });
+    const v=s.vicios;
+    if(v.tabaco>0){ p.salud=clamp(p.salud-v.tabaco/50,0,100); p.estres=clamp((p.estres||30)-1,0,100); }
+    if(v.alcohol>0){ p.salud=clamp(p.salud-v.alcohol/45,0,100); p.felicidad=clamp(p.felicidad+1,0,100); if(v.alcohol>60&&chance(.15)){ p.reputacion=clamp(p.reputacion-3,0,100); log('Otra vez llegaste borracho a un evento importante. Ya se comenta.','mal'); } }
+    if(v.juego>0&&chance(v.juego/120)){ const x=Math.max(2,Math.round(pat()*v.juego/2500)); S.efectivo-=x; log('Perdiste '+fmt(x)+' en apuestas este año.','mal'); }
+    if(v.drogas>0){ p.salud=clamp(p.salud-v.drogas/30,0,100); p.estres=clamp((p.estres||30)+3,0,100); if(chance(v.drogas/250)){ S.p.escandalos=(S.p.escandalos||0)+1; log('Unas fotos tuyas en una fiesta salieron en la prensa.','mal'); } }
+    Object.keys(v).forEach(k=>{ if(v[k]>0&&v[k]<100) v[k]=clamp(v[k]+(chance(.5)?2:0),0,100); });
+  }
+  function riesgoMuerte97(){
+    let r=0; sal().enfermedades.forEach(d=>{ if(d.curada) return; const e=enf(d.id); if(e&&e.muerte) r+=e.muerte*(d.controlada?.35:1)*(e.aguda?.4:1); });
+    const v=sal().vicios; r+=(v.tabaco+v.alcohol+v.drogas*1.5)/4000;
+    return r;
+  }
+  function wrapMuerte97(){
+    const old=window.probMuerte; if(typeof old!=='function'||window.__SA97_MUERTE) return;
+    window.probMuerte=function(){ let p=old.apply(this,arguments); try{ if(S&&S.p&&S.p.edad>=18) p=clamp(p+riesgoMuerte97(),0,.9); }catch(e){} return p; };
+    window.__SA97_MUERTE=true;
+  }
+  function wrapPaso97(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA97_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrSalud97(); }catch(e){} return r; };
+    window.__SA97_PASO=true;
+  }
+
+  /* --- causas de muerte --- */
+  function causaMuerte97(){
+    const s=sal(), act=s.enfermedades.filter(d=>!d.curada).map(d=>enf(d.id)).filter(Boolean).sort((a,b)=>(b.muerte||0)-(a.muerte||0));
+    if(act.length&&act[0].muerte) return act[0].n.replace(/^un |^una /,'');
+    if(s.vicios.drogas>50) return 'una sobredosis';
+    if(S.p.edad>=88) return 'vejez, en su cama';
+    if(S.p.salud<=5) return 'complicaciones de salud';
+    return pick(['un infarto','un derrame cerebral','una neumonía','un paro respiratorio']);
+  }
+  function causaPariente97(pa){
+    const e=(pa&&pa.edad)||60;
+    if(e>=88) return 'vejez';
+    if(window.intensidad91&&window.intensidad91()>=.8&&chance(.12)) return 'la violencia';
+    return pick(e<40?['un accidente de tránsito','una enfermedad repentina']:['un infarto','cáncer','un derrame cerebral','una neumonía','complicaciones de la diabetes']);
+  }
+
+  /* --- tu salud en el Perfil --- */
+  function escenaSalud97(){
+    const s=sal(), act=s.enfermedades.filter(d=>!d.curada), v=s.vicios;
+    const c=Math.max(3,Math.round(pat()*.004*(prepagada()?.4:1)));
+    const filas=act.map(d=>{ const e=enf(d.id); return '<tr><td>'+esc(e.n.charAt(0).toUpperCase()+e.n.slice(1))+' <span style="color:var(--humo2)">desde '+d.desde+'</span></td><td class="'+(d.controlada?'':'mal')+'">'+(d.controlada?'controlada':'sin tratar')+'</td></tr>'; }).join('');
+    const vic=Object.keys(v).filter(k=>v[k]>0).map(k=>medida(VICIOS_97[k],v[k],100,v[k]>=60?'r':'')).join('');
+    escena({rubro:'Tu salud',titulo:'Tu cuerpo y tus vicios',ancho:true,cerrable:true,
+      cuerpo:'Salud <b>'+Math.round(S.p.salud)+'/100</b>. '+(prepagada()?'Tienes medicina prepagada: los tratamientos te salen mucho más baratos.':'No tienes medicina prepagada (se contrata en "Revisar los seguros").'),
+      html:'<table class="libro">'+(filas||'<tr><td>No tienes enfermedades activas</td><td class="bien">bien</td></tr>')+'</table>'+(vic?'<div style="margin-top:10px">'+vic+'</div>':''),
+      opciones:[
+        {t:'Hacerte un chequeo completo',cat:'salud',d:'Cuesta '+fmt(c)+' y una movida. Detecta a tiempo lo que venga y sube un poco tu salud.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{
+          S.efectivo-=c; S.mov--; S.p.salud=clamp(S.p.salud+3,0,100);
+          const d=diagnosticar97(); if(d){ const e=enf(d.id); d.tratada=true; d.controlada=!!e.cronica; if(!e.cronica) d.curada=chance(.9); log('El chequeo encontró '+e.n+' a tiempo. Empezaste el tratamiento de una vez.','hito'); }
+          else log('Te hiciste un chequeo completo. Todo en orden.','bien'); }},
+        ...act.filter(d=>!d.controlada).map(d=>{ const e=enf(d.id), cm=costoTrat97(e,true);
+          return {t:'Tratar '+(({hipertension:'la ',diabetes:'la ',depresion:'la ',cirrosis:'la ',alzheimer:'el ',cancer:'el '})[e.id]||'')+e.n,cat:'salud',d:'El mejor especialista: '+fmt(cm)+'. Una movida.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ S.mov--; log(tratar97(d,true)); }}; }),
+        ...Object.keys(v).filter(k=>v[k]>=15).map(k=>{ const cr=Math.max(5,Math.round(pat()*.01));
+          return {t:'Dejar '+VICIOS_97[k],cat:'salud',d:'Rehabilitación: '+fmt(cr)+' y una movida. Funciona más si eres disciplinado.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{
+            S.efectivo-=cr; S.mov--; if(chance(clamp(.3+(((S.p.atr&&S.p.atr.disciplina)||5)-5)*.06,.1,.8))){ v[k]=0; S.p.felicidad=clamp(S.p.felicidad+6,0,100); log('Dejaste '+VICIOS_97[k]+'. No fue fácil.','bien'); }
+            else { v[k]=Math.max(0,v[k]-20); log('Intentaste dejar '+VICIOS_97[k]+'. Recaíste, pero vas mejor.','mal'); } }}; })
+      ]});
+  }
+  function instalarVicios97(){
+    if(window.__SA97_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o), adulto=()=>S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94());
+    E({p:.6,c:()=>adulto()&&sal().vicios.alcohol<40,t:()=>'Las cenas de negocios terminan siempre en whisky. Te estás acostumbrando a la copa de todas las noches.',
+      o:[{t:'Una más no hace daño',f:()=>{ sal().vicios.alcohol=clamp(sal().vicios.alcohol+30,0,100); S.p.felicidad=clamp(S.p.felicidad+4,0,100); return 'La copa de la noche se volvió costumbre.'; }},{t:'Cortar a tiempo',f:()=>{ S.p.salud=clamp(S.p.salud+2,0,100); return 'Te quedaste con el agua mineral. Algunos se rieron.'; }}]});
+    E({p:.5,c:()=>adulto()&&sal().vicios.tabaco<40&&S.anio<2010,t:()=>'En la oficina todo el mundo fuma. Te ofrecen un cigarrillo en cada reunión.',
+      o:[{t:'Aceptar',f:()=>{ sal().vicios.tabaco=clamp(sal().vicios.tabaco+35,0,100); return 'Ahora fumas como todos.'; }},{t:'No, gracias',f:()=>'Te quedaste con el aire limpio.'}]});
+    E({p:.45,c:()=>adulto()&&sal().vicios.juego<40,t:()=>'Unos amigos te llevan al casino "solo a mirar". La ruleta te gusta más de lo que quisieras.',
+      o:[{t:'Volver la semana siguiente',f:()=>{ sal().vicios.juego=clamp(sal().vicios.juego+35,0,100); return 'Ya eres conocido en el casino.'; }},{t:'No volver',f:()=>'Fue una noche y ya.'}]});
+    E({p:.4,c:()=>adulto()&&S.anio>=1975&&sal().vicios.drogas<30,t:()=>'En una fiesta de la alta sociedad, alguien saca una bandeja con cocaína. Todos miran a ver qué haces.',
+      o:[{t:'Probar',f:()=>{ sal().vicios.drogas=clamp(sal().vicios.drogas+30,0,100); S.p.felicidad=clamp(S.p.felicidad+5,0,100); return 'Probaste. Te gustó demasiado.'; }},{t:'Irte de la fiesta',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+1,0,100); return 'Te fuiste temprano.'; }}]});
+    window.__SA97_EV=true;
+  }
+  function wrapAcciones97(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA97_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=14){ const s=sal(), act=s.enfermedades.filter(d=>!d.curada).length, vic=Object.values(s.vicios).filter(x=>x>=15).length;
+        A.push({t:'Tu salud y tus vicios',d:(act?act+' enfermedad'+(act>1?'es':'')+' activa'+(act>1?'s':'')+'. ':'Sin enfermedades activas. ')+(vic?vic+' vicio'+(vic>1?'s':'')+'. ':'')+'Chequeos, tratamientos y rehabilitación.',mov:0,modal:true,run:()=>escenaSalud97()}); } }catch(e){}
+      return A;
+    };
+    window.__SA97_ACC=true;
+  }
+  function wrapCatDe97(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA97_CAT) return;
+    window.catDe=function(t){ if(t==='Tu salud y tus vicios') return 'salud'; return old.apply(this,arguments); };
+    window.__SA97_CAT=true;
+  }
+
+  function init97(){
+    wrapHistoria97(); wrapMuerte97(); wrapPaso97(); instalarVicios97(); wrapAcciones97(); wrapCatDe97();
+    Object.assign(window,{ENF_97,salud97:sal,diagnosticar97,tratar97,correrSalud97,riesgoMuerte97,causaMuerte97,causaPariente97,escenaSalud97,probEnfermar97,eventoDiagnostico97});
+  }
+  setTimeout(init97,40);
+  setTimeout(init97,220);
+  setTimeout(init97,650);
+  window.__SA97={version:V97};
 })();
 </script>
 
