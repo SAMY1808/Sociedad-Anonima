@@ -756,17 +756,76 @@ html{scroll-behavior:smooth}
   .cron93-pie{flex-direction:column;align-items:stretch}
 }
 </style>
+<style id="estilos-v99">
+.metas99{display:flex;flex-direction:column;gap:8px}
+.meta99{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--linea,rgba(214,166,72,.18));border-radius:10px;background:rgba(255,255,255,.02)}
+.meta99 .ic{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--humo2,#7d8a80);font-size:13px;color:var(--humo2,#7d8a80)}
+.meta99.ok .ic{border-color:var(--laton,#D6A648);background:var(--laton,#D6A648);color:#1b1408}
+.meta99 .tx{flex:1;min-width:0}
+.meta99 .tx b{display:block;font-weight:500;color:var(--marfil,#F0E7D5);font-size:14px}
+.meta99 .tx span{font-size:12.5px;color:var(--humo,#a9b3ab)}
+.meta99.ok .tx b{color:var(--laton,#D6A648)}
+.meta99 .pr{font-size:12px;color:var(--humo2,#7d8a80);white-space:nowrap}
+.logros99{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.logro99{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.015);opacity:.55}
+.logro99.ok{opacity:1;border-color:rgba(214,166,72,.35);background:rgba(214,166,72,.06)}
+.logro99 b{display:block;font-weight:500;font-size:13.5px;color:var(--marfil,#F0E7D5)}
+.logro99 span{display:block;font-size:12px;color:var(--humo,#a9b3ab);margin-top:2px}
+.logro99 em{display:block;font-style:normal;font-size:11.5px;color:var(--laton,#D6A648);margin-top:4px}
+.logro99 .pts{float:right;font-size:11px;color:var(--humo2,#7d8a80)}
+.epitafio99{margin:16px auto 4px;max-width:440px;text-align:center;padding:18px 20px;border:1px solid rgba(214,166,72,.35);border-radius:14px 14px 4px 4px;background:linear-gradient(180deg,rgba(214,166,72,.07),rgba(0,0,0,0))}
+.epitafio99 .rip{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--humo2,#7d8a80)}
+.epitafio99 .n{font-family:var(--display,serif);font-size:20px;color:var(--marfil,#F0E7D5);margin-top:6px}
+.epitafio99 .f{font-size:12.5px;color:var(--humo,#a9b3ab)}
+.epitafio99 .fr{font-style:italic;margin-top:10px;color:var(--laton,#D6A648);font-size:14.5px}
+.panteon99{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.panteon99 .epitafio99{margin:0;max-width:none}
+.puntaje99{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+.puntaje99>div{flex:1;min-width:110px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.25);text-align:center}
+.puntaje99 b{display:block;font-family:var(--display,serif);font-size:26px;color:var(--laton,#D6A648);font-weight:400}
+.puntaje99 span{font-size:12px;color:var(--humo,#a9b3ab)}
+</style>
+<style id="estilos-v100">
+.ranuras100{margin:26px 0 0;max-width:560px;text-align:left}
+.ranuras100 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.ranura100{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(214,166,72,.22);border-radius:12px;background:rgba(255,255,255,.02);margin-bottom:8px}
+.ranura100.libre{border-style:dashed;opacity:.6}
+.ranura100 .num{flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--laton,#D6A648);color:var(--laton,#D6A648);font-size:13px}
+.ranura100 .info{flex:1;min-width:0}
+.ranura100 .info b{display:block;font-weight:500;color:var(--marfil,#F0E7D5);font-size:15px}
+.ranura100 .info span{display:block;font-size:12.5px;color:var(--humo,#a9b3ab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ranura100 button{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid rgba(214,166,72,.4);background:transparent;color:var(--marfil,#F0E7D5);cursor:pointer}
+.ranura100 button.seguir{background:var(--laton,#D6A648);color:#1b1408;border-color:var(--laton,#D6A648)}
+.ranura100 button.borrar{border-color:rgba(255,255,255,.12);color:var(--humo,#a9b3ab)}
+.ranura100 button.borrar.confirmar{border-color:var(--ui-red,#d06a5a);color:var(--ui-red,#d06a5a)}
+.salon100{margin:22px 0 0;max-width:560px;text-align:left}
+.salon100 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.salon100 table{width:100%;border-collapse:collapse;font-size:13px}
+.salon100 td{padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--humo,#a9b3ab)}
+.salon100 td:first-child{color:var(--marfil,#F0E7D5)}
+.salon100 td:last-child{text-align:right;color:var(--laton,#D6A648);white-space:nowrap}
+.tuto100{position:fixed;left:50%;bottom:104px;transform:translateX(-50%);width:min(460px,calc(100vw - 32px));z-index:96;background:#1d2a22;border:1px solid var(--laton,#D6A648);border-radius:14px;padding:16px 18px;box-shadow:0 18px 50px rgba(0,0,0,.55);color:var(--marfil,#F0E7D5)}
+.tuto100 .paso{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--laton,#D6A648)}
+.tuto100 h4{font-family:var(--display,serif);font-weight:400;font-size:19px;margin:6px 0 6px}
+.tuto100 p{margin:0;font-size:14px;line-height:1.5;color:var(--humo,#c4ccc5)}
+.tuto100 .bot{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.tuto100 button{font:inherit;font-size:13.5px;padding:8px 14px;border-radius:9px;border:1px solid rgba(214,166,72,.4);background:transparent;color:var(--marfil,#F0E7D5);cursor:pointer}
+.tuto100 button.sig{background:var(--laton,#D6A648);color:#1b1408;border-color:var(--laton,#D6A648)}
+.tuto100-foco{outline:2px solid var(--laton,#D6A648)!important;outline-offset:3px;border-radius:10px;animation:tuto100pulso 1.4s ease-in-out infinite}
+@keyframes tuto100pulso{0%,100%{outline-color:rgba(214,166,72,1)}50%{outline-color:rgba(214,166,72,.25)}}
+@media (max-width:560px){.ranura100{flex-wrap:wrap}.ranura100 .info{flex-basis:calc(100% - 44px)}.ranura100 button{flex:1}.tuto100{bottom:96px}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v93</div>
+<div class="version-badge" id="versionBadge">v100</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
   <p class="lema">Una vida no alcanza para construir un grupo empresarial. Para eso están los hijos.</p>
   <div class="filete"></div>
   <div class="reglas">
-    Escoges en qué año arranca la casa —desde 1800 hasta hoy— y empiezas con 18 años.
+    Escoges en qué año arranca la casa —desde 1800 hasta hoy— y si vives tu infancia desde que naces o empiezas con 18 años.
     Puedes nacer y crecer en Colombia o en una de las ciudades internacionales disponibles; el lugar también cambia nombres, apellidos y parte de los eventos.
     Cada turno es un año y en cada año te alcanza para tres movidas:
     estudiar, emplearte, fundar, emitir acciones, armar una junta directiva o negociar con los que pueden echarte.
@@ -6455,8 +6514,9 @@ function pasarAnio(){
       const cercano=(pa.rel==='padre'||pa.rel==='madre');
       S.p.felicidad=clamp(S.p.felicidad-(cercano?14:4),0,100);
       pa.rel=relacionPorSexo(pa.rel,pa.sexo);
-      if(cercano) log('Murió tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>, que dejó '+fmt(pa.caudal||0)+'. La herencia queda pendiente de solicitud y reparto.','mal');
-      else log('Murió tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>.','mal');
+      const causaPa=(typeof window.causaPariente97==='function')?' de '+window.causaPariente97(pa):'';
+      if(cercano) log('Murió'+causaPa+' tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>, que dejó '+fmt(pa.caudal||0)+'. La herencia queda pendiente de solicitud y reparto.','mal');
+      else log('Murió'+causaPa+' tu '+pa.rel+' <b>'+esc(nombrePariente(pa))+'</b>.','mal');
       if(['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)) encolarFuneral(pa);
       if((pa.caudal||0)>5 && ['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)) encolarSucesion(pa);
       if(pa.gerenciaDe){ const so=sociedades().find(x=>x.sid===pa.gerenciaDe); if(so) so.gerente=null; }
@@ -8966,10 +9026,11 @@ function escenaAbonarHipoteca(){
 function morir(){
   S.muerto=true;
   const patr=patrimonio();
-  log('<b>'+esc(S.p.nombre+' '+S.p.apellido)+'</b> murió a los '+S.p.edad+' años, en '+S.anio+'. Patrimonio al morir: '+fmt(patr)+'.','hito');
+  const causa=(typeof window.causaMuerte97==='function')?window.causaMuerte97():''; S.causaMuerte97=causa;
+  log('<b>'+esc(S.p.nombre+' '+S.p.apellido)+'</b> murió'+(causa?' de '+esc(causa):'')+' a los '+S.p.edad+' años, en '+S.anio+'. Patrimonio al morir: '+fmt(patr)+'.','hito');
   hito('Murió a los '+S.p.edad+' años con '+fmt(patr));
   escena({rubro:'Fin de una vida',titulo:S.p.nombre+' '+S.p.apellido+', '+(S.anio-S.p.edad)+'–'+S.anio,
-    cuerpo:'Murió a los <b>'+S.p.edad+'</b> años. Deja '+fmt(patr)+(S.emp?', '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')
+    cuerpo:'Murió'+(causa?' de '+esc(causa):'')+' a los <b>'+S.p.edad+'</b> años. Deja '+fmt(patr)+(S.emp?', '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')
       +' y '+(S.familia.hijos.length?S.familia.hijos.length+' hijo'+(S.familia.hijos.length===1?'':'s'):'ningún heredero')+'. '
       +'Lo que sigue lo decide el testamento.',
     opciones:[{t:'Leer el testamento',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]});
@@ -19606,7 +19667,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const total=porAnio.size;
     const feed=anios.map(a=>{
       const ev=porAnio.get(a), ed=edadEn93(a), ahora=a===S.anio;
-      return '<div class="cron93-anio'+(ahora?' ahora':'')+'"><div class="cron93-edad"><b>'+(ed!==null?ed+' años':a)+'</b><span>'+(ed!==null?a:'antes de ti')+(ahora?' · ahora':'')+'</span></div>'
+      return '<div class="cron93-anio'+(ahora?' ahora':'')+'"><div class="cron93-edad"><b>'+(ed!==null?ed+(ed===1?' año':' años'):a)+'</b><span>'+(ed!==null?a:'antes de ti')+(ahora?' · ahora':'')+'</span></div>'
         +'<div class="cron93-lineas">'+(ev.length?ev.map(x=>'<p class="'+esc(x.clase||'')+'">'+x.txt+'</p>').join(''):'<p class="nada">Todavía no ha pasado nada este año. Tú decides qué pasa.</p>')+'</div></div>';
     }).join('');
     const chips=typeof window.chipsRasgos88==='function'?window.chipsRasgos88(p,'yo'):'';
@@ -19617,7 +19678,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       +(chips?'<div class="rasgos88-fila">'+chips+'</div>':'')+'</div>'
       +(total>anios.length?'<button type="button" class="cron93-link" data-dash-tab="acta">Toda la crónica ('+total+' años)</button>':'')+'</div>'
       +'<div class="cron93-feed" id="cron93Feed">'+feed+'</div>'
-      +'<div class="cron93-pie"><span>'+(S.mov>0?'Te quedan <b>'+S.mov+'</b> movida'+(S.mov===1?'':'s')+' este año. Usa Perfil, Negocios u Hogar, o deja que el año pase.':'Ya no te quedan movidas este año.')+'</span>'
+      +'<div class="cron93-pie"><span>'+(S.mov>0?'Te quedan <b>'+S.mov+'</b> movida'+(S.mov===1?'':'s')+' este año. '+((typeof window.esNino94==='function'&&window.esNino94())?'Usa Perfil para decidir qué haces este año.':'Usa Perfil, Negocios u Hogar, o deja que el año pase.'):'Ya no te quedan movidas este año.')+'</span>'
       +'<button type="button" class="cron93-cerrar" data-cerrar93>Cerrar '+S.anio+' →</button></div></section>';
   }
 
@@ -19661,7 +19722,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       +medida('estrés',isFinite(p.estres)?p.estres:30,100,(p.estres||0)>70?'r':'')+medida('reputación',p.reputacion,100)
       +medida('redes',p.redes,100)+medida('intelecto',(p.atr&&p.atr.intelecto)||0,10)+medida('carisma',(p.atr&&p.atr.carisma)||0,10)+medida('disciplina',(p.atr&&p.atr.disciplina)||0,10)+'</div></div>';
     secs.forEach(({s,del})=>{
-      if(!del.length&&s.id!=='justicia') return;
+      if(!del.length&&(s.id!=='justicia'||(typeof window.esNino94==='function'&&window.esNino94()))) return;
       h+='<div class="perfil93-sec"><h3>'+esc(s.t)+'<em>'+esc(s.d)+'</em></h3>'+filasHTML93(del)+'</div>';
     });
     return h+'</div>';
@@ -19711,6 +19772,1536 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init93,220);
   setTimeout(init93,650);
   window.__SA93={version:V93};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v94 · INFANCIA JUGABLE
+   Puedes empezar al nacer: colegio, amigos, travesuras, primer amor y los
+   eventos de la niñez, con acciones propias de cada edad. Lo que haces de
+   niño forma tus atributos, tus rasgos (v88) y tu educación; a los 18
+   empieza la vida adulta de siempre.
+   ========================================================================== */
+(function(){
+  const V94='v94';
+  const nino=()=>!!(typeof S!=='undefined'&&S&&S.p&&S.infancia94&&!S.infancia94.terminada&&S.p.edad<18);
+  const inf=()=>S.infancia94;
+  const subir=(k,p)=>{ if(chance(p)&&S.p.atr&&isFinite(S.p.atr[k])&&S.p.atr[k]<10){ S.p.atr[k]++; return true; } return false; };
+  const fel=d=>{ S.p.felicidad=clamp(S.p.felicidad+d,0,100); };
+  const sal=d=>{ S.p.salud=clamp(S.p.salud+d,0,100); };
+  const notas=d=>{ inf().notas=clamp((inf().notas||55)+d,0,100); };
+  const padres=()=>(S.parientes||[]).filter(p=>p.vivo!==false&&(p.rel==='padre'||p.rel==='madre'));
+  const afectoPadres=d=>padres().forEach(p=>{ p.afecto=clamp((isFinite(p.afecto)?p.afecto:60)+d,0,100); });
+  const rasgo=(id,origen,p)=>{ if(typeof window.darRasgo88==='function'&&chance(p)&&window.darRasgo88(S.p,id,origen+' ('+S.anio+')')){ log('Eso te marcó: ahora eres <b>'+id.replace('_',' ')+'</b>.','hito'); return true; } return false; };
+  const nombreDe=sx=>{ try{ return nombreLocal(S.p.ciudad,sx); }catch(e){ return pick(sx==='h'?NOM_H:NOM_M); } };
+  function nuevoAmigo94(origen){
+    const sx=chance(.5)?'h':'m', a={id:'a'+S.anio+'_'+ri(100,999),nombre:nombreDe(sx),apellido:pick(APELLIDOS),sexo:sx,desde:S.anio,origen,afecto:ri(55,80)};
+    (inf().amigos=inf().amigos||[]).push(a); if(inf().amigos.length>8) inf().amigos.shift();
+    return a;
+  }
+  function etapa94(){ const e=S.p.edad; return e<3?'bebé':e<6?'en el jardín':e<11?'en la primaria':e<15?'en el bachillerato':'terminando el colegio'; }
+
+  /* --- empezar al nacer --- */
+  function volverNino94(){
+    const dif=18;
+    S.p.edad=0;
+    S.infancia94={desde:S.anio,notas:ri(45,65),amigos:[],travesuras:0,primerAmor:null,mascota:null,terminada:false,
+      colegio:(S.p.origen==='elite'?'un colegio privado bilingüe':S.p.origen==='comercio'?'un colegio privado':'el colegio público del barrio')};
+    (S.parientes||[]).forEach(p=>{ if(isFinite(p.edad)) p.edad=Math.max(0,p.edad-dif); });
+    S.parientes=(S.parientes||[]).filter(p=>!(['primo','prima','sobrino','sobrina'].includes(p.rel)&&p.edad<=0&&chance(.5)));
+    if(S.p.atr) Object.keys(S.p.atr).forEach(k=>{ S.p.atr[k]=clamp(S.p.atr[k]-1,1,10); });
+    S.p.redes=Math.round((S.p.redes||0)*.3); S.p.reputacion=Math.round((S.p.reputacion||0)*.5);
+    S.mov=2; S.log=[];
+    log('Naciste en <b>'+esc(S.p.ciudad)+'</b>, en la casa de los '+esc(S.p.apellido)+'. '+(padres().length?'Tus papás son '+padres().map(p=>esc(p.nombre)).join(' y ')+'.':''),'hito');
+  }
+  function wrapIniciar94(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA94_INI) return;
+    window.iniciar=function(cfg,legado){
+      const r=old.apply(this,arguments);
+      try{ if(cfg&&cfg.infancia&&!legado&&S&&S.p){ volverNino94(); render(); guardar(true); } }catch(e){}
+      return r;
+    };
+    window.__SA94_INI=true;
+  }
+
+  /* --- acciones de la niñez --- */
+  function A94(t,d,min,max,run,mov){ return {t,d,cat:'familia',mov:mov===undefined?1:mov,infancia94:true,min,max,run}; }
+  function accionesInfancia94(){
+    const e=S.p.edad, L=[];
+    const add=a=>{ if(e>=a.min&&e<=a.max) L.push(a); };
+    add(A94('Jugar','Correr, inventar, ensuciarse. A esta edad, es lo más serio que hay.',0,12,()=>{ fel(6); subir('carisma',.12); log(pick(['Pasaste la tarde jugando con tus primos.','Armaste un fuerte con cobijas y no lo dejaste desarmar en una semana.','Jugaste fútbol en la calle hasta que oscureció.'])); }));
+    add(A94('Portarte bien con tus papás','Ayudar, obedecer, dar un abrazo sin que te lo pidan.',2,17,()=>{ afectoPadres(8); fel(2); log('Tus papás comentaron en la cena lo bien que te estás portando.','bien'); }));
+    add(A94('Hacer una pataleta','Gritar, patalear y salirte con la tuya. A veces funciona.',2,9,()=>{ fel(3); afectoPadres(-6); log('Hiciste una pataleta en pleno supermercado.','mal'); rasgo('rebelde','Pataletas de niño',.06); }));
+    add(A94('Estudiar duro','Tareas a tiempo, repasar para los exámenes. Sube tus notas y tu cabeza.',6,17,()=>{ notas(ri(6,12)); fel(-3); const sub=subir('intelecto',.22); log(sub?'Estudiaste en serio y se notó: entiendes cosas que antes no.':'Estudiaste toda la semana. Las notas lo agradecen.','bien'); rasgo('disciplinado','Años de estudio juicioso',.05); }));
+    add(A94('Leer por tu cuenta','Libros que nadie te mandó a leer.',5,17,()=>{ subir('intelecto',.2); fel(2); log(pick(['Te leíste un libro entero en una semana, debajo de las cobijas con una linterna.','Descubriste la biblioteca del abuelo y no saliste de ahí en todas las vacaciones.'])); }));
+    add(A94('Hacer amigos','Acercarte al de la otra fila, invitar a alguien a tu casa.',4,17,()=>{ const a=nuevoAmigo94('colegio'); subir('carisma',.15); fel(4); S.p.redes=clamp((S.p.redes||0)+1,0,100); log('Te hiciste amig'+(a.sexo==='m'?'a':'o')+' de <b>'+esc(a.nombre)+' '+esc(a.apellido)+'</b>.','bien'); }));
+    add(A94('Hacer deporte','Fútbol, natación, bicicleta. El cuerpo lo agradece toda la vida.',5,17,()=>{ sal(4); fel(3); subir('disciplina',.14); log(e>=12&&chance(.4)?'Te escogieron para el equipo del colegio.':'Entrenaste todo el año. Estás más fuerte.','bien'); rasgo('robusto','Una infancia de deporte',.04); }));
+    add(A94('Aprender música o arte','Piano, guitarra, pintura: algo que sea solo tuyo.',6,17,()=>{ subir('carisma',.12); fel(4); log(pick(['Aprendiste a tocar guitarra lo suficiente para animar cualquier paseo.','Pintaste un cuadro que tu mamá colgó en la sala.']),'bien'); }));
+    add(A94('Hacer una travesura','Timbrar y salir corriendo, esconder las llaves del carro de tu papá…',6,17,()=>{ fel(5); inf().travesuras=(inf().travesuras||0)+1;
+      if(chance(.35)){ fel(-6); afectoPadres(-5); log('Te pillaron en plena travesura. Castigo de un mes sin salir.','mal'); } else log('Hiciste una travesura y nadie supo que fuiste tú.');
+      if(inf().travesuras>=4) rasgo('rebelde','Demasiadas travesuras',.25); }));
+    add(A94('Copiar en un examen','Mirar la hoja del de al lado. Fácil… hasta que no.',9,17,()=>{ if(chance(.3)){ notas(-15); afectoPadres(-6); log('El profesor te pilló copiando. Cero en el examen y citación a tus papás.','mal'); rasgo('rebelde','Pillado copiando',.1); }
+      else { notas(10); log('Copiaste en el examen de química y sacaste la mejor nota del salón.'); rasgo('sin_escrupulos','Aprendiste que hacer trampa funciona',.06); } }));
+    add(A94('Defender a alguien del matón','Ponerte entre el matón del colegio y su víctima de turno.',8,17,()=>{ if(chance(.5+((S.p.atr&&S.p.atr.disciplina)||5)/40)){ S.p.reputacion=clamp((S.p.reputacion||0)+2,0,100); fel(5); log('Le paraste el macho al matón del colegio. Desde ese día te respetan.','bien'); rasgo('leal','Defendiste a un compañero',.15); }
+      else { sal(-6); fel(-4); log('Defendiste a un compañero y saliste con un ojo morado.','mal'); } }));
+    add(A94('Declararte a quien te gusta','Una carta, una canción, o simplemente decirlo.',13,17,()=>{ const sx=S.p.sexo==='h'?'m':'h', n=nombreDe(sx);
+      if(chance(clamp(.3+((S.p.atr&&S.p.atr.carisma)||5)/16,.15,.85))){ inf().primerAmor={nombre:n,sexo:sx,anio:S.anio}; fel(10); log('Te declaraste a <b>'+esc(n)+'</b> y te dijo que sí. Tu primer amor.','hito'); }
+      else { fel(-7); log('Te declaraste a '+esc(n)+' y te dijo que mejor como amigos.','mal'); } }));
+    add(A94('Ayudar en el negocio de la familia','Las vacaciones detrás del mostrador o en la oficina del papá.',13,17,()=>{ subir('disciplina',.18); S.p.redes=clamp((S.p.redes||0)+2,0,100); const x=Math.max(1,Math.round((S.efectivo||0)*.002)); S.efectivo+=x; log('Trabajaste las vacaciones en el negocio de la familia. Te ganaste '+fmt(x)+' y aprendiste más que en el colegio.','bien'); }));
+    add(A94('Ir a fiestas','La fiesta de quince de alguien, la del colegio, la de la finca.',13,17,()=>{ fel(6); S.p.redes=clamp((S.p.redes||0)+3,0,100); sal(-2); log(pick(['Fuiste a todas las fiestas del año.','Llegaste a las cuatro de la mañana y tu mamá te estaba esperando despierta.'])); rasgo('derrochador','Una adolescencia de fiesta',.05); }));
+    if(['elite','comercio'].includes(S.p.origen)) add(A94('Irte de intercambio','Un semestre afuera: otro idioma, otra casa, otra vida.',15,17,()=>{ subir('intelecto',.4); S.p.redes=clamp((S.p.redes||0)+4,0,100); fel(6); const x=Math.max(5,Math.round((S.efectivo||0)*.01)); S.efectivo-=Math.min(S.efectivo,x); log('Te fuiste de intercambio un semestre. Volviste hablando otro idioma y con amigos en otro país.','hito'); }));
+    L.push({t:'Crecer de una vez (saltar a los 18)',d:'Dejar que los años de colegio pasen solos. Creces con lo que la vida te dé.',cat:'legado',mov:0,modal:true,infancia94:true,run:()=>saltarA1894()});
+    return L;
+  }
+
+  /* --- eventos de la niñez --- */
+  const EVENTOS_INFANCIA_94=[
+    {id:'pasos',una:true,p:3,min:0,max:2,t:()=>'Diste tus primeros pasos en la sala de la casa. Tu papá lo grabó todo.',o:[{t:'Seguir',f:()=>{ fel(4); return ''; }}]},
+    {id:'palabra',una:true,p:2,min:0,max:3,t:()=>'Dijiste tu primera palabra. Hubo pelea en la familia sobre cuál fue.',o:[{t:'"Mamá"',f:()=>{ afectoPadres(4); return 'Tu mamá lo cuenta en cada reunión.'; }},{t:'"Plata"',f:()=>{ rasgo('vanidoso','Tu primera palabra fue "plata"',.3); return 'Tu abuelo dice que vas a ser el empresario de la familia.'; }}]},
+    {id:'jardin',una:true,p:3,min:3,max:6,t:()=>'Tu primer día en el jardín. Todos los demás niños están llorando.',o:[{t:'Llorar con ellos',f:()=>{ fel(-2); return 'Lloraste toda la mañana. Al otro día ya ni te acordabas.'; }},{t:'Hacerte amigo del que llora más',f:()=>{ const a=nuevoAmigo94('jardín'); return 'Consolaste a '+esc(a.nombre)+'. Siguen siendo amigos.'; }}]},
+    {p:2,min:5,max:12,c:()=>!inf().mascota,t:()=>'Un perro callejero te siguió desde el colegio hasta la puerta de la casa.',o:[{t:'Rogar que te lo dejen tener',f:()=>{ if(chance(.65)){ inf().mascota={nombre:pick(['Lucas','Canela','Tobi','Princesa','Max','Negro']),anio:S.anio}; fel(10); return 'Te lo dejaron. Se llama '+inf().mascota.nombre+' y duerme a tus pies.'; } fel(-6); return 'Tus papás dijeron que no. Lloraste toda la noche.'; }},{t:'Dejarlo en la calle',f:()=>{ fel(-3); return 'El perro se quedó en la esquina varios días. Después no volvió.'; }}]},
+    {id:'varicela',una:true,p:2,min:4,max:12,t:()=>'Te dio varicela. Dos semanas en la casa, con la cara llena de pepas.',o:[{t:'Quedarte quieto en la cama',f:()=>{ sal(-2); return 'Te curaste sin cicatrices.'; }},{t:'Rascarte',f:()=>{ sal(-4); return 'Te quedó una marquita en la frente para toda la vida.'; }}]},
+    {p:2.5,min:7,max:14,t:()=>'El matón del salón te quitó la lonchera por tercera vez esta semana.',o:[{t:'Pelear',f:()=>{ if(chance(.45)){ S.p.reputacion=clamp((S.p.reputacion||0)+3,0,100); return 'Le ganaste. No te volvió a molestar.'; } sal(-5); return 'Perdiste la pelea, pero no la dignidad.'; }},{t:'Decirle a un profesor',f:()=>{ return 'El profesor lo castigó. Los demás te dijeron sapo.'; }},{t:'Dejarlo así',f:()=>{ fel(-5); rasgo('rencoroso','No olvidaste al matón del colegio',.12); return 'Te quedaste callado. No se te olvida.'; }}]},
+    {id:'olimpiada',una:true,p:2,min:8,max:16,c:()=>(inf().notas||0)>=60,t:()=>'El colegio te escogió para la olimpiada de matemáticas.',o:[{t:'Prepararte en serio',f:()=>{ if(chance(.5)){ subir('intelecto',.6); notas(8); return 'Ganaste la medalla de plata. Saliste en el periódico local.'; } return 'Quedaste de quinto. Nada mal.'; }},{t:'No ir',f:()=>'Preferiste quedarte jugando.'}]},
+    {p:1.5,min:6,max:16,c:()=>padres().length>=2,t:()=>'Tus papás pelean todas las noches. Se oye desde tu cuarto.',o:[{t:'Encerrarte con audífonos',f:()=>{ fel(-5); rasgo('frio','Aprendiste a no sentir',.12); return 'Te acostumbraste a no escuchar.'; }},{t:'Intentar que se arreglen',f:()=>{ afectoPadres(5); rasgo('magnanimo','Mediaste entre tus papás',.12); return 'Les hiciste una carta. Esa noche no pelearon.'; }}]},
+    {id:'cigarrillo',una:true,p:2,min:12,max:17,t:()=>'Detrás del colegio te ofrecen un cigarrillo.',o:[{t:'Aceptar',f:()=>{ inf().fuma=true; sal(-2); return 'Toseste como un loco. Igual seguiste fumando a escondidas.'; }},{t:'No, gracias',f:()=>'Dijiste que no. Nadie insistió.'}]},
+    {p:1.5,min:11,max:17,c:()=>!inf().mentor,t:()=>{ const sx=chance(.5)?'h':'m'; inf()._mentor={nombre:nombreDe(sx)+' '+pick(APELLIDOS),sexo:sx}; return 'Un'+(sx==='m'?'a profesora':' profesor')+', '+esc(inf()._mentor.nombre)+', te dice que tienes algo especial y se ofrece a ayudarte después de clase.'; },
+     o:[{t:'Aceptar la ayuda',f:()=>{ inf().mentor=Object.assign({desde:S.anio},inf()._mentor); subir('intelecto',.4); notas(8); return esc(inf().mentor.nombre)+' se volvió tu mentor. Nunca lo vas a olvidar.'; }},{t:'No te interesa',f:()=>'Le dijiste que no tenías tiempo.'}]},
+    {p:2,min:13,max:17,t:()=>'La fiesta de fin de año del colegio. Alguien te saca a bailar.',o:[{t:'Bailar toda la noche',f:()=>{ fel(8); return 'Bailaste hasta que prendieron las luces.'; }},{t:'Quedarte en la esquina',f:()=>{ fel(-2); return 'Te quedaste mirando. El año que viene, quizás.'; }}]},
+    {p:5,min:17,max:17,c:()=>!inf().graduado,t:()=>{ inf().graduado=true; const n=inf().notas||50; return 'Te graduaste del colegio'+(n>=80?' <b>con honores</b>':n<40?' raspando':'')+'. Tus papás lloraron en la ceremonia.'; },
+     o:[{t:'Celebrar',f:()=>{ fel(6); if((inf().notas||0)>=80){ subir('intelecto',1); S.p.redes=clamp((S.p.redes||0)+3,0,100); } return ''; }}]}
+  ];
+  function wrapSortear94(){
+    const old=window.sortearEvento; if(typeof old!=='function'||window.__SA94_SORT) return;
+    window.sortearEvento=function(){
+      if(!nino()) return old.apply(this,arguments);
+      const e=S.p.edad, vistos=(inf().vistos=inf().vistos||[]);
+      const disp=EVENTOS_INFANCIA_94.filter(x=>e>=x.min&&e<=x.max&&!(x.una&&vistos.includes(x.id))&&(!x.c||(()=>{ try{ return x.c(); }catch(err){ return false; } })()));
+      if(!disp.length) return null;
+      const envolver=x=>({p:x.p,c:()=>true,t:()=>{ if(x.una&&!vistos.includes(x.id)) vistos.push(x.id); return x.t(); },o:x.o});
+      let r=Math.random()*disp.reduce((a,x)=>a+x.p,0);
+      for(const x of disp){ r-=x.p; if(r<=0) return envolver(x); }
+      return envolver(disp[0]);
+    };
+    window.__SA94_SORT=true;
+  }
+  function wrapHistoria94(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA94_HIST) return;
+    window.correrHistoria=function(){
+      const n0=cola.length; const r=old.apply(this,arguments);
+      try{ if(nino()) for(let k=n0;k<cola.length;k++){ const ev=cola[k]; if(ev&&ev.o&&ev.o.length>1){ ev.o=[{t:'Seguir creciendo',f:ev.o[0].f}]; } } }catch(e){}
+      return r;
+    };
+    window.__SA94_HIST=true;
+  }
+
+  /* --- crecer y llegar a los 18 --- */
+  function mayoriaDeEdad94(){
+    const I=inf(); if(!I||I.terminada) return;
+    I.terminada=true; S.p.edad=Math.max(18,S.p.edad);
+    const n=I.notas||50;
+    if(n>=80) S.p.educacion=Math.max(S.p.educacion||0,1);
+    const amigos=(I.amigos||[]).length;
+    log('Cumpliste <b>18 años</b>. '+(n>=80?'Saliste del colegio con honores. ':n<40?'Saliste del colegio a las patadas. ':'')+(amigos?'Te llevas '+amigos+' amig'+(amigos===1?'o':'os')+' de la infancia. ':'')+'Ahora empieza tu vida adulta.','hito');
+    hito('Cumplió la mayoría de edad');
+    S.mov=Math.max(S.mov,3);
+    I.mostrar=true;
+  }
+  function escenaMayoria94(){
+    const I=inf(), r=(typeof window.rasgosDe88==='function')?window.rasgosDe88(S.p).map(id=>(window.RASGOS_88||[]).find(x=>x.id===id)).filter(Boolean).map(x=>x.n.toLowerCase()):[];
+    escena({rubro:'Mayoría de edad',titulo:'Cumpliste 18',ancho:true,
+      cuerpo:'Creciste '+esc(etapa94()==='terminando el colegio'?'en '+I.colegio:'')+'. Notas finales: <b>'+Math.round(I.notas||50)+'/100</b>. '
+        +((I.amigos||[]).length?'Amigos de la infancia: '+I.amigos.map(a=>esc(a.nombre)).join(', ')+'. ':'')
+        +(I.primerAmor?'Tu primer amor fue '+esc(I.primerAmor.nombre)+'. ':'')+(I.mentor?'Tu mentor: '+esc(I.mentor.nombre)+'. ':'')+(I.mascota?'Tu perro '+esc(I.mascota.nombre)+' ya está viejito. ':'')
+        +(r.length?'<br><br>Llegas a la adultez siendo <b>'+r.join(', ')+'</b>. ':'')
+        +'<br><br>Desde ahora puedes estudiar una carrera, trabajar, fundar una compañía o casarte. La casa '+esc(S.dinastia||S.p.apellido)+' te está esperando.',
+      opciones:[{t:'Empezar la vida adulta',cat:'legado',run:()=>{}}]});
+  }
+  function crecerUnAnioRapido94(){
+    const pool=accionesInfancia94().filter(a=>a.mov>0);
+    for(let k=0;k<2&&pool.length;k++){ try{ pick(pool).run(); }catch(e){} }
+  }
+  function saltarA1894(){
+    if(!nino()) return;
+    const faltan=18-S.p.edad;
+    for(let i=0;i<faltan;i++){
+      S.anio++; S.p.edad++;
+      (S.parientes||[]).forEach(p=>{ if(p.vivo!==false&&isFinite(p.edad)) p.edad++; });
+      crecerUnAnioRapido94();
+      if(S.p.edad===17&&!inf().graduado){ inf().graduado=true; if((inf().notas||0)>=80) subir('intelecto',1); }
+    }
+    log('Los años del colegio pasaron volando.');
+    mayoriaDeEdad94(); render();
+  }
+  function wrapPaso94(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA94_PASO) return;
+    window.pasarAnio=function(){
+      const eraNino=nino();
+      const ef0=S.efectivo, deuda0=S.deuda, nivel0=S.hogar&&S.hogar.nivel;
+      const r=old.apply(this,arguments);
+      try{
+        if(eraNino&&S&&S.p){
+          /* de niño, la casa la pagan tus papás: tu plata no se toca */
+          S.efectivo=ef0; S.deuda=deuda0; if(S.hogar&&nivel0!==undefined) S.hogar.nivel=nivel0;
+          if(S.p.edad>=18) mayoriaDeEdad94();
+          else { S.mov=2; if(S.p.edad===6) log('Entraste a '+esc(inf().colegio)+'.','hito'); }
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA94_PASO=true;
+  }
+
+  /* --- la vida de un niño: acciones, pestañas y textos --- */
+  function wrapAcciones94(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA94_ACC) return;
+    window.listaAcciones=function(){
+      if(nino()) return accionesInfancia94();
+      return old.apply(this,arguments);
+    };
+    window.__SA94_ACC=true;
+  }
+  const PESTANAS_NINO_94=['mesa','perfil','familia','acta'];
+  function wrapPestanas94(){
+    const old=window.renderPestanas; if(typeof old!=='function'||window.__SA94_TABS) return;
+    window.renderPestanas=function(){
+      if(!nino()||typeof PESTANAS==='undefined') return old.apply(this,arguments);
+      const orig=PESTANAS.slice();
+      try{ if(!PESTANAS_NINO_94.includes(tab)) tab='mesa'; const f=orig.filter(p=>PESTANAS_NINO_94.includes(p[0])); PESTANAS.length=0; f.forEach(p=>PESTANAS.push(p)); return old.apply(this,arguments); }
+      finally{ PESTANAS.length=0; orig.forEach(p=>PESTANAS.push(p)); }
+    };
+    window.__SA94_TABS=true;
+  }
+  function wrapRol94(){
+    const old=window.rolActualDashboard; if(typeof old!=='function'||window.__SA94_ROL) return;
+    window.rolActualDashboard=function(){ if(nino()) return etapa94(); return old.apply(this,arguments); };
+    window.__SA94_ROL=true;
+  }
+  function seccionInfancia94(){
+    const sec=window.SECCIONES_93; if(!Array.isArray(sec)||sec.some(s=>s.id==='infancia')) return;
+    sec.unshift({id:'infancia',t:'Tu infancia',d:'lo que puedes hacer a tu edad',f:a=>!!a.infancia94});
+  }
+
+  /* --- elegir empezar al nacer --- */
+  function wrapCreacion94(){
+    const old=window.pantallaCreacion; if(typeof old!=='function'||window.__SA94_CREA) return;
+    window.pantallaCreacion=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const caja=document.querySelector('#escenaHost .lienzo'); if(!caja) return r;
+        const ancla=caja.querySelector('#cEpocaD'); if(!ancla) return r;
+        ancla.insertAdjacentHTML('afterend','<label class="campo">Cómo empieza tu historia</label><div class="fichas-sel" id="cVida94"><button type="button" class="opcion" data-v="nacer" aria-pressed="true">Desde que naces</button><button type="button" class="opcion" data-v="18" aria-pressed="false">A los 18 años</button></div><div class="apunte" id="cVida94D">Vives tu infancia: colegio, amigos, travesuras. Lo que hagas de niño forma quién vas a ser.</div>');
+        let modo='nacer';
+        caja.querySelectorAll('#cVida94 .opcion').forEach(b=>b.addEventListener('click',()=>{
+          caja.querySelectorAll('#cVida94 .opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); modo=b.dataset.v;
+          const d=caja.querySelector('#cVida94D'); if(d) d.textContent=modo==='nacer'?'Vives tu infancia: colegio, amigos, travesuras. Lo que hagas de niño forma quién vas a ser.':'Empiezas directo en la vida adulta, como siempre.';
+        }));
+        const btn=botonEscena(), viejo=btn&&btn.onclick;
+        if(btn&&viejo) btn.onclick=function(){
+          const oldIni=window.iniciar;
+          window.iniciar=function(cfg,legado){ if(cfg&&!legado) cfg.infancia=(modo==='nacer'); window.iniciar=oldIni; return oldIni.apply(this,arguments); };
+          try{ return viejo.apply(this,arguments); } finally{ if(window.iniciar!==oldIni) window.iniciar=oldIni; }
+        };
+      }catch(e){}
+      return r;
+    };
+    window.__SA94_CREA=true;
+    const bn=document.getElementById('btnNueva'); if(bn) bn.onclick=window.pantallaCreacion;
+  }
+
+  function wrapLienzo94(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA94_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{ const I=S&&S.infancia94; const host=$('escenaHost');
+        if(I&&I.mostrar&&host&&!host.innerHTML.trim()){ I.mostrar=false; escenaMayoria94(); } }catch(e){}
+      return r;
+    };
+    window.__SA94_LIENZO=true;
+  }
+  function wrapElecciones94(){
+    const old=window.escenaElecciones; if(typeof old!=='function'||window.__SA94_ELEC) return;
+    window.escenaElecciones=function(){
+      if(nino()){ try{ elegirGobierno(false); }catch(e){} render(); return; }
+      return old.apply(this,arguments);
+    };
+    window.__SA94_ELEC=true;
+  }
+  function init94(){
+    wrapIniciar94(); wrapLienzo94(); wrapElecciones94(); wrapSortear94(); wrapHistoria94(); wrapPaso94(); wrapAcciones94(); wrapPestanas94(); wrapRol94(); seccionInfancia94(); wrapCreacion94();
+    Object.assign(window,{accionesInfancia94,EVENTOS_INFANCIA_94,saltarA1894,mayoriaDeEdad94,volverNino94,esNino94:nino});
+  }
+  setTimeout(init94,40);
+  setTimeout(init94,220);
+  setTimeout(init94,650);
+  window.__SA94={version:V94};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v95 · GENTE QUE VUELVE
+   Amigos, enemigos, mentor, primer amor: personas con nombre que hacen su
+   propia carrera, ganan poder, recuerdan lo que les hiciste y vuelven a tu
+   crónica años después a cobrártelo o a ayudarte.
+   ========================================================================== */
+(function(){
+  const V95='v95';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const nombreDe=sx=>{ try{ return nombreLocal(S.p.ciudad,sx); }catch(e){ return pick(sx==='h'?NOM_H:NOM_M); } };
+  const OFICIOS_95=[
+    {id:'politico',n:['concejal','representante a la Cámara','senador','ministro'],w:1.2},
+    {id:'periodista',n:['reportero','columnista','director de noticiero','dueño de un periódico'],w:1},
+    {id:'juez',n:['abogado litigante','juez','magistrado','presidente de la Corte'],w:.8},
+    {id:'banquero',n:['analista de banco','gerente de sucursal','vicepresidente de banco','presidente de banco'],w:.9},
+    {id:'militar',n:['teniente','mayor','coronel','general'],w:.7},
+    {id:'medico',n:['médico residente','especialista','jefe de cirugía','dueño de una clínica'],w:.8},
+    {id:'empresario',n:['vendedor','dueño de un negocio','empresario','magnate'],w:1.2},
+    {id:'cura',n:['seminarista','párroco','vicario','obispo'],w:.4},
+    {id:'narco',n:['"comerciante"','traqueto','capo','patrón'],w:.5,desde:1975,hasta:2005}
+  ];
+  const ROLES_95={amigo:'Amigo',enemigo:'Enemigo',mentor:'Mentor',primerAmor:'Primer amor',exsocio:'Exsocio'};
+  function gente(){ if(!Array.isArray(S.gente95)) S.gente95=[]; return S.gente95; }
+  const vivos=()=>gente().filter(g=>g.vivo!==false);
+  const oficio=g=>OFICIOS_95.find(o=>o.id===g.oficio)||OFICIOS_95[6];
+  const CARGOS_F_95={politico:['concejala','representante a la Cámara','senadora','ministra'],periodista:['reportera','columnista','directora de noticiero','dueña de un periódico'],
+    juez:['abogada litigante','jueza','magistrada','presidenta de la Corte'],banquero:['analista de banco','gerente de sucursal','vicepresidenta de banco','presidenta de banco'],
+    medico:['médica residente','especialista','jefa de cirugía','dueña de una clínica'],empresario:['vendedora','dueña de un negocio','empresaria','magnate'],
+    cura:['novicia','monja','madre superiora','abadesa'],narco:['"comerciante"','traqueta','jefa de una red','patrona']};
+  const cargo=g=>{ const o=oficio(g), k=clamp(Math.floor((g.poder||0)/26),0,3); return (g.sexo==='m'&&CARGOS_F_95[o.id])?CARGOS_F_95[o.id][k]:o.n[k]; };
+  const rolTxt=g=>{ const m=g.sexo==='m'; return ({amigo:m?'amiga':'amigo',enemigo:m?'enemiga':'enemigo',mentor:m?'mentora':'mentor',primerAmor:'primer amor',exsocio:m?'exsocia':'exsocio'})[g.rol]||'conocido'; };
+  const fem=g=>g.sexo==='m';
+  const art=g=>fem(g)?'a':'o';
+  function recordar(g,txt,peso){ g.memoria=(g.memoria||[]).concat([{anio:S.anio,txt,peso:peso||0}]).slice(-8); }
+  function afecto(g,d){ g.afecto=clamp((isFinite(g.afecto)?g.afecto:0)+d,-100,100); }
+  function elegirOficio95(){
+    const ok=OFICIOS_95.filter(o=>(!o.desde||S.anio+10>=o.desde)&&(!o.hasta||S.anio<=o.hasta+10));
+    const bolsa=[]; ok.forEach(o=>{ for(let i=0;i<o.w*10;i++) bolsa.push(o.id); }); return pick(bolsa);
+  }
+  function nuevaPersona95(rol,datos){
+    const sx=(datos&&datos.sexo)||(chance(.5)?'h':'m');
+    const g=Object.assign({id:'g'+S.anio+'_'+ri(1000,9999),rol,nombre:nombreDe(sx),apellido:pick(APELLIDOS),sexo:sx,
+      edad:Math.max(0,(S.p.edad||18)+ri(-1,1)),desde:S.anio,afecto:rol==='enemigo'?-ri(30,60):ri(40,75),poder:ri(0,8),oficio:elegirOficio95(),vivo:true,memoria:[],ultimaVez:S.anio},datos||{});
+    if(rol==='mentor'){ g.edad=(S.p.edad||18)+ri(22,35); g.poder=Math.max(g.poder,ri(35,60)); }
+    gente().push(g); return g;
+  }
+
+  /* --- de dónde sale tu gente --- */
+  function sembrar95(){
+    if(!S||!S.p) return;
+    const I=S.infancia94;
+    if(I){
+      (I.amigos||[]).forEach(a=>{ if(!gente().some(g=>g.origenId===a.id)) nuevaPersona95('amigo',{origenId:a.id,nombre:a.nombre,apellido:a.apellido,sexo:a.sexo,desde:a.desde,afecto:a.afecto||60,memoria:[{anio:a.desde,txt:'Se hicieron amigos en el colegio.',peso:1}]}); });
+      if(I.mentor&&!gente().some(g=>g.rol==='mentor')){ const [n,...ap]=String(I.mentor.nombre).split(' '); nuevaPersona95('mentor',{nombre:n,apellido:ap.join(' ')||pick(APELLIDOS),sexo:I.mentor.sexo,desde:I.mentor.desde,oficio:'medico',memoria:[{anio:I.mentor.desde,txt:'Te dio clases después del colegio.',peso:2}]}).oficio=pick(['juez','banquero','politico','medico']); }
+      if(I.primerAmor&&!gente().some(g=>g.rol==='primerAmor')) nuevaPersona95('primerAmor',{nombre:I.primerAmor.nombre,sexo:I.primerAmor.sexo,desde:I.primerAmor.anio,afecto:70,memoria:[{anio:I.primerAmor.anio,txt:'Fue tu primer amor.',peso:2}]});
+      if(I.maton&&!gente().some(g=>g.rol==='enemigo')) nuevaPersona95('enemigo',{memoria:[{anio:I.maton,txt:'Te hacía la vida imposible en el colegio.',peso:-2}]});
+    }
+    if(!S.gente95Sembrada&&S.p.edad>=18){
+      S.gente95Sembrada=true;
+      if(!I){
+        for(let i=0;i<2;i++) recordar(nuevaPersona95('amigo'),'Se conocen desde el colegio.',1);
+        recordar(nuevaPersona95('enemigo'),'Desde el colegio no se soportan.',-1);
+      } else if(!gente().some(g=>g.rol==='enemigo')&&chance(.6)) recordar(nuevaPersona95('enemigo'),'Te tenía envidia desde el colegio.',-1);
+    }
+  }
+
+  /* --- cada persona vive su vida --- */
+  function correrGente95(){
+    if(typeof S==='undefined'||!S||!S.p||S.muerto) return;
+    sembrar95();
+    vivos().forEach(g=>{
+      g.edad=(g.edad||0)+1;
+      if(g.edad>=20) g.poder=clamp((g.poder||0)+(g.edad<55?rnd(1,4.5):rnd(-2,1)),0,100);
+      if(g.edad>=20&&g.oficio==='narco'&&S.anio>2005&&chance(.25)){ g.vivo=false; log(esc(g.nombre+' '+g.apellido)+', tu '+rolTxt(g)+' de otros tiempos, cayó en un operativo.','mal'); return; }
+      const pm=g.edad<50?.003:Math.pow((g.edad-45)/50,3)*.5;
+      if(chance(pm)){ g.vivo=false; log('Murió <b>'+esc(g.nombre+' '+g.apellido)+'</b>, '+(g.rol==='enemigo'?'tu '+rolTxt(g)+' de toda la vida':'tu '+rolTxt(g))+'.',g.rol==='enemigo'?'':'mal');
+        if(g.rol!=='enemigo') S.p.felicidad=clamp(S.p.felicidad-(g.rol==='mentor'?8:5),0,100); return; }
+      if(g.rol!=='enemigo') afecto(g,(S.anio-(g.ultimaVez||S.anio))>4?-2:0);
+      if(g.rol==='amigo'&&g.afecto<=-20){ g.rol='enemigo'; recordar(g,'La amistad se volvió rencor.',-2); log(esc(g.nombre)+' ya no te considera su amig'+art(g)+'.','mal'); }
+      if(g.rol==='enemigo'&&g.afecto>=30){ g.rol='amigo'; recordar(g,'Hicieron las paces.',2); }
+    });
+  }
+
+  /* --- cuando vuelven --- */
+  function candidatoReaparicion95(){
+    if(S.p.edad<18||(window.esNino94&&window.esNino94())) return null;
+    const cs=vivos().filter(g=>g.edad>=18&&(S.anio-(g.ultimaVez||0))>=2);
+    if(!cs.length) return null;
+    const bolsa=[]; cs.forEach(g=>{ const w=1+(g.poder||0)/30+(Math.abs(g.afecto||0)>50?1:0); for(let i=0;i<Math.round(w*3);i++) bolsa.push(g); });
+    return pick(bolsa);
+  }
+  function opcionesReaparicion95(g){
+    const nom='<b>'+esc(g.nombre+' '+g.apellido)+'</b>', c=cargo(g), cerca=rolTxt(g);
+    const memo=(g.memoria||[]).filter(m=>m.peso).slice(-1)[0];
+    const recuerdo=memo?' No se le olvida que en '+memo.anio+': '+memo.txt.charAt(0).toLowerCase()+memo.txt.slice(1):'';
+    g.ultimaVez=S.anio;
+    if(g.rol==='mentor'){
+      return {t:'Tu '+rolTxt(g)+', '+nom+', hoy '+esc(c)+', te invita a almorzar como en los viejos tiempos. Quiere darte un consejo.',
+        o:[{t:'Escucharlo con atención',f:()=>{ const k=pick(['intelecto','disciplina','carisma']); if(S.p.atr[k]<10) S.p.atr[k]++; afecto(g,8); recordar(g,'Le pediste consejo y lo seguiste.',1); return 'Te dio el mejor consejo de tu vida. Tu '+k+' subió.'; }},
+           {t:'Decirle que ya no necesitas consejos',f:()=>{ afecto(g,-15); recordar(g,'Le dijiste que ya no necesitabas sus consejos.',-1); return 'Se quedó callado. No volvió a invitarte.'; }}]};
+    }
+    if(g.rol==='primerAmor'){
+      const libre=!S.familia.pareja;
+      return {t:nom+', tu primer amor, apareció en una reunión de excompañeros. Hoy es '+esc(c)+'. Se te acerca como si no hubieran pasado los años.',
+        o:libre?[{t:'Invitarl'+art(g)+' a salir',f:()=>{ if(chance(.55+(g.afecto||0)/250)){ S.familia.pareja={nombre:g.nombre+' '+g.apellido,rol:c,sexo:g.sexo,edad:g.edad,casados:false,paciencia:75,afecto:80,exigencia:2}; g.rol='amigo'; recordar(g,'Volvieron después de tantos años.',3); S.p.felicidad=clamp(S.p.felicidad+12,0,100); return 'Volvieron. Como si el tiempo no hubiera pasado.'; } afecto(g,-5); return 'Fue una noche bonita, pero cada uno siguió por su lado.'; }},
+                 {t:'Saludar y seguir',f:()=>{ recordar(g,'Se saludaron de lejos.',0); return 'Se saludaron. Nada más.'; }}]
+             :[{t:'Recordar viejos tiempos… y algo más',f:()=>{ (S.familia.amantes=S.familia.amantes||[]).push({nombre:g.nombre+' '+g.apellido,sexo:g.sexo,desde:S.anio}); S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)-10,0,100); recordar(g,'Se volvieron a ver a escondidas.',2); return 'Volvieron a verse a escondidas. Esto puede salir muy caro.'; }},
+               {t:'Saludar con cariño y volver a casa',f:()=>{ recordar(g,'Se saludaron con cariño.',1); return 'Fue lindo verl'+art(g)+'. Volviste a casa.'; }}]};
+    }
+    if(g.rol==='enemigo'){
+      const golpe={
+        periodista:()=>{ S.p.escandalos=(S.p.escandalos||0)+1; return 'publicó una investigación contra tu familia'; },
+        politico:()=>{ if(S.penal) S.penal.riesgo=clamp((S.penal.riesgo||0)+10,0,100); return 'pidió que la Fiscalía revisara tus negocios'; },
+        juez:()=>{ if(S.penal&&S.penal.caso&&isFinite(S.penal.caso.evidencia)) S.penal.caso.evidencia=clamp(S.penal.caso.evidencia+10,0,100); return 'se está moviendo para que tu expediente no se cierre'; },
+        empresario:()=>{ if(S.emp) S.emp.ingresos*=.96; return 'abrió un negocio para quitarte clientes'; },
+        banquero:()=>{ if(S.emp) S.emp.deuda=(S.emp.deuda||0)*1.03; return 'te subió las tasas de todos tus créditos'; },
+        narco:()=>{ if(window.conf91) window.conf91().seguridad=Math.max(0,window.conf91().seguridad); S.p.estres=clamp((S.p.estres||30)+10,0,100); return 'te mandó un mensaje que es mejor no repetir'; }
+      };
+      const f=golpe[g.oficio]||(()=>{ moverPrestigio(-2,'habladurías'); return 'anda hablando mal de ti en todos los clubes'; });
+      const que=f();
+      return {t:nom+', '+esc(c)+', '+que+'.'+recuerdo,
+        o:[{t:'Buscarl'+art(g)+' para hacer las paces',f:()=>{ if(chance(.35)){ afecto(g,40); recordar(g,'Le buscaste para hacer las paces.',2); return 'Hablaron. No serán amigos, pero la guerra se acabó.'; } afecto(g,-5); return 'No quiso ni recibirte.'; }},
+           {t:'Devolverle el golpe',f:()=>{ afecto(g,-15); recordar(g,'Le devolviste el golpe.',-2); g.poder=clamp((g.poder||0)-ri(5,12),0,100); return 'Le devolviste el golpe. Ahora es personal.'; }},
+           {t:'Ignorarl'+art(g),f:()=>'Lo dejaste pasar.'}]};
+    }
+    if((g.poder||0)>=50&&(g.afecto||0)>=40){
+      const favor={
+        politico:{t:'te ofrece un contrato con el Estado, "sin tanta licitación"',ok:()=>{ const x=Math.max(20,Math.round(pat()*.04)); S.efectivo+=x; if(chance(.4)) registrarDelito('fraude en contratación',3,'contrato con '+g.nombre); return 'Te quedaste con el contrato: '+fmt(x)+'.'; }},
+        periodista:{t:'te avisa que en su medio iban a publicar algo de tu familia, y lo frenó',ok:()=>{ S.p.escandalos=Math.max(0,(S.p.escandalos||0)-1); return 'La nota nunca salió.'; }},
+        juez:{t:'te dice que puede "ayudarte" con cualquier lío que tengas',ok:()=>{ if(S.penal&&S.penal.caso&&isFinite(S.penal.caso.evidencia)){ S.penal.caso.evidencia=clamp(S.penal.caso.evidencia-15,0,100); registrarDelito('tráfico de influencias',3,'con '+g.nombre); return 'Algo cambió en tu expediente.'; } S.p.redes=clamp(S.p.redes+4,0,100); return 'Por ahora no tienes líos, pero queda la puerta abierta.'; }},
+        banquero:{t:'te ofrece un crédito en condiciones que nadie más consigue',ok:()=>{ const x=Math.max(30,Math.round(pat()*.06)); if(S.emp){ S.emp.caja=(S.emp.caja||0)+x; S.emp.deuda=(S.emp.deuda||0)+x*.8; } else S.efectivo+=x*.5; return 'Te prestaron '+fmt(x)+' casi regalado.'; }},
+        militar:{t:'te ofrece que su gente vigile tus fincas y tu familia',ok:()=>{ if(window.conf91){ const c=window.conf91(); c.seguridad=Math.max(c.seguridad,1); } return 'Ahora tienes protección de verdad.'; }},
+        medico:{t:'te consigue una cita con el mejor especialista del país',ok:()=>{ S.p.salud=clamp(S.p.salud+10,0,100); return 'Te hicieron un chequeo completo. Tu salud mejoró.'; }},
+        empresario:{t:'te propone un negocio juntos',ok:()=>{ const x=Math.max(15,Math.round(pat()*.03)); S.efectivo+=x; return 'El negocio salió bien: '+fmt(x)+' para ti.'; }},
+        cura:{t:'te ofrece casar a tus hijos en la catedral y bendecir tu casa',ok:()=>{ moverPrestigio(2,'la bendición del obispo'); return 'Toda la ciudad vio la bendición.'; }},
+        narco:{t:'te propone que "le ayudes a mover unos asuntos"',ok:()=>{ const x=Math.max(40,Math.round(pat()*.08)); S.efectivo+=x; registrarDelito('lavado de activos',6,'negocios con '+g.nombre); S.p.escandalos=(S.p.escandalos||0)+1; return 'Te pagaron '+fmt(x)+'. Ahora le debes algo a gente que no perdona.'; }}
+      }[g.oficio]||{t:'quiere ayudarte',ok:()=>{ S.p.redes=clamp(S.p.redes+5,0,100); return 'Te abrió varias puertas.'; }};
+      return {t:'Tu '+cerca+' '+nom+', hoy '+esc(c)+', '+favor.t+'.',
+        o:[{t:'Aceptar',f:()=>{ afecto(g,6); recordar(g,'Aceptaste su ayuda.',1); return favor.ok(); }},
+           {t:'Agradecer y no aceptar',f:()=>{ afecto(g,-3); recordar(g,'Rechazaste su ayuda con cortesía.',0); return 'Le diste las gracias. Entendió.'; }}]};
+    }
+    const monto=Math.max(5,Math.round(pat()*rnd(.005,.015)));
+    return {t:'Tu '+cerca+' '+nom+' te llama. Las cosas no le han salido bien y te pide prestados '+fmt(monto)+'.'+(recuerdo&&memo.peso<0?recuerdo:''),
+      o:[{t:'Prestárselos',f:()=>{ S.efectivo-=monto; afecto(g,20); g.poder=clamp((g.poder||0)+5,0,100); g.deuda95=(g.deuda95||0)+monto; recordar(g,'Le prestaste plata cuando más lo necesitaba.',3); return 'Le prestaste '+fmt(monto)+'. No lo va a olvidar.'; }},
+         {t:'Decirle que no',f:()=>{ afecto(g,-25); recordar(g,'Le negaste la ayuda cuando más lo necesitaba.',-3); return 'Le dijiste que no. Algo se rompió.'; }}]};
+  }
+  function instalarEvento95(){
+    if(window.__SA95_EVENTO||typeof EVENTOS_LOCALES==='undefined') return;
+    EVENTOS_LOCALES.push({
+      get p(){ try{ return S&&S.p&&S.p.edad>=18?Math.min(3,vivos().length*.45):0; }catch(e){ return 0; } },
+      c:()=>!!candidatoReaparicion95(),
+      t:()=>{ const g=candidatoReaparicion95(); if(!g) return null; const r=opcionesReaparicion95(g); S._g95=r; return r.t; },
+      o:[{t:'—',f:()=>''}]
+    });
+    const ev=EVENTOS_LOCALES[EVENTOS_LOCALES.length-1];
+    const tOrig=ev.t; ev.t=function(){ const x=tOrig(); if(x&&S._g95) ev.o=S._g95.o; return x; };
+    window.__SA95_EVENTO=true;
+  }
+
+  /* --- tu gente en el Perfil --- */
+  function filaPersona95(g){
+    const c=g.vivo===false?'murió':cargo(g);
+    const col=g.afecto>=50?'#79C897':g.afecto<=-20?'#D06A60':'#D6A648';
+    return '<button type="button" class="carta gente95" data-gente95="'+esc(g.id)+'"><span class="fichas"></span><div class="encabezado">'
+      +'<span class="glifo" style="overflow:hidden;border:0">'+avatarSVG(g.nombre+' '+g.apellido,{sexo:g.sexo,edad:g.edad,tam:28})+'</span>'
+      +'<span class="nom">'+esc(g.nombre+' '+g.apellido)+' <small style="color:'+col+'">· '+esc(rolTxt(g))+'</small></span></div>'
+      +'<div class="txt">'+(g.vivo===false?'Ya no está.':esc(c)+' · '+g.edad+' años · '+((g.afecto||0)>=0?'aprecio '+Math.round(g.afecto||0):'rencor '+Math.round(-(g.afecto||0))))+'</div></button>';
+  }
+  function seccionGente95(){
+    const G=gente(); if(!G.length) return '';
+    const orden=G.slice().sort((a,b)=>(a.vivo===false)-(b.vivo===false)||(b.poder||0)-(a.poder||0));
+    return '<div class="perfil93-sec" id="gente95"><h3>Tu gente<em>amigos, enemigos y los que vuelven</em></h3><div class="baraja">'+orden.map(filaPersona95).join('')+'</div></div>';
+  }
+  function escenaPersona95(g){
+    const memo=(g.memoria||[]).slice().reverse();
+    const vivo=g.vivo!==false, puedeFavor=vivo&&(g.poder||0)>=40&&(g.afecto||0)>=40&&g.rol!=='enemigo'&&(g.ultimoFavor||0)<=S.anio-3;
+    escena({rubro:'Tu gente',titulo:esc(g.nombre+' '+g.apellido),ancho:true,
+      html:'<div style="display:flex;gap:14px;align-items:center;margin:4px 0 10px">'+avatarSVG(g.nombre+' '+g.apellido,{sexo:g.sexo,edad:g.edad,tam:64})
+        +'<div><div style="font-size:13.5px;color:var(--humo)">'+esc(rolTxt(g).charAt(0).toUpperCase()+rolTxt(g).slice(1))+' · '+(vivo?g.edad+' años · '+esc(cargo(g)):'murió')+'</div>'
+        +((g.afecto||0)>=0?medida('aprecio',g.afecto||0,100,'v'):medida('rencor',-(g.afecto||0),100,'r'))+medida('poder',g.poder||0,100)+'</div></div>'
+        +(memo.length?'<div class="juicio89-bitacora">'+memo.map(m=>'<div><b>'+m.anio+'</b> '+esc(m.txt)+'</div>').join('')+'</div>':''),
+      cuerpo:vivo?'Se conocen desde '+g.desde+'.':'Se conocieron en '+g.desde+'. Ya no está.',
+      opciones:vivo?[
+        {t:'Llamar y ponerse al día',cat:'familia',d:'Una movida. Mantiene viva la relación.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ afecto(g,g.rol==='enemigo'?3:10); g.ultimaVez=S.anio; recordar(g,'Lo llamaste para ponerse al día.',0); S.mov--; log('Te pusiste al día con '+esc(g.nombre)+'.'); }},
+        {t:'Pedirle un favor',cat:'riesgo',d:puedeFavor?'Hoy es '+cargo(g)+': puede ayudarte. Una movida; no abuses.':'Necesita poder (40+) y aprecio (40+), y no haberle pedido nada en 3 años.',
+         dis:!puedeFavor?(g.rol==='enemigo'?'Es tu enemig'+art(g):(g.poder||0)<40?'Todavía no tiene poder para ayudarte':(g.afecto||0)<40?'No te aprecia lo suficiente ('+Math.round(g.afecto||0)+'/40)':'Ya le pediste algo hace poco'):(S.mov<1?'No te quedan movidas':null),run:()=>{ g.ultimoFavor=S.anio; S.mov--; const r=opcionesReaparicion95(Object.assign({},g,{rol:g.rol==='mentor'?'mentor':'amigo',poder:Math.max(50,g.poder),afecto:Math.max(40,g.afecto)})); const msg=r.o[0].f(); afecto(g,-6); recordar(g,'Le pediste un favor.',0); log(msg); }},
+        g.rol==='enemigo'
+          ?{t:'Hacer las paces',cat:'familia',d:'Cuesta '+fmt(Math.max(5,Math.round(pat()*.01)))+' en un gesto y una movida. No siempre funciona.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ S.efectivo-=Math.max(5,Math.round(pat()*.01)); S.mov--; if(chance(.45)){ afecto(g,45); recordar(g,'Hicieron las paces.',2); log('Hiciste las paces con '+esc(g.nombre)+'.','bien'); } else { afecto(g,5); log(esc(g.nombre)+' no quiso hacer las paces.','mal'); } }}
+          :{t:'Cortar el contacto',cat:'riesgo',d:'Se acaba la relación. Puede volverse rencor.',run:()=>{ afecto(g,-40); recordar(g,'Le cortaste el contacto.',-2); log('Cortaste el contacto con '+esc(g.nombre)+'.'); }}
+      ]:[],cerrable:true});
+  }
+  function wrapLienzo95(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA95_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{
+        if(typeof tab!=='undefined'&&tab==='perfil'&&S&&S.p){
+          sembrar95();
+          const host=$('lienzoJuego'), html=seccionGente95(); if(!html) return r;
+          const secs=Array.from(host.querySelectorAll('.perfil93-sec'));
+          const ancla=secs.find(s=>/Amor y familia|Tu infancia/.test(s.querySelector('h3')?s.querySelector('h3').textContent:''))||secs[secs.length-1];
+          if(ancla) ancla.insertAdjacentHTML('afterend',html); else host.querySelector('.wrap')&&host.querySelector('.wrap').insertAdjacentHTML('beforeend',html);
+          host.querySelectorAll('[data-gente95]').forEach(b=>b.onclick=()=>{ const g=gente().find(x=>x.id===b.dataset.gente95); if(g) escenaPersona95(g); });
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA95_LIENZO=true;
+  }
+  function wrapPaso95(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA95_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrGente95(); }catch(e){} return r; };
+    window.__SA95_PASO=true;
+  }
+  function wrapHeredar95(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA95_HER) return;
+    window.heredar=function(){ const r=old.apply(this,arguments); try{ if(S){ S.gente95=[]; S.gente95Sembrada=false; sembrar95(); } }catch(e){} return r; };
+    window.__SA95_HER=true;
+  }
+  /* el matón del colegio (v94) se vuelve tu enemigo de por vida */
+  function marcarMaton95(){
+    const ev=(window.EVENTOS_INFANCIA_94||[]).find(e=>e.o&&e.o.some(o=>o.t==='Dejarlo así')&&e.min===7);
+    if(!ev||ev.__v95) return; ev.__v95=true;
+    ev.o.forEach(o=>{ const f=o.f; o.f=function(){ try{ if(S.infancia94&&!S.infancia94.maton) S.infancia94.maton=S.anio; }catch(e){} return f.apply(this,arguments); }; });
+  }
+
+  function init95(){
+    wrapLienzo95(); wrapPaso95(); wrapHeredar95(); instalarEvento95(); marcarMaton95();
+    Object.assign(window,{gente95:gente,sembrar95,correrGente95,nuevaPersona95,escenaPersona95,opcionesReaparicion95,candidatoReaparicion95,cargo95:cargo});
+  }
+  setTimeout(init95,40);
+  setTimeout(init95,220);
+  setTimeout(init95,650);
+  window.__SA95={version:V95};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v96 · TU EQUIPO DE FÚTBOL
+   Comprar un club (ficticio), armar la plantilla, el técnico y el estadio,
+   jugar la liga cada año (títulos, descensos), pagar la nómina y lidiar con
+   barras, amaños, cracks que se van y plata que no se pregunta de dónde
+   viene. Los títulos le dan prestigio a la casa y el club se hereda.
+   ========================================================================== */
+(function(){
+  const V96='v96';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const CLUBES_96=[
+    {id:'condores',n:'Cóndores de Bogotá',ciudad:'Bogotá',grandeza:85},
+    {id:'leones',n:'Leones de Antioquia',ciudad:'Medellín',grandeza:88},
+    {id:'tiburones',n:'Tiburones del Caribe',ciudad:'Barranquilla',grandeza:72},
+    {id:'pumas',n:'Pumas del Valle',ciudad:'Cali',grandeza:80},
+    {id:'buhos',n:'Búhos de Santander',ciudad:'Bucaramanga',grandeza:55},
+    {id:'cafeteros',n:'Cafeteros de Caldas',ciudad:'Manizales',grandeza:58},
+    {id:'corsarios',n:'Corsarios de Cartagena',ciudad:'Cartagena',grandeza:50},
+    {id:'toros',n:'Toros de Córdoba',ciudad:'Montería',grandeza:45}
+  ];
+  const escala=()=>clamp(pat()/1400,.4,25);
+  const precioClub96=c=>Math.round((120+c.grandeza*6)*Math.max(.6,Math.min(6,escala()*.5)));
+  const club=()=>S&&S.futbol96&&S.futbol96.activo?S.futbol96:null;
+  const yaEsMio=()=>!!club();
+
+  function comprar96(c){
+    const precio=precioClub96(c); if(S.efectivo<precio) return false;
+    S.efectivo-=precio;
+    S.futbol96={activo:true,id:c.id,nombre:c.n,ciudad:c.ciudad,desde:S.anio,valor:precio,plantilla:clamp(Math.round(c.grandeza*.6+rnd(-8,8)),20,85),
+      hinchas:clamp(Math.round(c.grandeza*.8),20,95),estadio:1,tecnico:1,boleteria:'normal',division:'A',titulos:[],temporadas:[],caja:0,
+      platasucia:false,sinTitulo:0};
+    moverPrestigio(3,'compró un equipo de fútbol');
+    log('Compraste a los <b>'+esc(c.n)+'</b> por '+fmt(precio)+'. La ciudad entera habla de eso.','hito'); hito('Compró a los '+c.n);
+    return true;
+  }
+  function fuerza96(f){ return f.plantilla*.62+f.tecnico*7+f.estadio*3+(f.platasucia?6:0)+(f.division==='B'?12:0); }
+  function temporada96(){
+    const f=club(); if(!f) return null;
+    const fz=fuerza96(f);
+    const puesto=clamp(Math.round(18-(fz-28)/3.1+rnd(-4.5,4.5)),1,18);
+    const k=escala();
+    const taquilla=f.hinchas*(f.boleteria==='popular'?.9:f.boleteria==='caro'?1.35:1.1)*(f.division==='B'?.45:1)*k*.9;
+    const patrocinio=(18-puesto)*1.8*k+(f.platasucia?f.plantilla*.8*k:0);
+    const nomina=Math.pow(f.plantilla,1.35)*.32*k+f.tecnico*6*k;
+    const resultado=Math.round(taquilla+patrocinio-nomina);
+    f.caja=(f.caja||0)+resultado;
+    if(f.caja<0){ S.efectivo+=f.caja; log('Pusiste '+fmt(-f.caja)+' de tu bolsillo para pagar la nómina de los '+esc(f.nombre)+'.','mal'); f.caja=0; }
+    const t={anio:S.anio,puesto,division:f.division,resultado};
+    if(f.division==='A'){
+      if(puesto===1){ f.titulos.push(S.anio); f.hinchas=clamp(f.hinchas+10,0,100); f.valor*=1.2; f.sinTitulo=0; moverPrestigio(4,'campeón con su equipo');
+        log('<b>¡Los '+esc(f.nombre)+' son campeones!</b> La ciudad se volcó a las calles.','hito'); hito('Campeón con los '+f.nombre); t.campeon=true; }
+      else if(puesto<=3){ f.hinchas=clamp(f.hinchas+3,0,100); log('Los '+esc(f.nombre)+' terminaron '+puesto+'.º en la liga.','bien'); f.sinTitulo++; }
+      else if(puesto>=17){ f.division='B'; f.hinchas=clamp(f.hinchas-15,0,100); f.valor*=.7; moverPrestigio(-3,'su equipo descendió');
+        log('<b>Los '+esc(f.nombre)+' descendieron a la B.</b> Los hinchas no te lo perdonan.','mal'); t.descenso=true; f.sinTitulo++; }
+      else { log('Los '+esc(f.nombre)+' terminaron '+puesto+'.º en la liga.'); f.sinTitulo++; }
+    } else {
+      if(puesto<=2){ f.division='A'; f.hinchas=clamp(f.hinchas+8,0,100); log('<b>¡Los '+esc(f.nombre)+' volvieron a la A!</b>','hito'); t.ascenso=true; }
+      else log('Los '+esc(f.nombre)+' siguen en la B ('+puesto+'.º).','mal');
+    }
+    f.temporadas=(f.temporadas||[]).concat([t]).slice(-12);
+    f.plantilla=clamp(f.plantilla+rnd(-3,1),10,99);
+    f.valor=Math.max(10,Math.round(f.valor*(1+(t.campeon?0:(puesto<=6?.03:-.02)))));
+    return t;
+  }
+  function wrapPaso96(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA96_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&!S.muerto) temporada96(); }catch(e){} return r; };
+    window.__SA96_PASO=true;
+  }
+
+  /* --- la escena del club --- */
+  const opt=(v,t,dis,sel)=>'<option value="'+v+'"'+(dis?' disabled':'')+(sel?' selected':'')+'>'+esc(t)+(dis?' · '+esc(dis):'')+'</option>';
+  const sel=(id,et,ops)=>'<label class="campo91"><span>'+esc(et)+'</span><select id="'+id+'">'+ops+'</select></label>';
+  function costos96(){ const k=escala(); return {refuerzos:Math.round(60*k),estrella:Math.round(180*k),tecnico:Math.round(40*k),extranjero:Math.round(110*k),remodelar:Math.round(120*k),nuevo:Math.round(420*k)}; }
+  function escenaClub96(){
+    const f=club(); if(!f){ escenaComprar96(); return; }
+    const c=costos96(), ult=(f.temporadas||[]).slice(-6).reverse();
+    const tabla='<table class="libro">'+(ult.length?ult.map(t=>'<tr><td>'+t.anio+(t.division==='B'?' · en la B':'')+'</td><td class="'+(t.campeon||t.ascenso?'bien':t.descenso?'mal':'')+'">'+(t.campeon?'Campeón':t.descenso?'Descendió':t.ascenso?'Ascendió':t.puesto+'.º')+' · '+fmt(t.resultado)+'</td></tr>').join(''):'<tr><td>Todavía no ha jugado una temporada contigo</td><td></td></tr>')+'</table>';
+    const html='<div class="juicio89"><div class="juicio89-cab"><span>'+esc(f.ciudad)+'</span><span>Desde '+f.desde+'</span><span>'+(f.division==='A'?'Primera división':'Segunda división (la B)')+'</span><span>'+f.titulos.length+' título'+(f.titulos.length===1?'':'s')+'</span></div>'
+      +medida('plantilla',f.plantilla,100,f.plantilla>=70?'v':'')+medida('hinchas',f.hinchas,100,f.hinchas<35?'r':'v')+medida('estadio',f.estadio*33,100)+medida('técnico',f.tecnico*33,100)
+      +'<div class="juicio89-abogado">El club vale cerca de <b>'+fmt(f.valor)+'</b>.'+(f.platasucia?' <span style="color:var(--ui-red)">Tiene "patrocinadores" que nadie quiere nombrar.</span>':'')+'</div>'+tabla+'</div>'
+      +'<div class="form91" style="margin-top:12px">'
+      +sel('f96-fichajes','Fichajes del año',opt('','Nada nuevo')+opt('cantera','Subir muchachos de la cantera (gratis)')+opt('refuerzos','Un par de refuerzos ('+fmt(c.refuerzos)+')',S.efectivo<c.refuerzos?'sin plata':null)+opt('estrella','Una estrella internacional ('+fmt(c.estrella)+')',S.efectivo<c.estrella?'sin plata':null))
+      +sel('f96-tecnico','Técnico',opt('','Mantener el actual')+opt('1','Uno reconocido del país ('+fmt(c.tecnico)+')',f.tecnico>=2?'ya tienes uno igual o mejor':(S.efectivo<c.tecnico?'sin plata':null))+opt('2','Un técnico extranjero de prestigio ('+fmt(c.extranjero)+')',f.tecnico>=3?'ya lo tienes':(S.efectivo<c.extranjero?'sin plata':null)))
+      +sel('f96-estadio','Estadio',opt('','Dejarlo como está')+opt('remodelar','Remodelarlo ('+fmt(c.remodelar)+')',f.estadio>=2?'ya está remodelado':(S.efectivo<c.remodelar?'sin plata':null))+opt('nuevo','Construir un estadio nuevo ('+fmt(c.nuevo)+')',f.estadio>=3?'ya tienes uno':(S.efectivo<c.nuevo?'sin plata':null)))
+      +sel('f96-boleteria','Precio de la boletería',opt('popular','Popular: más hinchas, menos taquilla',null,f.boleteria==='popular')+opt('normal','Normal',null,f.boleteria==='normal')+opt('caro','Caro: más taquilla, hinchas molestos',null,f.boleteria==='caro'))
+      +'<div class="apunte">Aplicar el plan cuesta una movida. La liga se juega sola al cerrar el año.</div></div>';
+    escena({rubro:'Tu equipo de fútbol',titulo:esc(f.nombre),ancho:true,html,cerrable:true,
+      cuerpo:'Un equipo es la forma más rápida de que todo el país sepa tu apellido, y la más rápida de perder plata.',
+      opciones:[
+        {t:'Aplicar el plan de la temporada',cat:'compania',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+          const fi=document.getElementById('f96-fichajes').value, te=document.getElementById('f96-tecnico').value, es=document.getElementById('f96-estadio').value, bo=document.getElementById('f96-boleteria').value;
+          const msgs=[];
+          if(fi==='cantera'){ f.plantilla=clamp(f.plantilla+ri(1,4),0,99); msgs.push('subiste muchachos de la cantera'); }
+          if(fi==='refuerzos'&&S.efectivo>=c.refuerzos){ S.efectivo-=c.refuerzos; f.plantilla=clamp(f.plantilla+ri(5,9),0,99); msgs.push('trajiste dos refuerzos'); }
+          if(fi==='estrella'&&S.efectivo>=c.estrella){ S.efectivo-=c.estrella; f.plantilla=clamp(f.plantilla+ri(10,15),0,99); f.hinchas=clamp(f.hinchas+5,0,100); msgs.push('fichaste una estrella internacional'); }
+          if(te==='1'&&f.tecnico<2&&S.efectivo>=c.tecnico){ S.efectivo-=c.tecnico; f.tecnico=2; msgs.push('contrataste un técnico reconocido'); }
+          if(te==='2'&&f.tecnico<3&&S.efectivo>=c.extranjero){ S.efectivo-=c.extranjero; f.tecnico=3; msgs.push('trajiste un técnico extranjero'); }
+          if(es==='remodelar'&&f.estadio<2&&S.efectivo>=c.remodelar){ S.efectivo-=c.remodelar; f.estadio=2; f.hinchas=clamp(f.hinchas+3,0,100); msgs.push('remodelaste el estadio'); }
+          if(es==='nuevo'&&f.estadio<3&&S.efectivo>=c.nuevo){ S.efectivo-=c.nuevo; f.estadio=3; f.hinchas=clamp(f.hinchas+8,0,100); moverPrestigio(2,'un estadio nuevo'); msgs.push('construiste un estadio nuevo'); }
+          if(bo&&bo!==f.boleteria){ f.boleteria=bo; f.hinchas=clamp(f.hinchas+(bo==='popular'?4:bo==='caro'?-5:0),0,100); msgs.push('cambiaste el precio de la boletería'); }
+          S.mov--;
+          log(msgs.length?'En los '+esc(f.nombre)+' '+msgs.join(', ')+'.':'Dejaste a los '+esc(f.nombre)+' como estaban.','bien');
+          cerrarModal(); render(); }},
+        {t:'Vender el equipo',cat:'capital',d:'Te pagan cerca de '+fmt(f.valor)+'. La hinchada no lo va a olvidar.',cerrar:false,run:()=>{
+          S.efectivo+=f.valor; log('Vendiste a los <b>'+esc(f.nombre)+'</b> por '+fmt(f.valor)+'.','hito'); f.activo=false; moverPrestigio(-1,'vendió su equipo'); cerrarModal(); render(); }}
+      ]});
+  }
+  function escenaComprar96(){
+    escena({rubro:'Fútbol',titulo:'Comprar un equipo de fútbol',ancho:true,cerrable:true,
+      cuerpo:'Ser dueño de un equipo da más prestigio que cualquier empresa, y cuesta más plata que casi cualquier cosa. Los grandes valen más y llenan el estadio; los chicos son baratos y te dejan soñar.',
+      opciones:CLUBES_96.map(c=>{ const p=precioClub96(c); return {t:c.n,cat:'compania',d:esc(c.ciudad)+' · '+(c.grandeza>=80?'un grande del país':c.grandeza>=60?'de mitad de tabla':'un equipo chico')+' · cuesta '+fmt(p)+'.',
+        dis:S.efectivo<p?'Necesitas '+fmt(p):(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>{ if(comprar96(c)){ S.mov--; escenaClub96(); render(); } }}; })});
+  }
+  function wrapAcciones96(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA96_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){
+        const f=club();
+        A.push(f?{t:'Tu equipo de fútbol',d:esc(f.nombre)+' · '+(f.division==='A'?'primera':'la B')+' · '+f.titulos.length+' título'+(f.titulos.length===1?'':'s')+'. Fichajes, técnico, estadio y boletería.',mov:0,modal:true,run:()=>escenaClub96()}
+                :{t:'Comprar un equipo de fútbol',d:'El juguete más caro y más querido de las grandes familias.',mov:0,modal:true,run:()=>escenaComprar96()});
+      } }catch(e){}
+      return A;
+    };
+    window.__SA96_ACC=true;
+  }
+
+  /* --- lo que pasa alrededor de un equipo --- */
+  function instalarEventos96(){
+    if(window.__SA96_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o);
+    E({get p(){ return club()?1.2:0; },c:()=>!!club()&&club().hinchas>=50,
+      t:()=>'Las barras bravas de los '+esc(club().nombre)+' destrozaron media ciudad después del clásico. La alcaldía culpa al club.',
+      o:[{t:'Pagar los daños y pedir perdón',f:()=>{ const x=Math.round(20*escala()); S.efectivo-=x; return 'Pagaste '+fmt(x)+' en daños. La ciudad lo agradeció.'; }},
+         {t:'Defender a la hinchada',f:()=>{ club().hinchas=clamp(club().hinchas+6,0,100); moverPrestigio(-2,'defendió a las barras bravas'); return 'La barra te adora. El resto de la ciudad, no tanto.'; }},
+         {t:'Vetar a los líderes de la barra',f:()=>{ club().hinchas=clamp(club().hinchas-8,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Los vetaste. Ahora te amenazan en las paredes del estadio.'; }}]});
+    E({get p(){ return club()?.8:0; },c:()=>!!club(),
+      t:()=>'Un "intermediario" te propone arreglar el resultado de un partido de los '+esc(club().nombre)+'. Las apuestas pagan muy bien.',
+      o:[{t:'Aceptar',f:()=>{ const x=Math.round(40*escala()); S.efectivo+=x; registrarDelito('amaño de partidos',4,'con los '+club().nombre); if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; club().hinchas=clamp(club().hinchas-12,0,100); return 'Ganaste '+fmt(x)+', pero se supo. Escándalo nacional.'; } return 'Ganaste '+fmt(x)+'. Nadie se enteró… por ahora.'; }},
+         {t:'Denunciarlo',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+4,0,100); return 'Lo denunciaste. Los periódicos te llaman el dueño honesto.'; }},
+         {t:'Rechazarlo sin ruido',f:()=>'Le dijiste que no y que no volviera.'}]});
+    E({get p(){ return club()?.9:0; },c:()=>!!club(),
+      t:()=>'Un muchacho de la cantera de los '+esc(club().nombre)+' es la sensación del torneo. Un club europeo ofrece una fortuna por él.',
+      o:[{t:'Venderlo a Europa',f:()=>{ const x=Math.round(90*escala()); club().caja=(club().caja||0)+x; club().plantilla=clamp(club().plantilla-5,0,99); return 'Lo vendiste por '+fmt(x)+'. El equipo lo va a extrañar.'; }},
+         {t:'Quedártelo una temporada más',f:()=>{ club().plantilla=clamp(club().plantilla+4,0,99); club().hinchas=clamp(club().hinchas+4,0,100); return 'Se quedó. La hinchada te lo agradece.'; }}]});
+    E({get p(){ const f=club(); return f&&f.sinTitulo>=4?1.5:0; },c:()=>!!club()&&club().sinTitulo>=4,
+      t:()=>'Los hinchas de los '+esc(club().nombre)+' llevan '+club().sinTitulo+' años sin título y en el estadio piden tu cabeza.',
+      o:[{t:'Prometer un equipo campeón',f:()=>{ const x=Math.round(80*escala()); S.efectivo-=x; club().plantilla=clamp(club().plantilla+7,0,99); return 'Invertiste '+fmt(x)+' en refuerzos. Ahora hay que ganar.'; }},
+         {t:'Aguantar el chaparrón',f:()=>{ moverPrestigio(-2,'lo abuchean en su propio estadio'); club().hinchas=clamp(club().hinchas-5,0,100); return 'Te abuchearon en tu propio palco.'; }}]});
+    E({get p(){ return club()&&!club().platasucia&&S.anio>=1978&&S.anio<=1998?1.3:0; },c:()=>!!club()&&!club().platasucia&&S.anio>=1978&&S.anio<=1998,
+      t:()=>'Un "empresario" muy generoso, que nadie sabe bien de qué vive, quiere patrocinar a los '+esc(club().nombre)+'. Ofrece pagar la nómina entera y traer a las mejores figuras.',
+      o:[{t:'Aceptar el patrocinio',f:()=>{ const f=club(); f.platasucia=true; f.plantilla=clamp(f.plantilla+15,0,99); registrarDelito('lavado de activos',5,'patrocinio del equipo'); if(window.conf91) window.conf91().vinculos.cartel=S.anio; return 'Aceptaste. El equipo es una aplanadora. No preguntes de dónde sale la plata.'; }},
+         {t:'Rechazarlo',f:()=>{ if(chance(.25)){ S.p.estres=clamp((S.p.estres||30)+10,0,100); return 'Lo rechazaste. Al otro día apareció una corona fúnebre en la sede del club.'; } return 'Lo rechazaste. No volvió a insistir.'; }}]});
+    window.__SA96_EV=true;
+  }
+  function wrapHeredar96(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA96_HER) return;
+    window.heredar=function(){ const f=S&&S.futbol96?JSON.parse(JSON.stringify(S.futbol96)):null; const r=old.apply(this,arguments);
+      try{ if(f&&f.activo&&S){ S.futbol96=f; log('Heredas también a los <b>'+esc(f.nombre)+'</b>.'); } }catch(e){} return r; };
+    window.__SA96_HER=true;
+  }
+  function wrapCatDe96(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA96_CAT) return;
+    window.catDe=function(t){ if(t==='Tu equipo de fútbol'||t==='Comprar un equipo de fútbol') return 'compania'; return old.apply(this,arguments); };
+    window.__SA96_CAT=true;
+  }
+
+  function init96(){
+    wrapPaso96(); wrapAcciones96(); instalarEventos96(); wrapHeredar96(); wrapCatDe96();
+    Object.assign(window,{CLUBES_96,comprar96,temporada96,escenaClub96,escenaComprar96,precioClub96,fuerza96});
+  }
+  setTimeout(init96,40);
+  setTimeout(init96,220);
+  setTimeout(init96,650);
+  window.__SA96={version:V96};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v97 · SALUD DE VERDAD
+   Enfermedades con nombre (agudas y crónicas), diagnósticos con decisiones
+   de tratamiento, vicios que se adquieren y se pueden dejar, y muertes con
+   causa: la tuya y la de tu familia.
+   ========================================================================== */
+(function(){
+  const V97='v97';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const prepagada=()=>{ try{ return !!(S.seguros&&S.seguros.salud); }catch(e){ return false; } };
+  function sal(){
+    if(!S.salud97||typeof S.salud97!=='object') S.salud97={enfermedades:[],vicios:{tabaco:0,alcohol:0,juego:0,drogas:0}};
+    const s=S.salud97; s.enfermedades=s.enfermedades||[]; if(!s.vicios||typeof s.vicios!=='object') s.vicios={};
+    ['tabaco','alcohol','juego','drogas'].forEach(k=>{ if(!isFinite(s.vicios[k])) s.vicios[k]=0; });
+    if(S.infancia94&&S.infancia94.fuma&&!s.__fumaInfancia){ s.__fumaInfancia=true; s.vicios.tabaco=Math.max(s.vicios.tabaco,35); }
+    return s;
+  }
+  const VICIOS_97={tabaco:'el cigarrillo',alcohol:'el trago',juego:'las apuestas',drogas:'la cocaína'};
+  const ENF_97=[
+    {id:'gripa',n:'una gripa fuerte',min:0,p:.07,aguda:true,dano:4,costo:.001,cura:.95},
+    {id:'hipertension',n:'hipertensión',min:35,p:.045,cronica:true,dano:1.5,muerte:.006,costo:.003,cura:0},
+    {id:'diabetes',n:'diabetes',min:40,p:.03,cronica:true,dano:2,muerte:.01,costo:.004,cura:0},
+    {id:'infarto',n:'un infarto',min:42,p:.018,aguda:true,dano:25,muerte:.18,costo:.02,cura:.8,vicio:'tabaco',estres:true},
+    {id:'cancer',n:'cáncer',min:38,p:.011,grave:true,dano:14,muerte:.32,costo:.035,cura:.55,vicio:'tabaco'},
+    {id:'cirrosis',n:'cirrosis',min:35,p:0,grave:true,dano:10,muerte:.2,costo:.025,cura:.35,vicio:'alcohol',soloVicio:60},
+    {id:'depresion',n:'depresión',min:14,p:.02,cronica:true,dano:1,felicidad:-8,costo:.004,cura:.5,animo:true},
+    {id:'alzheimer',n:'alzhéimer',min:68,p:.03,cronica:true,dano:2,muerte:.02,costo:.006,cura:0,mente:true},
+    {id:'accidente',n:'un accidente de tránsito',min:16,p:.012,aguda:true,dano:18,muerte:.05,costo:.01,cura:.9,vicio:'alcohol'}
+  ];
+  const enf=id=>ENF_97.find(e=>e.id===id);
+  const activa=id=>sal().enfermedades.some(x=>x.id===id&&!x.curada);
+  function probEnfermar97(e){
+    const p=S.p, s=sal(), ed=p.edad;
+    if(ed<e.min) return 0;
+    let pr=e.p;
+    if(e.soloVicio) pr=(s.vicios[e.vicio]||0)>=e.soloVicio?.05:0;
+    if(e.vicio) pr*=1+(s.vicios[e.vicio]||0)/40;
+    if(e.estres) pr*=1+Math.max(0,((p.estres||30)-50))/50;
+    if(e.animo) pr*=(p.felicidad<30||(p.estres||0)>80)?3:1;
+    if(!e.aguda&&!e.animo) pr*=1+Math.max(0,ed-50)/30;
+    if(yo('enfermizo')) pr*=1.5; if(yo('robusto')) pr*=.6;
+    if(prepagada()) pr*=.85;
+    return clamp(pr,0,.5);
+  }
+
+  /* --- diagnósticos --- */
+  function diagnosticar97(){
+    if(!S||!S.p||S.muerto) return null;
+    for(const e of ENF_97){
+      if(activa(e.id)) continue;
+      if(chance(probEnfermar97(e))){
+        const d={id:e.id,desde:S.anio,tratada:false,curada:false};
+        sal().enfermedades.push(d);
+        S.p.salud=clamp(S.p.salud-e.dano,0,100);
+        if(e.felicidad) S.p.felicidad=clamp(S.p.felicidad+e.felicidad,0,100);
+        return d;
+      }
+    }
+    return null;
+  }
+  function costoTrat97(e,mejor){ return Math.max(mejor?8:2,Math.round(pat()*e.costo*(mejor?2.5:1)*(prepagada()?.4:1))); }
+  function tratar97(d,mejor){
+    const e=enf(d.id), c=costoTrat97(e,mejor); S.efectivo-=c; d.tratada=true;
+    if(e.cronica){ d.controlada=true; S.p.salud=clamp(S.p.salud+(mejor?6:3),0,100);
+      if(e.cura&&chance(e.cura*(mejor?1.2:.8))){ d.curada=true; return 'El tratamiento funcionó: superaste la '+e.n+'. Costó '+fmt(c)+'.'; }
+      return 'Ahora tu '+e.n+' está bajo control. Cuesta '+fmt(c)+' y hay que seguir el tratamiento cada año.'; }
+    if(chance(clamp(e.cura+(mejor?.15:0)+(prepagada()?.08:0),0,.97))){ d.curada=true; S.p.salud=clamp(S.p.salud+(mejor?8:4),0,100); return 'Te recuperaste de '+e.n+'. Costó '+fmt(c)+'.'; }
+    S.p.salud=clamp(S.p.salud-6,0,100); return 'El tratamiento no fue suficiente. Sigues luchando contra '+e.n+'. Costó '+fmt(c)+'.';
+  }
+  function eventoDiagnostico97(d){
+    const e=enf(d.id);
+    const cb=costoTrat97(e,false), cm=costoTrat97(e,true);
+    return {p:9,__salud97:true,c:()=>true,
+      t:()=>'<b>'+(e.aguda?'Sufriste '+e.n:'Te diagnosticaron '+e.n)+'.</b> '+(e.grave?'Es grave. Los médicos hablan despacio y no te miran a los ojos.':e.cronica?'No se cura del todo, pero se puede controlar.':'Te tocó pasar unas semanas en la clínica.')
+        +(prepagada()?' Tu medicina prepagada cubre buena parte.':''),
+      o:[{t:'El mejor especialista ('+fmt(cm)+')',f:()=>tratar97(d,true)},
+         {t:'El tratamiento básico ('+fmt(cb)+')',f:()=>tratar97(d,false)},
+         {t:'No hacer nada',f:()=>{ if(e.grave) S.p.salud=clamp(S.p.salud-10,0,100); return e.grave?'Decidiste no tratarte. Tu cuerpo lo va a cobrar.':'Lo dejaste pasar.'; }}]};
+  }
+  function wrapHistoria97(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA97_HIST) return;
+    window.correrHistoria=function(){
+      const r=old.apply(this,arguments);
+      try{ if(!(window.esNino94&&window.esNino94())){ const d=diagnosticar97(); if(d) cola.push(eventoDiagnostico97(d)); } }catch(e){}
+      return r;
+    };
+    window.__SA97_HIST=true;
+  }
+
+  /* --- cada año: enfermedades crónicas y vicios --- */
+  function correrSalud97(){
+    if(!S||!S.p||S.muerto) return;
+    const s=sal(), p=S.p;
+    s.enfermedades.forEach(d=>{
+      if(d.curada) return; const e=enf(d.id); if(!e) return;
+      if(e.aguda){ if(S.anio>d.desde){ d.curada=true; } return; }
+      if(d.controlada){ const c=Math.max(1,Math.round(pat()*e.costo*(prepagada()?.4:1))); S.efectivo-=c; p.salud=clamp(p.salud-e.dano*.3,0,100); }
+      else { p.salud=clamp(p.salud-e.dano,0,100); if(e.felicidad) p.felicidad=clamp(p.felicidad-3,0,100); if(e.mente&&p.atr) p.atr.intelecto=clamp(p.atr.intelecto-(chance(.3)?1:0),1,10); }
+    });
+    const v=s.vicios;
+    if(v.tabaco>0){ p.salud=clamp(p.salud-v.tabaco/50,0,100); p.estres=clamp((p.estres||30)-1,0,100); }
+    if(v.alcohol>0){ p.salud=clamp(p.salud-v.alcohol/45,0,100); p.felicidad=clamp(p.felicidad+1,0,100); if(v.alcohol>60&&chance(.15)){ p.reputacion=clamp(p.reputacion-3,0,100); log('Otra vez llegaste borracho a un evento importante. Ya se comenta.','mal'); } }
+    if(v.juego>0&&chance(v.juego/120)){ const x=Math.max(2,Math.round(pat()*v.juego/2500)); S.efectivo-=x; log('Perdiste '+fmt(x)+' en apuestas este año.','mal'); }
+    if(v.drogas>0){ p.salud=clamp(p.salud-v.drogas/30,0,100); p.estres=clamp((p.estres||30)+3,0,100); if(chance(v.drogas/250)){ S.p.escandalos=(S.p.escandalos||0)+1; log('Unas fotos tuyas en una fiesta salieron en la prensa.','mal'); } }
+    Object.keys(v).forEach(k=>{ if(v[k]>0&&v[k]<100) v[k]=clamp(v[k]+(chance(.5)?2:0),0,100); });
+  }
+  function riesgoMuerte97(){
+    let r=0; sal().enfermedades.forEach(d=>{ if(d.curada) return; const e=enf(d.id); if(e&&e.muerte) r+=e.muerte*(d.controlada?.35:1)*(e.aguda?.4:1); });
+    const v=sal().vicios; r+=(v.tabaco+v.alcohol+v.drogas*1.5)/4000;
+    return r;
+  }
+  function wrapMuerte97(){
+    const old=window.probMuerte; if(typeof old!=='function'||window.__SA97_MUERTE) return;
+    window.probMuerte=function(){ let p=old.apply(this,arguments); try{ if(S&&S.p&&S.p.edad>=18) p=clamp(p+riesgoMuerte97(),0,.9); }catch(e){} return p; };
+    window.__SA97_MUERTE=true;
+  }
+  function wrapPaso97(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA97_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrSalud97(); }catch(e){} return r; };
+    window.__SA97_PASO=true;
+  }
+
+  /* --- causas de muerte --- */
+  function causaMuerte97(){
+    const s=sal(), act=s.enfermedades.filter(d=>!d.curada).map(d=>enf(d.id)).filter(Boolean).sort((a,b)=>(b.muerte||0)-(a.muerte||0));
+    if(act.length&&act[0].muerte) return act[0].n.replace(/^un |^una /,'');
+    if(s.vicios.drogas>50) return 'una sobredosis';
+    if(S.p.edad>=88) return 'vejez, en su cama';
+    if(S.p.salud<=5) return 'complicaciones de salud';
+    return pick(['un infarto','un derrame cerebral','una neumonía','un paro respiratorio']);
+  }
+  function causaPariente97(pa){
+    const e=(pa&&pa.edad)||60;
+    if(e>=88) return 'vejez';
+    if(window.intensidad91&&window.intensidad91()>=.8&&chance(.12)) return 'la violencia';
+    return pick(e<40?['un accidente de tránsito','una enfermedad repentina']:['un infarto','cáncer','un derrame cerebral','una neumonía','complicaciones de la diabetes']);
+  }
+
+  /* --- tu salud en el Perfil --- */
+  function escenaSalud97(){
+    const s=sal(), act=s.enfermedades.filter(d=>!d.curada), v=s.vicios;
+    const c=Math.max(3,Math.round(pat()*.004*(prepagada()?.4:1)));
+    const filas=act.map(d=>{ const e=enf(d.id); return '<tr><td>'+esc(e.n.charAt(0).toUpperCase()+e.n.slice(1))+' <span style="color:var(--humo2)">desde '+d.desde+'</span></td><td class="'+(d.controlada?'':'mal')+'">'+(d.controlada?'controlada':'sin tratar')+'</td></tr>'; }).join('');
+    const vic=Object.keys(v).filter(k=>v[k]>0).map(k=>medida(VICIOS_97[k],v[k],100,v[k]>=60?'r':'')).join('');
+    escena({rubro:'Tu salud',titulo:'Tu cuerpo y tus vicios',ancho:true,cerrable:true,
+      cuerpo:'Salud <b>'+Math.round(S.p.salud)+'/100</b>. '+(prepagada()?'Tienes medicina prepagada: los tratamientos te salen mucho más baratos.':'No tienes medicina prepagada (se contrata en "Revisar los seguros").'),
+      html:'<table class="libro">'+(filas||'<tr><td>No tienes enfermedades activas</td><td class="bien">bien</td></tr>')+'</table>'+(vic?'<div style="margin-top:10px">'+vic+'</div>':''),
+      opciones:[
+        {t:'Hacerte un chequeo completo',cat:'salud',d:'Cuesta '+fmt(c)+' y una movida. Detecta a tiempo lo que venga y sube un poco tu salud.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{
+          S.efectivo-=c; S.mov--; S.p.salud=clamp(S.p.salud+3,0,100);
+          const d=diagnosticar97(); if(d){ const e=enf(d.id); d.tratada=true; d.controlada=!!e.cronica; if(!e.cronica) d.curada=chance(.9); log('El chequeo encontró '+e.n+' a tiempo. Empezaste el tratamiento de una vez.','hito'); }
+          else log('Te hiciste un chequeo completo. Todo en orden.','bien'); }},
+        ...act.filter(d=>!d.controlada).map(d=>{ const e=enf(d.id), cm=costoTrat97(e,true);
+          return {t:'Tratar '+(({hipertension:'la ',diabetes:'la ',depresion:'la ',cirrosis:'la ',alzheimer:'el ',cancer:'el '})[e.id]||'')+e.n,cat:'salud',d:'El mejor especialista: '+fmt(cm)+'. Una movida.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{ S.mov--; log(tratar97(d,true)); }}; }),
+        ...Object.keys(v).filter(k=>v[k]>=15).map(k=>{ const cr=Math.max(5,Math.round(pat()*.01));
+          return {t:'Dejar '+VICIOS_97[k],cat:'salud',d:'Rehabilitación: '+fmt(cr)+' y una movida. Funciona más si eres disciplinado.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{
+            S.efectivo-=cr; S.mov--; if(chance(clamp(.3+(((S.p.atr&&S.p.atr.disciplina)||5)-5)*.06,.1,.8))){ v[k]=0; S.p.felicidad=clamp(S.p.felicidad+6,0,100); log('Dejaste '+VICIOS_97[k]+'. No fue fácil.','bien'); }
+            else { v[k]=Math.max(0,v[k]-20); log('Intentaste dejar '+VICIOS_97[k]+'. Recaíste, pero vas mejor.','mal'); } }}; })
+      ]});
+  }
+  function instalarVicios97(){
+    if(window.__SA97_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o), adulto=()=>S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94());
+    E({p:.6,c:()=>adulto()&&sal().vicios.alcohol<40,t:()=>'Las cenas de negocios terminan siempre en whisky. Te estás acostumbrando a la copa de todas las noches.',
+      o:[{t:'Una más no hace daño',f:()=>{ sal().vicios.alcohol=clamp(sal().vicios.alcohol+30,0,100); S.p.felicidad=clamp(S.p.felicidad+4,0,100); return 'La copa de la noche se volvió costumbre.'; }},{t:'Cortar a tiempo',f:()=>{ S.p.salud=clamp(S.p.salud+2,0,100); return 'Te quedaste con el agua mineral. Algunos se rieron.'; }}]});
+    E({p:.5,c:()=>adulto()&&sal().vicios.tabaco<40&&S.anio<2010,t:()=>'En la oficina todo el mundo fuma. Te ofrecen un cigarrillo en cada reunión.',
+      o:[{t:'Aceptar',f:()=>{ sal().vicios.tabaco=clamp(sal().vicios.tabaco+35,0,100); return 'Ahora fumas como todos.'; }},{t:'No, gracias',f:()=>'Te quedaste con el aire limpio.'}]});
+    E({p:.45,c:()=>adulto()&&sal().vicios.juego<40,t:()=>'Unos amigos te llevan al casino "solo a mirar". La ruleta te gusta más de lo que quisieras.',
+      o:[{t:'Volver la semana siguiente',f:()=>{ sal().vicios.juego=clamp(sal().vicios.juego+35,0,100); return 'Ya eres conocido en el casino.'; }},{t:'No volver',f:()=>'Fue una noche y ya.'}]});
+    E({p:.4,c:()=>adulto()&&S.anio>=1975&&sal().vicios.drogas<30,t:()=>'En una fiesta de la alta sociedad, alguien saca una bandeja con cocaína. Todos miran a ver qué haces.',
+      o:[{t:'Probar',f:()=>{ sal().vicios.drogas=clamp(sal().vicios.drogas+30,0,100); S.p.felicidad=clamp(S.p.felicidad+5,0,100); return 'Probaste. Te gustó demasiado.'; }},{t:'Irte de la fiesta',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+1,0,100); return 'Te fuiste temprano.'; }}]});
+    window.__SA97_EV=true;
+  }
+  function wrapAcciones97(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA97_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=14){ const s=sal(), act=s.enfermedades.filter(d=>!d.curada).length, vic=Object.values(s.vicios).filter(x=>x>=15).length;
+        A.push({t:'Tu salud y tus vicios',d:(act?act+' enfermedad'+(act>1?'es':'')+' activa'+(act>1?'s':'')+'. ':'Sin enfermedades activas. ')+(vic?vic+' vicio'+(vic>1?'s':'')+'. ':'')+'Chequeos, tratamientos y rehabilitación.',mov:0,modal:true,run:()=>escenaSalud97()}); } }catch(e){}
+      return A;
+    };
+    window.__SA97_ACC=true;
+  }
+  function wrapCatDe97(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA97_CAT) return;
+    window.catDe=function(t){ if(t==='Tu salud y tus vicios') return 'salud'; return old.apply(this,arguments); };
+    window.__SA97_CAT=true;
+  }
+
+  function init97(){
+    wrapHistoria97(); wrapMuerte97(); wrapPaso97(); instalarVicios97(); wrapAcciones97(); wrapCatDe97();
+    Object.assign(window,{ENF_97,salud97:sal,diagnosticar97,tratar97,correrSalud97,riesgoMuerte97,causaMuerte97,causaPariente97,escenaSalud97,probEnfermar97,eventoDiagnostico97});
+  }
+  setTimeout(init97,40);
+  setTimeout(init97,220);
+  setTimeout(init97,650);
+  window.__SA97={version:V97};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v98 · LUJO Y COLECCIONES
+   Arte, carros, caballos de paso, yates, esmeraldas y relojes: dan
+   prestigio y gusto, se valorizan o se deprecian, cuestan mantenimiento,
+   a veces son falsos o de dudosa procedencia, los roban y se heredan.
+   ========================================================================== */
+(function(){
+  const V98='v98';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const escala=()=>clamp(pat()/1400,.3,30);
+  const TIPOS_98={arte:'Arte',carro:'Carros',caballo:'Caballos de paso',yate:'Yates',joya:'Esmeraldas y joyas',reloj:'Relojes'};
+  const CATALOGO_98=[
+    {id:'oleo',tipo:'arte',n:'Un óleo de un maestro colombiano',base:60,valoriza:.05,ruido:.08,pres:2,falso:.12},
+    {id:'europeo',tipo:'arte',n:'Un cuadro de un pintor europeo',base:220,valoriza:.06,ruido:.12,pres:4,falso:.15},
+    {id:'escultura',tipo:'arte',n:'Una escultura monumental para el jardín',base:90,valoriza:.04,ruido:.06,pres:2,falso:.06},
+    {id:'precolombino',tipo:'arte',n:'Piezas de oro precolombino',base:70,valoriza:.07,ruido:.1,pres:2,falso:.2,dudosa:true},
+    {id:'clasico',tipo:'carro',n:'Un carro clásico de colección',base:35,valoriza:.03,ruido:.05,pres:1,desde:1960},
+    {id:'deportivo',tipo:'carro',n:'Un deportivo italiano',base:45,valoriza:-.1,ruido:.03,pres:2,desde:1955},
+    {id:'blindada',tipo:'carro',n:'Una camioneta blindada',base:30,valoriza:-.12,ruido:.02,pres:0,desde:1980,seguridad:true},
+    {id:'paso',tipo:'caballo',n:'Un caballo de paso fino campeón',base:40,valoriza:-.02,ruido:.1,pres:2,mant:.05,vive:true},
+    {id:'yate',tipo:'yate',n:'Un yate anclado en Cartagena',base:180,valoriza:-.06,ruido:.03,pres:3,mant:.07,desde:1950},
+    {id:'esmeraldas',tipo:'joya',n:'Un collar de esmeraldas de Muzo',base:55,valoriza:.05,ruido:.07,pres:2,falso:.05},
+    {id:'esmeraldasBruto',tipo:'joya',n:'Un lote de esmeraldas en bruto "sin papeles"',base:40,valoriza:.08,ruido:.15,pres:0,dudosa:true,desde:1960},
+    {id:'reloj',tipo:'reloj',n:'Un reloj suizo de colección',base:20,valoriza:.03,ruido:.04,pres:1,falso:.08}
+  ];
+  const item=id=>CATALOGO_98.find(x=>x.id===id);
+  const precio98=c=>Math.round(c.base*escala());
+  function col(){ if(!Array.isArray(S.coleccion98)) S.coleccion98=[]; return S.coleccion98; }
+  const disponibles=()=>CATALOGO_98.filter(c=>!c.desde||S.anio>=c.desde);
+  function comprar98(id,peritaje){
+    const c=item(id); if(!c) return null;
+    const p=precio98(c), costo=Math.round(p*(peritaje?1.04:1));
+    if(S.efectivo<costo) return null;
+    S.efectivo-=costo;
+    let falso=!!(c.falso&&chance(c.falso));
+    let aviso='';
+    if(falso&&peritaje){ S.efectivo+=p; falso=false; aviso='El perito descubrió que '+c.n.charAt(0).toLowerCase()+c.n.slice(1)+' era falso. No lo compraste: solo pagaste el peritaje ('+fmt(costo-p)+').'; log(esc(aviso),'bien'); return {pieza:null,aviso}; }
+    const pieza={uid:'c'+S.anio+'_'+ri(1000,9999),id:c.id,tipo:c.tipo,n:c.n,valor:p,compra:p,anio:S.anio,falso,dudosa:!!c.dudosa};
+    col().push(pieza);
+    if(c.pres) moverPrestigio(c.pres*.5,'una pieza de colección');
+    S.p.felicidad=clamp(S.p.felicidad+3,0,100);
+    if(c.seguridad&&window.conf91){ const cf=window.conf91(); cf.seguridad=Math.max(cf.seguridad,1); }
+    if(c.dudosa&&chance(.25)) registrarDelito('tráfico de bienes',3,c.n.toLowerCase());
+    log('Compraste '+esc(c.n.charAt(0).toLowerCase()+c.n.slice(1))+' por '+fmt(costo)+'.'+aviso,'hito');
+    return {pieza,aviso};
+  }
+  function vender98(uid){
+    const i=col().findIndex(x=>x.uid===uid); if(i<0) return 0;
+    const pz=col()[i]; let v=Math.round(pz.valor*.9);
+    if(pz.falso){ v=Math.round(pz.compra*.05); log('Al tasar '+esc(pz.n.toLowerCase())+' para venderla, resultó ser <b>una falsificación</b>. Te dieron '+fmt(v)+'.','mal'); moverPrestigio(-2,'le vendieron un falso'); }
+    else log('Vendiste '+esc(pz.n.toLowerCase())+' por '+fmt(v)+'.');
+    S.efectivo+=v; col().splice(i,1); return v;
+  }
+  function correrColeccion98(){
+    if(!S||!S.p||S.muerto) return;
+    const C=col(); if(!C.length) return;
+    let mant=0;
+    C.slice().forEach(pz=>{
+      const c=item(pz.id)||{valoriza:0,ruido:.05};
+      pz.valor=Math.max(1,Math.round(pz.valor*(1+c.valoriza+rnd(-c.ruido,c.ruido))*(1+(c.valoriza>0?(S.macro&&S.macro.inflacion||0)*.3:0))));
+      if(c.mant) mant+=pz.valor*c.mant;
+      if(c.vive&&S.anio-pz.anio>=18&&chance(.25)){ col().splice(col().indexOf(pz),1); log('Murió tu caballo de paso, el que ganó tantas ferias.','mal'); }
+    });
+    if(mant>0){ S.efectivo-=Math.round(mant); }
+    if(C.length>=2) S.p.felicidad=clamp(S.p.felicidad+Math.min(3,Math.floor(C.length/2)),0,100);
+  }
+
+  /* --- eventos --- */
+  function instalarEventos98(){
+    if(window.__SA98_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o);
+    E({get p(){ return col().some(x=>x.falso)?1.2:0; },c:()=>col().some(x=>x.falso),
+      t:()=>{ const pz=col().find(x=>x.falso); S._falso98=pz.uid; return 'Un experto que visitó tu casa se quedó mirando '+esc(pz.n.toLowerCase())+' más de la cuenta. Te dice, en voz baja, que es <b>una falsificación</b>.'; },
+      o:[{t:'Demandar al que te la vendió',f:()=>{ const pz=col().find(x=>x.uid===S._falso98); if(!pz) return ''; pz.falso=false; pz.valor=Math.round(pz.compra*.05); if(chance(.5)){ S.efectivo+=Math.round(pz.compra*.6); return 'Le ganaste al marchante: te devolvió buena parte de la plata.'; } return 'El marchante desapareció del país.'; }},
+         {t:'Callarte y lucirla igual',f:()=>{ const pz=col().find(x=>x.uid===S._falso98); if(pz) pz.callada=true; return 'Sigue en la sala, a la vista de todos. Solo tú y el experto saben.'; }}]});
+    E({get p(){ return col().some(x=>x.dudosa)?.8:0; },c:()=>col().some(x=>x.dudosa),
+      t:()=>{ const pz=col().find(x=>x.dudosa); S._dudosa98=pz.uid; return 'La Fiscalía investiga el tráfico de '+esc(pz.tipo==='arte'?'patrimonio arqueológico':'esmeraldas sin papeles')+' y tu nombre aparece en una lista.'; },
+      o:[{t:'Entregar la pieza voluntariamente',f:()=>{ const i=col().findIndex(x=>x.uid===S._dudosa98); if(i>=0) col().splice(i,1); S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Entregaste la pieza. Te quedaste sin ella, pero sin proceso.'; }},
+         {t:'Esconderla',f:()=>{ if(chance(.4)){ const i=col().findIndex(x=>x.uid===S._dudosa98); if(i>=0) col().splice(i,1); registrarDelito('tráfico de bienes',4,'ocultaste una pieza decomisada'); S.p.escandalos=(S.p.escandalos||0)+1; return 'Allanaron tu casa y se la llevaron. Ahora es un escándalo.'; } return 'La escondiste en la finca. Por ahora no la encontraron.'; }}]});
+    E({get p(){ const n=col().length; const seg=window.conf91?window.conf91().seguridad:0; return n?.5*(seg?.4:1):0; },c:()=>col().length>0,
+      t:()=>{ const pz=pick(col()); S._robo98=pz.uid; return 'Se metieron a tu casa mientras estabas de viaje. Se llevaron '+esc(pz.n.toLowerCase())+'.'; },
+      o:[{t:'Contratar a alguien para recuperarla',f:()=>{ const x=Math.max(3,Math.round(pat()*.004)); S.efectivo-=x; if(chance(.5)) return 'La encontraron en un mercado de pulgas. Costó '+fmt(x)+'.'; const i=col().findIndex(y=>y.uid===S._robo98); if(i>=0) col().splice(i,1); return 'Pagaste '+fmt(x)+' y nunca apareció.'; }},
+         {t:'Darla por perdida',f:()=>{ const i=col().findIndex(y=>y.uid===S._robo98); if(i>=0) col().splice(i,1); return 'Nunca apareció.'; }}]});
+    E({get p(){ return col().some(x=>x.tipo==='caballo')?1:0; },c:()=>col().some(x=>x.tipo==='caballo'),
+      t:()=>'Llegó la feria equina nacional. Tu caballo de paso fino es de los favoritos.',
+      o:[{t:'Inscribirlo',f:()=>{ const x=Math.max(2,Math.round(pat()*.002)); S.efectivo-=x; if(chance(.4)){ moverPrestigio(2,'ganó la feria equina'); const pz=col().find(y=>y.tipo==='caballo'); if(pz) pz.valor=Math.round(pz.valor*1.25); return '¡Ganó la feria! Todo el gremio ganadero habla de tu caballo.'; } return 'Quedó de tercero. Buen papel.'; }},
+         {t:'Dejarlo descansar',f:()=>'Este año no compitió.'}]});
+    E({get p(){ return S&&S.p&&S.p.edad>=25&&pat()>=1500?.5:0; },c:()=>S.p.edad>=25&&pat()>=1500,
+      t:()=>{ const x=Math.round(320*escala()); S._subasta98=x; return 'En una subasta en Nueva York sale una obra de un maestro latinoamericano. Base: '+fmt(x)+'. Los grandes coleccionistas del continente están ahí.'; },
+      o:[{t:'Pujar fuerte',f:()=>{ const x=S._subasta98||0; if(S.efectivo<x) return 'No tenías la plata a la mano.'; if(chance(.55)){ const p=Math.round(x*rnd(1.1,1.4)); S.efectivo-=p; col().push({uid:'c'+S.anio+'_s',id:'europeo',tipo:'arte',n:'Una obra maestra latinoamericana',valor:Math.round(p*1.05),compra:p,anio:S.anio,falso:false}); moverPrestigio(4,'compró una obra maestra'); return 'Te la llevaste por '+fmt(p)+'. Salió en los periódicos de medio mundo.'; } return 'Un coleccionista mexicano pujó más que tú.'; }},
+         {t:'Mirar desde lejos',f:()=>'Te quedaste mirando cómo otro se la llevaba.'}]});
+    window.__SA98_EV=true;
+  }
+
+  /* --- la escena --- */
+  function escenaColeccion98(){
+    const C=col(), total=C.reduce((a,x)=>a+x.valor,0);
+    const opsTipo=Object.keys(TIPOS_98).map(k=>'<option value="'+k+'">'+esc(TIPOS_98[k])+'</option>').join('');
+    const tabla=C.length?'<table class="libro">'+C.map(pz=>'<tr><td>'+esc(pz.n)+' <span style="color:var(--humo2)">desde '+pz.anio+'</span></td><td class="'+(pz.valor>=pz.compra?'bien':'mal')+'">'+fmt(pz.valor)+'</td></tr>').join('')+'<tr class="suma"><td>Tu colección vale</td><td>'+fmt(total)+'</td></tr></table>':'<div class="vacio">Todavía no tienes nada de colección.</div>';
+    const html=tabla+'<div class="form91" style="margin-top:12px"><label class="campo91"><span>Qué quieres comprar</span><select id="f98-tipo">'+opsTipo+'</select></label>'
+      +'<label class="campo91"><span>La pieza</span><select id="f98-pieza"></select></label>'
+      +'<label class="campo91"><span>Peritaje</span><select id="f98-perito"><option value="1">Con peritaje (+4%): detecta falsificaciones</option><option value="0">Sin peritaje</option></select></label>'
+      +'<div class="form91-desc" id="f98-desc"></div>'
+      +(C.length?'<label class="campo91"><span>O vender una pieza</span><select id="f98-vender"><option value="">Nada</option>'+C.map(pz=>'<option value="'+pz.uid+'">'+esc(pz.n)+' · '+fmt(Math.round(pz.valor*.9))+'</option>').join('')+'</select></label>':'')+'</div>';
+    escena({rubro:'Lujo y colecciones',titulo:'Tu colección',ancho:true,cerrable:true,
+      cuerpo:'Las grandes familias se miden también por lo que cuelgan en la sala, lo que parquean en el garaje y lo que corre en las ferias. Cada compra cuesta una movida.',html,
+      opciones:[{t:'Comprar',cat:'casa',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+          const id=document.getElementById('f98-pieza').value, per=document.getElementById('f98-perito').value==='1';
+          const r=comprar98(id,per); if(!r) return; S.mov--; cerrarModal(); render(); }},
+        ...(C.length?[{t:'Vender la pieza elegida',cat:'capital',cerrar:false,run:()=>{ const uid=document.getElementById('f98-vender').value; if(!uid) return; vender98(uid); cerrarModal(); render(); }}]:[])]});
+    const tipo=document.getElementById('f98-tipo'), pieza=document.getElementById('f98-pieza'), desc=document.getElementById('f98-desc');
+    const llenar=()=>{ const L=disponibles().filter(c=>c.tipo===tipo.value);
+      pieza.innerHTML=L.length?L.map(c=>{ const p=precio98(c); return '<option value="'+c.id+'"'+(S.efectivo<p?' disabled':'')+'>'+esc(c.n)+' · '+fmt(p)+(S.efectivo<p?' · sin plata':'')+'</option>'; }).join(''):'<option value="" disabled>Nada disponible en '+S.anio+'</option>';
+      const primera=Array.from(pieza.options).find(o=>!o.disabled); if(primera) pieza.value=primera.value; pintar(); };
+    const pintar=()=>{ const c=item(pieza.value); if(!c){ desc.textContent=''; return; }
+      desc.innerHTML=(c.valoriza>0?'Se valoriza con los años.':'Se deprecia con los años.')+(c.mant?' Mantenerlo cuesta cerca de '+Math.round(c.mant*100)+'% de su valor al año.':'')+(c.pres?' Da prestigio a la casa.':'')+(c.dudosa?' <b style="color:var(--ui-red)">De dudosa procedencia: puede traerte líos con la Fiscalía.</b>':'')+(c.falso?' Hay '+Math.round(c.falso*100)+'% de que sea falso.':'')+(c.seguridad?' Sube tu esquema de seguridad.':''); };
+    tipo.addEventListener('change',llenar); pieza.addEventListener('change',pintar); llenar();
+  }
+
+  /* --- integración --- */
+  function wrapAcciones98(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA98_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){ const n=col().length;
+        A.push({t:'Lujo y colecciones',d:n?n+' pieza'+(n>1?'s':'')+' por '+fmt(col().reduce((a,x)=>a+x.valor,0))+'. Arte, carros, caballos, yates, esmeraldas.':'Arte, carros, caballos de paso, yates, esmeraldas y relojes.',mov:0,modal:true,run:()=>escenaColeccion98()}); } }catch(e){}
+      return A;
+    };
+    window.__SA98_ACC=true;
+  }
+  function seccionPerfil98(){
+    const sec=window.SECCIONES_93; if(!Array.isArray(sec)||sec.some(s=>s.id==='lujo')) return;
+    const i=sec.findIndex(s=>s.id==='amor');
+    sec.splice(i>=0?i+1:sec.length,0,{id:'lujo',t:'Lujo y aficiones',d:'colecciones, caballos, tu equipo',f:a=>/^Lujo y colecciones$|equipo de fútbol/.test(a.t)});
+  }
+  function wrapPatrimonio98(){
+    const old=window.patrimonio; if(typeof old!=='function'||window.__SA98_PATR) return;
+    window.patrimonio=function(){ const p=old.apply(this,arguments); try{ if(S&&Array.isArray(S.coleccion98)) return p+S.coleccion98.reduce((a,x)=>a+(x.valor||0),0); }catch(e){} return p; };
+    window.__SA98_PATR=true;
+  }
+  function wrapPaso98(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA98_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrColeccion98(); }catch(e){} return r; };
+    window.__SA98_PASO=true;
+  }
+  function wrapHeredar98(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA98_HER) return;
+    window.heredar=function(){ const C=S&&Array.isArray(S.coleccion98)?JSON.parse(JSON.stringify(S.coleccion98)):null; const r=old.apply(this,arguments);
+      try{ if(C&&C.length&&S){ S.coleccion98=C.map(x=>Object.assign(x,{reliquia:true})); log('Heredas la colección de la casa: '+C.length+' pieza'+(C.length>1?'s':'')+'.'); } }catch(e){} return r; };
+    window.__SA98_HER=true;
+  }
+  function wrapCatDe98(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA98_CAT) return;
+    window.catDe=function(t){ if(t==='Lujo y colecciones') return 'casa'; return old.apply(this,arguments); };
+    window.__SA98_CAT=true;
+  }
+
+  function init98(){
+    wrapAcciones98(); seccionPerfil98(); wrapPatrimonio98(); wrapPaso98(); wrapHeredar98(); wrapCatDe98(); instalarEventos98();
+    Object.assign(window,{CATALOGO_98,coleccion98:col,comprar98,vender98,correrColeccion98,escenaColeccion98,precio98});
+  }
+  setTimeout(init98,40);
+  setTimeout(init98,220);
+  setTimeout(init98,650);
+  window.__SA98={version:V98};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v99 · METAS DE DINASTÍA
+   Cada generación recibe tres metas propias; la casa acumula logros
+   permanentes, récords con nombre y año, y un epitafio por cada uno que se
+   va. Al cerrar la historia, un resumen con el puntaje de la casa.
+   ========================================================================== */
+(function(){
+  const V99='v99';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?x:0; }catch(e){ return 0; } };
+  const puesto=()=>{ try{ return miPuesto()||99; }catch(e){ return 99; } };
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const hijos=()=>(S.familia&&S.familia.hijos||[]).length;
+  const crimenes=()=>(S.penal&&S.penal.crimes||[]);
+  const titulos=()=>(S.futbol96&&S.futbol96.titulos||[]).length;
+  const coleccion=()=>(Array.isArray(S.coleccion98)?S.coleccion98:[]);
+  const gente=()=>(Array.isArray(S.gente95)?S.gente95:[]);
+  const cargoPol=()=>{ try{ const q=S.carrera&&S.carrera.politica; return q&&q.activo&&q.cargo?q.cargo:null; }catch(e){ return null; } };
+  const quien=()=>S.p.nombre+' '+S.p.apellido;
+  let colaAviso=0;
+  function avisar99(txt){ if(typeof aviso!=='function') return; const ahora=Date.now(), t0=Math.max(ahora,colaAviso); colaAviso=t0+2500; setTimeout(()=>aviso(txt),t0-ahora); }
+  function M(){
+    if(!S.legado) S.legado={hitos:[],pico:0,ancestros:[]};
+    const m=S.legado.metas99||(S.legado.metas99={logros:{},records:{},panteon:[],gen:null,lista:[],cumplidas:0,desde:S.anio-(S.p&&S.p.edad||0)});
+    if(!m.logros) m.logros={}; if(!m.records) m.records={}; if(!Array.isArray(m.panteon)) m.panteon=[]; if(!Array.isArray(m.lista)) m.lista=[];
+    return m;
+  }
+
+  /* --- metas de la generación --- */
+  const METAS_99=[
+    {id:'duplicar',n:'Duplica lo que recibiste',d:b=>'Pasa de '+fmt(b.pat)+' a '+fmt(b.pat*2)+'.',ok:b=>pat()>=b.pat*2,prog:b=>Math.min(1,pat()/(b.pat*2))},
+    {id:'top5',n:'Pon la casa entre las cinco grandes',d:()=>'Que tu apellido esté en el top 5 del país.',si:b=>b.puesto>5,ok:()=>puesto()<=5},
+    {id:'top1',n:'Que tu casa sea la primera del país',d:()=>'Nadie por encima de tu apellido.',si:b=>b.puesto>1&&b.puesto<=6,ok:()=>puesto()===1},
+    {id:'hijos',n:'Ten al menos tres hijos',d:()=>'Una casa sin herederos no llega lejos.',si:()=>hijos()<3,ok:()=>hijos()>=3,prog:()=>Math.min(1,hijos()/3)},
+    {id:'limpio',n:'Diez años sin un delito',d:()=>'Ni una mancha en el prontuario durante una década.',ok:b=>{ const u=crimenes().reduce((a,x)=>Math.max(a,x.anio||0),b.anio); return S.anio-u>=10; },prog:b=>{ const u=crimenes().reduce((a,x)=>Math.max(a,x.anio||0),b.anio); return Math.min(1,(S.anio-u)/10); }},
+    {id:'prestigio',n:'Lleva el prestigio de la casa a 70',d:()=>'Que el apellido pese en cualquier salón.',si:()=>prestigio()<60,ok:()=>prestigio()>=70,prog:()=>Math.min(1,prestigio()/70)},
+    {id:'politica',n:'Gana un cargo de elección popular',d:()=>'Concejo, alcaldía, Congreso… o más.',si:()=>!cargoPol(),ok:()=>!!cargoPol()},
+    {id:'futbol',n:'Gana un título con tu equipo',d:()=>'Hay que tener equipo primero.',si:b=>S.anio>=1948&&((S.futbol96&&S.futbol96.activo)||b.pat>=3000),ok:b=>titulos()>b.titulos},
+    {id:'coleccion',n:'Arma una colección de cinco piezas',d:()=>'Arte, caballos, joyas: lo que sea.',si:b=>coleccion().length<5&&b.pat>=800,ok:()=>coleccion().length>=5,prog:()=>Math.min(1,coleccion().length/5)},
+    {id:'amigo',n:'Ten una amistad de verdad',d:()=>'Alguien que te aprecie de verdad (80 de aprecio).',ok:()=>gente().some(g=>g.vivo!==false&&g.rol!=='enemigo'&&(g.afecto||0)>=80)},
+    {id:'longevo',n:'Llega a los 80 años',d:()=>'Cuídate. La casa te necesita.',si:()=>S.p.edad<70,ok:()=>S.p.edad>=80,prog:b=>Math.min(1,Math.max(0,(S.p.edad-(b.edad||0))/Math.max(1,80-(b.edad||0))))},
+    {id:'casarse',n:'Cásate',d:()=>'Con prenupcial o sin él.',si:()=>!(S.familia&&S.familia.pareja&&S.familia.pareja.casados),ok:()=>!!(S.familia&&S.familia.pareja&&S.familia.pareja.casados)},
+    {id:'empresas',n:'Ten tres compañías',d:()=>'Un grupo, no un negocio.',si:()=>{ try{ return companias().length<3; }catch(e){ return false; } },ok:()=>{ try{ return companias().length>=3; }catch(e){ return false; } },prog:()=>{ try{ return Math.min(1,companias().length/3); }catch(e){ return 0; } }}
+  ];
+  const meta=id=>METAS_99.find(x=>x.id===id);
+  function base(){ return {pat:Math.max(50,Math.round(pat())),puesto:puesto(),anio:S.anio,titulos:titulos(),edad:S.p.edad}; }
+  function asignarMetas99(forzar){
+    const m=M(); if(!S.p||nino()) return m.lista;
+    if(!forzar&&m.gen===S.gen&&m.lista.length) return m.lista;
+    const b=base(); const pool=METAS_99.filter(x=>(!x.si||x.si(b))&&!x.ok(b));
+    const lista=[]; while(lista.length<3&&pool.length){ const i=ri(0,pool.length-1); lista.push(pool.splice(i,1)[0]); }
+    if(m.gen!==S.gen) m.genAnio=S.anio; m.gen=S.gen; m.base=b; m.lista=lista.map(x=>({id:x.id,ok:false,anio:null}));
+    return m.lista;
+  }
+  function revisarMetas99(){
+    const m=M(); if(nino()||!S.p) return [];
+    if(m.gen!==S.gen||!m.lista.length) asignarMetas99();
+    const nuevas=[];
+    m.lista.forEach(x=>{ if(x.ok) return; const d=meta(x.id); if(!d) return; let ok=false; try{ ok=d.ok(m.base); }catch(e){}
+      if(ok){ x.ok=true; x.anio=S.anio; m.cumplidas=(m.cumplidas||0)+1; nuevas.push(d); moverPrestigio(3,'cumplió una meta de la casa'); log('<b>Meta cumplida:</b> '+esc(d.n.charAt(0).toLowerCase()+d.n.slice(1))+'.','hito'); } });
+    nuevas.forEach(d=>avisar99('Meta cumplida: '+d.n));
+    if(m.lista.length&&m.lista.every(x=>x.ok)&&!m.todasGen){ m.todasGen=S.gen; }
+    return nuevas;
+  }
+
+  /* --- logros permanentes de la casa --- */
+  const LOGROS_99=[
+    {id:'mil',n:'Los primeros mil millones',d:'La casa supera $1.000 millones.',pts:10,ok:()=>pat()>=1000},
+    {id:'diezmil',n:'Diez mil millones',d:'Patrimonio de $10.000 millones.',pts:20,ok:()=>pat()>=10000},
+    {id:'cienmil',n:'Una fortuna de leyenda',d:'Patrimonio de $100.000 millones.',pts:40,ok:()=>pat()>=100000},
+    {id:'billon',n:'Un billón',d:'Patrimonio de un billón de pesos.',pts:60,ok:()=>pat()>=1000000},
+    {id:'top3',n:'Entre las tres grandes',d:'Llegar al top 3 de las casas del país.',pts:20,ok:()=>puesto()<=3},
+    {id:'top1',n:'La primera casa del país',d:'Nadie por encima del apellido.',pts:40,ok:()=>puesto()===1},
+    {id:'presidente',n:'La casa en Palacio',d:'Alguien de la familia llegó a la Presidencia.',pts:50,ok:()=>cargoPol()==='presidente'},
+    {id:'cargo',n:'Con votos propios',d:'Alguien de la casa ganó un cargo de elección.',pts:15,ok:()=>!!cargoPol()},
+    {id:'campeon',n:'Campeones',d:'Ganar un título con el equipo de la casa.',pts:20,ok:()=>titulos()>=1},
+    {id:'tricampeon',n:'Dinastía en la cancha',d:'Tres títulos de fútbol.',pts:35,ok:()=>titulos()>=3},
+    {id:'coleccion',n:'Gran coleccionista',d:'Ocho piezas de colección a la vez.',pts:20,ok:()=>coleccion().length>=8},
+    {id:'gen3',n:'Tres generaciones',d:'El apellido pasa a la tercera generación.',pts:15,ok:()=>S.gen>=3},
+    {id:'gen5',n:'Cinco generaciones',d:'Pocas casas del país llegan hasta aquí.',pts:35,ok:()=>S.gen>=5},
+    {id:'siglo',n:'Un siglo de historia',d:'Cien años desde que nació el fundador.',pts:30,ok:()=>S.anio-fundacion99()>=100},
+    {id:'noventa',n:'Noventa velas',d:'Alguien de la casa cumple 90 años.',pts:15,ok:()=>S.p.edad>=90},
+    {id:'prole',n:'Casa llena',d:'Seis hijos en una misma generación.',pts:15,ok:()=>hijos()>=6},
+    {id:'infancia',n:'Desde la cuna',d:'Vivir la infancia completa y cumplir 18.',pts:10,ok:()=>!!(S.infancia94&&S.infancia94.terminada)},
+    {id:'amistad',n:'Amistad de toda la vida',d:'Un amigo de hace cuarenta años que todavía te aprecia.',pts:15,ok:()=>gente().some(g=>g.vivo!==false&&g.rol==='amigo'&&(g.afecto||0)>=60&&S.anio-(g.desde||S.anio)>=40)},
+    {id:'paces',n:'Las paces',d:'Hacer las paces con un enemigo.',pts:10,ok:()=>gente().some(g=>(g.memoria||[]).some(x=>/Hicieron las paces|guerra se acabó|buscaste para hacer las paces/.test(x.txt)))},
+    {id:'cancer',n:'Le ganó al cáncer',d:'Sobrevivir a un cáncer.',pts:15,ok:()=>!!(S.salud97&&(S.salud97.enfermedades||[]).some(e=>e.id==='cancer'&&e.curada))},
+    {id:'metas',n:'Generación perfecta',d:'Cumplir las tres metas de una generación.',pts:25,ok:()=>!!M().todasGen},
+    {id:'prontuario',n:'Prontuario',d:'Cinco delitos en la cuenta de una misma persona.',pts:5,oscuro:true,ok:()=>crimenes().length>=5},
+    {id:'carcel',n:'Tras las rejas',d:'Alguien de la casa pisó la cárcel.',pts:5,oscuro:true,ok:()=>!!(S.penal&&S.penal.prisionRestante>0)}
+  ];
+  function fundacion99(){ const m=M(); let x=Math.min(isFinite(m.desde)?m.desde:Infinity,S.anio-(S.p&&S.p.edad||0));
+    (S.legado.ancestros||[]).forEach(a=>{ if(a.muerte&&isFinite(a.edad)) x=Math.min(x,a.muerte-a.edad); });
+    if(x<m.desde||!isFinite(m.desde)) m.desde=x; return x; }
+  function revisarLogros99(){
+    const m=M(), nuevos=[]; if(!S.p) return nuevos;
+    LOGROS_99.forEach(l=>{ if(m.logros[l.id]) return; let ok=false; try{ ok=l.ok(); }catch(e){}
+      if(ok){ m.logros[l.id]={anio:S.anio,quien:quien(),gen:S.gen}; nuevos.push(l); log('<b>Logro de la casa:</b> '+esc(l.n)+'. '+esc(l.d),'hito'); } });
+    if(nuevos.length) avisar99('Logro de la casa: '+nuevos.map(l=>l.n).join(' · '));
+    return nuevos;
+  }
+
+  /* --- récords --- */
+  const RECORDS_99=[
+    {id:'patrimonio',n:'La fortuna más grande',v:()=>pat(),f:v=>fmt(v)},
+    {id:'puesto',n:'El mejor puesto entre las casas',v:()=>puesto(),menor:true,f:v=>v+'ª del país'},
+    {id:'edad',n:'La vida más larga',v:()=>S.p.edad,f:v=>v+' años'},
+    {id:'hijos',n:'Más hijos',v:()=>hijos(),f:v=>v+' hijo'+(v===1?'':'s')},
+    {id:'mando',n:'Más años al mando',v:()=>Math.max(0,S.anio-(M().genAnio||S.anio)),f:v=>v+' años'},
+    {id:'coleccion',n:'La colección más valiosa',v:()=>coleccion().reduce((a,x)=>a+(x.valor||0),0),f:v=>fmt(v)},
+    {id:'titulos',n:'Títulos de fútbol',v:()=>titulos(),f:v=>v+' título'+(v===1?'':'s')},
+    {id:'prestigio',n:'El mayor prestigio',v:()=>Math.round(prestigio()),f:v=>v+'/100'}
+  ];
+  function revisarRecords99(){
+    const m=M(); if(!S.p||nino()) return;
+    RECORDS_99.forEach(r=>{ let v; try{ v=r.v(); }catch(e){ return; } if(!isFinite(v)||(!r.menor&&v<=0)||(r.menor&&v>=99)) return;
+      const cur=m.records[r.id]; const mejor=!cur||(r.menor?v<cur.v:v>cur.v);
+      if(mejor) m.records[r.id]={v,quien:quien(),anio:S.anio,gen:S.gen}; });
+  }
+
+  /* --- epitafios --- */
+  function fraseEpitafio99(){
+    const m=M(), p=S.p, c=crimenes(), pt=pat(), rec=m.records||{};
+    const preso=S.penal&&(S.penal.prisionRestante>0||S.penal.estuvoPreso);
+    const b=m.base||{pat:pt};
+    if(cargoPol()==='presidente') return 'Gobernó un país entero. Su familia fue otra cosa.';
+    if(preso) return 'Pagó lo que debía. Casi todo.';
+    if(c.length>=3) return 'Nunca le pudieron probar nada.';
+    if(rec.patrimonio&&rec.patrimonio.quien===quien()&&rec.patrimonio.gen===S.gen&&S.gen>1) return 'Hizo la fortuna más grande que ha visto la casa.';
+    if(p.edad>=90) return 'Enterró a todos sus enemigos.';
+    if(p.edad<45) return 'Se fue demasiado pronto.';
+    if(hijos()>=5) return 'Dejó '+hijos()+' hijos y un solo apellido.';
+    if(titulos()>=1) return 'Hincha hasta el último pitazo.';
+    if(coleccion().length>=4) return 'Vivió rodeado de cosas bellas.';
+    if(b.pat>200&&pt<b.pat*.5) return 'Heredó una fortuna y la gastó con gusto.';
+    if(pt>b.pat*3) return 'Recibió poco y dejó mucho.';
+    if(gente().some(g=>g.rol==='amigo'&&(g.afecto||0)>=70)) return 'Sus amigos lo cargaron hasta el final.';
+    return 'Trabajó, amó y dejó la casa en pie.';
+  }
+  function epitafio99(){
+    const p=S.p; const ep={nombre:p.nombre+' '+p.apellido,nac:S.anio-p.edad,muerte:S.anio,edad:p.edad,gen:S.gen,frase:fraseEpitafio99(),causa:S.causaMuerte97||''};
+    const m=M(); if(!m.panteon.some(x=>x.nombre===ep.nombre&&x.muerte===ep.muerte)) m.panteon.push(ep);
+    return ep;
+  }
+  const htmlEpitafio=e=>'<div class="epitafio99"><div class="rip">Aquí yace</div><div class="n">'+esc(e.nombre)+'</div><div class="f">'+e.nac+' – '+e.muerte+' · generación '+genLabel(e.gen)+'</div><div class="fr">«'+esc(e.frase)+'»</div></div>';
+
+  /* --- puntaje --- */
+  function puntaje99(){
+    const m=M(); const pl=LOGROS_99.filter(l=>m.logros[l.id]).reduce((a,l)=>a+l.pts,0);
+    return {logros:Object.keys(m.logros).length,total:LOGROS_99.length,metas:m.cumplidas||0,puntos:Math.round((pl+(m.cumplidas||0)*5+Math.max(0,S.gen-1)*10)*(typeof window.multPuntaje100==='function'?window.multPuntaje100():1))};
+  }
+
+  /* --- vistas --- */
+  function metasHTML99(){
+    const m=M(); if(nino()) return '';
+    const L=asignarMetas99(); if(!L.length) return '';
+    return '<div class="perfil93-sec" id="metas99"><h3>Metas de tu generación<em>'+L.filter(x=>x.ok).length+' de '+L.length+' cumplidas</em></h3><div class="metas99">'
+      +L.map(x=>{ const d=meta(x.id); if(!d) return ''; let pr=''; if(!x.ok&&d.prog){ try{ pr=Math.round(d.prog(m.base)*100)+'%'; }catch(e){} }
+        return '<div class="meta99'+(x.ok?' ok':'')+'"><div class="ic">'+(x.ok?'✓':'')+'</div><div class="tx"><b>'+esc(d.n)+'</b><span>'+(x.ok?'Cumplida en '+x.anio+'.':esc(d.d(m.base)))+'</span></div><div class="pr">'+pr+'</div></div>'; }).join('')
+      +'</div></div>';
+  }
+  function logrosHTML99(){
+    const m=M();
+    return '<div class="logros99">'+LOGROS_99.map(l=>{ const g=m.logros[l.id];
+      return '<div class="logro99'+(g?' ok':'')+'"><b>'+esc(l.n)+'<span class="pts">'+l.pts+' pts</span></b><span>'+esc(l.d)+'</span>'+(g?'<em>'+esc(g.quien)+', '+g.anio+'</em>':'')+'</div>'; }).join('')+'</div>';
+  }
+  function recordsHTML99(){
+    const m=M(); const filas=RECORDS_99.filter(r=>m.records[r.id]).map(r=>{ const x=m.records[r.id]; return '<tr><td>'+esc(r.n)+' <span style="color:var(--humo2)">· '+esc(x.quien)+', '+x.anio+'</span></td><td>'+esc(r.f(x.v))+'</td></tr>'; }).join('');
+    return filas?'<table class="libro">'+filas+'</table>':'<div class="vacio">Todavía no hay récords.</div>';
+  }
+  function panteonHTML99(){
+    const P=M().panteon; return P.length?'<div class="panteon99">'+P.slice().reverse().map(htmlEpitafio).join('')+'</div>':'<div class="vacio">Nadie de la casa ha muerto todavía.</div>';
+  }
+  function legadoHTML99(){
+    const p=puntaje99();
+    return '<div id="legado99"><h3 style="margin-top:22px">Puntaje de la casa</h3><div class="puntaje99"><div><b>'+p.puntos+'</b><span>puntos</span></div><div><b>'+p.logros+'/'+p.total+'</b><span>logros</span></div><div><b>'+p.metas+'</b><span>metas cumplidas</span></div></div>'
+      +'<h3 style="margin-top:22px">Logros de la casa<em>'+p.logros+' de '+p.total+'</em></h3>'+logrosHTML99()
+      +'<h3 style="margin-top:22px">Récords de la casa</h3>'+recordsHTML99()
+      +'<h3 style="margin-top:22px">El panteón familiar</h3>'+panteonHTML99()+'</div>';
+  }
+
+  /* --- integración --- */
+  function wrapLienzo99(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA99_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const host=$('lienzoJuego'); if(!host||!S||!S.p) return r;
+        if(tab==='perfil'&&!host.querySelector('#metas99')){ const h=metasHTML99(); if(h){ const s1=host.querySelector('.perfil93-sec'); if(s1) s1.insertAdjacentHTML('beforebegin',h); else { const w=host.querySelector('.wrap'); if(w) w.insertAdjacentHTML('beforeend',h); } } }
+        if(tab==='legado'&&!host.querySelector('#legado99')){ const t=host.querySelector('.seccion table.libro'); if(t) t.insertAdjacentHTML('afterend',legadoHTML99()); }
+      }catch(e){}
+      return r;
+    };
+    window.__SA99_LIENZO=true;
+  }
+  function wrapPaso99(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA99_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto){ revisarRecords99(); revisarMetas99(); revisarLogros99(); } }catch(e){} return r; };
+    window.__SA99_PASO=true;
+  }
+  function wrapMorir99(){
+    const old=window.morir; if(typeof old!=='function'||window.__SA99_MORIR) return;
+    window.morir=function(){
+      let ep=null; try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ ep=epitafio99(); const rel=document.querySelector('#escenaHost .relato'); if(rel&&ep) rel.insertAdjacentHTML('afterend',htmlEpitafio(ep)); }catch(e){}
+      return r;
+    };
+    window.__SA99_MORIR=true;
+  }
+  function wrapHeredar99(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA99_HER) return;
+    window.heredar=function(h,frac,vivo){
+      try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ if(S&&S.legado&&S.legado.metas99){ S.legado.metas99.todasGen=S.legado.metas99.todasGen||null; asignarMetas99(true); } }catch(e){}
+      return r;
+    };
+    window.__SA99_HER=true;
+  }
+  function wrapFinal99(){
+    const old=window.pantallaFinal; if(typeof old!=='function'||window.__SA99_FIN) return;
+    window.pantallaFinal=function(){
+      try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{
+        const p=puntaje99(), m=M();
+        const ult=m.panteon.length?m.panteon[m.panteon.length-1]:null;
+        const html='<div id="final99"><div class="puntaje99"><div><b>'+p.puntos+'</b><span>puntos de la casa</span></div><div><b>'+p.logros+'/'+p.total+'</b><span>logros</span></div><div><b>'+p.metas+'</b><span>metas cumplidas</span></div><div><b>'+S.gen+'</b><span>generaciones</span></div></div>'
+          +'<h3 style="margin-top:18px">Récords de la casa</h3>'+recordsHTML99()
+          +(m.panteon.length?'<h3 style="margin-top:18px">El panteón</h3>'+panteonHTML99():'')+'</div>';
+        const host=document.querySelector('#escenaHost .vida-linea')||document.querySelector('#escenaHost .relato');
+        if(host) host.insertAdjacentHTML(host.classList.contains('vida-linea')?'beforebegin':'afterend',html);
+        window.__final99={puntos:p.puntos,ult:ult&&ult.nombre};
+        if(typeof window.registrarDinastia100==='function') window.registrarDinastia100(p);
+      }catch(e){}
+      return r;
+    };
+    window.__SA99_FIN=true;
+  }
+
+  function init99(){
+    wrapLienzo99(); wrapPaso99(); wrapMorir99(); wrapHeredar99(); wrapFinal99();
+    Object.assign(window,{METAS_99,LOGROS_99,RECORDS_99,metas99:M,fundacion99,asignarMetas99,revisarMetas99,revisarLogros99,revisarRecords99,epitafio99,fraseEpitafio99,puntaje99});
+  }
+  setTimeout(init99,40);
+  setTimeout(init99,220);
+  setTimeout(init99,650);
+  window.__SA99={version:V99};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v100 · CALIDAD DE VIDA
+   Tres ranuras de partida (con migración de la partida guardada de antes),
+   Salón de la fama de dinastías terminadas, niveles de dificultad y un
+   tutorial corto para la primera partida.
+   ========================================================================== */
+(function(){
+  const V100='v100';
+  const PREF='sociedad-anonima:', NR=3;
+  const claveR=n=>PREF+'ranura:'+n, SALON=PREF+'salon', TUTO=PREF+'tutorial';
+  const ls={get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+
+  /* --- ranuras --- */
+  function leerRanura(n){ const raw=ls.get(claveR(n)); if(!raw) return null; try{ const o=JSON.parse(raw); return o&&o.p?o:null; }catch(e){ return null; } }
+  function ranuras(){ return Array.from({length:NR},(_,i)=>({n:i+1,g:leerRanura(i+1)})); }
+  const primeraLibre=()=>{ const r=ranuras().find(x=>!x.g); return r?r.n:null; };
+  const masVieja=()=>ranuras().filter(x=>x.g).sort((a,b)=>(a.g.guardado100||0)-(b.g.guardado100||0))[0].n;
+  const nuevoId=()=>'d'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+  function migrar100(){
+    const raw=ls.get(CLAVE); if(!raw) return;
+    try{ const o=JSON.parse(raw); if(!o||!o.p){ ls.del(CLAVE); return; }
+      const n=primeraLibre(); if(!n) return;
+      o.ranura100=n; o.id100=o.id100||nuevoId(); o.guardado100=o.guardado100||Date.now();
+      if(ls.set(claveR(n),JSON.stringify(o))) ls.del(CLAVE);
+    }catch(e){}
+  }
+  function ranuraPara(){
+    let n=S.ranura100||window.__ranuraForzada100||primeraLibre()||masVieja();
+    const ex=leerRanura(n);
+    if(ex&&ex.id100&&S.id100&&ex.id100!==S.id100&&!window.__ranuraForzada100){ n=primeraLibre()||masVieja(); }
+    return n;
+  }
+  function wrapGuardar100(){
+    const old=window.guardar; if(typeof old!=='function'||window.__SA100_GUARDAR) return;
+    window.guardar=async function(silencio){
+      if(!S||!S.p) return old.apply(this,arguments);
+      if(!S.id100) S.id100=nuevoId();
+      S.ranura100=ranuraPara(); S.guardado100=Date.now();
+      if(!ls.set(claveR(S.ranura100),JSON.stringify(S))) return old.apply(this,arguments);
+      if(!silencio) aviso('Partida guardada en la ranura '+S.ranura100+'.');
+    };
+    window.__SA100_GUARDAR=true;
+  }
+  function wrapBorrar100(){
+    const old=window.localBorrar; if(typeof old!=='function'||window.__SA100_BORRAR) return;
+    window.localBorrar=async function(){ try{ if(S&&S.ranura100) ls.del(claveR(S.ranura100)); }catch(e){} return old.apply(this,arguments); };
+    window.__SA100_BORRAR=true;
+  }
+  function cargarRanura100(n){
+    const g=leerRanura(n); if(!g) return false;
+    S=g; S.ranura100=n; S.patrPintado=undefined;
+    try{ migrarFamilia(); asegurarVidaFamiliar(); normalizarFamiliaGeneros(); asegurarInstitucionesCasa(); asegurarColasFamilia(); asegurarHogar(); asegurarGrupo(); asegurarBolsa(); }catch(e){}
+    window.__ranuraForzada100=n;
+    render(); return true;
+  }
+  function resumenRanura(g){
+    const casa=g.dinastia||(g.p&&g.p.apellido)||'sin nombre';
+    let pat=''; try{ const pc=g.legado&&g.legado.pico||0; if(pc>0) pat=fmt(pc); }catch(e){}
+    const dif=DIF_100[g.dificultad100||'normal'];
+    return {casa,det:'generación '+(typeof genLabel==='function'?genLabel(g.gen||1):(g.gen||1))+' · '+g.anio+' · '+(g.p.nombre+' '+g.p.apellido)+', '+g.p.edad+' años'+(dif&&g.dificultad100&&g.dificultad100!=='normal'?' · '+dif.n.toLowerCase():'')+(pat?' · pico '+pat:'')};
+  }
+  function pintarPortada100(){
+    const port=document.getElementById('portada'); if(!port) return;
+    const bc=document.getElementById('btnCargar'); if(bc) bc.classList.add('oculto');
+    let box=document.getElementById('ranuras100');
+    if(!box){ box=document.createElement('div'); box.id='ranuras100'; box.className='ranuras100'; const ent=port.querySelector('.entrada'); (ent||port).insertAdjacentElement('afterend',box); }
+    const R=ranuras();
+    box.innerHTML=R.some(r=>r.g)?'<div class="t">Tus partidas</div>'+R.map(r=>{
+      if(!r.g) return '<div class="ranura100 libre"><div class="num">'+r.n+'</div><div class="info"><b>Ranura libre</b><span>Funda una dinastía y se guarda aquí.</span></div></div>';
+      const x=resumenRanura(r.g);
+      return '<div class="ranura100" data-r100="'+r.n+'"><div class="num">'+r.n+'</div><div class="info"><b>Casa '+esc(x.casa)+'</b><span>'+esc(x.det)+'</span></div><button class="seguir" data-seguir100="'+r.n+'">Seguir</button><button class="borrar" data-borrar100="'+r.n+'">Borrar</button></div>';
+    }).join(''):'';
+    box.querySelectorAll('[data-seguir100]').forEach(b=>b.onclick=()=>cargarRanura100(+b.dataset.seguir100));
+    box.querySelectorAll('[data-borrar100]').forEach(b=>b.onclick=()=>{
+      if(!b.classList.contains('confirmar')){ b.classList.add('confirmar'); b.textContent='¿Seguro?'; return; }
+      ls.del(claveR(+b.dataset.borrar100)); pintarPortada100(); });
+    // salón de la fama
+    let sal=document.getElementById('salon100'); const L=salon();
+    if(L.length){
+      if(!sal){ sal=document.createElement('div'); sal.id='salon100'; sal.className='salon100'; box.insertAdjacentElement('afterend',sal); }
+      sal.innerHTML='<div class="t">Salón de la fama</div><table>'+L.slice(0,5).map((d,i)=>'<tr><td>'+(i+1)+'. Casa '+esc(d.casa)+'</td><td>'+d.gens+' generaci'+(d.gens===1?'ón':'ones')+' · '+d.desde+'–'+d.hasta+(d.dif&&d.dif!=='normal'?' · '+esc(DIF_100[d.dif].n.toLowerCase()):'')+'</td><td>'+d.puntos+' pts</td></tr>').join('')+'</table>';
+    } else if(sal) sal.remove();
+  }
+  function salon(){ try{ const L=JSON.parse(ls.get(SALON)||'[]'); return Array.isArray(L)?L:[]; }catch(e){ return []; } }
+  function registrarDinastia100(p){
+    if(!S) return; const L=salon().filter(x=>x.id!==S.id100);
+    const desde=typeof window.fundacion99==='function'?window.fundacion99():(S.anio-S.p.edad);
+    L.push({id:S.id100||nuevoId(),casa:S.dinastia||S.p.apellido,gens:S.gen,puntos:p&&p.puntos||0,desde,hasta:S.anio,dif:S.dificultad100||'normal',fecha:Date.now()});
+    L.sort((a,b)=>b.puntos-a.puntos); ls.set(SALON,JSON.stringify(L.slice(0,20)));
+  }
+  function botonNueva100(){
+    const bn=document.getElementById('btnNueva'); if(!bn) return;
+    bn.onclick=()=>{
+      const libre=primeraLibre();
+      if(libre){ window.__ranuraNueva100=libre; window.pantallaCreacion(); return; }
+      escena({rubro:'Tus partidas',titulo:'Las tres ranuras están ocupadas',cerrable:true,
+        cuerpo:'Para fundar otra dinastía tienes que reemplazar una de las partidas guardadas. La que elijas se borra.',
+        opciones:ranuras().map(r=>{ const x=resumenRanura(r.g); return {t:'Reemplazar la casa '+esc(x.casa),cat:'legado',d:esc(x.det),cerrar:false,run:()=>{ cerrarModal(); window.__ranuraNueva100=r.n; window.pantallaCreacion(); }}; })});
+    };
+  }
+  function botonSalir100(){
+    if(document.getElementById('btnSalir100')) return;
+    const g=document.getElementById('btnGuardar'); if(!g) return;
+    const b=document.createElement('button'); b.className='btn lisa'; b.id='btnSalir100'; b.textContent='Partidas';
+    b.title='Guardar y volver a la portada';
+    b.onclick=async()=>{ try{ if(S&&S.p&&!S.muerto) await guardar(true); }catch(e){} location.reload(); };
+    g.insertAdjacentElement('beforebegin',b);
+  }
+
+  /* --- dificultad --- */
+  const DIF_100={
+    facil:{n:'Fácil',d:'Arrancas con más plata, tienes una movida extra cada año, la muerte tarda más y la justicia es lenta. El puntaje vale ×0,75.',ef:1.6,muerte:.7,delito:.7,mov:1,pts:.75},
+    normal:{n:'Normal',d:'El juego como fue pensado.',ef:1,muerte:1,delito:1,mov:0,pts:1},
+    dificil:{n:'Difícil',d:'Arrancas con menos plata, la salud cobra más y la justicia no perdona. El puntaje vale ×1,5.',ef:.6,muerte:1.3,delito:1.35,mov:0,pts:1.5}
+  };
+  const dif=()=>DIF_100[(S&&S.dificultad100)||'normal']||DIF_100.normal;
+  function wrapCreacion100(){
+    const old=window.pantallaCreacion; if(typeof old!=='function'||window.__SA100_CREA) return;
+    window.pantallaCreacion=function(){
+      const r=old.apply(this,arguments);
+      try{
+        window.__dif100='normal'; window.__tuto100=!ls.get(TUTO);
+        const host=document.getElementById('escenaHost'); const ancla=host&&host.querySelector('#cOriD');
+        if(ancla){
+          const g=(id,arr,val)=>'<div class="fichas-sel" id="'+id+'">'+arr.map(a=>'<button type="button" class="opcion" data-v="'+a.v+'" aria-pressed="'+(a.v===val?'true':'false')+'">'+a.t+'</button>').join('')+'</div>';
+          ancla.insertAdjacentHTML('afterend','<label class="campo">Dificultad</label>'+g('cDif100',Object.keys(DIF_100).map(k=>({v:k,t:DIF_100[k].n})),'normal')+'<div class="apunte" id="cDif100D">'+esc(DIF_100.normal.d)+'</div>'
+            +'<label class="campo">Tutorial</label>'+g('cTuto100',[{v:'1',t:'Mostrarme cómo se juega'},{v:'0',t:'Ya sé jugar'}],window.__tuto100?'1':'0'));
+          const sel=(id,cb)=>host.querySelectorAll('#'+id+' .opcion').forEach(b=>b.onclick=()=>{ host.querySelectorAll('#'+id+' .opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); cb(b.dataset.v); });
+          sel('cDif100',v=>{ window.__dif100=v; const d=host.querySelector('#cDif100D'); if(d) d.textContent=DIF_100[v].d; });
+          sel('cTuto100',v=>{ window.__tuto100=v==='1'; });
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA100_CREA=true;
+  }
+  function wrapIniciar100(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA100_INI) return;
+    window.iniciar=function(cfg,legado){
+      const prev=S&&S.p?{ranura:S.ranura100,id:S.id100,dif:S.dificultad100,tuto:S.tuto100}:null;
+      const heredando=!!(legado&&prev);
+      window.__ranuraForzada100=heredando?prev.ranura:(window.__ranuraNueva100||primeraLibre()||masVieja());
+      const r=old.apply(this,arguments);
+      try{
+        if(S&&S.p){
+          S.ranura100=window.__ranuraForzada100;
+          if(heredando){ S.id100=prev.id; S.dificultad100=prev.dif||'normal'; }
+          else{
+            S.id100=S.id100||nuevoId(); S.dificultad100=window.__dif100||'normal';
+            const f=dif().ef; if(f!==1&&isFinite(S.efectivo)){ S.efectivo=Math.round(S.efectivo*f*100)/100; S.patrPintado=undefined; try{ render(); }catch(e){} }
+            window.__ranuraNueva100=null;
+            if(window.__tuto100) setTimeout(()=>tutorial100(),700);
+          }
+          if(!S.muerto) guardar(true);
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA100_INI=true;
+  }
+  function wrapMuerte100(){
+    const old=window.probMuerte; if(typeof old!=='function'||window.__SA100_MUERTE) return;
+    window.probMuerte=function(){ const p=old.apply(this,arguments); try{ const f=dif().muerte; if(f!==1&&isFinite(p)) return clamp(p*f,0,1); }catch(e){} return p; };
+    window.__SA100_MUERTE=true;
+  }
+  function wrapDelito100(){
+    const old=window.registrarDelito; if(typeof old!=='function'||window.__SA100_DEL) return;
+    window.registrarDelito=function(tipo,sev){ const r=old.apply(this,arguments); try{ const f=dif().delito; if(f!==1&&S.penal) S.penal.riesgo=clamp(S.penal.riesgo+(f-1)*(sev||0)*14,0,100); }catch(e){} return r; };
+    window.__SA100_DEL=true;
+  }
+  function wrapMovidas100(){
+    const old=window.movidasBase; if(typeof old!=='function'||window.__SA100_MOV) return;
+    window.movidasBase=function(){ const n=old.apply(this,arguments); try{ if(!nino()) return n+dif().mov; }catch(e){} return n; };
+    window.__SA100_MOV=true;
+  }
+
+  /* --- tutorial --- */
+  const tabBtn=t=>Array.from(document.querySelectorAll('#pestanas button')).find(b=>b.textContent.trim().indexOf(t)===0);
+  const PASOS_100=[
+    {t:'Tu crónica',x:'Inicio es tu diario: cada año se escribe aquí lo que te pasó, lo bueno y lo malo.',el:()=>tabBtn('Inicio'),tab:'mesa'},
+    {t:'Tu vida, en una lista',x:'En Perfil está todo lo que puedes hacer: estudiar, trabajar, enamorarte, comprar lujos… o meterte en problemas.',el:()=>tabBtn('Perfil'),tab:'perfil'},
+    {t:'Las movidas',x:()=>nino()?'Cada año te alcanza para unas pocas movidas. Estudiar, hacer amigos o una travesura cuesta una. Escoge bien.':'Cada año te alcanza para unas pocas movidas. Estudiar, fundar una empresa o casarte cuesta una. Escoge bien.',el:()=>document.getElementById('mano')},
+    {t:'Cerrar el año',x:'Cuando termines, cierra el año. Pasan cosas: eventos, elecciones, enfermedades, gente del pasado que vuelve.',el:()=>document.getElementById('btnAnio')},
+    {t:'Metas y logros',x:'Cada generación tiene tres metas y la casa colecciona logros y récords. Los ves en Perfil y en Legado.',el:()=>tabBtn('Legado')},
+    {t:'El apellido sigue',x:'Cuando mueras no se acaba: se lee el testamento y sigues con un heredero. El reto es que el apellido dure generaciones. ¡Suerte!',el:()=>null}
+  ];
+  function tutorial100(desde){
+    if(!S||!S.p) return;
+    const host=document.getElementById('escenaHost');
+    if(host&&host.children.length&&!desde){ setTimeout(()=>tutorial100(),800); return; }
+    let i=desde||0; let card=document.getElementById('tuto100');
+    if(!card){ card=document.createElement('div'); card.id='tuto100'; card.className='tuto100'; document.body.appendChild(card); }
+    const limpiar=()=>document.querySelectorAll('.tuto100-foco').forEach(e=>e.classList.remove('tuto100-foco'));
+    const cerrar=()=>{ limpiar(); card.remove(); ls.set(TUTO,'1'); };
+    const pinta=()=>{
+      limpiar(); const p=PASOS_100[i];
+      if(p.tab&&typeof tab!=='undefined'&&tab!==p.tab){ tab=p.tab; try{ renderPestanas(); renderLienzo(); }catch(e){} }
+      const el=p.el(); if(el){ el.classList.add('tuto100-foco'); try{ el.scrollIntoView({block:'nearest'}); }catch(e){} }
+      const ult=i===PASOS_100.length-1;
+      card.innerHTML='<div class="paso">Cómo se juega · '+(i+1)+' de '+PASOS_100.length+'</div><h4>'+esc(p.t)+'</h4><p>'+esc(typeof p.x==='function'?p.x():p.x)+'</p><div class="bot"><button class="saltar">'+(ult?'Cerrar':'Saltar')+'</button><button class="sig">'+(ult?'A jugar':'Siguiente')+'</button></div>';
+      card.querySelector('.saltar').onclick=cerrar;
+      card.querySelector('.sig').onclick=()=>{ if(ult) return cerrar(); i++; pinta(); };
+    };
+    pinta();
+  }
+
+  function wrapPuntaje100(){ window.multPuntaje100=()=>dif().pts; }
+
+  function init100(){
+    migrar100(); wrapGuardar100(); wrapBorrar100(); wrapCreacion100(); wrapIniciar100(); wrapMuerte100(); wrapDelito100(); wrapMovidas100(); wrapPuntaje100();
+    botonNueva100(); botonSalir100();
+    if(!S||!S.p) pintarPortada100();
+    Object.assign(window,{DIF_100,ranuras100:ranuras,cargarRanura100,pintarPortada100,registrarDinastia100,salon100:salon,tutorial100,PASOS_100});
+  }
+  setTimeout(init100,40);
+  setTimeout(init100,220);
+  setTimeout(init100,650);
+  window.__SA100={version:V100};
 })();
 </script>
 
