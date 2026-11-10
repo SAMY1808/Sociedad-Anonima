@@ -843,10 +843,25 @@ html{scroll-behavior:smooth}
 .vida103 li.mal:before{background:var(--ui-red,#d06a5a)}
 .vida103 li em{font-style:normal;color:var(--laton);margin-right:6px;font-variant-numeric:tabular-nums}
 </style>
+<style id="estilos-v104">
+.jefe104{display:flex;gap:14px;align-items:flex-start;margin:12px 0 4px;padding:12px 14px;border:1px solid rgba(214,166,72,.25);border-radius:12px;background:rgba(214,166,72,.04)}
+.jefe104 .q{flex:1;min-width:0}
+.jefe104 .q b{display:block;font-weight:500;color:var(--marfil);font-size:15px}
+.jefe104 .q>span{display:block;font-size:12.5px;color:var(--humo)}
+.jefe104 .rasgo{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--laton);border:1px solid rgba(214,166,72,.35);border-radius:6px;padding:2px 8px;line-height:1.35}
+.jefe104 ul{list-style:none;margin:8px 0 0;padding:0}
+.jefe104 li{font-size:12.5px;color:var(--humo);padding:2px 0}
+.jefe104 li.pos:before{content:"+ ";color:var(--jade,#6CC08F)}
+.jefe104 li.neg:before{content:"– ";color:var(--ui-red,#d06a5a)}
+.jefes104{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.jefes104 .jefe104{margin:0}
+.rel104{height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}
+.rel104 i{display:block;height:100%}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v103</div>
+<div class="version-badge" id="versionBadge">v104</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1823,7 +1838,7 @@ function miIndice(){ return indiceCasa(patrimonio(),prestigio()); }
 function generarRivales(){
   const usados=[S.dinastia];
   const base=Math.max(400, patrimonio()*1.4+500);
-  S.rivales=CASAS.filter(c=>c.p>=25).slice()
+  S.rivales=CASAS.filter(c=>c.p>=25&&c.a!==S.dinastia&&c.a!==(S.p&&S.p.apellido)).slice()
     .sort(()=>Math.random()-.5).slice(0,6)
     .map(c=>{
       usados.push(c.a);
@@ -16109,6 +16124,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         if(!hijos.length||!candidatas.length) return null;
         const h=pick(hijos), r=pick(candidatas);
         S._propCasaHijo=h.nombre; S._propCasaRid=r.rid;
+        if(typeof window.jefe104==='function'){ const j=window.jefe104(r); return '<b>'+esc(j.nombre+' '+r.apellido)+'</b>, '+(j.sexo==='m'?'jefa':'jefe')+' de los '+esc(r.apellido)+', te invita a su finca y entre el postre y el café propone sellar la relación entre las dos casas con un matrimonio: alguien de su familia para '+esc(h.nombre)+'.'; }
         return 'Los <b>'+esc(r.apellido)+'</b> proponen sellar la relación entre las dos casas con un matrimonio: alguien de su familia para '+esc(h.nombre)+'.';
       },
       o:[
@@ -16122,6 +16138,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
             ciudad:h.ciudad||S.p.ciudad,casa:{apellido:r.apellido,prestigio:r.prestigio,patrimonio:r.patrimonio,pais:r.pais,rid:r.rid}};
           h.vinculo=clamp((h.vinculo||60)+8,0,100);
           r.relacionCasa=clamp((r.relacionCasa||50)+22,0,100);
+          if(typeof window.jefe104==='function'){ const j=window.jefe104(r); j.memoria.push({anio:S.anio,txt:'Casaron a sus hijos: las dos casas quedaron unidas.',peso:4}); }
+          if(window.anotarHijo103) window.anotarHijo103(h,'Se casó con '+h.pareja.nombre+': alianza con los '+r.apellido+'.','bien');
           if(window.__SA70&&window.__SA70.enGuerraCon&&window.__SA70.enGuerraCon(r)) S.guerraEmpresarial=null;
           hito(esc(h.nombre)+' se casó con los '+r.apellido+', por una propuesta de ellos');
           return 'Aceptaste: <b>'+esc(h.nombre)+'</b> se casó con alguien de los <b>'+esc(r.apellido)+'</b>. La relación entre las dos casas mejoró de verdad.';
@@ -21591,7 +21609,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(!chance(prob)) return;
     const cap=Math.max(200,pat()*.08);
     (S.rivales=S.rivales||[]).push({rid:'r'+ri(100,999),apellido:S.p.apellido+' (rama de '+x.nombre+')',prestigio:clamp(prestigio()*.6,5,90),patrimonio:cap,
-      sector:S.emp?S.emp.sector:pick(sectoresDisponibles()).id,compania:x.nombre+' '+S.p.apellido+' y Cía.',capaz:ri(4,8),agresiva:true,viva:true,delaCasa:true,rencor102:true,
+      sector:S.emp?S.emp.sector:pick(sectoresDisponibles()).id,compania:x.nombre+' '+S.p.apellido+' y Cía.',capaz:ri(4,8),agresiva:true,viva:true,delaCasa:true,rencor102:true,relacionCasa:15,
       jefe104:{nombre:x.nombre,sexo:x.sexo,edad:(pariente102(x.nombre)||{}).edad||40,rasgo:'vengativo',actitud:-70,memoria:[{anio:S.anio,txt:'Le quitaste la herencia que creía suya.',peso:-3}]}});
     log('<b>'+esc(x.nombre)+'</b> fundó una empresa en tu mismo sector. No lo esconde: es para competirte.','mal');
     hito(x.nombre+' montó una empresa para competirle a la casa');
@@ -21809,6 +21827,125 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init103,40); setTimeout(init103,220); setTimeout(init103,650);
   window.__SA103={version:V103};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v104 · RIVALES CON CARA
+   Cada casa rival tiene un jefe con nombre, edad y carácter, que recuerda
+   lo que le hiciste: la toma hostil, la guerra, la alianza. Te propone
+   casar a sus hijos con los tuyos o te sabotea, según quién sea. Cuando
+   muere, su heredero hereda el rencor (o el aprecio).
+   ========================================================================== */
+(function(){
+  const V104='v104';
+  const RASGOS_104={vengativo:{n:'vengativo',d:'No olvida nada.'},pragmatico:{n:'pragmático',d:'Primero los negocios.'},soberbio:{n:'soberbio',d:'Mira a todos por encima del hombro.'},
+    leal:{n:'leal',d:'Si le cumples, te cumple.'},calculador:{n:'calculador',d:'Juega a largo plazo.'}};
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const rel=r=>isFinite(r.relacionCasa)?r.relacionCasa:50;
+  function jefe(r){
+    if(!r.jefe104){ const sexo=r.herederoSexo||(chance(.75)?'h':'m');
+      r.jefe104={nombre:r.heredero||pick(sexo==='h'?NOM_H:NOM_M),sexo,edad:ri(45,72),rasgo:pick(Object.keys(RASGOS_104)),memoria:[],gen:r.generacion||1}; }
+    const j=r.jefe104; if(!Array.isArray(j.memoria)) j.memoria=[]; if(!RASGOS_104[j.rasgo]) j.rasgo='pragmatico'; return j;
+  }
+  function recordar(r,txt,peso){ const j=jefe(r); j.memoria=j.memoria.concat([{anio:S.anio,txt,peso:peso||0}]).slice(-8);
+    const mult=j.rasgo==='vengativo'&&peso<0?1.6:j.rasgo==='leal'&&peso>0?1.4:1;
+    r.relacionCasa=clamp(rel(r)+peso*5*mult,0,100); }
+  const nomJ=r=>{ const j=jefe(r); return j.nombre+' '+r.apellido.replace(/ \(.*\)$/,''); };
+  const elJ=j=>j.sexo==='m'?'ella':'él', laJ=j=>j.sexo==='m'?'la':'el', hijoJ=s=>s==='m'?'hija':'hijo';
+
+  /* --- el año de cada casa: memoria, edad y relevo --- */
+  function correrJefes104(){
+    rivalesVivas().forEach(r=>{
+      const j=jefe(r); j.edad++;
+      // relevo hecho por v74 (r.generacion sube y trae r.heredero)
+      if((r.generacion||1)!==j.gen){
+        const viejo=j; const nuevo={nombre:r.heredero||pick(NOM_H),sexo:r.herederoSexo||'h',edad:ri(30,50),rasgo:chance(.6)?viejo.rasgo:pick(Object.keys(RASGOS_104)),gen:r.generacion||1,
+          memoria:viejo.memoria.filter(m=>Math.abs(m.peso)>=2).slice(-4).map(m=>({anio:m.anio,txt:(viejo.sexo==='m'?'Su madre':'Su padre')+' recordaba: '+m.txt.charAt(0).toLowerCase()+m.txt.slice(1),peso:Math.round(m.peso*.7)}))};
+        r.jefe104=nuevo;
+        const v=rel(r); r.relacionCasa=clamp(50+(v-50)*.7,0,100);
+        if(v<35) log('<b>'+esc(nuevo.nombre)+'</b>, '+(nuevo.sexo==='m'?'la nueva jefa':'el nuevo jefe')+' de los '+esc(r.apellido)+', heredó el rencor de '+(viejo.sexo==='m'?'su madre':'su padre')+' contra tu casa.','mal');
+        else if(v>=65) log('<b>'+esc(nuevo.nombre)+'</b> toma el mando de los '+esc(r.apellido)+' y te manda decir que la amistad entre las casas sigue.','bien');
+      }
+      // memoria de lo que pasó este año
+      if(S.guerraEmpresarial&&S.guerraEmpresarial.rid===r.rid&&j.guerraVista!==S.guerraEmpresarial.desde){ j.guerraVista=S.guerraEmpresarial.desde; recordar(r,'Entraron en guerra con tu casa en '+S.guerraEmpresarial.desde+'.',-3); }
+      if(isFinite(r._rel104)){ const d=rel(r)-r._rel104;
+        if(d>=10&&!j.memoria.some(m=>m.anio===S.anio)) j.memoria.push({anio:S.anio,txt:'Se acercaron: alianza o gesto de tu casa.',peso:2});
+        if(d<=-10&&!j.memoria.some(m=>m.anio===S.anio)) j.memoria.push({anio:S.anio,txt:'Chocaron con tu casa en los negocios.',peso:-2}); }
+      r._rel104=rel(r);
+    });
+  }
+
+  /* --- eventos según el carácter de cada jefe --- */
+  function instalarEventos104(){
+    if(window.__SA104_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    const R=()=>rivalesVivas().find(x=>x.rid===S._r104);
+    E({p:1.1,c:()=>rivalesVivas().some(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo)),
+      t:()=>{ const r=pick(rivalesVivas().filter(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo))); S._r104=r.rid; const j=jefe(r);
+        const golpe=S.emp?pick(['se llevó a tu mejor cliente con una oferta que no tiene sentido','compró a tu gerente comercial','le contó a un periodista lo que sabe de tus cuentas']):pick(['le contó a un periodista lo que sabe de tus cuentas','te cerró la puerta en el club','habló mal de tu familia en una comida con el ministro']);
+        S._g104=golpe; const m=j.memoria.filter(x=>x.peso<0).slice(-1)[0];
+        return '<b>'+esc(nomJ(r))+'</b> '+golpe+'.'+(m?' No es casualidad: '+(j.sexo==='m'?'ella':'él')+' no olvida que '+esc(m.txt.charAt(0).toLowerCase()+m.txt.slice(1)).replace(/\.$/,'')+'.':' Es su forma de decir que no te quiere en su camino.'); },
+      o:[{t:'Devolver el golpe',f:()=>{ const r=R(); if(!r) return ''; r.patrimonio*=rnd(.93,.98); recordar(r,'Le devolviste un golpe.',-2); moverPrestigio(-1,''); return 'Le devolviste el golpe. Ahora es personal entre las dos casas.'; }},
+         {t:'Absorberlo y seguir',f:()=>{ const r=R(); if(S.emp&&/cliente|gerente/.test(S._g104)) S.emp.ingresos*=.95; else S.p.reputacion=clamp(S.p.reputacion-3,0,100); if(r) recordar(r,'Aguantaste su golpe sin responder.',0); return 'Lo absorbiste. Te costó, pero no le diste la pelea.'; }},
+         {t:()=>{ const r=rivalesVivas().find(x=>x.rid===S._r104); return 'Buscarl'+(r&&jefe(r).sexo==='m'?'a':'o')+' para hacer las paces'; },f:()=>{ const r=R(); if(!r) return ''; const c=Math.max(10,Math.round(pat()*.01)); S.efectivo-=Math.min(S.efectivo,c);
+           const j=jefe(r); const p=j.rasgo==='vengativo'?.25:j.rasgo==='soberbio'?.35:.55;
+           if(chance(p)){ recordar(r,'Le buscaste para hacer las paces.',3); return 'Almorzaron. No son amigos, pero la guerra fría se acabó. ('+fmt(c)+' en el gesto.)'; }
+           recordar(r,'Le buscaste para hacer las paces y te rechazó.',-1); return 'Te dejó esperando en el restaurante. Gastaste '+fmt(c)+' y el orgullo.'; }}]});
+    E({p:.8,c:()=>rivalesVivas().some(r=>(r.generacion||1)>1&&!jefe(r).visita104),
+      t:()=>{ const r=pick(rivalesVivas().filter(r=>(r.generacion||1)>1&&!jefe(r).visita104)); S._r104=r.rid; const j=jefe(r); j.visita104=true; const v=rel(r);
+        return '<b>'+esc(nomJ(r))+'</b>, '+(j.sexo==='m'?'la nueva jefa':'el nuevo jefe')+' de los '+esc(r.apellido)+', pide una cita contigo. '+(v<40?'Llega con la herencia de un pleito viejo con tu casa.':v>=60?'Dice que quiere seguir la amistad que tenían las dos casas.':'Viene a medirte.'); },
+      o:[{t:'Tenderle la mano',f:()=>{ const r=R(); if(r) recordar(r,'Le tendiste la mano cuando tomó el mando.',2); return 'Salió de tu oficina con una sonrisa. Veremos.'; }},
+         {t:()=>{ const r=rivalesVivas().find(x=>x.rid===S._r104); return 'Recibirl'+(r&&jefe(r).sexo==='m'?'a':'o')+' con frialdad'; },f:()=>{ const r=R(); if(r) recordar(r,'Le recibiste con frialdad cuando tomó el mando.',-2); return 'Diez minutos y la puerta. Entendió el mensaje.'; }}]});
+    window.__SA104_EV=true;
+  }
+
+  /* --- la toma hostil se recuerda --- */
+  function wrapOPA104(){
+    const old=window.escenaOPA; if(typeof old!=='function'||window.__SA104_OPA) return;
+    window.escenaOPA=function(r){ try{ if(r) recordar(r,'Le lanzaste una toma hostil.',-3); }catch(e){} return old.apply(this,arguments); };
+    window.__SA104_OPA=true;
+  }
+
+  /* --- vistas --- */
+  function tarjetaJefe(r){
+    const j=jefe(r), v=rel(r); const col=v>=60?'var(--jade,#6CC08F)':v<35?'var(--ui-red,#d06a5a)':'var(--laton)';
+    return '<div class="jefe104">'+avatarSVG(j.nombre+' '+r.apellido,{sexo:j.sexo,edad:j.edad,tam:52})+'<div class="q"><b>'+esc(j.nombre+' '+r.apellido.replace(/ \(.*\)$/,''))+'</b><span>'+(j.sexo==='m'?'Jefa':'Jefe')+' de los '+esc(r.apellido)+' · '+j.edad+' años'+((r.generacion||1)>1?' · generación '+r.generacion:'')+'</span>'
+      +'<span class="rasgo">'+esc(RASGOS_104[j.rasgo].n)+' · '+esc(RASGOS_104[j.rasgo].d)+'</span>'
+      +'<div class="rel104"><i style="width:'+Math.round(v)+'%;background:'+col+'"></i></div>'
+      +(j.memoria.length?'<ul>'+j.memoria.slice(-3).reverse().map(m=>'<li class="'+(m.peso>0?'pos':m.peso<0?'neg':'')+'">'+m.anio+': '+esc(m.txt)+'</li>').join('')+'</ul>':'<ul><li>Todavía no tiene nada que recordarte.</li></ul>')+'</div></div>';
+  }
+  function wrapEscena104(){
+    const old=window.escena; if(typeof old!=='function'||window.__SA104_ESC) return;
+    window.escena=function(cfg){ const r0=old.apply(this,arguments);
+      try{ if(cfg&&cfg.rubro==='Las otras casas'&&/^Los /.test(cfg.titulo||'')){
+        const ap=String(cfg.titulo).replace(/^Los /,'').replace(/&amp;/g,'&'); const r=rivalesVivas().find(x=>esc(x.apellido)===String(cfg.titulo).replace(/^Los /,'')||x.apellido===ap);
+        const rel0=document.querySelector('#escenaHost .relato'); if(r&&rel0&&!document.querySelector('#escenaHost .jefe104')) rel0.insertAdjacentHTML('afterend',tarjetaJefe(r)); } }catch(e){}
+      return r0; };
+    window.__SA104_ESC=true;
+  }
+  function wrapLienzo104(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA104_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='legado'&&S&&S.p&&!document.getElementById('jefes104')&&rivalesVivas().length){
+        const host=$('lienzoJuego'); const h3=Array.from(host.querySelectorAll('h3')).find(x=>/Las casas del país/.test(x.textContent)); const tabla=h3&&h3.nextElementSibling;
+        const html='<div id="jefes104"><h3 style="margin-top:22px">Quién manda en cada casa<em>y qué recuerda de la tuya</em></h3><div class="jefes104">'+rivalesVivas().slice().sort((a,b)=>rel(a)-rel(b)).map(tarjetaJefe).join('')+'</div></div>';
+        if(tabla) tabla.insertAdjacentHTML('afterend',html); else { const w=host.querySelector('.seccion'); if(w) w.insertAdjacentHTML('beforeend',html); } } }catch(e){}
+      return r; };
+    window.__SA104_LIENZO=true;
+  }
+  function wrapPaso104(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA104_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrJefes104(); }catch(e){} return r; };
+    window.__SA104_PASO=true;
+  }
+  function init104(){
+    instalarEventos104(); wrapOPA104(); wrapEscena104(); wrapLienzo104(); wrapPaso104();
+    Object.assign(window,{jefe104:jefe,recordarRival104:recordar,correrJefes104,RASGOS_104});
+  }
+  setTimeout(init104,40); setTimeout(init104,220); setTimeout(init104,650);
+  window.__SA104={version:V104};
 })();
 </script>
 
