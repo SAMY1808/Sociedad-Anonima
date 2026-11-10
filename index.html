@@ -818,7 +818,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v100</div>
+<div class="version-badge" id="versionBadge">v101</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2147,7 +2147,7 @@ function escenaEnroque(r){
          hito('Se enrocó con los '+r.apellido);
          S.mov--;
        }},
-      {t:'Mejor no amarrarse',cat:'capital',d:'Conservas las manos libres y la exposición.',run:()=>{ S.mov--; }}
+      {t:'Mejor no amarrarse',cat:'capital',d:'Conservas las manos libres y la exposición.',run:()=>{}}
     ]});
 }
 
@@ -2172,7 +2172,7 @@ function escenaAportarBien(){
         log('<b>'+esc(b.nombre)+'</b> entró al balance de '+esc(e.nombre)+'. Ahora produce dentro de la compañía.','hito');
         S.mov--;
       }}))
-      .concat([{t:'Dejarlos a mi nombre',cat:'casa',d:'Separados del negocio: si algo se quema, no se los lleva.',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Dejarlos a mi nombre',cat:'casa',d:'Separados del negocio: si algo se quema, no se los lleva.',run:()=>{}}])});
 }
 
 /* ==========================================================================
@@ -2310,7 +2310,7 @@ function escenaFideicomiso(){
              log('Repatriaste '+fmt(x*.94)+' y la operación levantó preguntas.','mal'); }
            else log('Repatriaste '+fmt(x*.94)+' sin ruido.');
            S.mov--; }},
-        {t:'Dejarlo quieto',cat:'legado',run:()=>{ S.mov--; }}
+        {t:'Dejarlo quieto',cat:'legado',run:()=>{}}
       ]});
     return;
   }
@@ -2325,7 +2325,7 @@ function escenaFideicomiso(){
         S.fideicomiso={jur:j.id,valor:x,desde:S.anio};
         log('Constituiste un fideicomiso en <b>'+esc(j.n)+'</b> con '+fmt(x)+'.','hito');
         S.mov--; }}))
-      .concat([{t:'Mejor todo a la vista',cat:'legado',d:'Pagas lo que toca y duermes sin sobresaltos.',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Mejor todo a la vista',cat:'legado',d:'Pagas lo que toca y duermes sin sobresaltos.',run:()=>{}}])});
 }
 function correrFideicomiso(res,m){
   const f=S.fideicomiso; if(!f||f.valor<=0) return;
@@ -2368,7 +2368,7 @@ function escenaFundacion(){
            moverPrestigio(-10,'se disolvió la fundación');
            log('Disolviste la fundación. Volvieron '+fmt(x)+' y quedó la pregunta de para qué la habías creado.','mal');
            S.fundacion=null; S.mov--; }},
-        {t:'Dejarla como está',cat:'legado',run:()=>{ S.mov--; }}
+        {t:'Dejarla como está',cat:'legado',run:()=>{}}
       ]});
     return;
   }
@@ -2439,7 +2439,7 @@ function escenaLobby(){
         }
         S.mov--;
       }}))
-      .concat([{t:'Dejar que la ley siga su curso',cat:'legado',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Dejar que la ley siga su curso',cat:'legado',run:()=>{}}])});
 }
 function asegurarPenal(){
   if(!S.penal||typeof S.penal!=='object')S.penal={caso:null,crimes:[],riesgo:0,prisionRestante:0,penaMuerte:false,condena:null};
@@ -2539,7 +2539,7 @@ function escenaSoborno(){
          else { S.p.escandalos++; moverPrestigio(-10,'intentar tapar el caso');
            log('Intentar taparlo lo volvió el doble de grande.','mal'); }
          S.mov--; }},
-      {t:'Nada de eso',cat:'legado',run:()=>{ S.mov--; }}
+      {t:'Nada de eso',cat:'legado',run:()=>{}}
     ]});
 }
 /* los sobornos viejos aparecen cuando cambia el gobierno */
@@ -2875,7 +2875,7 @@ function escenaSeguros(){
       run:()=>{ seguros()[s.id]=!seguros()[s.id];
         log(seguros()[s.id]?'Contrataste '+s.n.toLowerCase()+'.':'Cancelaste '+s.n.toLowerCase()+'.');
         S.mov--; }}))
-      .concat([{t:'Dejar como está',cat:'legado',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Dejar como está',cat:'legado',run:()=>{}}])});
 }
 
 /* ---------------- mausoleo y funerales ---------------- */
@@ -2931,7 +2931,7 @@ function escenaMausoleo(){
          dis:S.efectivo<Math.max(90,patrimonio()*.02)?'No te alcanza':null,
          run:()=>{ const x=Math.max(90,patrimonio()*.02); S.efectivo-=x; M.cupos+=4;
            moverPrestigio(2,''); log('Ampliaste el mausoleo: quedan '+M.cupos+' cupos.'); S.mov--; }},
-        {t:'Dejarlo así',cat:'legado',run:()=>{ S.mov--; }}
+        {t:'Dejarlo así',cat:'legado',run:()=>{}}
       ]});
     return;
   }
@@ -2951,7 +2951,7 @@ function escenaMausoleo(){
          moverPrestigio(6,'el mausoleo de la casa '+S.dinastia);
          log('Mandaste a construir el mausoleo de la casa '+esc(S.dinastia)+'.','hito');
          hito('Construyó el mausoleo de la casa'); S.mov--; }},
-      {t:'Eso se ve después',cat:'legado',run:()=>{ S.mov--; }}
+      {t:'Eso se ve después',cat:'legado',run:()=>{}}
     ]});
 }
 
@@ -3753,7 +3753,7 @@ function escenaGremios(){
         }
         S.mov--;
       }}))
-      .concat([{t:'Dejarlo así',cat:'legado',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Dejarlo así',cat:'legado',run:()=>{}}])});
 }
 
 /* ---------------- los sindicatos, con nombre y central ---------------- */
@@ -3865,7 +3865,7 @@ function escenaAmantes(){
     S.mov--; cerrarModal(); render();
   }}));
   if(activos.length) opciones.push({t:'Terminar una relación',cat:'familia',d:'Cerrar una relación paralela antes de que crezca el problema.',run:()=>{const a=activos[0];a.activo=false;a.fin=S.anio;S.p.felicidad=clamp(S.p.felicidad-2,0,100);S.mov--;log('Terminaste tu relación con <b>'+esc(a.nombre)+'</b>.','bien');cerrarModal();render();}});
-  opciones.push({t:'Dejarlo así',cat:'familia',run:()=>{S.mov--;}});
+  opciones.push({t:'Dejarlo así',cat:'familia',run:()=>{}});
   escena({rubro:'Vida sentimental',titulo:'Relaciones y vida privada',ancho:true,cuerpo,
     html:'<div class="apunte"><b>Fertilidad actual:</b> '+Math.round(fertilidadActual(S.p))+'/100 · <b>Relaciones paralelas activas:</b> '+activos.length+(q?' · <b>Pareja:</b> '+esc(q.nombre):'')+'</div>',opciones,cerrable:true});
 }
@@ -4047,7 +4047,7 @@ function escenaAdoptar(){
          S.mov--;
          setTimeout(()=>escenaBautizo(h,'Llegó a la casa'),0);
        }},
-      {t:'Todavía no',cat:'familia',run:()=>{ S.mov--; }}
+      {t:'Todavía no',cat:'familia',run:()=>{}}
     ]});
 }
 
@@ -4319,7 +4319,7 @@ function escenaMatrimonioEnCasa(){
         +'. Afecto contigo '+Math.round(p.afecto)+'.',
       run:()=>{
         p.casadoConmigo=true;
-        S.familia.pareja={nombre:p.nombre+' '+S.dinastia, rol:p.oficio, sexo:p.sexo, edad:p.edad,
+        S.familia.pareja={nombre:nombrePariente(p), rol:p.oficio, sexo:p.sexo, edad:p.edad,
           casados:true, paciencia:clamp(55+p.afecto*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
           casa:{apellido:S.dinastia,prestigio:prestigio()}, afecto:p.afecto, porInteres:true,
           separacionBienes:false, esPrima:true, pid:p.pid};
@@ -4397,7 +4397,7 @@ function escenaDivisas(){
         run:()=>{ const x=(D[dv.id]||0)*t[dv.id]*.985; D[dv.id]=0; S.efectivo+=x;
           S.valorDivisasAntes=valorDivisas();
           log('Vendiste tus '+dv.n+' por '+fmt(x)+'.'); S.mov--; }})))
-      .concat([{t:'Dejarlo en pesos',cat:'legado',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Dejarlo en pesos',cat:'legado',run:()=>{}}])});
   return caja;
 }
 
@@ -4407,14 +4407,14 @@ function escenaExportacion(){
   escena({rubro:'Comercio exterior',titulo:'Primer contrato de exportación',ancho:true,cuerpo:'Puedes vender desde Colombia a un distribuidor extranjero sin abrir una sociedad afuera. Es más barato, pero dependes del socio y del tipo de cambio.',
     opciones:PAISES.map(pz=>({t:pz.n,cat:'mercado',d:'Contrato inicial por cerca de '+fmt(e.ingresos*.08)+' al año, cobrado en '+(pz.div==='eur'?'euros':'dólares')+'. Riesgo comercial '+Math.round(pz.riesgo*100)+'%.',run:()=>{
       const venta=e.ingresos*.08*(1-rnd(.04,.12)),moneda=pz.div||'usd'; divisas()[moneda]+=venta/t[moneda]; e.ingresos+=venta*.35; e.marca=clamp(e.marca+3,0,100); e.exportaciones=(e.exportaciones||0)+venta;
-      log('Firmaste un contrato de exportación con '+esc(pz.n)+'. Entraron '+fmt(venta)+' equivalentes en '+(moneda==='eur'?'euros':'dólares')+'.','hito');S.mov--;}})).concat([{t:'Seguir vendiendo en Colombia',cat:'compania',run:()=>{S.mov--;}}])});
+      log('Firmaste un contrato de exportación con '+esc(pz.n)+'. Entraron '+fmt(venta)+' equivalentes en '+(moneda==='eur'?'euros':'dólares')+'.','hito');S.mov--;}})).concat([{t:'Seguir vendiendo en Colombia',cat:'compania',run:()=>{}}])});
 }
 function escenaJointVenture(){
   const e=S.emp,base=e.ingresos*.16;
   escena({rubro:'Alianza internacional',titulo:'Empresa conjunta con un socio local',ancho:true,cuerpo:'El socio extranjero aporta distribución, licencias o conocimiento del mercado. Tú pones capital y tecnología. La empresa queda compartida: ganas acceso, pero no mandas solo.',
     opciones:PAISES.map(pz=>({t:pz.n,cat:'mercado',d:'Aportas '+fmt(base*pz.costo*.55)+' y recibes cerca del 45% del proyecto.',dis:e.caja+capacidadDeudaDe(e)<base*pz.costo*.55?'La empresa no tiene caja ni capacidad de deuda suficiente':null,run:()=>{
       const aporte=base*pz.costo*.55,pago=financiarEmpresa(e,aporte,true); if(!pago.ok){log('La empresa no pudo financiar la alianza; tu caja personal quedó intacta.','mal');return;} if(pago.deuda>0) log('La alianza tomó '+fmt(pago.deuda)+' de deuda corporativa.','bien'); e.jv=e.jv||[];e.jv.push({pais:pz.id,n:pz.n,desde:S.anio,aporte,participacion:.45,base});e.ingresos+=base*.06;e.marca=clamp(e.marca+5,0,100);e.innovacion=clamp(e.innovacion+4,0,100);
-      log('Creaste una empresa conjunta en '+esc(pz.n)+'. Tu participación es 45% y el socio local controla el resto.','hito');S.mov--;}})).concat([{t:'No por ahora',cat:'compania',run:()=>{S.mov--;}}])});
+      log('Creaste una empresa conjunta en '+esc(pz.n)+'. Tu participación es 45% y el socio local controla el resto.','hito');S.mov--;}})).concat([{t:'No por ahora',cat:'compania',run:()=>{}}])});
 }
 function correrJointVentures(res){
   companias().forEach(e=>(e.jv||[]).forEach(j=>{const r=j.base*rnd(.08,.20),t=tasas(),p=PAISES.find(x=>x.id===j.pais),moneda=p?p.div:'usd';divisas()[moneda]+=r*j.participacion/t[moneda];res.push([e.nombre+' · joint venture en '+j.n,r*j.participacion,'pos']);}));
@@ -4462,7 +4462,7 @@ function escenaInternacional(){
         log('Arrancó el montaje de la filial en '+pz.n+', por '+fmt(x)+'.');
         S.mov--;
       }}))
-      .concat([{t:'Quedarse en Colombia',cat:'compania',d:'Menos riesgo, y todo tu destino atado al peso.',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Quedarse en Colombia',cat:'compania',d:'Menos riesgo, y todo tu destino atado al peso.',run:()=>{}}])});
 }
 function correrFiliales(res,m){
   companias().forEach(e=>{
@@ -4547,16 +4547,24 @@ function moverPrestigio(n,motivo){
 }
 
 let UIDP=1;
+function apellidoMaterno(){ if(!S.apMaterno){ let a=apellidoCiudad(S.p.ciudad); for(let i=0;i<8&&a===S.dinastia;i++) a=apellidoCiudad(S.p.ciudad); S.apMaterno=a; } return S.apMaterno; }
+function otroApellido(){ let a=apellidoCiudad(S.p.ciudad); for(let i=0;i<8&&(a===S.dinastia||a===S.apMaterno);i++) a=apellidoCiudad(S.p.ciudad); return a; }
+let PARIENTES_EN_CURSO=null;
+function nombreLibre(sexo,apellido){
+  const usados=new Set([...(S.parientes||[]),...(PARIENTES_EN_CURSO||[])].filter(x=>x.vivo!==false&&(x.apellido||S.dinastia)===apellido).map(x=>x.nombre).concat(S.p?[S.p.nombre]:[]).concat(((S.familia&&S.familia.hijos)||[]).map(x=>x.nombre)));
+  let n=nombreLocal(S.p.ciudad,sexo); for(let i=0;i<12&&usados.has(n);i++) n=nombreLocal(S.p.ciudad,sexo); return n;
+}
 function nuevoPariente(rel,sexo,edad,rama){
   const inferido={padre:'h',madre:'m',abuelo:'h',abuela:'m',hijo:'h',hermano:'h',hermana:'m','tío':'h','tía':'m',primo:'h',prima:'m','primo segundo':'h','prima segunda':'m',sobrino:'h',sobrina:'m'}[rel];
   const s=(sexo==='h'||sexo==='m')?sexo:(inferido||(chance(.5)?'h':'m'));
-  return { pid:'p'+(UIDP++), rel, sexo:s, edad,
-    nombre:nombreLocal(S.p.ciudad,s),
+  const ap=(rama==='materna')?apellidoMaterno():S.dinastia;
+  return { pid:'p'+(UIDP++), rel, sexo:s, edad, apellido:ap,
+    nombre:nombreLibre(s,ap),
     oficio:pick(OFICIOS_FAM), afecto:ri(45,80), capaz:ri(2,9), honrado:ri(2,9),
     rama:rama||'paterna', vivo:true, cultura:culturaCiudad(S.p.ciudad).id };
 }
 function parientesVivos(rel){ return (S.parientes||[]).filter(p=>p.vivo&&(!rel||p.rel===rel)); }
-function nombrePariente(p){ return p.nombre+' '+S.dinastia; }
+function nombrePariente(p){ return p.nombre+' '+(p.apellido||S.dinastia); }
 function relacionPorSexo(rel,sexo){
   if(!sexo) return rel;
   const m={'padre':{h:'padre',m:'madre'},'madre':{h:'padre',m:'madre'},'abuelo':{h:'abuelo',m:'abuela'},'abuela':{h:'abuelo',m:'abuela'},'hijo':{h:'hijo',m:'hija'},'hija':{h:'hijo',m:'hija'},'hermano':{h:'hermano',m:'hermana'},'hermana':{h:'hermano',m:'hermana'},'tío':{h:'tío',m:'tía'},'tía':{h:'tío',m:'tía'},'primo':{h:'primo',m:'prima'},'prima':{h:'primo',m:'prima'},'primo segundo':{h:'primo segundo',m:'prima segunda'},'prima segunda':{h:'primo segundo',m:'prima segunda'},'sobrino':{h:'sobrino',m:'sobrina'},'sobrina':{h:'sobrino',m:'sobrina'}};
@@ -4584,7 +4592,8 @@ function prepararSucesorColateral(pa){
 function sucesoresColaterales(){
   const vivos=parientesVivos().filter(p=>['hermano','hermana','sobrino','sobrina','primo','prima','primo segundo','prima segunda'].includes(relacionPorSexo(p.rel,p.sexo)));
   const pesos={hermano:1,hermana:1,sobrino:.82,sobrina:.82,primo:.66,prima:.66,'primo segundo':.52,'prima segunda':.52};
-  return vivos.sort((a,b)=>(pesos[b.rel]||.4)-(pesos[a.rel]||.4) || (a.edad||99)-(b.edad||99)).slice(0,6).map(prepararSucesorColateral);
+  const apto=p=>(pesos[p.rel]||.4)-((p.edad||0)>65?.6:0)-((p.edad||0)<16?.3:0);
+  return vivos.sort((a,b)=>apto(b)-apto(a) || (a.edad||99)-(b.edad||99)).slice(0,6).map(prepararSucesorColateral);
 }
 function sucesorDeEmergencia(){
   const sexo=chance(.5)?'h':'m';
@@ -4603,7 +4612,7 @@ function normalizarFamiliaGeneros(){
 }
 
 function generarParentela(){
-  const P=[];
+  const P=[]; PARIENTES_EN_CURSO=P; S.apMaterno=null;
   const origen=S.p.origen;
   const padre=nuevoPariente('padre','h',S.p.edad+ri(24,34));
   const madre=nuevoPariente('madre','m',S.p.edad+ri(21,31),'materna');
@@ -4624,33 +4633,39 @@ function generarParentela(){
     const t=nuevoPariente(chance(.5)?'tío':'tía',null,S.p.edad+ri(20,40),chance(.5)?'paterna':'materna');
     P.push(t);
     const nPri=ri(0,3);
-    for(let k=0;k<nPri;k++) P.push(nuevoPariente(chance(.5)?'primo':'prima',null,clamp(S.p.edad+ri(-10,10),0,55),t.rama));
+    // los hijos de una tía llevan el apellido de su marido
+    const apPrimos=t.sexo==='m'?otroApellido():null;
+    for(let k=0;k<nPri;k++){ const pr=nuevoPariente(chance(.5)?'primo':'prima',null,clamp(S.p.edad+ri(-10,10),0,55),t.rama); if(apPrimos){ pr.apellido=apPrimos; } P.push(pr); }
     if(chance(.62)) {
       const nLejanos=ri(1,2);
       for(let k=0;k<nLejanos;k++) P.push(nuevoPariente(chance(.5)?'primo segundo':'prima segunda',null,clamp(S.p.edad+ri(-14,14),0,60),t.rama));
     }
   }
   P.forEach(x=>{ x.caudal=caudalInicial(x.rel,origen,x.edad); asignarVia(x); });
-  S.parientes=P;
+  S.parientes=P; PARIENTES_EN_CURSO=null;
 }
 
 /* Al pasar a la siguiente generación, la familia se reacomoda:
    tus hermanos son los tíos de tu heredero, tus sobrinos sus primos. */
 function reacomodarParentela(heredero){
   const nuevos=[];
-  (S.parientes||[]).forEach(p=>{
-    if(!p.vivo) return;
-    let rel=null;
-    if(p.rel==='hermano') rel='tío'; else if(p.rel==='hermana') rel='tía';
-    else if(p.rel==='primo'||p.rel==='prima') rel=p.rel;       // primos segundos, siguen siendo primos
-    else if(p.rel==='sobrino'||p.rel==='sobrina') rel=p.rel==='sobrino'?'primo':'prima';
-    else if(p.rel==='abuelo'||p.rel==='abuela') rel=p.rel;
-    if(rel) nuevos.push({...p,rel:relacionPorSexo(rel,p.sexo)});
-  });
   // Si hereda un hijo directo, sus hermanos siguen siendo hermanos.
   // Si hereda una rama colateral, los hijos del difunto se reubican como sobrinos o primos.
   const relCol=heredero&&heredero._sucesorRel;
   const esHijoDirecto=!!(heredero&&!heredero._sucesorColateral&&!relCol);
+  (S.parientes||[]).forEach(p=>{
+    if(!p.vivo) return;
+    // quien hereda deja de ser pariente de sí mismo
+    if(heredero&&heredero.pid&&p.pid===heredero.pid) return;
+    let rel=null;
+    if(p.rel==='hermano') rel='tío'; else if(p.rel==='hermana') rel='tía';
+    else if(p.rel==='primo'||p.rel==='prima') rel=p.rel;       // primos segundos, siguen siendo primos
+    else if(p.rel==='sobrino'||p.rel==='sobrina') rel=p.rel==='sobrino'?'primo':'prima';
+    // los padres del difunto son los abuelos de su hijo; los abuelos del difunto ya serían bisabuelos
+    else if(p.rel==='padre'||p.rel==='madre') rel=esHijoDirecto?(p.rel==='padre'?'abuelo':'abuela'):null;
+    else if(p.rel==='abuelo'||p.rel==='abuela') rel=esHijoDirecto?null:p.rel;
+    if(rel) nuevos.push({...p,rel:relacionPorSexo(rel,p.sexo)});
+  });
   let relHijo=esHijoDirecto?'hermano':'tío';
   if(!esHijoDirecto){
     if(relCol==='hermano'||relCol==='hermana') relHijo='sobrino';
@@ -4664,8 +4679,10 @@ function reacomodarParentela(heredero){
   });
   // la viuda o el viudo del difunto
   if(S.familia.pareja){
-    nuevos.push({ pid:'p'+(UIDP++), rel:S.familia.pareja.sexo==='m'?'madre':'padre',
-      sexo:S.familia.pareja.sexo, edad:S.familia.pareja.edad, nombre:S.familia.pareja.nombre.split(' ')[0],
+    const pz=S.familia.pareja, partes=String(pz.nombre||'').split(' ');
+    const relViuda=esHijoDirecto?(pz.sexo==='m'?'madre':'padre'):(pz.sexo==='m'?'tía':'tío');
+    nuevos.push({ pid:'p'+(UIDP++), rel:relViuda, apellido:partes.slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||undefined,
+      sexo:pz.sexo, edad:pz.edad, nombre:partes[0],
       oficio:S.familia.pareja.rol, afecto:75, capaz:ri(3,8), honrado:ri(4,9), rama:'materna', vivo:true });
   }
   return nuevos.slice(0,18);
@@ -4735,7 +4752,7 @@ function escenaCortejo(){
       d:descripcionPretendiente(pr)+' '+terminosPretendiente(pr),
       dis: pr.dote<0 && S.efectivo< -pr.dote ? 'No tienes con qué responderle a esa familia':null,
       run:()=>{ desposar(pr, pr.afecto<50); S.mov--; }}))
-      .concat([{t:'Todavía no',cat:'familia',d:'Prefieres esperar a que la casa valga más.',run:()=>{ S.mov--; }}])});
+      .concat([{t:'Todavía no',cat:'familia',d:'Prefieres esperar a que la casa valga más.',run:()=>{}}])});
 }
 
 function escenaMatrimonioArreglado(pr){
@@ -4810,7 +4827,7 @@ function escenaDivorcio(){
          iniciarCompromiso({titulo:'Proceso de divorcio con '+pa.nombre,restan:2,mov:1,cerrar:()=>ejecutarDivorcio()});
          log('Iniciaste el divorcio con <b>'+esc(pa.nombre)+'</b>. La separación tomará dos años y ocupará una movida por año.','mal'); S.mov--;
        }},
-      {t:'Aguantar un año más',cat:'familia',d:'Nada cambia, pero nada se pierde todavía.',run:()=>{ S.mov--; }}
+      {t:'Aguantar un año más',cat:'familia',d:'Nada cambia, pero nada se pierde todavía.',run:()=>{}}
     ],cerrable:true});
 }
 
@@ -5806,7 +5823,7 @@ function escenaGobiernoFamilia(){
   }
   escena({rubro:'Gobierno de la familia',titulo:'Cómo se gobierna la casa',ancho:true,
     cuerpo:'La riqueza puede durar más que una persona. El protocolo intenta que la siguiente generación no tenga que inventar las reglas a golpes.',
-    opciones:opciones.concat([{t:'Dejarlo para después',cat:'familia',run:()=>{S.mov--;}}]),cerrable:true});
+    opciones:opciones.concat([{t:'Dejarlo para después',cat:'familia',run:()=>{}}]),cerrable:true});
 }
 function accionesGobiernoFamilia(A){
   asegurarGobiernoFamilia();
@@ -5940,7 +5957,7 @@ function listaAcciones(){
   {
     const disponibles=sectoresDisponibles();
     const barato=disponibles.length?Math.min(...disponibles.map(s=>s.cap)):Infinity;
-    A.push({t:S.emp?'Fundar una compañía desde cero':'Fundar una compañía', d:'Constituye una sociedad desde cero con capital propio. No necesitas comprar una empresa existente.', mov:1, modal:true,
+    A.push({t:'Fundar una compañía', d:'Constituye una sociedad desde cero con capital propio. No necesitas comprar una empresa existente.', mov:1, modal:true,
       dis:(!isFinite(barato)||S.efectivo<barato)?('Te falta capital (mínimo '+fmt(isFinite(barato)?barato:0)+')'):null,
       run:()=>modalFundar()});
   }
@@ -6256,7 +6273,6 @@ function listaAcciones(){
     A.push({t:'Casar a '+h.nombre, d:'Una alianza con otra casa: dote, contactos y prestigio para el apellido.', mov:1, modal:true,
       run:()=>escenaCasarHijo(h)});
   });
-  A.push({t:'Fundar una compañía desde cero',d:'Empieza una compañía propia desde cero, aunque ya tengas otros negocios o trabajes para alguien.',mov:1,modal:true,dis:sectoresDisponibles().length?'': 'No hay sectores disponibles para este año',run:()=>modalFundar()});
   A.push({t:'Constituir una sociedad', d:'Un negocio aparte que administre alguien más. Desde '+fmt(RAMOS[0].min)+'.', mov:1, modal:true,
     dis:S.efectivo<RAMOS[0].min?'Necesitas al menos '+fmt(RAMOS[0].min):null,
     run:()=>escenaCrearSociedad()});
@@ -6313,7 +6329,7 @@ function listaAcciones(){
     run:()=>{ const x=Math.max(80,S.efectivo*.1); S.efectivo-=x;
       S.p.reputacion=clamp(S.p.reputacion+ri(9,18),0,100); moverPrestigio(5,'la fundación lleva tu apellido'); if(S.emp) S.emp.marca=clamp(S.emp.marca+4,0,100);
       if(S.p.escandalos>0&&chance(.5)){S.p.escandalos--; log('La fundación ayudó a que olvidaran el escándalo.','bien');}
-      log('Creaste la Fundación '+esc(S.dinastia)+' con '+fmt(x)+'. Reputación arriba.','hito');}});
+      log('Financiaste una biblioteca y un fondo de becas con tu nombre: '+fmt(x)+'. Reputación arriba.','hito');}});
   A.push({t:'Mover palancas por debajo', d:'Contactos, favores, contratos. Rinde mucho; si te pillan, cuesta todo.', mov:1, modal:true,
     run:()=>modalLobby()});
   if(S.p.edad>=58&&(S.familia.hijos.some(h=>h.edad>=18)||S.familia.hijos.length))
@@ -6394,8 +6410,8 @@ function asegurarColasFamilia(){
   if(S.funeralPendiente){S.funeralPendientes.push(S.funeralPendiente);S.funeralPendiente=null;}
   if(S.sucesionPendiente){S.sucesionesPendientes.push(S.sucesionPendiente);S.sucesionPendiente=null;}
 }
-function encolarFuneral(pa){asegurarColasFamilia();if(pa&&pa.pid&&S.funeralPendientes.some(x=>x.pid===pa.pid))return;S.funeralPendientes.push({quien:nombrePariente(pa),rel:relacionPorSexo(pa.rel,pa.sexo),sexo:pa.sexo,pid:pa.pid});}
-function encolarSucesion(pa){asegurarColasFamilia();if(S.sucesionesPendientes.some(x=>x.pid===pa.pid))return;S.sucesionesPendientes.push({pid:pa.pid,nombre:pa.nombre,rel:relacionPorSexo(pa.rel,pa.sexo),sexo:pa.sexo,caudal:pa.caudal||0,rama:pa.rama,afecto:pa.afecto});}
+function encolarFuneral(pa){asegurarColasFamilia();if(pa&&pa.pid&&S.funeralPendientes.some(x=>x.pid===pa.pid))return;S.funeralPendientes.push({quien:nombrePariente(pa),rel:relacionPorSexo(pa.rel,pa.sexo),sexo:pa.sexo,pid:pa.pid,anio:S.anio});}
+function encolarSucesion(pa){asegurarColasFamilia();if(S.sucesionesPendientes.some(x=>x.pid===pa.pid))return;S.sucesionesPendientes.push({pid:pa.pid,nombre:pa.nombre,apellido:pa.apellido,rel:relacionPorSexo(pa.rel,pa.sexo),sexo:pa.sexo,caudal:pa.caudal||0,rama:pa.rama,afecto:pa.afecto});}
 
 /* ==========================================================================
    PASO DEL AÑO
@@ -7399,7 +7415,7 @@ function heredar(h,frac,vivo,pleito){
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
-    funeralPendientes:S.funeralPendientes||[], sucesionesPendientes:S.sucesionesPendientes||[],
+    funeralPendientes:[], sucesionesPendientes:[],
     guerraEmpresarial:S.guerraEmpresarial||null
   };
   if(S.emp){
@@ -8248,6 +8264,7 @@ function finDeAnio(){
     asegurarColasFamilia();
     const duelo=()=>{
       asegurarColasFamilia();
+      while(S.funeralPendientes.length&&isFinite(S.funeralPendientes[0].anio)&&S.funeralPendientes[0].anio<S.anio-1) S.funeralPendientes.shift();
       if(S.funeralPendientes.length){ const f=S.funeralPendientes.shift();
         escenaFuneral(f.quien,relacionPorSexo(f.rel,f.sexo),()=>{ cerrarModal(); duelo(); });
       } else pliego();
@@ -8726,7 +8743,7 @@ function modalTesoreria(){
       {t:'Bonos corporativos',cat:'mercado',d:'Financias a otra empresa. Más rendimiento, pero existe riesgo de impago.',run:()=>crearInstrumento('Bonos corporativos','bono',max*.35,S.macro.tasa+.025,3,.09)},
       {t:'Pagaré / mercado monetario',cat:'mercado',d:'Liquidez de corto plazo. Menos rentabilidad, pero puedes salir casi cuando quieras.',run:()=>crearInstrumento('Mercado monetario','monetario',max*.25,S.macro.tasa-.025,1,.015)},
       {t:'Cobertura del dólar',cat:'capital',d:'Reservas parte del costo futuro de importar maquinaria. Si el peso se devalúa, la cobertura compensa una parte.',run:()=>crearCoberturaCambiaria()},
-      {t:'No tocar la tesorería',cat:'legado',d:'Mantienes la caja disponible para una adquisición, una crisis o una oportunidad.',run:()=>{S.mov--;}}
+      {t:'No tocar la tesorería',cat:'legado',d:'Mantienes la caja disponible para una adquisición, una crisis o una oportunidad.',run:()=>{}}
     ],cerrable:true});
 }
 function crearInstrumento(nombre,tipo,maximo,tasa,anios,riesgo){
@@ -8770,7 +8787,7 @@ function modalLobby(){
          if(chance(.6)){ e.utilidad*=1.4; e.caja+=e.ingresos*.03; log('Los estados financieros quedaron mejor de lo que fue el año.','bien'); }
          else { e.caja-=e.ingresos*.08; S.p.escandalos+=2; S.junta.forEach(j=>j.lealtad=clamp(j.lealtad-22,0,100));
            log('El revisor fiscal encontró todo. La junta perdió la confianza y hay investigación.','mal'); } }},
-      {t:'Mejor no',cat:'legado',d:'Te quedas con la conciencia y sin el atajo.',run:()=>{ S.mov--; }}
+      {t:'Mejor no',cat:'legado',d:'Te quedas con la conciencia y sin el atajo.',run:()=>{}}
     ],cerrable:true});
 }
 
@@ -9322,7 +9339,7 @@ function escenaFamilyOffice(){
             {t:'Crecimiento',cat:'capital',d:'Mayor volatilidad a cambio de una expectativa de crecimiento superior.',run:()=>{fo.estrategia='crecimiento';log('La oficina pasó a una estrategia de crecimiento.','hito');S.mov--; }}
           ],cerrable:true});
         }},
-        {t:'Dejarlo como está',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Dejarlo como está',cat:'legado',run:()=>{}}
       ]});
   } else {
     const aporte=Math.max(180,patrimonio()*.05);
@@ -9524,7 +9541,7 @@ function correrFundacion(res,m){
         const familia=1+Math.min(4,(S.familia.hijos||[]).filter(h=>h.edad<25).length)*.12;
         const costo=base*familia;
         return {t:'Viaje a '+esc(c.n),cat:'salud',d:'Alojamiento, transporte y unos días de descanso · '+fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{S.efectivo-=costo;S.p.felicidad=clamp(S.p.felicidad+ri(8,16),0,100);S.p.salud=clamp(S.p.salud+3,0,100);(S.familia.hijos||[]).forEach(h=>h.vinculo=clamp((h.vinculo||60)+ri(2,6),0,100));S.p.redes=clamp(S.p.redes+(c.global?3:1),0,100);S.vida.viajes.push({anio:S.anio,ciudad:c.n,costo});dxRegistrarMomento('Viaje familiar a '+c.n,'bien');log('La familia viajó a <b>'+esc(c.n)+'</b>. El gasto fue '+fmt(costo)+'.','bien');S.mov--;}};
-      }).concat([{t:'Quedarse en casa',cat:'legado',run:()=>{S.mov--;}}]),cerrable:true});
+      }).concat([{t:'Quedarse en casa',cat:'legado',run:()=>{}}]),cerrable:true});
   }
 
   /* Patrimonio con historia */
@@ -10563,7 +10580,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         log('La banca de la casa le otorgó un crédito de '+fmt(max)+' a la rama de '+esc(nombreCompleto)+'.','bien'); S.mov--;
       }});
     }
-    opciones.push({t:'No intervenir por ahora',cat:'legado',run:()=>{ S.mov--; }});
+    opciones.push({t:'No intervenir por ahora',cat:'legado',run:()=>{}});
     escena({rubro:'Casas de la dinastía',titulo:c.nombre+' — '+nombreCompleto,ancho:true,
       cuerpo:'Patrimonio propio: <b>'+fmt(d.patrimonio||0)+'</b> (efectivo '+fmt(c.patFin.efectivo)+', empresas '+fmt(c.patFin.empresas)+', inmuebles '+fmt(c.patFin.inmuebles)+', deudas '+fmt(c.patFin.deudas)+'). '
         +'Ciudad: '+esc(d.ciudad||S.p.ciudad)+' · Profesión: '+esc(profesionCasa43(d))+(d.pareja?' · Pareja: '+esc(d.pareja.nombre):'')+(d.hijos&&d.hijos.length?' · '+d.hijos.length+' hijo'+(d.hijos.length===1?'':'s'):'')+'. '
@@ -11160,7 +11177,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           else { pa.paciencia=clamp(pa.paciencia-16,0,100); log(esc(pa.nombre)+' se negó a firmar capitulaciones. Quedó un mal sabor.','mal'); }
           S.mov--;
         }},
-        {t:'Dejarlo así',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Dejarlo así',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
 
@@ -11599,7 +11616,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         S.efectivo-=pg.costo; h.posgrado=pg.id; h.formacion=clamp(h.formacion+pg.form,0,100);
         moverPrestigio(pg.prest*.4,'el posgrado de '+h.nombre);
         log('<b>'+esc(h.nombre)+'</b> terminó '+pg.n+'.','hito'); S.mov--;
-      }})).concat([{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}]),cerrable:true});
+      }})).concat([{t:'Todavía no',cat:'legado',run:()=>{}}]),cerrable:true});
   }
   function accionesPosgrado47(A){
     (S.familia.hijos||[]).filter(h=>h.universidad&&h.edad>=23&&!h.posgrado).forEach(h=>{
@@ -11624,7 +11641,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('La beca de '+esc(h.nombre)+' no salió esta vez.','mal');
         }
         S.mov--;
-      }},{t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}],cerrable:true});
+      }},{t:'Todavía no',cat:'legado',run:()=>{}}],cerrable:true});
   }
   function accionesBeca47(A){
     (S.familia.hijos||[]).filter(h=>!h.universidad&&h.edad>=17&&h.edad<=20&&((h.atr&&h.atr.intelecto)||0)>=7).forEach(h=>{
@@ -11684,7 +11701,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           registrarViaje47('negocios',S.p.ciudad);
           log('Volviste del viaje de negocios con contactos nuevos.','bien'); S.mov--;
         }},
-        {t:'No es el momento',cat:'legado',run:()=>{S.mov--;}}
+        {t:'No es el momento',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionViajeNegocios47(A){
@@ -11703,7 +11720,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('<b>'+esc(e.nombre)+'</b> hizo un split 2 por 1. El precio bajó a '+fmt(precioAccion(e))+'.','hito');
           S.mov--;
         }},
-        {t:'Dejarla como está',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Dejarla como está',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionSplit47(A){
@@ -11725,7 +11742,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('<b>'+esc(e.nombre)+'</b> repartió un dividendo extraordinario de '+fmt(monto)+'. Te tocaron '+fmt(tuyo)+'.','hito');
           S.mov--;
         }},
-        {t:'No repartirlo',cat:'legado',run:()=>{S.mov--;}}
+        {t:'No repartirlo',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionDividendoExtra47(A){
@@ -11743,7 +11760,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         {t:'Fondo conservador',cat:'mercado',d:'Bajo riesgo, retorno modesto.',run:()=>crearInstrumento('Fondo conservador','fondo',max*.4,S.macro.tasa-.005,4,.02)},
         {t:'Fondo balanceado',cat:'mercado',d:'Riesgo medio, retorno de mercado.',run:()=>crearInstrumento('Fondo balanceado','fondo',max*.35,S.macro.tasa+.01,4,.06)},
         {t:'Fondo agresivo',cat:'mercado',d:'Más volátil, más retorno esperado.',run:()=>crearInstrumento('Fondo agresivo','fondo',max*.3,S.macro.tasa+.035,4,.14)},
-        {t:'No invertir por ahora',cat:'legado',run:()=>{S.mov--;}}
+        {t:'No invertir por ahora',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionFondos47(A){
@@ -11772,7 +11789,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           S.efectivo-=costo; S.p.estres=clamp((S.p.estres||30)-ri(10,18),0,100); S.p.felicidad=clamp(S.p.felicidad+ri(4,8),0,100);
           log('Te desconectaste un fin de semana. Se siente distinto.','bien'); S.mov--;
         }},
-        {t:'No hay tiempo para eso',cat:'legado',run:()=>{S.mov--;}}
+        {t:'No hay tiempo para eso',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionRespiro47(A){
@@ -11843,7 +11860,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('Te retiraste de la vida activa. Ahora vives de una pensión de '+fmt(pension)+' al año.','hito');
           hito('Se retiró de la vida activa'); S.mov--;
         }},
-        {t:'Todavía no',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Todavía no',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function escenaVolverActivo48(){
@@ -11854,7 +11871,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           S.retirado=false; S.pension=0;
           log('Volviste a la vida activa.','hito'); S.mov--;
         }},
-        {t:'Seguir retirado',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Seguir retirado',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function accionRetiro48(A){
@@ -12102,7 +12119,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         const neto=venderBien(b,-.05);
         log('Vendiste '+esc(b.nombre)+' a una constructora por '+fmt(neto)+'.','bien'); S.mov--;
       }},
-      {t:'Dejarlo así por ahora',cat:'legado',run:()=>{S.mov--;}}
+      {t:'Dejarlo así por ahora',cat:'legado',run:()=>{}}
     ]);
     escena({rubro:'Desarrollo inmobiliario',titulo:'¿Qué construyes en '+esc(b.nombre)+'?',ancho:true,
       cuerpo:'Valor del terreno: '+fmt(b.valor)+'. Elige el proyecto.',opciones,cerrable:true});
@@ -12118,7 +12135,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           log('Vendiste en preventa una parte de '+esc(p.n.toLowerCase())+' por adelantado.','bien');
           arrancarProyecto49(b,p,costo,valorFinal,.4);
         }},
-        {t:'No arrancar todavía',cat:'legado',run:()=>{S.mov--;}}
+        {t:'No arrancar todavía',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function arrancarProyecto49(b,p,costo,valorFinal,preventaPct){
@@ -12191,7 +12208,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           S.efectivo-=costo; b.inmobiliaria=true; b.arrendado=true;
           log('Vinculaste <b>'+esc(b.nombre)+'</b> a una inmobiliaria. Ya quedó arrendado.','bien'); S.mov--;
         }},
-        {t:'Buscarlo por tu cuenta',cat:'legado',run:()=>{S.mov--;}}
+        {t:'Buscarlo por tu cuenta',cat:'legado',run:()=>{}}
       ],cerrable:true});
   }
   function reforzarInmobiliaria49(){
@@ -14520,7 +14537,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
             ],cerrable:true});
           }},
           {t:'Trasladar la sede a otra ciudad',cat:'capital',d:'Mudar la oficina completa a otra ciudad del país.',run:()=>escenaReubicarFamilyOffice62(fo)},
-          {t:'Dejarlo como está',cat:'legado',run:()=>{S.mov--;}}
+          {t:'Dejarlo como está',cat:'legado',run:()=>{}}
         ]});
     } else {
       const aporte=Math.max(180,patrimonio()*.05);
@@ -14560,7 +14577,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            dis:S.efectivo<Math.max(90,patrimonio()*.02)?'No te alcanza':null,
            run:()=>{ const x=Math.max(90,patrimonio()*.02); S.efectivo-=x; M.cupos+=4;
              moverPrestigio(2,''); log('Ampliaste el mausoleo: quedan '+M.cupos+' cupos.'); S.mov--; }},
-          {t:'Dejarlo así',cat:'legado',run:()=>{ S.mov--; }}
+          {t:'Dejarlo así',cat:'legado',run:()=>{}}
         ]});
       return;
     }
@@ -14581,7 +14598,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            moverPrestigio(6,'el mausoleo de la casa '+S.dinastia);
            log('Mandaste a construir el mausoleo de la casa '+esc(S.dinastia)+' en '+esc(ciudad)+'.','hito');
            hito('Construyó el mausoleo de la casa'); S.mov--; }},
-        {t:'Eso se ve después',cat:'legado',run:()=>{ S.mov--; }}
+        {t:'Eso se ve después',cat:'legado',run:()=>{}}
       ]});
     const leerCiudad=wireSelectorCiudad62(caja,'cMaus62',S.hogar.ciudad);
   };
@@ -15266,7 +15283,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
             log(esc(h.nombre)+' entró a '+esc(u.n)+(total>0?' ('+fmt(total)+' en total)':'')+'.',base.form>25?'hito':'');
             setTimeout(()=>escenaCarreraEstudio(h),0);
           }};
-      }).concat([{t:'Enviarlo/la a estudiar afuera',cat:'formacion',d:'Pregrado completo en el exterior. Más caro, pero abre mundo y contactos.',run:()=>escenaUniversidadExterior69(h)}]),
+      }).concat([{t:(h.sexo==='m'?'Enviarla':'Enviarlo')+' a estudiar afuera',cat:'formacion',d:'Pregrado completo en el exterior. Más caro, pero abre mundo y contactos.',run:()=>escenaUniversidadExterior69(h)}]),
       cerrable:true});
   };
 
@@ -15811,7 +15828,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function escenaGobernarAlcaldia72(){
     const q=S.carrera.politica, ciudad=q.ciudad||S.hogar.ciudad;
     const tabla=(typeof window.BONOS_CIUDAD_SECTOR_61==='object'&&window.BONOS_CIUDAD_SECTOR_61)||null;
-    if(!tabla){ escena({rubro:'Alcaldía',titulo:'Gobernar la alcaldía',ancho:true,cuerpo:'Como alcalde de '+esc(ciudad)+' manejas la agenda local, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{S.mov--;}}],cerrable:true}); return; }
+    if(!tabla){ escena({rubro:'Alcaldía',titulo:'Gobernar la alcaldía',ancho:true,cuerpo:'Como alcalde de '+esc(ciudad)+' manejas la agenda local, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true}); return; }
     tabla[ciudad]=tabla[ciudad]||{};
     const actuales=tabla[ciudad];
     const sectoresEra=(epocaDe().sectores||SECTORES.map(s=>s.id));
@@ -15933,7 +15950,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const ciudades=dep?ciudadesDelDepartamento73(dep):[];
     const tabla=(typeof window.BONOS_CIUDAD_SECTOR_61==='object'&&window.BONOS_CIUDAD_SECTOR_61)||null;
     if(!tabla||!dep||!ciudades.length){
-      escena({rubro:'Gobernación',titulo:'Gobernar la gobernación',ancho:true,cuerpo:'Como gobernador manejas la agenda departamental, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{S.mov--;}}],cerrable:true});
+      escena({rubro:'Gobernación',titulo:'Gobernar la gobernación',ancho:true,cuerpo:'Como gobernador manejas la agenda departamental, aunque hoy no hay ninguna palanca económica disponible.',opciones:[{t:'Entendido',cat:'legado',run:()=>{}}],cerrable:true});
       return;
     }
     const sectoresEra=(epocaDe().sectores||SECTORES.map(s=>s.id));
@@ -21302,6 +21319,119 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init100,220);
   setTimeout(init100,650);
   window.__SA100={version:V100};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v101 · REVISIÓN DE COHERENCIA
+   Menos acciones repetidas: las que hacen casi lo mismo se juntan en un
+   solo formulario; las rutinas (vacaciones, gimnasio, atender a la
+   familia…) se hacen una vez al año; cada acción cae en su categoría.
+   Las correcciones de la historia familiar (apellidos, parentescos al
+   heredar, funerales que pasaban al heredero) están en el núcleo.
+   ========================================================================== */
+(function(){
+  const V101='v101';
+  const GRUPOS_101=[
+    {id:'negocio',t:'Empezar un negocio',cat:'compania',
+     d:'Fundar una compañía que manejas tú, o constituir una sociedad aparte que administra alguien más.',
+     miembros:[['La manejas tú','Fundar una compañía'],['La maneja otro','Constituir una sociedad']]},
+    {id:'empleo',t:'Buscar empleo',cat:'empleo',
+     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta.',
+     prefijos:[['Dónde','Emplearte: ']]},
+    {id:'opa',t:'Toma hostil',cat:'mercado',
+     d:'Ofrecerles a los accionistas de otra casa por encima del precio para quedarte con ella. Cuesta dos movidas.',
+     prefijos:[['Casas que cotizan','Toma hostil sobre los ']]},
+    {id:'invertir',t:'Invertir tu plata',cat:'mercado',
+     d:'Portafolio, fondos, tesorería, divisas y la rueda de la bolsa, en un solo lugar.',
+     miembros:[['Portafolio','Invertir en el mercado'],['Portafolio','Fondos de inversión'],['Tesorería','Gestionar tesorería financiera'],
+       ['Tesorería','Reserva en moneda extranjera'],['Bolsa','Ir a la rueda de la bolsa']]},
+    {id:'descanso',t:'Descansar',cat:'salud',
+     d:'Un fin de semana desconectado para bajar el estrés, o unas vacaciones de verdad.',
+     miembros:[['Descanso','Tomarte un respiro'],['Descanso','Vacaciones de verdad']]},
+    {id:'palancas',t:'Influencia y palancas',cat:'riesgo',
+     d:'Aceitar a un funcionario, mover palancas o empujar una ley en el Congreso.',
+     miembros:[['Influencia','Aceitar a un funcionario'],['Influencia','Mover palancas por debajo'],['Influencia','Mover una ley en el Congreso']]},
+    {id:'instituciones',t:'Instituciones de la casa',cat:'capital',
+     d:'Fundación, family office, banca privada, club y fideicomiso: lo que hace que la casa dure más que una vida.',
+     miembros:[['Crear','Crear una fundación familiar'],['Crear','Crear un family office'],['Crear','Crear banca privada de la familia'],
+       ['Crear','Crear club privado de la familia'],['Crear','Constituir un fideicomiso afuera']]}
+  ];
+  const CAT_101={'Empezar un negocio':'compania','Buscar empleo':'empleo','Toma hostil':'mercado','Invertir tu plata':'mercado','Descansar':'salud',
+    'Influencia y palancas':'riesgo','Instituciones de la casa':'capital','Revisar tu situación penal':'riesgo','Entrar en política':'empleo',
+    'Pasaporte de la familia':'familia','Cambiar tu apariencia':'salud','Ver portafolio patrimonial':'mercado','Fondos de inversión':'mercado','Tomarte un respiro':'salud'};
+  // rutinas que no tiene sentido repetir en el mismo año
+  const UNA_VEZ_101=new Set(['Atender a la familia','Cuidarte: médico y ejercicio','Vacaciones de verdad','Tomarte un respiro','Trabajar duro este año',
+    'Negociar salario','Obra social con tu nombre','Viaje de negocios']);
+
+  function instalarGrupos101(){
+    const G=window.GRUPOS_91; if(!Array.isArray(G)) return false;
+    GRUPOS_101.forEach(g=>{ if(!G.some(x=>x.id===g.id)) G.push(g); });
+    return true;
+  }
+  function hechas(){ if(!S.hechas101||S.hechas101.anio!==S.anio) S.hechas101={anio:S.anio,t:[]}; return S.hechas101; }
+  function wrapAcciones101(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA101_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{
+        if(!Array.isArray(A)||!S||!S.p) return A;
+        const H=hechas(), vistos=new Set(), B=[];
+        A.forEach(a=>{
+          if(!a||typeof a.t!=='string') return;
+          if(vistos.has(a.t)) return; vistos.add(a.t);   // nunca dos acciones con el mismo nombre
+          if(UNA_VEZ_101.has(a.t)){
+            if(H.t.includes(a.t)&&!a.dis) a.dis='Ya lo hiciste este año';
+            if(!a.__101){ const run=a.run; a.run=function(){ const h=hechas(); if(!h.t.includes(a.t)) h.t.push(a.t); return run.apply(this,arguments); }; a.__101=true; }
+          }
+          B.push(a);
+        });
+        A.length=0; B.forEach(a=>A.push(a));
+      }catch(e){}
+      return A;
+    };
+    window.__SA101_ACC=true;
+  }
+  function wrapCatDe101(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA101_CAT) return;
+    window.catDe=function(t){ if(Object.prototype.hasOwnProperty.call(CAT_101,t)) return CAT_101[t]; if(/^Revisar ofertas de cargos/.test(t)) return 'empleo'; return old.apply(this,arguments); };
+    window.__SA101_CAT=true;
+  }
+  /* --- eventos que se repetían demasiado: tiempo de espera --- */
+  const ESPERA_101=8, ESPERA_NINO_101=3;
+  const EXENTOS_101=/vota|elecci|Eleccion|S\._g95/i;
+  const UNO_POR_GEN_101=/tío lejano del que casi nadie/;
+  function ult(){ return S.evUlt101||(S.evUlt101={}); }
+  function enfriar101(e,nino){
+    if(!e||e.__cd101) return; e.__cd101=true;
+    const d=Object.getOwnPropertyDescriptor(e,'p'); if(d&&d.get) return;          // ya manejan su frecuencia
+    if(typeof e.t!=='function') return;
+    const k=(e.id?e.id+':':'')+String(e.t).replace(/\s+/g,' ').slice(0,90);
+    if(EXENTOS_101.test(k)) return;
+    const unoGen=UNO_POR_GEN_101.test(String(e.t));
+    const c0=e.c, t0=e.t, espera=nino?ESPERA_NINO_101:ESPERA_101;
+    e.c=function(){ try{ const u=ult()[k]; if(u){ if(unoGen&&u.gen===S.gen) return false; if(S.anio-u.anio<espera) return false; } }catch(x){}
+      return typeof c0==='function'?c0.apply(this,arguments):true; };
+    e.t=function(){ try{ ult()[k]={anio:S.anio,gen:S.gen}; }catch(x){} return t0.apply(this,arguments); };
+  }
+  function instalarEsperas101(){
+    try{ [typeof EVENTOS!=='undefined'?EVENTOS:[],typeof EVENTOS_LOCALES!=='undefined'?EVENTOS_LOCALES:[],typeof EVENTOS_VIDA_EXTENDIDOS!=='undefined'?EVENTOS_VIDA_EXTENDIDOS:[]].forEach(L=>L.forEach(e=>enfriar101(e,false)));
+      (window.EVENTOS_INFANCIA_94||[]).forEach(e=>enfriar101(e,true)); }catch(x){}
+  }
+  function wrapSorteo101(){
+    const old=window.sortearEvento; if(typeof old!=='function'||window.__SA101_SORT) return;
+    window.sortearEvento=function(){ instalarEsperas101(); return old.apply(this,arguments); };
+    window.__SA101_SORT=true;
+  }
+  function init101(){
+    instalarGrupos101(); wrapAcciones101(); wrapCatDe101(); wrapSorteo101();
+    Object.assign(window,{GRUPOS_101,UNA_VEZ_101});
+  }
+  setTimeout(init101,40);
+  setTimeout(init101,220);
+  setTimeout(init101,650);
+  window.__SA101={version:V101};
 })();
 </script>
 
