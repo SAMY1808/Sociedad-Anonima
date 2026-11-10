@@ -756,10 +756,39 @@ html{scroll-behavior:smooth}
   .cron93-pie{flex-direction:column;align-items:stretch}
 }
 </style>
+<style id="estilos-v99">
+.metas99{display:flex;flex-direction:column;gap:8px}
+.meta99{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--linea,rgba(214,166,72,.18));border-radius:10px;background:rgba(255,255,255,.02)}
+.meta99 .ic{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--humo2,#7d8a80);font-size:13px;color:var(--humo2,#7d8a80)}
+.meta99.ok .ic{border-color:var(--laton,#D6A648);background:var(--laton,#D6A648);color:#1b1408}
+.meta99 .tx{flex:1;min-width:0}
+.meta99 .tx b{display:block;font-weight:500;color:var(--marfil,#F0E7D5);font-size:14px}
+.meta99 .tx span{font-size:12.5px;color:var(--humo,#a9b3ab)}
+.meta99.ok .tx b{color:var(--laton,#D6A648)}
+.meta99 .pr{font-size:12px;color:var(--humo2,#7d8a80);white-space:nowrap}
+.logros99{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.logro99{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.015);opacity:.55}
+.logro99.ok{opacity:1;border-color:rgba(214,166,72,.35);background:rgba(214,166,72,.06)}
+.logro99 b{display:block;font-weight:500;font-size:13.5px;color:var(--marfil,#F0E7D5)}
+.logro99 span{display:block;font-size:12px;color:var(--humo,#a9b3ab);margin-top:2px}
+.logro99 em{display:block;font-style:normal;font-size:11.5px;color:var(--laton,#D6A648);margin-top:4px}
+.logro99 .pts{float:right;font-size:11px;color:var(--humo2,#7d8a80)}
+.epitafio99{margin:16px auto 4px;max-width:440px;text-align:center;padding:18px 20px;border:1px solid rgba(214,166,72,.35);border-radius:14px 14px 4px 4px;background:linear-gradient(180deg,rgba(214,166,72,.07),rgba(0,0,0,0))}
+.epitafio99 .rip{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--humo2,#7d8a80)}
+.epitafio99 .n{font-family:var(--display,serif);font-size:20px;color:var(--marfil,#F0E7D5);margin-top:6px}
+.epitafio99 .f{font-size:12.5px;color:var(--humo,#a9b3ab)}
+.epitafio99 .fr{font-style:italic;margin-top:10px;color:var(--laton,#D6A648);font-size:14.5px}
+.panteon99{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.panteon99 .epitafio99{margin:0;max-width:none}
+.puntaje99{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0}
+.puntaje99>div{flex:1;min-width:110px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.25);text-align:center}
+.puntaje99 b{display:block;font-family:var(--display,serif);font-size:26px;color:var(--laton,#D6A648);font-weight:400}
+.puntaje99 span{font-size:12px;color:var(--humo,#a9b3ab)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v98</div>
+<div class="version-badge" id="versionBadge">v99</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -20766,6 +20795,255 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init98,220);
   setTimeout(init98,650);
   window.__SA98={version:V98};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v99 · METAS DE DINASTÍA
+   Cada generación recibe tres metas propias; la casa acumula logros
+   permanentes, récords con nombre y año, y un epitafio por cada uno que se
+   va. Al cerrar la historia, un resumen con el puntaje de la casa.
+   ========================================================================== */
+(function(){
+  const V99='v99';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?x:0; }catch(e){ return 0; } };
+  const puesto=()=>{ try{ return miPuesto()||99; }catch(e){ return 99; } };
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const hijos=()=>(S.familia&&S.familia.hijos||[]).length;
+  const crimenes=()=>(S.penal&&S.penal.crimes||[]);
+  const titulos=()=>(S.futbol96&&S.futbol96.titulos||[]).length;
+  const coleccion=()=>(Array.isArray(S.coleccion98)?S.coleccion98:[]);
+  const gente=()=>(Array.isArray(S.gente95)?S.gente95:[]);
+  const cargoPol=()=>{ try{ const q=S.carrera&&S.carrera.politica; return q&&q.activo&&q.cargo?q.cargo:null; }catch(e){ return null; } };
+  const quien=()=>S.p.nombre+' '+S.p.apellido;
+  let colaAviso=0;
+  function avisar99(txt){ if(typeof aviso!=='function') return; const ahora=Date.now(), t0=Math.max(ahora,colaAviso); colaAviso=t0+2500; setTimeout(()=>aviso(txt),t0-ahora); }
+  function M(){
+    if(!S.legado) S.legado={hitos:[],pico:0,ancestros:[]};
+    const m=S.legado.metas99||(S.legado.metas99={logros:{},records:{},panteon:[],gen:null,lista:[],cumplidas:0,desde:S.anio-(S.p&&S.p.edad||0)});
+    if(!m.logros) m.logros={}; if(!m.records) m.records={}; if(!Array.isArray(m.panteon)) m.panteon=[]; if(!Array.isArray(m.lista)) m.lista=[];
+    return m;
+  }
+
+  /* --- metas de la generación --- */
+  const METAS_99=[
+    {id:'duplicar',n:'Duplica lo que recibiste',d:b=>'Pasa de '+fmt(b.pat)+' a '+fmt(b.pat*2)+'.',ok:b=>pat()>=b.pat*2,prog:b=>Math.min(1,pat()/(b.pat*2))},
+    {id:'top5',n:'Pon la casa entre las cinco grandes',d:()=>'Que tu apellido esté en el top 5 del país.',si:b=>b.puesto>5,ok:()=>puesto()<=5},
+    {id:'top1',n:'Que tu casa sea la primera del país',d:()=>'Nadie por encima de tu apellido.',si:b=>b.puesto>1&&b.puesto<=6,ok:()=>puesto()===1},
+    {id:'hijos',n:'Ten al menos tres hijos',d:()=>'Una casa sin herederos no llega lejos.',si:()=>hijos()<3,ok:()=>hijos()>=3,prog:()=>Math.min(1,hijos()/3)},
+    {id:'limpio',n:'Diez años sin un delito',d:()=>'Ni una mancha en el prontuario durante una década.',ok:b=>{ const u=crimenes().reduce((a,x)=>Math.max(a,x.anio||0),b.anio); return S.anio-u>=10; },prog:b=>{ const u=crimenes().reduce((a,x)=>Math.max(a,x.anio||0),b.anio); return Math.min(1,(S.anio-u)/10); }},
+    {id:'prestigio',n:'Lleva el prestigio de la casa a 70',d:()=>'Que el apellido pese en cualquier salón.',si:()=>prestigio()<60,ok:()=>prestigio()>=70,prog:()=>Math.min(1,prestigio()/70)},
+    {id:'politica',n:'Gana un cargo de elección popular',d:()=>'Concejo, alcaldía, Congreso… o más.',si:()=>!cargoPol(),ok:()=>!!cargoPol()},
+    {id:'futbol',n:'Gana un título con tu equipo',d:()=>'Hay que tener equipo primero.',si:b=>S.anio>=1948&&((S.futbol96&&S.futbol96.activo)||b.pat>=3000),ok:b=>titulos()>b.titulos},
+    {id:'coleccion',n:'Arma una colección de cinco piezas',d:()=>'Arte, caballos, joyas: lo que sea.',si:b=>coleccion().length<5&&b.pat>=800,ok:()=>coleccion().length>=5,prog:()=>Math.min(1,coleccion().length/5)},
+    {id:'amigo',n:'Ten una amistad de verdad',d:()=>'Alguien que te aprecie de verdad (80 de aprecio).',ok:()=>gente().some(g=>g.vivo!==false&&g.rol!=='enemigo'&&(g.afecto||0)>=80)},
+    {id:'longevo',n:'Llega a los 80 años',d:()=>'Cuídate. La casa te necesita.',si:()=>S.p.edad<70,ok:()=>S.p.edad>=80,prog:b=>Math.min(1,Math.max(0,(S.p.edad-(b.edad||0))/Math.max(1,80-(b.edad||0))))},
+    {id:'casarse',n:'Cásate',d:()=>'Con prenupcial o sin él.',si:()=>!(S.familia&&S.familia.pareja&&S.familia.pareja.casados),ok:()=>!!(S.familia&&S.familia.pareja&&S.familia.pareja.casados)},
+    {id:'empresas',n:'Ten tres compañías',d:()=>'Un grupo, no un negocio.',si:()=>{ try{ return companias().length<3; }catch(e){ return false; } },ok:()=>{ try{ return companias().length>=3; }catch(e){ return false; } },prog:()=>{ try{ return Math.min(1,companias().length/3); }catch(e){ return 0; } }}
+  ];
+  const meta=id=>METAS_99.find(x=>x.id===id);
+  function base(){ return {pat:Math.max(50,Math.round(pat())),puesto:puesto(),anio:S.anio,titulos:titulos(),edad:S.p.edad}; }
+  function asignarMetas99(forzar){
+    const m=M(); if(!S.p||nino()) return m.lista;
+    if(!forzar&&m.gen===S.gen&&m.lista.length) return m.lista;
+    const b=base(); const pool=METAS_99.filter(x=>(!x.si||x.si(b))&&!x.ok(b));
+    const lista=[]; while(lista.length<3&&pool.length){ const i=ri(0,pool.length-1); lista.push(pool.splice(i,1)[0]); }
+    if(m.gen!==S.gen) m.genAnio=S.anio; m.gen=S.gen; m.base=b; m.lista=lista.map(x=>({id:x.id,ok:false,anio:null}));
+    return m.lista;
+  }
+  function revisarMetas99(){
+    const m=M(); if(nino()||!S.p) return [];
+    if(m.gen!==S.gen||!m.lista.length) asignarMetas99();
+    const nuevas=[];
+    m.lista.forEach(x=>{ if(x.ok) return; const d=meta(x.id); if(!d) return; let ok=false; try{ ok=d.ok(m.base); }catch(e){}
+      if(ok){ x.ok=true; x.anio=S.anio; m.cumplidas=(m.cumplidas||0)+1; nuevas.push(d); moverPrestigio(3,'cumplió una meta de la casa'); log('<b>Meta cumplida:</b> '+esc(d.n.charAt(0).toLowerCase()+d.n.slice(1))+'.','hito'); } });
+    nuevas.forEach(d=>avisar99('Meta cumplida: '+d.n));
+    if(m.lista.length&&m.lista.every(x=>x.ok)&&!m.todasGen){ m.todasGen=S.gen; }
+    return nuevas;
+  }
+
+  /* --- logros permanentes de la casa --- */
+  const LOGROS_99=[
+    {id:'mil',n:'Los primeros mil millones',d:'La casa supera $1.000 millones.',pts:10,ok:()=>pat()>=1000},
+    {id:'diezmil',n:'Diez mil millones',d:'Patrimonio de $10.000 millones.',pts:20,ok:()=>pat()>=10000},
+    {id:'cienmil',n:'Una fortuna de leyenda',d:'Patrimonio de $100.000 millones.',pts:40,ok:()=>pat()>=100000},
+    {id:'billon',n:'Un billón',d:'Patrimonio de un billón de pesos.',pts:60,ok:()=>pat()>=1000000},
+    {id:'top3',n:'Entre las tres grandes',d:'Llegar al top 3 de las casas del país.',pts:20,ok:()=>puesto()<=3},
+    {id:'top1',n:'La primera casa del país',d:'Nadie por encima del apellido.',pts:40,ok:()=>puesto()===1},
+    {id:'presidente',n:'La casa en Palacio',d:'Alguien de la familia llegó a la Presidencia.',pts:50,ok:()=>cargoPol()==='presidente'},
+    {id:'cargo',n:'Con votos propios',d:'Alguien de la casa ganó un cargo de elección.',pts:15,ok:()=>!!cargoPol()},
+    {id:'campeon',n:'Campeones',d:'Ganar un título con el equipo de la casa.',pts:20,ok:()=>titulos()>=1},
+    {id:'tricampeon',n:'Dinastía en la cancha',d:'Tres títulos de fútbol.',pts:35,ok:()=>titulos()>=3},
+    {id:'coleccion',n:'Gran coleccionista',d:'Ocho piezas de colección a la vez.',pts:20,ok:()=>coleccion().length>=8},
+    {id:'gen3',n:'Tres generaciones',d:'El apellido pasa a la tercera generación.',pts:15,ok:()=>S.gen>=3},
+    {id:'gen5',n:'Cinco generaciones',d:'Pocas casas del país llegan hasta aquí.',pts:35,ok:()=>S.gen>=5},
+    {id:'siglo',n:'Un siglo de historia',d:'Cien años desde que nació el fundador.',pts:30,ok:()=>S.anio-M().desde>=100},
+    {id:'noventa',n:'Noventa velas',d:'Alguien de la casa cumple 90 años.',pts:15,ok:()=>S.p.edad>=90},
+    {id:'prole',n:'Casa llena',d:'Seis hijos en una misma generación.',pts:15,ok:()=>hijos()>=6},
+    {id:'infancia',n:'Desde la cuna',d:'Vivir la infancia completa y cumplir 18.',pts:10,ok:()=>!!(S.infancia94&&S.infancia94.terminada)},
+    {id:'amistad',n:'Amistad de toda la vida',d:'Un amigo de hace cuarenta años que todavía te aprecia.',pts:15,ok:()=>gente().some(g=>g.vivo!==false&&g.rol==='amigo'&&(g.afecto||0)>=60&&S.anio-(g.desde||S.anio)>=40)},
+    {id:'paces',n:'Las paces',d:'Hacer las paces con un enemigo.',pts:10,ok:()=>gente().some(g=>(g.memoria||[]).some(x=>/Hicieron las paces|guerra se acabó|buscaste para hacer las paces/.test(x.txt)))},
+    {id:'cancer',n:'Le ganó al cáncer',d:'Sobrevivir a un cáncer.',pts:15,ok:()=>!!(S.salud97&&(S.salud97.enfermedades||[]).some(e=>e.id==='cancer'&&e.curada))},
+    {id:'metas',n:'Generación perfecta',d:'Cumplir las tres metas de una generación.',pts:25,ok:()=>!!M().todasGen},
+    {id:'prontuario',n:'Prontuario',d:'Cinco delitos en la cuenta de una misma persona.',pts:5,oscuro:true,ok:()=>crimenes().length>=5},
+    {id:'carcel',n:'Tras las rejas',d:'Alguien de la casa pisó la cárcel.',pts:5,oscuro:true,ok:()=>!!(S.penal&&S.penal.prisionRestante>0)}
+  ];
+  function revisarLogros99(){
+    const m=M(), nuevos=[]; if(!S.p) return nuevos;
+    LOGROS_99.forEach(l=>{ if(m.logros[l.id]) return; let ok=false; try{ ok=l.ok(); }catch(e){}
+      if(ok){ m.logros[l.id]={anio:S.anio,quien:quien(),gen:S.gen}; nuevos.push(l); log('<b>Logro de la casa:</b> '+esc(l.n)+'. '+esc(l.d),'hito'); } });
+    if(nuevos.length) avisar99('Logro de la casa: '+nuevos.map(l=>l.n).join(' · '));
+    return nuevos;
+  }
+
+  /* --- récords --- */
+  const RECORDS_99=[
+    {id:'patrimonio',n:'La fortuna más grande',v:()=>pat(),f:v=>fmt(v)},
+    {id:'puesto',n:'El mejor puesto entre las casas',v:()=>puesto(),menor:true,f:v=>v+'ª del país'},
+    {id:'edad',n:'La vida más larga',v:()=>S.p.edad,f:v=>v+' años'},
+    {id:'hijos',n:'Más hijos',v:()=>hijos(),f:v=>v+' hijo'+(v===1?'':'s')},
+    {id:'mando',n:'Más años al mando',v:()=>Math.max(0,S.anio-(M().genAnio||S.anio)),f:v=>v+' años'},
+    {id:'coleccion',n:'La colección más valiosa',v:()=>coleccion().reduce((a,x)=>a+(x.valor||0),0),f:v=>fmt(v)},
+    {id:'titulos',n:'Títulos de fútbol',v:()=>titulos(),f:v=>v+' título'+(v===1?'':'s')},
+    {id:'prestigio',n:'El mayor prestigio',v:()=>Math.round(prestigio()),f:v=>v+'/100'}
+  ];
+  function revisarRecords99(){
+    const m=M(); if(!S.p||nino()) return;
+    RECORDS_99.forEach(r=>{ let v; try{ v=r.v(); }catch(e){ return; } if(!isFinite(v)||(!r.menor&&v<=0)||(r.menor&&v>=99)) return;
+      const cur=m.records[r.id]; const mejor=!cur||(r.menor?v<cur.v:v>cur.v);
+      if(mejor) m.records[r.id]={v,quien:quien(),anio:S.anio,gen:S.gen}; });
+  }
+
+  /* --- epitafios --- */
+  function fraseEpitafio99(){
+    const m=M(), p=S.p, c=crimenes(), pt=pat(), rec=m.records||{};
+    const preso=S.penal&&(S.penal.prisionRestante>0||S.penal.estuvoPreso);
+    const b=m.base||{pat:pt};
+    if(cargoPol()==='presidente') return 'Gobernó un país entero. Su familia fue otra cosa.';
+    if(preso) return 'Pagó lo que debía. Casi todo.';
+    if(c.length>=3) return 'Nunca le pudieron probar nada.';
+    if(rec.patrimonio&&rec.patrimonio.quien===quien()&&rec.patrimonio.gen===S.gen&&S.gen>1) return 'Hizo la fortuna más grande que ha visto la casa.';
+    if(p.edad>=90) return 'Enterró a todos sus enemigos.';
+    if(p.edad<45) return 'Se fue demasiado pronto.';
+    if(hijos()>=5) return 'Dejó '+hijos()+' hijos y un solo apellido.';
+    if(titulos()>=1) return 'Hincha hasta el último pitazo.';
+    if(coleccion().length>=4) return 'Vivió rodeado de cosas bellas.';
+    if(b.pat>200&&pt<b.pat*.5) return 'Heredó una fortuna y la gastó con gusto.';
+    if(pt>b.pat*3) return 'Recibió poco y dejó mucho.';
+    if(gente().some(g=>g.rol==='amigo'&&(g.afecto||0)>=70)) return 'Sus amigos lo cargaron hasta el final.';
+    return 'Trabajó, amó y dejó la casa en pie.';
+  }
+  function epitafio99(){
+    const p=S.p; const ep={nombre:p.nombre+' '+p.apellido,nac:S.anio-p.edad,muerte:S.anio,edad:p.edad,gen:S.gen,frase:fraseEpitafio99(),causa:S.causaMuerte97||''};
+    const m=M(); if(!m.panteon.some(x=>x.nombre===ep.nombre&&x.muerte===ep.muerte)) m.panteon.push(ep);
+    return ep;
+  }
+  const htmlEpitafio=e=>'<div class="epitafio99"><div class="rip">Aquí yace</div><div class="n">'+esc(e.nombre)+'</div><div class="f">'+e.nac+' – '+e.muerte+' · generación '+genLabel(e.gen)+'</div><div class="fr">«'+esc(e.frase)+'»</div></div>';
+
+  /* --- puntaje --- */
+  function puntaje99(){
+    const m=M(); const pl=LOGROS_99.filter(l=>m.logros[l.id]).reduce((a,l)=>a+l.pts,0);
+    return {logros:Object.keys(m.logros).length,total:LOGROS_99.length,metas:m.cumplidas||0,puntos:pl+(m.cumplidas||0)*5+Math.max(0,S.gen-1)*10};
+  }
+
+  /* --- vistas --- */
+  function metasHTML99(){
+    const m=M(); if(nino()) return '';
+    const L=asignarMetas99(); if(!L.length) return '';
+    return '<div class="perfil93-sec" id="metas99"><h3>Metas de tu generación<em>'+L.filter(x=>x.ok).length+' de '+L.length+' cumplidas</em></h3><div class="metas99">'
+      +L.map(x=>{ const d=meta(x.id); if(!d) return ''; let pr=''; if(!x.ok&&d.prog){ try{ pr=Math.round(d.prog(m.base)*100)+'%'; }catch(e){} }
+        return '<div class="meta99'+(x.ok?' ok':'')+'"><div class="ic">'+(x.ok?'✓':'')+'</div><div class="tx"><b>'+esc(d.n)+'</b><span>'+(x.ok?'Cumplida en '+x.anio+'.':esc(d.d(m.base)))+'</span></div><div class="pr">'+pr+'</div></div>'; }).join('')
+      +'</div></div>';
+  }
+  function logrosHTML99(){
+    const m=M();
+    return '<div class="logros99">'+LOGROS_99.map(l=>{ const g=m.logros[l.id];
+      return '<div class="logro99'+(g?' ok':'')+'"><b>'+esc(l.n)+'<span class="pts">'+l.pts+' pts</span></b><span>'+esc(l.d)+'</span>'+(g?'<em>'+esc(g.quien)+', '+g.anio+'</em>':'')+'</div>'; }).join('')+'</div>';
+  }
+  function recordsHTML99(){
+    const m=M(); const filas=RECORDS_99.filter(r=>m.records[r.id]).map(r=>{ const x=m.records[r.id]; return '<tr><td>'+esc(r.n)+' <span style="color:var(--humo2)">· '+esc(x.quien)+', '+x.anio+'</span></td><td>'+esc(r.f(x.v))+'</td></tr>'; }).join('');
+    return filas?'<table class="libro">'+filas+'</table>':'<div class="vacio">Todavía no hay récords.</div>';
+  }
+  function panteonHTML99(){
+    const P=M().panteon; return P.length?'<div class="panteon99">'+P.slice().reverse().map(htmlEpitafio).join('')+'</div>':'<div class="vacio">Nadie de la casa ha muerto todavía.</div>';
+  }
+  function legadoHTML99(){
+    const p=puntaje99();
+    return '<div id="legado99"><h3 style="margin-top:22px">Puntaje de la casa</h3><div class="puntaje99"><div><b>'+p.puntos+'</b><span>puntos</span></div><div><b>'+p.logros+'/'+p.total+'</b><span>logros</span></div><div><b>'+p.metas+'</b><span>metas cumplidas</span></div></div>'
+      +'<h3 style="margin-top:22px">Logros de la casa<em>'+p.logros+' de '+p.total+'</em></h3>'+logrosHTML99()
+      +'<h3 style="margin-top:22px">Récords de la casa</h3>'+recordsHTML99()
+      +'<h3 style="margin-top:22px">El panteón familiar</h3>'+panteonHTML99()+'</div>';
+  }
+
+  /* --- integración --- */
+  function wrapLienzo99(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA99_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const host=$('lienzoJuego'); if(!host||!S||!S.p) return r;
+        if(tab==='perfil'&&!host.querySelector('#metas99')){ const h=metasHTML99(); if(h){ const s1=host.querySelector('.perfil93-sec'); if(s1) s1.insertAdjacentHTML('beforebegin',h); else { const w=host.querySelector('.wrap'); if(w) w.insertAdjacentHTML('beforeend',h); } } }
+        if(tab==='legado'&&!host.querySelector('#legado99')){ const t=host.querySelector('.seccion table.libro'); if(t) t.insertAdjacentHTML('afterend',legadoHTML99()); }
+      }catch(e){}
+      return r;
+    };
+    window.__SA99_LIENZO=true;
+  }
+  function wrapPaso99(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA99_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto){ revisarRecords99(); revisarMetas99(); revisarLogros99(); } }catch(e){} return r; };
+    window.__SA99_PASO=true;
+  }
+  function wrapMorir99(){
+    const old=window.morir; if(typeof old!=='function'||window.__SA99_MORIR) return;
+    window.morir=function(){
+      let ep=null; try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ ep=epitafio99(); const rel=document.querySelector('#escenaHost .relato'); if(rel&&ep) rel.insertAdjacentHTML('afterend',htmlEpitafio(ep)); }catch(e){}
+      return r;
+    };
+    window.__SA99_MORIR=true;
+  }
+  function wrapHeredar99(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA99_HER) return;
+    window.heredar=function(h,frac,vivo){
+      try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ if(S&&S.legado&&S.legado.metas99){ S.legado.metas99.todasGen=S.legado.metas99.todasGen||null; asignarMetas99(true); } }catch(e){}
+      return r;
+    };
+    window.__SA99_HER=true;
+  }
+  function wrapFinal99(){
+    const old=window.pantallaFinal; if(typeof old!=='function'||window.__SA99_FIN) return;
+    window.pantallaFinal=function(){
+      try{ revisarRecords99(); revisarLogros99(); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{
+        const p=puntaje99(), m=M();
+        const ult=m.panteon.length?m.panteon[m.panteon.length-1]:null;
+        const html='<div id="final99"><div class="puntaje99"><div><b>'+p.puntos+'</b><span>puntos de la casa</span></div><div><b>'+p.logros+'/'+p.total+'</b><span>logros</span></div><div><b>'+p.metas+'</b><span>metas cumplidas</span></div><div><b>'+S.gen+'</b><span>generaciones</span></div></div>'
+          +'<h3 style="margin-top:18px">Récords de la casa</h3>'+recordsHTML99()
+          +(m.panteon.length?'<h3 style="margin-top:18px">El panteón</h3>'+panteonHTML99():'')+'</div>';
+        const host=document.querySelector('#escenaHost .vida-linea')||document.querySelector('#escenaHost .relato');
+        if(host) host.insertAdjacentHTML(host.classList.contains('vida-linea')?'beforebegin':'afterend',html);
+        window.__final99={puntos:p.puntos,ult:ult&&ult.nombre};
+        if(typeof window.registrarDinastia100==='function') window.registrarDinastia100(p);
+      }catch(e){}
+      return r;
+    };
+    window.__SA99_FIN=true;
+  }
+
+  function init99(){
+    wrapLienzo99(); wrapPaso99(); wrapMorir99(); wrapHeredar99(); wrapFinal99();
+    Object.assign(window,{METAS_99,LOGROS_99,RECORDS_99,metas99:M,asignarMetas99,revisarMetas99,revisarLogros99,revisarRecords99,epitafio99,fraseEpitafio99,puntaje99});
+  }
+  setTimeout(init99,40);
+  setTimeout(init99,220);
+  setTimeout(init99,650);
+  window.__SA99={version:V99};
 })();
 </script>
 
