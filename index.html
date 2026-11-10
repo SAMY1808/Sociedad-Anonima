@@ -759,7 +759,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v95</div>
+<div class="version-badge" id="versionBadge">v96</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -20213,6 +20213,186 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init95,220);
   setTimeout(init95,650);
   window.__SA95={version:V95};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v96 · TU EQUIPO DE FÚTBOL
+   Comprar un club (ficticio), armar la plantilla, el técnico y el estadio,
+   jugar la liga cada año (títulos, descensos), pagar la nómina y lidiar con
+   barras, amaños, cracks que se van y plata que no se pregunta de dónde
+   viene. Los títulos le dan prestigio a la casa y el club se hereda.
+   ========================================================================== */
+(function(){
+  const V96='v96';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const CLUBES_96=[
+    {id:'condores',n:'Cóndores de Bogotá',ciudad:'Bogotá',grandeza:85},
+    {id:'leones',n:'Leones de Antioquia',ciudad:'Medellín',grandeza:88},
+    {id:'tiburones',n:'Tiburones del Caribe',ciudad:'Barranquilla',grandeza:72},
+    {id:'pumas',n:'Pumas del Valle',ciudad:'Cali',grandeza:80},
+    {id:'buhos',n:'Búhos de Santander',ciudad:'Bucaramanga',grandeza:55},
+    {id:'cafeteros',n:'Cafeteros de Caldas',ciudad:'Manizales',grandeza:58},
+    {id:'corsarios',n:'Corsarios de Cartagena',ciudad:'Cartagena',grandeza:50},
+    {id:'toros',n:'Toros de Córdoba',ciudad:'Montería',grandeza:45}
+  ];
+  const escala=()=>clamp(pat()/1400,.4,25);
+  const precioClub96=c=>Math.round((120+c.grandeza*6)*Math.max(.6,Math.min(6,escala()*.5)));
+  const club=()=>S&&S.futbol96&&S.futbol96.activo?S.futbol96:null;
+  const yaEsMio=()=>!!club();
+
+  function comprar96(c){
+    const precio=precioClub96(c); if(S.efectivo<precio) return false;
+    S.efectivo-=precio;
+    S.futbol96={activo:true,id:c.id,nombre:c.n,ciudad:c.ciudad,desde:S.anio,valor:precio,plantilla:clamp(Math.round(c.grandeza*.6+rnd(-8,8)),20,85),
+      hinchas:clamp(Math.round(c.grandeza*.8),20,95),estadio:1,tecnico:1,boleteria:'normal',division:'A',titulos:[],temporadas:[],caja:0,
+      platasucia:false,sinTitulo:0};
+    moverPrestigio(3,'compró un equipo de fútbol');
+    log('Compraste a los <b>'+esc(c.n)+'</b> por '+fmt(precio)+'. La ciudad entera habla de eso.','hito'); hito('Compró a los '+c.n);
+    return true;
+  }
+  function fuerza96(f){ return f.plantilla*.62+f.tecnico*7+f.estadio*3+(f.platasucia?6:0)+(f.division==='B'?12:0); }
+  function temporada96(){
+    const f=club(); if(!f) return null;
+    const fz=fuerza96(f);
+    const puesto=clamp(Math.round(18-(fz-28)/3.1+rnd(-4.5,4.5)),1,18);
+    const k=escala();
+    const taquilla=f.hinchas*(f.boleteria==='popular'?.9:f.boleteria==='caro'?1.35:1.1)*(f.division==='B'?.45:1)*k*.9;
+    const patrocinio=(18-puesto)*1.8*k+(f.platasucia?f.plantilla*.8*k:0);
+    const nomina=Math.pow(f.plantilla,1.35)*.32*k+f.tecnico*6*k;
+    const resultado=Math.round(taquilla+patrocinio-nomina);
+    f.caja=(f.caja||0)+resultado;
+    if(f.caja<0){ S.efectivo+=f.caja; log('Pusiste '+fmt(-f.caja)+' de tu bolsillo para pagar la nómina de los '+esc(f.nombre)+'.','mal'); f.caja=0; }
+    const t={anio:S.anio,puesto,division:f.division,resultado};
+    if(f.division==='A'){
+      if(puesto===1){ f.titulos.push(S.anio); f.hinchas=clamp(f.hinchas+10,0,100); f.valor*=1.2; f.sinTitulo=0; moverPrestigio(4,'campeón con su equipo');
+        log('<b>¡Los '+esc(f.nombre)+' son campeones!</b> La ciudad se volcó a las calles.','hito'); hito('Campeón con los '+f.nombre); t.campeon=true; }
+      else if(puesto<=3){ f.hinchas=clamp(f.hinchas+3,0,100); log('Los '+esc(f.nombre)+' terminaron '+puesto+'.º en la liga.','bien'); f.sinTitulo++; }
+      else if(puesto>=17){ f.division='B'; f.hinchas=clamp(f.hinchas-15,0,100); f.valor*=.7; moverPrestigio(-3,'su equipo descendió');
+        log('<b>Los '+esc(f.nombre)+' descendieron a la B.</b> Los hinchas no te lo perdonan.','mal'); t.descenso=true; f.sinTitulo++; }
+      else { log('Los '+esc(f.nombre)+' terminaron '+puesto+'.º en la liga.'); f.sinTitulo++; }
+    } else {
+      if(puesto<=2){ f.division='A'; f.hinchas=clamp(f.hinchas+8,0,100); log('<b>¡Los '+esc(f.nombre)+' volvieron a la A!</b>','hito'); t.ascenso=true; }
+      else log('Los '+esc(f.nombre)+' siguen en la B ('+puesto+'.º).','mal');
+    }
+    f.temporadas=(f.temporadas||[]).concat([t]).slice(-12);
+    f.plantilla=clamp(f.plantilla+rnd(-3,1),10,99);
+    f.valor=Math.max(10,Math.round(f.valor*(1+(t.campeon?0:(puesto<=6?.03:-.02)))));
+    return t;
+  }
+  function wrapPaso96(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA96_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&!S.muerto) temporada96(); }catch(e){} return r; };
+    window.__SA96_PASO=true;
+  }
+
+  /* --- la escena del club --- */
+  const opt=(v,t,dis,sel)=>'<option value="'+v+'"'+(dis?' disabled':'')+(sel?' selected':'')+'>'+esc(t)+(dis?' · '+esc(dis):'')+'</option>';
+  const sel=(id,et,ops)=>'<label class="campo91"><span>'+esc(et)+'</span><select id="'+id+'">'+ops+'</select></label>';
+  function costos96(){ const k=escala(); return {refuerzos:Math.round(60*k),estrella:Math.round(180*k),tecnico:Math.round(40*k),extranjero:Math.round(110*k),remodelar:Math.round(120*k),nuevo:Math.round(420*k)}; }
+  function escenaClub96(){
+    const f=club(); if(!f){ escenaComprar96(); return; }
+    const c=costos96(), ult=(f.temporadas||[]).slice(-6).reverse();
+    const tabla='<table class="libro">'+(ult.length?ult.map(t=>'<tr><td>'+t.anio+(t.division==='B'?' · en la B':'')+'</td><td class="'+(t.campeon||t.ascenso?'bien':t.descenso?'mal':'')+'">'+(t.campeon?'Campeón':t.descenso?'Descendió':t.ascenso?'Ascendió':t.puesto+'.º')+' · '+fmt(t.resultado)+'</td></tr>').join(''):'<tr><td>Todavía no ha jugado una temporada contigo</td><td></td></tr>')+'</table>';
+    const html='<div class="juicio89"><div class="juicio89-cab"><span>'+esc(f.ciudad)+'</span><span>Desde '+f.desde+'</span><span>'+(f.division==='A'?'Primera división':'Segunda división (la B)')+'</span><span>'+f.titulos.length+' título'+(f.titulos.length===1?'':'s')+'</span></div>'
+      +medida('plantilla',f.plantilla,100,f.plantilla>=70?'v':'')+medida('hinchas',f.hinchas,100,f.hinchas<35?'r':'v')+medida('estadio',f.estadio*33,100)+medida('técnico',f.tecnico*33,100)
+      +'<div class="juicio89-abogado">El club vale cerca de <b>'+fmt(f.valor)+'</b>.'+(f.platasucia?' <span style="color:var(--ui-red)">Tiene "patrocinadores" que nadie quiere nombrar.</span>':'')+'</div>'+tabla+'</div>'
+      +'<div class="form91" style="margin-top:12px">'
+      +sel('f96-fichajes','Fichajes del año',opt('','Nada nuevo')+opt('cantera','Subir muchachos de la cantera (gratis)')+opt('refuerzos','Un par de refuerzos ('+fmt(c.refuerzos)+')',S.efectivo<c.refuerzos?'sin plata':null)+opt('estrella','Una estrella internacional ('+fmt(c.estrella)+')',S.efectivo<c.estrella?'sin plata':null))
+      +sel('f96-tecnico','Técnico',opt('','Mantener el actual')+opt('1','Uno reconocido del país ('+fmt(c.tecnico)+')',f.tecnico>=2?'ya tienes uno igual o mejor':(S.efectivo<c.tecnico?'sin plata':null))+opt('2','Un técnico extranjero de prestigio ('+fmt(c.extranjero)+')',f.tecnico>=3?'ya lo tienes':(S.efectivo<c.extranjero?'sin plata':null)))
+      +sel('f96-estadio','Estadio',opt('','Dejarlo como está')+opt('remodelar','Remodelarlo ('+fmt(c.remodelar)+')',f.estadio>=2?'ya está remodelado':(S.efectivo<c.remodelar?'sin plata':null))+opt('nuevo','Construir un estadio nuevo ('+fmt(c.nuevo)+')',f.estadio>=3?'ya tienes uno':(S.efectivo<c.nuevo?'sin plata':null)))
+      +sel('f96-boleteria','Precio de la boletería',opt('popular','Popular: más hinchas, menos taquilla',null,f.boleteria==='popular')+opt('normal','Normal',null,f.boleteria==='normal')+opt('caro','Caro: más taquilla, hinchas molestos',null,f.boleteria==='caro'))
+      +'<div class="apunte">Aplicar el plan cuesta una movida. La liga se juega sola al cerrar el año.</div></div>';
+    escena({rubro:'Tu equipo de fútbol',titulo:esc(f.nombre),ancho:true,html,cerrable:true,
+      cuerpo:'Un equipo es la forma más rápida de que todo el país sepa tu apellido, y la más rápida de perder plata.',
+      opciones:[
+        {t:'Aplicar el plan de la temporada',cat:'compania',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+          const fi=document.getElementById('f96-fichajes').value, te=document.getElementById('f96-tecnico').value, es=document.getElementById('f96-estadio').value, bo=document.getElementById('f96-boleteria').value;
+          const msgs=[];
+          if(fi==='cantera'){ f.plantilla=clamp(f.plantilla+ri(1,4),0,99); msgs.push('subiste muchachos de la cantera'); }
+          if(fi==='refuerzos'&&S.efectivo>=c.refuerzos){ S.efectivo-=c.refuerzos; f.plantilla=clamp(f.plantilla+ri(5,9),0,99); msgs.push('trajiste dos refuerzos'); }
+          if(fi==='estrella'&&S.efectivo>=c.estrella){ S.efectivo-=c.estrella; f.plantilla=clamp(f.plantilla+ri(10,15),0,99); f.hinchas=clamp(f.hinchas+5,0,100); msgs.push('fichaste una estrella internacional'); }
+          if(te==='1'&&f.tecnico<2&&S.efectivo>=c.tecnico){ S.efectivo-=c.tecnico; f.tecnico=2; msgs.push('contrataste un técnico reconocido'); }
+          if(te==='2'&&f.tecnico<3&&S.efectivo>=c.extranjero){ S.efectivo-=c.extranjero; f.tecnico=3; msgs.push('trajiste un técnico extranjero'); }
+          if(es==='remodelar'&&f.estadio<2&&S.efectivo>=c.remodelar){ S.efectivo-=c.remodelar; f.estadio=2; f.hinchas=clamp(f.hinchas+3,0,100); msgs.push('remodelaste el estadio'); }
+          if(es==='nuevo'&&f.estadio<3&&S.efectivo>=c.nuevo){ S.efectivo-=c.nuevo; f.estadio=3; f.hinchas=clamp(f.hinchas+8,0,100); moverPrestigio(2,'un estadio nuevo'); msgs.push('construiste un estadio nuevo'); }
+          if(bo&&bo!==f.boleteria){ f.boleteria=bo; f.hinchas=clamp(f.hinchas+(bo==='popular'?4:bo==='caro'?-5:0),0,100); msgs.push('cambiaste el precio de la boletería'); }
+          S.mov--;
+          log(msgs.length?'En los '+esc(f.nombre)+' '+msgs.join(', ')+'.':'Dejaste a los '+esc(f.nombre)+' como estaban.','bien');
+          cerrarModal(); render(); }},
+        {t:'Vender el equipo',cat:'capital',d:'Te pagan cerca de '+fmt(f.valor)+'. La hinchada no lo va a olvidar.',cerrar:false,run:()=>{
+          S.efectivo+=f.valor; log('Vendiste a los <b>'+esc(f.nombre)+'</b> por '+fmt(f.valor)+'.','hito'); f.activo=false; moverPrestigio(-1,'vendió su equipo'); cerrarModal(); render(); }}
+      ]});
+  }
+  function escenaComprar96(){
+    escena({rubro:'Fútbol',titulo:'Comprar un equipo de fútbol',ancho:true,cerrable:true,
+      cuerpo:'Ser dueño de un equipo da más prestigio que cualquier empresa, y cuesta más plata que casi cualquier cosa. Los grandes valen más y llenan el estadio; los chicos son baratos y te dejan soñar.',
+      opciones:CLUBES_96.map(c=>{ const p=precioClub96(c); return {t:c.n,cat:'compania',d:esc(c.ciudad)+' · '+(c.grandeza>=80?'un grande del país':c.grandeza>=60?'de mitad de tabla':'un equipo chico')+' · cuesta '+fmt(p)+'.',
+        dis:S.efectivo<p?'Necesitas '+fmt(p):(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>{ if(comprar96(c)){ S.mov--; escenaClub96(); render(); } }}; })});
+  }
+  function wrapAcciones96(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA96_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){
+        const f=club();
+        A.push(f?{t:'Tu equipo de fútbol',d:esc(f.nombre)+' · '+(f.division==='A'?'primera':'la B')+' · '+f.titulos.length+' título'+(f.titulos.length===1?'':'s')+'. Fichajes, técnico, estadio y boletería.',mov:0,modal:true,run:()=>escenaClub96()}
+                :{t:'Comprar un equipo de fútbol',d:'El juguete más caro y más querido de las grandes familias.',mov:0,modal:true,run:()=>escenaComprar96()});
+      } }catch(e){}
+      return A;
+    };
+    window.__SA96_ACC=true;
+  }
+
+  /* --- lo que pasa alrededor de un equipo --- */
+  function instalarEventos96(){
+    if(window.__SA96_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o);
+    E({get p(){ return club()?1.2:0; },c:()=>!!club()&&club().hinchas>=50,
+      t:()=>'Las barras bravas de los '+esc(club().nombre)+' destrozaron media ciudad después del clásico. La alcaldía culpa al club.',
+      o:[{t:'Pagar los daños y pedir perdón',f:()=>{ const x=Math.round(20*escala()); S.efectivo-=x; return 'Pagaste '+fmt(x)+' en daños. La ciudad lo agradeció.'; }},
+         {t:'Defender a la hinchada',f:()=>{ club().hinchas=clamp(club().hinchas+6,0,100); moverPrestigio(-2,'defendió a las barras bravas'); return 'La barra te adora. El resto de la ciudad, no tanto.'; }},
+         {t:'Vetar a los líderes de la barra',f:()=>{ club().hinchas=clamp(club().hinchas-8,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Los vetaste. Ahora te amenazan en las paredes del estadio.'; }}]});
+    E({get p(){ return club()?.8:0; },c:()=>!!club(),
+      t:()=>'Un "intermediario" te propone arreglar el resultado de un partido de los '+esc(club().nombre)+'. Las apuestas pagan muy bien.',
+      o:[{t:'Aceptar',f:()=>{ const x=Math.round(40*escala()); S.efectivo+=x; registrarDelito('amaño de partidos',4,'con los '+club().nombre); if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; club().hinchas=clamp(club().hinchas-12,0,100); return 'Ganaste '+fmt(x)+', pero se supo. Escándalo nacional.'; } return 'Ganaste '+fmt(x)+'. Nadie se enteró… por ahora.'; }},
+         {t:'Denunciarlo',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+4,0,100); return 'Lo denunciaste. Los periódicos te llaman el dueño honesto.'; }},
+         {t:'Rechazarlo sin ruido',f:()=>'Le dijiste que no y que no volviera.'}]});
+    E({get p(){ return club()?.9:0; },c:()=>!!club(),
+      t:()=>'Un muchacho de la cantera de los '+esc(club().nombre)+' es la sensación del torneo. Un club europeo ofrece una fortuna por él.',
+      o:[{t:'Venderlo a Europa',f:()=>{ const x=Math.round(90*escala()); club().caja=(club().caja||0)+x; club().plantilla=clamp(club().plantilla-5,0,99); return 'Lo vendiste por '+fmt(x)+'. El equipo lo va a extrañar.'; }},
+         {t:'Quedártelo una temporada más',f:()=>{ club().plantilla=clamp(club().plantilla+4,0,99); club().hinchas=clamp(club().hinchas+4,0,100); return 'Se quedó. La hinchada te lo agradece.'; }}]});
+    E({get p(){ const f=club(); return f&&f.sinTitulo>=4?1.5:0; },c:()=>!!club()&&club().sinTitulo>=4,
+      t:()=>'Los hinchas de los '+esc(club().nombre)+' llevan '+club().sinTitulo+' años sin título y en el estadio piden tu cabeza.',
+      o:[{t:'Prometer un equipo campeón',f:()=>{ const x=Math.round(80*escala()); S.efectivo-=x; club().plantilla=clamp(club().plantilla+7,0,99); return 'Invertiste '+fmt(x)+' en refuerzos. Ahora hay que ganar.'; }},
+         {t:'Aguantar el chaparrón',f:()=>{ moverPrestigio(-2,'lo abuchean en su propio estadio'); club().hinchas=clamp(club().hinchas-5,0,100); return 'Te abuchearon en tu propio palco.'; }}]});
+    E({get p(){ return club()&&!club().platasucia&&S.anio>=1978&&S.anio<=1998?1.3:0; },c:()=>!!club()&&!club().platasucia&&S.anio>=1978&&S.anio<=1998,
+      t:()=>'Un "empresario" muy generoso, que nadie sabe bien de qué vive, quiere patrocinar a los '+esc(club().nombre)+'. Ofrece pagar la nómina entera y traer a las mejores figuras.',
+      o:[{t:'Aceptar el patrocinio',f:()=>{ const f=club(); f.platasucia=true; f.plantilla=clamp(f.plantilla+15,0,99); registrarDelito('lavado de activos',5,'patrocinio del equipo'); if(window.conf91) window.conf91().vinculos.cartel=S.anio; return 'Aceptaste. El equipo es una aplanadora. No preguntes de dónde sale la plata.'; }},
+         {t:'Rechazarlo',f:()=>{ if(chance(.25)){ S.p.estres=clamp((S.p.estres||30)+10,0,100); return 'Lo rechazaste. Al otro día apareció una corona fúnebre en la sede del club.'; } return 'Lo rechazaste. No volvió a insistir.'; }}]});
+    window.__SA96_EV=true;
+  }
+  function wrapHeredar96(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA96_HER) return;
+    window.heredar=function(){ const f=S&&S.futbol96?JSON.parse(JSON.stringify(S.futbol96)):null; const r=old.apply(this,arguments);
+      try{ if(f&&f.activo&&S){ S.futbol96=f; log('Heredas también a los <b>'+esc(f.nombre)+'</b>.'); } }catch(e){} return r; };
+    window.__SA96_HER=true;
+  }
+  function wrapCatDe96(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA96_CAT) return;
+    window.catDe=function(t){ if(t==='Tu equipo de fútbol'||t==='Comprar un equipo de fútbol') return 'compania'; return old.apply(this,arguments); };
+    window.__SA96_CAT=true;
+  }
+
+  function init96(){
+    wrapPaso96(); wrapAcciones96(); instalarEventos96(); wrapHeredar96(); wrapCatDe96();
+    Object.assign(window,{CLUBES_96,comprar96,temporada96,escenaClub96,escenaComprar96,precioClub96,fuerza96});
+  }
+  setTimeout(init96,40);
+  setTimeout(init96,220);
+  setTimeout(init96,650);
+  window.__SA96={version:V96};
 })();
 </script>
 
