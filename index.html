@@ -759,14 +759,14 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v93</div>
+<div class="version-badge" id="versionBadge">v94</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
   <p class="lema">Una vida no alcanza para construir un grupo empresarial. Para eso están los hijos.</p>
   <div class="filete"></div>
   <div class="reglas">
-    Escoges en qué año arranca la casa —desde 1800 hasta hoy— y empiezas con 18 años.
+    Escoges en qué año arranca la casa —desde 1800 hasta hoy— y si vives tu infancia desde que naces o empiezas con 18 años.
     Puedes nacer y crecer en Colombia o en una de las ciudades internacionales disponibles; el lugar también cambia nombres, apellidos y parte de los eventos.
     Cada turno es un año y en cada año te alcanza para tres movidas:
     estudiar, emplearte, fundar, emitir acciones, armar una junta directiva o negociar con los que pueden echarte.
@@ -19606,7 +19606,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const total=porAnio.size;
     const feed=anios.map(a=>{
       const ev=porAnio.get(a), ed=edadEn93(a), ahora=a===S.anio;
-      return '<div class="cron93-anio'+(ahora?' ahora':'')+'"><div class="cron93-edad"><b>'+(ed!==null?ed+' años':a)+'</b><span>'+(ed!==null?a:'antes de ti')+(ahora?' · ahora':'')+'</span></div>'
+      return '<div class="cron93-anio'+(ahora?' ahora':'')+'"><div class="cron93-edad"><b>'+(ed!==null?ed+(ed===1?' año':' años'):a)+'</b><span>'+(ed!==null?a:'antes de ti')+(ahora?' · ahora':'')+'</span></div>'
         +'<div class="cron93-lineas">'+(ev.length?ev.map(x=>'<p class="'+esc(x.clase||'')+'">'+x.txt+'</p>').join(''):'<p class="nada">Todavía no ha pasado nada este año. Tú decides qué pasa.</p>')+'</div></div>';
     }).join('');
     const chips=typeof window.chipsRasgos88==='function'?window.chipsRasgos88(p,'yo'):'';
@@ -19617,7 +19617,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       +(chips?'<div class="rasgos88-fila">'+chips+'</div>':'')+'</div>'
       +(total>anios.length?'<button type="button" class="cron93-link" data-dash-tab="acta">Toda la crónica ('+total+' años)</button>':'')+'</div>'
       +'<div class="cron93-feed" id="cron93Feed">'+feed+'</div>'
-      +'<div class="cron93-pie"><span>'+(S.mov>0?'Te quedan <b>'+S.mov+'</b> movida'+(S.mov===1?'':'s')+' este año. Usa Perfil, Negocios u Hogar, o deja que el año pase.':'Ya no te quedan movidas este año.')+'</span>'
+      +'<div class="cron93-pie"><span>'+(S.mov>0?'Te quedan <b>'+S.mov+'</b> movida'+(S.mov===1?'':'s')+' este año. '+((typeof window.esNino94==='function'&&window.esNino94())?'Usa Perfil para decidir qué haces este año.':'Usa Perfil, Negocios u Hogar, o deja que el año pase.'):'Ya no te quedan movidas este año.')+'</span>'
       +'<button type="button" class="cron93-cerrar" data-cerrar93>Cerrar '+S.anio+' →</button></div></section>';
   }
 
@@ -19661,7 +19661,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       +medida('estrés',isFinite(p.estres)?p.estres:30,100,(p.estres||0)>70?'r':'')+medida('reputación',p.reputacion,100)
       +medida('redes',p.redes,100)+medida('intelecto',(p.atr&&p.atr.intelecto)||0,10)+medida('carisma',(p.atr&&p.atr.carisma)||0,10)+medida('disciplina',(p.atr&&p.atr.disciplina)||0,10)+'</div></div>';
     secs.forEach(({s,del})=>{
-      if(!del.length&&s.id!=='justicia') return;
+      if(!del.length&&(s.id!=='justicia'||(typeof window.esNino94==='function'&&window.esNino94()))) return;
       h+='<div class="perfil93-sec"><h3>'+esc(s.t)+'<em>'+esc(s.d)+'</em></h3>'+filasHTML93(del)+'</div>';
     });
     return h+'</div>';
@@ -19711,6 +19711,270 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init93,220);
   setTimeout(init93,650);
   window.__SA93={version:V93};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v94 · INFANCIA JUGABLE
+   Puedes empezar al nacer: colegio, amigos, travesuras, primer amor y los
+   eventos de la niñez, con acciones propias de cada edad. Lo que haces de
+   niño forma tus atributos, tus rasgos (v88) y tu educación; a los 18
+   empieza la vida adulta de siempre.
+   ========================================================================== */
+(function(){
+  const V94='v94';
+  const nino=()=>!!(typeof S!=='undefined'&&S&&S.p&&S.infancia94&&!S.infancia94.terminada&&S.p.edad<18);
+  const inf=()=>S.infancia94;
+  const subir=(k,p)=>{ if(chance(p)&&S.p.atr&&isFinite(S.p.atr[k])&&S.p.atr[k]<10){ S.p.atr[k]++; return true; } return false; };
+  const fel=d=>{ S.p.felicidad=clamp(S.p.felicidad+d,0,100); };
+  const sal=d=>{ S.p.salud=clamp(S.p.salud+d,0,100); };
+  const notas=d=>{ inf().notas=clamp((inf().notas||55)+d,0,100); };
+  const padres=()=>(S.parientes||[]).filter(p=>p.vivo!==false&&(p.rel==='padre'||p.rel==='madre'));
+  const afectoPadres=d=>padres().forEach(p=>{ p.afecto=clamp((isFinite(p.afecto)?p.afecto:60)+d,0,100); });
+  const rasgo=(id,origen,p)=>{ if(typeof window.darRasgo88==='function'&&chance(p)&&window.darRasgo88(S.p,id,origen+' ('+S.anio+')')){ log('Eso te marcó: ahora eres <b>'+id.replace('_',' ')+'</b>.','hito'); return true; } return false; };
+  const nombreDe=sx=>{ try{ return nombreLocal(S.p.ciudad,sx); }catch(e){ return pick(sx==='h'?NOM_H:NOM_M); } };
+  function nuevoAmigo94(origen){
+    const sx=chance(.5)?'h':'m', a={id:'a'+S.anio+'_'+ri(100,999),nombre:nombreDe(sx),apellido:pick(APELLIDOS),sexo:sx,desde:S.anio,origen,afecto:ri(55,80)};
+    (inf().amigos=inf().amigos||[]).push(a); if(inf().amigos.length>8) inf().amigos.shift();
+    return a;
+  }
+  function etapa94(){ const e=S.p.edad; return e<3?'bebé':e<6?'en el jardín':e<11?'en la primaria':e<15?'en el bachillerato':'terminando el colegio'; }
+
+  /* --- empezar al nacer --- */
+  function volverNino94(){
+    const dif=18;
+    S.p.edad=0;
+    S.infancia94={desde:S.anio,notas:ri(45,65),amigos:[],travesuras:0,primerAmor:null,mascota:null,terminada:false,
+      colegio:(S.p.origen==='elite'?'un colegio privado bilingüe':S.p.origen==='comercio'?'un colegio privado':'el colegio público del barrio')};
+    (S.parientes||[]).forEach(p=>{ if(isFinite(p.edad)) p.edad=Math.max(0,p.edad-dif); });
+    S.parientes=(S.parientes||[]).filter(p=>!(['primo','prima','sobrino','sobrina'].includes(p.rel)&&p.edad<=0&&chance(.5)));
+    if(S.p.atr) Object.keys(S.p.atr).forEach(k=>{ S.p.atr[k]=clamp(S.p.atr[k]-1,1,10); });
+    S.p.redes=Math.round((S.p.redes||0)*.3); S.p.reputacion=Math.round((S.p.reputacion||0)*.5);
+    S.mov=2; S.log=[];
+    log('Naciste en <b>'+esc(S.p.ciudad)+'</b>, en la casa de los '+esc(S.p.apellido)+'. '+(padres().length?'Tus papás son '+padres().map(p=>esc(p.nombre)).join(' y ')+'.':''),'hito');
+  }
+  function wrapIniciar94(){
+    const old=window.iniciar; if(typeof old!=='function'||window.__SA94_INI) return;
+    window.iniciar=function(cfg,legado){
+      const r=old.apply(this,arguments);
+      try{ if(cfg&&cfg.infancia&&!legado&&S&&S.p){ volverNino94(); render(); guardar(true); } }catch(e){}
+      return r;
+    };
+    window.__SA94_INI=true;
+  }
+
+  /* --- acciones de la niñez --- */
+  function A94(t,d,min,max,run,mov){ return {t,d,cat:'familia',mov:mov===undefined?1:mov,infancia94:true,min,max,run}; }
+  function accionesInfancia94(){
+    const e=S.p.edad, L=[];
+    const add=a=>{ if(e>=a.min&&e<=a.max) L.push(a); };
+    add(A94('Jugar','Correr, inventar, ensuciarse. A esta edad, es lo más serio que hay.',0,12,()=>{ fel(6); subir('carisma',.12); log(pick(['Pasaste la tarde jugando con tus primos.','Armaste un fuerte con cobijas y no lo dejaste desarmar en una semana.','Jugaste fútbol en la calle hasta que oscureció.'])); }));
+    add(A94('Portarte bien con tus papás','Ayudar, obedecer, dar un abrazo sin que te lo pidan.',2,17,()=>{ afectoPadres(8); fel(2); log('Tus papás comentaron en la cena lo bien que te estás portando.','bien'); }));
+    add(A94('Hacer una pataleta','Gritar, patalear y salirte con la tuya. A veces funciona.',2,9,()=>{ fel(3); afectoPadres(-6); log('Hiciste una pataleta en pleno supermercado.','mal'); rasgo('rebelde','Pataletas de niño',.06); }));
+    add(A94('Estudiar duro','Tareas a tiempo, repasar para los exámenes. Sube tus notas y tu cabeza.',6,17,()=>{ notas(ri(6,12)); fel(-3); const sub=subir('intelecto',.22); log(sub?'Estudiaste en serio y se notó: entiendes cosas que antes no.':'Estudiaste toda la semana. Las notas lo agradecen.','bien'); rasgo('disciplinado','Años de estudio juicioso',.05); }));
+    add(A94('Leer por tu cuenta','Libros que nadie te mandó a leer.',5,17,()=>{ subir('intelecto',.2); fel(2); log(pick(['Te leíste un libro entero en una semana, debajo de las cobijas con una linterna.','Descubriste la biblioteca del abuelo y no saliste de ahí en todas las vacaciones.'])); }));
+    add(A94('Hacer amigos','Acercarte al de la otra fila, invitar a alguien a tu casa.',4,17,()=>{ const a=nuevoAmigo94('colegio'); subir('carisma',.15); fel(4); S.p.redes=clamp((S.p.redes||0)+1,0,100); log('Te hiciste amig'+(a.sexo==='m'?'a':'o')+' de <b>'+esc(a.nombre)+' '+esc(a.apellido)+'</b>.','bien'); }));
+    add(A94('Hacer deporte','Fútbol, natación, bicicleta. El cuerpo lo agradece toda la vida.',5,17,()=>{ sal(4); fel(3); subir('disciplina',.14); log(e>=12&&chance(.4)?'Te escogieron para el equipo del colegio.':'Entrenaste todo el año. Estás más fuerte.','bien'); rasgo('robusto','Una infancia de deporte',.04); }));
+    add(A94('Aprender música o arte','Piano, guitarra, pintura: algo que sea solo tuyo.',6,17,()=>{ subir('carisma',.12); fel(4); log(pick(['Aprendiste a tocar guitarra lo suficiente para animar cualquier paseo.','Pintaste un cuadro que tu mamá colgó en la sala.']),'bien'); }));
+    add(A94('Hacer una travesura','Timbrar y salir corriendo, esconder las llaves del carro de tu papá…',6,17,()=>{ fel(5); inf().travesuras=(inf().travesuras||0)+1;
+      if(chance(.35)){ fel(-6); afectoPadres(-5); log('Te pillaron en plena travesura. Castigo de un mes sin salir.','mal'); } else log('Hiciste una travesura y nadie supo que fuiste tú.');
+      if(inf().travesuras>=4) rasgo('rebelde','Demasiadas travesuras',.25); }));
+    add(A94('Copiar en un examen','Mirar la hoja del de al lado. Fácil… hasta que no.',9,17,()=>{ if(chance(.3)){ notas(-15); afectoPadres(-6); log('El profesor te pilló copiando. Cero en el examen y citación a tus papás.','mal'); rasgo('rebelde','Pillado copiando',.1); }
+      else { notas(10); log('Copiaste en el examen de química y sacaste la mejor nota del salón.'); rasgo('sin_escrupulos','Aprendiste que hacer trampa funciona',.06); } }));
+    add(A94('Defender a alguien del matón','Ponerte entre el matón del colegio y su víctima de turno.',8,17,()=>{ if(chance(.5+((S.p.atr&&S.p.atr.disciplina)||5)/40)){ S.p.reputacion=clamp((S.p.reputacion||0)+2,0,100); fel(5); log('Le paraste el macho al matón del colegio. Desde ese día te respetan.','bien'); rasgo('leal','Defendiste a un compañero',.15); }
+      else { sal(-6); fel(-4); log('Defendiste a un compañero y saliste con un ojo morado.','mal'); } }));
+    add(A94('Declararte a quien te gusta','Una carta, una canción, o simplemente decirlo.',13,17,()=>{ const sx=S.p.sexo==='h'?'m':'h', n=nombreDe(sx);
+      if(chance(clamp(.3+((S.p.atr&&S.p.atr.carisma)||5)/16,.15,.85))){ inf().primerAmor={nombre:n,sexo:sx,anio:S.anio}; fel(10); log('Te declaraste a <b>'+esc(n)+'</b> y te dijo que sí. Tu primer amor.','hito'); }
+      else { fel(-7); log('Te declaraste a '+esc(n)+' y te dijo que mejor como amigos.','mal'); } }));
+    add(A94('Ayudar en el negocio de la familia','Las vacaciones detrás del mostrador o en la oficina del papá.',13,17,()=>{ subir('disciplina',.18); S.p.redes=clamp((S.p.redes||0)+2,0,100); const x=Math.max(1,Math.round((S.efectivo||0)*.002)); S.efectivo+=x; log('Trabajaste las vacaciones en el negocio de la familia. Te ganaste '+fmt(x)+' y aprendiste más que en el colegio.','bien'); }));
+    add(A94('Ir a fiestas','La fiesta de quince de alguien, la del colegio, la de la finca.',13,17,()=>{ fel(6); S.p.redes=clamp((S.p.redes||0)+3,0,100); sal(-2); log(pick(['Fuiste a todas las fiestas del año.','Llegaste a las cuatro de la mañana y tu mamá te estaba esperando despierta.'])); rasgo('derrochador','Una adolescencia de fiesta',.05); }));
+    if(['elite','comercio'].includes(S.p.origen)) add(A94('Irte de intercambio','Un semestre afuera: otro idioma, otra casa, otra vida.',15,17,()=>{ subir('intelecto',.4); S.p.redes=clamp((S.p.redes||0)+4,0,100); fel(6); const x=Math.max(5,Math.round((S.efectivo||0)*.01)); S.efectivo-=Math.min(S.efectivo,x); log('Te fuiste de intercambio un semestre. Volviste hablando otro idioma y con amigos en otro país.','hito'); }));
+    L.push({t:'Crecer de una vez (saltar a los 18)',d:'Dejar que los años de colegio pasen solos. Creces con lo que la vida te dé.',cat:'legado',mov:0,modal:true,infancia94:true,run:()=>saltarA1894()});
+    return L;
+  }
+
+  /* --- eventos de la niñez --- */
+  const EVENTOS_INFANCIA_94=[
+    {id:'pasos',una:true,p:3,min:0,max:2,t:()=>'Diste tus primeros pasos en la sala de la casa. Tu papá lo grabó todo.',o:[{t:'Seguir',f:()=>{ fel(4); return ''; }}]},
+    {id:'palabra',una:true,p:2,min:0,max:3,t:()=>'Dijiste tu primera palabra. Hubo pelea en la familia sobre cuál fue.',o:[{t:'"Mamá"',f:()=>{ afectoPadres(4); return 'Tu mamá lo cuenta en cada reunión.'; }},{t:'"Plata"',f:()=>{ rasgo('vanidoso','Tu primera palabra fue "plata"',.3); return 'Tu abuelo dice que vas a ser el empresario de la familia.'; }}]},
+    {id:'jardin',una:true,p:3,min:3,max:6,t:()=>'Tu primer día en el jardín. Todos los demás niños están llorando.',o:[{t:'Llorar con ellos',f:()=>{ fel(-2); return 'Lloraste toda la mañana. Al otro día ya ni te acordabas.'; }},{t:'Hacerte amigo del que llora más',f:()=>{ const a=nuevoAmigo94('jardín'); return 'Consolaste a '+esc(a.nombre)+'. Siguen siendo amigos.'; }}]},
+    {p:2,min:5,max:12,c:()=>!inf().mascota,t:()=>'Un perro callejero te siguió desde el colegio hasta la puerta de la casa.',o:[{t:'Rogar que te lo dejen tener',f:()=>{ if(chance(.65)){ inf().mascota={nombre:pick(['Lucas','Canela','Tobi','Princesa','Max','Negro']),anio:S.anio}; fel(10); return 'Te lo dejaron. Se llama '+inf().mascota.nombre+' y duerme a tus pies.'; } fel(-6); return 'Tus papás dijeron que no. Lloraste toda la noche.'; }},{t:'Dejarlo en la calle',f:()=>{ fel(-3); return 'El perro se quedó en la esquina varios días. Después no volvió.'; }}]},
+    {id:'varicela',una:true,p:2,min:4,max:12,t:()=>'Te dio varicela. Dos semanas en la casa, con la cara llena de pepas.',o:[{t:'Quedarte quieto en la cama',f:()=>{ sal(-2); return 'Te curaste sin cicatrices.'; }},{t:'Rascarte',f:()=>{ sal(-4); return 'Te quedó una marquita en la frente para toda la vida.'; }}]},
+    {p:2.5,min:7,max:14,t:()=>'El matón del salón te quitó la lonchera por tercera vez esta semana.',o:[{t:'Pelear',f:()=>{ if(chance(.45)){ S.p.reputacion=clamp((S.p.reputacion||0)+3,0,100); return 'Le ganaste. No te volvió a molestar.'; } sal(-5); return 'Perdiste la pelea, pero no la dignidad.'; }},{t:'Decirle a un profesor',f:()=>{ return 'El profesor lo castigó. Los demás te dijeron sapo.'; }},{t:'Dejarlo así',f:()=>{ fel(-5); rasgo('rencoroso','No olvidaste al matón del colegio',.12); return 'Te quedaste callado. No se te olvida.'; }}]},
+    {id:'olimpiada',una:true,p:2,min:8,max:16,c:()=>(inf().notas||0)>=60,t:()=>'El colegio te escogió para la olimpiada de matemáticas.',o:[{t:'Prepararte en serio',f:()=>{ if(chance(.5)){ subir('intelecto',.6); notas(8); return 'Ganaste la medalla de plata. Saliste en el periódico local.'; } return 'Quedaste de quinto. Nada mal.'; }},{t:'No ir',f:()=>'Preferiste quedarte jugando.'}]},
+    {p:1.5,min:6,max:16,c:()=>padres().length>=2,t:()=>'Tus papás pelean todas las noches. Se oye desde tu cuarto.',o:[{t:'Encerrarte con audífonos',f:()=>{ fel(-5); rasgo('frio','Aprendiste a no sentir',.12); return 'Te acostumbraste a no escuchar.'; }},{t:'Intentar que se arreglen',f:()=>{ afectoPadres(5); rasgo('magnanimo','Mediaste entre tus papás',.12); return 'Les hiciste una carta. Esa noche no pelearon.'; }}]},
+    {id:'cigarrillo',una:true,p:2,min:12,max:17,t:()=>'Detrás del colegio te ofrecen un cigarrillo.',o:[{t:'Aceptar',f:()=>{ inf().fuma=true; sal(-2); return 'Toseste como un loco. Igual seguiste fumando a escondidas.'; }},{t:'No, gracias',f:()=>'Dijiste que no. Nadie insistió.'}]},
+    {p:1.5,min:11,max:17,c:()=>!inf().mentor,t:()=>{ const sx=chance(.5)?'h':'m'; inf()._mentor={nombre:nombreDe(sx)+' '+pick(APELLIDOS),sexo:sx}; return 'Un'+(sx==='m'?'a profesora':' profesor')+', '+esc(inf()._mentor.nombre)+', te dice que tienes algo especial y se ofrece a ayudarte después de clase.'; },
+     o:[{t:'Aceptar la ayuda',f:()=>{ inf().mentor=Object.assign({desde:S.anio},inf()._mentor); subir('intelecto',.4); notas(8); return esc(inf().mentor.nombre)+' se volvió tu mentor. Nunca lo vas a olvidar.'; }},{t:'No te interesa',f:()=>'Le dijiste que no tenías tiempo.'}]},
+    {p:2,min:13,max:17,t:()=>'La fiesta de fin de año del colegio. Alguien te saca a bailar.',o:[{t:'Bailar toda la noche',f:()=>{ fel(8); return 'Bailaste hasta que prendieron las luces.'; }},{t:'Quedarte en la esquina',f:()=>{ fel(-2); return 'Te quedaste mirando. El año que viene, quizás.'; }}]},
+    {p:5,min:17,max:17,c:()=>!inf().graduado,t:()=>{ inf().graduado=true; const n=inf().notas||50; return 'Te graduaste del colegio'+(n>=80?' <b>con honores</b>':n<40?' raspando':'')+'. Tus papás lloraron en la ceremonia.'; },
+     o:[{t:'Celebrar',f:()=>{ fel(6); if((inf().notas||0)>=80){ subir('intelecto',1); S.p.redes=clamp((S.p.redes||0)+3,0,100); } return ''; }}]}
+  ];
+  function wrapSortear94(){
+    const old=window.sortearEvento; if(typeof old!=='function'||window.__SA94_SORT) return;
+    window.sortearEvento=function(){
+      if(!nino()) return old.apply(this,arguments);
+      const e=S.p.edad, vistos=(inf().vistos=inf().vistos||[]);
+      const disp=EVENTOS_INFANCIA_94.filter(x=>e>=x.min&&e<=x.max&&!(x.una&&vistos.includes(x.id))&&(!x.c||(()=>{ try{ return x.c(); }catch(err){ return false; } })()));
+      if(!disp.length) return null;
+      const envolver=x=>({p:x.p,c:()=>true,t:()=>{ if(x.una&&!vistos.includes(x.id)) vistos.push(x.id); return x.t(); },o:x.o});
+      let r=Math.random()*disp.reduce((a,x)=>a+x.p,0);
+      for(const x of disp){ r-=x.p; if(r<=0) return envolver(x); }
+      return envolver(disp[0]);
+    };
+    window.__SA94_SORT=true;
+  }
+  function wrapHistoria94(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA94_HIST) return;
+    window.correrHistoria=function(){
+      const n0=cola.length; const r=old.apply(this,arguments);
+      try{ if(nino()) for(let k=n0;k<cola.length;k++){ const ev=cola[k]; if(ev&&ev.o&&ev.o.length>1){ ev.o=[{t:'Seguir creciendo',f:ev.o[0].f}]; } } }catch(e){}
+      return r;
+    };
+    window.__SA94_HIST=true;
+  }
+
+  /* --- crecer y llegar a los 18 --- */
+  function mayoriaDeEdad94(){
+    const I=inf(); if(!I||I.terminada) return;
+    I.terminada=true; S.p.edad=Math.max(18,S.p.edad);
+    const n=I.notas||50;
+    if(n>=80) S.p.educacion=Math.max(S.p.educacion||0,1);
+    const amigos=(I.amigos||[]).length;
+    log('Cumpliste <b>18 años</b>. '+(n>=80?'Saliste del colegio con honores. ':n<40?'Saliste del colegio a las patadas. ':'')+(amigos?'Te llevas '+amigos+' amig'+(amigos===1?'o':'os')+' de la infancia. ':'')+'Ahora empieza tu vida adulta.','hito');
+    hito('Cumplió la mayoría de edad');
+    S.mov=Math.max(S.mov,3);
+    I.mostrar=true;
+  }
+  function escenaMayoria94(){
+    const I=inf(), r=(typeof window.rasgosDe88==='function')?window.rasgosDe88(S.p).map(id=>(window.RASGOS_88||[]).find(x=>x.id===id)).filter(Boolean).map(x=>x.n.toLowerCase()):[];
+    escena({rubro:'Mayoría de edad',titulo:'Cumpliste 18',ancho:true,
+      cuerpo:'Creciste '+esc(etapa94()==='terminando el colegio'?'en '+I.colegio:'')+'. Notas finales: <b>'+Math.round(I.notas||50)+'/100</b>. '
+        +((I.amigos||[]).length?'Amigos de la infancia: '+I.amigos.map(a=>esc(a.nombre)).join(', ')+'. ':'')
+        +(I.primerAmor?'Tu primer amor fue '+esc(I.primerAmor.nombre)+'. ':'')+(I.mentor?'Tu mentor: '+esc(I.mentor.nombre)+'. ':'')+(I.mascota?'Tu perro '+esc(I.mascota.nombre)+' ya está viejito. ':'')
+        +(r.length?'<br><br>Llegas a la adultez siendo <b>'+r.join(', ')+'</b>. ':'')
+        +'<br><br>Desde ahora puedes estudiar una carrera, trabajar, fundar una compañía o casarte. La casa '+esc(S.dinastia||S.p.apellido)+' te está esperando.',
+      opciones:[{t:'Empezar la vida adulta',cat:'legado',run:()=>{}}]});
+  }
+  function crecerUnAnioRapido94(){
+    const pool=accionesInfancia94().filter(a=>a.mov>0);
+    for(let k=0;k<2&&pool.length;k++){ try{ pick(pool).run(); }catch(e){} }
+  }
+  function saltarA1894(){
+    if(!nino()) return;
+    const faltan=18-S.p.edad;
+    for(let i=0;i<faltan;i++){
+      S.anio++; S.p.edad++;
+      (S.parientes||[]).forEach(p=>{ if(p.vivo!==false&&isFinite(p.edad)) p.edad++; });
+      crecerUnAnioRapido94();
+      if(S.p.edad===17&&!inf().graduado){ inf().graduado=true; if((inf().notas||0)>=80) subir('intelecto',1); }
+    }
+    log('Los años del colegio pasaron volando.');
+    mayoriaDeEdad94(); render();
+  }
+  function wrapPaso94(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA94_PASO) return;
+    window.pasarAnio=function(){
+      const eraNino=nino();
+      const ef0=S.efectivo, deuda0=S.deuda, nivel0=S.hogar&&S.hogar.nivel;
+      const r=old.apply(this,arguments);
+      try{
+        if(eraNino&&S&&S.p){
+          /* de niño, la casa la pagan tus papás: tu plata no se toca */
+          S.efectivo=ef0; S.deuda=deuda0; if(S.hogar&&nivel0!==undefined) S.hogar.nivel=nivel0;
+          if(S.p.edad>=18) mayoriaDeEdad94();
+          else { S.mov=2; if(S.p.edad===6) log('Entraste a '+esc(inf().colegio)+'.','hito'); }
+        }
+      }catch(e){}
+      return r;
+    };
+    window.__SA94_PASO=true;
+  }
+
+  /* --- la vida de un niño: acciones, pestañas y textos --- */
+  function wrapAcciones94(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA94_ACC) return;
+    window.listaAcciones=function(){
+      if(nino()) return accionesInfancia94();
+      return old.apply(this,arguments);
+    };
+    window.__SA94_ACC=true;
+  }
+  const PESTANAS_NINO_94=['mesa','perfil','familia','acta'];
+  function wrapPestanas94(){
+    const old=window.renderPestanas; if(typeof old!=='function'||window.__SA94_TABS) return;
+    window.renderPestanas=function(){
+      if(!nino()||typeof PESTANAS==='undefined') return old.apply(this,arguments);
+      const orig=PESTANAS.slice();
+      try{ if(!PESTANAS_NINO_94.includes(tab)) tab='mesa'; const f=orig.filter(p=>PESTANAS_NINO_94.includes(p[0])); PESTANAS.length=0; f.forEach(p=>PESTANAS.push(p)); return old.apply(this,arguments); }
+      finally{ PESTANAS.length=0; orig.forEach(p=>PESTANAS.push(p)); }
+    };
+    window.__SA94_TABS=true;
+  }
+  function wrapRol94(){
+    const old=window.rolActualDashboard; if(typeof old!=='function'||window.__SA94_ROL) return;
+    window.rolActualDashboard=function(){ if(nino()) return etapa94(); return old.apply(this,arguments); };
+    window.__SA94_ROL=true;
+  }
+  function seccionInfancia94(){
+    const sec=window.SECCIONES_93; if(!Array.isArray(sec)||sec.some(s=>s.id==='infancia')) return;
+    sec.unshift({id:'infancia',t:'Tu infancia',d:'lo que puedes hacer a tu edad',f:a=>!!a.infancia94});
+  }
+
+  /* --- elegir empezar al nacer --- */
+  function wrapCreacion94(){
+    const old=window.pantallaCreacion; if(typeof old!=='function'||window.__SA94_CREA) return;
+    window.pantallaCreacion=function(){
+      const r=old.apply(this,arguments);
+      try{
+        const caja=document.querySelector('#escenaHost .lienzo'); if(!caja) return r;
+        const ancla=caja.querySelector('#cEpocaD'); if(!ancla) return r;
+        ancla.insertAdjacentHTML('afterend','<label class="campo">Cómo empieza tu historia</label><div class="fichas-sel" id="cVida94"><button type="button" class="opcion" data-v="nacer" aria-pressed="true">Desde que naces</button><button type="button" class="opcion" data-v="18" aria-pressed="false">A los 18 años</button></div><div class="apunte" id="cVida94D">Vives tu infancia: colegio, amigos, travesuras. Lo que hagas de niño forma quién vas a ser.</div>');
+        let modo='nacer';
+        caja.querySelectorAll('#cVida94 .opcion').forEach(b=>b.addEventListener('click',()=>{
+          caja.querySelectorAll('#cVida94 .opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); modo=b.dataset.v;
+          const d=caja.querySelector('#cVida94D'); if(d) d.textContent=modo==='nacer'?'Vives tu infancia: colegio, amigos, travesuras. Lo que hagas de niño forma quién vas a ser.':'Empiezas directo en la vida adulta, como siempre.';
+        }));
+        const btn=botonEscena(), viejo=btn&&btn.onclick;
+        if(btn&&viejo) btn.onclick=function(){
+          const oldIni=window.iniciar;
+          window.iniciar=function(cfg,legado){ if(cfg&&!legado) cfg.infancia=(modo==='nacer'); window.iniciar=oldIni; return oldIni.apply(this,arguments); };
+          try{ return viejo.apply(this,arguments); } finally{ if(window.iniciar!==oldIni) window.iniciar=oldIni; }
+        };
+      }catch(e){}
+      return r;
+    };
+    window.__SA94_CREA=true;
+    const bn=document.getElementById('btnNueva'); if(bn) bn.onclick=window.pantallaCreacion;
+  }
+
+  function wrapLienzo94(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA94_LIENZO) return;
+    window.renderLienzo=function(){
+      const r=old.apply(this,arguments);
+      try{ const I=S&&S.infancia94; const host=$('escenaHost');
+        if(I&&I.mostrar&&host&&!host.innerHTML.trim()){ I.mostrar=false; escenaMayoria94(); } }catch(e){}
+      return r;
+    };
+    window.__SA94_LIENZO=true;
+  }
+  function wrapElecciones94(){
+    const old=window.escenaElecciones; if(typeof old!=='function'||window.__SA94_ELEC) return;
+    window.escenaElecciones=function(){
+      if(nino()){ try{ elegirGobierno(false); }catch(e){} render(); return; }
+      return old.apply(this,arguments);
+    };
+    window.__SA94_ELEC=true;
+  }
+  function init94(){
+    wrapIniciar94(); wrapLienzo94(); wrapElecciones94(); wrapSortear94(); wrapHistoria94(); wrapPaso94(); wrapAcciones94(); wrapPestanas94(); wrapRol94(); seccionInfancia94(); wrapCreacion94();
+    Object.assign(window,{accionesInfancia94,EVENTOS_INFANCIA_94,saltarA1894,mayoriaDeEdad94,volverNino94,esNino94:nino});
+  }
+  setTimeout(init94,40);
+  setTimeout(init94,220);
+  setTimeout(init94,650);
+  window.__SA94={version:V94};
 })();
 </script>
 
