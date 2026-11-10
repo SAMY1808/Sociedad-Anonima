@@ -868,10 +868,36 @@ html{scroll-behavior:smooth}
 .recorte105 b{display:block;font-family:var(--display);font-weight:400;font-size:16px;color:var(--marfil)}
 .recorte105 span{font-size:11.5px;color:var(--humo2);font-style:italic}
 </style>
+<style id="estilos-v107">
+.arbol107{position:relative;border:1px solid rgba(214,166,72,.18);border-radius:14px;background:radial-gradient(120% 80% at 50% 0%,rgba(214,166,72,.07),rgba(0,0,0,0) 60%),rgba(0,0,0,.12);overflow:hidden}
+.arbol107 .barra{display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap}
+.arbol107 .barra .ley{margin-right:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--humo)}
+.arbol107 .barra .ley i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.arbol107 .barra button{font:inherit;font-size:12.5px;padding:6px 11px;border-radius:8px;border:1px solid rgba(214,166,72,.35);background:transparent;color:var(--marfil);cursor:pointer}
+.arbol107 .barra button:hover{border-color:var(--laton)}
+.arbol107 .lienzo107{overflow:auto;max-height:720px;-webkit-overflow-scrolling:touch}
+.arbol107 svg.a107{display:block;margin:0 auto}
+.a107 .nodo{cursor:default}
+.a107 .nodo.muerto .cara{filter:grayscale(1) brightness(.85)}
+.a107 .nodo:hover .fondo{stroke:#D6A648}
+.linea107{list-style:none;margin:0;padding:0}
+.linea107 .gen{margin:18px 0 6px;display:flex;align-items:baseline;gap:10px}
+.linea107 .gen b{font-family:var(--display);font-weight:400;font-size:19px;color:var(--marfil)}
+.linea107 .gen span{font-size:12px;color:var(--humo2)}
+.linea107 .gen em{font-style:normal;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--laton);border:1px solid rgba(214,166,72,.4);border-radius:999px;padding:1px 8px}
+.linea107 ol{list-style:none;margin:0 0 0 8px;padding:0 0 0 16px;border-left:2px solid rgba(214,166,72,.22)}
+.linea107 li{position:relative;padding:5px 0;font-size:13.5px;color:var(--humo)}
+.linea107 li:before{content:"";position:absolute;left:-22px;top:11px;width:10px;height:10px;border-radius:50%;background:#2a3a30;border:2px solid var(--humo2)}
+.linea107 li.vida:before{border-color:#D6A648;background:#D6A648}
+.linea107 li.muerte:before{border-color:#9aa39c;background:#1b241f}
+.linea107 li.logro:before{border-color:#6CC08F;background:#6CC08F}
+.linea107 li.mal:before{border-color:#d06a5a}
+.linea107 li b{color:var(--laton);font-weight:500;margin-right:8px;font-variant-numeric:tabular-nums}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v106</div>
+<div class="version-badge" id="versionBadge">v107</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -22204,6 +22230,242 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init106(){ instalar106(); wrapPaso106(); Object.assign(window,{H106,correr106}); }
   setTimeout(init106,40); setTimeout(init106,220); setTimeout(init106,650);
   window.__SA106={version:V106};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v107 · EL ÁRBOL DE LA CASA, LA LÍNEA DE TIEMPO Y EL FINAL
+   Un árbol genealógico nuevo con todas las generaciones: el tronco de los
+   que llevaron la casa, sus parejas, sus hermanos, tus hijos y tus nietos;
+   los que murieron en gris con sus años, el sucesor marcado. Se puede
+   ampliar y descargar como imagen. En Legado, la línea de tiempo por
+   generación; al cerrar la historia, el árbol completo y la línea.
+   ========================================================================== */
+(function(){
+  const V107='v107';
+  const ORO='#D6A648', JADE='#6CC08F', LINEA='rgba(214,166,72,.55)', LINEA2='rgba(240,231,213,.18)';
+  const roman=n=>(typeof genLabel==='function'?genLabel(n):String(n));
+  function registros(){ const L=S.legado||(S.legado={}); if(!Array.isArray(L.arbol107)) L.arbol107=[]; return L.arbol107; }
+
+  /* --- se guarda cada generación al heredar --- */
+  function capturar(heredero,vivo){
+    const p=S.p, pz=S.familia&&S.familia.pareja;
+    const padres=S.gen===1?(S.parientes||[]).filter(x=>x.rel==='padre'||x.rel==='madre').map(x=>({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,muerto:!x.vivo})):[];
+    const herm=(S.parientes||[]).filter(x=>/^herman/.test(x.rel)).map(x=>({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,muerto:!x.vivo,nac:S.anio-(x.edad||0)}));
+    return {gen:S.gen,nombre:p.nombre,apellido:p.apellido,sexo:p.sexo,nac:S.anio-p.edad,fin:S.anio,murio:!vivo,edad:p.edad,causa:S.causaMuerte97||'',
+      pareja:pz?{nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||'',sexo:pz.sexo,casados:!!pz.casados}:null,
+      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>({nombre:h.nombre,sexo:h.sexo,nac:S.anio-(h.edad||0),heredero:h===heredero,famoso:!!h.famoso103})),
+      colateral:!!(heredero&&heredero._sucesorColateral), herederoNombre:heredero&&heredero.nombre, herederoRel:heredero&&heredero._sucesorRel, padres, hermanos:herm, pico:Math.round((S.legado&&S.legado.pico)||0)};
+  }
+  function wrapHeredar107(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA107_HER) return;
+    window.heredar=function(h,frac,vivo){ let rec=null; try{ rec=capturar(h,vivo); }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ if(rec&&S){ const R=registros(); if(!R.some(x=>x.gen===rec.gen)) R.push(rec); } }catch(e){}
+      return r; };
+    window.__SA107_HER=true;
+  }
+
+  /* --- quién va en cada fila --- */
+  function filas(){
+    const R=registros().slice().sort((a,b)=>a.gen-b.gen);
+    // partidas viejas: solo hay ancestros sin detalle
+    const anc=(S.legado&&S.legado.ancestros)||[];
+    anc.forEach(a=>{ if(!R.some(r=>r.gen===a.gen)){ const pt=String(a.nombre||'').split(' ');
+      R.push({gen:a.gen,nombre:pt[0],apellido:pt.slice(1).join(' '),sexo:'h',nac:a.muerte?a.muerte-(a.edad||60):null,fin:a.muerte,murio:!!a.muerte,edad:a.edad,pareja:null,hijos:[],padres:[],hermanos:[],viejo:true}); } });
+    R.sort((a,b)=>a.gen-b.gen);
+    const F=[];
+    const nodo=(o)=>Object.assign({tam:46},o);
+    // padres del fundador
+    const primero=R[0];
+    const padres=primero?primero.padres:(S.gen===1?(S.parientes||[]).filter(x=>x.rel==='padre'||x.rel==='madre').map(x=>({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,muerto:!x.vivo})):[]);
+    if(padres&&padres.length) F.push({et:'Antes de la casa',nodos:padres.map(x=>nodo({nombre:x.nombre,apellido:x.apellido,sexo:x.sexo,rol:x.sexo==='m'?'madre del fundador':'padre del fundador',muerto:x.muerto,edad:70})),pareja:true});
+    R.forEach((r,i)=>{
+      const prev=R[i-1];
+      const herm=prev?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==r.nombre).map(h=>nodo({nombre:h.nombre,apellido:prev.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:h.nac?'n. '+h.nac:'',edad:50,famoso:h.famoso})):(r.hermanos||[]).map(h=>nodo({nombre:h.nombre,apellido:h.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',muerto:h.muerto,edad:50}));
+      F.push({et:'Generación '+roman(r.gen),sub:(r.nac?r.nac:'?')+'–'+(r.fin||''),
+        cabeza:nodo({nombre:r.nombre,apellido:r.apellido,sexo:r.sexo,rol:(r.murio?'murió':'se retiró')+(r.edad?' a los '+r.edad:''),anios:(r.nac||'?')+'–'+(r.fin||'?'),muerto:r.murio,edad:Math.min(80,r.edad||70),tam:62,cabeza:true,colateral:prev&&prev.colateral,causa:r.causa}),
+        pareja:r.pareja?nodo({nombre:r.pareja.nombre,apellido:r.pareja.apellido,sexo:r.pareja.sexo,rol:r.pareja.casados?(r.pareja.sexo==='m'?'esposa':'esposo'):'pareja',edad:Math.min(80,r.edad||60)}):null,
+        hermanos:herm.slice(0,4),masHermanos:Math.max(0,herm.length-4)});
+    });
+    // la generación que se juega ahora
+    const prev=R[R.length-1];
+    const herm=prev&&prev.gen===S.gen-1?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==S.p.nombre).map(h=>nodo({nombre:h.nombre,apellido:S.p.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:'n. '+h.nac,edad:Math.max(1,S.anio-h.nac),famoso:h.famoso}))
+      :(S.parientes||[]).filter(x=>/^herman/.test(x.rel)).map(x=>nodo({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,rol:x.rel,muerto:!x.vivo,edad:x.edad||30}));
+    const pz=S.familia&&S.familia.pareja;
+    const suc=S.suc102&&S.suc102.gen===S.gen?S.suc102.delfin:null;
+    if(!S.muerto||!R.some(r=>r.gen===S.gen)) F.push({et:'Generación '+roman(S.gen),sub:'hoy',actual:true,
+      cabeza:nodo({nombre:S.p.nombre,apellido:S.p.apellido,sexo:S.p.sexo,rol:'tú · '+S.p.edad+' años',anios:(S.anio-S.p.edad)+'–',edad:S.p.edad,tam:66,cabeza:true,yo:true,colateral:prev&&prev.colateral,muerto:!!S.muerto}),
+      pareja:pz?nodo({nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' '),sexo:pz.sexo,rol:pz.casados?(pz.sexo==='m'?'esposa':'esposo'):'pareja',edad:pz.edad||S.p.edad}):null,
+      hermanos:herm.slice(0,4),masHermanos:Math.max(0,herm.length-4),
+      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>Object.assign(nodo({nombre:h.nombre,apellido:S.p.apellido,sexo:h.sexo,rol:(h.sexo==='m'?'hija':'hijo')+' · '+h.edad,edad:h.edad,sucesor:suc===h.nombre,famoso:!!h.famoso103,tam:50}),
+        {nietos:(h.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:'nieto',edad:g.edad||5,tam:36}))}))});
+    return F;
+  }
+
+  /* --- dibujo --- */
+  function cara(n,x,y){
+    const t=n.tam; let s=avatarSVG(n.nombre+' '+(n.apellido||''),{sexo:n.sexo,edad:n.edad,tam:t,anillo:n.cabeza?ORO:n.sucesor?ORO:undefined});
+    return s.replace('<svg ','<svg x="'+(x-t/2)+'" y="'+(y-t/2)+'" ');
+  }
+  function nodoSVG(n,x,y){
+    const t=n.tam, w=Math.max(96,t+40), nomY=y+t/2+16;
+    const cls='nodo'+(n.muerto?' muerto':'');
+    let h='<g class="'+cls+'"><title>'+esc(n.nombre+' '+(n.apellido||''))+(n.rol?' · '+n.rol:'')+(n.anios?' · '+n.anios:'')+(n.causa?' · murió de '+n.causa:'')+'</title>';
+    if(n.cabeza) h+='<circle cx="'+x+'" cy="'+y+'" r="'+(t/2+7)+'" fill="none" stroke="'+ORO+'" stroke-opacity=".35" stroke-width="1"/>';
+    h+=cara(n,x,y);
+    if(n.cabeza) h+='<path class="corona107" d="M'+(x-9)+' '+(y-t/2-12)+' l3 -7 l3 4 l3 -6 l3 6 l3 -4 l3 7 z" fill="'+ORO+'"/>';
+    if(n.muerto) h+='<text x="'+(x+t/2-2)+'" y="'+(y-t/2+10)+'" font-size="13" fill="#c9cfca" text-anchor="middle">†</text>';
+    h+='<text x="'+x+'" y="'+nomY+'" text-anchor="middle" font-family="Georgia,serif" font-size="'+(n.cabeza?15:13)+'" fill="'+(n.yo?ORO:'#F0E7D5')+'">'+esc(n.nombre)+'</text>';
+    h+='<text x="'+x+'" y="'+(nomY+14)+'" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10.5" fill="#a9b3ab">'+esc((n.apellido||'').slice(0,22))+'</text>';
+    const pie=n.anios&&!n.yo?n.anios:(n.rol||'');
+    h+='<text x="'+x+'" y="'+(nomY+27)+'" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#7d8a80">'+esc(String(pie).slice(0,26))+'</text>';
+    if(n.sucesor||n.famoso){ const et=n.sucesor?'SUCESOR':'FAMOS'+(n.sexo==='m'?'A':'O'); const bw=et.length*6.4+12;
+      h+='<rect x="'+(x-bw/2)+'" y="'+(nomY+33)+'" width="'+bw+'" height="14" rx="7" fill="'+(n.sucesor?ORO:'#b9a2e6')+'"/><text x="'+x+'" y="'+(nomY+43.5)+'" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8.5" letter-spacing="1" fill="#1b1408">'+et+'</text>'; }
+    return h+'</g>';
+  }
+  function arbol107(){
+    const F=filas(); if(!F.length) return '';
+    const COL=124, ROW=176, TOP=46;
+    // ancho: el tronco va en una columna fija; hermanos a la izquierda, pareja a la derecha
+    const izq=Math.max(1,...F.map(f=>(f.hermanos||[]).length+(f.masHermanos?1:0)));
+    const hijosF=F.find(f=>f.hijos&&f.hijos.length); const nH=hijosF?hijosF.hijos.reduce((a,h)=>a+Math.max(1,h.nietos.length*.62),0):0;
+    const der=Math.max(2,Math.ceil(nH/2)+1);
+    const W=Math.max(560,(izq+der+1)*COL+60), xT=40+izq*COL+COL/2;
+    let filasN=F.length+(hijosF?1:0)+(hijosF&&hijosF.hijos.some(h=>h.nietos.length)?1:0);
+    const H=TOP+filasN*ROW+20;
+    const P=[], N=[];
+    let y=TOP+40, prevMid=null;
+    F.forEach((f,i)=>{
+      // etiqueta de la generación
+      P.push('<text x="16" y="'+(y-36)+'" font-family="system-ui,sans-serif" font-size="10.5" letter-spacing="1.6" fill="'+ORO+'" opacity=".85">'+esc(f.et.toUpperCase())+'</text>'+(f.sub?'<text x="16" y="'+(y-22)+'" font-family="system-ui,sans-serif" font-size="10.5" fill="#7d8a80">'+esc(f.sub)+'</text>':''));
+      if(f.nodos){ // padres del fundador: una pareja
+        const xs=f.nodos.map((n,k)=>xT+(k-(f.nodos.length-1)/2)*COL*.9);
+        if(f.nodos.length===2) P.push('<line x1="'+(xs[0]+26)+'" y1="'+y+'" x2="'+(xs[1]-26)+'" y2="'+y+'" stroke="'+LINEA+'" stroke-width="2"/>');
+        f.nodos.forEach((n,k)=>N.push(nodoSVG(n,xs[k],y)));
+        prevMid={x:xT,y:y}; y+=ROW; return;
+      }
+      const xC=xT, xP=xT+COL;
+      const hijosAqui=[{x:xC,colateral:f.cabeza.colateral}].concat((f.hermanos||[]).map((h,k)=>({x:xT-(k+1)*COL})));
+      if(f.masHermanos) hijosAqui.push({x:xT-((f.hermanos.length)+1)*COL});
+      // líneas desde la pareja de arriba
+      if(prevMid){
+        const yBar=y-ROW/2+18;
+        P.push('<path d="M'+prevMid.x+' '+(prevMid.y+48)+' L'+prevMid.x+' '+yBar+'" stroke="'+LINEA+'" stroke-width="2" fill="none"/>');
+        const xs=hijosAqui.map(h=>h.x); const minX=Math.min(...xs,prevMid.x), maxX=Math.max(...xs,prevMid.x);
+        P.push('<path d="M'+minX+' '+yBar+' L'+maxX+' '+yBar+'" stroke="'+LINEA2+'" stroke-width="1.5" fill="none"/>');
+        hijosAqui.forEach(h=>P.push('<path d="M'+h.x+' '+yBar+' L'+h.x+' '+(y-(h.x===xC?42:30))+'" stroke="'+(h.x===xC?LINEA:LINEA2)+'" stroke-width="'+(h.x===xC?2:1.5)+'"'+(h.colateral?' stroke-dasharray="5 4"':'')+' fill="none"/>'));
+        if(f.cabeza.colateral) P.push('<text x="'+(xC+8)+'" y="'+(yBar+16)+'" font-family="system-ui,sans-serif" font-size="9.5" fill="'+ORO+'" opacity=".8">rama colateral</text>');
+      }
+      // pareja
+      if(f.pareja){ P.push('<line x1="'+(xC+36)+'" y1="'+(y-3)+'" x2="'+(xP-27)+'" y2="'+(y-3)+'" stroke="'+LINEA+'" stroke-width="1.6"/><line x1="'+(xC+36)+'" y1="'+(y+3)+'" x2="'+(xP-27)+'" y2="'+(y+3)+'" stroke="'+LINEA+'" stroke-width="1.6"/>');
+        N.push(nodoSVG(f.pareja,xP,y)); }
+      (f.hermanos||[]).forEach((h,k)=>N.push(nodoSVG(h,xT-(k+1)*COL,y)));
+      if(f.masHermanos) N.push('<text x="'+(xT-(f.hermanos.length+1)*COL)+'" y="'+(y+5)+'" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#a9b3ab">+'+f.masHermanos+' más</text>');
+      N.push(nodoSVG(f.cabeza,xC,y));
+      prevMid={x:f.pareja?(xC+xP)/2:xC,y:y};
+      y+=ROW;
+      // hijos de la generación actual (y nietos)
+      if(f.hijos&&f.hijos.length){
+        const anchos=f.hijos.map(h=>Math.max(COL,h.nietos.length*COL*.62));
+        const total=anchos.reduce((a,b)=>a+b,0); let x0=prevMid.x-total/2;
+        const xs=anchos.map(a=>{ const x=x0+a/2; x0+=a; return x; });
+        const yBar=y-ROW/2+18;
+        P.push('<path d="M'+prevMid.x+' '+(prevMid.y+(f.pareja?4:48))+' L'+prevMid.x+' '+yBar+'" stroke="'+LINEA+'" stroke-width="2" fill="none"/>');
+        P.push('<path d="M'+Math.min(...xs,prevMid.x)+' '+yBar+' L'+Math.max(...xs,prevMid.x)+' '+yBar+'" stroke="'+LINEA2+'" stroke-width="1.5" fill="none"/>');
+        xs.forEach((x,k)=>{ const h=f.hijos[k]; P.push('<path d="M'+x+' '+yBar+' L'+x+' '+(y-32)+'" stroke="'+(h.sucesor?LINEA:LINEA2)+'" stroke-width="'+(h.sucesor?2:1.5)+'" fill="none"/>'); N.push(nodoSVG(h,x,y)); });
+        P.push('<text x="16" y="'+(y-36)+'" font-family="system-ui,sans-serif" font-size="10.5" letter-spacing="1.6" fill="'+ORO+'" opacity=".85">LOS QUE SIGUEN</text>');
+        y+=ROW;
+        if(f.hijos.some(h=>h.nietos.length)){
+          xs.forEach((x,k)=>{ const ns=f.hijos[k].nietos; if(!ns.length) return; const w=COL*.62; const s0=x-(ns.length-1)*w/2;
+            P.push('<path d="M'+x+' '+(y-ROW+62)+' L'+x+' '+(y-58)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
+            if(ns.length>1) P.push('<path d="M'+s0+' '+(y-58)+' L'+(s0+(ns.length-1)*w)+' '+(y-58)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
+            ns.forEach((g,j)=>{ const gx=s0+j*w; P.push('<path d="M'+gx+' '+(y-58)+' L'+gx+' '+(y-24)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>'); N.push(nodoSVG(g,gx,y)); }); });
+          P.push('<text x="16" y="'+(y-36)+'" font-family="system-ui,sans-serif" font-size="10.5" letter-spacing="1.6" fill="'+ORO+'" opacity=".85">NIETOS</text>');
+          y+=ROW;
+        }
+      }
+    });
+    const Hreal=y-ROW+110;
+    return '<svg class="a107" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+Hreal+'" width="'+W+'" height="'+Hreal+'" role="img" aria-label="Árbol de la casa '+esc(S.dinastia||'')+'">'
+      +'<rect width="100%" height="100%" fill="#13201a"/>'+P.join('')+N.join('')+'</svg>';
+  }
+  function bloqueArbol107(id){
+    return '<div class="arbol107" id="'+id+'"><div class="barra"><div class="ley"><span><i style="background:'+ORO+'"></i>los que llevaron la casa</span><span><i style="background:#9aa39c"></i>ya murieron</span><span><i style="background:#b9a2e6"></i>famosos</span></div>'
+      +'<button data-z="-">−</button><button data-z="+">+</button><button data-png="1">Descargar imagen</button></div><div class="lienzo107">'+arbol107()+'</div></div>';
+  }
+  function conectar107(raiz){
+    const box=raiz&&raiz.querySelector('.arbol107'); if(!box||box.__ok) return; box.__ok=true;
+    const svg=()=>box.querySelector('svg.a107'); let z=1;
+    box.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{ const s=svg(); if(!s) return; const w0=+s.getAttribute('viewBox').split(' ')[2], h0=+s.getAttribute('viewBox').split(' ')[3];
+      z=clamp(z*(b.dataset.z==='+'?1.2:1/1.2),.4,2.2); s.setAttribute('width',Math.round(w0*z)); s.setAttribute('height',Math.round(h0*z)); });
+    const ajustar=()=>{ const s=svg(), c=box.querySelector('.lienzo107'); if(!s||!c) return; const w0=+s.getAttribute('viewBox').split(' ')[2]; const disp=c.clientWidth-4;
+      if(disp>0&&w0>disp){ z=Math.max(.55,disp/w0); const h0=+s.getAttribute('viewBox').split(' ')[3]; s.setAttribute('width',Math.round(w0*z)); s.setAttribute('height',Math.round(h0*z)); } };
+    ajustar();
+    const png=box.querySelector('[data-png]'); if(png) png.onclick=()=>descargar107(svg());
+  }
+  function descargar107(s){
+    try{ if(!s) return; const vb=s.getAttribute('viewBox').split(' ').map(Number); const xml=new XMLSerializer().serializeToString(s);
+      const img=new Image(); const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+      img.onload=()=>{ const c=document.createElement('canvas'); c.width=vb[2]*2; c.height=vb[3]*2; const g=c.getContext('2d'); g.scale(2,2); g.drawImage(img,0,0,vb[2],vb[3]);
+        const a=document.createElement('a'); a.download='arbol-casa-'+String(S.dinastia||'familia').toLowerCase().replace(/\s+/g,'-')+'.png'; a.href=c.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); window.__png107=a.href.length; };
+      img.src=url; }catch(e){ if(typeof aviso==='function') aviso('No se pudo generar la imagen en este navegador.'); }
+  }
+
+  /* --- línea de tiempo por generación --- */
+  function linea107(){
+    const R=registros().slice().sort((a,b)=>a.gen-b.gen);
+    const hitos=((S.legado&&S.legado.hitos)||[]).slice();
+    const M=S.legado&&S.legado.metas99, logros=M?Object.keys(M.logros||{}).map(k=>({anio:M.logros[k].anio,gen:M.logros[k].gen,t:'Logro: '+((window.LOGROS_99||[]).find(l=>l.id===k)||{n:k}).n,tipo:'logro'})):[];
+    const gens=[...new Set(hitos.map(h=>h.gen).concat(R.map(r=>r.gen)).concat([S.gen]))].filter(Boolean).sort((a,b)=>a-b);
+    if(!gens.length) return '';
+    return '<div class="linea107">'+gens.map(g=>{
+      const r=R.find(x=>x.gen===g); const actual=g===S.gen&&!S.muerto;
+      const quien=r?r.nombre+' '+r.apellido:(actual?S.p.nombre+' '+S.p.apellido:'');
+      const it=hitos.filter(h=>h.gen===g).map(h=>({anio:h.anio,t:h.t,tipo:/^Nació|Llegó a la familia|Se casó/.test(h.t)?'vida':/^Murió/.test(h.t)?'muerte':/escándalo|pleito|cárcel|condena|perdió/i.test(h.t)?'mal':''}))
+        .concat(logros.filter(l=>l.gen===g)).sort((a,b)=>a.anio-b.anio);
+      return '<div class="gen"><b>'+esc(quien)+'</b><span>'+(r?(r.nac||'?')+'–'+(r.fin||''):'desde '+(S.anio-S.p.edad))+'</span><em>gen. '+roman(g)+'</em></div>'
+        +(it.length?'<ol>'+it.map(x=>'<li class="'+x.tipo+'"><b>'+x.anio+'</b>'+esc(x.t)+'</li>').join('')+'</ol>':'<ol><li>Una generación sin grandes titulares.</li></ol>');
+    }).join('')+'</div>';
+  }
+
+  /* --- dónde se ve --- */
+  function wrapArbol107(){
+    if(window.__SA107_ARBOL) return;
+    window.arbolSVG=function(){ try{ return bloqueArbol107('arbolFam107'); }catch(e){ return ''; } };
+    window.__SA107_ARBOL=true;
+  }
+  function wrapLienzo107(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA107_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ const host=$('lienzoJuego');
+        if(tab==='familia') conectar107(host);
+        if(tab==='legado'&&S&&S.p&&!document.getElementById('linea107')){
+          const h3=Array.from(host.querySelectorAll('h3')).find(x=>/^Línea de la casa/.test(x.textContent));
+          const html='<div id="linea107">'+linea107()+'</div>';
+          if(h3){ h3.innerHTML='La línea de la casa<em>generación por generación</em>'; let sib=h3.nextElementSibling; if(sib&&(sib.classList.contains('vida-linea')||sib.classList.contains('vacio'))) sib.remove(); h3.insertAdjacentHTML('afterend',html); }
+          if(!document.getElementById('arbolLeg107')){ const sec=host.querySelector('.seccion'); if(sec) sec.insertAdjacentHTML('beforeend','<h3 style="margin-top:22px">El árbol de la casa<em>todas las generaciones</em></h3>'+bloqueArbol107('arbolLeg107')); conectar107(sec); }
+        } }catch(e){}
+      return r; };
+    window.__SA107_LIENZO=true;
+  }
+  function wrapFinal107(){
+    const old=window.pantallaFinal; if(typeof old!=='function'||window.__SA107_FIN) return;
+    window.pantallaFinal=function(){
+      const r=old.apply(this,arguments);
+      try{ const host=document.querySelector('#escenaHost'); const ancla=host&&(host.querySelector('#final99')||host.querySelector('.relato'));
+        if(ancla&&!host.querySelector('#arbolFin107')){ ancla.insertAdjacentHTML('afterend','<h3 style="margin-top:18px">El árbol de la casa</h3>'+bloqueArbol107('arbolFin107')+'<h3 style="margin-top:18px">La línea de la casa</h3>'+linea107());
+          conectar107(host); const vl=host.querySelector('.vida-linea'); if(vl) vl.style.display='none'; } }catch(e){}
+      return r; };
+    window.__SA107_FIN=true;
+  }
+  function init107(){
+    wrapHeredar107(); wrapArbol107(); wrapLienzo107(); wrapFinal107();
+    Object.assign(window,{arbol107,linea107,filasArbol107:filas,registrosArbol107:registros,descargar107});
+  }
+  setTimeout(init107,40); setTimeout(init107,220); setTimeout(init107,650);
+  window.__SA107={version:V107};
 })();
 </script>
 
