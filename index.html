@@ -19724,7 +19724,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function perfilHTML93(){
     const p=S.p, A=(ACC||[]).slice();
     if(typeof window.escenaRasgos88==='function')
-      A.unshift({t:'Tu carácter',cat:'formacion',d:'Tus rasgos, de dónde vienen y qué mueven. Trabaja un defecto o cultiva una virtud.',mov:0,modal:true,run:()=>window.escenaRasgos88(S.p,true)});
+      A.unshift({t:'Tu carácter y tus facultades',cat:'formacion',d:'Tus rasgos (defectos y virtudes) y tus atributos: intelecto, carisma, disciplina. Qué traes y qué puedes cultivar.',mov:0,modal:true,run:()=>(typeof window.escenaCaracter101==='function'?window.escenaCaracter101():window.escenaRasgos88(S.p,true))});
     const usadas=new Set(), secs=SECCIONES_93.map(s=>{
       const del=A.filter(a=>!usadas.has(a)&&(()=>{ try{ return s.f(a); }catch(e){ return false; } })());
       del.forEach(a=>usadas.add(a)); return {s,del};
@@ -21387,7 +21387,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           }
           B.push(a);
         });
-        A.length=0; B.forEach(a=>A.push(a));
+        A.length=0; B.forEach(a=>A.push(a)); unir101(A);
       }catch(e){}
       return A;
     };
@@ -21424,9 +21424,35 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.sortearEvento=function(){ instalarEsperas101(); return old.apply(this,arguments); };
     window.__SA101_SORT=true;
   }
+  /* --- carácter + facultades; salud + cuidarte --- */
+  const OCULTAS_101=new Set(['Facultades personales','Cuidarte: médico y ejercicio']);
+  const cruda=t=>{ try{ return accionesCrudas91().find(a=>a.t===t)||null; }catch(e){ return null; } };
+  function escenaCaracter101(){
+    const fac=cruda('Facultades personales');
+    escena({rubro:'Tú',titulo:'Tu carácter y tus facultades',cerrable:true,
+      cuerpo:'Lo que traes de nacimiento y lo que vas formando: tus rasgos de carácter y tus atributos.',
+      opciones:[{t:'Tus rasgos',cat:'formacion',d:'Defectos y virtudes, de dónde vienen y qué mueven. Trabaja un defecto o cultiva una virtud.',cerrar:false,run:()=>{ cerrarModal(); window.escenaRasgos88(S.p,true); }},
+        ...(fac?[{t:'Tus facultades',cat:'formacion',d:fac.d,dis:fac.dis||null,cerrar:false,run:()=>{ cerrarModal(); fac.run(); }}]:[])]});
+  }
+  function escenaSaludUnida101(original){
+    const cu=cruda('Cuidarte: médico y ejercicio');
+    escena({rubro:'Tú',titulo:'Tu salud',cerrable:true,
+      cuerpo:'Salud en '+Math.round(S.p.salud)+'/100. Puedes dedicar el año a cuidarte o revisar enfermedades, tratamientos y vicios.',
+      opciones:[...(cu?[{t:'Médico y ejercicio todo el año',cat:'salud',d:cu.d+' Cuesta una movida.',dis:cu.dis||(S.mov<1?'No te quedan movidas':null),cerrar:false,
+          run:()=>{ cerrarModal(); cu.run(); S.mov=Math.max(0,S.mov-1); render(); }}]:[]),
+        {t:'Chequeos, tratamientos y vicios',cat:'salud',d:'Tus enfermedades, el chequeo completo y la rehabilitación.',cerrar:false,run:()=>{ cerrarModal(); original(); }}]});
+  }
+  function unir101(A){
+    if(window.__crudo91) return;
+    for(let i=A.length-1;i>=0;i--){ const a=A[i];
+      if(OCULTAS_101.has(a.t)) A.splice(i,1);
+      else if(a.t==='Tu salud y tus vicios'&&!a.__u101){ const orig=a.run; a.run=()=>escenaSaludUnida101(orig); a.d='Médico y ejercicio, chequeos, tratamientos y vicios. '+(a.d||''); a.__u101=true; }
+      else if(a.t==='Tu carácter'){ a.t='Tu carácter y tus facultades'; a.run=()=>escenaCaracter101(); }
+    }
+  }
   function init101(){
     instalarGrupos101(); wrapAcciones101(); wrapCatDe101(); wrapSorteo101();
-    Object.assign(window,{GRUPOS_101,UNA_VEZ_101});
+    Object.assign(window,{GRUPOS_101,UNA_VEZ_101,escenaCaracter101});
   }
   setTimeout(init101,40);
   setTimeout(init101,220);
