@@ -815,10 +815,24 @@ html{scroll-behavior:smooth}
 @keyframes tuto100pulso{0%,100%{outline-color:rgba(214,166,72,1)}50%{outline-color:rgba(214,166,72,.25)}}
 @media (max-width:560px){.ranura100{flex-wrap:wrap}.ranura100 .info{flex-basis:calc(100% - 44px)}.ranura100 button{flex:1}.tuto100{bottom:96px}}
 </style>
+<style id="estilos-v102">
+.suc102 .fila{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.suc102 .fila:last-child{border-bottom:0}
+.suc102 .quien{flex:1;min-width:0}
+.suc102 .quien b{display:block;font-weight:500;color:var(--marfil);font-size:14.5px}
+.suc102 .quien>span{display:block;font-size:12.5px;color:var(--humo)}
+.suc102 .delfin{display:inline-block;margin-left:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#1b1408;background:var(--laton);border-radius:999px;padding:2px 8px;vertical-align:2px}
+.suc102 .amb{width:120px;flex:0 0 120px}
+.suc102 .amb small{display:block;font-size:10.5px;color:var(--humo2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.suc102 .amb i{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.suc102 .amb i b{display:block;height:100%;background:linear-gradient(90deg,var(--laton),#d06a5a)}
+.op-delfin102{display:inline-block;margin-left:6px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#1b1408;background:var(--laton);border-radius:999px;padding:1px 7px;vertical-align:2px}
+@media (max-width:520px){.suc102 .amb{width:84px;flex-basis:84px}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v101</div>
+<div class="version-badge" id="versionBadge">v102</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -21458,6 +21472,187 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init101,220);
   setTimeout(init101,650);
   window.__SA101={version:V101};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v102 · LA SUCESIÓN COMO EL GRAN MOMENTO
+   Los hijos compiten por el mando durante años (uno con la junta, otro con
+   la mamá), puedes nombrar un delfín, y al morir el testamento se puede
+   impugnar; un hermano resentido puede montar una empresa para
+   competirte, y puede aparecer un hijo de fuera del matrimonio.
+   ========================================================================== */
+(function(){
+  const V102='v102';
+  const AMB_BASE={ambicioso:72,heredero:58,independiente:38,prodigo:30,conciliador:24,estudioso:20};
+  const hijoA=h=>h.sexo==='m'?'hija':'hijo', el=h=>h.sexo==='m'?'ella':'él', lo=h=>h.sexo==='m'?'la':'lo', o=h=>h.sexo==='m'?'a':'o';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  function suc(){ if(!S.suc102||S.suc102.gen!==S.gen) S.suc102={gen:S.gen,delfin:null,desde:null,bandos:{}}; return S.suc102; }
+  function amb(h){ if(!isFinite(h.ambicion102)) h.ambicion102=clamp((AMB_BASE[h.temperamento]||40)+ri(-10,10),0,100); return h.ambicion102; }
+  const adultos=()=>((S.familia&&S.familia.hijos)||[]).filter(h=>h.edad>=20&&h.vivo!==false);
+  const porNombre=n=>((S.familia&&S.familia.hijos)||[]).find(h=>h.nombre===n);
+  function nombrarDelfin(h,motivo){
+    const s=suc(); const antes=s.delfin;
+    s.delfin=h?h.nombre:null; s.desde=S.anio;
+    if(h){ h.vinculo=clamp((h.vinculo||55)+10,0,100); h.ambicion102=clamp(amb(h)-10,0,100);
+      adultos().filter(x=>x!==h).forEach(x=>{ x.vinculo=clamp((x.vinculo||55)-6,0,100); x.ambicion102=clamp(amb(x)+(amb(x)>50?10:3),0,100); });
+      log('Dejaste claro quién sigue: <b>'+esc(h.nombre)+'</b> será quien herede el mando'+(motivo?' ('+motivo+')':'')+'.','hito');
+      hito(h.nombre+' quedó como sucesor'+(h.sexo==='m'?'a':''));
+    } else if(antes) log('Ya no hay sucesor designado. La pelea por el mando queda abierta.','mal');
+  }
+
+  /* --- eventos en vida --- */
+  function instalarEventos102(){
+    if(window.__SA102_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    // 1. dos hijos se disputan el mando
+    E({p:1.4,c:()=>S.p.edad>=45&&adultos().length>=2&&!suc().delfin,
+      t:()=>{ const A=adultos().sort((a,b)=>amb(b)-amb(a)); const a=A[0], b=A[1]; S._p102=[a.nombre,b.nombre];
+        suc().bandos[a.nombre]='junta'; suc().bandos[b.nombre]='madre';
+        return '<b>'+esc(a.nombre)+'</b> se está moviendo: almuerza con los de la junta y deja caer que '+(S.emp?'la próxima presidencia de '+esc(S.emp.nombre):'el mando de la casa')+' debería ser para '+el(a)+'. <b>'+esc(b.nombre)+'</b> no se queda quiet'+o(b)+': ya habló con '+(S.familia.pareja?'tu '+(S.familia.pareja.sexo==='m'?'esposa':'esposo'):'el resto de la familia')+'.'; },
+      o:[{t:()=>{ const h=porNombre((S._p102||[])[0])||{nombre:'—'}; return 'Nombrar a '+h.nombre+' como tu sucesor'+(h.sexo==='m'?'a':''); },f:()=>{ const h=porNombre(S._p102[0]); nombrarDelfin(h,'tenía la junta'); return 'La junta respira. En la casa, no todos.'; }},
+         {t:()=>{ const h=porNombre((S._p102||[])[1])||{nombre:'—'}; return 'Nombrar a '+h.nombre+' como tu sucesor'+(h.sexo==='m'?'a':''); },f:()=>{ const h=porNombre(S._p102[1]); nombrarDelfin(h,'tenía a la familia'); if(S.junta) S.junta.forEach(j=>j.lealtad=clamp(j.lealtad-3,0,100)); return 'La familia aplaude. En la junta hay caras largas.'; }},
+         {t:'Que se lo ganen: por ahora, ninguno',f:()=>{ adultos().forEach(h=>h.ambicion102=clamp(amb(h)+6,0,100)); return 'Los dos entendieron que la carrera sigue abierta. Se van a esforzar… y a pelear.'; }},
+         {t:'Ponerlos en su sitio',f:()=>{ adultos().forEach(h=>{ h.ambicion102=clamp(amb(h)-15,0,100); h.vinculo=clamp((h.vinculo||55)-6,0,100); }); return 'Mientras estés vivo, aquí mandas tú. Se callaron, pero no se les olvida.'; }}]});
+    // 2. el que se quedó por fuera arma bando
+    E({p:1.1,c:()=>{ const s=suc(); return !!s.delfin&&adultos().some(h=>h.nombre!==s.delfin&&amb(h)>=60); },
+      t:()=>{ const s=suc(); const x=adultos().filter(h=>h.nombre!==s.delfin).sort((a,b)=>amb(b)-amb(a))[0]; S._r102=x.nombre;
+        return '<b>'+esc(x.nombre)+'</b> no se resigna a quedar de segund'+o(x)+'. Está armando bando '+(S.emp?'en la junta':'entre los primos')+' contra <b>'+esc(s.delfin)+'</b>, tu sucesor'+(porNombre(s.delfin)&&porNombre(s.delfin).sexo==='m'?'a':'')+'.'; },
+      o:[{t:'Respaldar a tu sucesor en público',f:()=>{ const x=porNombre(S._r102); if(x){ x.vinculo=clamp((x.vinculo||55)-12,0,100); x.ambicion102=clamp(amb(x)-5,0,100); } return 'Quedó claro quién manda. '+(x?esc(x.nombre)+' no te habla desde entonces.':''); }},
+         {t:'Abrir la sucesión otra vez',f:()=>{ nombrarDelfin(null); const x=porNombre(S._r102); if(x) x.vinculo=clamp((x.vinculo||55)+8,0,100); return 'Volvió a empezar la carrera. Tu sucesor de antes se siente traicionado.'; }},
+         {t:'Darle algo propio para que se entretenga',f:()=>{ const x=porNombre(S._r102); const c=Math.max(20,Math.round(pat()*.03)); S.efectivo-=Math.min(S.efectivo,c); if(x){ x.ambicion102=clamp(amb(x)-25,0,100); x.efectivo=(x.efectivo||0)+c; x.vinculo=clamp((x.vinculo||55)+6,0,100); } return 'Le diste '+fmt(c)+' para que monte lo suyo. Por ahora, deja de conspirar.'; }}]});
+    // 3. la pareja toma partido
+    E({p:.9,c:()=>!!(S.familia.pareja&&S.familia.pareja.casados)&&adultos().length>=2,
+      t:()=>{ const fav=pick(adultos()); S._m102=fav.nombre; const pz=S.familia.pareja;
+        return 'Tu '+(pz.sexo==='m'?'esposa':'esposo')+' ya decidió quién debe heredar: <b>'+esc(fav.nombre)+'</b>. Lo dice en las comidas, delante de los demás hijos.'; },
+      o:[{t:'Hacerle caso',f:()=>{ const h=porNombre(S._m102); nombrarDelfin(h,'como quería '+(S.familia.pareja.sexo==='m'?'su madre':'su padre')); S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)+10,0,100); return 'En la casa hay paz. Por ahora.'; }},
+         {t:'Eso lo decido yo',f:()=>{ S.familia.pareja.paciencia=clamp((S.familia.pareja.paciencia||60)-12,0,100); const h=porNombre(S._m102); if(h) h.ambicion102=clamp(amb(h)+8,0,100); return 'La discusión duró hasta la madrugada.'; }}]});
+    window.__SA102_EV=true;
+  }
+
+  /* --- después de la muerte: impugnación, rama resentida, hijo de fuera --- */
+  function pendientes(){ return S.pend102||(S.pend102=[]); }
+  function wrapHeredar102(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA102_HER) return;
+    window.heredar=function(h,frac,vivo){
+      let cap=null;
+      try{ const s=suc();
+        cap={difunto:S.p.nombre+' '+S.p.apellido, sexo:S.p.sexo, vivo:!!vivo, delfin:s.delfin, elegido:h&&h.nombre, colateral:!!(h&&h._sucesorColateral),
+          amantes:((S.familia&&S.familia.amantes)||[]).length, patr:pat(),
+          otros:((S.familia&&S.familia.hijos)||[]).filter(x=>x!==h&&x.edad>=18).map(x=>({nombre:x.nombre,sexo:x.sexo,amb:amb(x),vinc:x.vinculo||55,temp:x.temperamento,delfin:s.delfin===x.nombre}))};
+      }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ if(cap&&S&&S.p){
+        const P=[];
+        cap.otros.forEach(x=>{
+          let pr=(x.delfin?.55:0)+(x.amb>=60?.3:0)+(x.vinc<40?.2:0)+(x.temp==='ambicioso'?.1:0)-(x.temp==='conciliador'?.25:0);
+          if(cap.vivo) pr*=.4;
+          if(chance(clamp(pr,0,.85))) P.push({tipo:'impugna',nombre:x.nombre,sexo:x.sexo,difunto:cap.difunto,sexoDif:cap.sexo,delfin:x.delfin,anio:S.anio});
+        });
+        if(!cap.vivo&&chance(clamp(.05+cap.amantes*.12,0,.45))) P.push({tipo:'natural',sexo:chance(.5)?'h':'m',difunto:cap.difunto,sexoDif:cap.sexo,anio:S.anio});
+        S.pend102=P.slice(0,2);
+        if(cap.delfin&&cap.elegido&&cap.delfin!==cap.elegido) log('El testamento sorprendió a todos: el mando no quedó con '+esc(cap.delfin)+', a quien se lo habían prometido.','mal');
+      } }catch(e){}
+      return r;
+    };
+    window.__SA102_HER=true;
+  }
+  function pariente102(nombre){ return (S.parientes||[]).find(p=>p.vivo&&p.nombre===nombre&&/herman/.test(p.rel)); }
+  function eventoImpugna(x){
+    const papa=x.sexoDif==='m'?'mamá':'papá';
+    return {p:9,c:()=>true,
+      t:()=>'<b>'+esc(x.nombre)+'</b> impugnó el testamento. Dice que '+papa+' no estaba en sus cabales cuando lo firmó'+(x.delfin?' y que el mando se lo habían prometido a '+(x.sexo==='m'?'ella':'él'):'')+'. Ya contrató abogados.',
+      o:[{t:'Llegar a un acuerdo',f:()=>{ const c=Math.max(10,Math.round(pat()*.07)); S.efectivo-=Math.min(S.efectivo,c); const p=pariente102(x.nombre); if(p) p.afecto=clamp((p.afecto||50)+8,0,100);
+           return 'Le pagaste '+fmt(c)+' y firmó. No son amigos, pero no hay pleito.'; }},
+         {t:'Pelear en el juzgado',f:()=>{ const legal=Math.max(5,Math.round(pat()*.02)); S.efectivo-=Math.min(S.efectivo,legal); const p=pariente102(x.nombre);
+           const gana=chance(clamp(.45+prestigio()/250,.3,.8));
+           if(gana){ if(p) p.afecto=clamp((p.afecto||50)-25,0,100); fundaRival(x,.5); return 'Ganaste el pleito (y gastaste '+fmt(legal)+' en abogados). '+esc(x.nombre)+' no te lo va a perdonar.'; }
+           const c=Math.max(10,Math.round(pat()*.14)); S.efectivo-=Math.min(S.efectivo,c); moverPrestigio(-3,'perdió el pleito de la herencia'); if(p) p.afecto=clamp((p.afecto||50)-15,0,100); fundaRival(x,.35);
+           return 'Perdiste. El juez le dio la razón y tuviste que pagarle '+fmt(c)+', más '+fmt(legal)+' de abogados.'; }},
+         {t:'Ofrecerle un puesto en la empresa',dis:null,f:()=>{ const p=pariente102(x.nombre); if(S.emp&&S.junta){ S.junta.push({nombre:x.nombre+' '+S.p.apellido,arq:'familiar',lealtad:35,anios:0,hijo:x.nombre}); }
+           if(p) p.afecto=clamp((p.afecto||50)+4,0,100); return S.emp?esc(x.nombre)+' aceptó una silla en la junta de '+esc(S.emp.nombre)+'. Ahora la pelea es adentro.':'Aceptó trabajar contigo. Habrá que ver cuánto dura.'; }}]};
+  }
+  function fundaRival(x,prob){
+    if(!chance(prob)) return;
+    const cap=Math.max(200,pat()*.08);
+    (S.rivales=S.rivales||[]).push({rid:'r'+ri(100,999),apellido:S.p.apellido+' (rama de '+x.nombre+')',prestigio:clamp(prestigio()*.6,5,90),patrimonio:cap,
+      sector:S.emp?S.emp.sector:pick(sectoresDisponibles()).id,compania:x.nombre+' '+S.p.apellido+' y Cía.',capaz:ri(4,8),agresiva:true,viva:true,delaCasa:true,rencor102:true,
+      jefe104:{nombre:x.nombre,sexo:x.sexo,edad:(pariente102(x.nombre)||{}).edad||40,rasgo:'vengativo',actitud:-70,memoria:[{anio:S.anio,txt:'Le quitaste la herencia que creía suya.',peso:-3}]}});
+    log('<b>'+esc(x.nombre)+'</b> fundó una empresa en tu mismo sector. No lo esconde: es para competirte.','mal');
+    hito(x.nombre+' montó una empresa para competirle a la casa');
+  }
+  function eventoNatural(x){
+    const papa=x.sexoDif==='m'?'tu mamá':'tu papá';
+    const adn=S.anio>=1988, edad=ri(17,38), nombre=nombreLocal(S.p.ciudad,x.sexo);
+    return {p:9,c:()=>true,
+      t:()=>'En la lectura del testamento aparece <b>'+esc(nombre)+'</b>, de '+edad+' años, que dice ser '+(x.sexo==='m'?'hija':'hijo')+' de '+papa+'. Trae fotos, cartas y una cara que se parece demasiado.',
+      o:[{t:'Reconocer'+(x.sexo==='m'?'la':'lo')+' como de la familia',f:()=>{ const c=Math.max(10,Math.round(pat()*.05)); S.efectivo-=Math.min(S.efectivo,c);
+           const pa=nuevoPariente(x.sexo==='m'?'hermana':'hermano',x.sexo,edad); pa.nombre=nombre; pa.afecto=70; pa.natural102=true; (S.parientes=S.parientes||[]).push(pa);
+           S.p.reputacion=clamp(S.p.reputacion+2,0,100); moverPrestigio(-1,'');
+           return 'Le diste su parte ('+fmt(c)+') y un lugar en la mesa. La familia murmura, pero la ciudad lo ve como un gesto decente.'; }},
+         {t:adn?'Exigir una prueba de ADN':'Llevarlo a un pleito de filiación',f:()=>{ const legal=Math.max(4,Math.round(pat()*.01)); S.efectivo-=Math.min(S.efectivo,legal);
+           if(chance(.6)){ const c=Math.max(10,Math.round(pat()*.07)); S.efectivo-=Math.min(S.efectivo,c); const pa=nuevoPariente(x.sexo==='m'?'hermana':'hermano',x.sexo,edad); pa.nombre=nombre; pa.afecto=35; pa.natural102=true; (S.parientes=S.parientes||[]).push(pa);
+             return (adn?'La prueba salió positiva.':'El juez le dio la razón.')+' Ahora es de la familia por ley, y le tocó una parte más grande: '+fmt(c)+'.'; }
+           return (adn?'La prueba salió negativa: era un montaje.':'El juez no le creyó.')+' Se fue como llegó. Gastaste '+fmt(legal)+' en abogados.'; }},
+         {t:'Pagarle para que desaparezca',f:()=>{ const c=Math.max(6,Math.round(pat()*.03)); S.efectivo-=Math.min(S.efectivo,c);
+           if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; S.p.reputacion=clamp(S.p.reputacion-6,0,100); return 'Le pagaste '+fmt(c)+'… y a los seis meses le contó todo a una revista. Escándalo.'; }
+           return 'Le pagaste '+fmt(c)+' y firmó un papel. Nadie volvió a saber de '+(x.sexo==='m'?'ella':'él')+'.'; }}]};
+  }
+  function wrapHistoria102(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA102_HIS) return;
+    window.correrHistoria=function(){ const r=old.apply(this,arguments);
+      try{ if(S&&S.p&&Array.isArray(S.pend102)&&S.pend102.length&&!(window.esNino94&&window.esNino94())){
+        S.pend102.splice(0).forEach(x=>cola.push(x.tipo==='impugna'?eventoImpugna(x):eventoNatural(x))); } }catch(e){}
+      return r; };
+    window.__SA102_HIS=true;
+  }
+
+  /* --- vistas --- */
+  function seccionSucesion102(){
+    const A=adultos(); const s=suc();
+    if(!A.length) return '';
+    const filas=A.map(h=>{ const a=amb(h); const b=s.bandos[h.nombre];
+      return '<div class="fila">'+avatarSVG(h.nombre+' '+S.p.apellido,{sexo:h.sexo,edad:h.edad,tam:40})+'<div class="quien"><b>'+esc(h.nombre)+(s.delfin===h.nombre?'<span class="delfin">sucesor'+(h.sexo==='m'?'a':'')+'</span>':'')+'</b><span>'+h.edad+' años · '+esc(tempDe(h).n)+(b?' · '+(b==='junta'?'tiene a la junta':'tiene a la familia'):'')+' · vínculo '+Math.round(h.vinculo||55)+'</span></div>'
+        +'<div class="amb"><small>ambición</small><i><b style="width:'+Math.round(a)+'%"></b></i></div></div>'; }).join('');
+    return '<div class="seccion suc102" id="suc102"><h3>¿Quién se queda con la casa?<em>'+(s.delfin?'sucesor: '+esc(s.delfin):'sin sucesor designado')+'</em></h3>'+filas
+      +'<div class="apunte">Nombrar a alguien calma la pelea, pero al que queda por fuera le sube la ambición. Si al morir eliges a otro, el testamento se puede impugnar.</div></div>';
+  }
+  function wrapLienzo102(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA102_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='familia'&&S&&S.p&&!document.getElementById('suc102')){ const html=seccionSucesion102(); if(html){
+        const host=$('lienzoJuego'); const sec=Array.from(host.querySelectorAll('.seccion')).find(x=>/Descendencia directa/.test(x.textContent));
+        if(sec) sec.insertAdjacentHTML('beforebegin',html); else { const w=host.querySelector('.wrap'); if(w) w.insertAdjacentHTML('beforeend',html); } } } }catch(e){}
+      return r; };
+    window.__SA102_LIENZO=true;
+  }
+  function wrapSucesion102(){
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA102_PS) return;
+    window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
+      try{ const s=suc(); if(s.delfin){ document.querySelectorAll('#escenaHost .carta .nom').forEach(n=>{ if(n.textContent.indexOf(s.delfin+' ')>=0&&!n.querySelector('.op-delfin102')) n.insertAdjacentHTML('beforeend',' <span class="op-delfin102">tu sucesor</span>'); }); } }catch(e){}
+      return r; };
+    window.__SA102_PS=true;
+  }
+  function accion102(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA102_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&adultos().length>=1&&!(window.esNino94&&window.esNino94())){ const s=suc();
+        A.push({t:'Nombrar sucesor',cat:'familia',d:s.delfin?'Hoy: '+s.delfin+'. Cambiarlo tiene costo en la casa.':'Decir en vida quién se queda con el mando.',mov:1,modal:true,run:()=>{
+          escena({rubro:'Sucesión',titulo:'¿Quién se queda con la casa?',cerrable:true,cuerpo:'Lo que digas hoy lo va a recordar toda la familia el día de la lectura del testamento.',
+            opciones:adultos().map(h=>({t:esc(h.nombre)+(s.delfin===h.nombre?' (ya es tu sucesor'+(h.sexo==='m'?'a':'')+')':''),cat:'familia',d:h.edad+' años, '+tempDe(h).n+'. Ambición '+Math.round(amb(h))+', vínculo '+Math.round(h.vinculo||55)+'.',
+              dis:s.delfin===h.nombre?'Ya lo es':null,run:()=>{ nombrarDelfin(h); S.mov=Math.max(0,S.mov-1); render(); }}))
+              .concat(s.delfin?[{t:'Dejar la sucesión abierta',cat:'legado',run:()=>{ const d=porNombre(s.delfin); if(d) d.vinculo=clamp((d.vinculo||55)-10,0,100); nombrarDelfin(null); S.mov=Math.max(0,S.mov-1); render(); }}]:[])}); }}); } }catch(e){}
+      return A; };
+    window.__SA102_ACC=true;
+  }
+  function wrapCat102(){ const old=window.catDe; if(typeof old!=='function'||window.__SA102_CAT) return; window.catDe=function(t){ return t==='Nombrar sucesor'?'familia':old.apply(this,arguments); }; window.__SA102_CAT=true; }
+  function init102(){
+    wrapCat102(); instalarEventos102(); wrapHeredar102(); wrapHistoria102(); wrapLienzo102(); wrapSucesion102(); accion102();
+    Object.assign(window,{suc102:suc,amb102:amb,nombrarDelfin102:nombrarDelfin,eventoImpugna102:eventoImpugna,eventoNatural102:eventoNatural,fundaRival102:fundaRival});
+  }
+  setTimeout(init102,40); setTimeout(init102,220); setTimeout(init102,650);
+  window.__SA102={version:V102};
 })();
 </script>
 
