@@ -759,7 +759,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v97</div>
+<div class="version-badge" id="versionBadge">v98</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -20597,6 +20597,175 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init97,220);
   setTimeout(init97,650);
   window.__SA97={version:V97};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v98 · LUJO Y COLECCIONES
+   Arte, carros, caballos de paso, yates, esmeraldas y relojes: dan
+   prestigio y gusto, se valorizan o se deprecian, cuestan mantenimiento,
+   a veces son falsos o de dudosa procedencia, los roban y se heredan.
+   ========================================================================== */
+(function(){
+  const V98='v98';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const escala=()=>clamp(pat()/1400,.3,30);
+  const TIPOS_98={arte:'Arte',carro:'Carros',caballo:'Caballos de paso',yate:'Yates',joya:'Esmeraldas y joyas',reloj:'Relojes'};
+  const CATALOGO_98=[
+    {id:'oleo',tipo:'arte',n:'Un óleo de un maestro colombiano',base:60,valoriza:.05,ruido:.08,pres:2,falso:.12},
+    {id:'europeo',tipo:'arte',n:'Un cuadro de un pintor europeo',base:220,valoriza:.06,ruido:.12,pres:4,falso:.15},
+    {id:'escultura',tipo:'arte',n:'Una escultura monumental para el jardín',base:90,valoriza:.04,ruido:.06,pres:2,falso:.06},
+    {id:'precolombino',tipo:'arte',n:'Piezas de oro precolombino',base:70,valoriza:.07,ruido:.1,pres:2,falso:.2,dudosa:true},
+    {id:'clasico',tipo:'carro',n:'Un carro clásico de colección',base:35,valoriza:.03,ruido:.05,pres:1,desde:1960},
+    {id:'deportivo',tipo:'carro',n:'Un deportivo italiano',base:45,valoriza:-.1,ruido:.03,pres:2,desde:1955},
+    {id:'blindada',tipo:'carro',n:'Una camioneta blindada',base:30,valoriza:-.12,ruido:.02,pres:0,desde:1980,seguridad:true},
+    {id:'paso',tipo:'caballo',n:'Un caballo de paso fino campeón',base:40,valoriza:-.02,ruido:.1,pres:2,mant:.05,vive:true},
+    {id:'yate',tipo:'yate',n:'Un yate anclado en Cartagena',base:180,valoriza:-.06,ruido:.03,pres:3,mant:.07,desde:1950},
+    {id:'esmeraldas',tipo:'joya',n:'Un collar de esmeraldas de Muzo',base:55,valoriza:.05,ruido:.07,pres:2,falso:.05},
+    {id:'esmeraldasBruto',tipo:'joya',n:'Un lote de esmeraldas en bruto "sin papeles"',base:40,valoriza:.08,ruido:.15,pres:0,dudosa:true,desde:1960},
+    {id:'reloj',tipo:'reloj',n:'Un reloj suizo de colección',base:20,valoriza:.03,ruido:.04,pres:1,falso:.08}
+  ];
+  const item=id=>CATALOGO_98.find(x=>x.id===id);
+  const precio98=c=>Math.round(c.base*escala());
+  function col(){ if(!Array.isArray(S.coleccion98)) S.coleccion98=[]; return S.coleccion98; }
+  const disponibles=()=>CATALOGO_98.filter(c=>!c.desde||S.anio>=c.desde);
+  function comprar98(id,peritaje){
+    const c=item(id); if(!c) return null;
+    const p=precio98(c), costo=Math.round(p*(peritaje?1.04:1));
+    if(S.efectivo<costo) return null;
+    S.efectivo-=costo;
+    let falso=!!(c.falso&&chance(c.falso));
+    let aviso='';
+    if(falso&&peritaje){ S.efectivo+=p; falso=false; aviso='El perito descubrió que '+c.n.charAt(0).toLowerCase()+c.n.slice(1)+' era falso. No lo compraste: solo pagaste el peritaje ('+fmt(costo-p)+').'; log(esc(aviso),'bien'); return {pieza:null,aviso}; }
+    const pieza={uid:'c'+S.anio+'_'+ri(1000,9999),id:c.id,tipo:c.tipo,n:c.n,valor:p,compra:p,anio:S.anio,falso,dudosa:!!c.dudosa};
+    col().push(pieza);
+    if(c.pres) moverPrestigio(c.pres*.5,'una pieza de colección');
+    S.p.felicidad=clamp(S.p.felicidad+3,0,100);
+    if(c.seguridad&&window.conf91){ const cf=window.conf91(); cf.seguridad=Math.max(cf.seguridad,1); }
+    if(c.dudosa&&chance(.25)) registrarDelito('tráfico de bienes',3,c.n.toLowerCase());
+    log('Compraste '+esc(c.n.charAt(0).toLowerCase()+c.n.slice(1))+' por '+fmt(costo)+'.'+aviso,'hito');
+    return {pieza,aviso};
+  }
+  function vender98(uid){
+    const i=col().findIndex(x=>x.uid===uid); if(i<0) return 0;
+    const pz=col()[i]; let v=Math.round(pz.valor*.9);
+    if(pz.falso){ v=Math.round(pz.compra*.05); log('Al tasar '+esc(pz.n.toLowerCase())+' para venderla, resultó ser <b>una falsificación</b>. Te dieron '+fmt(v)+'.','mal'); moverPrestigio(-2,'le vendieron un falso'); }
+    else log('Vendiste '+esc(pz.n.toLowerCase())+' por '+fmt(v)+'.');
+    S.efectivo+=v; col().splice(i,1); return v;
+  }
+  function correrColeccion98(){
+    if(!S||!S.p||S.muerto) return;
+    const C=col(); if(!C.length) return;
+    let mant=0;
+    C.slice().forEach(pz=>{
+      const c=item(pz.id)||{valoriza:0,ruido:.05};
+      pz.valor=Math.max(1,Math.round(pz.valor*(1+c.valoriza+rnd(-c.ruido,c.ruido))*(1+(c.valoriza>0?(S.macro&&S.macro.inflacion||0)*.3:0))));
+      if(c.mant) mant+=pz.valor*c.mant;
+      if(c.vive&&S.anio-pz.anio>=18&&chance(.25)){ col().splice(col().indexOf(pz),1); log('Murió tu caballo de paso, el que ganó tantas ferias.','mal'); }
+    });
+    if(mant>0){ S.efectivo-=Math.round(mant); }
+    if(C.length>=2) S.p.felicidad=clamp(S.p.felicidad+Math.min(3,Math.floor(C.length/2)),0,100);
+  }
+
+  /* --- eventos --- */
+  function instalarEventos98(){
+    if(window.__SA98_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o);
+    E({get p(){ return col().some(x=>x.falso)?1.2:0; },c:()=>col().some(x=>x.falso),
+      t:()=>{ const pz=col().find(x=>x.falso); S._falso98=pz.uid; return 'Un experto que visitó tu casa se quedó mirando '+esc(pz.n.toLowerCase())+' más de la cuenta. Te dice, en voz baja, que es <b>una falsificación</b>.'; },
+      o:[{t:'Demandar al que te la vendió',f:()=>{ const pz=col().find(x=>x.uid===S._falso98); if(!pz) return ''; pz.falso=false; pz.valor=Math.round(pz.compra*.05); if(chance(.5)){ S.efectivo+=Math.round(pz.compra*.6); return 'Le ganaste al marchante: te devolvió buena parte de la plata.'; } return 'El marchante desapareció del país.'; }},
+         {t:'Callarte y lucirla igual',f:()=>{ const pz=col().find(x=>x.uid===S._falso98); if(pz) pz.callada=true; return 'Sigue en la sala, a la vista de todos. Solo tú y el experto saben.'; }}]});
+    E({get p(){ return col().some(x=>x.dudosa)?.8:0; },c:()=>col().some(x=>x.dudosa),
+      t:()=>{ const pz=col().find(x=>x.dudosa); S._dudosa98=pz.uid; return 'La Fiscalía investiga el tráfico de '+esc(pz.tipo==='arte'?'patrimonio arqueológico':'esmeraldas sin papeles')+' y tu nombre aparece en una lista.'; },
+      o:[{t:'Entregar la pieza voluntariamente',f:()=>{ const i=col().findIndex(x=>x.uid===S._dudosa98); if(i>=0) col().splice(i,1); S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Entregaste la pieza. Te quedaste sin ella, pero sin proceso.'; }},
+         {t:'Esconderla',f:()=>{ if(chance(.4)){ const i=col().findIndex(x=>x.uid===S._dudosa98); if(i>=0) col().splice(i,1); registrarDelito('tráfico de bienes',4,'ocultaste una pieza decomisada'); S.p.escandalos=(S.p.escandalos||0)+1; return 'Allanaron tu casa y se la llevaron. Ahora es un escándalo.'; } return 'La escondiste en la finca. Por ahora no la encontraron.'; }}]});
+    E({get p(){ const n=col().length; const seg=window.conf91?window.conf91().seguridad:0; return n?.5*(seg?.4:1):0; },c:()=>col().length>0,
+      t:()=>{ const pz=pick(col()); S._robo98=pz.uid; return 'Se metieron a tu casa mientras estabas de viaje. Se llevaron '+esc(pz.n.toLowerCase())+'.'; },
+      o:[{t:'Contratar a alguien para recuperarla',f:()=>{ const x=Math.max(3,Math.round(pat()*.004)); S.efectivo-=x; if(chance(.5)) return 'La encontraron en un mercado de pulgas. Costó '+fmt(x)+'.'; const i=col().findIndex(y=>y.uid===S._robo98); if(i>=0) col().splice(i,1); return 'Pagaste '+fmt(x)+' y nunca apareció.'; }},
+         {t:'Darla por perdida',f:()=>{ const i=col().findIndex(y=>y.uid===S._robo98); if(i>=0) col().splice(i,1); return 'Nunca apareció.'; }}]});
+    E({get p(){ return col().some(x=>x.tipo==='caballo')?1:0; },c:()=>col().some(x=>x.tipo==='caballo'),
+      t:()=>'Llegó la feria equina nacional. Tu caballo de paso fino es de los favoritos.',
+      o:[{t:'Inscribirlo',f:()=>{ const x=Math.max(2,Math.round(pat()*.002)); S.efectivo-=x; if(chance(.4)){ moverPrestigio(2,'ganó la feria equina'); const pz=col().find(y=>y.tipo==='caballo'); if(pz) pz.valor=Math.round(pz.valor*1.25); return '¡Ganó la feria! Todo el gremio ganadero habla de tu caballo.'; } return 'Quedó de tercero. Buen papel.'; }},
+         {t:'Dejarlo descansar',f:()=>'Este año no compitió.'}]});
+    E({get p(){ return S&&S.p&&S.p.edad>=25&&pat()>=1500?.5:0; },c:()=>S.p.edad>=25&&pat()>=1500,
+      t:()=>{ const x=Math.round(320*escala()); S._subasta98=x; return 'En una subasta en Nueva York sale una obra de un maestro latinoamericano. Base: '+fmt(x)+'. Los grandes coleccionistas del continente están ahí.'; },
+      o:[{t:'Pujar fuerte',f:()=>{ const x=S._subasta98||0; if(S.efectivo<x) return 'No tenías la plata a la mano.'; if(chance(.55)){ const p=Math.round(x*rnd(1.1,1.4)); S.efectivo-=p; col().push({uid:'c'+S.anio+'_s',id:'europeo',tipo:'arte',n:'Una obra maestra latinoamericana',valor:Math.round(p*1.05),compra:p,anio:S.anio,falso:false}); moverPrestigio(4,'compró una obra maestra'); return 'Te la llevaste por '+fmt(p)+'. Salió en los periódicos de medio mundo.'; } return 'Un coleccionista mexicano pujó más que tú.'; }},
+         {t:'Mirar desde lejos',f:()=>'Te quedaste mirando cómo otro se la llevaba.'}]});
+    window.__SA98_EV=true;
+  }
+
+  /* --- la escena --- */
+  function escenaColeccion98(){
+    const C=col(), total=C.reduce((a,x)=>a+x.valor,0);
+    const opsTipo=Object.keys(TIPOS_98).map(k=>'<option value="'+k+'">'+esc(TIPOS_98[k])+'</option>').join('');
+    const tabla=C.length?'<table class="libro">'+C.map(pz=>'<tr><td>'+esc(pz.n)+' <span style="color:var(--humo2)">desde '+pz.anio+'</span></td><td class="'+(pz.valor>=pz.compra?'bien':'mal')+'">'+fmt(pz.valor)+'</td></tr>').join('')+'<tr class="suma"><td>Tu colección vale</td><td>'+fmt(total)+'</td></tr></table>':'<div class="vacio">Todavía no tienes nada de colección.</div>';
+    const html=tabla+'<div class="form91" style="margin-top:12px"><label class="campo91"><span>Qué quieres comprar</span><select id="f98-tipo">'+opsTipo+'</select></label>'
+      +'<label class="campo91"><span>La pieza</span><select id="f98-pieza"></select></label>'
+      +'<label class="campo91"><span>Peritaje</span><select id="f98-perito"><option value="1">Con peritaje (+4%): detecta falsificaciones</option><option value="0">Sin peritaje</option></select></label>'
+      +'<div class="form91-desc" id="f98-desc"></div>'
+      +(C.length?'<label class="campo91"><span>O vender una pieza</span><select id="f98-vender"><option value="">Nada</option>'+C.map(pz=>'<option value="'+pz.uid+'">'+esc(pz.n)+' · '+fmt(Math.round(pz.valor*.9))+'</option>').join('')+'</select></label>':'')+'</div>';
+    escena({rubro:'Lujo y colecciones',titulo:'Tu colección',ancho:true,cerrable:true,
+      cuerpo:'Las grandes familias se miden también por lo que cuelgan en la sala, lo que parquean en el garaje y lo que corre en las ferias. Cada compra cuesta una movida.',html,
+      opciones:[{t:'Comprar',cat:'casa',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+          const id=document.getElementById('f98-pieza').value, per=document.getElementById('f98-perito').value==='1';
+          const r=comprar98(id,per); if(!r) return; S.mov--; cerrarModal(); render(); }},
+        ...(C.length?[{t:'Vender la pieza elegida',cat:'capital',cerrar:false,run:()=>{ const uid=document.getElementById('f98-vender').value; if(!uid) return; vender98(uid); cerrarModal(); render(); }}]:[])]});
+    const tipo=document.getElementById('f98-tipo'), pieza=document.getElementById('f98-pieza'), desc=document.getElementById('f98-desc');
+    const llenar=()=>{ const L=disponibles().filter(c=>c.tipo===tipo.value);
+      pieza.innerHTML=L.length?L.map(c=>{ const p=precio98(c); return '<option value="'+c.id+'"'+(S.efectivo<p?' disabled':'')+'>'+esc(c.n)+' · '+fmt(p)+(S.efectivo<p?' · sin plata':'')+'</option>'; }).join(''):'<option value="" disabled>Nada disponible en '+S.anio+'</option>';
+      const primera=Array.from(pieza.options).find(o=>!o.disabled); if(primera) pieza.value=primera.value; pintar(); };
+    const pintar=()=>{ const c=item(pieza.value); if(!c){ desc.textContent=''; return; }
+      desc.innerHTML=(c.valoriza>0?'Se valoriza con los años.':'Se deprecia con los años.')+(c.mant?' Mantenerlo cuesta cerca de '+Math.round(c.mant*100)+'% de su valor al año.':'')+(c.pres?' Da prestigio a la casa.':'')+(c.dudosa?' <b style="color:var(--ui-red)">De dudosa procedencia: puede traerte líos con la Fiscalía.</b>':'')+(c.falso?' Hay '+Math.round(c.falso*100)+'% de que sea falso.':'')+(c.seguridad?' Sube tu esquema de seguridad.':''); };
+    tipo.addEventListener('change',llenar); pieza.addEventListener('change',pintar); llenar();
+  }
+
+  /* --- integración --- */
+  function wrapAcciones98(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA98_ACC) return;
+    window.listaAcciones=function(){
+      const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){ const n=col().length;
+        A.push({t:'Lujo y colecciones',d:n?n+' pieza'+(n>1?'s':'')+' por '+fmt(col().reduce((a,x)=>a+x.valor,0))+'. Arte, carros, caballos, yates, esmeraldas.':'Arte, carros, caballos de paso, yates, esmeraldas y relojes.',mov:0,modal:true,run:()=>escenaColeccion98()}); } }catch(e){}
+      return A;
+    };
+    window.__SA98_ACC=true;
+  }
+  function seccionPerfil98(){
+    const sec=window.SECCIONES_93; if(!Array.isArray(sec)||sec.some(s=>s.id==='lujo')) return;
+    const i=sec.findIndex(s=>s.id==='amor');
+    sec.splice(i>=0?i+1:sec.length,0,{id:'lujo',t:'Lujo y aficiones',d:'colecciones, caballos, tu equipo',f:a=>/^Lujo y colecciones$|equipo de fútbol/.test(a.t)});
+  }
+  function wrapPatrimonio98(){
+    const old=window.patrimonio; if(typeof old!=='function'||window.__SA98_PATR) return;
+    window.patrimonio=function(){ const p=old.apply(this,arguments); try{ if(S&&Array.isArray(S.coleccion98)) return p+S.coleccion98.reduce((a,x)=>a+(x.valor||0),0); }catch(e){} return p; };
+    window.__SA98_PATR=true;
+  }
+  function wrapPaso98(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA98_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ correrColeccion98(); }catch(e){} return r; };
+    window.__SA98_PASO=true;
+  }
+  function wrapHeredar98(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA98_HER) return;
+    window.heredar=function(){ const C=S&&Array.isArray(S.coleccion98)?JSON.parse(JSON.stringify(S.coleccion98)):null; const r=old.apply(this,arguments);
+      try{ if(C&&C.length&&S){ S.coleccion98=C.map(x=>Object.assign(x,{reliquia:true})); log('Heredas la colección de la casa: '+C.length+' pieza'+(C.length>1?'s':'')+'.'); } }catch(e){} return r; };
+    window.__SA98_HER=true;
+  }
+  function wrapCatDe98(){
+    const old=window.catDe; if(typeof old!=='function'||window.__SA98_CAT) return;
+    window.catDe=function(t){ if(t==='Lujo y colecciones') return 'casa'; return old.apply(this,arguments); };
+    window.__SA98_CAT=true;
+  }
+
+  function init98(){
+    wrapAcciones98(); seccionPerfil98(); wrapPatrimonio98(); wrapPaso98(); wrapHeredar98(); wrapCatDe98(); instalarEventos98();
+    Object.assign(window,{CATALOGO_98,coleccion98:col,comprar98,vender98,correrColeccion98,escenaColeccion98,precio98});
+  }
+  setTimeout(init98,40);
+  setTimeout(init98,220);
+  setTimeout(init98,650);
+  window.__SA98={version:V98};
 })();
 </script>
 
