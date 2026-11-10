@@ -871,7 +871,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v105</div>
+<div class="version-badge" id="versionBadge">v106</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1639,7 +1639,9 @@ function correrHistoria(){
     if(ev.anio===S.anio && !S.historiaVista.includes(i)){
       S.historiaVista.push(i);
       cola.push({p:9,c:()=>true,t:()=>'<b>'+esc(ev.t)+'</b>',
-        o:[{t:'Seguir',f:()=>{ try{ return ev.f(); }catch(e){ return 'El país siguió su curso.'; } }}]});
+        o:Array.isArray(ev.o)&&ev.o.length
+          ? ev.o.map(op=>({t:op.t,f:()=>{ try{ return op.f(); }catch(e){ return 'El país siguió su curso.'; } }}))
+          : [{t:'Seguir',f:()=>{ try{ return ev.f(); }catch(e){ return 'El país siguió su curso.'; } }}]});
     }
   });
 }
@@ -22104,6 +22106,104 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init105,40); setTimeout(init105,220); setTimeout(init105,650);
   window.__SA105={version:V105};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v106 · LA HISTORIA DE COLOMBIA TE TOCA
+   Momentos del país que obligan a decidir: la Independencia, la abolición,
+   la Guerra de los Mil Días, Panamá, las bananeras, el crac del 29, el
+   Bogotazo, Rojas Pinilla, el paro cívico, la Constituyente, el Proceso
+   8000, el UPAC y las privatizaciones. La primera opción de cada uno es
+   la prudente (es la que se toma si el personaje todavía es un niño).
+   ========================================================================== */
+(function(){
+  const V106='v106';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const pago=f=>{ const c=Math.max(2,Math.round(pat()*f)); S.efectivo-=Math.min(S.efectivo,c); return c; };
+  const sector=()=>{ try{ return S.emp?sectorDe(S.emp).id:null; }catch(e){ return null; } };
+  const tieneFinca=()=>(S.bienes||[]).some(b=>b.clase==='finca'||b.tipo==='finca'||b.tipo==='cafe');
+  const img=d=>{ if(typeof window.moverImagen105==='function') window.moverImagen105(d); };
+  const H106=[
+    {anio:1819,t:'Batalla de Boyacá: el ejército patriota derrota a los realistas y se abre el camino a Santafé.',
+     o:[{t:'Esperar a ver quién se queda con el poder',f:()=>'Los que esperaron no ganaron nada, pero tampoco perdieron.'},
+        {t:'Financiar al ejército patriota',f:()=>{ const c=pago(.08); moverPrestigio(5,'financió la Independencia'); S.p.redes=clamp(S.p.redes+10,0,100); return 'Pusiste '+fmt(c)+'. En la nueva república, tu apellido se pronuncia con respeto.'; }},
+        {t:'Seguir con los realistas',f:()=>{ if(chance(.7)){ const c=pago(.25); moverPrestigio(-6,'apoyó a la Corona'); return 'Ganaron los patriotas. Te confiscaron bienes por '+fmt(c)+' y el apellido quedó marcado.'; } return 'Pasaste agachado. Nadie se acordó de ti.'; }}]},
+    {anio:1851,t:'Se abolió la esclavitud en la Nueva Granada.',
+     o:[{t:'Cumplir la ley sin más',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Cumpliste. Algunos hacendados te miran raro en misa.'; }},
+        {t:'Pedir la indemnización del Estado',f:()=>{ const x=Math.max(2,Math.round(pat()*.03)); S.efectivo+=x; S.p.reputacion=clamp(S.p.reputacion-4,0,100); return 'El Estado te pagó '+fmt(x)+' en bonos. A la gente libre no le pagaron nada.'; }},
+        {t:'Resistirse con los conservadores del Cauca',f:()=>{ S.p.escandalos=(S.p.escandalos||0)+1; moverPrestigio(-4,'se opuso a la abolición'); return 'La rebelión de 1851 fracasó en meses. Tu nombre quedó del lado equivocado de la historia.'; }}]},
+    {anio:1899,t:'Estalla la Guerra de los Mil Días entre liberales y conservadores.',
+     o:[{t:'Mandar a la familia a la finca y esperar',f:()=>{ (S.bienes||[]).forEach(b=>{ if(b.clase==='finca') b.valor*=.85; }); return 'Tres años de guerra. Las fincas quedaron saqueadas, pero la familia sobrevivió.'; }},
+        {t:'Financiar a los conservadores',f:()=>{ const c=pago(.06); S._mil106='c'; return 'Pusiste '+fmt(c)+' del lado del gobierno. Habrá que ver quién gana.'; }},
+        {t:'Financiar a los liberales',f:()=>{ const c=pago(.06); S._mil106='l'; return 'Pusiste '+fmt(c)+' del lado de la revolución. Si pierden, lo vas a pagar.'; }}]},
+    {anio:1902,t:'Termina la Guerra de los Mil Días con el tratado de Wisconsin: ganan los conservadores.',
+     o:[{t:'Seguir',f:()=>{ const b=S._mil106; delete S._mil106;
+        if(b==='c'){ S.p.redes=clamp(S.p.redes+12,0,100); moverPrestigio(3,'apostó por el gobierno en la guerra'); return 'Tu apuesta salió bien: el gobierno conservador te debe favores.'; }
+        if(b==='l'){ const c=pago(.08); moverPrestigio(-3,''); return 'Los liberales perdieron. Te cobraron el apoyo con '+fmt(c)+' en multas y expropiaciones.'; }
+        return 'Cien mil muertos. El país quedó en ruinas.'; }}]},
+    {anio:1903,t:'Panamá se separa de Colombia con el respaldo de Estados Unidos.',
+     o:[{t:'Seguir con tus negocios aquí',f:()=>'El país perdió el istmo y el canal. Los diarios hablan de traición.'},
+        {t:'Abrir una casa comercial en Panamá',f:()=>{ const c=pago(.04); if(chance(.6)){ const x=Math.round(c*rnd(1.8,3)); S.efectivo+=x; return 'Con el canal llegó el comercio del mundo: tu casa en Panamá devolvió '+fmt(x)+'.'; } return 'Perdiste '+fmt(c)+': los americanos ya tenían todo amarrado.'; }}]},
+    {anio:1928,t:'La United Fruit Company pide a los empresarios respaldar al ejército contra la huelga bananera.',
+     o:[{t:'No meterte',f:()=>'El 6 de diciembre el ejército disparó contra los huelguistas en Ciénaga. Nadie sabe cuántos murieron.'},
+        {t:'Firmar el comunicado de respaldo',f:()=>{ S.p.redes=clamp(S.p.redes+6,0,100); S.p.reputacion=clamp(S.p.reputacion-6,0,100); return 'Firmaste. Después de la masacre de Ciénaga, tu firma aparece en los periódicos liberales.'; }},
+        {t:'Negarte en público',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+5,0,100); S.p.redes=clamp(S.p.redes-5,0,100); img(4); return 'Te negaste. El gobierno te cerró puertas; Gaitán te citó en el Congreso como ejemplo.'; }}]},
+    {anio:1929,t:'Se desploma la bolsa de Nueva York y el precio del café se va al piso.',
+     o:[{t:'Aguantar sin vender nada',f:()=>{ (S.bienes||[]).forEach(b=>{ if(b.tipo==='cafe'||b.clase==='finca') b.valor*=.75; }); return 'Aguantaste. Tus tierras valen un cuarto menos, pero siguen siendo tuyas.'; }},
+        {t:'Vender a tiempo lo que se pueda',f:()=>{ let x=0; (S.bienes||[]).forEach(b=>{ if(b.tipo==='cafe'||b.clase==='finca'){ x+=b.valor*.1; b.valor*=.8; } }); S.efectivo+=Math.round(x); return x>0?'Vendiste parte de las cosechas antes del derrumbe: '+fmt(Math.round(x))+' en caja.':'No tenías mucho que vender. Te salvaste por no tener.'; }},
+        {t:'Comprar tierras baratas a los quebrados',f:()=>{ const c=pago(.1); S._crac106={c,anio:S.anio}; return 'Pusiste '+fmt(c)+' comprando fincas a precio de remate. Si el café se recupera, ganaste.'; }}]},
+    {anio:1948,t:'9 de abril: asesinan a Jorge Eliécer Gaitán en Bogotá y la ciudad arde.',
+     o:[{t:'Cerrar todo y esconder a la familia',f:()=>{ if(S.emp){ S.emp.ingresos*=.94; } return 'Pasaron tres días encerrados. Cuando salieron, el centro de Bogotá estaba en ruinas.'; }},
+        {t:'Pagar guardias para proteger tus negocios',f:()=>{ const c=pago(.02); if(S.emp) S.emp.marca=clamp(S.emp.marca+3,0,100); return 'Pagaste '+fmt(c)+'. Tus bodegas fueron de las pocas que no saquearon.'; }},
+        {t:'Comprar los locales del centro cuando se calme',f:()=>{ const c=pago(.05); if(chance(.65)){ const x=Math.round(c*rnd(1.5,2.4)); S.efectivo+=x; S.p.reputacion=clamp(S.p.reputacion-2,0,100); return 'Compraste ruinas a precio de ruina. Años después valían '+fmt(x)+'. Algunos lo llaman oportunismo.'; } return 'Compraste '+fmt(c)+' en escombros que nadie quiso reconstruir.'; }}]},
+    {anio:1953,t:'El general Rojas Pinilla da un golpe de Estado "para pacificar el país".',
+     o:[{t:'Mantener la distancia',f:()=>'Ni con el régimen ni contra él. Por ahora.'},
+        {t:'Apoyar al régimen',f:()=>{ S.p.redes=clamp(S.p.redes+10,0,100); S._rojas106=true; return 'El general te devuelve las llamadas. Los contratos llegan solos.'; }},
+        {t:'Financiar en secreto a la oposición',f:()=>{ const c=pago(.02); S._opos106=true; return 'Pusiste '+fmt(c)+' para los partidos. Si te descubren, lo pagas caro.'; }}]},
+    {anio:1958,t:'Arranca el Frente Nacional: los que apoyaron al general quedan a la sombra.',
+     o:[{t:'Seguir',f:()=>{ if(S._rojas106){ delete S._rojas106; S.p.redes=clamp(S.p.redes-12,0,100); moverPrestigio(-2,''); return 'Tus amigos del régimen ya no mandan. Las puertas que se abrieron se cerraron.'; }
+        if(S._opos106){ delete S._opos106; S.p.redes=clamp(S.p.redes+12,0,100); moverPrestigio(3,'apoyó la caída del régimen'); return 'Los partidos no olvidan quién los financió cuando era peligroso.'; }
+        return 'Liberales y conservadores se reparten el poder. El país respira.'; }}]},
+    {anio:1977,t:'Paro cívico nacional: los sindicatos paralizan las ciudades.',
+     o:[{t:'Cerrar ese día y negociar',f:()=>{ if(S.emp) S.emp.ingresos*=.98; return 'Cerraste un día. Tus trabajadores lo notaron.'; }},
+        {t:'Abrir a la fuerza con policía',f:()=>{ S.p.reputacion=clamp(S.p.reputacion-4,0,100); img(-4); return 'Abriste. Hubo gases lacrimógenos en la entrada y una foto en primera página.'; }},
+        {t:'Subir salarios para desactivar la protesta',f:()=>{ if(S.emp){ S.emp.ingresos*=.97; S.emp.clima=clamp((S.emp.clima||50)+10,0,100); } S.p.reputacion=clamp(S.p.reputacion+4,0,100); return 'Subiste salarios. La utilidad bajó; la lealtad de tu gente, no.'; }}]},
+    {anio:1991,t:'La Asamblea Nacional Constituyente escribe una nueva Constitución.',
+     o:[{t:'Verlo por televisión',f:()=>'Nace la tutela. En unos años, cualquiera podrá demandarte por sus derechos.'},
+        {t:'Financiar a un constituyente',f:()=>{ const c=pago(.01); S.p.redes=clamp(S.p.redes+8,0,100); img(2); return 'Pusiste '+fmt(c)+'. Tu candidato se sentó en la Asamblea y te llama de vez en cuando.'; }}]},
+    {anio:1994,t:'El gobierno pone en venta bancos, telefónicas y termoeléctricas del Estado.',
+     o:[{t:'No meterte',f:()=>'Los grandes grupos se quedaron con las joyas del Estado.'},
+        {t:'Entrar en la subasta de una empresa estatal',f:()=>{ if(pat()<1500) return 'No te alcanzó ni para la garantía de seriedad.'; const c=pago(.12); const nom=pick(['un banco estatal','una termoeléctrica','una telefónica regional','una cementera oficial']); S.priv106={c,anio:S.anio,nom};
+          moverPrestigio(2,''); return 'Te quedaste con una parte de '+nom+' por '+fmt(c)+'. En unos años se sabrá si fue un negocio o un regalo.'; }}]},
+    {anio:1995,t:'Proceso 8000: se descubre que el narcotráfico financió la campaña presidencial.',
+     o:[{t:'Seguir',f:()=>{ if(S.gobierno&&S.gobierno.apoyado){ if(chance(.4)){ S.p.escandalos=(S.p.escandalos||0)+1; img(-8); S.p.reputacion=clamp(S.p.reputacion-6,0,100); return 'Tu nombre aparece en la lista de los que también pusieron plata. Te tocó dar explicaciones en la Fiscalía.'; } return 'Los fiscales revisan a todos los que financiaron campañas. A ti no te llamaron… todavía.'; }
+        return 'El país se enteró de quién paga las campañas. Tú no estabas en esa lista.'; }}]},
+    {anio:1999,t:'Crisis del UPAC: las cuotas de las hipotecas se disparan y miles de familias pierden su casa.',
+     o:[{t:'Pagar lo que toque',f:()=>{ const h=(typeof hipotecasTotal==='function')?hipotecasTotal():0; if(h>0){ const c=Math.round(h*.18); S.efectivo-=Math.min(S.efectivo,c); return 'Tu hipoteca subió '+fmt(c)+' en un año. Pagaste, a duras penas.'; } return 'No tenías hipoteca. Tus vecinos sí.'; }},
+        {t:'Demandar al banco (tutela)',f:()=>{ const h=(typeof hipotecasTotal==='function')?hipotecasTotal():0; if(h<=0) return 'No tenías hipoteca que demandar.'; if(chance(.55)){ (S.bienes||[]).forEach(b=>{ if(b.hipoteca>0) b.hipoteca*=.85; }); return 'La Corte les dio la razón a los deudores: te reliquidaron la hipoteca.'; } return 'El juez negó la tutela. Seguiste pagando.'; }},
+        {t:'Comprar casas embargadas a precio de remate',f:()=>{ const c=pago(.04); if(chance(.6)){ const x=Math.round(c*rnd(1.4,2)); S.efectivo+=x; S.p.reputacion=clamp(S.p.reputacion-3,0,100); img(-2); return 'Compraste a precio de remate y vendiste años después por '+fmt(x)+'. Algunos te llaman buitre.'; } return 'Las casas embargadas no se vendían ni regaladas. Perdiste '+fmt(c)+'.'; }}]}
+  ];
+  function instalar106(){
+    if(window.__SA106_H||typeof HISTORIA==='undefined') return;
+    H106.forEach(h=>{ if(!HISTORIA.some(x=>x.anio===h.anio&&x.t===h.t)) HISTORIA.push(h); });
+    window.__SA106_H=true;
+  }
+  // las apuestas largas se cobran años después
+  function correr106(){
+    if(S._crac106&&S.anio-S._crac106.anio>=6){ const x=Math.round(S._crac106.c*rnd(1.6,2.6)); S.efectivo+=x; log('Las fincas que compraste en el crac del 29 se valorizaron: las vendiste por '+fmt(x)+'.','bien'); delete S._crac106; }
+    if(S.priv106&&S.anio-S.priv106.anio>=5){ const p=S.priv106; const m=chance(.7)?rnd(1.5,3):rnd(.4,.9); const x=Math.round(p.c*m); S.efectivo+=x;
+      log('Vendiste tu parte de '+esc(p.nom)+', comprada en la privatización de '+p.anio+', por '+fmt(x)+'.'+(m>1?' Fue un negocio redondo.':' Salió peor de lo que parecía.'),m>1?'bien':'mal'); delete S.priv106; }
+  }
+  function wrapPaso106(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA106_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correr106(); }catch(e){} return r; };
+    window.__SA106_PASO=true;
+  }
+  function init106(){ instalar106(); wrapPaso106(); Object.assign(window,{H106,correr106}); }
+  setTimeout(init106,40); setTimeout(init106,220); setTimeout(init106,650);
+  window.__SA106={version:V106};
 })();
 </script>
 
