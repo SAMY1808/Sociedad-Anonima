@@ -22307,7 +22307,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   /* --- dibujo --- */
   function cara(n,x,y){
     const t=n.tam; let s=avatarSVG(n.nombre+' '+(n.apellido||''),{sexo:n.sexo,edad:n.edad,tam:t,anillo:n.cabeza?ORO:n.sucesor?ORO:undefined});
-    return s.replace('<svg ','<svg x="'+(x-t/2)+'" y="'+(y-t/2)+'" ');
+    return s.replace('<svg ','<svg x="'+(x-t/2)+'" y="'+(y-t/2)+'" '+(n.muerto?'style="filter:grayscale(1) brightness(.85)" ':''));
   }
   function nodoSVG(n,x,y){
     const t=n.tam, w=Math.max(96,t+40), nomY=y+t/2+16;
@@ -22379,9 +22379,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         y+=ROW;
         if(f.hijos.some(h=>h.nietos.length)){
           xs.forEach((x,k)=>{ const ns=f.hijos[k].nietos; if(!ns.length) return; const w=COL*.62; const s0=x-(ns.length-1)*w/2;
-            P.push('<path d="M'+x+' '+(y-ROW+62)+' L'+x+' '+(y-58)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
-            if(ns.length>1) P.push('<path d="M'+s0+' '+(y-58)+' L'+(s0+(ns.length-1)*w)+' '+(y-58)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
-            ns.forEach((g,j)=>{ const gx=s0+j*w; P.push('<path d="M'+gx+' '+(y-58)+' L'+gx+' '+(y-24)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>'); N.push(nodoSVG(g,gx,y)); }); });
+            P.push('<path d="M'+x+' '+(y-ROW+(f.hijos[k].sucesor||f.hijos[k].famoso?100:86))+' L'+x+' '+(y-48)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
+            if(ns.length>1) P.push('<path d="M'+s0+' '+(y-48)+' L'+(s0+(ns.length-1)*w)+' '+(y-48)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>');
+            ns.forEach((g,j)=>{ const gx=s0+j*w; P.push('<path d="M'+gx+' '+(y-48)+' L'+gx+' '+(y-22)+'" stroke="'+LINEA2+'" stroke-width="1.3" fill="none"/>'); N.push(nodoSVG(g,gx,y)); }); });
           P.push('<text x="16" y="'+(y-36)+'" font-family="system-ui,sans-serif" font-size="10.5" letter-spacing="1.6" fill="'+ORO+'" opacity=".85">NIETOS</text>');
           y+=ROW;
         }
