@@ -955,10 +955,14 @@ html{scroll-behavior:smooth}
 .icono-bien.ilustracion-premium{border-radius:9px;box-shadow:0 5px 16px rgba(0,0,0,.2);background:#789389}
 .retrato .cara,.family-card .cara,.dash-profile .cara,.hud .cara{box-shadow:0 0 0 2px rgba(222,190,125,.24),0 5px 18px rgba(0,0,0,.18)}
 </style>
+<style id="estilos-v115">
+.prop109 .img svg.ilustracion-premium{border-radius:12px 12px 0 0;box-shadow:none}
+.ficha109 svg.ilustracion-premium{border-radius:12px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v114</div>
+<div class="version-badge" id="versionBadge">v115</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3615,7 +3619,9 @@ const ICONOS_BIEN={
   penthouse:'<rect x="14" y="2" width="20" height="42" fill="url(#gSteel)" stroke="#C9A33F" stroke-width="1"/><g fill="#B9DCE6" opacity=".9"><rect x="17" y="6" width="5" height="6"/><rect x="26" y="6" width="5" height="6"/><rect x="17" y="15" width="5" height="6"/><rect x="26" y="15" width="5" height="6"/><rect x="17" y="24" width="5" height="6"/><rect x="26" y="24" width="5" height="6"/></g><path d="M10 44V34h28v10z" fill="url(#gStone)" stroke="#D8B95B" stroke-width="1"/><path d="M13 34v-5M35 34v-5" stroke="#E4C66A" stroke-width="1.3"/><path d="M13 29h22" stroke="#E4C66A" stroke-width="1.3"/><circle cx="24" cy="33" r="2.4" fill="#4A7A52"/><path d="M6 44h36" stroke="#E4C66A" stroke-width="1.6"/>',
   vinedo:'<path d="M4 44q4-20 20-20t20 20z" fill="url(#gGreen)"/><path d="M8 40q4-13 16-13M14 42q3-11 10-11M20 43q2-9 8-9" stroke="#8C6B2C" stroke-width="1.4" fill="none"/><circle cx="36" cy="10" r="5" fill="#E8D38A" opacity=".9"/><path d="M6 44h36" stroke="#E4C66A" stroke-width="1.5"/>'
 };
-function iconoBien(tipo,clase,tam,seed){
+function iconoBien(tipo,clase,tam,seed){ return iconoBienPremium(tipo,clase,tam,seed); }
+/* diseño de las propiedades (edición visual v114); la v115 lo usa en tarjetas, fichas e íconos */
+function iconoBienPremium(tipo,clase,tam,seed){
  const id=String(tipo||clase||'apartamento').toLowerCase();
  const rural=/finca|cafe|café|ganad|viñ|vined|hacienda|rural|cultivo|agro/.test(id+' '+clase);
  const lujo=/mans|palacio|hacienda|villa|grande|lujo/.test(id);
@@ -22901,6 +22907,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   /* --- la ilustración --- */
   const PARED=['#E8D9B8','#D9B38C','#C96F53','#8FA7B8','#B7C4A1','#E3C16F','#C9A0A0','#9DB5A0'], TECHO=['#8A3B2E','#5B4636','#3F5B6B','#6B4A3A'];
   function dibujo109(b,w,h,mini){
+    try{ if(typeof window.dibujoPropiedad115==='function'){ const r=window.dibujoPropiedad115(b,w,h,mini); if(r) return r; } }catch(e){}
     const s=hash(b.uid||b.nombre||b.tipo), t=tipoDe(b), pared=PARED[s%PARED.length], techo=TECHO[(s>>>3)%TECHO.length];
     const W=240,H=150, G=118; // suelo
     const win=(x,y,ww,hh,on)=>'<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" rx="1" fill="'+(on?'#F6D98A':'#3B4A55')+'"/>';
@@ -23760,6 +23767,34 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init113,40); setTimeout(init113,220); setTimeout(init113,650);
   window.__SA113={version:V113};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v115 · EL DISEÑO NUEVO DE LAS PROPIEDADES SE VE EN TODO EL JUEGO
+   La edición visual de la v114 traía un dibujo nuevo para las propiedades,
+   pero la v109 dibujaba encima con el suyo. Ahora el diseño nuevo manda en
+   las tarjetas del Hogar, la ficha de cada propiedad y los íconos de
+   Patrimonio. Los negocios (con su letrero), los lotes vacíos y el mausoleo conservan el suyo.
+   ========================================================================== */
+(function(){
+  const V115='v115';
+  function dibujoPropiedad115(b,w,h,mini){
+    if(!b||typeof iconoBienPremium!=='function') return null;
+    if(b.clase==='negocio'||b.neg110) return null;
+    const t=String(b.tipo||'');
+    if(/mausoleo|nicho/.test(t)) return null;
+    try{ if(b.clase==='terreno'||(typeof window.tipoBien109==='function'&&window.tipoBien109(b)==='lote')) return null; }catch(e){} // un lote vacío no lleva casa
+    const seed=b.uid||b.nombre||t;
+    let svg=iconoBienPremium(b.tipo,b.clase,w||240,seed);
+    if(!mini){ // tarjeta o ficha: proporción completa 3:2, sin recortar
+      svg=svg.replace(/ width="[^"]*" height="[^"]*"/,' width="240" height="160"').replace('preserveAspectRatio="xMidYMid slice"','preserveAspectRatio="xMidYMid meet"');
+    }
+    return svg.replace('aria-label="Ilustración de propiedad"','aria-label="'+esc(b.nombre||'Propiedad')+'"');
+  }
+  window.dibujoPropiedad115=dibujoPropiedad115;
+  window.__SA115={version:V115};
 })();
 </script>
 
