@@ -27,3 +27,13 @@ Controles: arrastrar para pintar o mover (herramienta ✋), rueda o pellizco par
 - `manifest.webmanifest`, `sw.js` — PWA.
 
 La partida se guarda sola cada año en `localStorage`.
+
+## Novedades recientes
+
+- **Gráficos tipo SimCity 4:** sombras proyectadas según la hora, terreno con relieve y playas, agua con profundidad, árboles variados y atmósfera.
+- **Peajes y glorietas**, y **empresas públicas** con gerente técnico, político o compadre.
+- **Clima y desastres:** lluvia, tormenta, niebla, ola de calor, sequía, inundaciones y terremotos.
+- **Pestaña Poder:** concejo por bloques, oposición, medios y redes, y gabinete.
+- **Ciudad:** crimen organizado, vivienda social e invasiones, turismo (hotel, museo, aeropuerto) y distritos (zona rosa, barrio histórico, zona franca).
+- **Mapas:** tres tamaños (48, 64 y 80) y cinco tipos de terreno (valle con río, isla, costa, archipiélago, lago).
+- **Logros** guardados entre partidas y **sonido** sintetizado (con botón de silencio).
