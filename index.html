@@ -947,10 +947,14 @@ html{scroll-behavior:smooth}
 .etapas112 div.ahora{border-color:#d06a5a;background:rgba(208,106,90,.14);color:#F0E7D5;font-weight:500}
 @media (max-width:520px){.etapas112 div{font-size:10px}}
 </style>
+<style id="estilos-v113">
+.pareja113 .sub{font-size:12.5px;color:var(--humo2);margin-top:4px}
+.sec113{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--humo2);margin:14px 0 -2px;grid-column:1/-1}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v112</div>
+<div class="version-badge" id="versionBadge">v113</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7882,7 +7886,7 @@ function baraja(acciones,conGrupos){
 let ACC=[];
 function conectarCartas(){
   document.querySelectorAll('[data-per]').forEach(el=>{
-    el.onclick=()=>{ if(S.mov<=0){ aviso('No te quedan movidas este año.'); return; } abrirPersona(el.dataset.per); };
+    el.onclick=()=>{ if(S.mov<=0&&!/^pareja::/.test(el.dataset.per)){ aviso('No te quedan movidas este año.'); return; } abrirPersona(el.dataset.per); };
   });
   document.querySelectorAll('[data-i]').forEach(b=>{
     b.onclick=()=>{
@@ -23637,6 +23641,92 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init112,40); setTimeout(init112,220); setTimeout(init112,650);
   window.__SA112={version:V112};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v113 · UNA SOLA FICHA DE PAREJA
+   Antes la pareja tenía tres menús distintos: la cara (en Inicio y Familia),
+   la acción "Tu pareja" y el grupo "Matrimonio y pareja" (capitulaciones,
+   divorcio). Ahora todo abre la misma ficha, con todas las opciones juntas.
+   ========================================================================== */
+(function(){
+  const V113='v113';
+  const pz=()=>S&&S.familia&&S.familia.pareja;
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const costo=(f,min)=>Math.max(min||2,Math.round(pat()*f));
+  const P1=n=>String(n||'').split(' ')[0];
+  const PLAN_TXT={buscar:'buscando un hijo',natural:'lo que venga',cuidarse:'sin hijos por ahora'};
+  const plan=()=>(S.familia&&S.familia.plan108)||'natural';
+  const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
+  const rasgoTxt=q=>{ const R=window.RASGOS_108||{}; const r=R[q.rasgo108]; return r?(q.sexo==='m'?r.na:r.n):''; };
+  const SACADAS=['Negociar capitulaciones matrimoniales','Divorciarte'];
+  function accionCruda(t){
+    try{ window.__sa113SinFiltro=true; const A=typeof window.accionesCrudas91==='function'?window.accionesCrudas91():listaAcciones(); return (A||[]).find(a=>a.t===t); }
+    catch(e){ return null; } finally{ window.__sa113SinFiltro=false; }
+  }
+  const sinMov=()=>S.mov<1?'No te quedan movidas':null;
+  function hecho(fn){ return ()=>{ fn(); cerrarModal(); render(); }; }
+
+  function escenaPareja113(){
+    const q=pz(); if(!q) return;
+    const años=isFinite(q.desde108)?S.anio-q.desde108:null;
+    const quien=q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja';
+    const cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25), cRegalo=Math.max(25,pat()*.02);
+    const extra=[q.casa&&q.casa.apellido?'de los '+esc(q.casa.apellido):'',q.porInteres?'fue un matrimonio por conveniencia':'',q.divorcioEnCurso?'<b>divorcio en curso</b>':''].filter(Boolean).join(' · ');
+    const html='<div class="pareja108 pareja113">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:64})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años'+(q.rol?' · '+esc(q.rol):'')+' · '+quien+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
+      +(extra?'<div class="sub">'+extra+'</div>':'')
+      +'<div class="chips">'+(q.rasgo108?'<i>'+esc(rasgoTxt(q))+'</i>':'')+(isFinite(q.compat108)?'<i>'+compatTxt(q.compat108)+'</i>':'')+'<i>hijos: '+PLAN_TXT[plan()]+'</i>'+(q.casados?'<i>'+(q.separacionBienes?'con capitulaciones':'sociedad conyugal')+'</i>':'')+'</div></div></div>'
+      +medida('la relación',Math.round(q.paciencia||0),100,(q.paciencia||0)<35?'r':'v');
+    const pac=()=>((window.RASGOS_108||{})[q.rasgo108]||{pac:1}).pac;
+    const op=[];
+    // cuidar la relación
+    op.push({t:'Un plan juntos',cat:'familia',d:'Cena, cine o un paseo. '+fmt(cCita)+' y una movida. Una vez al año.',dis:S.cita108===S.anio?'Ya lo hiciste este año':sinMov(),cerrar:false,run:hecho(()=>{
+      S.cita108=S.anio; S.mov--; S.efectivo-=Math.min(S.efectivo,cCita); q.paciencia=clamp((q.paciencia||60)+Math.round(ri(8,14)*pac()),0,100); S.p.felicidad=clamp(S.p.felicidad+5,0,100); log('Sacaste tiempo para '+esc(P1(q.nombre))+'. Se nota.','bien'); })});
+    op.push({t:'Dedicarle el año',cat:'familia',d:'Sin viajes ni regalos: estar. Sube mucho la relación, pero tus negocios lo resienten.',dis:sinMov(),cerrar:false,run:hecho(()=>{
+      S.mov--; q.paciencia=clamp((q.paciencia||60)+ri(16,26),0,100); S.p.felicidad=clamp(S.p.felicidad+8,0,100); if(S.emp) S.emp.crecimiento-=.005; log('Le dedicaste el año a '+esc(P1(q.nombre))+'.','bien'); })});
+    op.push({t:'Un viaje los dos solos',cat:'familia',d:fmt(cViaje)+' y una movida. Arregla casi todo.',dis:S.efectivo<cViaje?'No te alcanza':sinMov(),cerrar:false,run:hecho(()=>{
+      S.mov--; S.efectivo-=cViaje; q.paciencia=clamp((q.paciencia||60)+ri(16,24),0,100); S.p.felicidad=clamp(S.p.felicidad+10,0,100); if(isFinite(S.p.estres)) S.p.estres=clamp(S.p.estres-10,0,100); log('Te fuiste de viaje con '+esc(P1(q.nombre))+'. Volvieron como recién conocidos.','bien'); })});
+    op.push({t:'Hacerle un regalo grande',cat:'casa',d:fmt(cRegalo)+' y una movida. Funciona, hasta cierto punto.',dis:S.efectivo<cRegalo?'No te alcanza':sinMov(),cerrar:false,run:hecho(()=>{
+      S.mov--; S.efectivo-=cRegalo; q.paciencia=clamp((q.paciencia||60)+ri(8,15),0,100); log('Le regalaste algo de '+fmt(cRegalo)+' a '+esc(P1(q.nombre))+'.'); })});
+    op.push({t:'Hablar de lo que está pasando',cat:'familia',d:'A veces alcanza con eso; a veces destapa lo que faltaba. Una movida.',dis:sinMov(),cerrar:false,run:hecho(()=>{
+      S.mov--; if(chance(clamp(.5+(q.paciencia||50)/200,.35,.85))){ q.paciencia=clamp((q.paciencia||50)+12,0,100); log('Hablaron de verdad. Quedaron mejor.','bien'); }
+      else { q.paciencia=clamp((q.paciencia||50)-6,0,100); S.p.felicidad=clamp(S.p.felicidad-4,0,100); log('La conversación se torció y salió todo lo que no se habían dicho.','mal'); } })});
+    // hijos
+    if(typeof window.escenaPlanHijos108==='function') op.push({t:'Hablar de tener hijos',cat:'familia',d:'Hoy: '+PLAN_TXT[plan()]+'.',cerrar:false,run:()=>{ cerrarModal(); window.escenaPlanHijos108(); }});
+    if(S.anio>=1985&&plan()==='buscar') op.push({t:'Tratamiento de fertilidad',cat:'salud',d:fmt(cFert)+'. Sube mucho la probabilidad de embarazo por dos años.',dis:S.efectivo<cFert?'No te alcanza':(S.familia.fert108&&S.anio-S.familia.fert108<2)?'Ya están en tratamiento':null,cerrar:false,run:hecho(()=>{
+      S.efectivo-=cFert; S.familia.fert108=S.anio; log('Empezaron un tratamiento de fertilidad ('+fmt(cFert)+').'); })});
+    // el vínculo legal
+    if(!q.casados){
+      op.push({t:'Proponer matrimonio',cat:'familia',d:(q.paciencia||0)<45?'La relación todavía no está para eso.':'Si dice que sí, eliges el régimen de bienes y la boda.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); modalMatrimonio(); }});
+      op.push({t:'Terminar la relación',cat:'riesgo',d:'Cada uno por su lado.',cerrar:false,run:hecho(()=>{ log('Terminaste tu relación con <b>'+esc(q.nombre)+'</b>.'); S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-6,0,100); })});
+    } else {
+      if(!q.separacionBienes&&!q.divorcioEnCurso){ const a=accionCruda('Negociar capitulaciones matrimoniales');
+        op.push({t:'Capitulaciones matrimoniales',cat:'capital',d:'Separar bienes protege tu patrimonio si el matrimonio termina. '+esc(P1(q.nombre))+' lo va a leer como desconfianza.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); if(a) a.run(); else { S.mov--; q.separacionBienes=true; q.paciencia=clamp((q.paciencia||50)-18,0,100); log('Firmaron capitulaciones. Quedó un silencio largo.','mal'); render(); } }}); }
+      if(typeof escenaDivorcio==='function') op.push({t:'Divorciarte',cat:'riesgo',d:'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaDivorcio(); }});
+    }
+    escena({rubro:'Tu vida',titulo:q.casados?(q.sexo==='m'?'Tu esposa':'Tu esposo'):'Tu pareja',ancho:true,cerrable:true,cuerpo:'Una relación se cuida o se gasta. Si la descuidas varios años, se acaba.',html,opciones:op});
+  }
+
+  function wrapAcciones113(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA113_ACC) return;
+    window.listaAcciones=function(){ let A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||window.__sa113SinFiltro) return A;
+        if(pz()) A=A.filter(a=>!SACADAS.includes(a.t));   // viven dentro de la ficha de la pareja
+        A.forEach(a=>{ if(a.t==='Tu pareja'){ a.run=()=>escenaPareja113(); a.mov=0; a.modal=true; } });
+      }catch(e){}
+      return A; };
+    window.__SA113_ACC=true;
+  }
+  function init113(){
+    wrapAcciones113();
+    try{ const g=(window.GRUPOS_91||[]).find(x=>x.id==='matrimonio'); if(g&&!g.__v113){ g.d='Casarte (con quién, con qué régimen y con qué boda), conocer a alguien o tu vida sentimental. Lo del día a día con tu pareja, capitulaciones y divorcio incluidos, está en "Tu pareja" o tocando su cara.'; g.__v113=true; } }catch(e){}
+    if(!window.__SA113_PER){ window.escenaConPareja=escenaPareja113; window.__SA113_PER=true; }
+    Object.assign(window,{escenaPareja113});
+  }
+  setTimeout(init113,40); setTimeout(init113,220); setTimeout(init113,650);
+  window.__SA113={version:V113};
 })();
 </script>
 
