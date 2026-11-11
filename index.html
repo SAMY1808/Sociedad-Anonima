@@ -894,10 +894,49 @@ html{scroll-behavior:smooth}
 .linea107 li.mal:before{border-color:#d06a5a}
 .linea107 li b{color:var(--laton);font-weight:500;margin-right:8px;font-variant-numeric:tabular-nums}
 </style>
+<style id="estilos-v108">
+.cand108{display:flex;gap:12px;align-items:center}
+.pareja108{display:flex;gap:14px;align-items:center;margin:8px 0 6px;padding:12px 14px;border:1px solid rgba(214,166,72,.25);border-radius:12px;background:rgba(214,166,72,.04)}
+.pareja108 .q{flex:1;min-width:0}
+.pareja108 .q b{display:block;font-weight:500;color:var(--marfil);font-size:15.5px}
+.pareja108 .q span{display:block;font-size:12.5px;color:var(--humo)}
+.pareja108 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pareja108 .chips i{font-style:normal;font-size:11.5px;color:var(--laton);border:1px solid rgba(214,166,72,.35);border-radius:6px;padding:1px 7px}
+.fallecidos108 .f{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.fallecidos108 .f:last-child{border-bottom:0}
+.fallecidos108 .f svg{filter:grayscale(1) brightness(.85)}
+.fallecidos108 .f b{display:block;font-weight:500;color:var(--marfil);font-size:14px}
+.fallecidos108 .f span{font-size:12.5px;color:var(--humo)}
+</style>
+<style id="estilos-v109">
+.resumen109{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 14px}
+.resumen109>div{border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.02)}
+.resumen109 span{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--humo2)}
+.resumen109 b{display:block;font-family:var(--display);font-weight:400;font-size:19px;color:var(--marfil);margin-top:3px;white-space:nowrap}
+.props109{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.prop109{display:block;width:100%;text-align:left;font:inherit;color:inherit;padding:0;border:1px solid rgba(214,166,72,.2);border-radius:14px;background:rgba(255,255,255,.02);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.prop109:hover{border-color:var(--laton);transform:translateY(-2px)}
+.prop109 .img{position:relative;display:block;line-height:0}
+.prop109 .img svg{width:100%;height:auto;display:block}
+.prop109 .cinta{position:absolute;left:10px;top:10px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:3px 9px;line-height:1.3;background:rgba(15,25,20,.82);color:var(--marfil);border:1px solid rgba(255,255,255,.18)}
+.prop109 .cinta.ok{color:#8fe0b0;border-color:rgba(108,192,143,.5)}
+.prop109 .cinta.mal{color:#f0a195;border-color:rgba(208,106,90,.6)}
+.prop109 .cinta.casa{color:#1b1408;background:var(--laton);border-color:var(--laton)}
+.prop109 .cuerpo{display:block;padding:11px 13px 13px}
+.prop109 .cuerpo b{display:block;font-weight:500;color:var(--marfil);font-size:14.5px}
+.prop109 .cuerpo .l{display:block;font-size:12px;color:var(--humo);margin-top:2px}
+.prop109 .cuerpo .v{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:12px;color:var(--humo)}
+.prop109 .cuerpo .v strong{font-family:var(--display);font-weight:400;font-size:18px;color:var(--laton)}
+.prop109 .cuerpo .v .sube{color:var(--jade,#6CC08F)}.prop109 .cuerpo .v .baja{color:var(--ui-red,#d06a5a)}
+.ficha109{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start;margin:6px 0 4px}
+.ficha109 svg{width:100%;height:auto;border-radius:12px;display:block}
+.ficha109 table{width:100%}
+@media (max-width:620px){.ficha109{grid-template-columns:1fr}.resumen109{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v107</div>
+<div class="version-badge" id="versionBadge">v109</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4734,6 +4773,7 @@ function reacomodarParentela(heredero){
   // Si hereda una rama colateral, los hijos del difunto se reubican como sobrinos o primos.
   const relCol=heredero&&heredero._sucesorRel;
   const esHijoDirecto=!!(heredero&&!heredero._sucesorColateral&&!relCol);
+  const esNieto=/^niet/.test(relCol||'');
   (S.parientes||[]).forEach(p=>{
     if(!p.vivo) return;
     // quien hereda deja de ser pariente de sí mismo
@@ -4744,7 +4784,7 @@ function reacomodarParentela(heredero){
     else if(p.rel==='sobrino'||p.rel==='sobrina') rel=p.rel==='sobrino'?'primo':'prima';
     // los padres del difunto son los abuelos de su hijo; los abuelos del difunto ya serían bisabuelos
     else if(p.rel==='padre'||p.rel==='madre') rel=esHijoDirecto?(p.rel==='padre'?'abuelo':'abuela'):null;
-    else if(p.rel==='abuelo'||p.rel==='abuela') rel=esHijoDirecto?null:p.rel;
+    else if(p.rel==='abuelo'||p.rel==='abuela') rel=(esHijoDirecto||esNieto)?null:p.rel;
     if(rel) nuevos.push({...p,rel:relacionPorSexo(rel,p.sexo)});
   });
   let relHijo=esHijoDirecto?'hermano':'tío';
@@ -4753,7 +4793,8 @@ function reacomodarParentela(heredero){
     else if(relCol==='sobrino'||relCol==='sobrina'||relCol==='primo'||relCol==='prima'||relCol==='primo segundo'||relCol==='prima segunda') relHijo='primo';
   }
   S.familia.hijos.filter(h=>h!==heredero).forEach(h=>{
-    nuevos.push({ pid:'p'+(UIDP++), rel:relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
+    const esSuPadre=esNieto&&heredero._padre108===h.nombre;
+    nuevos.push({ pid:'p'+(UIDP++), rel:esSuPadre?(h.sexo==='m'?'madre':'padre'):relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
       nombre:h.nombre, oficio:h.rumbo||pick(OFICIOS_FAM), afecto:clamp(h.vinculo||55,0,100),
       capaz:clamp(Math.round(((h.atr&&h.atr.intelecto)||5+(h.atr&&h.atr.disciplina)||5)/2),1,10),
       honrado:ri(3,9), rama:'paterna', vivo:true, deLaCasa:true });
@@ -4761,7 +4802,7 @@ function reacomodarParentela(heredero){
   // la viuda o el viudo del difunto
   if(S.familia.pareja){
     const pz=S.familia.pareja, partes=String(pz.nombre||'').split(' ');
-    const relViuda=esHijoDirecto?(pz.sexo==='m'?'madre':'padre'):(pz.sexo==='m'?'tía':'tío');
+    const relViuda=esHijoDirecto?(pz.sexo==='m'?'madre':'padre'):esNieto?(pz.sexo==='m'?'abuela':'abuelo'):(pz.sexo==='m'?'tía':'tío');
     nuevos.push({ pid:'p'+(UIDP++), rel:relViuda, apellido:partes.slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||undefined,
       sexo:pz.sexo, edad:pz.edad, nombre:partes[0],
       oficio:S.familia.pareja.rol, afecto:75, capaz:ri(3,8), honrado:ri(4,9), rama:'materna', vivo:true });
@@ -8998,7 +9039,7 @@ function escenaMudanzaGlobal(g){
       const cc=costos();
       if(S.efectivo<cc.total){ log('No alcanzaba para instalarte en '+esc(g.n)+'.','mal'); cerrarModal(); render(); return; }
       const viv=viviendaPropia();
-      if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
+      if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
       const antes=S.hogar.ciudad;
       S.hogar.ciudad=g.n;
       S.hogar.zona=st.zona;
@@ -9134,7 +9175,10 @@ function morir(){
     opciones:[{t:'Leer el testamento',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]});
 }
 function pantallaSucesion(vivo){
-  const directos=S.familia.hijos.filter(h=>h.edad>=0);
+  const propios=S.familia.hijos.filter(h=>h.edad>=0);
+  // v108: los nietos (sobre todo los de un hijo que murió antes) y los sobrinos también pueden heredar
+  const extras=(typeof window.herederosExtra108==='function')?window.herederosExtra108():[];
+  const directos=propios.concat(extras.filter(x=>propios.length||/niet/.test(x._sucesorRel||'')));
   const herederos=directos.length?directos:sucesoresColaterales();
   const patr=patrimonio();
   if(!herederos.length){
@@ -9147,9 +9191,10 @@ function pantallaSucesion(vivo){
     return;
   }
   const colateral=!directos.length;
+  const soloNietos=!propios.length&&directos.length>0;
   escena({rubro:vivo?'Sucesión en vida':'Lectura del testamento',titulo:vivo?'Entregar el mando':'¿Con quién sigue la casa?',ancho:true,
     cuerpo:'Hay <b>'+fmt(patr)+'</b> para repartir'+(S.emp?', incluyendo '+pc(miPct(S.emp))+' de '+esc(S.emp.nombre):'')+'. '
-      +(colateral?'No hay hijos disponibles: la continuidad pasa a una rama colateral de la familia. ':'')
+      +(colateral?'No hay hijos disponibles: la continuidad pasa a una rama colateral de la familia. ':'')+(soloNietos?'No te sobrevive ningún hijo: la casa pasa a tus nietos. ':'')
       +'Con quien elijas sigues jugando: sus atributos pasan a ser los tuyos. Los demás reciben su parte y salen de la historia.',
     opciones:herederos.map(h=>({t:'<span class="op-cara">'+avatarSVG(h.nombre+' '+S.p.apellido,{sexo:h.sexo,edad:h.edad,tam:34})
         +'<span>'+esc(h.nombre+' '+apellidoCompletoDeHijo(h))+', '+h.edad+' años · '+esc(relacionPorSexo(h._sucesorRel||'hijo',h.sexo))+'</span></span>',cat:'familia',
@@ -9718,7 +9763,7 @@ function correrFundacion(res,m){
     const origen=p.ciudad;
     let esGlobal=false; try{ esGlobal=esCiudadGlobal(o.ciudad); }catch(e){}
     let viv=null; try{ viv=viviendaPropia(); }catch(e){}
-    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda de '+esc(origen)+' por '+fmt(neto)+' netos al mudarte por el nuevo cargo.'); }
+    if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda de '+esc(origen)+' por '+fmt(neto)+' netos al mudarte por el nuevo cargo.'); }
     S.hogar=S.hogar||{};
     S.hogar.ciudad=o.ciudad; S.hogar.zona=isFinite(S.hogar.zonaElegida61)?S.hogar.zonaElegida61:1; S.hogar.zonaElegida61=undefined; S.hogar.conLosPadres=false; S.hogar.vivienda=null;
     p.ciudad=o.ciudad;
@@ -12716,7 +12761,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function moverseASede501(ciudad){
     const viv=viviendaPropia();
-    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
+    if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
     const antes=S.hogar.ciudad, g=ciudadGlobalDe(ciudad);
     S.hogar.ciudad=ciudad; S.hogar.zona=g?0:1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=ciudad;
     S.p.redes=clamp(S.p.redes*(g?.45:.62),0,100);
@@ -19667,9 +19712,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   /* --- acciones desde el mapa --- */
   function mudarseA92(c){
-    escena({rubro:'Mudanza',titulo:'Mudarte a '+esc(c),cuerpo:'Si tienes casa propia en '+esc(S.hogar.ciudad)+' se vende. Los contactos se rehacen desde cero: tus redes bajan cerca de un 40%.',
+    escena({rubro:'Mudanza',titulo:'Mudarte a '+esc(c),cuerpo:'Si tienes casa propia en '+esc(S.hogar.ciudad)+', '+(()=>{ const v=viviendaPropia(); const p=(v&&v.alMudarme109)||'arrendar'; return p==='vender'?'se vende':p==='conservar'?'la conservas como casa de descanso':'queda arrendada y sigue siendo tuya'; })()+' (lo cambias en la ficha de la casa). Los contactos se rehacen desde cero: tus redes bajan cerca de un 40%.',
       opciones:[{t:'Mudarme a '+esc(c),cat:'casa',run:()=>{
-        const viv=viviendaPropia(); if(viv){ const neto=venderBien(viv,.05); log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.'); }
+        const viv=viviendaPropia(); if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.'); }
         S.hogar.ciudad=c; S.hogar.zona=1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=c;
         S.p.redes=clamp(S.p.redes*.62,0,100); S.efectivo-=Math.min(S.efectivo,arriendoActual()*.8);
         log('Te mudaste a <b>'+esc(c)+'</b>. Toca rehacer los contactos.','hito'); hito('Se mudó a '+c); S.mov--; }}],cerrable:true});
@@ -21847,6 +21892,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA103_PS) return;
     window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
       try{ document.querySelectorAll('#escenaHost .carta').forEach(b=>{ const nom=b.querySelector('.nom'); if(!nom) return;
+        if(/· (niet|sobrin|herman|prim)/.test(nom.textContent)) return;
         const h=((S.familia&&S.familia.hijos)||[]).find(x=>nom.textContent.indexOf(x.nombre+' ')>=0); if(!h) return;
         const res=resumenVida103(h); if(!res||b.querySelector('.vida103-res')) return;
         const tx=b.querySelector('.txt'); const html='<div class="txt vida103-res" style="margin-top:4px;font-style:italic">Lo que recuerdas: '+esc(res)+'</div>';
@@ -22255,7 +22301,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const herm=(S.parientes||[]).filter(x=>/^herman/.test(x.rel)).map(x=>({nombre:x.nombre,apellido:x.apellido||S.dinastia,sexo:x.sexo,muerto:!x.vivo,nac:S.anio-(x.edad||0)}));
     return {gen:S.gen,nombre:p.nombre,apellido:p.apellido,sexo:p.sexo,nac:S.anio-p.edad,fin:S.anio,murio:!vivo,edad:p.edad,causa:S.causaMuerte97||'',
       pareja:pz?{nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' ')||(pz.casa&&pz.casa.apellido)||'',sexo:pz.sexo,casados:!!pz.casados}:null,
-      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>({nombre:h.nombre,sexo:h.sexo,nac:S.anio-(h.edad||0),heredero:h===heredero,famoso:!!h.famoso103})),
+      hijos:((S.familia&&S.familia.hijos)||[]).map(h=>({nombre:h.nombre,sexo:h.sexo,nac:S.anio-(h.edad||0),heredero:h===heredero,famoso:!!h.famoso103})).concat(((S.familia&&S.familia.fallecidos108)||[]).map(f=>({nombre:f.nombre,sexo:f.sexo,nac:f.nac,fin:f.muerte,muerto:true}))),
       colateral:!!(heredero&&heredero._sucesorColateral), herederoNombre:heredero&&heredero.nombre, herederoRel:heredero&&heredero._sucesorRel, padres, hermanos:herm, pico:Math.round((S.legado&&S.legado.pico)||0)};
   }
   function wrapHeredar107(){
@@ -22283,7 +22329,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(padres&&padres.length) F.push({et:'Antes de la casa',nodos:padres.map(x=>nodo({nombre:x.nombre,apellido:x.apellido,sexo:x.sexo,rol:x.sexo==='m'?'madre del fundador':'padre del fundador',muerto:x.muerto,edad:70})),pareja:true});
     R.forEach((r,i)=>{
       const prev=R[i-1];
-      const herm=prev?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==r.nombre).map(h=>nodo({nombre:h.nombre,apellido:prev.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:h.nac?'n. '+h.nac:'',edad:50,famoso:h.famoso})):(r.hermanos||[]).map(h=>nodo({nombre:h.nombre,apellido:h.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',muerto:h.muerto,edad:50}));
+      const herm=prev?(prev.hijos||[]).filter(h=>!h.heredero&&h.nombre!==r.nombre).map(h=>nodo({nombre:h.nombre,apellido:prev.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',anios:h.fin?h.nac+'–'+h.fin:h.nac?'n. '+h.nac:'',edad:h.fin?Math.max(1,h.fin-h.nac):50,famoso:h.famoso,muerto:h.muerto})):(r.hermanos||[]).map(h=>nodo({nombre:h.nombre,apellido:h.apellido,sexo:h.sexo,rol:h.sexo==='m'?'hermana':'hermano',muerto:h.muerto,edad:50}));
       F.push({et:'Generación '+roman(r.gen),sub:(r.nac?r.nac:'?')+'–'+(r.fin||''),
         cabeza:nodo({nombre:r.nombre,apellido:r.apellido,sexo:r.sexo,rol:(r.murio?'murió':'se retiró')+(r.edad?' a los '+r.edad:''),anios:(r.nac||'?')+'–'+(r.fin||'?'),muerto:r.murio,edad:Math.min(80,r.edad||70),tam:62,cabeza:true,colateral:prev&&prev.colateral,causa:r.causa}),
         pareja:r.pareja?nodo({nombre:r.pareja.nombre,apellido:r.pareja.apellido,sexo:r.pareja.sexo,rol:r.pareja.casados?(r.pareja.sexo==='m'?'esposa':'esposo'):'pareja',edad:Math.min(80,r.edad||60)}):null,
@@ -22300,7 +22346,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       pareja:pz?nodo({nombre:String(pz.nombre||'').split(' ')[0],apellido:String(pz.nombre||'').split(' ').slice(1).join(' '),sexo:pz.sexo,rol:pz.casados?(pz.sexo==='m'?'esposa':'esposo'):'pareja',edad:pz.edad||S.p.edad}):null,
       hermanos:herm.slice(0,4),masHermanos:Math.max(0,herm.length-4),
       hijos:((S.familia&&S.familia.hijos)||[]).map(h=>Object.assign(nodo({nombre:h.nombre,apellido:S.p.apellido,sexo:h.sexo,rol:(h.sexo==='m'?'hija':'hijo')+' · '+h.edad,edad:h.edad,sucesor:suc===h.nombre,famoso:!!h.famoso103,tam:50}),
-        {nietos:(h.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:'nieto',edad:g.edad||5,tam:36}))}))});
+        {nietos:(h.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:g.sexo==='m'?'nieta':'nieto',edad:g.edad||5,tam:36}))}))
+        .concat(((S.familia&&S.familia.fallecidos108)||[]).map(f=>Object.assign(nodo({nombre:f.nombre,apellido:f.apellido,sexo:f.sexo,rol:'†',anios:f.nac+'–'+f.muerte,edad:Math.max(1,f.edad),muerto:true,tam:50}),{nietos:(f.hijos||[]).map(g=>nodo({nombre:g.nombre,apellido:g.apellido||S.p.apellido,sexo:g.sexo,rol:g.sexo==='m'?'nieta':'nieto',edad:g.edad||5,tam:36}))})))});
     return F;
   }
 
@@ -22466,6 +22513,526 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init107,40); setTimeout(init107,220); setTimeout(init107,650);
   window.__SA107={version:V107};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v108 · RELACIONES, HIJOS Y PÉRDIDAS
+   Conocer pareja deja de ser un sorteo: eliges dónde buscar y a quién.
+   La relación tiene carácter, compatibilidad y decisiones (citas, viajes,
+   hablar de hijos, proponer matrimonio). Los hijos se pueden buscar,
+   esperar o evitar; hay gemelos y embarazos que no llegan. Los amantes
+   exigen y amenazan; la pareja también puede ser infiel. Y un hijo puede
+   morir antes que tú: entonces sus hijos (tus nietos) o tus sobrinos
+   pueden heredar la casa.
+   ========================================================================== */
+(function(){
+  const V108='v108';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const costo=(f,min)=>Math.max(min||2,Math.round(pat()*f));
+  const pz=()=>S.familia&&S.familia.pareja;
+  const P1=n=>String(n||'').split(' ')[0];
+  const o=x=>x&&x.sexo==='m'?'a':'o', elx=x=>x&&x.sexo==='m'?'ella':'él';
+  const amantes=()=>((S.familia&&S.familia.amantes)||[]).filter(a=>a.activo!==false);
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const RASGOS_108={carinoso:{n:'cariñoso',na:'cariñosa',d:'Perdona fácil y pide tiempo juntos.',pac:1.3},ambicioso:{n:'ambicioso',na:'ambiciosa',d:'Le importa que a la casa le vaya bien.',pac:1},
+    celoso:{n:'celoso',na:'celosa',d:'Nota todo. Una infidelidad le duele el doble.',pac:1},independiente:{n:'independiente',na:'independiente',d:'Tiene su propia vida; no necesita que estés encima.',pac:.7},
+    tradicional:{n:'tradicional',na:'tradicional',d:'Quiere matrimonio, hijos y misa los domingos.',pac:1},fiestero:{n:'fiestero',na:'fiestera',d:'Se aburre en casa. Hay que salir.',pac:1.15}};
+  const rasgoTxt=q=>{ const r=RASGOS_108[q.rasgo108]; return r?(q.sexo==='m'?r.na:r.n):''; };
+  const LUGARES_108=[
+    {id:'fiesta',n:'En una fiesta del club',d:'Gente de casas conocidas. Hace falta tener contactos.',si:()=>S.p.redes>=40,dis:'Te faltan contactos (redes 40)',bono:0,casa:true},
+    {id:'trabajo',n:'En el trabajo o la universidad',d:'Alguien que ya te conoce en tu día a día. Más compatibilidad.',si:()=>true,bono:12},
+    {id:'familia',n:'Que te presente la familia',d:'Tu mamá y tus tías llevan años con candidatos listos. Gente tradicional.',si:()=>true,bono:4,rasgo:'tradicional'},
+    {id:'viaje',n:'En un viaje',d:'Lejos de casa pasan cosas. Menos seguro, más emocionante.',si:()=>S.efectivo>=20,dis:'No te alcanza para el viaje',bono:-4,costo:20,fel:6},
+    {id:'app',n:'Por una aplicación de citas',d:'Muchas opciones, poca paciencia.',si:()=>S.anio>=2013,bono:-8}
+  ];
+  function candidato(l){
+    const sx=S.p.sexo==='h'?'m':'h'; let nom=nombreLocal(S.p.ciudad,sx); const usados=(S.familia.hijos||[]).map(h=>h.nombre).concat((S.parientes||[]).map(p=>p.nombre));
+    for(let i=0;i<8&&usados.includes(nom);i++) nom=nombreLocal(S.p.ciudad,sx);
+    const casa=l.casa&&typeof casaParaPretendiente==='function'?casaParaPretendiente():null;
+    const ap=casa?casa.a:apellidoCiudad(S.p.ciudad);
+    const w=r=>String(r).split(' ')[0]; const roles=PAREJAS_ROL.filter(r=>/ista$/.test(w(r))||(sx==='h'?!/a$/.test(w(r)):!/(o|or)$/.test(w(r))));
+    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:pick(roles.length?roles:PAREJAS_ROL),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
+      compat:clamp(ri(30,85)+l.bono+Math.round((S.p.atr.carisma-5)*2),10,98),quiereHijos:chance(.7),casa:casa?{apellido:casa.a,prestigio:casa.p}:null};
+  }
+  const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
+  function escenaConocer108(){
+    escena({rubro:'Tu vida',titulo:'¿Dónde quieres conocer a alguien?',cerrable:true,cuerpo:'Cuesta una movida. Donde busques cambia a quién encuentras.',
+      opciones:LUGARES_108.filter(l=>l.id!=='app'||S.anio>=2013).map(l=>({t:l.n,cat:'familia',d:l.d+(l.costo?' Cuesta '+fmt(l.costo)+'.':''),dis:l.si()?(S.mov<1?'No te quedan movidas':null):(l.dis||'No disponible'),cerrar:false,run:()=>{
+        S.mov=Math.max(0,S.mov-1); if(l.costo) S.efectivo-=Math.min(S.efectivo,l.costo); if(l.fel) S.p.felicidad=clamp(S.p.felicidad+l.fel,0,100);
+        const C=[candidato(l),candidato(l),candidato(l)]; cerrarModal(); escenaCandidatos108(l,C); }}))});
+  }
+  function escenaCandidatos108(l,C){
+    escena({rubro:l.n,titulo:'Tres personas te llamaron la atención',ancho:true,cerrable:true,cuerpo:'Fíjate en el carácter y en qué tan bien se entienden: de eso depende cuánto dura.',
+      opciones:C.map(c=>({t:'<span class="op-cara">'+avatarSVG(c.nombre,{sexo:c.sexo,edad:c.edad,tam:34})+'<span>'+esc(c.nombre)+', '+c.edad+' años</span></span>',cat:'familia',
+        d:esc(c.rol.charAt(0).toUpperCase()+c.rol.slice(1))+'. '+esc((c.sexo==='m'?RASGOS_108[c.rasgo].na:RASGOS_108[c.rasgo].n).replace(/^./,x=>x.toUpperCase()))+': '+RASGOS_108[c.rasgo].d.toLowerCase()+' Compatibilidad: '+compatTxt(c.compat)+'. '+(c.quiereHijos?'Quiere hijos.':'No quiere hijos.')+(c.casa?' De los '+esc(c.casa.apellido)+'.':''),
+        run:()=>{ if(chance(clamp(.35+c.compat/160+S.p.atr.carisma/40,.25,.95))){
+            S.familia.pareja={nombre:c.nombre,rol:c.rol,sexo:c.sexo,edad:c.edad,casados:false,paciencia:clamp(50+c.compat*.3,0,100),exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),afecto:clamp(40+c.compat*.5,0,100),
+              rasgo108:c.rasgo,compat108:c.compat,quiereHijos108:c.quiereHijos,desde108:S.anio,conocio108:l.id,casa:c.casa||undefined};
+            S.p.felicidad=clamp(S.p.felicidad+12,0,100); log('Conociste a <b>'+esc(c.nombre)+'</b>, '+esc(c.rol)+', '+l.n.charAt(0).toLowerCase()+l.n.slice(1)+'. Empezaron a salir.','bien'); hito('Conoció a '+c.nombre);
+          } else { S.p.felicidad=clamp(S.p.felicidad-3,0,100); log('Saliste un par de veces con '+esc(c.nombre)+'. No pasó de ahí.'); } }}))
+        .concat([{t:'Nadie me convence',cat:'legado',run:()=>{ log('Conociste gente, pero nadie te movió el piso.'); }}])});
+  }
+
+  /* --- la relación --- */
+  function plan(){ return (S.familia&&S.familia.plan108)||'natural'; }
+  const PLAN_TXT={buscar:'buscando un hijo',natural:'lo que venga',cuidarse:'sin hijos por ahora'};
+  function escenaPareja108(){
+    const q=pz(); if(!q) return;
+    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25);
+    const html='<div class="pareja108">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:60})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años · '+esc(q.rol||'')+' · '+(q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja')+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
+      +'<div class="chips">'+(q.rasgo108?'<i>'+esc(rasgoTxt(q))+'</i>':'')+(isFinite(q.compat108)?'<i>'+compatTxt(q.compat108)+'</i>':'')+'<i>hijos: '+PLAN_TXT[plan()]+'</i>'+(q.separacionBienes?'<i>con capitulaciones</i>':'')+'</div></div></div>'
+      +medida('la relación',Math.round(q.paciencia||0),100,(q.paciencia||0)<35?'r':'v');
+    const yaCita=S.cita108===S.anio;
+    const op=[
+      {t:'Un plan juntos',cat:'familia',d:'Cena, cine o un paseo. '+fmt(cCita)+' y una movida. Una vez al año.',dis:yaCita?'Ya lo hiciste este año':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.cita108=S.anio; S.mov--; S.efectivo-=Math.min(S.efectivo,cCita); const d=Math.round(ri(8,14)*((RASGOS_108[q.rasgo108]||{pac:1}).pac)); q.paciencia=clamp((q.paciencia||60)+d,0,100); S.p.felicidad=clamp(S.p.felicidad+5,0,100);
+        log('Sacaste tiempo para '+esc(P1(q.nombre))+'. Se nota.','bien'); cerrarModal(); render(); }},
+      {t:'Un viaje los dos solos',cat:'familia',d:fmt(cViaje)+' y una movida. Arregla casi todo.',dis:S.efectivo<cViaje?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.mov--; S.efectivo-=cViaje; q.paciencia=clamp((q.paciencia||60)+ri(16,24),0,100); S.p.felicidad=clamp(S.p.felicidad+10,0,100); if(isFinite(S.p.estres)) S.p.estres=clamp(S.p.estres-10,0,100);
+        log('Te fuiste de viaje con '+esc(P1(q.nombre))+'. Volvieron como recién conocidos.','bien'); cerrarModal(); render(); }},
+      {t:'Hablar de tener hijos',cat:'familia',d:'Hoy: '+PLAN_TXT[plan()]+'.',cerrar:false,run:()=>{ cerrarModal(); escenaPlanHijos108(); }}
+    ];
+    if(S.anio>=1985&&plan()==='buscar') op.push({t:'Tratamiento de fertilidad',cat:'salud',d:fmt(cFert)+'. Sube mucho la probabilidad de embarazo por dos años.',dis:S.efectivo<cFert?'No te alcanza':(S.familia.fert108&&S.anio-S.familia.fert108<2)?'Ya están en tratamiento':null,cerrar:false,run:()=>{
+        S.efectivo-=cFert; S.familia.fert108=S.anio; log('Empezaron un tratamiento de fertilidad ('+fmt(cFert)+').'); cerrarModal(); render(); }});
+    if(!q.casados) op.push({t:'Proponer matrimonio',cat:'familia',d:(q.paciencia||0)<45?'La relación todavía no está para eso.':'Si dice que sí, eliges el régimen de bienes.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ cerrarModal(); modalMatrimonio(); }},
+      {t:'Terminar la relación',cat:'riesgo',d:'Cada uno por su lado.',cerrar:false,run:()=>{ log('Terminaste tu relación con <b>'+esc(q.nombre)+'</b>.'); S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-6,0,100); cerrarModal(); render(); }});
+    escena({rubro:'Tu vida',titulo:'Tu pareja',ancho:true,cerrable:true,cuerpo:'Una relación se cuida o se gasta. Si la descuidas varios años, se acaba.',html,opciones:op});
+  }
+  function escenaPlanHijos108(){
+    const q=pz(); const quiere=q&&q.quiereHijos108;
+    const set=(p,txt)=>{ S.familia.plan108=p; if(q&&q.quiereHijos108!==undefined){ if(p==='cuidarse'&&quiere){ q.paciencia=clamp((q.paciencia||60)-10,0,100); txt+=' '+P1(q.nombre)+' quería otra cosa: quedó dolid'+o(q)+'.'; } if(p==='buscar'&&quiere) q.paciencia=clamp((q.paciencia||60)+6,0,100); if(p==='buscar'&&quiere===false){ q.paciencia=clamp((q.paciencia||60)-8,0,100); txt+=' '+P1(q.nombre)+' no está convencid'+o(q)+'.'; } } log(txt); };
+    escena({rubro:'Tu familia',titulo:'¿Quieren tener hijos?',cerrable:true,cuerpo:(q&&q.quiereHijos108!==undefined?esc(P1(q.nombre))+(quiere?' quiere hijos.':' no quiere hijos.')+' ':'')+(S.anio<1965?'Todavía no existe la píldora: cuidarse ayuda, pero no es seguro.':'Hoy la decisión es de ustedes.'),
+      opciones:[{t:'Buscar un hijo',cat:'familia',d:'Sube bastante la probabilidad de embarazo cada año.',run:()=>set('buscar','Decidieron buscar un hijo.')},
+        {t:'Que llegue cuando llegue',cat:'familia',d:'Como ha sido siempre.',run:()=>set('natural','Los hijos llegarán cuando lleguen.')},
+        {t:'Cuidarse: sin hijos por ahora',cat:'familia',d:S.anio<1965?'Baja la probabilidad a la mitad.':'Baja la probabilidad casi a cero.',run:()=>set('cuidarse','Decidieron no tener hijos por ahora.')}]});
+  }
+  function wrapConcepcion108(){
+    const old=window.probConcepcion; if(typeof old!=='function'||window.__SA108_CON) return;
+    window.probConcepcion=function(){ let p=old.apply(this,arguments);
+      try{ const pl=plan(); p*=pl==='buscar'?1.9:pl==='cuidarse'?(S.anio<1965?.5:.07):1; if(S.familia.fert108&&S.anio-S.familia.fert108<2) p*=1.8; p=clamp(p,0,.5); }catch(e){}
+      return p; };
+    window.__SA108_CON=true;
+  }
+  function wrapNacimientos108(){
+    const old=window.resolverConcepcionesNaturales; if(typeof old!=='function'||window.__SA108_NAC) return;
+    window.resolverConcepcionesNaturales=function(res){
+      let antes=null;
+      try{ antes=new Set((S.familia.hijos||[]).map(h=>h.fid));
+        const edadMadre=S.p.sexo==='m'?S.p.edad:((pz()&&pz().edad)||30);
+        S.familia.embarazos=(S.familia.embarazos||[]).filter(e=>{ if(e.naceEn<=S.anio&&chance(edadMadre>=40?.12:.04)){ S.p.felicidad=clamp(S.p.felicidad-12,0,100); if(pz()) pz().paciencia=clamp((pz().paciencia||60)+4,0,100);
+          log('El embarazo no llegó a término. Fueron meses difíciles en la casa.','mal'); return false; } return true; });
+      }catch(e){}
+      const r=old.apply(this,arguments);
+      try{ const nuevos=(S.familia.hijos||[]).filter(h=>!antes.has(h.fid)&&h.edad===0&&h.origen==='biologico');
+        if(nuevos.length===1&&S.familia.hijos.length<12&&chance(.025)){ const a=nuevos[0], sx=chance(.5)?'h':'m'; const libres=nombresCiudad(S.p.ciudad,sx).filter(n=>!S.familia.hijos.some(h=>h.nombre===n)); const nom=libres.length?pick(libres):nombreLocal(S.p.ciudad,sx);
+          const g=nuevoHijo(nom,sx,0); g.apellido=a.apellido; g.madre=a.madre; g.padre=a.padre; g.gemelo108=a.nombre; a.gemelo108=g.nombre; g.vinculo=60; S.familia.hijos.push(g);
+          log('¡Sorpresa en la clínica: eran dos! Junto con '+esc(a.nombre)+' nació <b>'+esc(g.nombre)+'</b>.','hito'); hito('Nacieron gemelos: '+a.nombre+' y '+g.nombre); } }catch(e){}
+      return r; };
+    window.__SA108_NAC=true;
+  }
+  function wrapMatrimonio108(){
+    const old=window.modalMatrimonio; if(typeof old!=='function'||window.__SA108_MAT) return;
+    window.modalMatrimonio=function(){ const q=pz();
+      if(q&&q.rasgo108&&(q.paciencia||0)<45){ q.paciencia=clamp((q.paciencia||0)-4,0,100);
+        escena({rubro:'La propuesta',titulo:esc(P1(q.nombre))+' dijo que todavía no',cuerpo:'"Te quiero, pero así como estamos no." La relación tiene que estar mejor antes de hablar de matrimonio.',opciones:[{t:'Entendido',cat:'familia',run:()=>{}}]});
+        log(esc(P1(q.nombre))+' no aceptó tu propuesta de matrimonio. Todavía no.','mal'); return; }
+      return old.apply(this,arguments); };
+    window.__SA108_MAT=true;
+  }
+
+  /* --- la muerte de un hijo --- */
+  function fallecidos(){ if(!Array.isArray(S.familia.fallecidos108)) S.familia.fallecidos108=[]; return S.familia.fallecidos108; }
+  function morirHijo108(h,causa){
+    const i=S.familia.hijos.indexOf(h); if(i<0) return false;
+    S.familia.hijos.splice(i,1);
+    fallecidos().push({nombre:h.nombre,sexo:h.sexo,apellido:h.apellido||S.p.apellido,nac:S.anio-(h.edad||0),muerte:S.anio,edad:h.edad||0,causa,hijos:(h.hijos||[]).slice(),pareja:h.pareja?h.pareja.nombre:null,famoso103:h.famoso103,fid:h.fid});
+    S.p.felicidad=clamp(S.p.felicidad-30,0,100); if(isFinite(S.p.estres)) S.p.estres=clamp(S.p.estres+25,0,100); S.p.salud=clamp(S.p.salud-5,0,100);
+    S.familia.hijos.forEach(x=>{ x.vinculo=clamp((x.vinculo||55)+4,0,100); });
+    if(pz()) pz().paciencia=clamp((pz().paciencia||60)+(chance(.6)?8:-12),0,100);
+    if(S.suc102&&S.suc102.delfin===h.nombre){ S.suc102.delfin=null; log('La casa se quedó sin sucesor designado.','mal'); }
+    if(S.testamento&&S.testamento.nombre===h.nombre){ S.testamento=null; log('Tu testamento quedó sin efecto: nombraba a '+esc(h.nombre)+'.','mal'); }
+    if(Array.isArray(S.junta)) S.junta=S.junta.filter(j=>j.hijo!==h.nombre);
+    S.familia.ultMuerteHijo108=S.anio;
+    const nietos=(h.hijos||[]).length;
+    log('Murió tu '+(h.sexo==='m'?'hija':'hijo')+' <b>'+esc(h.nombre)+'</b>, a los '+(h.edad||0)+' años, de '+esc(causa)+'. Ningún padre debería enterrar a un hijo.'+(nietos?' Deja '+nietos+' hijo'+(nietos===1?'':'s')+', que quedan bajo el amparo de la casa.':''),'mal');
+    hito('Murió '+h.nombre+', a los '+(h.edad||0)+' años');
+    try{ asegurarColasFamilia(); S.funeralPendientes.push({quien:h.nombre+' '+(h.apellido||S.p.apellido),rel:'hijo',sexo:h.sexo,anio:S.anio}); }catch(e){}
+    return true;
+  }
+  function causaHijo(h){
+    const e=h.edad||0, violencia=S.anio>=1948&&S.anio<=2008;
+    if(e<5) return pick(S.anio<1950?['una fiebre que no cedió','una infección','tosferina','difteria']:['una infección','una enfermedad congénita','una neumonía']);
+    if(e<15) return pick(['un accidente en un río','una meningitis','un accidente','una enfermedad de la sangre']);
+    if(e<36) return pick(['un accidente de carretera','un accidente de moto','un accidente de carretera'].concat(violencia?['una bala perdida','la violencia']:[]).concat(S.anio>=1930?['un accidente aéreo']:['una caída de caballo']));
+    return pick(['un infarto','cáncer','un accidente de carretera','un derrame cerebral']);
+  }
+  function riesgoHijo(h){
+    const e=h.edad||0, a=S.anio; const inf=a<1930?.012:a<1960?.006:a<1990?.002:.0006;
+    if(e<5) return inf; if(e<15) return inf*.2+.0003; if(e<36) return .0012+(a>=1985&&a<=2005?.0008:0)+(h.temperamento==='prodigo'?.0006:0);
+    return .001+(e-36)*.0004+(e>=60?.01:0);
+  }
+  function correrHijos108(){
+    if(!S.familia) return;
+    // los nietos huérfanos siguen creciendo
+    fallecidos().forEach(f=>(f.hijos||[]).forEach(g=>{ g.edad=(g.edad||0)+1; }));
+    const hace=S.anio-(S.familia.ultMuerteHijo108||-99);
+    (S.familia.hijos||[]).slice().forEach(h=>{ if(hace<12&&(h.edad||0)<60) return; if(S.familia.ultMuerteHijo108===S.anio) return;
+      if(chance(riesgoHijo(h))) morirHijo108(h,causaHijo(h)); });
+    // la pareja se enfría sola si no se cuida (solo relaciones nuevas)
+    const q=pz(); if(q&&q.rasgo108&&isFinite(q.compat108)){ q.paciencia=clamp((q.paciencia||60)+(q.compat108-55)/14,0,100); }
+    amantes().forEach(a=>{ a.exige108=(a.exige108||0)+((a.afecto||50)>=60?1:0); });
+  }
+
+  /* --- herederos: nietos y sobrinos --- */
+  function herederosExtra108(){
+    const out=[]; if(typeof prepararSucesorColateral!=='function') return out;
+    const prep=(g,rel,huerfano,padre)=>{ const h=prepararSucesorColateral({pid:g.gid||g.pid||('n'+ri(10000,99999)),rel,sexo:g.sexo,edad:g.edad||0,nombre:g.nombre,oficio:g.oficio,afecto:g.vinculo||g.afecto||60,capaz:g.capaz||6});
+      if(!h) return; if(g.atr) h.atr=Object.assign({},h.atr,g.atr); h._extra108=true; h._huerfano108=!!huerfano; h._padre108=padre||null; h._sucesorRel=rel; out.push(h); };
+    fallecidos().forEach(f=>(f.hijos||[]).forEach(g=>prep(g,g.sexo==='m'?'nieta':'nieto',true,f.nombre)));
+    (S.familia.hijos||[]).forEach(hj=>(hj.hijos||[]).filter(g=>(g.edad||0)>=18).forEach(g=>prep(g,g.sexo==='m'?'nieta':'nieto',false,hj.nombre)));
+    (S.parientes||[]).filter(p=>p.vivo&&/^sobrin/.test(p.rel)&&(p.edad||0)>=18).sort((a,b)=>(b.afecto||0)-(a.afecto||0)).slice(0,2).forEach(p=>prep(p,p.sexo==='m'?'sobrina':'sobrino',false,null));
+    return out.slice(0,5);
+  }
+  function wrapSucesion108(){
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA108_PS) return;
+    window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
+      try{ const E=herederosExtra108(); document.querySelectorAll('#escenaHost .carta').forEach(b=>{ const nom=b.querySelector('.nom'); if(!nom||b.querySelector('.extra108')) return;
+        const h=E.find(x=>nom.textContent.indexOf(x.nombre+' ')>=0&&/niet|sobrin/.test(nom.textContent)); if(!h) return;
+        const txt=h._huerfano108?'Hereda en lugar de '+h._padre108+', que murió antes que tú.':/niet/.test(h._sucesorRel)?(h.sexo==='m'?'Hija':'Hijo')+' de '+h._padre108+'. Saltarías una generación.':'De la rama de tus hermanos.';
+        const tx=b.querySelector('.txt'); const html='<div class="txt extra108" style="margin-top:4px;color:var(--laton)">'+esc(txt)+'</div>'; if(tx) tx.insertAdjacentHTML('afterend',html); else b.insertAdjacentHTML('beforeend',html); }); }catch(e){}
+      return r; };
+    window.__SA108_PS=true;
+  }
+
+  /* --- eventos --- */
+  function instalarEventos108(){
+    if(window.__SA108_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    const A=()=>amantes().find(a=>a.id===S._am108)||amantes()[0];
+    E({p:1,c:()=>!!pz()&&amantes().some(a=>(a.afecto||0)>=60&&(a.exige108||0)>=2),
+      t:()=>{ const a=amantes().filter(a=>(a.afecto||0)>=60).sort((x,y)=>(y.exige108||0)-(x.exige108||0))[0]; S._am108=a.id; a.exige108=0;
+        return '<b>'+esc(a.nombre)+'</b> ya no quiere seguir escondid'+o(a)+'. "O dejas a '+esc(P1(pz().nombre))+', o esto se acaba. Y no te prometo quedarme callad'+o(a)+'."'; },
+      o:[{t:'Prometerle que pronto',f:()=>{ const a=A(); if(a){ a.afecto=clamp(a.afecto+6,0,100); a.promesa108=(a.promesa108||0)+1; } return a&&a.promesa108>=2?'Es la segunda vez que se lo prometes. Ya no te cree.':'Te creyó. Por ahora.'; }},
+         {t:'Terminar con esa relación',f:()=>{ const a=A(); if(!a) return ''; a.activo=false; a.fin=S.anio; if(chance(.35+(100-(a.discrecion||50))/250)){ pz().paciencia=clamp((pz().paciencia||60)-(pz().rasgo108==='celoso'?40:28),0,100); S.p.escandalos=(S.p.escandalos||0)+1; return 'Terminaste. A la semana, '+esc(P1(pz().nombre))+' recibió una carta con fechas, hoteles y fotos.'; } return 'Lloró, gritó y se fue. No dijo nada a nadie.'; }},
+         {t:'Dejar a tu pareja',f:()=>{ const a=A(), q=pz(); if(!a||!q) return ''; if(q.casados){ q.paciencia=0; a.afecto=clamp(a.afecto+20,0,100); return 'Se lo dijiste a '+esc(P1(q.nombre))+'. Esa misma noche llamó a un abogado.'; }
+           S.familia.pareja={nombre:a.nombre,rol:a.rol,sexo:a.sexo,edad:a.edad,casados:false,paciencia:70,exigencia:1,rasgo108:pick(Object.keys(RASGOS_108)),compat108:ri(50,85),quiereHijos108:chance(.6),desde108:S.anio,conocio108:'amante'}; a.activo=false;
+           return 'Dejaste a '+esc(P1(q.nombre))+'. Ahora '+esc(P1(a.nombre))+' es tu pareja, a la vista de todos.'; }}]});
+    E({p:.8,c:()=>!!pz()&&amantes().some(a=>(a.discrecion||50)<50),
+      t:()=>{ const a=amantes().filter(a=>(a.discrecion||50)<50)[0]; S._am108=a.id; const c=costo(.01,8); S._c108=c; return '<b>'+esc(a.nombre)+'</b> necesita plata. Mucha: '+fmt(c)+'. No lo dice, pero lo deja claro: si no aparece, '+esc(P1(pz().nombre))+' se entera de todo.'; },
+      o:[{t:()=>'Pagar los '+fmt(S._c108||0),f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c108||0); const a=A(); if(a) a.discrecion=clamp((a.discrecion||40)+10,0,100); return 'Pagaste. Sabes que va a volver a pedir.'; }},
+         {t:'Que cuente lo que quiera',f:()=>{ const a=A(), q=pz(); if(a){ a.activo=false; a.fin=S.anio; } if(q) q.paciencia=clamp((q.paciencia||60)-30,0,100); S.p.escandalos=(S.p.escandalos||0)+1; if(typeof window.moverImagen105==='function') window.moverImagen105(-5); return 'Lo contó. A tu pareja, y a media ciudad.'; }}]});
+    E({p:1,c:()=>!!pz()&&amantes().length>0,
+      t:()=>{ const q=pz(); return '<b>'+esc(P1(q.nombre))+'</b> encontró '+pick(['un recibo de hotel en tu chaqueta','un mensaje que no era para '+elx(q),'una foto que alguien le mandó'])+'. Te está esperando en la sala, con la luz apagada.'; },
+      o:[{t:'Pedir perdón y terminar con lo otro',f:()=>{ const q=pz(); amantes().forEach(a=>{ a.activo=false; a.fin=S.anio; }); q.paciencia=clamp((q.paciencia||60)-(q.rasgo108==='celoso'?28:q.rasgo108==='carinoso'?10:16),0,100); return 'Lloraron los dos. Dijo que lo va a intentar, pero que no es lo mismo.'; }},
+         {t:'Negarlo todo',f:()=>{ const q=pz(); if(chance(.45)){ q.paciencia=clamp((q.paciencia||60)-5,0,100); return 'Te creyó. O decidió creerte.'; } q.paciencia=clamp((q.paciencia||60)-36,0,100); return 'No te creyó. Y ahora, además, sabe que le mientes en la cara.'; }},
+         {t:'Admitirlo y no cambiar nada',f:()=>{ const q=pz(); q.paciencia=clamp((q.paciencia||60)-42,0,100); return 'Se lo dijiste sin adornos. Esa noche durmió en otro cuarto. Tal vez para siempre.'; }}]});
+    E({p:.8,c:()=>!!pz()&&(pz().paciencia||60)<42&&!pz().infiel108,
+      t:()=>{ const q=pz(); q.infiel108=S.anio; return 'Te lo dijo alguien del club, con cara de lástima: <b>'+esc(P1(q.nombre))+'</b> se está viendo con otra persona. Llevan meses.'; },
+      o:[{t:'Hablarlo y perdonar',f:()=>{ const q=pz(); q.paciencia=clamp((q.paciencia||40)+12,0,100); S.p.felicidad=clamp(S.p.felicidad-10,0,100); return 'Hablaron hasta el amanecer. Dijo que se sentía sol'+o(q)+'. Decidieron seguir.'; }},
+         {t:'Terapia de pareja',f:()=>{ const q=pz(), c=costo(.003,3); S.efectivo-=Math.min(S.efectivo,c); if(chance(.6)){ q.paciencia=clamp((q.paciencia||40)+26,0,100); return 'Seis meses de terapia ('+fmt(c)+'). Contra todo pronóstico, funcionó.'; } q.paciencia=clamp((q.paciencia||40)-6,0,100); return 'Fueron a terapia ('+fmt(c)+'). Sirvió para entender que el problema era más hondo.'; }},
+         {t:'Esto se acabó',f:()=>{ const q=pz(); if(q.casados){ q.paciencia=0; return 'Le pediste que se fuera. Los abogados harán el resto.'; } S.familia.pareja=null; S.p.felicidad=clamp(S.p.felicidad-8,0,100); return 'Terminaron esa misma noche.'; }}]});
+    E({p:.9,c:()=>!!pz()&&pz().casados&&isFinite(pz().desde108)&&S.anio-pz().desde108>=5&&(S.anio-pz().desde108)%5===0,
+      t:()=>{ const q=pz(); return 'Se cumplen <b>'+(S.anio-q.desde108)+' años</b> desde que conociste a '+esc(P1(q.nombre))+'.'; },
+      o:[{t:'Celebrarlo en grande',f:()=>{ const c=costo(.006,6); S.efectivo-=Math.min(S.efectivo,c); pz().paciencia=clamp((pz().paciencia||60)+18,0,100); S.p.felicidad=clamp(S.p.felicidad+8,0,100); return 'Fiesta, serenata y toda la familia ('+fmt(c)+'). '+esc(P1(pz().nombre))+' lloró en el brindis.'; }},
+         {t:'Una cena los dos',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)+9,0,100); return 'El mismo restaurante de la primera cita. Seguía igual.'; }},
+         {t:'Se te pasó la fecha',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)-12,0,100); return 'Te acordaste tres días después. No dijo nada. Eso fue lo peor.'; }}]});
+    E({p:.8,c:()=>!!pz()&&pz().quiereHijos108===true&&plan()==='cuidarse'&&pz().edad<45,
+      t:()=>'<b>'+esc(P1(pz().nombre))+'</b> lo dice sin rodeos: quiere un hijo. Y no va a esperar toda la vida.',
+      o:[{t:'Está bien: busquemos un hijo',f:()=>{ S.familia.plan108='buscar'; pz().paciencia=clamp((pz().paciencia||60)+15,0,100); return 'Lo abrazaste. Empezaron a buscarlo.'; }},
+         {t:'Todavía no',f:()=>{ pz().paciencia=clamp((pz().paciencia||60)-14,0,100); return 'Aceptó. Pero algo se quedó en el aire.'; }}]});
+    // un hijo gravemente enfermo
+    E({p:.5,c:()=>(S.familia.hijos||[]).length>0&&S.anio-(S.familia.ultMuerteHijo108||-99)>=12&&S.anio-(S._enf108||-99)>=15,
+      t:()=>{ const h=pick(S.familia.hijos); S._hj108=h.fid; S._enf108=S.anio; const enf=(h.edad||0)<16?pick(['leucemia','meningitis','una enfermedad del corazón']):pick(['un cáncer agresivo','una enfermedad del corazón','una infección que no cede']); S._enfN108=enf;
+        return 'Los médicos no le dan vueltas: <b>'+esc(h.nombre)+'</b>, de '+(h.edad||0)+' años, tiene '+enf+'. Hay que decidir ya.'; },
+      o:[{t:'El mejor tratamiento, en el exterior',f:()=>curar(.86,costo(.04,30),'en el exterior')},
+         {t:'Tratarlo aquí',f:()=>curar(S.anio<1950?.4:S.anio<1990?.6:.75,costo(.008,6),'aquí')},
+         {t:'Rezar y esperar',f:()=>curar(.3,0,'en casa')}]});
+    window.__SA108_EV=true;
+  }
+  function curar(prob,c,donde){
+    const h=(S.familia.hijos||[]).find(x=>x.fid===S._hj108); if(!h) return 'Ya no aplicaba.';
+    if(c>S.efectivo){ prob*=.75; c=S.efectivo; } S.efectivo-=c;
+    if(chance(prob)){ h.vinculo=clamp((h.vinculo||55)+12,0,100); h.salud=clamp((h.salud||70)-10,30,100); if(window.anotarHijo103) window.anotarHijo103(h,'Sobrevivió a '+S._enfN108+'.','bien');
+      return esc(h.nombre)+' se salvó. Fueron los meses más largos de tu vida'+(c?' ('+fmt(c)+')':'')+'.'; }
+    morirHijo108(h,S._enfN108); return 'Se hizo lo que se pudo, '+donde+'. '+esc(h.nombre)+' no lo logró.';
+  }
+
+  /* --- integración --- */
+  function wrapAcciones108(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA108_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!S||!S.p||nino()) return A;
+        A.forEach(a=>{ if(a.t==='Salir a conocer gente'&&!a.__108){ a.__108=true; a.modal=true; a.d='Eliges dónde buscar y con quién salir.'; a.run=()=>escenaConocer108(); } });
+        if(pz()&&!A.some(a=>a.t==='Tu pareja')) A.push({t:'Tu pareja',cat:'familia',d:P1(pz().nombre)+': la relación está en '+Math.round(pz().paciencia||0)+'/100. Planes juntos, hijos'+(pz().casados?'':' y matrimonio')+'.',mov:0,modal:true,run:()=>escenaPareja108()});
+      }catch(e){}
+      return A; };
+    window.__SA108_ACC=true;
+  }
+  function wrapCat108(){ const old=window.catDe; if(typeof old!=='function'||window.__SA108_CAT) return; window.catDe=function(t){ return t==='Tu pareja'?'familia':old.apply(this,arguments); }; window.__SA108_CAT=true; }
+  function wrapPaso108(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA108_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrHijos108(); }catch(e){} return r; };
+    window.__SA108_PASO=true;
+  }
+  function wrapLienzo108(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA108_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='familia'&&S&&S.familia&&fallecidos().length&&!document.getElementById('fallecidos108')){ const host=$('lienzoJuego');
+        const html='<div class="seccion fallecidos108" id="fallecidos108"><h3>Los que se fueron antes<em>hijos que la casa perdió</em></h3>'+fallecidos().map(f=>'<div class="f">'+avatarSVG(f.nombre+' '+f.apellido,{sexo:f.sexo,edad:Math.max(1,f.edad),tam:42})+'<div><b>'+esc(f.nombre+' '+f.apellido)+' †</b><span>'+f.nac+'–'+f.muerte+' · '+esc(f.causa)+((f.hijos||[]).length?' · dejó '+f.hijos.length+' hijo'+(f.hijos.length===1?'':'s')+': '+esc(f.hijos.map(g=>g.nombre+' ('+(g.edad||0)+')').join(', ')):'')+'</span></div></div>').join('')+'</div>';
+        const ancla=Array.from(host.querySelectorAll('.seccion')).find(x=>/Descendencia directa/.test(x.textContent)); if(ancla) ancla.insertAdjacentHTML('afterend',html); else { const w=host.querySelector('.wrap'); if(w) w.insertAdjacentHTML('beforeend',html); } } }catch(e){}
+      return r; };
+    window.__SA108_LIENZO=true;
+  }
+  function init108(){
+    wrapConcepcion108(); wrapNacimientos108(); wrapMatrimonio108(); wrapSucesion108(); instalarEventos108(); wrapAcciones108(); wrapCat108(); wrapPaso108(); wrapLienzo108();
+    Object.assign(window,{RASGOS_108,escenaConocer108,escenaCandidatos108,escenaPareja108,escenaPlanHijos108,morirHijo108,correrHijos108,herederosExtra108,fallecidos108:fallecidos,riesgoHijo108:riesgoHijo});
+  }
+  setTimeout(init108,40); setTimeout(init108,220); setTimeout(init108,650);
+  window.__SA108={version:V108};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v109 · PROPIEDADES
+   Cada propiedad tiene su ilustración (según el tipo, con colores propios)
+   y su ficha: arrendarla, fijar el canon, ponerle administrador o seguro,
+   remodelarla, venderla. Al mudarte de ciudad la casa ya no se vende a la
+   fuerza: se arrienda, se conserva o se vende, como tú digas; y si
+   vuelves, puedes volver a vivir en ella.
+   ========================================================================== */
+(function(){
+  const V109='v109';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const hash=s=>{ let h=2166136261; s=String(s||'x'); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0); };
+  const esHogar=b=>S.hogar&&b.uid===S.hogar.vivienda;
+  const bien=uid=>(S.bienes||[]).find(b=>b.uid===uid);
+  function tipoDe(b){
+    const t=String(b.tipo||''), c=b.clase;
+    if(c==='finca') return /cafe/.test(t)?'cafe':/ganad/.test(t)?'ganado':/vined|viñed/.test(t)?'vinedo':'finca';
+    if(/terreno|lote/.test(t)||c==='terreno') return 'lote';
+    if(/bodega/.test(t)) return 'bodega'; if(/oficina/.test(t)) return 'oficina'; if(/local/.test(t)) return 'local';
+    if(/penthouse/i.test(t)) return 'penthouse'; if(/mansi/.test(t)) return 'mansion'; if(/grande|duplex|dúplex/.test(t)) return 'casa_grande';
+    if(/casa/.test(t)) return 'casa'; if(c==='renta'&&!b.exVivienda109) return /apart/.test(t)?'apartamento':'local';
+    return 'apartamento';
+  }
+  /* --- la ilustración --- */
+  const PARED=['#E8D9B8','#D9B38C','#C96F53','#8FA7B8','#B7C4A1','#E3C16F','#C9A0A0','#9DB5A0'], TECHO=['#8A3B2E','#5B4636','#3F5B6B','#6B4A3A'];
+  function dibujo109(b,w,h,mini){
+    const s=hash(b.uid||b.nombre||b.tipo), t=tipoDe(b), pared=PARED[s%PARED.length], techo=TECHO[(s>>>3)%TECHO.length];
+    const W=240,H=150, G=118; // suelo
+    const win=(x,y,ww,hh,on)=>'<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" rx="1" fill="'+(on?'#F6D98A':'#3B4A55')+'"/>';
+    const lit=(i)=>((s>>(i%20))&3)!==0;
+    let cielo=['#9CC7E0','#DDEBEF'], suelo='#5C7F52', cuerpo='';
+    const arbol=(x,y,r)=>'<rect x="'+(x-1.5)+'" y="'+(y)+'" width="3" height="'+(G-y)+'" fill="#5B4636"/><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#3F6B45"/>';
+    if(t==='apartamento'||t==='oficina'||t==='penthouse'){
+      const bw=t==='oficina'?74:64, bh=t==='penthouse'?96:t==='oficina'?92:82, x=(W-bw)/2, y=G-bh; suelo='#6E7377';
+      cuerpo+='<rect x="'+(x-46)+'" y="'+(G-48)+'" width="40" height="48" fill="#7F8B93"/><rect x="'+(x+bw+8)+'" y="'+(G-60)+'" width="38" height="60" fill="#8C979E"/>';
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+(t==='oficina'?'#6F93A8':pared)+'"/>';
+      const cols=t==='oficina'?5:4, rows=Math.floor(bh/14)-1;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) cuerpo+=win(x+7+c*((bw-14)/cols)+1,y+8+r*14,(bw-14)/cols-4,8,t==='oficina'?true:lit(r*cols+c));
+      if(t==='penthouse') cuerpo+='<rect x="'+(x-4)+'" y="'+(y-12)+'" width="'+(bw+8)+'" height="14" fill="#F6D98A"/><rect x="'+(x+8)+'" y="'+(y-20)+'" width="'+(bw-16)+'" height="8" fill="'+techo+'"/>'+arbol(x+10,y-18,5);
+      else cuerpo+='<rect x="'+(x-3)+'" y="'+(y-4)+'" width="'+(bw+6)+'" height="5" fill="'+techo+'"/>';
+      cuerpo+='<rect x="'+(W/2-7)+'" y="'+(G-16)+'" width="14" height="16" fill="#3B2B20"/>';
+    } else if(t==='casa'||t==='casa_grande'||t==='mansion'){
+      const bw=t==='mansion'?150:t==='casa_grande'?110:78, bh=t==='mansion'?54:t==='casa_grande'?50:42, x=(W-bw)/2, y=G-bh;
+      cuerpo+=arbol(x-18,G-40,14)+arbol(x+bw+20,G-34,12);
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+pared+'"/><path d="M'+(x-8)+' '+y+' L'+(W/2)+' '+(y-(t==='mansion'?30:26))+' L'+(x+bw+8)+' '+y+' Z" fill="'+techo+'"/>';
+      const n=t==='mansion'?6:t==='casa_grande'?4:2;
+      for(let i=0;i<n;i++){ const wx=x+10+i*((bw-20)/n)+((bw-20)/n-14)/2; if(Math.abs(wx+7-W/2)<12) continue; cuerpo+=win(wx,y+10,14,14,lit(i)); if(t!=='casa') cuerpo+=win(wx,y+bh-22,14,12,lit(i+7)); }
+      if(t==='mansion') for(let i=0;i<4;i++) cuerpo+='<rect x="'+(W/2-27+i*17)+'" y="'+(G-34)+'" width="4" height="34" fill="#F4EEE0"/>';
+      cuerpo+='<rect x="'+(W/2-7)+'" y="'+(G-22)+'" width="14" height="22" rx="1" fill="#4A3324"/>';
+      if(t!=='casa') cuerpo+='<rect x="'+(x+bw-22)+'" y="'+(y-22)+'" width="8" height="16" fill="'+techo+'"/>';
+    } else if(t==='local'){
+      const bw=120,bh=52,x=(W-bw)/2,y=G-bh; suelo='#6E7377';
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+pared+'"/><rect x="'+(x+8)+'" y="'+(y+22)+'" width="'+(bw-44)+'" height="24" fill="#BFE1EE"/><rect x="'+(x+bw-30)+'" y="'+(y+20)+'" width="20" height="32" fill="#4A3324"/>';
+      for(let i=0;i<8;i++) cuerpo+='<rect x="'+(x-4+i*((bw+8)/8))+'" y="'+(y+8)+'" width="'+((bw+8)/8)+'" height="12" fill="'+(i%2?'#F4EEE0':techo)+'"/>';
+      cuerpo+='<rect x="'+(x+bw/2-24)+'" y="'+(y-9)+'" width="48" height="10" rx="2" fill="#2E3B33"/>';
+    } else if(t==='bodega'){
+      const bw=150,bh=46,x=(W-bw)/2,y=G-bh; suelo='#77756B';
+      cuerpo+='<path d="M'+x+' '+G+' L'+x+' '+y+' Q'+(W/2)+' '+(y-34)+' '+(x+bw)+' '+y+' L'+(x+bw)+' '+G+' Z" fill="#A9B2B5"/><rect x="'+(W/2-28)+'" y="'+(G-34)+'" width="56" height="34" fill="'+techo+'"/>';
+      for(let i=1;i<5;i++) cuerpo+='<line x1="'+(W/2-28)+'" x2="'+(W/2+28)+'" y1="'+(G-34+i*7)+'" y2="'+(G-34+i*7)+'" stroke="rgba(0,0,0,.25)"/>';
+      cuerpo+='<rect x="'+(x+bw-34)+'" y="'+(G-14)+'" width="26" height="12" fill="#C9A24A"/><circle cx="'+(x+bw-28)+'" cy="'+(G-1)+'" r="3" fill="#222"/><circle cx="'+(x+bw-14)+'" cy="'+(G-1)+'" r="3" fill="#222"/>';
+    } else if(t==='lote'){
+      suelo='#8C7A52';
+      for(let i=0;i<7;i++) cuerpo+='<rect x="'+(30+i*30)+'" y="'+(G-14)+'" width="3" height="14" fill="#5B4636"/>';
+      cuerpo+='<line x1="30" x2="213" y1="'+(G-9)+'" y2="'+(G-9)+'" stroke="#E8D9B8" stroke-width="1.2"/><rect x="'+(W/2-22)+'" y="'+(G-46)+'" width="44" height="22" fill="#F4EEE0"/><rect x="'+(W/2-1.5)+'" y="'+(G-24)+'" width="3" height="24" fill="#5B4636"/><line x1="'+(W/2-14)+'" x2="'+(W/2+14)+'" y1="'+(G-38)+'" y2="'+(G-38)+'" stroke="#8A3B2E" stroke-width="3"/><line x1="'+(W/2-14)+'" x2="'+(W/2+8)+'" y1="'+(G-31)+'" y2="'+(G-31)+'" stroke="#999" stroke-width="2"/>'+arbol(40,G-30,10);
+    } else { // fincas
+      cielo=['#A8D0E6','#F0E9D2']; suelo=t==='cafe'?'#4E7A45':t==='vinedo'?'#6C7D45':'#6D9A55';
+      cuerpo+='<path d="M0 '+G+' Q60 '+(G-56)+' 120 '+(G-22)+' T240 '+(G-30)+' L240 '+G+' Z" fill="#7FA36B"/><path d="M0 '+G+' Q90 '+(G-30)+' 160 '+(G-10)+' T240 '+(G-14)+' L240 '+G+' Z" fill="#5E8A54"/>';
+      const x=150,y=G-34; cuerpo+='<rect x="'+x+'" y="'+y+'" width="50" height="26" fill="'+pared+'"/><path d="M'+(x-6)+' '+y+' L'+(x+25)+' '+(y-16)+' L'+(x+56)+' '+y+' Z" fill="'+techo+'"/>'+win(x+8,y+8,9,9,true)+'<rect x="'+(x+28)+'" y="'+(y+8)+'" width="9" height="18" fill="#4A3324"/>';
+      if(t==='ganado'){ for(let i=0;i<6;i++) cuerpo+='<rect x="'+(14+i*22)+'" y="'+(G-12)+'" width="2.5" height="12" fill="#E8D9B8"/>'; cuerpo+='<line x1="14" x2="127" y1="'+(G-8)+'" y2="'+(G-8)+'" stroke="#E8D9B8" stroke-width="1.5"/>';
+        [[40,G-18],[78,G-20],[104,G-16]].forEach(([cx,cy],i)=>cuerpo+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="9" ry="5.5" fill="'+(i%2?'#F4EEE0':'#6B4A3A')+'"/><circle cx="'+(cx+9)+'" cy="'+(cy-3)+'" r="3.2" fill="'+(i%2?'#F4EEE0':'#6B4A3A')+'"/>'); }
+      else { const col=t==='cafe'?'#2F5E37':t==='vinedo'?'#5B3A6B':'#C9A24A'; for(let r=0;r<3;r++) for(let c=0;c<7;c++) cuerpo+='<circle cx="'+(18+c*18+r*5)+'" cy="'+(G-6-r*9)+'" r="'+(5-r*.8)+'" fill="'+col+'"/>'+(t==='cafe'&&c%2?'<circle cx="'+(20+c*18+r*5)+'" cy="'+(G-7-r*9)+'" r="1.3" fill="#C4372F"/>':''); }
+    }
+    const id='g'+(s%100000)+(mini?'m':'');
+    const base='<defs><linearGradient id="'+id+'" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+cielo[0]+'"/><stop offset="1" stop-color="'+cielo[1]+'"/></linearGradient></defs><rect width="'+W+'" height="'+H+'" fill="url(#'+id+')"/><circle cx="'+(40+(s%150))+'" cy="26" r="11" fill="#FFF3C4" opacity=".85"/><ellipse cx="'+(60+((s>>>5)%130))+'" cy="'+(34+((s>>>9)%12))+'" rx="22" ry="6" fill="#fff" opacity=".7"/>'+cuerpo+'<rect y="'+G+'" width="'+W+'" height="'+(H-G)+'" fill="'+suelo+'"/>';
+    if(mini){ const lado=h||w||46; return '<svg class="bien109" viewBox="45 0 150 150" width="'+lado+'" height="'+lado+'" style="border-radius:10px;flex:0 0 auto" aria-hidden="true">'+base+'</svg>'; }
+    return '<svg class="bien109" viewBox="0 0 '+W+' '+H+'" width="'+(w||W)+'" height="'+(h||H)+'" role="img" aria-label="'+esc(b.nombre||'propiedad')+'">'+base+'</svg>';
+  }
+  function wrapIcono109(){
+    if(window.__SA109_ICO||typeof window.iconoBien!=='function') return;
+    const old=window.iconoBien;
+    window.iconoBien=function(tipo,clase,tam,seed){ try{ const b=(S&&S.bienes||[]).find(x=>x.uid===seed)||{tipo,clase,uid:seed}; return dibujo109(b,tam||40,tam||40,true); }catch(e){ return old.apply(this,arguments); } };
+    window.__SA109_ICO=true;
+  }
+
+  /* --- estado y números de cada propiedad --- */
+  function estado(b){
+    if(esHogar(b)) return {t:'Vives aquí',c:'casa'};
+    if(b.clase==='renta') return b.arrendado?{t:'Arrendado',c:'ok'}:{t:'Vacío',c:'mal'};
+    if(b.clase==='finca') return b.renta>0?{t:'Produce',c:'ok'}:{t:'Sin producir',c:''};
+    if(b.clase==='vivienda') return {t:'Casa de descanso',c:''};
+    return {t:tipoDe(b)==='lote'?'Lote':'En tu poder',c:''};
+  }
+  const rentaDe=b=>(b.clase==='renta'&&b.arrendado)||(b.clase==='finca'&&b.renta>0)?b.valor*(b.renta||0):0;
+  const plus=b=>isFinite(b.precioCompra)&&b.precioCompra>0?b.valor/b.precioCompra-1:0;
+  const CANON={bajo:{n:'Canon bajo',d:'Casi nunca queda vacío, pero entra menos.',r:.85,v:.45},mercado:{n:'Canon de mercado',d:'Lo normal del barrio.',r:1,v:1},alto:{n:'Canon alto',d:'Entra más cuando hay inquilino; queda vacío más seguido.',r:1.22,v:2.1}};
+  function aplicarCanon(b){
+    if(b.clase!=='renta') return; if(!isFinite(b.rentaBase109)){ b.rentaBase109=b.renta||.055; b.vacBase109=isFinite(b.vac)&&b.vac>0?b.vac:.08; }
+    const c=CANON[b.canon109||'mercado']; b.renta=b.rentaBase109*c.r; b.vac=clamp(b.vacBase109*c.v*(b.admin109?.5:1),.01,.6);
+  }
+
+  /* --- mudarse sin vender --- */
+  function alMudarse109(viv){
+    try{ const pref=viv.alMudarme109||'arrendar'; if(pref==='vender') return false;
+      const ciudad=viv.ciudad||S.hogar.ciudad;
+      if(pref==='arrendar'){ viv.claseAntes109=viv.clase; viv.clase='renta'; viv.exVivienda109=true; viv.arrendado=true; viv.rentaBase109=undefined; viv.renta=.055; viv.vac=.08; aplicarCanon(viv);
+        log('Dejaste arrendada <b>'+esc(viv.nombre)+'</b> en '+esc(ciudad)+': entran cerca de '+fmt(viv.valor*viv.renta)+' al año.','bien'); }
+      else { viv.exVivienda109=true; log('Conservaste <b>'+esc(viv.nombre)+'</b> en '+esc(ciudad)+' como casa de descanso. Cuesta mantenerla, pero sigue siendo tuya.'); }
+      S.hogar.vivienda=null; return true;
+    }catch(e){ return false; }
+  }
+  function volverAVivir(b){
+    const viv=viviendaPropia(); if(viv&&viv.uid!==b.uid){ viv.alMudarme109=viv.alMudarme109||'arrendar'; alMudarse109(viv); }
+    b.clase='vivienda'; b.arrendado=false; b.exVivienda109=false; b.contrato109=null; S.hogar.vivienda=b.uid; S.hogar.conLosPadres=false; if(isFinite(b.zona)) S.hogar.zona=b.zona;
+    S.p.felicidad=clamp(S.p.felicidad+6,0,100); log('Volviste a vivir en <b>'+esc(b.nombre)+'</b>.','bien');
+  }
+
+  /* --- la ficha --- */
+  function escenaPropiedad109(uid){
+    const b=bien(uid); if(!b) return; aplicarCanon(b);
+    const e=estado(b), pl=plus(b), años=isFinite(b.comprado)?S.anio-b.comprado:null, r=rentaDe(b), cRem=Math.max(4,Math.round(b.valor*.07)), cSeg=b.valor*.003;
+    const fila=(a,c)=>'<tr><td>'+a+'</td><td>'+c+'</td></tr>';
+    const html='<div class="ficha109">'+dibujo109(b)+'<table class="libro">'
+      +fila('Vale hoy',fmt(b.valor))+(isFinite(b.precioCompra)?fila('La compraste'+(b.comprado?' en '+b.comprado:''),fmt(b.precioCompra)+' <span class="'+(pl>=0?'bien':'mal')+'">('+(pl>=0?'+':'')+Math.round(pl*100)+'%)</span>'):'')
+      +fila('Hipoteca',b.hipoteca>0?fmt(b.hipoteca)+' · cuota '+fmt(b.cuota):'Sin deuda')
+      +fila('Mantenimiento al año',fmt(b.valor*(b.mant||0)))
+      +(b.clase==='renta'||b.clase==='finca'?fila(b.clase==='finca'?'Produce al año':'Arriendo al año',r>0?'<span class="bien">'+fmt(r)+'</span>':'—'):'')
+      +fila('Estado',esc(e.t)+(b.contrato109&&b.contrato109>S.anio?' · contrato hasta '+b.contrato109:'')+(b.admin109?' · con administrador':'')+(b.seguro109?' · asegurada':''))+'</table></div>';
+    const op=[]; const cerrarY=f=>()=>{ f(); cerrarModal(); render(); };
+    if(esHogar(b)){
+      const pref=b.alMudarme109||'arrendar';
+      op.push({t:'Si me mudo de ciudad…',cat:'casa',d:'Hoy: '+({arrendar:'se arrienda',conservar:'se conserva como casa de descanso',vender:'se vende'})[pref]+'.',cerrar:false,run:()=>{ cerrarModal();
+        escena({rubro:esc(b.nombre),titulo:'¿Qué pasa con la casa si te mudas?',cerrable:true,cuerpo:'Lo que elijas aquí se aplica solo cuando cambies de ciudad.',
+          opciones:[{t:'Arrendarla',cat:'casa',d:'Sigue siendo tuya y entra arriendo cada año.',run:()=>{ b.alMudarme109='arrendar'; }},{t:'Conservarla como casa de descanso',cat:'casa',d:'No entra nada y cuesta mantenerla, pero puedes volver cuando quieras.',run:()=>{ b.alMudarme109='conservar'; }},{t:'Venderla',cat:'capital',d:'Como antes: se vende para financiar la mudanza.',run:()=>{ b.alMudarme109='vender'; }}]}); }});
+    } else {
+      if((b.clase==='vivienda'||b.exVivienda109)&&(b.ciudad||S.hogar.ciudad)===S.hogar.ciudad) op.push({t:'Volver a vivir aquí',cat:'casa',d:(b.clase==='renta'&&b.arrendado?'Hay que pedirle la casa al inquilino. ':'')+'Pasa a ser tu hogar.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato de arriendo hasta '+b.contrato109:null,cerrar:false,run:cerrarY(()=>volverAVivir(b))});
+      if(b.clase==='vivienda') op.push({t:'Ponerla en arriendo',cat:'casa',d:'Entrarían cerca de '+fmt(b.valor*.055)+' al año.',cerrar:false,run:cerrarY(()=>{ b.clase='renta'; b.exVivienda109=true; b.arrendado=true; b.rentaBase109=undefined; b.renta=.055; b.vac=.08; aplicarCanon(b); log('Pusiste en arriendo <b>'+esc(b.nombre)+'</b>.','bien'); })});
+      if(b.clase==='renta'){
+        op.push({t:'Fijar el canon',cat:'casa',d:'Hoy: '+CANON[b.canon109||'mercado'].n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(b.nombre),titulo:'¿Cuánto cobras de arriendo?',cerrable:true,cuerpo:'A mercado entran '+fmt(b.valor*b.rentaBase109)+' al año.',
+          opciones:Object.keys(CANON).map(k=>({t:CANON[k].n,cat:'casa',d:CANON[k].d+' '+fmt(b.valor*b.rentaBase109*CANON[k].r)+' al año.',run:()=>{ b.canon109=k; aplicarCanon(b); log('Fijaste '+CANON[k].n.toLowerCase()+' para '+esc(b.nombre)+'.'); }}))}); }});
+        op.push({t:b.admin109?'Quitar al administrador':'Contratar una inmobiliaria',cat:'casa',d:b.admin109?'Vuelves a manejar tú el arriendo.':'Cobra 8% del arriendo. Queda vacío la mitad de las veces y ellos lidian con el inquilino.',cerrar:false,run:cerrarY(()=>{ b.admin109=!b.admin109; aplicarCanon(b); log(b.admin109?'Una inmobiliaria administra ahora '+esc(b.nombre)+'.':'Volviste a administrar tú '+esc(b.nombre)+'.'); })});
+        if(b.exVivienda109) op.push({t:'Dejar de arrendarla',cat:'casa',d:'Queda como casa de descanso.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato hasta '+b.contrato109:null,cerrar:false,run:cerrarY(()=>{ b.clase='vivienda'; b.arrendado=false; log('Sacaste del mercado <b>'+esc(b.nombre)+'</b>.'); })});
+      }
+    }
+    op.push({t:'Remodelar',cat:'casa',d:'Cuesta '+fmt(cRem)+' y una movida. Sube el valor cerca de 10%'+(b.clase==='renta'?' y el arriendo':'')+'.',dis:b.remodelada109&&S.anio-b.remodelada109<8?'La remodelaste en '+b.remodelada109:S.efectivo<cRem?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:cerrarY(()=>{
+      S.efectivo-=cRem; S.mov--; b.valor*=rnd(1.08,1.13); b.remodelada109=S.anio; if(isFinite(b.rentaBase109)){ b.rentaBase109*=1.04; aplicarCanon(b); } if(esHogar(b)) S.p.felicidad=clamp(S.p.felicidad+5,0,100); log('Remodelaste <b>'+esc(b.nombre)+'</b> ('+fmt(cRem)+'). Ahora vale '+fmt(b.valor)+'.','bien'); })});
+    op.push({t:b.seguro109?'Cancelar el seguro':'Asegurarla',cat:'salud',d:b.seguro109?'Dejas de pagar '+fmt(cSeg)+' al año.':fmt(cSeg)+' al año. Cubre incendios, inundaciones y daños.',cerrar:false,run:cerrarY(()=>{ b.seguro109=!b.seguro109; log(b.seguro109?'Aseguraste '+esc(b.nombre)+'.':'Cancelaste el seguro de '+esc(b.nombre)+'.'); })});
+    if(!esHogar(b)) op.push({t:'Venderla',cat:'capital',d:'Te quedarían cerca de '+fmt(Math.max(0,b.valor*.97-(b.hipoteca||0)))+' después de la comisión'+(b.hipoteca>0?' y de pagar la hipoteca':'')+'.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato de arriendo hasta '+b.contrato109:S.mov<1?'No te quedan movidas':null,cerrar:false,run:cerrarY(()=>{ const n=venderBien(b,.03); S.mov--; log('Vendiste <b>'+esc(b.nombre)+'</b> y te quedaron '+fmt(Math.max(0,n))+'.','hito'); })});
+    escena({rubro:(b.ciudad?esc(b.ciudad)+' · ':'')+esc(e.t),titulo:esc(b.nombre),ancho:true,cerrable:true,html,opciones:op});
+  }
+
+  /* --- el año de las propiedades --- */
+  function correrPropiedades109(){
+    let admin=0, seg=0, descanso=false;
+    (S.bienes||[]).forEach(b=>{
+      if(b.contrato109&&b.contrato109>S.anio&&b.clase==='renta') b.arrendado=true; else if(b.contrato109&&b.contrato109<=S.anio) b.contrato109=null;
+      if(b.clase==='renta'&&b.admin109&&b.arrendado) admin+=b.valor*(b.renta||0)*.08;
+      if(b.seguro109) seg+=b.valor*.003;
+      if(b.clase==='vivienda'&&!esHogar(b)) descanso=true;
+    });
+    if(admin+seg>0) S.efectivo-=Math.round((admin+seg)*100)/100;
+    if(descanso) S.p.felicidad=clamp(S.p.felicidad+2,0,100);
+  }
+  function instalarEventos109(){
+    if(window.__SA109_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x), B=()=>bien(S._b109);
+    E({p:1,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!b.admin109),
+      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!b.admin109)); S._b109=b.uid; S._c109=Math.max(2,Math.round(b.valor*.03)); return 'El inquilino de <b>'+esc(b.nombre)+'</b> se fue de noche. Dejó dos meses sin pagar, una pared tumbada y la cocina sin gabinetes.'; },
+      o:[{t:()=>'Arreglar todo ('+fmt(S._c109||0)+')',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b) b.arrendado=false; return 'Quedó como nueva. Ahora a buscar otro inquilino.'; }},
+         {t:'Arrendarla así, más barata',f:()=>{ const b=B(); if(b){ b.valor*=.96; b.canon109='bajo'; aplicarCanon(b); } return 'La arrendaste como estaba, con canon bajo. La propiedad perdió algo de valor.'; }},
+         {t:'Contratar una inmobiliaria para que no vuelva a pasar',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b){ b.admin109=true; aplicarCanon(b); } return 'Arreglaste y entregaste las llaves a una inmobiliaria. Cobran 8%, pero duermes tranquilo.'; }}]});
+    E({p:.7,c:()=>(S.bienes||[]).length>0,
+      t:()=>{ const b=pick(S.bienes); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
+        return S._q109+' <b>'+esc(b.nombre)+'</b>. El arreglo vale '+fmt(S._c109)+'.'+(b.seguro109?' Menos mal estaba asegurada.':''); },
+      o:[{t:()=>{ const b=B(); return b&&b.seguro109?'Cobrar el seguro':'Pagar el arreglo'; },f:()=>{ const b=B(); if(b&&b.seguro109) return 'El seguro pagó todo. Para eso era.'; S.efectivo-=Math.min(S.efectivo,S._c109); return 'Pagaste '+fmt(S._c109)+' de tu bolsillo.'; }},
+         {t:'Dejarla así por ahora',f:()=>{ const b=B(); if(b&&b.seguro109) return 'Igual el seguro lo cubrió.'; if(b){ b.valor*=.88; if(b.clase==='renta') b.arrendado=false; } return 'No la arreglaste. Perdió valor'+(b&&b.clase==='renta'?' y quedó vacía':'')+'.'; }}]});
+    E({p:.8,c:()=>(S.bienes||[]).some(b=>!esHogar(b)&&!(b.contrato109>S.anio)),
+      t:()=>{ const b=pick(S.bienes.filter(b=>!esHogar(b)&&!(b.contrato109>S.anio))); S._b109=b.uid; S._c109=Math.round(b.valor*rnd(1.2,1.4)); return 'Una constructora quiere <b>'+esc(b.nombre)+'</b> para un proyecto. Ofrece '+fmt(S._c109)+', bastante más de lo que vale hoy ('+fmt(b.valor)+').'; },
+      o:[{t:'Vender',f:()=>{ const b=B(); if(!b) return ''; const n=Math.max(0,S._c109-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Vendiste. Te quedaron '+fmt(n)+'.'; }},
+         {t:'Pedir más',f:()=>{ const b=B(); if(!b) return ''; if(chance(.4)){ const p=Math.round(S._c109*1.15), n=Math.max(0,p-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Subieron a '+fmt(p)+'. Vendiste.'; } return 'Se fueron a comprar el lote de al lado.'; }},
+         {t:'No está en venta',f:()=>{ const b=B(); if(b) b.valor*=1.04; return 'Dijiste que no. Pero ya sabes que la zona se está moviendo.'; }}]});
+    E({p:.8,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio)),
+      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio))); S._b109=b.uid; return 'El inquilino de <b>'+esc(b.nombre)+'</b> es de los buenos: paga puntual y cuida. Te propone un contrato a cinco años si le sostienes el canon.'; },
+      o:[{t:'Firmar a cinco años',f:()=>{ const b=B(); if(b){ b.contrato109=S.anio+5; b.arrendado=true; } return 'Firmaron. Cinco años sin preocuparte por esa propiedad (tampoco puedes venderla).'; }},
+         {t:'Mejor año a año',f:()=>'Prefieres tener las manos libres.'}]});
+    E({p:.6,c:()=>(S.bienes||[]).some(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0)))),
+      t:()=>{ const b=pick(S.bienes.filter(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0))))); S._b109=b.uid; return 'Te avisa un vecino: hay gente levantando ranchos en <b>'+esc(b.nombre)+'</b>. Si pasan los meses, sacarlos va a ser casi imposible.'; },
+      o:[{t:'Abogado y policía, ya',f:()=>{ const c=Math.max(3,Math.round(pat()*.004)); S.efectivo-=Math.min(S.efectivo,c); if(chance(.75)) return 'Los desalojaron a tiempo ('+fmt(c)+'). Pusiste un cuidandero.'; const b=B(); if(b) b.valor*=.7; return 'El proceso se enredó ('+fmt(c)+'). Recuperaste solo una parte del terreno.'; }},
+         {t:'Negociar: venderles una parte barata',f:()=>{ const b=B(); if(b){ const x=Math.round(b.valor*.12); S.efectivo+=x; b.valor*=.75; S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Les vendiste una franja por '+fmt(x)+'. Quedaste bien con el barrio.'; } return ''; }},
+         {t:'No hacer nada',f:()=>{ const b=B(); if(b) b.valor*=.5; return 'Pasó un año. Ya hay calles, tiendas y una escuela. Medio terreno ya no es tuyo.'; }}]});
+    window.__SA109_EV=true;
+  }
+
+  /* --- vistas --- */
+  function tarjeta(b){
+    const e=estado(b), pl=plus(b), r=rentaDe(b);
+    return '<button class="prop109" data-prop109="'+esc(b.uid)+'"><span class="img">'+dibujo109(b)+'<span class="cinta '+e.c+'">'+esc(e.t)+'</span></span><span class="cuerpo"><b>'+esc(b.nombre)+'</b><span class="l">'+esc(b.ciudad||S.hogar.ciudad||'')+(b.hipoteca>0?' · debes '+fmt(b.hipoteca):' · sin deuda')+'</span>'
+      +'<span class="v"><strong>'+fmt(b.valor)+'</strong><span>'+(r>0?'<span class="sube">+'+fmt(r)+'/año</span>':isFinite(b.precioCompra)?'<span class="'+(pl>=0?'sube':'baja')+'">'+(pl>=0?'+':'')+Math.round(pl*100)+'%</span>':'')+'</span></span></span></button>';
+  }
+  function portafolioHTML109(){
+    const B=(S.bienes||[]).slice().sort((a,b)=>(esHogar(b)?1:0)-(esHogar(a)?1:0)||b.valor-a.valor);
+    const tot=B.reduce((a,b)=>a+b.valor,0), deu=B.reduce((a,b)=>a+(b.hipoteca||0),0), ren=B.reduce((a,b)=>a+rentaDe(b),0);
+    return '<div id="props109"><div class="resumen109"><div><span>Propiedades</span><b>'+B.length+'</b></div><div><span>Valen</span><b>'+fmt(tot)+'</b></div><div><span>Debes</span><b>'+fmt(deu)+'</b></div><div><span>Te entran al año</span><b>'+fmt(ren)+'</b></div></div><div class="props109">'+B.map(tarjeta).join('')+'</div></div>';
+  }
+  function conectar109(raiz){ raiz.querySelectorAll('[data-prop109]').forEach(x=>x.onclick=()=>escenaPropiedad109(x.dataset.prop109)); }
+  function wrapLienzo109(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA109_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='casa'&&S&&(S.bienes||[]).length&&!document.getElementById('props109')){ const host=$('lienzoJuego');
+        const sec=Array.from(host.querySelectorAll('.seccion')).find(x=>{ const h=x.querySelector('h3'); return h&&/^Lo que es tuyo/.test(h.textContent); });
+        if(sec){ sec.querySelectorAll(':scope > .retrato').forEach(x=>x.remove()); const h3=sec.querySelector('h3'); h3.insertAdjacentHTML('afterend',portafolioHTML109()+'<div class="apunte">Toca una propiedad para administrarla: arrendarla, remodelarla, asegurarla, venderla o decidir qué pasa con ella si te mudas.</div>'); conectar109(sec); } } }catch(e){}
+      return r; };
+    window.__SA109_LIENZO=true;
+  }
+  function escenaPortafolio109(){
+    escena({rubro:'Tu patrimonio',titulo:'Tus propiedades',ancho:true,cerrable:true,html:(S.bienes||[]).length?portafolioHTML109():'<div class="vacio">Todavía no tienes propiedades.</div>',
+      opciones:[{t:'Comprar otra propiedad',cat:'casa',cerrar:false,run:()=>{ cerrarModal(); if(typeof window.escenaGrupo91==='function') window.escenaGrupo91('propiedades'); }}]});
+    conectar109(document.getElementById('escenaHost'));
+  }
+  function wrapAcciones109(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA109_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&(S.bienes||[]).length&&!(window.esNino94&&window.esNino94())&&!A.some(a=>a.t==='Administrar tus propiedades')){ const n=S.bienes.length;
+        A.push({t:'Administrar tus propiedades',cat:'casa',d:n+' propiedad'+(n===1?'':'es')+'. Arriendos, remodelaciones, seguros y ventas, una por una.',mov:0,modal:true,run:()=>escenaPortafolio109()}); } }catch(e){}
+      return A; };
+    window.__SA109_ACC=true;
+  }
+  function wrapCat109(){ const old=window.catDe; if(typeof old!=='function'||window.__SA109_CAT) return; window.catDe=function(t){ return t==='Administrar tus propiedades'?'casa':old.apply(this,arguments); }; window.__SA109_CAT=true; }
+  function wrapPaso109(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA109_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrPropiedades109(); }catch(e){} return r; };
+    window.__SA109_PASO=true;
+  }
+  function init109(){
+    wrapIcono109(); instalarEventos109(); wrapLienzo109(); wrapAcciones109(); wrapCat109(); wrapPaso109();
+    Object.assign(window,{dibujo109,alMudarse109,escenaPropiedad109,escenaPortafolio109,correrPropiedades109,tipoBien109:tipoDe});
+  }
+  setTimeout(init109,40); setTimeout(init109,220); setTimeout(init109,650);
+  window.__SA109={version:V109};
 })();
 </script>
 
