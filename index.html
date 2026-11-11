@@ -959,10 +959,16 @@ html{scroll-behavior:smooth}
 .prop109 .img svg.ilustracion-premium{border-radius:12px 12px 0 0;box-shadow:none}
 .ficha109 svg.ilustracion-premium{border-radius:12px}
 </style>
+<style id="estilos-v116">
+svg.foto116{display:block;background:#1d2a23}
+.prop109 .img svg.foto116{border-radius:12px 12px 0 0}
+.ficha109 svg.foto116{border-radius:12px}
+.prop109 .img:has(svg.foto116) .cinta{top:10px;right:10px;bottom:auto;left:auto;background:rgba(14,20,17,.82);backdrop-filter:blur(2px)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v115</div>
+<div class="version-badge" id="versionBadge">v116</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -23795,6 +23801,71 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   window.dibujoPropiedad115=dibujoPropiedad115;
   window.__SA115={version:V115};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v116 · FOTOS DE LAS PROPIEDADES
+   Cada tipo de propiedad, negocio y sepultura tiene su foto en img/. Si la
+   foto no carga (por ejemplo, si abres el index.html suelto, sin la carpeta
+   img/), se sigue viendo el dibujo de antes.
+   ========================================================================== */
+(function(){
+  const V116='v116';
+  const FOTOS=['apartamento','casa_pequena','casa','casa_grande','mansion','penthouse',
+    'finca','cafe','ganado','vinedo','aguacate_hass','finca_recreacion','flores_exoticas','palma',
+    'local','oficina','bodega','lote','mausoleo','nicho',
+    'panaderia','restaurante','funeraria','colegio','hotel','cine','gasolinera','parqueadero','clinica','edificio','lavanderia','motel','discoteca','centrocomercial','gimnasio','fincahotel'];
+  const ok={};   // nombre → true cuando la foto cargó
+  let pend=0;
+  function precargar(){
+    if(window.__SA116_PRE) return; window.__SA116_PRE=true;
+    FOTOS.forEach(n=>{ const im=new Image(); pend++;
+      im.onload=()=>{ ok[n]=true; fin(); }; im.onerror=()=>{ ok[n]=false; fin(); };
+      im.src='img/'+n+'.jpg'; });
+  }
+  let t=null;
+  function fin(){ pend--; clearTimeout(t); t=setTimeout(()=>{ try{ if(S&&S.p&&typeof render==='function'&&!document.querySelector('#escenaHost .lienzo')) render(); }catch(e){} },120); }
+
+  function fotoDe(b){
+    if(!b) return null;
+    const tipo=String(b.tipo||'').toLowerCase(), c=b.clase;
+    if(/mausoleo/.test(tipo)) return 'mausoleo';
+    if(/nicho/.test(tipo)) return 'nicho';
+    if(c==='negocio'||b.neg110){ const n=typeof window.catNegocio110==='function'&&window.catNegocio110(b.tipo); const id=(n&&n.id)||tipo; return FOTOS.includes(id)?id:null; }
+    if(c==='finca'){
+      if(/recreo/.test(tipo)) return 'finca_recreacion';
+      if(/aguacate/.test(tipo)) return 'aguacate_hass';
+      if(/flor/.test(tipo)) return 'flores_exoticas';
+      if(/palma/.test(tipo)) return 'palma';
+      if(/cafe|café/.test(tipo)) return 'cafe';
+      if(/ganad/.test(tipo)) return 'ganado';
+      if(/vined|viñed/.test(tipo)) return 'vinedo';
+      return 'finca';
+    }
+    if(/peque/.test(tipo)) return 'casa_pequena';
+    let t=null; try{ t=typeof window.tipoBien109==='function'?window.tipoBien109(b):null; }catch(e){}
+    return t&&FOTOS.includes(t)?t:null;
+  }
+  function svgFoto(n,b,w,h,mini){
+    const W=240,H=160, ww=mini?(w||46):240, hh=mini?(h||w||46):160;
+    const nom=esc((b&&b.nombre)||n.replace(/_/g,' '));
+    return '<svg class="foto116 icono-bien" viewBox="0 0 '+W+' '+H+'" width="'+ww+'" height="'+hh+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="'+nom+'">'
+      +'<image href="img/'+n+'.jpg" x="0" y="0" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid slice"/></svg>';
+  }
+  function instalar116(){
+    if(window.__SA116_DIB) return;
+    const prev=window.dibujoPropiedad115;
+    window.dibujoPropiedad115=function(b,w,h,mini){
+      try{ const n=fotoDe(b); if(n&&ok[n]) return svgFoto(n,b,w,h,mini); }catch(e){}
+      return typeof prev==='function'?prev.apply(this,arguments):null;
+    };
+    window.__SA116_DIB=true;
+  }
+  function init116(){ instalar116(); precargar(); Object.assign(window,{fotoPropiedad116:fotoDe,fotosCargadas116:ok}); }
+  setTimeout(init116,40); setTimeout(init116,220); setTimeout(init116,650);
+  window.__SA116={version:V116};
 })();
 </script>
 
