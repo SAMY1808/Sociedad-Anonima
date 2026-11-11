@@ -951,10 +951,14 @@ html{scroll-behavior:smooth}
 .pareja113 .sub{font-size:12.5px;color:var(--humo2);margin-top:4px}
 .sec113{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--humo2);margin:14px 0 -2px;grid-column:1/-1}
 </style>
+<style>/* V114: edición visual */
+.icono-bien.ilustracion-premium{border-radius:9px;box-shadow:0 5px 16px rgba(0,0,0,.2);background:#789389}
+.retrato .cara,.family-card .cara,.dash-profile .cara,.hud .cara{box-shadow:0 0 0 2px rgba(222,190,125,.24),0 5px 18px rgba(0,0,0,.18)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v113</div>
+<div class="version-badge" id="versionBadge">v114</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3512,7 +3516,7 @@ function avatarSVG(nombre,op){
   P.push('<rect x="28" y="40" width="8" height="10" rx="3.5" fill="'+piel+'"/>');
   P.push('<ellipse cx="32" cy="46" rx="4.4" ry="2" fill="rgba(0,0,0,.16)"/>');
   // cabeza grande, estilo caricatura
-  const rx=bebe?16:(mujer?15.4:15.8), ry=bebe?15.4:16.6;
+  const rx=bebe?15:(mujer?14.2:14.7), ry=bebe?17:(mujer?18.1:18.4);
   P.push('<ellipse cx="32" cy="27" rx="'+rx+'" ry="'+ry+'" fill="'+piel+'"/>');
   P.push('<ellipse cx="'+(32-rx)+'" cy="29" rx="2.2" ry="3" fill="'+piel+'"/>');
   P.push('<ellipse cx="'+(32+rx)+'" cy="29" rx="2.2" ry="3" fill="'+piel+'"/>');
@@ -3540,11 +3544,11 @@ function avatarSVG(nombre,op){
   // cejas
   P.push('<path d="M23.4 22.6q3-2 6 0M34.6 22.6q3-2 6 0" stroke="'+pelo+'" stroke-width="1.7" fill="none" stroke-linecap="round"/>');
   // ojos grandes con brillo, con color de iris propio
-  const oy=bebe?28.4:27.6;
+  const oy=bebe?28.4:28.2;
   [26.2,37.8].forEach(ox=>{
-    P.push('<ellipse cx="'+ox+'" cy="'+oy+'" rx="'+(bebe?3.6:3.2)+'" ry="'+(bebe?3.8:3.4)+'" fill="#FFFFFF"/>');
-    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?2.1:1.8)+'" fill="'+iris+'"/>');
-    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?.9:.75)+'" fill="#120B07"/>');
+    P.push('<ellipse cx="'+ox+'" cy="'+oy+'" rx="'+(bebe?2.6:2.2)+'" ry="'+(bebe?2.9:2.5)+'" fill="#FFFFFF"/>');
+    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?1.65:1.45)+'" fill="'+iris+'"/>');
+    P.push('<circle cx="'+ox+'" cy="'+(oy+.4)+'" r="'+(bebe?.8:.65)+'" fill="#120B07"/>');
     P.push('<circle cx="'+(ox-.7)+'" cy="'+(oy-.9)+'" r=".75" fill="#FFFFFF"/>');
   });
   // nariz
@@ -3612,18 +3616,47 @@ const ICONOS_BIEN={
   vinedo:'<path d="M4 44q4-20 20-20t20 20z" fill="url(#gGreen)"/><path d="M8 40q4-13 16-13M14 42q3-11 10-11M20 43q2-9 8-9" stroke="#8C6B2C" stroke-width="1.4" fill="none"/><circle cx="36" cy="10" r="5" fill="#E8D38A" opacity=".9"/><path d="M6 44h36" stroke="#E4C66A" stroke-width="1.5"/>'
 };
 function iconoBien(tipo,clase,tam,seed){
-  let id=tipo;
-  if(!ICONOS_BIEN[id]){
-    if(clase==='finca') id= tipo==='cafe'?'cafe':(tipo==='ganaderia'||tipo==='ganado'?'ganado':(tipo==='vinedo'?'vinedo':'finca'));
-    else if(clase==='renta') id= /bodega/.test(tipo||'')?'bodega':(/oficina/.test(tipo||'')?'oficina':'local');
-    else if(/penthouse/i.test(tipo||'')) id='penthouse'; else if(/mansion|mansión/.test(tipo||'')) id='mansion'; else if(/grande/.test(tipo||'')) id='casa_grande'; else if(/pequeña|pequena/.test(tipo||'')) id='casa_pequena'; else id= /casa/.test(tipo||'')?'casa':'apartamento';
-  }
-  const t=tam||40;
-  const filtro=seed?(' style="filter:hue-rotate('+(semillaDe(String(seed))%360)+'deg) saturate('+(0.85+(semillaDe(String(seed)+'s')%30)/100).toFixed(2)+')"'):'';
-  return '<svg class="icono-bien"'+filtro+' viewBox="0 0 48 48" width="'+t+'" height="'+t+'" aria-hidden="true">'
-    +'<defs><linearGradient id="gMansion" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2D2B5"/><stop offset="1" stop-color="#9E886A"/></linearGradient><linearGradient id="gWarm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C99769"/><stop offset="1" stop-color="#7D4D34"/></linearGradient><linearGradient id="gStone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D0C7B7"/><stop offset="1" stop-color="#77716A"/></linearGradient><linearGradient id="gSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#758391"/><stop offset="1" stop-color="#39444E"/></linearGradient><linearGradient id="gGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#658A58"/><stop offset="1" stop-color="#294A31"/></linearGradient></defs>'
-    +'<rect x="1" y="1" width="46" height="46" rx="6" fill="#191309" stroke="#8C6B2C" stroke-width=".7"/>'
-    +ICONOS_BIEN[id]+'</svg>';
+ const id=String(tipo||clase||'apartamento').toLowerCase();
+ const rural=/finca|cafe|café|ganad|viñ|vined|hacienda|rural|cultivo|agro/.test(id+' '+clase);
+ const lujo=/mans|palacio|hacienda|villa|grande|lujo/.test(id);
+ const torre=/apart|penthouse|oficina|edificio/.test(id);
+ const comercio=/local|centro comercial|comercio|tienda|mall|bodega/.test(id);
+ const k=semillaDe(String(seed||tipo||clase||'bien'))%5;
+ const cielo=['#8baeb3','#9cb3ad','#c5b5a1','#8ba4b1','#a4b4a3'][k];
+ const fachada=['#e5d7bf','#d6c6ad','#e7d9c5','#c7b6a0','#e1d2bb'][k];
+ const t=tam||40;
+ let edificio='';
+ if(rural){
+   edificio='<path d="M0 105Q38 67 83 96T170 87T240 105V160H0Z" fill="#5d8067"/><path d="M0 125Q60 103 120 123T240 116V160H0Z" fill="#78936a"/>'
+   +'<path d="M67 106V76L120 47L175 76V108Z" fill="'+fachada+'" stroke="#a18a69" stroke-width="2"/>'
+   +'<path d="M57 78L120 38L185 78L174 82L120 51L67 82Z" fill="#725247"/>'
+   +'<path d="M110 108V82H132V108" fill="#655246"/><path d="M80 79H99V95H80ZM142 79H161V95H142Z" fill="#6c9695" stroke="#f1e9d7" stroke-width="4"/>';
+ } else if(torre){
+   edificio='<path d="M0 130H240V160H0Z" fill="#6d8276"/>'
+   +'<path d="M46 145V57L104 35V145Z" fill="#b8b7ab"/><path d="M104 145V22H180V145Z" fill="'+fachada+'" stroke="#a99781" stroke-width="2"/>'
+   +'<path d="M180 145V72L205 83V145Z" fill="#a1a89e"/>'
+   +Array.from({length:5},(_,r)=>Array.from({length:4},(_,c)=>'<rect x="'+(114+c*16)+'" y="'+(34+r*21)+'" width="10" height="14" rx="1" fill="'+((r+c+k)%3===0?'#d7e8df':'#668c91')+'"/>').join('')).join('')
+   +'<path d="M104 22H180M46 57L104 35" stroke="#f6e5c7" stroke-width="3"/><path d="M137 145V124H153V145" fill="#56665e"/>';
+ } else if(comercio){
+   edificio='<path d="M0 132H240V160H0Z" fill="#7e8579"/><rect x="26" y="55" width="188" height="89" rx="3" fill="'+fachada+'"/>'
+   +'<path d="M19 62H221L211 83H29Z" fill="#a77963"/><path d="M29 83H211V93H29Z" fill="#e7d5b9"/>'
+   +'<rect x="43" y="96" width="55" height="42" fill="#62888a"/><rect x="109" y="96" width="35" height="48" fill="#526d70"/><rect x="155" y="96" width="45" height="42" fill="#62888a"/>'
+   +'<path d="M42 118H98M155 118H200" stroke="#d9e7df" stroke-width="2"/>';
+ } else {
+   edificio='<path d="M0 129H240V160H0Z" fill="#738b72"/><path d="M36 94L120 37L205 94V144H36Z" fill="'+fachada+'" stroke="#ad957a" stroke-width="2"/>'
+   +'<path d="M24 97L120 27L217 97L205 102L120 44L36 102Z" fill="'+(lujo?'#6e6a65':'#75574b')+'"/>'
+   +'<path d="M106 144V102H136V144Z" fill="#6d6256"/><path d="M54 100H85V123H54ZM155 100H186V123H155Z" fill="#71969a" stroke="#f5e9d5" stroke-width="5"/>'
+   +(lujo?'<path d="M40 142V109H52V142M188 142V109H200V142" fill="none" stroke="#e9d7b5" stroke-width="6"/>':'');
+ }
+ const trees='<path d="M18 143V106M224 143V102" stroke="#665d47" stroke-width="6"/><g fill="#456e59"><circle cx="18" cy="99" r="19"/><circle cx="224" cy="94" r="23"/><circle cx="11" cy="110" r="13"/><circle cx="232" cy="111" r="15"/></g>';
+ return '<svg class="icono-bien ilustracion-premium" viewBox="0 0 240 160" width="'+t+'" height="'+t+'" role="img" aria-label="Ilustración de propiedad" preserveAspectRatio="xMidYMid slice">'
+ +'<rect width="240" height="160" rx="10" fill="'+cielo+'"/>'
+ +'<circle cx="194" cy="32" r="17" fill="#f7e6bc" opacity=".75"/>'
+ +'<path d="M0 117Q65 96 120 115T240 111V160H0Z" fill="#9db3a0" opacity=".55"/>'
+ +edificio+trees
+ +'<path d="M0 153Q120 145 240 153V160H0Z" fill="#536c5d" opacity=".5"/>'
+ +'<rect x="1.5" y="1.5" width="237" height="157" rx="9" fill="none" stroke="#f6e8c9" stroke-opacity=".35" stroke-width="3"/>'
+ +'</svg>';
 }
 
 /* ==========================================================================
