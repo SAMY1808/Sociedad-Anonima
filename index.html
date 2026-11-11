@@ -968,7 +968,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v116</div>
+<div class="version-badge" id="versionBadge">v117</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -22907,7 +22907,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(/terreno|lote/.test(t)||c==='terreno') return 'lote';
     if(/bodega/.test(t)) return 'bodega'; if(/oficina/.test(t)) return 'oficina'; if(/local/.test(t)) return 'local';
     if(/penthouse/i.test(t)) return 'penthouse'; if(/mansi/.test(t)) return 'mansion'; if(/grande|duplex|dúplex/.test(t)) return 'casa_grande';
-    if(/casa/.test(t)) return 'casa'; if(c==='renta'&&!b.exVivienda109) return /apart/.test(t)?'apartamento':'local';
+    if(/casa/.test(t)) return 'casa'; if(c==='renta'&&!b.exVivienda109) return /apart|^apto/.test(t)?'apartamento':'local';
     return 'apartamento';
   }
   /* --- la ilustración --- */
@@ -23813,7 +23813,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
    ========================================================================== */
 (function(){
   const V116='v116';
-  const FOTOS=['apartamento','casa_pequena','casa','casa_grande','mansion','penthouse',
+  const FOTOS=['apartamento','apartamento_arriendo','casa_pequena','casa','casa_grande','mansion','penthouse',
     'finca','cafe','ganado','vinedo','aguacate_hass','finca_recreacion','flores_exoticas','palma',
     'local','oficina','bodega','lote','mausoleo','nicho',
     'panaderia','restaurante','funeraria','colegio','hotel','cine','gasolinera','parqueadero','clinica','edificio','lavanderia','motel','discoteca','centrocomercial','gimnasio','fincahotel'];
@@ -23845,6 +23845,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return 'finca';
     }
     if(/peque/.test(tipo)) return 'casa_pequena';
+    if(c==='renta'&&!b.exVivienda109&&/^apto|apart/.test(tipo)) return 'apartamento_arriendo'; // v117: apartamento para arrendar
     let t=null; try{ t=typeof window.tipoBien109==='function'?window.tipoBien109(b):null; }catch(e){}
     return t&&FOTOS.includes(t)?t:null;
   }
@@ -23865,7 +23866,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function init116(){ instalar116(); precargar(); Object.assign(window,{fotoPropiedad116:fotoDe,fotosCargadas116:ok}); }
   setTimeout(init116,40); setTimeout(init116,220); setTimeout(init116,650);
-  window.__SA116={version:V116};
+  window.__SA116={version:V116}; window.__SA117={version:'v117'};
 })();
 </script>
 
