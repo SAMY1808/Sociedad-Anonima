@@ -933,10 +933,24 @@ html{scroll-behavior:smooth}
 .ficha109 table{width:100%}
 @media (max-width:620px){.ficha109{grid-template-columns:1fr}.resumen109{grid-template-columns:1fr 1fr}}
 </style>
+<style id="estilos-v112">
+.score112{display:flex;gap:16px;align-items:center;margin:8px 0 12px}
+.score112 .n{font-family:var(--display);font-size:42px;line-height:1;color:var(--laton);min-width:86px}
+.score112 .n small{display:block;font-family:inherit;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--humo2);margin-top:4px}
+.score112 .barra{flex:1;min-width:0}
+.score112 .barra i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#d06a5a 0%,#E3C16F 45%,#6CC08F 100%);position:relative}
+.score112 .barra i b{position:absolute;top:-4px;width:4px;height:18px;border-radius:2px;background:#F0E7D5;box-shadow:0 0 0 2px #13201a}
+.score112 .barra span{display:flex;justify-content:space-between;font-size:11px;color:var(--humo2);margin-top:5px}
+.etapas112{display:flex;gap:6px;margin:10px 0}
+.etapas112 div{flex:1;text-align:center;font-size:11px;padding:7px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.08);color:var(--humo2)}
+.etapas112 div.hecha{border-color:rgba(208,106,90,.45);color:#f0a195}
+.etapas112 div.ahora{border-color:#d06a5a;background:rgba(208,106,90,.14);color:#F0E7D5;font-weight:500}
+@media (max-width:520px){.etapas112 div{font-size:10px}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v111</div>
+<div class="version-badge" id="versionBadge">v112</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1390,6 +1404,18 @@ function cubrirFaltante(res){
   if(recortes>1){
     res.push(['Hubo que apretarse el cinturón en la casa',0,'neg']);
     log('Bajaron el tren de vida a <b>'+NIVELES[S.hogar.nivel].n+'</b> porque no daba para más.','mal');
+  }
+
+  // 2b. (v112) ya no se vende de afán: el faltante va a tarjeta y sobregiro hasta donde presten,
+  //     y lo que pase de ahí queda en mora; el banco cobra por etapas (cobro, embargo, remate)
+  if(falta>0.5&&typeof window.entrarEnMora112==='function'){
+    const cupo=Math.max(120, valorBienes()*.4 + (S.carrera.ruta&&S.carrera.ruta!=='desempleado'?300:60))*(window.cupoFactor112?window.cupoFactor112():1);
+    const aDeuda=Math.min(falta,Math.max(0,cupo-S.deuda));
+    if(aDeuda>0.5){ S.deuda+=aDeuda; falta-=aDeuda;
+      res.push(['El faltante se fue a la tarjeta y al sobregiro',0,'neg']);
+      log('No alcanzó: '+fmt(aDeuda)+' se fueron a deuda de consumo (tarjeta y sobregiro).','mal'); }
+    if(falta>0.5) window.entrarEnMora112(falta,res);
+    return;
   }
 
   // 3. vender ladrillo: primero lo que no se habita
@@ -22912,6 +22938,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   /* --- estado y números de cada propiedad --- */
   function estado(b){
+    if(b.embargo112) return {t:'Embargada',c:'mal'};
     if(b.clase==='negocio'&&b.neg110){ const g=b.neg110; return g.cerrado?{t:'Cerrado',c:'mal'}:(g.ult!==null&&g.ult!==undefined&&g.ult<0)?{t:'Con pérdidas',c:'mal'}:{t:'Abierto',c:'ok'}; }
     if(esHogar(b)) return {t:'Vives aquí',c:'casa'};
     if(b.clase==='renta') return b.arrendado?{t:'Arrendado',c:'ok'}:{t:'Vacío',c:'mal'};
@@ -23282,6 +23309,334 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init111(){ wrapLienzo111(); }
   setTimeout(init111,40); setTimeout(init111,220); setTimeout(init111,650);
   window.__SA111={version:V111};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v112 · EL SECTOR FINANCIERO
+   1. Calificación de crédito: sube si pagas, baja si te atrasas, y decide
+      la tasa y si te prestan.
+   2. Mora, cobro, embargo y remate: cuando la plata no alcanza ya no se
+      vende todo de afán ni llega la insolvencia de golpe; el banco te cobra
+      por etapas y en cada una decides (pagar, acuerdo, vender, ley de
+      insolvencia, testaferro).
+   3. Banco propio: una financiera tuya puede pedir licencia a la
+      Superfinanciera (o fundas uno nuevo). Capta depósitos, presta, y puede
+      sufrir corridas, intervención o crecer como los grandes.
+   4. Eventos: pirámides, comisiones abusivas, el banquero amigo, compra de
+      cartera, autopréstamos.
+   ========================================================================== */
+(function(){
+  const V112='v112';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const SUPER=()=>S.anio>=2005?'la Superintendencia Financiera':S.anio>=1923?'la Superintendencia Bancaria':'el Ministerio de Hacienda';
+  const SUPERT=()=>{ const x=SUPER(); return x.charAt(0).toUpperCase()+x.slice(1); };
+  const ETAPAS=['Cobranza','Cobro jurídico','Embargo','Remate'];
+  function C(){
+    if(!S.credito112){ const base={elite:720,comercio:680,media:640,popular:600}[S.p&&S.p.origen]||640; S.credito112={score:base,hist:[],mora:null,acuerdo:null,testaferro:[]}; }
+    const c=S.credito112; if(!Array.isArray(c.hist)) c.hist=[]; if(!Array.isArray(c.testaferro)) c.testaferro=[]; return c;
+  }
+  const subir=d=>{ const c=C(); c.score=clamp(Math.round(c.score+d),300,950); };
+  const banda=s=>s>=800?'excelente':s>=680?'buena':s>=560?'regular':s>=440?'mala':'reportado';
+  const spread=()=>clamp((650-C().score)/5000,-.02,.05);
+  const leyInsolvencia=()=>S.anio>=2013?'la ley de insolvencia de persona natural':S.anio>=1999?'un acuerdo de reestructuración con los acreedores':'un concordato con los acreedores';
+
+  /* --- 1. entrar en mora en vez de vender todo de afán --- */
+  function entrarEnMora112(falta,res){
+    if(!S||!S.p||nino()) return false;
+    const c=C();
+    if(c.mora){ c.mora.monto+=falta; }
+    else { c.mora={monto:falta,desde:S.anio,etapa:0,origen:hipTotal()>0?'las cuotas de la hipoteca':'tus deudas del año'}; }
+    subir(-70);
+    if(c.acuerdo){ c.acuerdo=null; log('Incumpliste el acuerdo de pago: el banco reactivó el cobro.','mal'); }
+    res&&res.push(['Quedaste en mora con el banco',0,'neg']);
+    log('No alcanzó para pagar '+c.mora.origen+': quedaste <b>en mora</b> con el banco por '+fmt(c.mora.monto)+'. Tu calificación de crédito cayó a '+c.score+'.','mal');
+    return true;
+  }
+  const hipTotal=()=>(S.bienes||[]).reduce((a,b)=>a+(b.hipoteca||0),0);
+  function embargar(){
+    const c=C(), m=c.mora; let cubre=(S.bienes||[]).filter(b=>b.embargo112).reduce((a,b)=>a+Math.max(0,b.valor*.7-(b.hipoteca||0)),0);
+    const orden=(S.bienes||[]).filter(b=>!b.embargo112).sort((a,b)=>(a.uid===S.hogar.vivienda)-(b.uid===S.hogar.vivienda)||b.valor-a.valor);
+    const nuevos=[];
+    for(const b of orden){ if(cubre>=m.monto) break; b.embargo112=true; nuevos.push(b.nombre); cubre+=Math.max(0,b.valor*.7-(b.hipoteca||0)); }
+    let cuentas=0; if(cubre<m.monto&&S.efectivo>0){ cuentas=Math.min(S.efectivo*.5,m.monto); S.efectivo-=cuentas; m.monto-=cuentas; }
+    log('<b>Embargo.</b> El juzgado embargó '+(nuevos.length?listaY(nuevos.map(n=>esc(n))):'')+(nuevos.length&&cuentas?' y ':'')+(cuentas?'tus cuentas ('+fmt(cuentas)+')':'')+(!nuevos.length&&!cuentas?'lo poco que había':'')+'. No los puedes vender libremente: lo que entre, va primero al banco.','mal');
+  }
+  function rematar(){
+    const c=C(), m=c.mora; const E=(S.bienes||[]).filter(b=>b.embargo112).sort((a,b)=>b.valor-a.valor); const vendidos=[];
+    for(const b of E){ if(m.monto<=0.5) break; const neto=Math.max(0,b.valor*.7-(b.hipoteca||0)); S.bienes=S.bienes.filter(x=>x.uid!==b.uid);
+      if(S.hogar.vivienda===b.uid){ S.hogar.vivienda=null; S.hogar.conLosPadres=false; S.p.felicidad=clamp(S.p.felicidad-15,0,100); }
+      const usa=Math.min(neto,m.monto); m.monto-=usa; S.efectivo+=neto-usa; vendidos.push(b.nombre); }
+    if(vendidos.length) log('<b>Remate.</b> Se remataron '+listaY(vendidos.map(n=>esc(n)))+' al 70% de su valor.'+(m.monto<=0.5?' La deuda quedó saldada.':' Todavía se deben '+fmt(m.monto)+'.'),'mal');
+    if(m.monto<=0.5){ c.mora=null; (S.bienes||[]).forEach(b=>delete b.embargo112); return; }
+    if(!(S.bienes||[]).length){ // no queda nada: insolvencia forzada
+      const perd=m.monto+(S.deuda||0); c.mora=null; S.deuda=0; S.p.reputacion=clamp(S.p.reputacion*.6,0,100); moverPrestigio(-10,'la insolvencia'); c.score=300;
+      log('No quedó nada que rematar. El juez cerró el proceso con '+fmt(perd)+' sin pagar: quedaste insolvente y reportad'+(S.p.sexo==='m'?'a':'o')+' por años.','mal'); hito('Cayó en insolvencia en '+S.anio);
+    }
+  }
+  function correrCredito112(){
+    if(!S||!S.p||nino()) return;
+    const c=C();
+    if(c.acuerdo){ const a=c.acuerdo;
+      if(S.efectivo>=a.cuota){ S.efectivo-=a.cuota; a.restan--; subir(15); if(a.restan<=0){ c.acuerdo=null; c.mora=null; (S.bienes||[]).forEach(b=>delete b.embargo112); log('Pagaste la última cuota del acuerdo con el banco. Quedaste a paz y salvo.','bien'); } }
+      else { c.acuerdo=null; if(c.mora) c.mora.etapa=Math.max(c.mora.etapa,2); subir(-60); log('No alcanzó para la cuota del acuerdo: el banco lo dio por roto y siguió con el cobro.','mal'); }
+    } else if(c.mora){
+      const m=c.mora;
+      if(m.desde<S.anio||m.etapa>0){
+        m.monto*=1+Math.min(.5,((S.macro&&S.macro.tasa)||.1)*1.5); /* tasa de usura: 1,5 veces la corriente */ m.etapa=Math.min(4,m.etapa+1); subir(-35);
+        if(m.etapa===2){ m.monto*=1.08; log('Tu deuda pasó a <b>cobro jurídico</b>: abogados del banco, costas e intereses de mora. Ya va en '+fmt(m.monto)+'.','mal'); }
+        if(m.etapa===3) embargar();
+        if(m.etapa===4) rematar();
+        if(c.mora&&m.etapa>=3){ // los arriendos de lo embargado van al banco
+          const r=(S.bienes||[]).filter(b=>b.embargo112&&b.clase==='renta'&&b.arrendado).reduce((a,b)=>a+b.valor*(b.renta||0),0);
+          if(r>0){ const u=Math.min(r,m.monto,S.efectivo); S.efectivo-=u; m.monto-=u; }
+        }
+      } else m.etapa=1;
+    } else { subir(hipTotal()>0||S.deuda>0?12:5); }
+    c.hist.push({anio:S.anio,v:c.score}); c.hist=c.hist.slice(-40);
+  }
+  function evMora(){
+    const c=C(), m=c.mora; if(!m) return null;
+    const ops=[];
+    ops.push({t:()=>'Pagar todo ('+fmt(C().mora?C().mora.monto:0)+')',f:()=>{ const m=C().mora; if(!m) return ''; if(S.efectivo<m.monto) return 'No tenías esa plata en caja. El cobro sigue.'; S.efectivo-=m.monto; C().mora=null; (S.bienes||[]).forEach(b=>delete b.embargo112); subir(40); return 'Pagaste todo. El banco levantó '+(m.etapa>=3?'los embargos':'el cobro')+'.'; }});
+    if(m.etapa<4) ops.push({t:'Acuerdo de pago a tres años',f:()=>{ const m=C().mora; if(!m) return ''; const cuota=Math.round(m.monto*1.15/3*100)/100; C().acuerdo={cuota,restan:3,desde:S.anio}; return 'Firmaste un acuerdo: tres cuotas de '+fmt(cuota)+'. Si incumples una, el cobro vuelve con todo.'; }});
+    const vend=(S.bienes||[]).filter(b=>b.uid!==S.hogar.vivienda).sort((a,b)=>b.valor-a.valor)[0];
+    if(vend) ops.push({t:'Vender '+vend.nombre+' antes del remate',f:()=>{ const m=C().mora; const b=(S.bienes||[]).find(x=>x.uid===vend.uid); if(!b||!m) return ''; const neto=Math.max(0,b.valor*.92-(b.hipoteca||0)); S.bienes=S.bienes.filter(x=>x.uid!==b.uid);
+      const usa=Math.min(neto,m.monto); m.monto-=usa; S.efectivo+=neto-usa; if(m.monto<=0.5){ C().mora=null; (S.bienes||[]).forEach(x=>delete x.embargo112); return 'Vendiste a buen precio y pagaste todo. Saliste del problema.'; } return 'Vendiste y abonaste '+fmt(usa)+'. Todavía debes '+fmt(m.monto)+'.'; }});
+    if(m.etapa>=2) ops.push({t:'Acogerte a '+leyInsolvencia(),f:()=>{ const m=C().mora; if(!m) return ''; const nuevo=Math.round(m.monto*.55*100)/100; C().acuerdo={cuota:Math.round(nuevo/5*100)/100,restan:5,desde:S.anio,insolvencia:true}; m.monto=nuevo; C().score=Math.min(C().score,400);
+      S.p.reputacion=clamp(S.p.reputacion-8,0,100); moverPrestigio(-5,'se declaró insolvente'); return 'El juez aprobó la negociación: debes '+fmt(nuevo)+' en cinco años y conservas tus bienes. Pero tu nombre quedó marcado.'; }});
+    if(m.etapa>=2&&(S.bienes||[]).length) ops.push({t:'Pasar una propiedad a nombre de un testaferro',f:()=>{ const b=(S.bienes||[]).slice().sort((a,b)=>b.valor-a.valor)[0]; if(!b) return ''; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); delete b.embargo112;
+      C().testaferro.push({bien:b,desde:S.anio,quien:nombreLocal(S.p.ciudad,'h')+' '+apellidoCiudad(S.p.ciudad)}); if(S.hogar.vivienda===b.uid){ S.hogar.vivienda=null; }
+      registrarDelito('insolvencia fraudulenta',4,'pasar '+b.nombre+' a nombre de un tercero'); return b.nombre+' ya no figura a tu nombre. Para el banco, no existe. Para la Fiscalía, quizás sí.'; }});
+    ops.push({t:'No hacer nada',f:()=>'El banco sigue adelante con el proceso.'});
+    const txt=['El banco te llama todos los días: estás en mora por <b>'+fmt(m.monto)+'</b> ('+esc(m.origen)+').',
+      'Tu deuda está en <b>cobro jurídico</b>: '+fmt(m.monto)+'. El paso siguiente es el embargo.',
+      'Tienes bienes <b>embargados</b> por una deuda de '+fmt(m.monto)+'. Si no haces nada, el año entrante se rematan.',
+      'Se viene el <b>remate</b> por '+fmt(m.monto)+'.'][clamp(m.etapa-1,0,3)];
+    return {p:9,c:()=>!!C().mora&&!C().acuerdo,t:()=>txt,o:ops};
+  }
+  function evTestaferro(){
+    const c=C(); const t=c.testaferro.find(x=>!x.devuelto&&S.anio-x.desde>=2); if(!t||!chance(.25)) return null;
+    return {p:9,c:()=>true,t:()=>'<b>'+esc(t.quien)+'</b>, el testaferro que tiene a su nombre '+esc(t.bien.nombre)+', te busca. '+(chance(.5)?'Dice que la Fiscalía lo está llamando a declarar.':'Dice que necesita "una ayudita" para seguir callado.'),
+      o:[{t:'Recuperar la propiedad',f:()=>{ t.devuelto=true; t.bien.embargo112=!!C().mora; S.bienes.push(t.bien); return t.bien.nombre+' volvió a tu nombre. '+(C().mora?'Y el banco la volvió a embargar.':''); }},
+         {t:'Pagarle para que siga callado',f:()=>{ const x=Math.max(2,Math.round(t.bien.valor*.08)); S.efectivo-=Math.min(S.efectivo,x); return 'Le pagaste '+fmt(x)+'. Por ahora.'; }},
+         {t:'Dejarla perdida',f:()=>{ t.devuelto=true; return 'La propiedad ya es de él. Así son las cosas.'; }}]};
+  }
+
+  /* --- la tasa y el acceso al crédito dependen de la calificación --- */
+  function wrapComprar112(){
+    const old=window.comprarBien; if(typeof old!=='function'||window.__SA112_COMPRA) return;
+    window.comprarBien=function(o){
+      try{ const fin=o&&o.cuotaInicial!==undefined&&o.cuotaInicial<1&&S&&S.p;
+        if(fin&&(C().mora||C().score<440)){ log('Ningún banco te quiso prestar para '+esc(o.nombre||'la compra')+': '+(C().mora?'estás en mora':'tu calificación de crédito es '+C().score)+'. Solo de contado.','mal'); if(typeof aviso==='function') aviso('Ningún banco te presta: '+(C().mora?'estás en mora.':'calificación '+C().score+'.')); return null; }
+        const b=old.apply(this,arguments);
+        if(b&&fin&&b.hipoteca>0){ b.tasaH=Math.max(.02,b.tasaH+spread()); b.cuota=cuotaHipoteca(b.hipoteca,b.tasaH,b.aniosH); }
+        return b; }catch(e){ return old.apply(this,arguments); }
+    };
+    window.__SA112_COMPRA=true;
+  }
+  function wrapVender112(){
+    const old=window.venderBien; if(typeof old!=='function'||window.__SA112_VENDE) return;
+    window.venderBien=function(b){ const m=S&&S.credito112&&S.credito112.mora; const ef0=S.efectivo; const r=old.apply(this,arguments);
+      try{ if(m&&b&&(b.embargo112||m.etapa>=3)){ const entro=Math.max(0,S.efectivo-ef0); const u=Math.min(entro,m.monto); S.efectivo-=u; m.monto-=u; log('Lo de la venta fue primero al banco: abonaste '+fmt(u)+' a la deuda en mora.','mal'); if(m.monto<=0.5){ S.credito112.mora=null; (S.bienes||[]).forEach(x=>delete x.embargo112); log('Con eso quedaste a paz y salvo con el banco.','bien'); } } }catch(e){}
+      return r; };
+    window.__SA112_VENDE=true;
+  }
+
+  /* --- 3. el banco propio --- */
+  const POL={conservador:{n:'Conservadora',spread:.03,mora:.008,crece:.03},normal:{n:'Normal',spread:.045,mora:.02,crece:.06},agresivo:{n:'Agresiva',spread:.065,mora:.045,crece:.11}};
+  const capMin=()=>{ const s=SECTORES.find(x=>x.id==='financiero'); return Math.round((s?s.cap:3000)*1.2); };
+  const mios=()=>companias().filter(e=>e.sector==='financiero'&&miPct(e)>=.5);
+  const bancos=()=>companias().filter(e=>e.banco112&&!e.banco112.intervenido);
+  function requisitos(e){
+    const falta=[]; if(S.p.reputacion<45) falta.push('reputación de al menos 45 (tienes '+Math.round(S.p.reputacion)+')');
+    if(S.penal&&(S.penal.caso||S.penal.prisionRestante>0)) falta.push('no tener procesos penales abiertos');
+    if(C().mora) falta.push('no estar en mora');
+    if(e&&e.caja+S.efectivo<capMin()) falta.push('capital mínimo de '+fmt(capMin())+' entre la caja de la compañía y la tuya');
+    return falta;
+  }
+  function pedirLicencia(e){
+    const costo=Math.round(capMin()*.03); S.efectivo-=Math.min(S.efectivo,costo);
+    if(e.caja<capMin()){ const pone=Math.min(S.efectivo,capMin()-e.caja); S.efectivo-=pone; e.caja+=pone; }
+    e.licencia112={pedida:S.anio}; log('<b>'+esc(e.nombre)+'</b> radicó la solicitud de licencia bancaria ante '+SUPER()+' ('+fmt(costo)+' en trámites).','hito');
+  }
+  function evLicencia(){
+    const e=companias().find(x=>x.licencia112&&!x.banco112&&x.licencia112.pedida<S.anio); if(!e) return null;
+    const crimes=((S.penal&&S.penal.crimes)||[]).length, p=clamp(.55+S.p.reputacion/250-crimes*.1,.1,.95);
+    return {p:9,c:()=>true,t:()=>SUPERT()+' respondió la solicitud de <b>'+esc(e.nombre)+'</b>.',
+      o:[{t:'Abrir la carta',f:()=>{ delete e.licencia112; if(chance(p)){ e.banco112={desde:S.anio,dep:Math.round(e.caja*2.5),pol:'normal',reserva:.15,util:0,mora:0};
+          if(!/^Banco/.test(e.nombre)) e.nombre='Banco '+e.nombre.replace(/^(Financiera|Compañía Financiera|Corporación Financiera|Inversiones)\s+/i,'').replace(/ (S\.A\.|y Cía\.|& Cía\.)$/,'');
+          moverPrestigio(4,'abrió un banco'); hito('Abrió '+e.nombre); return '¡Aprobada! Ahora es <b>'+esc(e.nombre)+'</b>: puede captar depósitos del público. Arranca con '+fmt(e.banco112.dep)+' en depósitos.'; }
+        return 'Negada. "No cumple los estándares de idoneidad." La financiera sigue como estaba; puedes volver a intentarlo.'; }}]};
+  }
+  function correrBancos112(){
+    const m=S.macro||{ciclo:0,tasa:.1}; const ciclo=m.ciclo||0;
+    bancos().forEach(e=>{ const b=e.banco112, pol=POL[b.pol]||POL.normal;
+      const crisis=ciclo<-.05?1+(-ciclo)*14:1;
+      b.dep=Math.max(0,b.dep*(1+pol.crece+(e.marca-50)/500+ciclo*.6));
+      const cartera=b.dep*(1-b.reserva);
+      b.mora=Math.min(.6,pol.mora*crisis*(e.gerente112==='amigos'?2:1));
+      const util=cartera*pol.spread-cartera*b.mora*.7-b.dep*.004;
+      b.util=Math.round(util*100)/100; e.caja+=util; e.ingresos=Math.max(e.ingresos,cartera*.12);
+      if(util<0) e.aniosMalos=(e.aniosMalos||0)+1;
+      b.solv=e.caja/Math.max(1,b.dep);
+      if(b.solv<.03){ intervenir(e,'la solvencia cayó por debajo del mínimo legal'); return; }
+      if(b.solv<.07) log(SUPERT()+' le exige a <b>'+esc(e.nombre)+'</b> capitalizarse: su solvencia está en '+pc(b.solv)+' y el mínimo es 9%.','mal');
+    });
+  }
+  function intervenir(e,motivo){
+    const b=e.banco112; b.intervenido=S.anio; e.ceoExterno=SUPER(); e.caja=Math.max(0,e.caja*.1); e.ingresos*=.35;
+    S.p.reputacion=clamp(S.p.reputacion-12,0,100); moverPrestigio(-8,'la intervención de su banco'); if(typeof window.moverImagen105==='function') window.moverImagen105(-12);
+    log('<b>'+SUPERT()+' intervino '+esc(e.nombre)+'</b>: '+esc(motivo)+'. Tomó el control y los ahorradores hacen fila afuera.','mal'); hito('Intervinieron '+e.nombre);
+  }
+  function escenaBanco112(){
+    const L=bancos(); if(!L.length) return;
+    const e=L[0], b=e.banco112, pol=POL[b.pol]||POL.normal;
+    const f=(a,c)=>'<tr><td>'+a+'</td><td>'+c+'</td></tr>';
+    const html='<table class="libro">'+f('Depósitos del público',fmt(b.dep))+f('Cartera de créditos',fmt(b.dep*(1-b.reserva)))+f('Reserva (encaje)',pc(b.reserva)+' · '+fmt(b.dep*b.reserva))
+      +f('Mora de la cartera','<span class="'+(b.mora>.05?'mal':'')+'">'+pc(b.mora||0)+'</span>')+f('Utilidad del último año','<span class="'+((b.util||0)>=0?'bien':'mal')+'">'+fmt(b.util||0)+'</span>')
+      +f('Solvencia','<span class="'+((b.solv||1)<.09?'mal':'bien')+'">'+pc(isFinite(b.solv)?b.solv:e.caja/Math.max(1,b.dep))+'</span> (mínimo 9%)')+f('Política de crédito',pol.n)+'</table>';
+    const capi=Math.max(10,Math.round(b.dep*.03));
+    escena({rubro:'Tu banco',titulo:esc(e.nombre),ancho:true,cerrable:true,cuerpo:'Captas plata del público y la prestas. Más riesgo deja más margen… hasta que llega una crisis.',html,
+      opciones:[{t:'Cambiar la política de crédito',cat:'compania',d:'Conservadora, normal o agresiva: margen, crecimiento y mora.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(e.nombre),titulo:'¿A quién le prestas?',cerrable:true,
+          opciones:Object.keys(POL).map(k=>({t:POL[k].n,cat:'compania',d:'Margen '+pc(POL[k].spread)+', mora normal '+pc(POL[k].mora)+', crecimiento '+pc(POL[k].crece)+' al año.',run:()=>{ b.pol=k; log('Política de crédito de '+esc(e.nombre)+': '+POL[k].n.toLowerCase()+'.'); }}))}); }},
+        {t:'Cambiar la reserva',cat:'capital',d:'Hoy '+pc(b.reserva)+'. Más reserva: menos utilidad, pero aguantas mejor una corrida.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(e.nombre),titulo:'¿Cuánto guardas?',cerrable:true,
+          opciones:[.1,.15,.25].map(r=>({t:pc(r)+' de reserva',cat:'capital',run:()=>{ b.reserva=r; }}))}); }},
+        {t:'Capitalizar el banco',cat:'capital',d:'Pones '+fmt(capi)+' de tu bolsillo. Sube la solvencia.',dis:S.efectivo<capi?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ S.efectivo-=capi; e.caja+=capi; S.mov--; b.solv=e.caja/Math.max(1,b.dep); log('Capitalizaste '+esc(e.nombre)+' con '+fmt(capi)+'.','bien'); cerrarModal(); render(); }}]});
+  }
+  function escenaFundarBanco112(){
+    const nom='Banco '+(S.dinastia||S.p.apellido), cap=capMin(), falta=requisitos(null).concat(S.efectivo<cap?['tener '+fmt(cap)+' de capital en caja']:[]);
+    escena({rubro:SUPERT().replace(/^(La|El) /,''),titulo:'Fundar un banco',cerrable:true,
+      cuerpo:'Se constituye <b>'+esc(nom)+'</b> con '+fmt(cap)+' de capital y se pide la licencia. Mientras '+SUPER()+' responde (un año), funciona como financiera.'+(falta.length?'<br><br><b>Te falta:</b> '+esc(listaY(falta))+'.':''),
+      opciones:[{t:'Constituirlo y pedir la licencia',cat:'compania',dis:falta.length?'No cumples los requisitos':S.mov<1?'No te quedan movidas':null,run:()=>{ fundarEn(nom,'financiero',cap); const e=companias()[companias().length-1]; S.mov--; pedirLicencia(e); }}]});
+  }
+  function escenaLicencia112(e){
+    const falta=requisitos(e);
+    escena({rubro:SUPERT().replace(/^(La|El) /,''),titulo:'Licencia bancaria para '+esc(e.nombre),cerrable:true,
+      cuerpo:'Con licencia, '+esc(e.nombre)+' puede captar depósitos del público y prestarlos. Exige capital mínimo de '+fmt(capMin())+', reputación y un pasado limpio. La respuesta llega el año entrante.'+(falta.length?'<br><br><b>Te falta:</b> '+esc(listaY(falta))+'.':''),
+      opciones:[{t:'Radicar la solicitud',cat:'compania',dis:falta.length?'No cumples los requisitos':S.mov<1?'No te quedan movidas':null,run:()=>{ S.mov--; pedirLicencia(e); }}]});
+  }
+
+  /* --- la escena "Bancos y crédito" --- */
+  function escenaCredito112(){
+    const c=C(), s=c.score, m=c.mora, hip=(S.bienes||[]).filter(b=>b.hipoteca>0);
+    const tasaNueva=(S.macro.tasa||.1)+.045+spread();
+    const refi=hip.filter(b=>b.tasaH>tasaNueva+.01);
+    let html='<div class="score112"><div class="n">'+s+'<small>'+banda(s)+'</small></div><div class="barra"><i><b style="left:calc('+((s-300)/650*100).toFixed(1)+'% - 2px)"></b></i><span><em>300</em><em>reportado · malo · regular · bueno · excelente</em><em>950</em></span></div></div>'
+      +'<table class="libro"><tr><td>Hipotecas</td><td>'+fmt(hipTotal())+'</td></tr><tr><td>Deuda de consumo</td><td>'+fmt(S.deuda||0)+'</td></tr><tr><td>Tasa que te darían hoy</td><td>'+pc(tasaNueva)+(spread()>0?' <span class="mal">(+'+pc(spread())+' por tu calificación)</span>':spread()<0?' <span class="bien">('+pc(spread())+' por tu calificación)</span>':'')+'</td></tr></table>';
+    if(m) html+='<div class="etapas112">'+ETAPAS.map((x,i)=>'<div class="'+(i+1<m.etapa?'hecha':i+1===Math.max(1,m.etapa)?'ahora':'')+'">'+x+'</div>').join('')+'</div><div class="aviso"><b>En mora por '+fmt(m.monto)+'</b>'+(c.acuerdo?' · con acuerdo de pago: '+c.acuerdo.restan+' cuotas de '+fmt(c.acuerdo.cuota):'')+'.</div>';
+    const op=[];
+    if(m&&!c.acuerdo){ const ev=evMora(); ev.o.forEach(o=>op.push({t:typeof o.t==='function'?o.t():o.t,cat:'riesgo',cerrar:false,run:()=>{ const r=o.f(); if(r) log(r); cerrarModal(); render(); }})); }
+    if(refi.length) op.push({t:'Refinanciar tus hipotecas',cat:'capital',d:refi.length+' crédito'+(refi.length>1?'s':'')+' a una tasa más alta que la de hoy. Cuesta 1% del saldo y una movida.',dis:S.mov<1?'No te quedan movidas':m?'No te refinancian estando en mora':null,cerrar:false,run:()=>{
+      let costo=0; refi.forEach(b=>{ costo+=b.hipoteca*.01; b.tasaH=tasaNueva; b.cuota=cuotaHipoteca(b.hipoteca,b.tasaH,b.aniosH); }); S.efectivo-=Math.min(S.efectivo,costo); S.mov--; log('Refinanciaste '+refi.length+' hipoteca'+(refi.length>1?'s':'')+' al '+pc(tasaNueva)+'.','bien'); cerrarModal(); render(); }});
+    if(S.deuda>0) op.push({t:'Pagar la deuda de consumo',cat:'capital',d:'Debes '+fmt(S.deuda)+'. Pagarla sube tu calificación.',dis:S.efectivo<S.deuda?'No te alcanza':null,cerrar:false,run:()=>{ S.efectivo-=S.deuda; S.deuda=0; subir(30); log('Pagaste toda tu deuda de consumo.','bien'); cerrarModal(); render(); }});
+    escena({rubro:'Tu crédito',titulo:'Bancos y crédito',ancho:true,cerrable:true,cuerpo:'Tu historial con los bancos decide cuánto te prestan y a qué tasa. Pagar a tiempo lo sube; atrasarte lo hunde.',html,opciones:op});
+  }
+
+  /* --- 4. eventos --- */
+  const SEG=[]; // seguimientos garantizados (no los frena el enfriamiento de eventos)
+  function instalarEventos112(){
+    if(window.__SA112_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    E({p:1,c:()=>S.anio>=1990&&!S.piramide112&&pat()>200,
+      t:()=>'Un conocido del club te cuenta en voz baja de una "captadora" que paga <b>10% mensual</b>. Su cuñado ya cobró dos veces y se compró una camioneta.',
+      o:[{t:()=>'Meterle '+fmt(Math.round(pat()*.05)),f:()=>{ const x=Math.round(pat()*.05); S.efectivo-=Math.min(S.efectivo,x); S.piramide112={monto:x,anio:S.anio}; return 'Le entregaste '+fmt(x)+' en efectivo a un muchacho con una maleta.'; }},
+         {t:'Eso es una pirámide',f:()=>'Te reíste. Tu conocido no.'}]});
+    SEG.push({p:9,c:()=>!!S.piramide112&&S.anio>S.piramide112.anio&&!S.piramide112.fin&&S.piramide112.visto!==S.anio,
+      t:()=>{ const p=S.piramide112; p.visto=S.anio; if(S.anio-p.anio===1&&chance(.65)){ p.paga=true; return 'La captadora te pagó: <b>'+fmt(Math.round(p.monto*.6))+'</b> de "rendimientos" en un año. Todo el pueblo está metiendo plata.'; }
+        p.paga=false; p.fin=true; return 'Intervinieron la captadora. El dueño se fue del país y tus <b>'+fmt(p.monto)+'</b> desaparecieron. Hay marchas de ahorradores en la plaza.'; },
+      o:[{t:()=>S.piramide112.paga?'Cobrar y dejar el capital adentro':'Ir a la marcha de ahorradores',f:()=>{ const p=S.piramide112; if(!p.paga) return 'Gritaste con todos en la plaza. La plata no volvió.'; S.efectivo+=Math.round(p.monto*.6); return 'Cobraste. El capital sigue adentro, rindiendo… por ahora.'; }},
+         {t:()=>S.piramide112.paga?'Sacar todo ahora':'Hacer la denuncia y pasar la página',f:()=>{ const p=S.piramide112; if(!p.paga) return 'Pusiste la denuncia. Por lo menos no fuiste de los que hipotecaron la casa.'; S.efectivo+=Math.round(p.monto*1.6); p.fin=true; return 'Sacaste capital y rendimientos justo a tiempo. Al mes, la intervinieron.'; }}]});
+    E({p:.8,c:()=>hipTotal()>0||S.deuda>0,
+      t:()=>{ S._c112=Math.max(2,Math.round(pat()*.003)); return 'Revisando el extracto encontraste que el banco te cobró <b>'+fmt(S._c112)+'</b> en comisiones que nunca autorizaste: "manejo de cuenta", "seguro de vida", "papelería".'; },
+      o:[{t:()=>'Quejarte ante '+SUPER(),f:()=>chance(.65)?'Te devolvieron todo, con disculpas por escrito.':'Te devolvieron la mitad y te mandaron un formulario.'},
+         {t:'Dejarlo así',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c112); return 'No vale la pena el tiempo. El banco lo sabe.'; }}]});
+    E({p:.7,c:()=>S.p.redes>=55&&!C().mora,
+      t:()=>{ S._b112=Math.round(Math.max(50,pat()*.15)); return 'El presidente de un banco, amigo de la familia, te ofrece un crédito de <b>'+fmt(S._b112)+'</b> sin garantías, a una tasa que nadie más consigue. "Entre nosotros no hacen falta papeles."'; },
+      o:[{t:'Aceptarlo',f:()=>{ S.efectivo+=S._b112; S.deuda=(S.deuda||0)+S._b112; S._amigo112=S.anio; return 'Entraron '+fmt(S._b112)+'. Te quedó debiendo un favor… a ti, o tú a él.'; }},
+         {t:'Agradecer y no',f:()=>'Le dijiste que prefieres los papeles. No le gustó.'}]});
+    SEG.push({p:9,c:()=>!!S._amigo112&&S.anio-S._amigo112>=2&&chance(.5),
+      t:()=>{ delete S._amigo112; return 'Capturaron al presidente del banco que te prestó sin garantías: préstamos irregulares a sus amigos. Tu crédito aparece en el expediente.'; },
+      o:[{t:'Pagar el crédito de inmediato',f:()=>{ const x=Math.min(S.efectivo,S.deuda||0); S.efectivo-=x; S.deuda-=x; return 'Pagaste lo que pudiste ('+fmt(x)+'). Quedaste como deudor, no como cómplice.'; }},
+         {t:'Decir que no sabías nada',f:()=>{ if(chance(.5)){ S.p.escandalos=(S.p.escandalos||0)+1; S.p.reputacion=clamp(S.p.reputacion-6,0,100); return 'Nadie te creyó. Tu foto salió junto a la del banquero.'; } return 'Te creyeron. O no les interesaste.'; }}]});
+    E({p:.9,c:()=>!!C().mora&&C().mora.etapa>=2,
+      t:()=>{ S._cc112=Math.round(C().mora.monto*.6); return 'Una firma de cobranzas compró tu deuda al banco por centavos. Te ofrecen cerrar todo hoy por <b>'+fmt(S._cc112)+'</b>, el 60%.'; },
+      o:[{t:'Pagar y cerrar',f:()=>{ if(S.efectivo<S._cc112) return 'No tenías esa plata.'; S.efectivo-=S._cc112; C().mora=null; C().acuerdo=null; (S.bienes||[]).forEach(b=>delete b.embargo112); subir(25); return 'Pagaste el 60% y quedaste a paz y salvo.'; }},
+         {t:'Esperar una oferta mejor',f:()=>'Dijeron que lo pensaban. El cobro sigue.'}]});
+    E({p:.6,c:()=>!C().mora&&C().score>=560,
+      t:()=>'Te negaron una tarjeta de crédito "por tu historial". Revisando, apareces reportad'+(S.p.sexo==='m'?'a':'o')+' por una deuda de alguien con tu mismo nombre.',
+      o:[{t:'Reclamar hasta que lo corrijan',f:()=>{ subir(10); return 'Tres meses de cartas. Lo corrigieron, y tu calificación quedó mejor que antes.'; }},
+         {t:'No perder el tiempo',f:()=>{ subir(-40); return 'El error quedó ahí. Tu calificación bajó.'; }}]});
+    // el banco propio
+    E({p:1.2,c:()=>bancos().length>0&&((S.macro&&S.macro.ciclo<-.04)||(S.p.escandalos||0)>0),
+      t:()=>{ const e=bancos()[0]; S._bk112=e.nombre; const b=e.banco112; S._ret112=Math.round(b.dep*rnd(.25,.4)); const cubre=b.dep*b.reserva+e.caja; S._cub112=cubre>=S._ret112;
+        return '<b>Corrida bancaria.</b> Corre el rumor de que '+esc(e.nombre)+' está quebrado. Hay filas desde las cinco de la mañana: los ahorradores quieren sacar '+fmt(S._ret112)+'. '+(S._cub112?'La reserva alcanza… apenas.':'La reserva no alcanza.'); },
+      o:[{t:'Abrir todas las ventanillas y pagar',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(!e) return ''; const b=e.banco112; b.dep-=S._ret112; if(S._cub112){ e.caja-=Math.max(0,S._ret112-b.dep*b.reserva); return 'Pagaste a todos. Al tercer día las filas se acabaron: la gente vio que la plata estaba.'; }
+           intervenir(e,'no pudo pagarle a sus ahorradores'); return 'No alcanzó. A media mañana cerraron las puertas.'; }},
+         {t:'Poner plata tuya',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(!e) return ''; const pone=Math.min(S.efectivo,S._ret112*.6); S.efectivo-=pone; e.caja+=pone; e.banco112.dep-=S._ret112; if(e.caja>0) return 'Pusiste '+fmt(pone)+' de tu bolsillo. Sobrevivió, pero tú quedaste más corto.'; intervenir(e,'la corrida se llevó todo'); return 'Ni con tu plata alcanzó.'; }},
+         {t:'Pedir apoyo al Banco de la República',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(!e) return ''; e.banco112.dep-=S._ret112; e.deuda=(e.deuda||0)+S._ret112*.8; if(chance(.75)) return 'El Banco de la República prestó lo necesario, a una tasa de castigo. La corrida pasó.'; intervenir(e,'el apoyo de liquidez llegó con intervención incluida'); return 'Te prestaron… y de paso te intervinieron.'; }}]});
+    E({p:.8,c:()=>bancos().some(e=>!e.gerente112),
+      t:()=>{ const e=bancos().find(e=>!e.gerente112); S._bk112=e.nombre; return 'La auditoría de <b>'+esc(e.nombre)+'</b> encontró que el gerente de crédito le prestó a sus amigos sin estudiar nada. La mora de esa cartera es altísima.'; },
+      o:[{t:'Echarlo y castigar la cartera',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(e){ e.gerente112='nuevo'; e.caja-=e.banco112.dep*.02; } return 'Lo echaste y asumiste la pérdida. El banco quedó más sano.'; }},
+         {t:'Dejarlo: es buen amigo de la familia',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(e) e.gerente112='amigos'; return 'Se quedó. La mora va a seguir subiendo.'; }}]});
+    E({p:.7,c:()=>bancos().length>0,
+      t:()=>{ const e=bancos()[0]; S._bk112=e.nombre; S._ap112=Math.round(e.banco112.dep*.1); return 'Tu tesorero te dice que <b>'+esc(e.nombre)+'</b> podría prestarle a las empresas de la familia hasta '+fmt(S._ap112)+'. "Sin trámites, sin preguntas." Los autopréstamos están prohibidos por encima de cierto límite.'; },
+      o:[{t:'Hacerlo',f:()=>{ const e=bancos().find(x=>x.nombre===S._bk112); if(!e) return ''; S.efectivo+=S._ap112; e.banco112.dep-=S._ap112; registrarDelito('autopréstamos',4,'créditos de '+e.nombre+' a la familia');
+           if(chance(.35)){ intervenir(e,'autopréstamos a empresas vinculadas'); return SUPERT()+' lo detectó en la siguiente inspección.'; } return 'Entraron '+fmt(S._ap112)+'. Nadie lo notó… por ahora.'; }},
+         {t:'No: así cayeron los grandes',f:()=>'Te acordaste del Grupo Grancolombiano. Mejor no.'}]});
+    window.__SA112_EV=true;
+  }
+
+  /* --- integración --- */
+  function wrapHistoria112(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA112_HIS) return;
+    window.correrHistoria=function(){ const r=old.apply(this,arguments);
+      try{ if(S&&S.p&&!nino()){ const a=evMora(); if(a&&C().mora&&C().mora.etapa>=1&&!C().acuerdo&&S._evMora112!==S.anio){ S._evMora112=S.anio; cola.push(a); } const l=evLicencia(); if(l) cola.push(l); const t=evTestaferro(); if(t) cola.push(t); SEG.forEach(x=>{ try{ if(x.c()) cola.push(Object.assign({},x,{c:()=>true})); }catch(e){} }); } }catch(e){}
+      return r; };
+    window.__SA112_HIS=true;
+  }
+  function wrapAcciones112(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA112_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!S||!S.p||S.p.edad<18||nino()) return A; const c=C();
+        if(!A.some(a=>a.t==='Bancos y crédito')) A.push({t:'Bancos y crédito',cat:'mercado',d:'Calificación '+c.score+' ('+banda(c.score)+')'+(c.mora?'. En mora por '+fmt(c.mora.monto)+'.':'.'),mov:0,modal:true,run:()=>escenaCredito112()});
+        if(bancos().length) A.push({t:'Tu banco',cat:'compania',d:esc(bancos()[0].nombre)+': '+fmt(bancos()[0].banco112.dep)+' en depósitos.',mov:0,modal:true,run:()=>escenaBanco112()});
+        else { const f=mios().find(e=>!e.banco112&&!e.licencia112);
+          if(f) A.push({t:'Pedir licencia bancaria',cat:'compania',d:'Convertir '+f.nombre+' en un banco que capte depósitos del público.',mov:1,modal:true,run:()=>escenaLicencia112(f)});
+          else if(!companias().some(e=>e.licencia112)&&S.anio>=1870) A.push({t:'Fundar un banco',cat:'compania',d:'Capital mínimo '+fmt(capMin())+'. Licencia de '+SUPER()+'.',mov:1,modal:true,dis:S.efectivo<capMin()*.5?'Necesitas al menos '+fmt(capMin()):null,run:()=>escenaFundarBanco112()}); }
+      }catch(e){}
+      return A; };
+    window.__SA112_ACC=true;
+  }
+  function wrapCat112(){ const old=window.catDe; if(typeof old!=='function'||window.__SA112_CAT) return;
+    window.catDe=function(t){ if(t==='Bancos y crédito') return 'mercado'; if(t==='Tu banco'||t==='Pedir licencia bancaria'||t==='Fundar un banco') return 'compania'; return old.apply(this,arguments); }; window.__SA112_CAT=true; }
+  function wrapPaso112(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA112_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto){ correrCredito112(); correrBancos112(); } }catch(e){} return r; };
+    window.__SA112_PASO=true;
+  }
+  function wrapLienzo112(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA112_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='perfil'&&S&&S.p&&!nino()){ const st=document.querySelector('#lienzoJuego .perfil93-stats'); if(st&&!st.querySelector('.cred112')){ const s=C().score; st.insertAdjacentHTML('beforeend','<div class="cred112" style="display:contents">'+medida('crédito · '+banda(s),s-300,650,s<560?'r':'v').replace(/<span class="n">-?\d+<\/span>/,'<span class="n">'+s+'</span>')+'</div>'); } } }catch(e){}
+      return r; };
+    window.__SA112_LIENZO=true;
+  }
+  function wrapHeredar112(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA112_HER) return;
+    window.heredar=function(){ const prev=S&&S.credito112?JSON.parse(JSON.stringify(S.credito112)):null; const r=old.apply(this,arguments);
+      try{ if(prev&&S){ S.credito112={score:clamp(Math.round(650+(prev.score-650)*.4),300,950),hist:[],mora:prev.mora,acuerdo:prev.acuerdo,testaferro:prev.testaferro||[]}; if(prev.mora) log('Heredaste también la deuda en mora de la casa: '+fmt(prev.mora.monto)+'.','mal'); } }catch(e){}
+      return r; };
+    window.__SA112_HER=true;
+  }
+  function init112(){
+    wrapComprar112(); wrapVender112(); wrapHistoria112(); wrapAcciones112(); wrapCat112(); wrapPaso112(); wrapLienzo112(); wrapHeredar112(); instalarEventos112();
+    Object.assign(window,{cupoFactor112:()=>{ const x=C().score; return x>=800?1.25:x>=680?1.1:x>=560?1:x>=440?.75:.5; },credito112:C,entrarEnMora112,correrCredito112,correrBancos112,escenaCredito112,escenaBanco112,escenaFundarBanco112,escenaLicencia112,evMora112:evMora,evLicencia112:evLicencia,intervenirBanco112:intervenir,bancos112:bancos,capMinBanco112:capMin,pedirLicencia112:pedirLicencia,requisitosBanco112:requisitos});
+  }
+  setTimeout(init112,40); setTimeout(init112,220); setTimeout(init112,650);
+  window.__SA112={version:V112};
 })();
 </script>
 
