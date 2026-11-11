@@ -971,10 +971,19 @@ svg.foto116{display:block;background:#1d2a23}
 .nombre118 input:focus{outline:2px solid var(--laton);outline-offset:1px}
 .nombre118 .error{width:100%;font-size:12.5px;color:#f0a195;min-height:1em}
 </style>
+<style id="estilos-v119">
+.suc119 table.libro td:last-child{text-align:right}
+.suc119 .jug td{color:var(--laton);font-weight:500}
+.suc119 .nota{font-size:12.5px;color:var(--humo2);margin:8px 0 2px;line-height:1.5}
+.suc119 .pasos{display:flex;gap:6px;margin:10px 0}
+.suc119 .pasos div{flex:1;text-align:center;font-size:11px;padding:7px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.08);color:var(--humo2)}
+.suc119 .pasos div.hecho{border-color:rgba(214,166,72,.4);color:var(--laton)}
+.suc119 .pasos div.ahora{border-color:var(--laton);background:rgba(214,166,72,.12);color:var(--marfil);font-weight:500}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v118</div>
+<div class="version-badge" id="versionBadge">v119</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8144,7 +8153,7 @@ function renderLienzo(){
     S.junta.forEach(j=>{
       const a=arq(j.arq);
       h+='<div class="retrato '+(j.lealtad>65?'leal':j.lealtad<35?'hostil':'')+'"><div class="fila-r">'
-        +avatarSVG(j.nombre,{edad:52,tam:44})
+        +avatarSVG(j.nombre,{sexo:j.sexo,edad:j.edad||52,tam:44})
         +'<div class="quien"><div class="nom">'+esc(j.nombre)+'</div>'
         +'<div class="rol">'+a.n+', '+j.anios+' año'+(j.anios===1?'':'s')+' en la silla</div>'
         +medida('lealtad',j.lealtad,100,j.lealtad>65?'v':j.lealtad<35?'r':'')
@@ -8565,7 +8574,7 @@ function escenaVotacion(luego){
     cuerpo:'Dos años de resultados malos y la confianza en <b>'+Math.round(confianzaJunta())+' de 100</b>. '
       +'Tienes '+pc(ctrl)+' de las acciones: no alcanza para frenar esto solo. Se vota silla por silla.',
     html:'<div class="urna" id="urna">'+S.junta.map((j,i)=>
-        '<div class="voto" id="v'+i+'"><span style="flex:0 0 36px">'+avatarSVG(j.nombre,{edad:52,tam:36})+'</span>'
+        '<div class="voto" id="v'+i+'"><span style="flex:0 0 36px">'+avatarSVG(j.nombre,{sexo:j.sexo,edad:j.edad||52,tam:36})+'</span>'
         +'<span class="quien"><b>'+esc(j.nombre)+'</b><small>'+arq(j.arq).n+', lealtad '+Math.round(j.lealtad)+'</small></span>'
         +'<span class="papeleta" id="p'+i+'">—</span></div>').join('')
       +'</div><div class="marcador" id="marcador"></div>',
@@ -22996,6 +23005,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   /* --- estado y números de cada propiedad --- */
   function estado(b){
     if(b.embargo112) return {t:'Embargada',c:'mal'};
+    if(b.suc119&&S.sucesion119&&!S.sucesion119.cerrada) return {t:'En sucesión',c:'mal'};
     if(b.clase==='negocio'&&b.neg110){ const g=b.neg110; return g.cerrado?{t:'Cerrado',c:'mal'}:(g.ult!==null&&g.ult!==undefined&&g.ult<0)?{t:'Con pérdidas',c:'mal'}:{t:'Abierto',c:'ok'}; }
     if(esHogar(b)) return {t:'Vives aquí',c:'casa'};
     if(b.clase==='renta') return b.arrendado?{t:'Arrendado',c:'ok'}:{t:'Vacío',c:'mal'};
@@ -24004,6 +24014,365 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init118(){ wrapApellido118(); wrapHeredar118(); wrapPaso118(); wrapPantalla118(); Object.assign(window,{escenaNombre118,tutorHerencia118:tutorDe,sugerenciasNombre118:sugerencias}); }
   setTimeout(init118,40); setTimeout(init118,220); setTimeout(init118,650);
   window.__SA118={version:V118};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v119 · LA SUCESIÓN DE VERDAD
+   - Al morir ya no decides quién se queda con todo: solo eliges con quién
+     sigues jugando. La herencia se reparte según el testamento (cumplido a
+     cabalidad) o, si no hay, según la ley (órdenes sucesorales, gananciales
+     del cónyuge, representación de los nietos).
+   - Todo pasa primero a "la sucesión de X": los bienes quedan congelados
+     (no se venden), la plata queda retenida (recibes un anticipo) y las
+     acciones las tiene la sucesión. Se tramita por notaría (si todos firman)
+     o en juicio (años, abogados y negociaciones con los otros herederos).
+   - Al final, la partición: derechos en común y proindiviso, bienes enteros
+     para cada uno (compensando en plata) o vender todo y repartir.
+   - En las compañías, cada heredero con al menos 10% exige su silla en la
+     junta (ya no hay un bloque genérico de "Hermanos X").
+   ========================================================================== */
+(function(){
+  const V119='v119';
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const primer=n=>String(n||'').split(' ')[0];
+  const neto=b=>Math.max(0,(b.valor||0)-(b.hipoteca||0));
+  const SUC=()=>S&&S.sucesion119&&!S.sucesion119.cerrada?S.sucesion119:null;
+  const UMBRAL_JUNTA=.10;
+
+  /* ---------- 1. quién hereda y cuánto (con el estado del causante) ---------- */
+  function calcular119(h){
+    const out={base:'ley',lineas:[],her:[],fundacionPct:0};
+    const ap=S.p.apellido;
+    const pa=S.familia&&S.familia.pareja;
+    const cony=pa&&pa.casados&&pa.vivo!==false&&!pa.divorcioEnCurso?pa:null;
+    const gan=cony&&!pa.separacionBienes?.5:0;
+    if(cony) out.lineas.push(gan?'Por la sociedad conyugal, la mitad de lo que hay (gananciales) es de '+esc(primer(cony.nombre))+' y no entra a la herencia.':esc(primer(cony.nombre))+' firmó capitulaciones: no recibe gananciales.');
+    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0);
+    const estirpes=vivos.map(x=>({miembros:[{key:'h:'+x.nombre,nombre:x.nombre+' '+apellidoCompletoDeHijo(x),rel:x.sexo==='m'?'hija':'hijo',sexo:x.sexo}]}));
+    let extras=[]; try{ extras=(typeof window.herederosExtra108==='function'?window.herederosExtra108():[]).filter(x=>x._huerfano108); }catch(e){}
+    const porPadre={}; extras.forEach(g=>{ const k=g._padre108||'?'; (porPadre[k]=porPadre[k]||[]).push(g); });
+    Object.keys(porPadre).forEach(k=>estirpes.push({padre:k,miembros:porPadre[k].map(g=>({key:'n:'+g.nombre,nombre:g.nombre+' '+ap,rel:g.sexo==='m'?'nieta':'nieto',sexo:g.sexo}))}));
+    const T=S.testamento;
+    if(estirpes.length){
+      const masa=1-gan, n=estirpes.length; let partes=estirpes.map(()=>1/n);
+      const iT=T&&T.tipo==='hijo'?estirpes.findIndex(e=>e.miembros.some(m=>m.key==='h:'+T.nombre)):-1;
+      if(iT>=0){ out.base='testamento'; partes=estirpes.map((e,i)=>.5/n+(i===iT?.5:0));
+        out.lineas.push('Testamento: la mitad (la legítima) se reparte por igual entre los hijos; la otra mitad (cuarta de mejoras y libre disposición) es para '+esc(T.nombre)+'.'); }
+      else if(T&&T.tipo==='fundacion'){ out.base='testamento'; partes=estirpes.map(()=>.75/n); out.fundacionPct=.25*masa;
+        out.lineas.push('Testamento: la cuarta de libre disposición va a la fundación; el resto, por igual entre los hijos.'); }
+      else if(T&&T.tipo==='parejo'){ out.base='testamento'; out.lineas.push('Testamento: por partes iguales entre los hijos.'); }
+      else out.lineas.push('Sin testamento, manda la ley: los hijos heredan por partes iguales'+(Object.keys(porPadre).length?', y los hijos de un hijo fallecido reciben la parte de su papá o mamá':'')+'.');
+      estirpes.forEach((e,i)=>e.miembros.forEach(m=>out.her.push(Object.assign({},m,{pct:partes[i]*masa/e.miembros.length}))));
+    } else {
+      const masa=1-gan;
+      const padres=(S.parientes||[]).filter(p=>p.vivo&&/^(padre|madre)$/.test(p.rel));
+      if(T&&T.tipo==='pariente'){ out.base='testamento'; const p=(S.parientes||[]).find(x=>x.pid===T.pid);
+        if(p) out.her.push({key:'p:'+p.pid,nombre:nombrePariente(p),rel:p.rel,sexo:p.sexo,pct:masa}); out.lineas.push('Testamento: todo para '+esc(p?nombrePariente(p):'el pariente nombrado')+'.'); }
+      else if(padres.length){
+        const parte=cony?masa*.5:masa; padres.forEach(p=>out.her.push({key:'p:'+p.pid,nombre:nombrePariente(p),rel:p.rel,sexo:p.sexo,pct:parte/padres.length}));
+        if(cony) out.her.push({key:'c2',nombre:cony.nombre,rel:cony.sexo==='m'?'esposa':'esposo',sexo:cony.sexo,pct:masa*.5,_cony:true});
+        out.lineas.push('Sin hijos, la ley llama a los padres'+(cony?' junto con el cónyuge, mitad y mitad':'')+'.');
+      } else {
+        const herm=(S.parientes||[]).filter(p=>p.vivo&&/^herman/.test(p.rel));
+        const lista=herm.map(p=>({key:'p:'+p.pid,nombre:nombrePariente(p),rel:p.rel,sexo:p.sexo}));
+        if(h&&!lista.some(m=>m.key==='p:'+h.pid)) lista.push({key:'x:'+h.nombre,nombre:h.nombre+' '+ap,rel:h._sucesorRel||'pariente',sexo:h.sexo});
+        const parte=cony?masa*.5:masa; lista.forEach(m=>out.her.push(Object.assign({},m,{pct:parte/lista.length})));
+        if(cony) out.her.push({key:'c2',nombre:cony.nombre,rel:cony.sexo==='m'?'esposa':'esposo',sexo:cony.sexo,pct:masa*.5,_cony:true});
+        out.lineas.push('Sin hijos ni padres, heredan los hermanos (y los sobrinos en lugar de un hermano)'+(cony?', con el cónyuge llevándose la mitad':'')+'.');
+      }
+    }
+    if(cony&&gan){ const c=out.her.find(x=>x._cony); if(c) c.pct+=gan; else out.her.push({key:'c',nombre:cony.nombre,rel:cony.sexo==='m'?'esposa':'esposo',sexo:cony.sexo,pct:gan,_cony:true}); }
+    // quién es el jugador
+    const kj=h?(vivos.includes(h)?'h:'+h.nombre:(h._huerfano108?'n:'+h.nombre:(h.pid&&out.her.some(x=>x.key==='p:'+h.pid)?'p:'+h.pid:'x:'+h.nombre))):null;
+    out.her.forEach(x=>x.jugador=x.key===kj);
+    if(h&&!out.her.some(x=>x.jugador)) out.her.push({key:kj,nombre:h.nombre+' '+ap,rel:h._sucesorRel||(h.sexo==='m'?'hija':'hijo'),sexo:h.sexo,pct:0,jugador:true});
+    out.legados=((S.testamentoRico&&S.testamentoRico.legados)||[]).filter(l=>l.tipo==='bien'||l.tipo==='acciones').map(l=>Object.assign({},l));
+    if(out.legados.length) out.lineas.push('Se cumplen también los legados del testamento: '+out.legados.length+'.');
+    return out;
+  }
+  const pctTxt=x=>(Math.round(x*1000)/10).toString().replace('.',',')+'%';
+  function tablaHer(her,E){
+    const tot=E?her.reduce((a,x)=>a+Math.max(0,x.E||0),0):1;
+    return '<table class="libro">'+her.map(x=>'<tr class="'+(x.jugador?'jug':'')+'"><td>'+esc(x.nombre)+' <span style="color:var(--humo2)">· '+esc(x.rel)+(x.jugador?' · tú':'')+'</span></td><td>'+(E?pctTxt(tot>0?Math.max(0,x.E)/tot:0)+' · '+fmt(Math.max(0,x.E)):pctTxt(x.pct))+'</td></tr>').join('')+'</table>';
+  }
+
+  /* ---------- 2. en la pantalla de sucesión: solo eliges con quién sigues ---------- */
+  let planPrevio=null;
+  function wrapPantalla119(){
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA119_PS) return;
+    window.pantallaSucesion=function(vivo){ const r=old.apply(this,arguments);
+      try{ if(!vivo){
+        const host=document.querySelector('#escenaHost .lienzo'); if(!host) return r;
+        const rel=host.querySelector('.relato'); if(rel) rel.innerHTML=rel.innerHTML.replace(/Con quien elijas sigues jugando:.*$/,'Eliges con quién sigues jugando. <b>La herencia no la repartes tú</b>: se cumple el testamento o, si no hay, la ley.');
+        const plan=calcular119(null);
+        host.querySelectorAll('#eleccion .carta').forEach(b=>{ const t=b.textContent;
+          if(/fundación/.test(t)&&/Dejarlo todo/.test(t)){ b.remove(); return; }
+          const her=plan.her.find(x=>!x._cony&&t.includes(x.nombre.split(' ').slice(0,2).join(' ')));
+          const txt=b.querySelector('.txt'); if(txt&&!txt.querySelector('.her119')) txt.insertAdjacentHTML('beforeend',' <b class="her119">'+(her&&her.pct>0?'Por '+(plan.base==='ley'?'ley':'testamento')+' le toca el '+pctTxt(her.pct)+'.':'No le toca herencia: '+(plan.base==='ley'?'la ley no lo llama a heredar.':'el testamento no lo incluye.'))+'</b>'); });
+      } }catch(e){}
+      return r; };
+    window.__SA119_PS=true;
+  }
+  function wrapReparto119(){
+    const old=window.modalReparto; if(typeof old!=='function'||window.__SA119_MR) return;
+    window.modalReparto=function(h,vivo){
+      if(vivo) return old.apply(this,arguments);
+      const plan=calcular119(h); planPrevio=plan;
+      escena({rubro:plan.base==='ley'?'Sucesión sin testamento':'Lectura del testamento',titulo:'Así queda la herencia',ancho:true,clase:'suc119',
+        cuerpo:'Antes de repartir, todo pasa a <b>la sucesión de '+esc(S.p.nombre+' '+S.p.apellido)+'</b>. Hasta la partición, los bienes no se pueden vender y la plata queda retenida; tú recibes un anticipo.',
+        html:tablaHer(plan.her)+'<div class="nota">'+plan.lineas.join(' ')+(plan.fundacionPct?' La fundación recibe el '+pctTxt(plan.fundacionPct)+'.':'')+'</div>',
+        opciones:[{t:'Seguir como '+esc(h.nombre),cat:'familia',d:'Abres la sucesión. Puede ser rápida en notaría, si todos firman, o un juicio de años.',run:()=>heredar(h,1,false,false)},
+          {t:'Elegir a otra persona',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]});
+    };
+    window.__SA119_MR=true;
+  }
+
+  /* ---------- 3. abrir la sucesión ---------- */
+  function wrapHeredar119(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA119_HER) return;
+    window.heredar=function(h,frac,vivo,pleito){
+      if(vivo||!h) return old.apply(this,arguments);
+      const plan=calcular119(h), propios=new Set((h.bienes||[]).map(b=>b.uid)), causante=S.p.nombre+' '+S.p.apellido, genAntes=S.gen;
+      // la ley (o el testamento) reemplaza el castigo genérico por "reclamos" del reparto viejo
+      const T0=S.testamento, pleitoF=window.pleitoDeHermanos, prestF=window.moverPrestigio;
+      S.testamento={tipo:'parejo',_v119:true};
+      window.pleitoDeHermanos=function(){ return {extra:0,texto:''}; };
+      window.moverPrestigio=function(n,motivo){ if(motivo==='una sucesión ordenada'&&!T0) return; return prestF.apply(this,arguments); };
+      let r;
+      try{ r=old.call(this,h,1,false,false); }
+      finally{ window.pleitoDeHermanos=pleitoF; window.moverPrestigio=prestF; if(S&&S.gen===genAntes) S.testamento=T0; }
+      if(!S||S.gen===genAntes) return r;   // no se completó (p. ej. la elección del heredero menor)
+      try{ abrirSucesion119(plan,propios,causante); }catch(e){ console.error(e); }
+      return r;
+    };
+    window.__SA119_HER=true;
+  }
+  function abrirSucesion119(plan,propios,causante){
+    if(S.testamento&&S.testamento._v119) S.testamento=null;
+    const bienes=(S.bienes||[]).filter(b=>!propios.has(b.uid));
+    const caja0=(S.efectivo||0)+(S.portafolio||[]).reduce((a,p)=>a+p.valor,0);
+    const jug=plan.her.find(x=>x.jugador)||{pct:0};
+    const p=jug.pct||0;
+    const anticipo=Math.round(caja0*p*.15*100)/100;
+    const suc={causante,anio:S.anio,base:plan.base,lineas:plan.lineas,her:plan.her.map(x=>Object.assign({},x)),bienes:bienes.map(b=>b.uid),
+      caja:Math.max(0,caja0-anticipo),anticipo,via:null,anios:0,duracion:null,costos:0,cerrada:false,legadosAcc:(plan.legados||[]).filter(l=>l.tipo==='acciones'),fundacionPct:plan.fundacionPct||0};
+    S.efectivo=anticipo; S.portafolio=[];
+    if(suc.fundacionPct>0){ const f=suc.caja*suc.fundacionPct; suc.caja-=f; log('La fundación recibió '+fmt(f)+' por la cuarta de libre disposición.','hito'); }
+    bienes.forEach(b=>{ b.suc119=true; });
+    const M0=suc.caja+bienes.reduce((a,b)=>a+neto(b),0); suc.M0=M0;
+    const totPct=suc.her.reduce((a,x)=>a+x.pct,0)||1;
+    suc.her.forEach(x=>{ x.E=M0*x.pct/totPct; });
+    // legados de bienes: se adjudican de una
+    (plan.legados||[]).filter(l=>l.tipo==='bien').forEach(l=>{ const b=bienes.find(x=>x.uid===l.bienUid); const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(b&&x) adjudicar(suc,b,x,'por legado del testamento'); });
+    // acciones: tu parte directa; el resto, en cabeza de la sucesión
+    companias().forEach(e=>{ const tu=(e.holders||[]).find(y=>y.id==='tu'); if(!tu||!(tu.n>0)) return;
+      const n0=tu.n, mio=Math.round(n0*p), resto=n0-mio; tu.n=mio;
+      if(resto>0){ e.holders.push({id:'suc119',nombre:'Sucesión de '+causante,tipo:'familia',n:resto});
+        if(resto/totalAcciones(e)>=UMBRAL_JUNTA&&Array.isArray(e.junta)) e.junta.push({nombre:'Albacea de la sucesión de '+primer(causante),arq:'familiar',lealtad:50,anios:0,albacea119:true}); } });
+    S.sucesion119=suc;
+    // el cónyuge que recibe gananciales: cuando muera, sus hijos heredan lo suyo
+    suc.her.filter(x=>x._cony&&x.E>0).forEach(x=>{ const pr=(S.parientes||[]).find(q=>q.vivo&&q.nombre===primer(x.nombre)&&/^(madre|padre)$/.test(q.rel));
+      if(pr) pr.herencia119={key:x.key,hijos:Math.max(1,suc.her.filter(y=>!y._cony&&/hij/.test(y.rel)).length),causante:causante}; });
+    log('Se abrió <b>la sucesión de '+esc(causante)+'</b>. '+(p>0?'Te corresponde el '+pctTxt(p)+'; recibiste un anticipo de '+fmt(anticipo)+'.':'No te corresponde herencia: '+(plan.base==='ley'?'la ley llama a otros.':'el testamento no te incluye.')),'hito');
+    if(nino()){ suc.via='notarial'; suc.duracion=1; suc.tutor=true; log('Tu tutor llevó la sucesión a la notaría.'); }
+    else setTimeout(()=>{ try{ if(!document.querySelector('#escenaHost .lienzo')) escenaVia119(); else S._via119pend=true; }catch(e){} },120);
+  }
+  function adjudicar(suc,b,x,motivo){
+    const v=neto(b); x.E-=v; suc.bienes=suc.bienes.filter(u=>u!==b.uid);
+    if(x.jugador){ b.suc119=false; } else { S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar&&S.hogar.vivienda===b.uid){ S.hogar.vivienda=null; } }
+    if(x.E<0){ const debe=-x.E; x.E=0; if(x.jugador){ const pg=Math.min(S.efectivo,debe); S.efectivo-=pg; suc.caja+=pg; } else suc.caja+=debe; }
+    log('<b>'+esc(b.nombre)+'</b> quedó para '+(x.jugador?'ti':esc(x.nombre))+(motivo?' ('+motivo+')':'')+'.');
+  }
+  const otros=suc=>suc.her.filter(x=>!x.jugador&&x.E>0);
+  function armonia(suc){ const o=otros(suc); if(!o.length) return 1; const af=o.map(x=>{ const p=parienteDe(x); return p?(p.afecto||55):60; }); return af.reduce((a,b)=>a+b,0)/af.length/100; }
+  function parienteDe(x){ const n=primer(x.nombre); return (S.parientes||[]).find(p=>p.vivo&&p.nombre===n)||null; }
+  function afecto(x,d){ const p=parienteDe(x); if(p) p.afecto=clamp((p.afecto||55)+d,0,100); }
+
+  /* ---------- 4. notaría o juicio ---------- */
+  function escenaVia119(){
+    const suc=SUC(); if(!suc||suc.via) return;
+    const o=otros(suc), prob=probNotaria(suc);
+    escena({rubro:'La sucesión de '+esc(suc.causante),titulo:'¿Notaría o juzgado?',ancho:true,clase:'suc119',
+      cuerpo:'Para repartir hay que liquidar la sucesión. En <b>notaría</b> es rápido y barato, pero todos los herederos tienen que firmar. Si alguno se niega, va a <b>juicio</b>: años de abogados y negociaciones.',
+      html:tablaHer(suc.her,true)+'<div class="nota">'+(o.length?'Probabilidad de que todos firmen: '+Math.round(prob*100)+'%.':'Eres el único heredero: la notaría es un trámite.')+'</div>',
+      opciones:[{t:'Intentar en notaría',cat:'legado',d:'Un año. Cuesta cerca del 2% de la herencia en derechos notariales y abogado.',run:()=>{ irNotaria(suc); }},
+        {t:'Ir directo a juicio',cat:'riesgo',d:'Entre 2 y 5 años. Cada año se va cerca del 1,5% en abogados, peritos y costas.',run:()=>{ irJuicio(suc,'Decidiste llevar la sucesión a juicio.'); }}]});
+  }
+  function probNotaria(suc){ const o=otros(suc); if(!o.length) return 1; return clamp(.9-(o.length-1)*.12+(suc.base==='testamento'?.08:0)+(armonia(suc)-.55)*.6,.12,.95); }
+  function irNotaria(suc){
+    const costo=suc.M0*.02; suc.caja=Math.max(0,suc.caja-costo); suc.costos+=costo;
+    if(chance(probNotaria(suc))){ suc.via='notarial'; suc.duracion=1; log('Todos los herederos firmaron: la sucesión de '+esc(suc.causante)+' se liquida en notaría.','bien'); }
+    else { const x=pick(otros(suc)); afecto(x,-6); irJuicio(suc,'<b>'+esc(x.nombre)+'</b> no firmó en la notaría. La sucesión se va a juicio.'); }
+  }
+  function irJuicio(suc,msg){ suc.via='judicial'; suc.duracion=Math.min(6,ri(2,3)+Math.floor(otros(suc).length/2)); log(msg+' El abogado calcula unos '+suc.duracion+' años.','mal'); }
+
+  /* ---------- 5. cada año: costos, negociaciones y partición ---------- */
+  function herenciaConyuge119(){
+    (S.parientes||[]).forEach(pr=>{ const H=pr.herencia119; if(!H||H.hecha||pr.vivo!==false) return; H.hecha=true;
+      const s0=S.sucesion119, x=s0&&s0.her.find(y=>y.key===H.key); const parte=1/H.hijos; let plata=0;
+      if(x&&s0.cerrada) plata=Math.max(0,x.E)*parte*.9;   // su parte en plata y bienes, menos el trámite
+      S.efectivo+=plata;
+      const nuevos=[]; companias().forEach(e=>{ const hd=(e.holders||[]).find(y=>y.id==='her119_'+H.key); if(!hd) return;
+        const mio=Math.round(hd.n*parte), resto=hd.n-mio, tu=e.holders.find(y=>y.id==='tu'); if(tu) tu.n+=mio;
+        const herm=e.holders.filter(y=>y.heredero119&&y!==hd&&!/^her119_c/.test(y.id));
+        herm.forEach(y=>{ y.n+=Math.round(resto/Math.max(1,herm.length)); }); e.holders=e.holders.filter(y=>y!==hd);
+        if(Array.isArray(e.junta)) for(let i=e.junta.length-1;i>=0;i--) if(e.junta[i].nombre&&e.junta[i].nombre.startsWith(pr.nombre+' ')&&e.junta[i].heredero119) e.junta.splice(i,1);
+        nuevos.push(e.nombre); });
+      log('Murió <b>'+esc(pr.nombre)+'</b>: sus hijos heredaron lo que recibió de la sucesión de '+esc(H.causante)+'. A ti te tocó '+(plata>0?fmt(plata):'tu parte')+(nuevos.length?' y su participación en '+listaY(nuevos.map(n=>esc(n))):'')+'.','hito');
+    });
+  }
+  function anual119(){
+    try{ herenciaConyuge119(); }catch(e){}
+    const suc=SUC(); if(!suc) return;
+    if(!suc.via){ if(S._via119pend){ delete S._via119pend; cola.push(eventoVia(suc)); return; } irJuicio(suc,'Nadie movió el trámite y la sucesión terminó en juicio.'); }
+    suc.anios++;
+    if(suc.via==='judicial'){ const c=suc.M0*.015; suc.caja=Math.max(0,suc.caja-c); suc.costos+=c; }
+    if(suc.anios>=suc.duracion){ if(nino()||suc.tutor) particion(suc,'proindiviso',true); else cola.push(eventoParticion(suc)); return; }
+    if(suc.via==='judicial'&&!nino()&&otros(suc).length&&chance(.8)){ const ev=eventoNegociacion(suc); if(ev) cola.push(ev); }
+  }
+  function eventoVia(suc){ return {p:9,c:()=>!!SUC()&&!SUC().via,t:()=>'Hay que decidir cómo se liquida <b>la sucesión de '+esc(suc.causante)+'</b>.',
+    o:[{t:'Intentar en notaría',f:()=>{ irNotaria(suc); return ''; }},{t:'Ir a juicio',f:()=>{ irJuicio(suc,'La sucesión va a juicio.'); return ''; }}]}; }
+  function eventoNegociacion(suc){
+    const x=pick(otros(suc)); if(!x) return null;
+    const B=(S.bienes||[]).filter(b=>suc.bienes.includes(b.uid));
+    const tipo=pick(B.length?['quiere','plata','pelea','perito','quiere']:['plata','pelea','perito']);
+    const nom='<b>'+esc(x.nombre)+'</b> ('+esc(x.rel)+')';
+    if(tipo==='quiere'){ const b=B.slice().sort((a,c)=>neto(c)-neto(a))[ri(0,Math.min(2,B.length-1))];
+      return {p:9,c:()=>!!SUC()&&S.bienes.includes(b),t:()=>'Sucesión de '+esc(suc.causante)+': '+nom+' exige quedarse con <b>'+esc(b.nombre)+'</b> ('+fmt(neto(b))+'), a cuenta de su parte.',
+        o:[{t:'Que se la quede',f:()=>{ adjudicar(suc,b,x,'acuerdo entre herederos'); afecto(x,8); return 'Uno menos para pelear.'; }},
+           {t:'Quedártela tú, a cuenta de tu parte',f:()=>{ const j=suc.her.find(y=>y.jugador); if(!j) return ''; adjudicar(suc,b,j,'te la adjudicaron'); afecto(x,-8); if(chance(.5)){ suc.duracion++; return 'Se puso bravo y el juicio se alargó un año.'; } return 'Aceptó, de mala gana.'; }},
+           {t:'Negarte: que lo decida el juez',f:()=>{ afecto(x,-10); suc.duracion++; return 'El juicio se alarga un año más.'; }}]};
+    }
+    if(tipo==='plata'){ const monto=Math.round(Math.min(suc.caja,x.E*.3)*100)/100;
+      return {p:9,c:()=>!!SUC(),t:()=>'Sucesión de '+esc(suc.causante)+': '+nom+' dice que necesita plata ya y pide un anticipo de '+fmt(monto)+' de la caja de la sucesión.',
+        o:[{t:'Dárselo',f:()=>{ if(monto<=0) return 'No había caja.'; suc.caja-=monto; x.E-=monto; afecto(x,6); return 'Recibió su anticipo. Se calmó.'; }},
+           {t:'Vender un bien de la sucesión y repartir',f:()=>{ const B2=(S.bienes||[]).filter(b=>suc.bienes.includes(b.uid)); if(!B2.length) return 'No había qué vender.'; const b=B2.sort((a,c)=>neto(a)-neto(c))[0]; suc.caja+=neto(b)*.9; suc.bienes=suc.bienes.filter(u=>u!==b.uid); S.bienes=S.bienes.filter(y=>y.uid!==b.uid); afecto(x,4); return 'Se vendió '+b.nombre+' por '+fmt(neto(b)*.9)+'. La plata quedó en la sucesión.'; }},
+           {t:'Negarte',f:()=>{ afecto(x,-8); if(chance(.4)){ suc.duracion++; return 'Pidió medidas cautelares y el juicio se alargó.'; } return 'Se quedó esperando, sin ganas.'; }}]};
+    }
+    if(tipo==='pelea'){ const tr=suc.M0*.05;
+      return {p:9,c:()=>!!SUC(),t:()=>'Sucesión de '+esc(suc.causante)+': '+nom+' dice que el reparto es injusto'+(suc.base==='testamento'?' y quiere impugnar el testamento':' y reclama más por haber cuidado a '+esc(primer(suc.causante))+' los últimos años')+'.',
+        o:[{t:'Transar: reconocerle '+fmt(tr),f:()=>{ const j=suc.her.find(y=>y.jugador); const tot=suc.her.filter(y=>y!==x).reduce((a,y)=>a+Math.max(0,y.E),0)||1; suc.her.filter(y=>y!==x).forEach(y=>{ y.E-=tr*Math.max(0,y.E)/tot; }); x.E+=tr; afecto(x,10); if(suc.duracion>suc.anios+1) suc.duracion--; return 'Firmaron una transacción. El juicio se acorta.'; }},
+           {t:'Pelear hasta el final',f:()=>{ afecto(x,-12); const c=suc.M0*.01; suc.caja=Math.max(0,suc.caja-c); suc.costos+=c; if(chance(.5)){ suc.duracion++; return 'Más audiencias, más abogados: un año más.'; } return 'El juez le dio la razón a la sucesión. Perdió.'; }}]};
+    }
+    const pc0=suc.M0*.005;
+    return {p:9,c:()=>!!SUC(),t:()=>'Sucesión de '+esc(suc.causante)+': el juez ordenó el inventario y avalúo de los bienes. Los peritos oficiales tienen una fila de meses.',
+      o:[{t:'Pagar un perito privado ('+fmt(pc0)+')',f:()=>{ suc.caja=Math.max(0,suc.caja-pc0); suc.costos+=pc0; if(suc.duracion>suc.anios+1) suc.duracion--; return 'Con el avalúo listo, el juicio se adelanta.'; }},
+         {t:'Esperar el turno',f:()=>'El expediente sigue en el despacho.'}]};
+  }
+
+  /* ---------- 6. la partición ---------- */
+  function eventoParticion(suc){
+    const j=suc.her.find(y=>y.jugador)||{E:0}; const B=(S.bienes||[]).filter(b=>suc.bienes.includes(b.uid));
+    return {p:9,c:()=>!!SUC(),t:()=>'<b>La sucesión de '+esc(suc.causante)+'</b> está lista para la partición'+(suc.via==='judicial'?' (el juez dictó sentencia)':'')+'. '+(B.length?'Quedan '+B.length+' bien'+(B.length===1?'':'es')+' por repartir y ':'')+fmt(suc.caja)+' en caja. ¿Cómo se reparte?',
+      o:[{t:'Derechos en común y proindiviso',f:()=>{ particion(suc,'proindiviso'); return ''; }},
+         {t:'Cada uno con bienes enteros, compensando en plata',f:()=>{ particion(suc,'adjudicacion'); return ''; }},
+         {t:'Vender todo y repartir la plata',f:()=>{ particion(suc,'venta'); return ''; }}]};
+  }
+  function particion(suc,modo,auto){
+    const B=(S.bienes||[]).filter(b=>suc.bienes.includes(b.uid));
+    const M=suc.caja+B.reduce((a,b)=>a+neto(b),0), totE=suc.her.reduce((a,x)=>a+Math.max(0,x.E),0)||1;
+    suc.her.forEach(x=>{ x.E=Math.max(0,x.E)*M/totE; });
+    const j=suc.her.find(y=>y.jugador)||{E:0}; const p=j.E/(M||1);
+    let msg='';
+    if(modo==='adjudicacion'&&otros(suc).length&&!chance(clamp(.45+armonia(suc)*.5,.3,.9))){ modo='proindiviso'; msg='No hubo acuerdo sobre quién se queda con qué: el juez dejó todo en común y proindiviso. '; }
+    if(modo==='venta'){ B.forEach(b=>{ suc.caja+=neto(b)*.9; S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar.vivienda===b.uid) S.hogar.vivienda=null; });
+      const recibe=suc.caja*p; S.efectivo+=recibe; msg+='Se vendieron '+B.length+' bienes al 90% y repartieron la plata: te tocaron '+fmt(recibe)+'.'; }
+    else if(modo==='adjudicacion'){
+      const R=new Map(suc.her.map(x=>[x,x.E]));
+      const prio=(x,b)=>R.get(x)+((x.jugador&&S.hogar.vivienda===b.uid)?1e12:0);   // tu casa, para ti
+      B.slice().sort((a,c)=>neto(c)-neto(a)).forEach(b=>{ let mejor=null; R.forEach((v,x)=>{ if(!mejor||prio(x,b)>prio(mejor,b)) mejor=x; });
+        R.set(mejor,R.get(mejor)-neto(b)); if(mejor.jugador) b.suc119=false; else { S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar.vivienda===b.uid) S.hogar.vivienda=null; } });
+      const saldo=R.get(j)||0; S.efectivo+=saldo;
+      const mios=B.filter(b=>S.bienes.includes(b));
+      msg+='Te adjudicaron '+(mios.length?listaY(mios.map(b=>esc(b.nombre))):'ningún bien')+(saldo>=0?' y recibiste '+fmt(saldo)+' en plata.':'; como te tocó más de tu parte, pagaste '+fmt(-saldo)+' de compensación.');
+    } else {
+      const recibe=suc.caja*p; S.efectivo+=recibe;
+      B.forEach(b=>{ if(p<=0.001){ S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar.vivienda===b.uid) S.hogar.vivienda=null; return; }
+        if(p<.999){ b.cuota119=Math.round(p*1000)/1000; b.valorTotal119=b.valor; b.valor=b.valor*p; b.hipoteca=(b.hipoteca||0)*p; if(isFinite(b.cuota)) b.cuota=b.cuota*p; b.precioCompra=isFinite(b.precioCompra)?b.precioCompra*p:b.valor;
+          if(!/derechos del/.test(b.nombre)) b.nombre=b.nombre+' (derechos del '+pctTxt(p)+')'; } });
+      msg+=(B.length?(p>0.001?'Quedaste dueño del '+pctTxt(p)+' de '+B.length+' bien'+(B.length===1?'':'es')+', en común con los demás herederos':'Los bienes quedaron para los demás herederos')+'. ':'')+'Te tocaron '+fmt(recibe)+' de la caja.';
+    }
+    B.forEach(b=>{ delete b.suc119; });
+    repartirAcciones(suc);
+    (S.sociedades||[]).forEach(x=>{ if(isFinite(x.capital)&&p<.999) x.capital*=p; });
+    suc.cerrada=true; suc.cierre=S.anio; suc.modo=modo;
+    const resumen='Se cerró la sucesión de '+esc(suc.causante)+' tras '+suc.anios+' año'+(suc.anios===1?'':'s')+(suc.via==='judicial'?' de juicio':' en notaría')+'. Costó '+fmt(suc.costos)+'. ';
+    log(resumen+msg,'hito'); hito('Se liquidó la sucesión de '+suc.causante);
+    if(auto&&suc.tutor) log('Tu tutor firmó la partición en común y proindiviso.');
+    return auto?'':msg;
+  }
+  function repartirAcciones(suc){
+    const O=suc.her.filter(x=>!x.jugador);
+    companias().forEach(e=>{
+      const h=(e.holders||[]).find(y=>y.id==='suc119'); if(!h) return;
+      let pool=h.n; e.holders=e.holders.filter(y=>y!==h);
+      const tot=totalAcciones(e)+pool;
+      const asign=new Map();
+      (suc.legadosAcc||[]).filter(l=>l.empresa===e.nombre).forEach(l=>{ const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(!x) return; const n=Math.min(pool,Math.round(tot*(l.pct||0)/100)); pool-=n; asign.set(x,(asign.get(x)||0)+n); });
+      const totPct=O.reduce((a,x)=>a+x.pct,0);
+      O.forEach(x=>{ const n=totPct>0?Math.round(pool*x.pct/totPct):0; asign.set(x,(asign.get(x)||0)+n); });
+      asign.forEach((n,x)=>{ if(n<=0) return; if(x.jugador){ const tu=e.holders.find(y=>y.id==='tu'); if(tu) tu.n+=n; return; }
+        e.holders.push({id:'her119_'+x.key,nombre:x.nombre,tipo:'familia',n,heredero119:true}); });
+      // la junta: fuera el albacea; entra cada heredero que tenga el porcentaje
+      if(Array.isArray(e.junta)){
+        for(let i=e.junta.length-1;i>=0;i--) if(e.junta[i].albacea119) e.junta.splice(i,1);
+        const T=totalAcciones(e), nuevos=[];
+        asign.forEach((n,x)=>{ if(x.jugador||n/T<UMBRAL_JUNTA||e.junta.some(s=>s.nombre===x.nombre)) return; const pr=parienteDe(x);
+          e.junta.push({nombre:x.nombre,sexo:x.sexo,edad:pr&&pr.edad,arq:'familiar',lealtad:clamp(Math.round(pr?pr.afecto:55),15,90),anios:0,heredero119:true}); nuevos.push(x.nombre+' ('+pctTxt(n/T)+')'); });
+        if(nuevos.length) log('En la junta de <b>'+esc(e.nombre)+'</b> entraron los herederos que tienen el porcentaje: '+listaY(nuevos.map(n=>esc(n)))+'.','hito');
+      }
+    });
+  }
+
+  /* ---------- 7. en el juego: congelar ventas, acción, perfil ---------- */
+  function wrapVender119(){
+    const old=window.venderBien; if(typeof old!=='function'||window.__SA119_VB) return;
+    window.venderBien=function(b){ if(b&&b.suc119&&SUC()&&SUC().bienes.includes(b.uid)){ if(typeof aviso==='function') aviso('Está en la sucesión: no se puede vender hasta la partición.'); return 0; } return old.apply(this,arguments); };
+    window.__SA119_VB=true;
+  }
+  function wrapFicha119(){
+    const old=window.escenaPropiedad109; if(typeof old!=='function'||old.__v119) return;   // la v109 se vuelve a registrar: se envuelve cada vez
+    window.escenaPropiedad109=function(uid){ const r=old.apply(this,arguments);
+      try{ const b=(S.bienes||[]).find(x=>x.uid===uid); if(b&&b.suc119&&SUC()){ document.querySelectorAll('#eleccion .carta').forEach(c=>{ if(/Venderla|hipoteca|Hipotecar/i.test(c.textContent)){ c.disabled=true; const t=c.querySelector('.txt'); if(t) t.textContent='Está en la sucesión: no se puede vender ni hipotecar hasta la partición.'; } }); } }catch(e){}
+      return r; };
+    window.escenaPropiedad109.__v119=true; window.__SA119_FI=true;
+  }
+  function escenaSucesion119(){
+    const suc=SUC(); if(!suc) return;
+    const pasos=['Apertura','Inventario','Negociación','Partición'], k=!suc.via?0:suc.anios<1?1:suc.anios<suc.duracion?2:3;
+    const B=(S.bienes||[]).filter(b=>suc.bienes.includes(b.uid));
+    const html='<div class="pasos">'+pasos.map((x,i)=>'<div class="'+(i<k?'hecho':i===k?'ahora':'')+'">'+x+'</div>').join('')+'</div>'
+      +tablaHer(suc.her,true)+'<table class="libro" style="margin-top:10px"><tr><td>Vía</td><td>'+(suc.via==='notarial'?'Notaría':suc.via==='judicial'?'Juicio':'Por decidir')+'</td></tr><tr><td>Tiempo</td><td>'+(suc.duracion?'año '+(suc.anios+1)+' de unos '+suc.duracion:'—')+'</td></tr><tr><td>Bienes congelados</td><td>'+B.length+' · '+fmt(B.reduce((a,b)=>a+neto(b),0))+'</td></tr><tr><td>Plata retenida</td><td>'+fmt(suc.caja)+'</td></tr><tr><td>Costos hasta hoy</td><td>'+fmt(suc.costos)+'</td></tr></table>'
+      +'<div class="nota">'+suc.lineas.join(' ')+'</div>';
+    const acuerdo=suc.M0*.04, ops=[];
+    if(!suc.via) ops.push({t:'Decidir: notaría o juicio',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaVia119(); }});
+    if(suc.via==='judicial'&&suc.duracion>suc.anios+1) ops.push({t:'Ofrecer un arreglo a los demás herederos',cat:'familia',d:'Pones '+fmt(acuerdo)+' de tu bolsillo para que firmen. Si aceptan, la partición llega el año entrante.',dis:S.efectivo<acuerdo?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+      S.mov--; S.efectivo-=acuerdo; const o=otros(suc), tot=o.reduce((a,x)=>a+x.E,0)||1; o.forEach(x=>{ x.E+=acuerdo*x.E/tot; afecto(x,6); });
+      if(chance(clamp(.4+armonia(suc)*.5,.3,.9))){ suc.duracion=suc.anios+1; log('Los herederos aceptaron el arreglo: la partición será el año entrante.','bien'); } else log('Recibieron la plata, pero uno no firmó. El juicio sigue.','mal');
+      cerrarModal(); render(); }});
+    escena({rubro:'Tu herencia',titulo:'La sucesión de '+esc(suc.causante),ancho:true,clase:'suc119',cuerpo:'Hasta la partición, los bienes de la herencia no se pueden vender y la plata sigue retenida. Las acciones las tiene la sucesión.',html,opciones:ops,cerrable:true});
+  }
+  function wrapAcciones119(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA119_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const suc=SUC(); if(suc&&Array.isArray(A)&&!nino()&&!A.some(a=>a.t==='La sucesión de '+suc.causante)) A.unshift({t:'La sucesión de '+suc.causante,cat:'legado',d:(suc.via==='judicial'?'En juicio':suc.via==='notarial'?'En notaría':'Sin trámite')+(suc.duracion?', año '+(suc.anios+1)+' de unos '+suc.duracion:'')+'. '+fmt(suc.caja)+' retenidos.',mov:0,modal:true,run:()=>escenaSucesion119()}); }catch(e){}
+      return A; };
+    window.__SA119_ACC=true;
+  }
+  function wrapCat119(){ const old=window.catDe; if(typeof old!=='function'||window.__SA119_CAT) return; window.catDe=function(t){ if(/^La sucesión de /.test(String(t))) return 'legado'; return old.apply(this,arguments); }; window.__SA119_CAT=true; }
+  function wrapHistoria119(){
+    const old=window.correrHistoria; if(typeof old!=='function'||window.__SA119_HIS) return;
+    window.correrHistoria=function(){ const r=old.apply(this,arguments); try{ anual119(); }catch(e){ console.error(e); } return r; };
+    window.__SA119_HIS=true;
+  }
+  function init119(){
+    wrapPantalla119(); wrapReparto119(); wrapHeredar119(); wrapVender119(); wrapFicha119(); wrapAcciones119(); wrapCat119(); wrapHistoria119();
+    Object.assign(window,{calcularHerencia119:calcular119,escenaSucesion119,escenaVia119,particion119:particion,anualSucesion119:anual119,eventoNegociacion119:eventoNegociacion});
+  }
+  setTimeout(init119,40); setTimeout(init119,220); setTimeout(init119,650);
+  window.__SA119={version:V119};
 })();
 </script>
 
