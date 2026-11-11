@@ -965,10 +965,16 @@ svg.foto116{display:block;background:#1d2a23}
 .ficha109 svg.foto116{border-radius:12px}
 .prop109 .img:has(svg.foto116) .cinta{top:10px;right:10px;bottom:auto;left:auto;background:rgba(14,20,17,.82);backdrop-filter:blur(2px)}
 </style>
+<style id="estilos-v118">
+.nombre118{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap}
+.nombre118 input{flex:1;min-width:180px;font:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid rgba(214,166,72,.35);background:rgba(255,255,255,.04);color:var(--marfil)}
+.nombre118 input:focus{outline:2px solid var(--laton);outline-offset:1px}
+.nombre118 .error{width:100%;font-size:12.5px;color:#f0a195;min-height:1em}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v117</div>
+<div class="version-badge" id="versionBadge">v118</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7840,6 +7846,7 @@ function renderHud(){
     : c.ruta==='profesional'&&crHud ? crHud.n+' · '+crHud.niveles[clamp(c.nivelProf||0,0,crHud.niveles.length-1)].n.toLowerCase()
     : (c.ruta&&c.ruta!=='desempleado') ? RUTAS[c.ruta].niveles[c.nivel].n.toLowerCase()
     : (e?'accionista':'sin empleo');
+  if(typeof window.esNino94==='function'&&window.esNino94()){ const k=p.edad; rol=k<3?'bebé':k<6?'en el jardín':k<11?'en la primaria':k<15?'en el bachillerato':'terminando el colegio'; if(S.tutor118&&!S.tutor118.entregado) rol+=' · con tutor'; }
   $('hudEdad').innerHTML=p.nombre+' '+p.apellido+', '+p.edad+' años<br>'+esc(rol);
   const patr=patrimonio();
   contar($('hudPatr'), isFinite(S.patrPintado)?S.patrPintado:patr, patr, fmt, 850);
@@ -23867,6 +23874,136 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init116(){ instalar116(); precargar(); Object.assign(window,{fotoPropiedad116:fotoDe,fotosCargadas116:ok}); }
   setTimeout(init116,40); setTimeout(init116,220); setTimeout(init116,650);
   window.__SA116={version:V116}; window.__SA117={version:'v117'};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v118 · TÚ LE PONES EL NOMBRE · LA INFANCIA DEL HEREDERO
+   1. Cuando nace un hijo, eliges su nombre: sugerencias de la región, nombres
+      de la familia (papá, mamá, abuelos) o el que tú escribas. Después viene,
+      como siempre, el apellido.
+   2. Si mueres y tu heredero es menor de edad, puedes jugar su infancia
+      (un tutor administra la herencia hasta que cumpla 18) o saltar hasta
+      sus 22 años, como antes.
+   ========================================================================== */
+(function(){
+  const V118='v118';
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const cap=s=>String(s||'').toLowerCase().replace(/(^|[\s-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase());
+  const primer=n=>String(n||'').split(' ')[0];
+
+  /* --- 1. el nombre del bebé --- */
+  const cola=[]; let activo=false;
+  function hermanosVivos(h){ return (S.familia.hijos||[]).filter(x=>x!==h&&x.vivo!==false&&!x.muerto); }
+  function nombreLibre(n,h){ const p=primer(n).toLowerCase(); return !hermanosVivos(h).some(x=>primer(x.nombre).toLowerCase()===p); }
+  function sugerencias(h){
+    const fam=[];
+    const add=(n,por)=>{ n=primer(n); if(n&&nombreLibre(n,h)&&!fam.some(x=>x.n===n)) fam.push({n,por}); };
+    if(S.p.sexo===h.sexo) add(S.p.nombre,'como tú');
+    const pa=S.familia.pareja; if(pa&&pa.sexo===h.sexo) add(pa.nombre,h.sexo==='m'?'como su mamá':'como su papá');
+    (S.parientes||[]).filter(p=>p.sexo===h.sexo&&/^(padre|madre|abuel|papá|mamá)/i.test(p.rel||'')).forEach(p=>add(p.nombre,/abuel/i.test(p.rel)?'como su bisabuel'+(h.sexo==='m'?'a':'o'):'como su abuel'+(h.sexo==='m'?'a':'o')));
+    const reg=[]; let vueltas=0;
+    while(reg.length<3&&vueltas++<40){ const n=primer(nombreLocal(S.p.ciudad,h.sexo)); if(nombreLibre(n,h)&&n!==primer(h.nombre)&&!reg.includes(n)&&!fam.some(x=>x.n===n)) reg.push(n); }
+    return {fam:fam.slice(0,3),reg};
+  }
+  function ponerNombre(h,n,por){
+    const viejo=h.nombre; h.nombre=n; h.nombre118=true;
+    log('Le pusieron <b>'+esc(n)+'</b>'+(por?' ('+esc(por)+')':'')+'.','hito');
+    try{ (S.log||[]).forEach(e=>{ if(e&&typeof e.txt==='string'&&e.anio===S.anio&&e.txt.includes('<b>'+viejo)) e.txt=e.txt.split('<b>'+viejo).join('<b>'+n); }); }catch(e){}
+  }
+  function escenaNombre118(h,otro,sigue){
+    const s=sugerencias(h), quien=h.sexo==='m'?'la niña':'el niño', art=h.sexo==='m'?'una niña':'un niño';
+    const ops=[{t:esc(primer(h.nombre)),cat:'familia',d:'El nombre que propuso la familia.',run:()=>{ h.nombre118=true; sigue(); }}];
+    s.fam.forEach(x=>ops.push({t:esc(x.n),cat:'legado',d:'Un nombre de la casa: '+esc(x.por)+'.',run:()=>{ ponerNombre(h,x.n,x.por); sigue(); }}));
+    s.reg.forEach(n=>ops.push({t:esc(n),cat:'familia',d:'Un nombre común en '+esc(S.p.ciudad)+'.',run:()=>{ ponerNombre(h,n); sigue(); }}));
+    const html='<div class="nombre118"><input id="nombre118" maxlength="28" autocomplete="off" placeholder="O escribe el nombre que quieras"><button class="btn" id="nombre118ok" type="button">Ponerle este nombre</button><div class="error" id="nombre118err"></div></div>';
+    const caja=escena({rubro:'Registro civil',titulo:'¿Cómo se va a llamar?',cuerpo:'Nació '+art+(otro&&otro.nombre?' de '+esc(primer(S.p.nombre))+' y '+esc(primer(otro.nombre)):'')+'. Antes del apellido, el nombre de '+quien+'.',html,opciones:ops});
+    const inp=caja&&caja.querySelector('#nombre118'), ok=caja&&caja.querySelector('#nombre118ok'), err=caja&&caja.querySelector('#nombre118err');
+    if(!inp||!ok) return;
+    const enviar=()=>{ const n=cap(inp.value.trim().replace(/\s+/g,' '));
+      if(!/^[\p{L}][\p{L}' -]{1,27}$/u.test(n)){ err.textContent='Escribe un nombre de 2 a 28 letras.'; inp.focus(); return; }
+      if(!nombreLibre(n,h)){ err.textContent='Ya tienes un hijo que se llama '+primer(n)+'.'; inp.focus(); return; }
+      $('escenaHost').innerHTML=''; ponerNombre(h,n,'lo escogiste tú'); render(); sigue(); };
+    ok.onclick=enviar; inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); enviar(); } };
+  }
+  function siguiente(){
+    if(!cola.length){ activo=false; return; }
+    const libre=()=>!document.querySelector('#escenaHost .lienzo');
+    if(!libre()){ setTimeout(siguiente,350); return; }
+    activo=true; const {h,otro,old}=cola.shift();
+    if(!S||!S.familia||!(S.familia.hijos||[]).includes(h)){ siguiente(); return; }
+    escenaNombre118(h,otro,()=>{ setTimeout(()=>{ try{ old(h,otro); }catch(e){} esperar(); },0); });
+  }
+  function esperar(){ setTimeout(()=>{ if(document.querySelector('#escenaHost .lienzo')) esperar(); else siguiente(); },350); }
+  function wrapApellido118(){
+    const old=window.escenaApellidoHijo; if(typeof old!=='function'||window.__SA118_AP) return;
+    window.escenaApellidoHijo=function(h,otro){
+      if(!h||h.nombre118||nino()) return old.apply(this,arguments);
+      cola.push({h,otro,old}); if(!activo) siguiente();
+    };
+    window.__SA118_AP=true;
+  }
+
+  /* --- 2. el heredero menor de edad --- */
+  function tutorDe(h){
+    const pa=S.familia&&S.familia.pareja;
+    if(pa&&pa.vivo!==false) return {nombre:pa.nombre,rel:pa.sexo==='m'?'tu mamá':'tu papá'};
+    const otroHijo=(S.familia.hijos||[]).filter(x=>x!==h&&x.edad>=21&&x.vivo!==false).sort((a,b)=>b.edad-a.edad)[0];
+    if(otroHijo) return {nombre:otroHijo.nombre+' '+apellidoCompletoDeHijo(otroHijo),rel:otroHijo.sexo==='m'?'tu hermana mayor':'tu hermano mayor'};
+    const tio=(S.parientes||[]).filter(p=>p.vivo!==false&&/^herman/i.test(p.rel||'')&&p.edad>=25).sort((a,b)=>(b.afecto||0)-(a.afecto||0))[0];
+    if(tio) return {nombre:(typeof nombrePariente==='function'?nombrePariente(tio):tio.nombre),rel:tio.sexo==='m'?'tu tía':'tu tío'};
+    return {nombre:'la junta de la familia',rel:'un consejo de albaceas'};
+  }
+  function wrapHeredar118(){
+    const old=window.heredar; if(typeof old!=='function'||window.__SA118_HER) return;
+    window.heredar=function(h,frac,vivo,pleito){
+      if(!h||vivo||!(h.edad<18)) return old.apply(this,arguments);
+      if(!h.__modo118){
+        const t=tutorDe(h);
+        escena({rubro:'Un heredero menor de edad',titulo:esc(h.nombre)+' tiene '+h.edad+' año'+(h.edad===1?'':'s'),ancho:true,
+          cuerpo:'La casa queda en manos de '+(h.sexo==='m'?'una niña':'un niño')+'. Mientras sea menor, <b>'+esc(t.nombre)+'</b> ('+esc(t.rel.replace(/^tu /,'su '))+') administrará la herencia como tutor.',
+          opciones:[
+            {t:'Jugar su infancia',cat:'familia',d:'Lo acompañas desde los '+h.edad+' años: colegio, amigos, travesuras. Su plata no se toca hasta los 18 y las compañías siguen andando.',run:()=>{ h.__modo118='infancia'; window.heredar(h,frac,vivo,pleito); }},
+            {t:'Saltar hasta que cumpla 22',cat:'legado',d:'Como antes: pasan los años, la junta administra y retomas la historia con '+esc(h.nombre)+' ya adult'+(h.sexo==='m'?'a':'o')+'.',run:()=>{ h.__modo118='saltar'; window.heredar(h,frac,vivo,pleito); }}]});
+        return;
+      }
+      if(h.__modo118!=='infancia') return old.apply(this,arguments);
+      const edad=Math.max(0,h.edad), t=tutorDe(h), form=h.formacion;
+      h.edad=22; let r;
+      try{ r=old.apply(this,arguments); } finally { h.edad=edad; }
+      try{
+        S.p.edad=edad; S.p.educacion=0;
+        S.infancia94={desde:S.anio,notas:clamp(Math.round(45+(isFinite(form)?form/3:10)),35,85),amigos:[],travesuras:0,primerAmor:null,mascota:null,terminada:false,
+          colegio:(S.p.origen==='elite'?'un colegio privado bilingüe':S.p.origen==='comercio'?'un colegio privado':'el colegio público del barrio')};
+        S.tutor118={nombre:t.nombre,rel:t.rel,desde:S.anio,entregado:false};
+        S.mov=2;
+        log('Tienes '+edad+' año'+(edad===1?'':'s')+'. Mientras seas menor de edad, <b>'+esc(t.nombre)+'</b> ('+esc(t.rel)+') administra tu herencia.','hito');
+        render(); guardar(true);
+      }catch(e){}
+      return r;
+    };
+    window.__SA118_HER=true;
+  }
+  function wrapPaso118(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA118_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments);
+      try{ const T=S&&S.tutor118; if(T&&!T.entregado&&S.infancia94&&S.infancia94.terminada){ T.entregado=true;
+        log('<b>'+esc(T.nombre)+'</b> te entregó las cuentas de la herencia: desde hoy decides tú.','hito'); hito('Recibió su herencia al cumplir 18'); } }catch(e){}
+      return r; };
+    window.__SA118_PASO=true;
+  }
+  function wrapPantalla118(){
+    // el texto de la sucesión ya no dice que la junta administra "hasta los 22" sin más
+    const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA118_SUC) return;
+    window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
+      try{ document.querySelectorAll('#escenaHost .carta .txt').forEach(d=>{ d.innerHTML=d.innerHTML.replace('Como aún es menor, la junta administra hasta que cumpla 22.','Es menor de edad: podrás jugar su infancia con un tutor o saltar hasta sus 22.'); }); }catch(e){}
+      return r; };
+    window.__SA118_SUC=true;
+  }
+  function init118(){ wrapApellido118(); wrapHeredar118(); wrapPaso118(); wrapPantalla118(); Object.assign(window,{escenaNombre118,tutorHerencia118:tutorDe,sugerenciasNombre118:sugerencias}); }
+  setTimeout(init118,40); setTimeout(init118,220); setTimeout(init118,650);
+  window.__SA118={version:V118};
 })();
 </script>
 
