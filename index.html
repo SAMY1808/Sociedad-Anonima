@@ -936,7 +936,7 @@ html{scroll-behavior:smooth}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v110</div>
+<div class="version-badge" id="versionBadge">v111</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2576,10 +2576,24 @@ function registrarDelito(tipo,severidad,detalle){
   asegurarPenal();S.penal.crimes.push({tipo,severidad,anio:S.anio,detalle:detalle||''});S.penal.crimes=S.penal.crimes.slice(-10);S.penal.riesgo=clamp(S.penal.riesgo+severidad*14,0,100);
 }
 function gravedadPenal(){asegurarPenal();return clamp(S.penal.crimes.reduce((a,x)=>a+(x.severidad||0),0),0,12);}
+/* v111: el motivo de un proceso o de una condena, a partir del caso y de los delitos registrados */
+const MOTIVO_GENERICO=/^(la investigación penal llegó a tu puerta|investigación penal|una investigación penal)$/i;
+function delitosRegistrados(){ asegurarPenal(); const vistos=[]; (S.penal.crimes||[]).slice().reverse().forEach(x=>{ if(x&&x.tipo&&!vistos.some(v=>v.tipo===x.tipo)) vistos.push(x); }); return vistos; }
+function listaY(L){ return L.length<=1?(L[0]||''):L.slice(0,-1).join(', ')+' y '+L[L.length-1]; }
+function motivoPenal(){
+  asegurarPenal(); const c=S.penal.caso, D=delitosRegistrados();
+  const propio=c&&c.motivo&&!MOTIVO_GENERICO.test(String(c.motivo).trim())?String(c.motivo):'';
+  const otros=D.filter(x=>!propio||propio.toLowerCase().indexOf(String(x.tipo).toLowerCase())<0).map(x=>x.tipo+(x.anio?' ('+x.anio+')':''));
+  if(propio) return propio+(otros.length?', además de '+listaY(otros.slice(0,2))+(otros.length>2?' y otros delitos':''):'');
+  if(otros.length) return listaY(otros.slice(0,3))+(otros.length>3?' y otros delitos':'');
+  return S.penal.motivoCondena||'cargos que la fiscalía no hizo públicos';
+}
+function fijarMotivoCondena(){ const m=motivoPenal(); S.penal.motivoCondena=m; return m; }
 function abrirCasoPenal(motivo){
-  asegurarPenal();if(S.penal.caso)return;const j=jurisdiccionActual(),g=gravedadPenal();
+  asegurarPenal();if(S.penal.caso)return;
+  if(!motivo||MOTIVO_GENERICO.test(String(motivo).trim())){ const D=delitosRegistrados(); if(D.length) motivo=listaY(D.slice(0,2).map(x=>x.tipo)); }const j=jurisdiccionActual(),g=gravedadPenal();
   S.penal.caso={estado:'juicio',motivo:motivo||'investigación penal',inicio:S.anio,jurisdiccion:j.jurisdiccion};
-  S.penal.riesgo=clamp(S.penal.riesgo+12+g*2,0,100);moverPrestigio(-Math.min(12,3+g),'enfrenta un proceso penal');log('La investigación penal pasó a un proceso formal en '+esc(j.jurisdiccion)+'.','mal');
+  S.penal.riesgo=clamp(S.penal.riesgo+12+g*2,0,100);moverPrestigio(-Math.min(12,3+g),'enfrenta un proceso penal');log('La investigación penal por <b>'+esc(S.penal.caso.motivo)+'</b> pasó a un proceso formal en '+esc(j.jurisdiccion)+'.','mal');
 }
 function escenaProcesoPenal(){
   asegurarPenal();const j=jurisdiccionActual(),g=gravedadPenal();
@@ -2590,7 +2604,7 @@ function escenaProcesoPenal(){
         if(chance(.4+(S.p.atr.disciplina-5)/40)){
           S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1);
           log('Buena conducta: te adelantaron un año de condena.','bien');
-          if(S.penal.prisionRestante===0){ S.penal.condena=null; log('Terminaste de cumplir la condena.','bien'); }
+          if(S.penal.prisionRestante===0){ S.penal.condena=null;S.penal.motivoCondena=null; log('Terminaste de cumplir la condena.','bien'); }
         } else { S.p.salud=clamp(S.p.salud-3,0,100); log('Lo intentaste, pero no cambió nada. El encierro pesa.','mal'); }
         cerrarModal(); render();
       }},
@@ -2607,7 +2621,7 @@ function escenaProcesoPenal(){
       }}]:[]),
       {t:'Intentar fugarte',cat:'riesgo',d:'Apuesta todo. Si sale bien, la condena termina ahora mismo; si sale mal, la gravedad del caso se dispara'+(j.penaCapital?' — y en esta jurisdicción eso puede costarte la vida':'')+'.',cerrar:false,run:()=>{
         if(chance(.12)){
-          S.penal.prisionRestante=0; S.penal.condena=null; S.penal.fugado=true;
+          S.penal.prisionRestante=0; S.penal.condena=null;S.penal.motivoCondena=null; S.penal.fugado=true;
           moverPrestigio(-6,'se supo que te fugaste');
           log('Te fugaste. La condena quedó atrás, pero tu nombre ya no es el mismo.','hito');
         } else {
@@ -2620,10 +2634,10 @@ function escenaProcesoPenal(){
       }},
       {t:'Aceptar la condena',cat:'riesgo',cerrar:false,run:()=>{cerrarModal();render();}}
     ];
-    escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones,cerrable:true});
+    escena({rubro:'Justicia',titulo:'Estás cumpliendo una condena',ancho:true,cuerpo:'Te quedan <b>'+S.penal.prisionRestante+'</b> años de prisión en '+esc(j.jurisdiccion)+(S.penal.motivoCondena?', condenad'+(S.p.sexo==='m'?'a':'o')+' por <b>'+esc(S.penal.motivoCondena)+'</b>':'')+'. La partida continúa: familia y patrimonio siguen, pero el empleo activo queda suspendido mientras dure la condena.',opciones,cerrable:true});
     return;
   }
-  if(S.penal.penaMuerte){escena({rubro:'Sentencia',titulo:'Pena capital dictada',ancho:true,cuerpo:'El tribunal de '+esc(j.jurisdiccion)+' dictó pena capital por la gravedad acumulada del caso. Aún existe una etapa final de revisión dentro de la simulación.',opciones:[
+  if(S.penal.penaMuerte){escena({rubro:'Sentencia',titulo:'Pena capital dictada',ancho:true,cuerpo:'El tribunal de '+esc(j.jurisdiccion)+' dictó pena capital por '+(S.penal.motivoCondena?'<b>'+esc(S.penal.motivoCondena)+'</b>':'la gravedad acumulada del caso')+'. Aún existe una etapa final de revisión dentro de la simulación.',opciones:[
     {t:'Apelar la sentencia',cat:'riesgo',cerrar:false,run:()=>{if(chance(.45)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(18,35);S.penal.condena='prisión';log('La apelación cambió la pena capital por una condena de prisión.','bien');}else log('La apelación no cambió la sentencia.','mal');cerrarModal();render();}},
     {t:'Agotar los recursos',cat:'riesgo',cerrar:false,run:()=>{if(chance(.22)){S.penal.penaMuerte=false;S.penal.prisionRestante=ri(12,28);S.penal.condena='prisión';log('Un recurso extraordinario evitó la ejecución y dejó una condena de prisión.','bien');cerrarModal();render();}else{cerrarModal();morir();}}}
   ],cerrable:true});return;}
@@ -2631,7 +2645,7 @@ function escenaProcesoPenal(){
   const conv=Math.min(.88,.18+g*.045+(S.p.escandalos||0)*.03+(S.penal.riesgo||0)/400);
   escena({rubro:'Tribunal',titulo:'Tu proceso penal',ancho:true,cuerpo:'Caso abierto en '+esc(j.jurisdiccion)+'. La gravedad acumulada es <b>'+g+'</b>/12.',opciones:[
     {t:'Colaborar con la justicia',cat:'riesgo',d:'Puede cerrar el caso con sanciones patrimoniales y pérdida de prestigio.',cerrar:false,run:()=>{if(chance(.58)){S.penal.caso=null;S.penal.riesgo=clamp(S.penal.riesgo-25,0,100);S.p.escandalos=Math.max(0,(S.p.escandalos||0)-1);S.efectivo-=Math.min(S.efectivo,Math.max(20,patrimonio()*.015));log('Colaboraste con la investigación y el proceso quedó cerrado con sanciones patrimoniales.','bien');}else{S.penal.caso.estado='sentencia';log('La colaboración no evitó una condena. El tribunal prepara la sentencia.','mal');}cerrarModal();render();}},
-    {t:'Ir a juicio',cat:'riesgo',cerrar:false,run:()=>{if(chance(1-conv)){S.penal.caso=null;S.penal.riesgo=clamp(S.penal.riesgo-18,0,100);log('El tribunal absolvió al personaje. El caso quedó cerrado.','bien');}else{const j2=jurisdiccionActual(),capital=j2.penaCapital&&g>=8&&chance(.34+g*.018);if(capital){S.penal.penaMuerte=true;S.penal.condena='pena capital';S.penal.caso.estado='sentencia';log('El tribunal impuso pena capital por la gravedad del caso.','mal');}else{S.penal.prisionRestante=ri(Math.max(1,2+g*2),Math.max(8,8+g*3));S.penal.condena='prisión';S.penal.caso=null;log('El tribunal impuso una condena de prisión de '+S.penal.prisionRestante+' años.','mal');}}cerrarModal();render();}}
+    {t:'Ir a juicio',cat:'riesgo',cerrar:false,run:()=>{if(chance(1-conv)){S.penal.caso=null;S.penal.riesgo=clamp(S.penal.riesgo-18,0,100);log('El tribunal absolvió al personaje. El caso quedó cerrado.','bien');}else{const j2=jurisdiccionActual(),capital=j2.penaCapital&&g>=8&&chance(.34+g*.018);const mot=fijarMotivoCondena();if(capital){S.penal.penaMuerte=true;S.penal.condena='pena capital';S.penal.caso.estado='sentencia';log('El tribunal impuso pena capital por <b>'+esc(mot)+'</b>.','mal');}else{S.penal.prisionRestante=ri(Math.max(1,2+g*2),Math.max(8,8+g*3));S.penal.condena='prisión';S.penal.caso=null;log('El tribunal impuso una condena de prisión de '+S.penal.prisionRestante+' años por <b>'+esc(mot)+'</b>.','mal');}}cerrarModal();render();}}
   ],cerrable:true});
 }
 
@@ -6699,7 +6713,7 @@ function pasarAnio(){
   S.legado.pico=Math.max(S.legado.pico||0,patrimonio());
   revisarEscandalos();
   asegurarPenal();
-  if(S.penal.prisionRestante>0){ S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1); if(S.penal.prisionRestante===0){S.penal.condena=null;log('Terminaste de cumplir la condena de prisión y recuperaste tus decisiones laborales.','bien');} }
+  if(S.penal.prisionRestante>0){ S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1); if(S.penal.prisionRestante===0){S.penal.condena=null;S.penal.motivoCondena=null;log('Terminaste de cumplir la condena de prisión y recuperaste tus decisiones laborales.','bien');} }
   if(S.penal.caso&&S.penal.caso.estado==='investigacion'&&chance(.18+(S.penal.riesgo||0)/500)) S.penal.caso.estado='juicio';
   if(!S.penal.caso&&!S.penal.penaMuerte&&S.penal.prisionRestante===0&&S.penal.riesgo>35&&chance(.06+S.penal.riesgo/900)) abrirCasoPenal('La investigación penal llegó a tu puerta');
 
@@ -7937,9 +7951,9 @@ function accionesInmediatas(){
 }
 function resumenLegalActual(){
   asegurarPenal();
-  if(S.penal.penaMuerte)return 'Pena capital dictada · revisión pendiente';
-  if(S.penal.prisionRestante>0)return 'Cumpliendo '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de prisión';
-  if(S.penal.caso)return S.penal.caso.estado==='juicio'?'Proceso penal abierto':'Investigación penal';
+  if(S.penal.penaMuerte)return 'Pena capital dictada'+(S.penal.motivoCondena?' por '+S.penal.motivoCondena:'')+' · revisión pendiente';
+  if(S.penal.prisionRestante>0)return 'Cumpliendo '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de prisión'+(S.penal.motivoCondena?' por '+S.penal.motivoCondena:'');
+  if(S.penal.caso)return (S.penal.caso.estado==='juicio'?'Proceso penal abierto':'Investigación penal')+(S.penal.caso.motivo&&!MOTIVO_GENERICO.test(String(S.penal.caso.motivo))?' por '+S.penal.caso.motivo:'');
   return '';
 }
 function panelContextoVida(){
@@ -13965,8 +13979,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     cerrarModal();
     const e=S.emp;
     const accion=((window.accionesCrudas91?window.accionesCrudas91():listaAcciones())||[]).find(a=>a.t==='Construir una planta nueva');
-    if(!accion||!e){ render(); return; }
+    if(!accion||!e||accion.dis||(accion.mov||1)>S.mov){ if(accion&&(accion.mov||1)>S.mov) aviso('No te quedan movidas este año.'); render(); return; }
     accion.run();
+    if(!accion.modal) S.mov=Math.max(0,S.mov-(accion.mov||1));
     e.plantas57=e.plantas57||[];
     e.plantas57.push({ciudad,anio:S.anio,restan:3});
     render();
@@ -18148,16 +18163,17 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return {absuelto:true,prob:p};
     }
     if(j.penaCapital&&g>=8&&chance(clamp(.34+g*.018-q*.06,.05,.9))){
-      S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia';
-      log('El tribunal impuso pena capital por la gravedad del caso.','mal');
-      return {capital:true,prob:p};
+      const mot=fijarMotivoCondena(); S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia';
+      log('El tribunal impuso pena capital por <b>'+esc(mot)+'</b>.','mal');
+      return {capital:true,prob:p,motivo:mot};
     }
     const [lo,hi]=penaRango89();
     const anios=Math.max(1,Math.round(ri(lo,hi)*(1-q*.15)));
+    const mot=fijarMotivoCondena();
     S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios;
     moverPrestigio(-3,'fue condenado');
-    log('<b>Culpable.</b> El tribunal impuso una condena de '+anios+' año'+(anios===1?'':'s')+' de prisión.','mal');
-    return {anios,prob:p};
+    log('<b>Culpable</b> de '+esc(mot)+'. El tribunal impuso una condena de '+anios+' año'+(anios===1?'':'s')+' de prisión.','mal');
+    return {anios,prob:p,motivo:mot};
   }
   function costoApelacion89(){ return Math.max(15,Math.round(pat()*.02)); }
   function apelarPenal89(){
@@ -18182,13 +18198,13 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     }
     if(res.capital){
       escena({rubro:'Tribunal',titulo:'Pena capital',ancho:true,clase:'veredicto89 mal',
-        cuerpo:relato+'<b>Culpable.</b> El tribunal dictó la pena más alta que existe en esta jurisdicción. Todavía quedan recursos.',
+        cuerpo:relato+'<b>Culpable</b> de '+esc(res.motivo||S.penal.motivoCondena||'')+'. El tribunal dictó la pena más alta que existe en esta jurisdicción. Todavía quedan recursos.',
         opciones:[{t:'Enfrentar lo que viene',cat:'riesgo',cerrar:false,run:()=>escenaProcesoPenal()}]});
       return;
     }
     const costo=costoApelacion89();
     escena({rubro:'Tribunal',titulo:'Culpable',ancho:true,clase:'veredicto89 mal',
-      cuerpo:relato+'<b>Culpable.</b> '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión. Tu abogado te dice al oído que se puede apelar.',
+      cuerpo:relato+'<b>Culpable</b> de '+esc(res.motivo||S.penal.motivoCondena||'')+'. '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión. Tu abogado te dice al oído que se puede apelar.',
       opciones:[
         {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Si prospera, el tribunal superior rebaja la condena a la mitad.',
          dis:S.efectivo<costo?'No te alcanza':null,cerrar:false,run:()=>{ const m=apelarPenal89(); log(m,/prosperó/.test(m)?'bien':'mal'); cerrarModal(); render(); }},
@@ -18275,8 +18291,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         {t:'Aceptar la oferta',cat:'riesgo',dis:(o.tipo==='multa'&&S.efectivo<o.monto)?'No te alcanza para la multa':null,run:()=>{
           if(o.tipo==='multa'){ S.efectivo-=o.monto; S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-25,0,100); moverPrestigio(-2,'aceptó un preacuerdo');
             log('Aceptaste el preacuerdo: pagaste '+fmt(o.monto)+' y el caso quedó cerrado.','bien'); }
-          else { S.penal.prisionRestante=o.anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-20,0,100); moverPrestigio(-3,'se declaró culpable');
-            log('Te declaraste culpable: '+o.anios+' año'+(o.anios===1?'':'s')+' de prisión, en vez de arriesgarte a más.','mal'); }
+          else { const mot=fijarMotivoCondena(); S.penal.prisionRestante=o.anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.riesgo=clamp(S.penal.riesgo-20,0,100); moverPrestigio(-3,'se declaró culpable');
+            log('Te declaraste culpable de '+esc(mot)+': '+o.anios+' año'+(o.anios===1?'':'s')+' de prisión, en vez de arriesgarte a más.','mal'); }
         }},
         {t:'Rechazarla',cat:'riesgo',cerrar:false,run:()=>{ c.preacuerdoRechazado=true; c.evidencia=clamp(c.evidencia+3,0,100); bitacora89(c,'Rechazaste el preacuerdo. El fiscal se lo tomó personal.'); escenaJuicio89(); }}
       ]});
@@ -18290,9 +18306,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         const res=veredictoPenal89(); if(!res) return null;
         const intro='<b>Llegó el día del juicio.</b> Se acabaron los aplazamientos: el juez de '+esc(jurisdiccionActual().jurisdiccion)+' leyó el veredicto. ';
         if(res.absuelto){ ev.o=[{t:'Salir del juzgado',f:()=>''}]; return intro+'<b>No culpable.</b> Sales libre y el caso queda cerrado.'; }
-        if(res.capital){ ev.o=[{t:'Enfrentar lo que viene',f:()=>''}]; return intro+'<b>Culpable.</b> Pena capital. Todavía quedan recursos.'; }
+        if(res.capital){ ev.o=[{t:'Enfrentar lo que viene',f:()=>''}]; return intro+'<b>Culpable</b> de '+esc(res.motivo||'')+'. Pena capital. Todavía quedan recursos.'; }
         ev.o=[{t:'Apelar (cuesta '+fmt(costoApelacion89())+')',f:()=>apelarPenal89()},{t:'Aceptar la condena',f:()=>{ S.penal.apelable89=0; return 'Aceptaste la condena.'; }}];
-        return intro+'<b>Culpable.</b> '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión.';
+        return intro+'<b>Culpable</b> de '+esc(res.motivo||'')+'. '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión.';
       }};
     return ev;
   }
@@ -22117,11 +22133,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       {t:'Dar una entrevista',cat:'legado',d:'Una movida. Sale bien si tienes carisma; si no, puede volverse un chiste nacional.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
         S.mov--; const pr=.45+((S.p.atr&&S.p.atr.carisma)||5)/20; if(chance(pr)){ const d=ri(4,9); mover(d); log('Diste una entrevista larga y salió bien: la imagen de la familia subió '+d+' puntos.','bien'); }
         else { mover(-6); log('La entrevista salió mal: una frase tuya se volvió meme.','mal'); } cerrarModal(); render(); }},
-      {t:'Contratar una agencia de comunicaciones',cat:'legado',d:'Cuesta '+fmt(costoAg)+'. Mejora la imagen todo el año. Una vez al año.',dis:p.anioAgencia===S.anio?'Ya la contrataste este año':S.efectivo<costoAg?'No te alcanza':null,cerrar:false,run:()=>{
-        S.efectivo-=costoAg; p.anioAgencia=S.anio; mover(6); log('Contrataste una agencia de comunicaciones ('+fmt(costoAg)+'). La familia sale mejor en las fotos.','bien'); cerrarModal(); render(); }}
+      {t:'Contratar una agencia de comunicaciones',cat:'legado',d:'Cuesta '+fmt(costoAg)+' y una movida. Mejora la imagen todo el año. Una vez al año.',dis:p.anioAgencia===S.anio?'Ya la contrataste este año':S.efectivo<costoAg?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.mov--; S.efectivo-=costoAg; p.anioAgencia=S.anio; mover(6); log('Contrataste una agencia de comunicaciones ('+fmt(costoAg)+'). La familia sale mejor en las fotos.','bien'); cerrarModal(); render(); }}
     ];
-    if(!p.medio) op.push({t:'Comprar un medio de comunicación',cat:'capital',d:'Cuesta '+fmt(costoMedio)+'. Lo que publique tu medio te favorece cada año. La competencia lo nota.',dis:pat()<2000?'Hace falta una fortuna mayor (patrimonio de $2.000 M)':S.efectivo<costoMedio?'No te alcanza':null,cerrar:false,run:()=>{
-        S.efectivo-=costoMedio; const tipo=pick(['Diario','Revista','Radio','Noticiero']); const nom=tipo+' '+pick(['del Valle','La Opinión','Nacional','El Faro','Capital','de la Tarde']);
+    if(!p.medio) op.push({t:'Comprar un medio de comunicación',cat:'capital',d:'Cuesta '+fmt(costoMedio)+' y una movida. Lo que publique tu medio te favorece cada año. La competencia lo nota.',dis:pat()<2000?'Hace falta una fortuna mayor (patrimonio de $2.000 M)':S.efectivo<costoMedio?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
+        S.mov--; S.efectivo-=costoMedio; const tipo=pick(['Diario','Revista','Radio','Noticiero']); const nom=tipo+' '+pick(['del Valle','La Opinión','Nacional','El Faro','Capital','de la Tarde']);
         p.medio={nombre:nom,desde:S.anio}; if(Array.isArray(MEDIOS)&&!MEDIOS.includes(nom)) MEDIOS.push(nom); mover(4); moverPrestigio(2,'compró '+nom);
         log('Compraste <b>'+esc(nom)+'</b> por '+fmt(costoMedio)+'. Ahora la familia tiene su propia voz.','hito'); hito('Compró '+nom); cerrarModal(); render(); }});
     else op.push({t:'Usar tu medio contra una casa rival',cat:'riesgo',d:'Una movida. Les baja el prestigio, pero la gente nota de dónde viene el golpe.',dis:!rivalesVivas().length?'No hay casas rivales':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{
@@ -23242,6 +23258,30 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init110,40); setTimeout(init110,220); setTimeout(init110,650);
   window.__SA110={version:V110};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v111 · MOVIDAS QUE SE VEN Y CONDENAS CON MOTIVO
+   Las acciones del perfil de una compañía (recortar costos, contratar,
+   lanzar productos…) sí gastaban la movida, pero la barra de abajo y la
+   plata de arriba no se actualizaban hasta el siguiente clic. Ahora cada
+   vez que se redibuja una pestaña se redibujan también. Las condenas
+   dicen por qué te condenaron (en el núcleo: motivoPenal).
+   ========================================================================== */
+(function(){
+  const V111='v111';
+  function wrapLienzo111(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA111_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(S&&S.p){ if(typeof renderBanca==='function') renderBanca(); if(typeof renderHud==='function') renderHud(); } }catch(e){}
+      return r; };
+    window.__SA111_LIENZO=true;
+  }
+  function init111(){ wrapLienzo111(); }
+  setTimeout(init111,40); setTimeout(init111,220); setTimeout(init111,650);
+  window.__SA111={version:V111};
 })();
 </script>
 
