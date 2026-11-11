@@ -908,10 +908,35 @@ html{scroll-behavior:smooth}
 .fallecidos108 .f b{display:block;font-weight:500;color:var(--marfil);font-size:14px}
 .fallecidos108 .f span{font-size:12.5px;color:var(--humo)}
 </style>
+<style id="estilos-v109">
+.resumen109{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:4px 0 14px}
+.resumen109>div{border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.02)}
+.resumen109 span{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--humo2)}
+.resumen109 b{display:block;font-family:var(--display);font-weight:400;font-size:19px;color:var(--marfil);margin-top:3px;white-space:nowrap}
+.props109{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.prop109{display:block;width:100%;text-align:left;font:inherit;color:inherit;padding:0;border:1px solid rgba(214,166,72,.2);border-radius:14px;background:rgba(255,255,255,.02);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
+.prop109:hover{border-color:var(--laton);transform:translateY(-2px)}
+.prop109 .img{position:relative;display:block;line-height:0}
+.prop109 .img svg{width:100%;height:auto;display:block}
+.prop109 .cinta{position:absolute;left:10px;top:10px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:3px 9px;line-height:1.3;background:rgba(15,25,20,.82);color:var(--marfil);border:1px solid rgba(255,255,255,.18)}
+.prop109 .cinta.ok{color:#8fe0b0;border-color:rgba(108,192,143,.5)}
+.prop109 .cinta.mal{color:#f0a195;border-color:rgba(208,106,90,.6)}
+.prop109 .cinta.casa{color:#1b1408;background:var(--laton);border-color:var(--laton)}
+.prop109 .cuerpo{display:block;padding:11px 13px 13px}
+.prop109 .cuerpo b{display:block;font-weight:500;color:var(--marfil);font-size:14.5px}
+.prop109 .cuerpo .l{display:block;font-size:12px;color:var(--humo);margin-top:2px}
+.prop109 .cuerpo .v{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:12px;color:var(--humo)}
+.prop109 .cuerpo .v strong{font-family:var(--display);font-weight:400;font-size:18px;color:var(--laton)}
+.prop109 .cuerpo .v .sube{color:var(--jade,#6CC08F)}.prop109 .cuerpo .v .baja{color:var(--ui-red,#d06a5a)}
+.ficha109{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px;align-items:start;margin:6px 0 4px}
+.ficha109 svg{width:100%;height:auto;border-radius:12px;display:block}
+.ficha109 table{width:100%}
+@media (max-width:620px){.ficha109{grid-template-columns:1fr}.resumen109{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v108</div>
+<div class="version-badge" id="versionBadge">v109</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -9014,7 +9039,7 @@ function escenaMudanzaGlobal(g){
       const cc=costos();
       if(S.efectivo<cc.total){ log('No alcanzaba para instalarte en '+esc(g.n)+'.','mal'); cerrarModal(); render(); return; }
       const viv=viviendaPropia();
-      if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
+      if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
       const antes=S.hogar.ciudad;
       S.hogar.ciudad=g.n;
       S.hogar.zona=st.zona;
@@ -9738,7 +9763,7 @@ function correrFundacion(res,m){
     const origen=p.ciudad;
     let esGlobal=false; try{ esGlobal=esCiudadGlobal(o.ciudad); }catch(e){}
     let viv=null; try{ viv=viviendaPropia(); }catch(e){}
-    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda de '+esc(origen)+' por '+fmt(neto)+' netos al mudarte por el nuevo cargo.'); }
+    if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda de '+esc(origen)+' por '+fmt(neto)+' netos al mudarte por el nuevo cargo.'); }
     S.hogar=S.hogar||{};
     S.hogar.ciudad=o.ciudad; S.hogar.zona=isFinite(S.hogar.zonaElegida61)?S.hogar.zonaElegida61:1; S.hogar.zonaElegida61=undefined; S.hogar.conLosPadres=false; S.hogar.vivienda=null;
     p.ciudad=o.ciudad;
@@ -12736,7 +12761,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function moverseASede501(ciudad){
     const viv=viviendaPropia();
-    if(viv){ const neto=venderBien(viv,.05); log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
+    if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la vivienda en '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos para financiar la mudanza.'); }
     const antes=S.hogar.ciudad, g=ciudadGlobalDe(ciudad);
     S.hogar.ciudad=ciudad; S.hogar.zona=g?0:1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=ciudad;
     S.p.redes=clamp(S.p.redes*(g?.45:.62),0,100);
@@ -19687,9 +19712,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   /* --- acciones desde el mapa --- */
   function mudarseA92(c){
-    escena({rubro:'Mudanza',titulo:'Mudarte a '+esc(c),cuerpo:'Si tienes casa propia en '+esc(S.hogar.ciudad)+' se vende. Los contactos se rehacen desde cero: tus redes bajan cerca de un 40%.',
+    escena({rubro:'Mudanza',titulo:'Mudarte a '+esc(c),cuerpo:'Si tienes casa propia en '+esc(S.hogar.ciudad)+', '+(()=>{ const v=viviendaPropia(); const p=(v&&v.alMudarme109)||'arrendar'; return p==='vender'?'se vende':p==='conservar'?'la conservas como casa de descanso':'queda arrendada y sigue siendo tuya'; })()+' (lo cambias en la ficha de la casa). Los contactos se rehacen desde cero: tus redes bajan cerca de un 40%.',
       opciones:[{t:'Mudarme a '+esc(c),cat:'casa',run:()=>{
-        const viv=viviendaPropia(); if(viv){ const neto=venderBien(viv,.05); log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.'); }
+        const viv=viviendaPropia(); if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.05); if(neto!==null) log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.'); }
         S.hogar.ciudad=c; S.hogar.zona=1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=c;
         S.p.redes=clamp(S.p.redes*.62,0,100); S.efectivo-=Math.min(S.efectivo,arriendoActual()*.8);
         log('Te mudaste a <b>'+esc(c)+'</b>. Toca rehacer los contactos.','hito'); hito('Se mudó a '+c); S.mov--; }}],cerrable:true});
@@ -22766,6 +22791,248 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init108,40); setTimeout(init108,220); setTimeout(init108,650);
   window.__SA108={version:V108};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v109 · PROPIEDADES
+   Cada propiedad tiene su ilustración (según el tipo, con colores propios)
+   y su ficha: arrendarla, fijar el canon, ponerle administrador o seguro,
+   remodelarla, venderla. Al mudarte de ciudad la casa ya no se vende a la
+   fuerza: se arrienda, se conserva o se vende, como tú digas; y si
+   vuelves, puedes volver a vivir en ella.
+   ========================================================================== */
+(function(){
+  const V109='v109';
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const hash=s=>{ let h=2166136261; s=String(s||'x'); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0); };
+  const esHogar=b=>S.hogar&&b.uid===S.hogar.vivienda;
+  const bien=uid=>(S.bienes||[]).find(b=>b.uid===uid);
+  function tipoDe(b){
+    const t=String(b.tipo||''), c=b.clase;
+    if(c==='finca') return /cafe/.test(t)?'cafe':/ganad/.test(t)?'ganado':/vined|viñed/.test(t)?'vinedo':'finca';
+    if(/terreno|lote/.test(t)||c==='terreno') return 'lote';
+    if(/bodega/.test(t)) return 'bodega'; if(/oficina/.test(t)) return 'oficina'; if(/local/.test(t)) return 'local';
+    if(/penthouse/i.test(t)) return 'penthouse'; if(/mansi/.test(t)) return 'mansion'; if(/grande|duplex|dúplex/.test(t)) return 'casa_grande';
+    if(/casa/.test(t)) return 'casa'; if(c==='renta'&&!b.exVivienda109) return /apart/.test(t)?'apartamento':'local';
+    return 'apartamento';
+  }
+  /* --- la ilustración --- */
+  const PARED=['#E8D9B8','#D9B38C','#C96F53','#8FA7B8','#B7C4A1','#E3C16F','#C9A0A0','#9DB5A0'], TECHO=['#8A3B2E','#5B4636','#3F5B6B','#6B4A3A'];
+  function dibujo109(b,w,h,mini){
+    const s=hash(b.uid||b.nombre||b.tipo), t=tipoDe(b), pared=PARED[s%PARED.length], techo=TECHO[(s>>>3)%TECHO.length];
+    const W=240,H=150, G=118; // suelo
+    const win=(x,y,ww,hh,on)=>'<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+hh+'" rx="1" fill="'+(on?'#F6D98A':'#3B4A55')+'"/>';
+    const lit=(i)=>((s>>(i%20))&3)!==0;
+    let cielo=['#9CC7E0','#DDEBEF'], suelo='#5C7F52', cuerpo='';
+    const arbol=(x,y,r)=>'<rect x="'+(x-1.5)+'" y="'+(y)+'" width="3" height="'+(G-y)+'" fill="#5B4636"/><circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#3F6B45"/>';
+    if(t==='apartamento'||t==='oficina'||t==='penthouse'){
+      const bw=t==='oficina'?74:64, bh=t==='penthouse'?96:t==='oficina'?92:82, x=(W-bw)/2, y=G-bh; suelo='#6E7377';
+      cuerpo+='<rect x="'+(x-46)+'" y="'+(G-48)+'" width="40" height="48" fill="#7F8B93"/><rect x="'+(x+bw+8)+'" y="'+(G-60)+'" width="38" height="60" fill="#8C979E"/>';
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+(t==='oficina'?'#6F93A8':pared)+'"/>';
+      const cols=t==='oficina'?5:4, rows=Math.floor(bh/14)-1;
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) cuerpo+=win(x+7+c*((bw-14)/cols)+1,y+8+r*14,(bw-14)/cols-4,8,t==='oficina'?true:lit(r*cols+c));
+      if(t==='penthouse') cuerpo+='<rect x="'+(x-4)+'" y="'+(y-12)+'" width="'+(bw+8)+'" height="14" fill="#F6D98A"/><rect x="'+(x+8)+'" y="'+(y-20)+'" width="'+(bw-16)+'" height="8" fill="'+techo+'"/>'+arbol(x+10,y-18,5);
+      else cuerpo+='<rect x="'+(x-3)+'" y="'+(y-4)+'" width="'+(bw+6)+'" height="5" fill="'+techo+'"/>';
+      cuerpo+='<rect x="'+(W/2-7)+'" y="'+(G-16)+'" width="14" height="16" fill="#3B2B20"/>';
+    } else if(t==='casa'||t==='casa_grande'||t==='mansion'){
+      const bw=t==='mansion'?150:t==='casa_grande'?110:78, bh=t==='mansion'?54:t==='casa_grande'?50:42, x=(W-bw)/2, y=G-bh;
+      cuerpo+=arbol(x-18,G-40,14)+arbol(x+bw+20,G-34,12);
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+pared+'"/><path d="M'+(x-8)+' '+y+' L'+(W/2)+' '+(y-(t==='mansion'?30:26))+' L'+(x+bw+8)+' '+y+' Z" fill="'+techo+'"/>';
+      const n=t==='mansion'?6:t==='casa_grande'?4:2;
+      for(let i=0;i<n;i++){ const wx=x+10+i*((bw-20)/n)+((bw-20)/n-14)/2; if(Math.abs(wx+7-W/2)<12) continue; cuerpo+=win(wx,y+10,14,14,lit(i)); if(t!=='casa') cuerpo+=win(wx,y+bh-22,14,12,lit(i+7)); }
+      if(t==='mansion') for(let i=0;i<4;i++) cuerpo+='<rect x="'+(W/2-27+i*17)+'" y="'+(G-34)+'" width="4" height="34" fill="#F4EEE0"/>';
+      cuerpo+='<rect x="'+(W/2-7)+'" y="'+(G-22)+'" width="14" height="22" rx="1" fill="#4A3324"/>';
+      if(t!=='casa') cuerpo+='<rect x="'+(x+bw-22)+'" y="'+(y-22)+'" width="8" height="16" fill="'+techo+'"/>';
+    } else if(t==='local'){
+      const bw=120,bh=52,x=(W-bw)/2,y=G-bh; suelo='#6E7377';
+      cuerpo+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+pared+'"/><rect x="'+(x+8)+'" y="'+(y+22)+'" width="'+(bw-44)+'" height="24" fill="#BFE1EE"/><rect x="'+(x+bw-30)+'" y="'+(y+20)+'" width="20" height="32" fill="#4A3324"/>';
+      for(let i=0;i<8;i++) cuerpo+='<rect x="'+(x-4+i*((bw+8)/8))+'" y="'+(y+8)+'" width="'+((bw+8)/8)+'" height="12" fill="'+(i%2?'#F4EEE0':techo)+'"/>';
+      cuerpo+='<rect x="'+(x+bw/2-24)+'" y="'+(y-9)+'" width="48" height="10" rx="2" fill="#2E3B33"/>';
+    } else if(t==='bodega'){
+      const bw=150,bh=46,x=(W-bw)/2,y=G-bh; suelo='#77756B';
+      cuerpo+='<path d="M'+x+' '+G+' L'+x+' '+y+' Q'+(W/2)+' '+(y-34)+' '+(x+bw)+' '+y+' L'+(x+bw)+' '+G+' Z" fill="#A9B2B5"/><rect x="'+(W/2-28)+'" y="'+(G-34)+'" width="56" height="34" fill="'+techo+'"/>';
+      for(let i=1;i<5;i++) cuerpo+='<line x1="'+(W/2-28)+'" x2="'+(W/2+28)+'" y1="'+(G-34+i*7)+'" y2="'+(G-34+i*7)+'" stroke="rgba(0,0,0,.25)"/>';
+      cuerpo+='<rect x="'+(x+bw-34)+'" y="'+(G-14)+'" width="26" height="12" fill="#C9A24A"/><circle cx="'+(x+bw-28)+'" cy="'+(G-1)+'" r="3" fill="#222"/><circle cx="'+(x+bw-14)+'" cy="'+(G-1)+'" r="3" fill="#222"/>';
+    } else if(t==='lote'){
+      suelo='#8C7A52';
+      for(let i=0;i<7;i++) cuerpo+='<rect x="'+(30+i*30)+'" y="'+(G-14)+'" width="3" height="14" fill="#5B4636"/>';
+      cuerpo+='<line x1="30" x2="213" y1="'+(G-9)+'" y2="'+(G-9)+'" stroke="#E8D9B8" stroke-width="1.2"/><rect x="'+(W/2-22)+'" y="'+(G-46)+'" width="44" height="22" fill="#F4EEE0"/><rect x="'+(W/2-1.5)+'" y="'+(G-24)+'" width="3" height="24" fill="#5B4636"/><line x1="'+(W/2-14)+'" x2="'+(W/2+14)+'" y1="'+(G-38)+'" y2="'+(G-38)+'" stroke="#8A3B2E" stroke-width="3"/><line x1="'+(W/2-14)+'" x2="'+(W/2+8)+'" y1="'+(G-31)+'" y2="'+(G-31)+'" stroke="#999" stroke-width="2"/>'+arbol(40,G-30,10);
+    } else { // fincas
+      cielo=['#A8D0E6','#F0E9D2']; suelo=t==='cafe'?'#4E7A45':t==='vinedo'?'#6C7D45':'#6D9A55';
+      cuerpo+='<path d="M0 '+G+' Q60 '+(G-56)+' 120 '+(G-22)+' T240 '+(G-30)+' L240 '+G+' Z" fill="#7FA36B"/><path d="M0 '+G+' Q90 '+(G-30)+' 160 '+(G-10)+' T240 '+(G-14)+' L240 '+G+' Z" fill="#5E8A54"/>';
+      const x=150,y=G-34; cuerpo+='<rect x="'+x+'" y="'+y+'" width="50" height="26" fill="'+pared+'"/><path d="M'+(x-6)+' '+y+' L'+(x+25)+' '+(y-16)+' L'+(x+56)+' '+y+' Z" fill="'+techo+'"/>'+win(x+8,y+8,9,9,true)+'<rect x="'+(x+28)+'" y="'+(y+8)+'" width="9" height="18" fill="#4A3324"/>';
+      if(t==='ganado'){ for(let i=0;i<6;i++) cuerpo+='<rect x="'+(14+i*22)+'" y="'+(G-12)+'" width="2.5" height="12" fill="#E8D9B8"/>'; cuerpo+='<line x1="14" x2="127" y1="'+(G-8)+'" y2="'+(G-8)+'" stroke="#E8D9B8" stroke-width="1.5"/>';
+        [[40,G-18],[78,G-20],[104,G-16]].forEach(([cx,cy],i)=>cuerpo+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="9" ry="5.5" fill="'+(i%2?'#F4EEE0':'#6B4A3A')+'"/><circle cx="'+(cx+9)+'" cy="'+(cy-3)+'" r="3.2" fill="'+(i%2?'#F4EEE0':'#6B4A3A')+'"/>'); }
+      else { const col=t==='cafe'?'#2F5E37':t==='vinedo'?'#5B3A6B':'#C9A24A'; for(let r=0;r<3;r++) for(let c=0;c<7;c++) cuerpo+='<circle cx="'+(18+c*18+r*5)+'" cy="'+(G-6-r*9)+'" r="'+(5-r*.8)+'" fill="'+col+'"/>'+(t==='cafe'&&c%2?'<circle cx="'+(20+c*18+r*5)+'" cy="'+(G-7-r*9)+'" r="1.3" fill="#C4372F"/>':''); }
+    }
+    const id='g'+(s%100000)+(mini?'m':'');
+    const base='<defs><linearGradient id="'+id+'" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="'+cielo[0]+'"/><stop offset="1" stop-color="'+cielo[1]+'"/></linearGradient></defs><rect width="'+W+'" height="'+H+'" fill="url(#'+id+')"/><circle cx="'+(40+(s%150))+'" cy="26" r="11" fill="#FFF3C4" opacity=".85"/><ellipse cx="'+(60+((s>>>5)%130))+'" cy="'+(34+((s>>>9)%12))+'" rx="22" ry="6" fill="#fff" opacity=".7"/>'+cuerpo+'<rect y="'+G+'" width="'+W+'" height="'+(H-G)+'" fill="'+suelo+'"/>';
+    if(mini){ const lado=h||w||46; return '<svg class="bien109" viewBox="45 0 150 150" width="'+lado+'" height="'+lado+'" style="border-radius:10px;flex:0 0 auto" aria-hidden="true">'+base+'</svg>'; }
+    return '<svg class="bien109" viewBox="0 0 '+W+' '+H+'" width="'+(w||W)+'" height="'+(h||H)+'" role="img" aria-label="'+esc(b.nombre||'propiedad')+'">'+base+'</svg>';
+  }
+  function wrapIcono109(){
+    if(window.__SA109_ICO||typeof window.iconoBien!=='function') return;
+    const old=window.iconoBien;
+    window.iconoBien=function(tipo,clase,tam,seed){ try{ const b=(S&&S.bienes||[]).find(x=>x.uid===seed)||{tipo,clase,uid:seed}; return dibujo109(b,tam||40,tam||40,true); }catch(e){ return old.apply(this,arguments); } };
+    window.__SA109_ICO=true;
+  }
+
+  /* --- estado y números de cada propiedad --- */
+  function estado(b){
+    if(esHogar(b)) return {t:'Vives aquí',c:'casa'};
+    if(b.clase==='renta') return b.arrendado?{t:'Arrendado',c:'ok'}:{t:'Vacío',c:'mal'};
+    if(b.clase==='finca') return b.renta>0?{t:'Produce',c:'ok'}:{t:'Sin producir',c:''};
+    if(b.clase==='vivienda') return {t:'Casa de descanso',c:''};
+    return {t:tipoDe(b)==='lote'?'Lote':'En tu poder',c:''};
+  }
+  const rentaDe=b=>(b.clase==='renta'&&b.arrendado)||(b.clase==='finca'&&b.renta>0)?b.valor*(b.renta||0):0;
+  const plus=b=>isFinite(b.precioCompra)&&b.precioCompra>0?b.valor/b.precioCompra-1:0;
+  const CANON={bajo:{n:'Canon bajo',d:'Casi nunca queda vacío, pero entra menos.',r:.85,v:.45},mercado:{n:'Canon de mercado',d:'Lo normal del barrio.',r:1,v:1},alto:{n:'Canon alto',d:'Entra más cuando hay inquilino; queda vacío más seguido.',r:1.22,v:2.1}};
+  function aplicarCanon(b){
+    if(b.clase!=='renta') return; if(!isFinite(b.rentaBase109)){ b.rentaBase109=b.renta||.055; b.vacBase109=isFinite(b.vac)&&b.vac>0?b.vac:.08; }
+    const c=CANON[b.canon109||'mercado']; b.renta=b.rentaBase109*c.r; b.vac=clamp(b.vacBase109*c.v*(b.admin109?.5:1),.01,.6);
+  }
+
+  /* --- mudarse sin vender --- */
+  function alMudarse109(viv){
+    try{ const pref=viv.alMudarme109||'arrendar'; if(pref==='vender') return false;
+      const ciudad=viv.ciudad||S.hogar.ciudad;
+      if(pref==='arrendar'){ viv.claseAntes109=viv.clase; viv.clase='renta'; viv.exVivienda109=true; viv.arrendado=true; viv.rentaBase109=undefined; viv.renta=.055; viv.vac=.08; aplicarCanon(viv);
+        log('Dejaste arrendada <b>'+esc(viv.nombre)+'</b> en '+esc(ciudad)+': entran cerca de '+fmt(viv.valor*viv.renta)+' al año.','bien'); }
+      else { viv.exVivienda109=true; log('Conservaste <b>'+esc(viv.nombre)+'</b> en '+esc(ciudad)+' como casa de descanso. Cuesta mantenerla, pero sigue siendo tuya.'); }
+      S.hogar.vivienda=null; return true;
+    }catch(e){ return false; }
+  }
+  function volverAVivir(b){
+    const viv=viviendaPropia(); if(viv&&viv.uid!==b.uid){ viv.alMudarme109=viv.alMudarme109||'arrendar'; alMudarse109(viv); }
+    b.clase='vivienda'; b.arrendado=false; b.exVivienda109=false; b.contrato109=null; S.hogar.vivienda=b.uid; S.hogar.conLosPadres=false; if(isFinite(b.zona)) S.hogar.zona=b.zona;
+    S.p.felicidad=clamp(S.p.felicidad+6,0,100); log('Volviste a vivir en <b>'+esc(b.nombre)+'</b>.','bien');
+  }
+
+  /* --- la ficha --- */
+  function escenaPropiedad109(uid){
+    const b=bien(uid); if(!b) return; aplicarCanon(b);
+    const e=estado(b), pl=plus(b), años=isFinite(b.comprado)?S.anio-b.comprado:null, r=rentaDe(b), cRem=Math.max(4,Math.round(b.valor*.07)), cSeg=b.valor*.003;
+    const fila=(a,c)=>'<tr><td>'+a+'</td><td>'+c+'</td></tr>';
+    const html='<div class="ficha109">'+dibujo109(b)+'<table class="libro">'
+      +fila('Vale hoy',fmt(b.valor))+(isFinite(b.precioCompra)?fila('La compraste'+(b.comprado?' en '+b.comprado:''),fmt(b.precioCompra)+' <span class="'+(pl>=0?'bien':'mal')+'">('+(pl>=0?'+':'')+Math.round(pl*100)+'%)</span>'):'')
+      +fila('Hipoteca',b.hipoteca>0?fmt(b.hipoteca)+' · cuota '+fmt(b.cuota):'Sin deuda')
+      +fila('Mantenimiento al año',fmt(b.valor*(b.mant||0)))
+      +(b.clase==='renta'||b.clase==='finca'?fila(b.clase==='finca'?'Produce al año':'Arriendo al año',r>0?'<span class="bien">'+fmt(r)+'</span>':'—'):'')
+      +fila('Estado',esc(e.t)+(b.contrato109&&b.contrato109>S.anio?' · contrato hasta '+b.contrato109:'')+(b.admin109?' · con administrador':'')+(b.seguro109?' · asegurada':''))+'</table></div>';
+    const op=[]; const cerrarY=f=>()=>{ f(); cerrarModal(); render(); };
+    if(esHogar(b)){
+      const pref=b.alMudarme109||'arrendar';
+      op.push({t:'Si me mudo de ciudad…',cat:'casa',d:'Hoy: '+({arrendar:'se arrienda',conservar:'se conserva como casa de descanso',vender:'se vende'})[pref]+'.',cerrar:false,run:()=>{ cerrarModal();
+        escena({rubro:esc(b.nombre),titulo:'¿Qué pasa con la casa si te mudas?',cerrable:true,cuerpo:'Lo que elijas aquí se aplica solo cuando cambies de ciudad.',
+          opciones:[{t:'Arrendarla',cat:'casa',d:'Sigue siendo tuya y entra arriendo cada año.',run:()=>{ b.alMudarme109='arrendar'; }},{t:'Conservarla como casa de descanso',cat:'casa',d:'No entra nada y cuesta mantenerla, pero puedes volver cuando quieras.',run:()=>{ b.alMudarme109='conservar'; }},{t:'Venderla',cat:'capital',d:'Como antes: se vende para financiar la mudanza.',run:()=>{ b.alMudarme109='vender'; }}]}); }});
+    } else {
+      if((b.clase==='vivienda'||b.exVivienda109)&&(b.ciudad||S.hogar.ciudad)===S.hogar.ciudad) op.push({t:'Volver a vivir aquí',cat:'casa',d:(b.clase==='renta'&&b.arrendado?'Hay que pedirle la casa al inquilino. ':'')+'Pasa a ser tu hogar.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato de arriendo hasta '+b.contrato109:null,cerrar:false,run:cerrarY(()=>volverAVivir(b))});
+      if(b.clase==='vivienda') op.push({t:'Ponerla en arriendo',cat:'casa',d:'Entrarían cerca de '+fmt(b.valor*.055)+' al año.',cerrar:false,run:cerrarY(()=>{ b.clase='renta'; b.exVivienda109=true; b.arrendado=true; b.rentaBase109=undefined; b.renta=.055; b.vac=.08; aplicarCanon(b); log('Pusiste en arriendo <b>'+esc(b.nombre)+'</b>.','bien'); })});
+      if(b.clase==='renta'){
+        op.push({t:'Fijar el canon',cat:'casa',d:'Hoy: '+CANON[b.canon109||'mercado'].n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(b.nombre),titulo:'¿Cuánto cobras de arriendo?',cerrable:true,cuerpo:'A mercado entran '+fmt(b.valor*b.rentaBase109)+' al año.',
+          opciones:Object.keys(CANON).map(k=>({t:CANON[k].n,cat:'casa',d:CANON[k].d+' '+fmt(b.valor*b.rentaBase109*CANON[k].r)+' al año.',run:()=>{ b.canon109=k; aplicarCanon(b); log('Fijaste '+CANON[k].n.toLowerCase()+' para '+esc(b.nombre)+'.'); }}))}); }});
+        op.push({t:b.admin109?'Quitar al administrador':'Contratar una inmobiliaria',cat:'casa',d:b.admin109?'Vuelves a manejar tú el arriendo.':'Cobra 8% del arriendo. Queda vacío la mitad de las veces y ellos lidian con el inquilino.',cerrar:false,run:cerrarY(()=>{ b.admin109=!b.admin109; aplicarCanon(b); log(b.admin109?'Una inmobiliaria administra ahora '+esc(b.nombre)+'.':'Volviste a administrar tú '+esc(b.nombre)+'.'); })});
+        if(b.exVivienda109) op.push({t:'Dejar de arrendarla',cat:'casa',d:'Queda como casa de descanso.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato hasta '+b.contrato109:null,cerrar:false,run:cerrarY(()=>{ b.clase='vivienda'; b.arrendado=false; log('Sacaste del mercado <b>'+esc(b.nombre)+'</b>.'); })});
+      }
+    }
+    op.push({t:'Remodelar',cat:'casa',d:'Cuesta '+fmt(cRem)+' y una movida. Sube el valor cerca de 10%'+(b.clase==='renta'?' y el arriendo':'')+'.',dis:b.remodelada109&&S.anio-b.remodelada109<8?'La remodelaste en '+b.remodelada109:S.efectivo<cRem?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:cerrarY(()=>{
+      S.efectivo-=cRem; S.mov--; b.valor*=rnd(1.08,1.13); b.remodelada109=S.anio; if(isFinite(b.rentaBase109)){ b.rentaBase109*=1.04; aplicarCanon(b); } if(esHogar(b)) S.p.felicidad=clamp(S.p.felicidad+5,0,100); log('Remodelaste <b>'+esc(b.nombre)+'</b> ('+fmt(cRem)+'). Ahora vale '+fmt(b.valor)+'.','bien'); })});
+    op.push({t:b.seguro109?'Cancelar el seguro':'Asegurarla',cat:'salud',d:b.seguro109?'Dejas de pagar '+fmt(cSeg)+' al año.':fmt(cSeg)+' al año. Cubre incendios, inundaciones y daños.',cerrar:false,run:cerrarY(()=>{ b.seguro109=!b.seguro109; log(b.seguro109?'Aseguraste '+esc(b.nombre)+'.':'Cancelaste el seguro de '+esc(b.nombre)+'.'); })});
+    if(!esHogar(b)) op.push({t:'Venderla',cat:'capital',d:'Te quedarían cerca de '+fmt(Math.max(0,b.valor*.97-(b.hipoteca||0)))+' después de la comisión'+(b.hipoteca>0?' y de pagar la hipoteca':'')+'.',dis:b.contrato109&&b.contrato109>S.anio?'Tiene contrato de arriendo hasta '+b.contrato109:S.mov<1?'No te quedan movidas':null,cerrar:false,run:cerrarY(()=>{ const n=venderBien(b,.03); S.mov--; log('Vendiste <b>'+esc(b.nombre)+'</b> y te quedaron '+fmt(Math.max(0,n))+'.','hito'); })});
+    escena({rubro:(b.ciudad?esc(b.ciudad)+' · ':'')+esc(e.t),titulo:esc(b.nombre),ancho:true,cerrable:true,html,opciones:op});
+  }
+
+  /* --- el año de las propiedades --- */
+  function correrPropiedades109(){
+    let admin=0, seg=0, descanso=false;
+    (S.bienes||[]).forEach(b=>{
+      if(b.contrato109&&b.contrato109>S.anio&&b.clase==='renta') b.arrendado=true; else if(b.contrato109&&b.contrato109<=S.anio) b.contrato109=null;
+      if(b.clase==='renta'&&b.admin109&&b.arrendado) admin+=b.valor*(b.renta||0)*.08;
+      if(b.seguro109) seg+=b.valor*.003;
+      if(b.clase==='vivienda'&&!esHogar(b)) descanso=true;
+    });
+    if(admin+seg>0) S.efectivo-=Math.round((admin+seg)*100)/100;
+    if(descanso) S.p.felicidad=clamp(S.p.felicidad+2,0,100);
+  }
+  function instalarEventos109(){
+    if(window.__SA109_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x), B=()=>bien(S._b109);
+    E({p:1,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!b.admin109),
+      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!b.admin109)); S._b109=b.uid; S._c109=Math.max(2,Math.round(b.valor*.03)); return 'El inquilino de <b>'+esc(b.nombre)+'</b> se fue de noche. Dejó dos meses sin pagar, una pared tumbada y la cocina sin gabinetes.'; },
+      o:[{t:()=>'Arreglar todo ('+fmt(S._c109||0)+')',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b) b.arrendado=false; return 'Quedó como nueva. Ahora a buscar otro inquilino.'; }},
+         {t:'Arrendarla así, más barata',f:()=>{ const b=B(); if(b){ b.valor*=.96; b.canon109='bajo'; aplicarCanon(b); } return 'La arrendaste como estaba, con canon bajo. La propiedad perdió algo de valor.'; }},
+         {t:'Contratar una inmobiliaria para que no vuelva a pasar',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b){ b.admin109=true; aplicarCanon(b); } return 'Arreglaste y entregaste las llaves a una inmobiliaria. Cobran 8%, pero duermes tranquilo.'; }}]});
+    E({p:.7,c:()=>(S.bienes||[]).length>0,
+      t:()=>{ const b=pick(S.bienes); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
+        return S._q109+' <b>'+esc(b.nombre)+'</b>. El arreglo vale '+fmt(S._c109)+'.'+(b.seguro109?' Menos mal estaba asegurada.':''); },
+      o:[{t:()=>{ const b=B(); return b&&b.seguro109?'Cobrar el seguro':'Pagar el arreglo'; },f:()=>{ const b=B(); if(b&&b.seguro109) return 'El seguro pagó todo. Para eso era.'; S.efectivo-=Math.min(S.efectivo,S._c109); return 'Pagaste '+fmt(S._c109)+' de tu bolsillo.'; }},
+         {t:'Dejarla así por ahora',f:()=>{ const b=B(); if(b&&b.seguro109) return 'Igual el seguro lo cubrió.'; if(b){ b.valor*=.88; if(b.clase==='renta') b.arrendado=false; } return 'No la arreglaste. Perdió valor'+(b&&b.clase==='renta'?' y quedó vacía':'')+'.'; }}]});
+    E({p:.8,c:()=>(S.bienes||[]).some(b=>!esHogar(b)&&!(b.contrato109>S.anio)),
+      t:()=>{ const b=pick(S.bienes.filter(b=>!esHogar(b)&&!(b.contrato109>S.anio))); S._b109=b.uid; S._c109=Math.round(b.valor*rnd(1.2,1.4)); return 'Una constructora quiere <b>'+esc(b.nombre)+'</b> para un proyecto. Ofrece '+fmt(S._c109)+', bastante más de lo que vale hoy ('+fmt(b.valor)+').'; },
+      o:[{t:'Vender',f:()=>{ const b=B(); if(!b) return ''; const n=Math.max(0,S._c109-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Vendiste. Te quedaron '+fmt(n)+'.'; }},
+         {t:'Pedir más',f:()=>{ const b=B(); if(!b) return ''; if(chance(.4)){ const p=Math.round(S._c109*1.15), n=Math.max(0,p-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Subieron a '+fmt(p)+'. Vendiste.'; } return 'Se fueron a comprar el lote de al lado.'; }},
+         {t:'No está en venta',f:()=>{ const b=B(); if(b) b.valor*=1.04; return 'Dijiste que no. Pero ya sabes que la zona se está moviendo.'; }}]});
+    E({p:.8,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio)),
+      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio))); S._b109=b.uid; return 'El inquilino de <b>'+esc(b.nombre)+'</b> es de los buenos: paga puntual y cuida. Te propone un contrato a cinco años si le sostienes el canon.'; },
+      o:[{t:'Firmar a cinco años',f:()=>{ const b=B(); if(b){ b.contrato109=S.anio+5; b.arrendado=true; } return 'Firmaron. Cinco años sin preocuparte por esa propiedad (tampoco puedes venderla).'; }},
+         {t:'Mejor año a año',f:()=>'Prefieres tener las manos libres.'}]});
+    E({p:.6,c:()=>(S.bienes||[]).some(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0)))),
+      t:()=>{ const b=pick(S.bienes.filter(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0))))); S._b109=b.uid; return 'Te avisa un vecino: hay gente levantando ranchos en <b>'+esc(b.nombre)+'</b>. Si pasan los meses, sacarlos va a ser casi imposible.'; },
+      o:[{t:'Abogado y policía, ya',f:()=>{ const c=Math.max(3,Math.round(pat()*.004)); S.efectivo-=Math.min(S.efectivo,c); if(chance(.75)) return 'Los desalojaron a tiempo ('+fmt(c)+'). Pusiste un cuidandero.'; const b=B(); if(b) b.valor*=.7; return 'El proceso se enredó ('+fmt(c)+'). Recuperaste solo una parte del terreno.'; }},
+         {t:'Negociar: venderles una parte barata',f:()=>{ const b=B(); if(b){ const x=Math.round(b.valor*.12); S.efectivo+=x; b.valor*=.75; S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Les vendiste una franja por '+fmt(x)+'. Quedaste bien con el barrio.'; } return ''; }},
+         {t:'No hacer nada',f:()=>{ const b=B(); if(b) b.valor*=.5; return 'Pasó un año. Ya hay calles, tiendas y una escuela. Medio terreno ya no es tuyo.'; }}]});
+    window.__SA109_EV=true;
+  }
+
+  /* --- vistas --- */
+  function tarjeta(b){
+    const e=estado(b), pl=plus(b), r=rentaDe(b);
+    return '<button class="prop109" data-prop109="'+esc(b.uid)+'"><span class="img">'+dibujo109(b)+'<span class="cinta '+e.c+'">'+esc(e.t)+'</span></span><span class="cuerpo"><b>'+esc(b.nombre)+'</b><span class="l">'+esc(b.ciudad||S.hogar.ciudad||'')+(b.hipoteca>0?' · debes '+fmt(b.hipoteca):' · sin deuda')+'</span>'
+      +'<span class="v"><strong>'+fmt(b.valor)+'</strong><span>'+(r>0?'<span class="sube">+'+fmt(r)+'/año</span>':isFinite(b.precioCompra)?'<span class="'+(pl>=0?'sube':'baja')+'">'+(pl>=0?'+':'')+Math.round(pl*100)+'%</span>':'')+'</span></span></span></button>';
+  }
+  function portafolioHTML109(){
+    const B=(S.bienes||[]).slice().sort((a,b)=>(esHogar(b)?1:0)-(esHogar(a)?1:0)||b.valor-a.valor);
+    const tot=B.reduce((a,b)=>a+b.valor,0), deu=B.reduce((a,b)=>a+(b.hipoteca||0),0), ren=B.reduce((a,b)=>a+rentaDe(b),0);
+    return '<div id="props109"><div class="resumen109"><div><span>Propiedades</span><b>'+B.length+'</b></div><div><span>Valen</span><b>'+fmt(tot)+'</b></div><div><span>Debes</span><b>'+fmt(deu)+'</b></div><div><span>Te entran al año</span><b>'+fmt(ren)+'</b></div></div><div class="props109">'+B.map(tarjeta).join('')+'</div></div>';
+  }
+  function conectar109(raiz){ raiz.querySelectorAll('[data-prop109]').forEach(x=>x.onclick=()=>escenaPropiedad109(x.dataset.prop109)); }
+  function wrapLienzo109(){
+    const old=window.renderLienzo; if(typeof old!=='function'||window.__SA109_LIENZO) return;
+    window.renderLienzo=function(){ const r=old.apply(this,arguments);
+      try{ if(tab==='casa'&&S&&(S.bienes||[]).length&&!document.getElementById('props109')){ const host=$('lienzoJuego');
+        const sec=Array.from(host.querySelectorAll('.seccion')).find(x=>{ const h=x.querySelector('h3'); return h&&/^Lo que es tuyo/.test(h.textContent); });
+        if(sec){ sec.querySelectorAll(':scope > .retrato').forEach(x=>x.remove()); const h3=sec.querySelector('h3'); h3.insertAdjacentHTML('afterend',portafolioHTML109()+'<div class="apunte">Toca una propiedad para administrarla: arrendarla, remodelarla, asegurarla, venderla o decidir qué pasa con ella si te mudas.</div>'); conectar109(sec); } } }catch(e){}
+      return r; };
+    window.__SA109_LIENZO=true;
+  }
+  function escenaPortafolio109(){
+    escena({rubro:'Tu patrimonio',titulo:'Tus propiedades',ancho:true,cerrable:true,html:(S.bienes||[]).length?portafolioHTML109():'<div class="vacio">Todavía no tienes propiedades.</div>',
+      opciones:[{t:'Comprar otra propiedad',cat:'casa',cerrar:false,run:()=>{ cerrarModal(); if(typeof window.escenaGrupo91==='function') window.escenaGrupo91('propiedades'); }}]});
+    conectar109(document.getElementById('escenaHost'));
+  }
+  function wrapAcciones109(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA109_ACC) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&(S.bienes||[]).length&&!(window.esNino94&&window.esNino94())&&!A.some(a=>a.t==='Administrar tus propiedades')){ const n=S.bienes.length;
+        A.push({t:'Administrar tus propiedades',cat:'casa',d:n+' propiedad'+(n===1?'':'es')+'. Arriendos, remodelaciones, seguros y ventas, una por una.',mov:0,modal:true,run:()=>escenaPortafolio109()}); } }catch(e){}
+      return A; };
+    window.__SA109_ACC=true;
+  }
+  function wrapCat109(){ const old=window.catDe; if(typeof old!=='function'||window.__SA109_CAT) return; window.catDe=function(t){ return t==='Administrar tus propiedades'?'casa':old.apply(this,arguments); }; window.__SA109_CAT=true; }
+  function wrapPaso109(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA109_PASO) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) correrPropiedades109(); }catch(e){} return r; };
+    window.__SA109_PASO=true;
+  }
+  function init109(){
+    wrapIcono109(); instalarEventos109(); wrapLienzo109(); wrapAcciones109(); wrapCat109(); wrapPaso109();
+    Object.assign(window,{dibujo109,alMudarse109,escenaPropiedad109,escenaPortafolio109,correrPropiedades109,tipoBien109:tipoDe});
+  }
+  setTimeout(init109,40); setTimeout(init109,220); setTimeout(init109,650);
+  window.__SA109={version:V109};
 })();
 </script>
 
