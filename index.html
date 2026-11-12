@@ -980,10 +980,16 @@ svg.foto116{display:block;background:#1d2a23}
 .suc119 .pasos div.hecho{border-color:rgba(214,166,72,.4);color:var(--laton)}
 .suc119 .pasos div.ahora{border-color:var(--laton);background:rgba(214,166,72,.12);color:var(--marfil);font-weight:500}
 </style>
+<style id="estilos-v120">
+.momento120{margin:-4px 0 14px;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 0 1px rgba(214,166,72,.35)}
+.momento120 img{display:block;width:100%;aspect-ratio:3/2;max-height:min(42vh,330px);object-fit:cover;filter:saturate(.92) contrast(1.02)}
+.momento120 figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;font-family:var(--display);font-size:15px;letter-spacing:.04em;color:#F6EBD3;background:linear-gradient(transparent,rgba(16,12,8,.78))}
+.lienzo.momento120caja{max-width:620px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v119</div>
+<div class="version-badge" id="versionBadge">v120</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24373,6 +24379,92 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   setTimeout(init119,40); setTimeout(init119,220); setTimeout(init119,650);
   window.__SA119={version:V119};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v120 · LOS MOMENTOS DE LA VIDA, ILUSTRADOS
+   Cada momento importante trae su ilustración de época: nacimientos de hijos
+   y nietos, bodas (íntima, normal, de sociedad), funerales (sencillo,
+   normal, de pompa, de beneficencia), juicios, embargos y sucesiones.
+   Si una imagen no carga, el juego sigue igual, sin ilustración.
+   ========================================================================== */
+(function(){
+  const V120='v120';
+  const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion'];
+  const ok={};
+  function precargar(){ if(window.__SA120_PRE) return; window.__SA120_PRE=true;
+    IMGS.forEach(n=>{ const im=new Image(); im.onload=()=>{ ok[n]=true; }; im.onerror=()=>{ ok[n]=false; }; im.src='img/eventos/'+n+'.jpg'; }); }
+  const PIE={nacimiento_hijo:'Un nacimiento en la casa',nacimiento_nieto:'Llegó la siguiente generación',boda_intima:'Una boda íntima',boda_normal:'Una boda como se debe',boda_elite:'Boda de sociedad',
+    funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión'};
+  const figura=(k,pie)=>'<figure class="momento120" data-momento="'+k+'"><img src="img/eventos/'+k+'.jpg" alt="'+esc(PIE[k]||'')+'"><figcaption>'+esc(pie||PIE[k]||'')+'</figcaption></figure>';
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
+
+  /* --- 1. en las escenas que ya existen: la ilustración arriba --- */
+  function funeralPropio(){ const pr=(typeof prestigio==='function')?prestigio():50, pt=(typeof patrimonio==='function')?patrimonio():0;
+    return pt<=0?'funeral_beneficencia':pr>=70?'funeral_pompa':pr>=40?'funeral_normal':'funeral_sencillo'; }
+  function detectar(o){
+    const ti=plano(o.titulo), cu=plano(o.cuerpo), ru=plano(o.rubro);
+    if(ti==='¿Cómo se va a llamar?') return 'nacimiento_hijo';
+    if(/Llegó el día del juicio/.test(cu)) return 'juicio';
+    if(ti==='Así queda la herencia'||ti==='¿Notaría o juzgado?'||/^La sucesión de /.test(ti)||/está lista para la partición/.test(cu)) return 'sucesion';
+    if((ti==='¿Con quién sigue la casa?'||ti==='La casa necesita un sucesor')&&!/Retiro|en vida/.test(ru)) return funeralPropio();
+    if(/embargados por una deuda|Se viene el remate/.test(cu)) return 'embargo';
+    return null;
+  }
+  const FUNERAL_OPC=[[/^Algo sencillo/,'funeral_sencillo'],[/^Como debe ser/,'funeral_normal'],[/^Honras completas/,'funeral_pompa'],[/beneficencia/,'funeral_beneficencia']];
+  function wrapEscena120(){
+    const old=window.escena; if(typeof old!=='function'||old.__v120) return;
+    window.escena=function(o){
+      try{
+        if(o&&/^El funeral de /.test(plano(o.titulo))&&Array.isArray(o.opciones)){
+          const quien=plano(o.titulo).replace(/^El funeral de /,'');
+          o=Object.assign({},o,{opciones:o.opciones.map(op=>{ const m=FUNERAL_OPC.find(([re])=>re.test(plano(op.t))); if(!m) return op; const run=op.run;
+            return Object.assign({},op,{run:function(){ const r=run&&run.apply(this,arguments); momento(m[1],'El funeral de '+quien,(PIE[m[1]]||'')); return r; }}); })});
+        }
+        const k=o&&detectar(o);
+        const caja=old.call(this,o);
+        if(k&&ok[k]&&caja&&!caja.querySelector('.momento120')){ caja.insertAdjacentHTML('afterbegin',figura(k)); }
+        return caja;
+      }catch(e){ return old.apply(this,arguments); }
+    };
+    window.escena.__v120=true;
+  }
+
+  /* --- 2. momentos que solo quedaban en la crónica: una lámina aparte --- */
+  const cola120=[]; let corriendo=false;
+  function momento(k,titulo,texto){ if(!ok[k]) return; if(cola120.some(m=>m.k===k&&m.titulo===titulo)) return; cola120.push({k,titulo,texto}); if(!corriendo) setTimeout(siguiente,60); }
+  function siguiente(){
+    if(!cola120.length){ corriendo=false; return; }
+    corriendo=true;
+    if(document.querySelector('#escenaHost .lienzo')){ setTimeout(siguiente,400); return; }
+    const m=cola120.shift();
+    window.__momento120=true;
+    try{ const caja=escena({rubro:'Año '+S.anio,titulo:esc(m.titulo),clase:'momento120caja',cuerpo:m.texto,opciones:[{t:'Seguir',cat:'familia'}]}); if(caja&&!caja.querySelector('.momento120')) caja.insertAdjacentHTML('afterbegin',figura(m.k)); }catch(e){}
+    window.__momento120=false;
+    setTimeout(siguiente,400);
+  }
+  function wrapLog120(){
+    const old=window.log; if(typeof old!=='function'||old.__v120) return;
+    let bodaTick=null;
+    window.log=function(txt,clase){ const r=old.apply(this,arguments);
+      try{ const t=plano(txt);
+        if(/^La boda fue íntima/.test(t)){ bodaTick='boda_intima'; }
+        else if(/^La boda fue como se debe/.test(t)){ bodaTick='boda_normal'; }
+        else if(/^La boda fue de sociedad/.test(t)){ bodaTick='boda_elite'; }
+        else if(/^Te casaste con /.test(t)&&!bodaTick){ bodaTick='?'; }
+        if(bodaTick){ const tt=t; setTimeout(()=>{ if(!bodaTick) return; const k=bodaTick==='?'?'boda_normal':bodaTick; bodaTick=null;
+          const pa=S&&S.familia&&S.familia.pareja; momento(k,pa?'Tu boda con '+String(pa.nombre).split(' ')[0]:'La boda',PIE[k]+'.'); },0); }
+        if(/tuvieron (una niña|un niño): /.test(t)&&clase==='hito') momento('nacimiento_nieto',/una niña/.test(t)?'Nació una nieta':'Nació un nieto',t.replace(/\s+/g,' ').trim());
+        if(/^\s*Embargo\.\s+El juzgado embargó/.test(t)) momento('embargo','El embargo',t.replace(/^\s*Embargo\.\s*/,'').replace(/\s+/g,' ').trim());
+      }catch(e){}
+      return r; };
+    window.log.__v120=true;
+  }
+  function init120(){ precargar(); wrapEscena120(); wrapLog120(); Object.assign(window,{momento120:momento,momentosCargados120:ok,detectarMomento120:detectar}); }
+  setTimeout(init120,40); setTimeout(init120,220); setTimeout(init120,650);
+  window.__SA120={version:V120};
 })();
 </script>
 
