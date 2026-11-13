@@ -985,11 +985,13 @@ svg.foto116{display:block;background:#1d2a23}
 .momento120 img{display:block;width:100%;aspect-ratio:3/2;max-height:min(42vh,330px);object-fit:cover;filter:saturate(.92) contrast(1.02)}
 .momento120 figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;font-family:var(--display);font-size:15px;letter-spacing:.04em;color:#F6EBD3;background:linear-gradient(transparent,rgba(16,12,8,.78))}
 .lienzo.momento120caja{max-width:620px}
+/* v121: embargo, juicio y sucesión vienen en franja panorámica (es lo que se pudo rescatar de la escena) */
+.momento120[data-momento="embargo"] img,.momento120[data-momento="juicio"] img,.momento120[data-momento="sucesion"] img{aspect-ratio:960/286;max-height:none}
 </style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v120</div>
+<div class="version-badge" id="versionBadge">v121</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24425,7 +24427,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         }
         const k=o&&detectar(o);
         const caja=old.call(this,o);
-        if(k&&ok[k]&&caja&&!caja.querySelector('.momento120')){ caja.insertAdjacentHTML('afterbegin',figura(k)); }
+        if(k&&ok[k]&&caja&&!caja.querySelector('.momento120')){ caja.insertAdjacentHTML('afterbegin',figura(k));
+          const sello=caja.querySelector(':scope > .evento90-sello'), fig=caja.querySelector('.momento120');   // el sello del evento baja junto al título
+          if(sello&&fig){ const ajustar=()=>{ sello.style.top=(fig.offsetTop+fig.offsetHeight+18)+'px'; }; ajustar(); const im=fig.querySelector('img'); if(im&&!im.complete) im.addEventListener('load',ajustar); } }
         return caja;
       }catch(e){ return old.apply(this,arguments); }
     };
@@ -24464,7 +24468,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function init120(){ precargar(); wrapEscena120(); wrapLog120(); Object.assign(window,{momento120:momento,momentosCargados120:ok,detectarMomento120:detectar}); }
   setTimeout(init120,40); setTimeout(init120,220); setTimeout(init120,650);
-  window.__SA120={version:V120};
+  window.__SA120={version:V120}; window.__SA121={version:'v121'};
 })();
 </script>
 
