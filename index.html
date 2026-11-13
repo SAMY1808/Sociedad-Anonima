@@ -989,7 +989,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v126</div>
+<div class="version-badge" id="versionBadge">v127</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24607,6 +24607,81 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init125(){ instalar125(); precargar(); Object.assign(window,{fotoCiudad125:claveDe,fotosCiudad125:ok}); }
   setTimeout(init125,60); setTimeout(init125,240); setTimeout(init125,700);
   window.__SA125={version:V125};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v127 · COMPRAR PARA ARRENDAR CUALQUIER VIVIENDA
+   "Comprar para arrendar" ahora ofrece los mismos tipos que compras para
+   vivir (apartamento, casa, dúplex, mansión, penthouse), con barrio, tamaño,
+   cuota inicial y plazo, y muestra canon, rentabilidad y vacancia. Las
+   viviendas compradas así funcionan como una casa tuya puesta en arriendo:
+   puedes irte a vivir ahí, dejarla de descanso o cambiar el canon.
+   Los locales, bodegas, oficinas, etc. siguen en "Otros inmuebles".
+   ========================================================================== */
+(function(){
+  const V127='v127';
+  const TIPOS_ARR=[
+    {n:'Apartamento',tipo:'apartamento',base:.68,renta:.058,vac:.06,mant:.022,d:'Se arrienda rápido y casi nunca queda vacío. El clásico.'},
+    {n:'Casa',tipo:'casa',base:.95,renta:.055,vac:.08,mant:.020,d:'Para una familia que busca patio y espacio. Demanda estable.'},
+    {n:'Dúplex',tipo:'casa_grande',base:1.15,renta:.052,vac:.09,mant:.020,d:'Más grande y más caro de arrendar; inquilinos de buen ingreso.'},
+    {n:'Mansión',tipo:'mansion',base:1.55,renta:.038,vac:.20,mant:.025,d:'Pocos pueden pagarla: renta poco y queda vacía seguido, pero se valoriza.'},
+    {n:'Penthouse',tipo:'penthouse',base:1.70,renta:.045,vac:.12,mant:.022,d:'Ejecutivos y extranjeros. Canon alto, pero hay que esperar al inquilino.'}
+  ];
+  // en barrios populares la renta rinde más (y se vacía más); en los exclusivos, menos
+  function condiciones(t,zona){ const p=(zona&&zona.p)||3, k=3-p;
+    return {renta:Math.max(.02,t.renta*(1+k*.05)), vac:clamp(t.vac*(1+k*.10),.02,.5)}; }
+  function escenaRenta127(old){
+    const ciudad=S.hogar.ciudad, Z=zonasVivienda(ciudad);
+    const st={tipo:0,zona:clamp(isFinite(S.hogar.zona)?S.hogar.zona:0,0,Z.length-1),ajuste:1,inicial:.3,anios:15};
+    const calc=()=>{ const t=TIPOS_ARR[st.tipo], z=Z[st.zona], valor=precioVivienda(ciudad,st.zona,t.base*st.ajuste), r=resumenCuota(valor,st.inicial,st.anios), c=condiciones(t,z);
+      const canon=valor*c.renta, neto=canon*(1-c.vac)-valor*t.mant-r.cuota; return {t,z,valor,r,c,canon,neto}; };
+    const fila=(a,id)=>'<div class="trato-fila"><span>'+a+'</span><span id="'+id+'"></span></div>';
+    const caja=escena({rubro:'Renta inmobiliaria',titulo:'Comprar para arrendar en '+esc(ciudad),ancho:true,
+      cuerpo:'Elige qué vivienda compras para ponerla en arriendo. Más grande no siempre renta más: una mansión se valoriza, pero pocos pueden pagar el canon.',
+      html:'<label class="campo">Tipo de vivienda</label><div class="fichas-sel" id="a127tipo">'+TIPOS_ARR.map((t,i)=>'<button class="opcion" data-v="'+i+'" aria-pressed="'+(i===st.tipo)+'">'+t.n+'</button>').join('')+'</div>'
+        +'<div class="apunte" id="a127d"></div>'
+        +'<label class="campo">Barrio</label><div class="fichas-sel" id="a127zona">'+Z.map((z,i)=>'<button class="opcion" data-v="'+i+'" aria-pressed="'+(i===st.zona)+'">'+esc(z.n)+'</button>').join('')+'</div>'
+        +'<label class="campo">Tamaño: <b id="a127tam"></b><input type="range" id="a127hol" min="85" max="120" value="100"></label>'
+        +'<label class="campo">Cuota inicial: <b id="a127ini"></b><input type="range" id="a127iniR" min="20" max="100" value="30"></label>'
+        +'<label class="campo">Plazo del crédito: <b id="a127an"></b><input type="range" id="a127anR" min="5" max="20" value="15"></label>'
+        +'<div class="mesa-trato">'+fila('Precio','a127pre')+fila('Pagas de entrada','a127ent')+fila('Cuota del crédito al año','a127cuo')
+        +fila('Canon al año','a127can')+fila('Rentabilidad bruta','a127ren')+fila('Queda vacía','a127vac')+fila('Te queda al año, más o menos','a127net')+'<div class="apunte" id="a127nota"></div></div>',
+      opciones:[{t:'Comprar para arrendar',cat:'casa',cerrar:false,run:()=>comprar()},
+        {t:'Otros inmuebles: local, bodega, oficina…',cat:'casa',d:'Lo comercial: rinde más, pero se vacía con las crisis.',cerrar:false,run:()=>{ cerrarModal(); old(); try{ document.querySelectorAll('#escenaHost #eleccion .carta').forEach(c=>{ if(/^(Apartamento para arrendar|Casa residencial)/.test((c.querySelector('.nom')||{}).textContent||'')) c.remove(); }); }catch(e){} }}],cerrable:true});   // la vivienda ya está arriba
+    const q=s=>caja.querySelector(s);
+    const pintar=()=>{ const x=calc();
+      q('#a127d').textContent=x.t.d; q('#a127tam').textContent=st.ajuste<.95?'compacto':st.ajuste>1.1?'amplio':'normal';
+      q('#a127ini').textContent=pc(st.inicial); q('#a127an').textContent=st.anios+' años';
+      q('#a127pre').textContent=fmt(x.valor); q('#a127ent').textContent=fmt(x.r.entrada); q('#a127cuo').textContent=fmt(x.r.cuota);
+      q('#a127can').textContent=fmt(x.canon); q('#a127ren').textContent=pc(x.c.renta); q('#a127vac').textContent=pc(x.c.vac)+' del tiempo';
+      const n=q('#a127net'); n.textContent=(x.neto>=0?'':'−')+fmt(Math.abs(x.neto)); n.className=x.neto>=0?'bien':'mal';
+      q('#a127nota').textContent=S.efectivo<x.r.entrada?'No tienes los '+fmt(x.r.entrada)+' de la cuota inicial.':x.neto<0?'Mientras pagas el crédito, el arriendo no alcanza para la cuota: pones plata cada año, pero el inmueble queda tuyo.':x.r.saldo<=0?'Sin crédito: lo que deja el arriendo, descontando vacancia y mantenimiento, es todo tuyo.':'El arriendo paga la cuota y sobra.';
+      const b=caja.querySelector('#eleccion .carta'); if(b) b.disabled=S.efectivo<x.r.entrada||S.mov<1; };
+    const sel=(id,k)=>caja.querySelectorAll(id+' .opcion').forEach(b=>b.onclick=()=>{ caja.querySelectorAll(id+' .opcion').forEach(y=>y.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); st[k]=+b.dataset.v; pintar(); });
+    sel('#a127tipo','tipo'); sel('#a127zona','zona');
+    q('#a127hol').oninput=e=>{ st.ajuste=e.target.value/100; pintar(); };
+    q('#a127iniR').oninput=e=>{ st.inicial=e.target.value/100; pintar(); };
+    q('#a127anR').oninput=e=>{ st.anios=+e.target.value; pintar(); };
+    function comprar(){
+      const x=calc(); if(S.efectivo<x.r.entrada||S.mov<1) return;
+      const b=comprarBien({clase:'renta',tipo:x.t.tipo,nombre:x.t.n+' para arrendar en '+x.z.n,valor:x.valor,mant:x.t.mant,renta:x.c.renta,vac:x.c.vac,ciudad,zona:st.zona,cuotaInicial:st.inicial,anios:st.anios});
+      if(!b) return;   // el banco no prestó (la v112 ya avisó)
+      b.exVivienda109=true; b.compradaParaArrendar127=true; b.arrendado=true;
+      S.mov--; log('Compraste '+(x.t.tipo==='apartamento'?'un apartamento':x.t.tipo==='casa'?'una casa':x.t.tipo==='casa_grande'?'un dúplex':x.t.tipo==='mansion'?'una mansión':'un penthouse')+' en <b>'+esc(x.z.n)+'</b> para arrendar, por '+fmt(x.valor)+'. El canon es de unos '+fmt(x.canon)+' al año.','bien');
+      cerrarModal(); render();
+    }
+    pintar();
+  }
+  function wrapRenta127(){
+    const old=window.escenaRenta; if(typeof old!=='function'||old.__v127) return;
+    window.escenaRenta=function(){ try{ if(typeof zonasVivienda==='function'&&typeof precioVivienda==='function') return escenaRenta127(old); }catch(e){ console.error(e); } return old.apply(this,arguments); };
+    window.escenaRenta.__v127=true;
+  }
+  function init127(){ wrapRenta127(); Object.assign(window,{TIPOS_ARRIENDO_127:TIPOS_ARR}); }
+  setTimeout(init127,40); setTimeout(init127,220); setTimeout(init127,650);
+  window.__SA127={version:V127};
 })();
 </script>
 
