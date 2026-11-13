@@ -989,7 +989,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v127</div>
+<div class="version-badge" id="versionBadge">v128</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -11438,7 +11438,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     S.testamentoRico.legados.forEach(l=>{
       if(l.tipo==='bien') partes.push(esc(l.nombre)+' pasa a '+esc(l.paraNombre)+'.');
       else if(l.tipo==='acciones') partes.push('El '+l.pct+'% de las acciones de '+esc(l.empresa)+' pasa a '+esc(l.paraNombre)+'.');
-      else if(l.tipo==='fundacion') partes.push(fmt(l.monto)+' fueron a la fundación.');
+      else if(l.tipo==='fundacion') partes.push(fmt(l.monto)+(l.pendiente128?' irán a la fundación.':' fueron a la fundación.'));
       else if(l.tipo==='restriccion') partes.push(esc(l.nombre)+' deberá conservarse '+l.anios+' años.');
     });
     return partes;
@@ -11465,12 +11465,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           cerrarModal();
           escena({rubro:'Testamento detallado',titulo:'¿Para quién es '+esc(b.nombre||b.tipo||'esta propiedad')+'?',
             opciones:hijos.map(h=>({t:h.nombre,cat:'familia',cerrar:false,run:()=>{
-              S.bienes=S.bienes.filter(x=>x.uid!==b.uid);
-              h.bienes=h.bienes||[]; marcarPropiedadDeRama(h,b); h.bienes.push(b);
+              // v128: el testamento solo deja escrito; la propiedad sigue siendo tuya hasta que mueras
               h.vinculo=clamp((h.vinculo||60)+8,0,100);
               S.testamentoRico.legados=S.testamentoRico.legados.filter(l=>!(l.tipo==='bien'&&l.bienUid===b.uid));
               S.testamentoRico.legados.push({tipo:'bien',bienUid:b.uid,nombre:b.nombre||b.tipo,paraNombre:h.nombre,paraFid:h.fid});
-              log('El testamento deja <b>'+esc(b.nombre||b.tipo)+'</b> a '+esc(h.nombre)+'.','hito');
+              log('El testamento deja <b>'+esc(b.nombre||b.tipo)+'</b> a '+esc(h.nombre)+' cuando mueras. Mientras tanto sigue siendo tuya.','hito');
               S.mov--; escenaTestamentoDetallado45();
             }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
         }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
@@ -11482,25 +11481,21 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         opciones:hijos.map(h=>({t:h.nombre,cat:'familia',cerrar:false,run:()=>{
           cerrarModal();
           escena({rubro:'Testamento detallado',titulo:'¿Qué porcentaje para '+esc(h.nombre)+'?',
-            opciones:[5,10,15,20,25].map(pct=>({t:pct+'%',cat:'capital',dis:miPct(e)*100<pct?'No tienes ese porcentaje disponible':null,run:()=>{
-              const total=totalAcciones(e); const mover=Math.round(total*pct/100); const mio=e.holders.find(x=>x.id==='tu');
-              if(!mio||mio.n<mover){ log('No tienes suficientes acciones para ese legado.','mal'); return; }
-              mio.n-=mover;
-              let dest=e.holders.find(x=>x.id==='legado-'+h.fid);
-              if(dest) dest.n+=mover; else e.holders.push({id:'legado-'+h.fid,nombre:h.nombre+' (legado)',tipo:'familia',n:mover});
+            opciones:[5,10,15,20,25].map(pct=>{ const yaLegado=S.testamentoRico.legados.filter(l=>l.tipo==='acciones'&&l.empresa===e.nombre).reduce((a,l)=>a+(l.pct||0),0);
+              return {t:pct+'%',cat:'capital',dis:miPct(e)*100-yaLegado<pct?'No te queda ese porcentaje sin legar':null,run:()=>{
+              // v128: las acciones siguen siendo tuyas; se entregan al morir
               S.testamentoRico.legados.push({tipo:'acciones',pct,empresa:e.nombre,paraNombre:h.nombre,paraFid:h.fid});
-              log('El testamento entregó el '+pct+'% de <b>'+esc(e.nombre)+'</b> a '+esc(h.nombre)+'.','hito');
+              log('El testamento deja el '+pct+'% de <b>'+esc(e.nombre)+'</b> a '+esc(h.nombre)+' cuando mueras. Hasta entonces, votas tú.','hito');
               S.mov--; escenaTestamentoDetallado45();
-            }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
+            }}; }),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
         }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
     }});
-    opciones.push({t:'Donar un monto a la fundación',cat:'legado',dis:!S.fundacion?'Todavía no existe una fundación de la casa':(S.efectivo<50?'Necesitas al menos '+fmt(50):null),cerrar:false,run:()=>{
+    opciones.push({t:'Dejar un monto a la fundación',cat:'legado',dis:!S.fundacion?'Todavía no existe una fundación de la casa':(S.efectivo<50?'Necesitas al menos '+fmt(50):null),cerrar:false,run:()=>{
       cerrarModal();
       escena({rubro:'Testamento detallado',titulo:'¿Cuánto va a la fundación?',
         opciones:[50,120,250,500].filter(m=>m<=S.efectivo).map(m=>({t:fmt(m),cat:'legado',run:()=>{
-          S.efectivo-=m; S.fundacion.activos=(S.fundacion.activos||0)+m;
-          S.testamentoRico.legados.push({tipo:'fundacion',monto:m});
-          log('Dejaste asentado un legado de '+fmt(m)+' para la fundación.','hito'); S.mov--;
+          S.testamentoRico.legados.push({tipo:'fundacion',monto:m,pendiente128:true});
+          log('Dejaste escrito un legado de '+fmt(m)+' para la fundación: se entrega cuando mueras.','hito'); S.mov--;
         }})),cerrable:true,alCerrar:()=>escenaTestamentoDetallado45()});
     }});
     opciones.push({t:'Poner una cláusula de conservación',cat:'legado',dis:!bienesLegablesRestriccion45().length?'No hay propiedades disponibles para una cláusula':null,cerrar:false,run:()=>{
@@ -24094,7 +24089,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const kj=h?(vivos.includes(h)?'h:'+h.nombre:(h._huerfano108?'n:'+h.nombre:(h.pid&&out.her.some(x=>x.key==='p:'+h.pid)?'p:'+h.pid:'x:'+h.nombre))):null;
     out.her.forEach(x=>x.jugador=x.key===kj);
     if(h&&!out.her.some(x=>x.jugador)) out.her.push({key:kj,nombre:h.nombre+' '+ap,rel:h._sucesorRel||(h.sexo==='m'?'hija':'hijo'),sexo:h.sexo,pct:0,jugador:true});
-    out.legados=((S.testamentoRico&&S.testamentoRico.legados)||[]).filter(l=>l.tipo==='bien'||l.tipo==='acciones').map(l=>Object.assign({},l));
+    out.legados=((S.testamentoRico&&S.testamentoRico.legados)||[]).filter(l=>l.tipo==='bien'||l.tipo==='acciones'||(l.tipo==='fundacion'&&l.pendiente128)).map(l=>Object.assign({},l));
     if(out.legados.length) out.lineas.push('Se cumplen también los legados del testamento: '+out.legados.length+'.');
     return out;
   }
@@ -24157,6 +24152,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function abrirSucesion119(plan,propios,causante){
     if(S.testamento&&S.testamento._v119) S.testamento=null;
+    // v128: los legados se separan antes de repartir (son adicionales a la parte de cada heredero)
+    const legBienes=new Map(); (plan.legados||[]).filter(l=>l.tipo==='bien').forEach(l=>{ const x=plan.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(x) legBienes.set(l.bienUid,x); });
+    (S.bienes||[]).slice().forEach(b=>{ const x=legBienes.get(b.uid); if(!x||propios.has(b.uid)) return;
+      if(!x.jugador){ S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar&&S.hogar.vivienda===b.uid) S.hogar.vivienda=null; }
+      log('<b>'+esc(b.nombre)+'</b> quedó para '+(x.jugador?'ti':esc(x.nombre))+' (por legado del testamento).','hito'); propios.add(b.uid); });
     const bienes=(S.bienes||[]).filter(b=>!propios.has(b.uid));
     const caja0=(S.efectivo||0)+(S.portafolio||[]).reduce((a,p)=>a+p.valor,0);
     const jug=plan.her.find(x=>x.jugador)||{pct:0};
@@ -24166,15 +24166,17 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       caja:Math.max(0,caja0-anticipo),anticipo,via:null,anios:0,duracion:null,costos:0,cerrada:false,legadosAcc:(plan.legados||[]).filter(l=>l.tipo==='acciones'),fundacionPct:plan.fundacionPct||0};
     S.efectivo=anticipo; S.portafolio=[];
     if(suc.fundacionPct>0){ const f=suc.caja*suc.fundacionPct; suc.caja-=f; log('La fundación recibió '+fmt(f)+' por la cuarta de libre disposición.','hito'); }
+    // v128: lo que el testamento dejó a la fundación sale de la caja de la sucesión
+    (plan.legados||[]).filter(l=>l.tipo==='fundacion').forEach(l=>{ const m=Math.min(suc.caja,l.monto||0); if(m<=0) return; suc.caja-=m; if(S.fundacion) S.fundacion.activos=(S.fundacion.activos||0)+m; log('La fundación recibió '+fmt(m)+', como lo dejó escrito el testamento.','hito'); });
     bienes.forEach(b=>{ b.suc119=true; });
     const M0=suc.caja+bienes.reduce((a,b)=>a+neto(b),0); suc.M0=M0;
     const totPct=suc.her.reduce((a,x)=>a+x.pct,0)||1;
     suc.her.forEach(x=>{ x.E=M0*x.pct/totPct; });
-    // legados de bienes: se adjudican de una
-    (plan.legados||[]).filter(l=>l.tipo==='bien').forEach(l=>{ const b=bienes.find(x=>x.uid===l.bienUid); const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(b&&x) adjudicar(suc,b,x,'por legado del testamento'); });
     // acciones: tu parte directa; el resto, en cabeza de la sucesión
     companias().forEach(e=>{ const tu=(e.holders||[]).find(y=>y.id==='tu'); if(!tu||!(tu.n>0)) return;
-      const n0=tu.n, mio=Math.round(n0*p), resto=n0-mio; tu.n=mio;
+      const n0=tu.n, T=totalAcciones(e); let leg=0, legJug=0;
+      suc.legadosAcc.filter(l=>l.empresa===e.nombre).forEach(l=>{ const n=Math.min(n0-leg,Math.round(T*(l.pct||0)/100)); leg+=n; const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(x&&x.jugador){ legJug+=n; l.hecho128=true; } });
+      const mio=Math.round((n0-leg)*p)+legJug, resto=n0-mio; tu.n=mio;
       if(resto>0){ e.holders.push({id:'suc119',nombre:'Sucesión de '+causante,tipo:'familia',n:resto});
         if(resto/totalAcciones(e)>=UMBRAL_JUNTA&&Array.isArray(e.junta)) e.junta.push({nombre:'Albacea de la sucesión de '+primer(causante),arq:'familiar',lealtad:50,anios:0,albacea119:true}); } });
     S.sucesion119=suc;
@@ -24316,7 +24318,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       let pool=h.n; e.holders=e.holders.filter(y=>y!==h);
       const tot=totalAcciones(e)+pool;
       const asign=new Map();
-      (suc.legadosAcc||[]).filter(l=>l.empresa===e.nombre).forEach(l=>{ const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(!x) return; const n=Math.min(pool,Math.round(tot*(l.pct||0)/100)); pool-=n; asign.set(x,(asign.get(x)||0)+n); });
+      (suc.legadosAcc||[]).filter(l=>l.empresa===e.nombre&&!l.hecho128).forEach(l=>{ const x=suc.her.find(y=>primer(y.nombre)===primer(l.paraNombre)); if(!x||x.jugador) return; const n=Math.min(pool,Math.round(tot*(l.pct||0)/100)); pool-=n; asign.set(x,(asign.get(x)||0)+n); });
       const totPct=O.reduce((a,x)=>a+x.pct,0);
       O.forEach(x=>{ const n=totPct>0?Math.round(pool*x.pct/totPct):0; asign.set(x,(asign.get(x)||0)+n); });
       asign.forEach((n,x)=>{ if(n<=0) return; if(x.jugador){ const tu=e.holders.find(y=>y.id==='tu'); if(tu) tu.n+=n; return; }
@@ -24682,6 +24684,35 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init127(){ wrapRenta127(); Object.assign(window,{TIPOS_ARRIENDO_127:TIPOS_ARR}); }
   setTimeout(init127,40); setTimeout(init127,220); setTimeout(init127,650);
   window.__SA127={version:V127};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v128 · EL TESTAMENTO SE CUMPLE AL MORIR
+   Antes, "Legar una propiedad" y "Legar acciones" las pasaban de una vez al
+   hijo, como si las hubieras regalado en vida. Ahora el testamento solo deja
+   escrito quién recibe qué; la sucesión lo cumple cuando mueres.
+   En partidas guardadas, lo que ya se había pasado "por testamento" vuelve a
+   tu patrimonio y el legado queda escrito.
+   ========================================================================== */
+(function(){
+  const V128='v128';
+  function migrar128(){
+    if(!S||!S.p||S._mig128) return; S._mig128=true;
+    const L=(S.testamentoRico&&S.testamentoRico.legados)||[]; if(!L.length) return;
+    let bienes=0, acc=0;
+    L.filter(l=>l.tipo==='bien').forEach(l=>{ (S.familia.hijos||[]).forEach(h=>{ const i=(h.bienes||[]).findIndex(b=>b.uid===l.bienUid); if(i<0) return;
+      const b=h.bienes.splice(i,1)[0]; ['legadoRama','ramaPropietariaPid','ramaPropietariaNombre','ramaAdministradorPid','ramaAdministradorNombre','destinoRentaRama'].forEach(k=>delete b[k]);
+      if(!(S.bienes||[]).some(x=>x.uid===b.uid)){ S.bienes.push(b); bienes++; } }); });
+    companias().forEach(e=>{ const tu=(e.holders||[]).find(x=>x.id==='tu'); (e.holders||[]).filter(x=>/^legado-/.test(String(x.id))).forEach(x=>{ if(tu){ tu.n+=x.n; acc++; } }); if(tu) e.holders=e.holders.filter(x=>!/^legado-/.test(String(x.id))); });
+    if(bienes||acc) log('Se corrigió tu testamento: '+(bienes?bienes+' propiedad'+(bienes===1?'':'es'):'')+(bienes&&acc?' y ':'')+(acc?'las acciones legadas':'')+' vuelven a ser tuyas hasta que mueras; el legado sigue escrito.','hito');
+  }
+  function wrapRender128(){ const old=window.render; if(typeof old!=='function'||old.__v128) return;
+    window.render=function(){ try{ migrar128(); }catch(e){} return old.apply(this,arguments); }; window.render.__v128=true; }
+  function init128(){ wrapRender128(); Object.assign(window,{migrarTestamento128:migrar128}); }
+  setTimeout(init128,40); setTimeout(init128,220); setTimeout(init128,650);
+  window.__SA128={version:V128};
 })();
 </script>
 
