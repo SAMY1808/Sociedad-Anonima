@@ -989,7 +989,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v124</div>
+<div class="version-badge" id="versionBadge">v125</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24552,6 +24552,56 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init122(){ wrapHito122(); wrapLog122(); wrapRender122(); Object.assign(window,{revisarMomentos122:revisar122}); }
   setTimeout(init122,40); setTimeout(init122,220); setTimeout(init122,650);
   window.__SA122={version:V122}; window.__SA123={version:'v123'};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v125 · CADA CIUDAD CON SU CASA
+   Las viviendas en las 9 ciudades de Colombia usan la foto de su ciudad y su
+   tipo (apartamento, casa, dúplex, mansión, penthouse): Cartagena colonial,
+   Manizales de montaña, Barranquilla con palmeras… Son imágenes verticales:
+   se muestran completas sobre un fondo desenfocado de la misma foto.
+   En el exterior, o si una foto no carga, se ve la foto general de antes.
+   ========================================================================== */
+(function(){
+  const V125='v125';
+  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena'};
+  const TIPOS125=['apartamento','casa','duplex','mansion','penthouse'];
+  const ok={};
+  function precargar(){ if(window.__SA125_PRE) return; window.__SA125_PRE=true; let pend=0, t=null;
+    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const k=c+'_'+tp, im=new Image(); pend++;
+      const fin=()=>{ clearTimeout(t); t=setTimeout(()=>{ try{ if(S&&S.p&&typeof render==='function'&&!document.querySelector('#escenaHost .lienzo')) render(); }catch(e){} },150); };
+      im.onload=()=>{ ok[k]=true; fin(); }; im.onerror=()=>{ ok[k]=false; }; im.src='img/ciudades/'+k+'.jpg'; })); }
+  function claveDe(b){
+    if(!b) return null;
+    const esVivienda=b.clase==='vivienda'||b.exVivienda109;
+    if(!esVivienda) return null;
+    const c=CIUDADES125[b.ciudad||(S&&S.hogar&&S.hogar.ciudad)]; if(!c) return null;
+    const t=String(b.tipo||'').toLowerCase();
+    let tp=/penthouse/.test(t)?'penthouse':/mansi/.test(t)?'mansion':/grande|duplex|dúplex/.test(t)?'duplex':/casa/.test(t)?'casa':/apart|apto/.test(t)?'apartamento':null;
+    if(!tp){ try{ const x=window.tipoBien109&&window.tipoBien109(b); tp=x==='casa_grande'?'duplex':TIPOS125.includes(x)?x:null; }catch(e){} }
+    return tp?c+'_'+tp:null;
+  }
+  let n125=0;
+  function svg125(k,b,w,h,mini){
+    const W=240,H=160, ww=mini?(w||46):240, hh=mini?(h||w||46):160, id='b125_'+(++n125), src='img/ciudades/'+k+'.jpg';
+    const nom=esc((b&&b.nombre)||k.replace(/_/g,' '));
+    if(mini) return '<svg class="foto116 icono-bien" viewBox="0 0 '+W+' '+H+'" width="'+ww+'" height="'+hh+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="'+nom+'"><image href="'+src+'" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid slice"/></svg>';
+    return '<svg class="foto116 icono-bien" viewBox="0 0 '+W+' '+H+'" width="'+ww+'" height="'+hh+'" role="img" aria-label="'+nom+'">'
+      +'<defs><filter id="'+id+'" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="9"/></filter></defs>'
+      +'<image href="'+src+'" x="-20" y="-20" width="280" height="200" preserveAspectRatio="xMidYMid slice" filter="url(#'+id+')" opacity=".8"/>'
+      +'<rect width="'+W+'" height="'+H+'" fill="#0e1512" opacity=".28"/>'
+      +'<image href="'+src+'" width="'+W+'" height="'+H+'" preserveAspectRatio="xMidYMid meet"/></svg>';
+  }
+  function instalar125(){
+    const prev=window.dibujoPropiedad115; if(typeof prev!=='function'||prev.__v125) return;
+    window.dibujoPropiedad115=function(b,w,h,mini){ try{ const k=claveDe(b); if(k&&ok[k]) return svg125(k,b,w,h,mini); }catch(e){} return prev.apply(this,arguments); };
+    window.dibujoPropiedad115.__v125=true;
+  }
+  function init125(){ instalar125(); precargar(); Object.assign(window,{fotoCiudad125:claveDe,fotosCiudad125:ok}); }
+  setTimeout(init125,60); setTimeout(init125,240); setTimeout(init125,700);
+  window.__SA125={version:V125};
 })();
 </script>
 
