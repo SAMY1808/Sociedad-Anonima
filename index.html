@@ -986,10 +986,21 @@ svg.foto116{display:block;background:#1d2a23}
 .momento120 figcaption{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;font-family:var(--display);font-size:15px;letter-spacing:.04em;color:#F6EBD3;background:linear-gradient(transparent,rgba(16,12,8,.78))}
 .lienzo.momento120caja{max-width:620px}
 </style>
+<style id="estilos-v129">
+.esc129 .fila{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.esc129 .fila:last-child{border-bottom:0}
+.esc129 .tipo{flex:0 0 auto;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid rgba(208,106,90,.5);color:#f0a195;margin-top:2px}
+.esc129 .tipo.hijos{border-color:rgba(214,166,72,.5);color:var(--laton)}
+.esc129 .tipo.sociedad{border-color:rgba(160,140,220,.5);color:#c9b8f0}
+.esc129 .tipo.empresa{border-color:rgba(108,192,143,.5);color:#8fe0b0}
+.esc129 .q{flex:1;min-width:0}
+.esc129 .q b{display:block;font-weight:500;color:var(--marfil)}
+.esc129 .q span{font-size:12.5px;color:var(--humo2)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v128</div>
+<div class="version-badge" id="versionBadge">v129</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24050,7 +24061,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const cony=pa&&pa.casados&&pa.vivo!==false&&!pa.divorcioEnCurso?pa:null;
     const gan=cony&&!pa.separacionBienes?.5:0;
     if(cony) out.lineas.push(gan?'Por la sociedad conyugal, la mitad de lo que hay (gananciales) es de '+esc(primer(cony.nombre))+' y no entra a la herencia.':esc(primer(cony.nombre))+' firmó capitulaciones: no recibe gananciales.');
-    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0);
+    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0&&!x.desheredado129);   // v129: el desheredado no hereda
     const estirpes=vivos.map(x=>({miembros:[{key:'h:'+x.nombre,nombre:x.nombre+' '+apellidoCompletoDeHijo(x),rel:x.sexo==='m'?'hija':'hijo',sexo:x.sexo}]}));
     let extras=[]; try{ extras=(typeof window.herederosExtra108==='function'?window.herederosExtra108():[]).filter(x=>x._huerfano108); }catch(e){}
     const porPadre={}; extras.forEach(g=>{ const k=g._padre108||'?'; (porPadre[k]=porPadre[k]||[]).push(g); });
@@ -24549,7 +24560,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(ahora.pres&&!antes.pres) M('carcel','A la cárcel',(S.penal&&S.penal.motivoCondena?'Culpable de '+S.penal.motivoCondena+'. ':'')+'Te quedan '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de condena.');
     if(!ahora.pres&&antes.pres&&!S.muerto&&!(S.penal&&S.penal.penaMuerte)) M('libertad','Libre otra vez','Cumpliste la condena. Afuera, el apellido te espera.');
     if(ahora.muertos>antes.muertos){ try{ const f=window.fallecidos108(); const u=f[f.length-1]; if(u) M('duelo_hijo','Murió '+u.nombre,'Tenía '+(u.edad||0)+' año'+(u.edad===1?'':'s')+'. '+(u.causa?String(u.causa).charAt(0).toUpperCase()+String(u.causa).slice(1)+'.':'')); }catch(e){} }
-    if(ahora.esc>antes.esc&&cada('escandalo',3)) M('escandalo','El escándalo','Tu nombre está en todos los periódicos, y no por buenas razones.');
+    if(ahora.esc>antes.esc&&cada('escandalo',3)){ const t=typeof window.ultimoEscandalo129==='function'&&window.ultimoEscandalo129(); M('escandalo',t||'El escándalo','Tu nombre está en todos los periódicos, y no por buenas razones.'); }
   }
   function wrapRender122(){
     const old=window.render; if(typeof old!=='function'||old.__v122) return;
@@ -24713,6 +24724,167 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init128(){ wrapRender128(); Object.assign(window,{migrarTestamento128:migrar128}); }
   setTimeout(init128,40); setTimeout(init128,220); setTimeout(init128,650);
   window.__SA128={version:V128};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v129 · ESCÁNDALOS CON NOMBRE
+   El escándalo deja de ser solo un contador: cada uno tiene tipo (político,
+   de sociedad, de los hijos, empresarial, fiscal, familiar), título, año,
+   intensidad y protagonista. Hay decisiones para cada uno y se pueden
+   manejar después desde "Los escándalos de la casa". Con los años se olvidan.
+   El contador de siempre (S.p.escandalos) sigue siendo el que pesa en la
+   compañía, la Fiscalía y la prensa: cada escándalo abierto suma su
+   intensidad.
+   ========================================================================== */
+(function(){
+  const V129='v129';
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const adulto=()=>S&&S.p&&S.p.edad>=20&&!nino();
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const costo=(f,min)=>Math.max(min||5,Math.round(pat()*f));
+  const P1=n=>String(n||'').split(' ')[0];
+  const TIPOS={politico:'Político',sociedad:'De sociedad',hijos:'Los hijos',empresa:'Empresarial',fiscal:'Fiscal',familia:'Familiar',negocios:'Negocios'};
+  const L=()=>{ if(!Array.isArray(S.esc129)) S.esc129=[]; return S.esc129; };
+  const abiertos=()=>L().filter(e=>e.estado==='abierto');
+  let ultimo=null;
+
+  function abrir(tipo,titulo,intens,quien){
+    const e={id:'e'+S.anio+'_'+Math.floor(Math.random()*1e5),tipo,titulo,anio:S.anio,intens:intens||1,quien:quien||null,estado:'abierto'};
+    L().push(e); S.p.escandalos=(S.p.escandalos||0)+e.intens; ultimo=e;
+    S.p.reputacion=clamp(S.p.reputacion-3*e.intens,0,100); moverPrestigio(-2*e.intens,'');
+    if(typeof window.moverImagen105==='function') try{ window.moverImagen105(-4*e.intens); }catch(x){}
+    return e;
+  }
+  function cerrar(e,estado,txt){ if(!e||e.estado!=='abierto') return; e.estado=estado||'olvidado'; e.cierre=S.anio; S.p.escandalos=Math.max(0,(S.p.escandalos||0)-e.intens); if(txt) log(txt,'bien'); }
+  function crecer(e,d){ if(!e||e.estado!=='abierto') return; e.intens+=d; S.p.escandalos=(S.p.escandalos||0)+d; S.p.reputacion=clamp(S.p.reputacion-4*d,0,100); }
+  const ev=()=>ultimo;
+
+  /* --- respuestas generales --- */
+  const DAR_CARA=(txt)=>({t:'Dar la cara y pedir perdón',f:()=>{ const e=ev(); S.p.reputacion=clamp(S.p.reputacion-2,0,100);
+    if(chance(.7)){ cerrar(e,'superado'); return txt||'Saliste a dar explicaciones. Doliste un rato, pero el tema se apagó.'; } return 'Pediste perdón, pero la prensa quiere más.'; }});
+  const NEGAR=()=>({t:'Negarlo todo y demandar al medio',f:()=>{ const e=ev(); const c=costo(.004,8); S.efectivo-=Math.min(S.efectivo,c);
+    if(chance(clamp(.38+S.p.reputacion/300,.25,.7))){ cerrar(e,'desmentido'); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'El medio rectificó. Te costó '+fmt(c)+' en abogados, pero ganaste.'; }
+    crecer(e,1); return 'Salieron más pruebas. Ahora el escándalo es más grande.'; }});
+  const TAPAR=(delito)=>({t:()=>'Pagar para que no se hable más ('+fmt(costo(.015,20))+')',f:()=>{ const e=ev(), c=costo(.015,20); if(S.efectivo<c) return 'No tenías esa plata a la mano.'; S.efectivo-=c;
+    if(chance(.65)){ cerrar(e,'tapado'); return 'Un par de llamadas y un sobre. El tema desapareció de los periódicos.'; }
+    crecer(e,1); if(delito&&typeof registrarDelito==='function') registrarDelito('soborno a la prensa',3,'intentaste comprar el silencio de un periodista'); return 'El periodista publicó que intentaste comprarlo. Peor.'; }});
+  const DEJAR=()=>({t:'Dejar que pase',f:()=>'No dijiste nada. Ya se olvidará… o no.'});
+
+  /* --- los escándalos --- */
+  function hijoEntre(a,b){ const H=(S.familia.hijos||[]).filter(h=>h.vivo!==false&&(h.edad||0)>=a&&(h.edad||0)<=b); return H.length?pick(H):null; }
+  function instalar(){
+    if(window.__SA129_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=x=>EVENTOS_LOCALES.push(x);
+    // --- políticos ---
+    E({p:.45,c:()=>adulto()&&S.anio>=1940&&(S.emp||(S.carrera&&(S.carrera.politica||S.carrera.judicatura)))&&(S.p.redes||0)>=35,
+      t:()=>{ abrir('politico','La grabación del congresista',2); return '<b>Escándalo político.</b> Una revista publicó una grabación en la que se te oye pidiéndole a un congresista que "mueva" una licencia para la familia.'; },
+      o:[NEGAR(),DAR_CARA(),TAPAR(true),DEJAR()]});
+    E({p:.4,c:()=>adulto()&&S.anio>=1950&&pat()>300,
+      t:()=>{ abrir('politico','La campaña del político capturado',1); return '<b>Escándalo político.</b> Capturaron a un senador por corrupción, y tu nombre aparece en la lista de los que le financiaron la campaña.'; },
+      o:[{t:'Mostrar que todo fue legal',f:()=>{ const e=ev(); if(chance(.55+S.p.reputacion/400)){ cerrar(e,'desmentido'); return 'Los papeles estaban en orden. Te dejaron en paz.'; } crecer(e,1); return 'Los papeles no cuadraban del todo. Siguieron preguntando.'; }},DAR_CARA(),TAPAR(true),DEJAR()]});
+    E({p:.6,c:()=>adulto()&&S.carrera&&(S.carrera.politica&&S.carrera.politica.cargo||S.carrera.politica&&S.carrera.politica.nivel>0)&&(S.parientes||[]).some(p=>p.vivo&&/sobrin|primo|prima/.test(p.rel)),
+      t:()=>{ const p=pick((S.parientes||[]).filter(p=>p.vivo&&/sobrin|primo|prima/.test(p.rel))); S._p129=p&&p.pid; abrir('politico','El nombramiento de '+(p?P1(p.nombre):'un pariente'),1); return '<b>Escándalo político.</b> Nombraste a tu '+esc(p?p.rel:'pariente')+' '+esc(p?nombrePariente(p):'')+' en un cargo público. Los noticieros lo llaman "nepotismo de manual".'; },
+      o:[{t:'Revocar el nombramiento',f:()=>{ const e=ev(); cerrar(e,'superado'); const p=(S.parientes||[]).find(x=>x.pid===S._p129); if(p) p.afecto=clamp((p.afecto||50)-20,0,100); return 'Lo sacaste del cargo. La prensa se calmó; tu pariente no te vuelve a hablar.'; }},NEGAR(),DEJAR()]});
+    // --- de sociedad ---
+    E({p:.55,c:()=>adulto()&&S.familia.pareja&&(((S.familia.amantes||[]).some(a=>a.activo!==false))||chance(.25)),
+      t:()=>{ abrir('sociedad','Las fotos del hotel',2); return '<b>Escándalo de sociedad.</b> Una revista de farándula publicó fotos tuyas saliendo de un hotel con alguien que no es '+esc(P1(S.familia.pareja.nombre))+'.'; },
+      o:[{t:'Pedirle perdón a '+'tu pareja'+' en privado',f:()=>{ const pa=S.familia.pareja; if(pa) pa.paciencia=clamp((pa.paciencia||60)-15,0,100); return 'En la casa hubo gritos y silencio. Afuera, el chisme sigue.'; }},
+         {t:'Negarlo: "son montajes"',f:()=>{ const e=ev(); if(chance(.35)){ cerrar(e,'desmentido'); return 'Coló. Por ahora.'; } crecer(e,1); const pa=S.familia.pareja; if(pa) pa.paciencia=clamp((pa.paciencia||60)-25,0,100); return 'Salieron más fotos. Y tu pareja las vio.'; }},
+         TAPAR(false),DEJAR()]});
+    E({p:.5,c:()=>adulto()&&S.anio>=1950&&(S.hogar&&S.hogar.nivel>=3),
+      t:()=>{ abrir('sociedad','La fiesta que terminó con la policía',1); return '<b>Escándalo de sociedad.</b> Tu fiesta de cumpleaños terminó a las 5 de la mañana con la policía, un piano en la piscina y un concejal en calzoncillos. Salió en todas las revistas.'; },
+      o:[{t:()=>'Pagar los daños y bajar el perfil ('+fmt(costo(.003,5))+')',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.003,5)); cerrar(e,'superado'); return 'Pagaste, mandaste flores a los vecinos y te quedaste en casa unos meses.'; }},
+         {t:'Reírte en público',f:()=>{ S.p.redes=clamp((S.p.redes||0)+5,0,100); S.p.reputacion=clamp(S.p.reputacion-3,0,100); return '"Uno solo cumple años una vez." La gente seria te mira raro; la otra quiere ir a la próxima.'; }},DEJAR()]});
+    E({p:.4,c:()=>adulto()&&S.anio>=1960&&(S.hogar&&S.hogar.nivel>=3),
+      t:()=>{ abrir('sociedad','Lo que dijiste en la puerta del club',2); return '<b>Escándalo de sociedad.</b> En la puerta del club no dejaron entrar a un invitado tuyo "por su color", y alguien filtró lo que dijiste tú. El video circula por todas partes.'; },
+      o:[{t:'Pedir perdón público y renunciar al club',f:()=>{ const e=ev(); cerrar(e,'superado'); S.p.redes=clamp((S.p.redes||0)-6,0,100); return 'Renunciaste y pediste perdón. Perdiste contactos, pero recuperaste algo de respeto.'; }},DAR_CARA(),NEGAR(),DEJAR()]});
+    E({p:.45,c:()=>adulto()&&(S.rivales||[]).length>0&&S.p.edad<70,
+      t:()=>{ const r=pick(S.rivales); S._r129=r&&r.apellido; abrir('sociedad','La pelea en la boda de los '+(r?r.apellido:'rivales'),1); return '<b>Escándalo de sociedad.</b> En la boda de los '+esc(r?r.apellido:'vecinos')+' terminaste a los empujones con uno de ellos frente a doscientos invitados.'; },
+      o:[{t:'Mandar una carta de disculpas',f:()=>{ const e=ev(); cerrar(e,'superado'); return 'La carta circuló más que la pelea. Quedaste como un caballero.'; }},{t:'Sostener que él empezó',f:()=>{ S.tension=clamp((S.tension||0)+4,0,100); return 'La rivalidad con los '+(S._r129||'rivales')+' se puso más fea.'; }},DEJAR()]});
+    // --- los hijos ---
+    E({p:.6,c:()=>adulto()&&!!hijoEntre(16,32)&&S.anio>=1930,
+      t:()=>{ const h=hijoEntre(16,32); S._h129=h.nombre; abrir('hijos',P1(h.nombre)+' chocó borracho',2,h.nombre); return '<b>Escándalo con los hijos.</b> '+esc(h.nombre)+' chocó el carro de la familia a las 3 de la mañana. Iba borrach'+(h.sexo==='m'?'a':'o')+' y en el otro carro hay un herido.'; },
+      o:[{t:'Que responda ante la justicia',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h) h.vinculo=clamp((h.vinculo||55)-12,0,100); cerrar(e,'superado'); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Pagó su multa y su servicio social. La gente dijo: "por lo menos no lo taparon".'; }},
+         {t:()=>'Arreglar con el herido y con el tránsito ('+fmt(costo(.01,15))+')',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.01,15)); if(chance(.6)){ cerrar(e,'tapado'); return 'Se arregló "entre caballeros". Nadie volvió a hablar de eso.'; } crecer(e,1); if(typeof registrarDelito==='function') registrarDelito('soborno',3,'arreglar el choque de tu hijo'); return 'El agente de tránsito habló con la prensa. Ahora también es un caso de soborno.'; }},
+         {t:'Mandarlo a estudiar al exterior',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,costo(.004,10)); if(h){ h.formacion=Math.min(100,(h.formacion||0)+10); h.vinculo=clamp((h.vinculo||55)-5,0,100); } if(chance(.6)) cerrar(e,'olvidado'); return 'Se fue a estudiar afuera. Lejos de las cámaras, el tema se fue apagando.'; }},DEJAR()]});
+    E({p:.5,c:()=>adulto()&&!!hijoEntre(18,30),
+      t:()=>{ const h=hijoEntre(18,30); S._h129=h.nombre; const a=h.sexo==='m'?'un músico de vallenato':'una cantante de cabaret'; abrir('hijos','La boda a escondidas de '+P1(h.nombre),1,h.nombre); return '<b>Escándalo con los hijos.</b> '+esc(h.nombre)+' se casó a escondidas con '+a+'. La foto de la boda en una notaría de pueblo salió en la prensa.'; },
+      o:[{t:'Aceptarlo y hacerles una fiesta',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h) h.vinculo=clamp((h.vinculo||55)+15,0,100); cerrar(e,'superado'); return 'La fiesta fue tan buena que la gente olvidó cómo empezó todo.'; }},
+         {t:()=>{ const h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); return 'Desheredarl'+(h&&h.sexo==='m'?'a':'o')+' en público'; },f:()=>{ const h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h){ h.vinculo=clamp((h.vinculo||55)-35,0,100); h.desheredado129=true; } S.p.reputacion=clamp(S.p.reputacion+1,0,100); return 'Lo anunciaste en el club. En la casa, nadie volvió a decir su nombre.'; }},
+         {t:'Pagarle a la otra parte para que desaparezca',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.006,10)); if(chance(.5)){ cerrar(e,'tapado'); return 'Se fue con la plata. Tu hijo no te lo perdona.'; } crecer(e,1); return 'Lo contó todo en la radio, incluida tu oferta.'; }},DEJAR()]});
+    E({p:.5,c:()=>adulto()&&S.anio>=1970&&!!hijoEntre(16,30),
+      t:()=>{ const h=hijoEntre(16,30); S._h129=h.nombre; abrir('hijos',P1(h.nombre)+' en las páginas judiciales',2,h.nombre); return '<b>Escándalo con los hijos.</b> Detuvieron a '+esc(h.nombre)+' en una fiesta donde había droga. Salió en las páginas judiciales con el apellido completo.'; },
+      o:[{t:()=>'Clínica de rehabilitación ('+fmt(costo(.005,10))+')',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,costo(.005,10)); if(h){ h.salud=clamp((h.salud||80)+5,0,100); h.vinculo=clamp((h.vinculo||55)+5,0,100); } cerrar(e,'superado'); return 'Seis meses en una clínica. Volvió distinto, y la prensa perdió interés.'; }},
+         {t:'Sacarlo con los mejores abogados',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.004,8)); if(chance(.6)){ cerrar(e,'tapado'); return 'Salió sin cargos. Todos saben por qué.'; } return 'Salió, pero el tema sigue en la prensa.'; }},DEJAR()]});
+    E({p:.7,c:()=>adulto()&&S.anio>=2005&&!!hijoEntre(15,30),
+      t:()=>{ const h=hijoEntre(15,30); S._h129=h.nombre; abrir('hijos','El video viral de '+P1(h.nombre),1,h.nombre); return '<b>Escándalo con los hijos.</b> Un video de '+esc(h.nombre)+' gritándole "¿usted no sabe quién soy yo?" a un mesero se volvió viral. Tiene millones de vistas y el apellido es tendencia.'; },
+      o:[{t:'Que '+'pida perdón en video',f:()=>{ const e=ev(); if(chance(.65)){ cerrar(e,'superado'); return 'Pidió perdón, le dio una propina enorme al mesero y el tema murió en una semana.'; } return 'El video de disculpas también se volvió meme.'; }},
+         {t:'Quitarle la tarjeta y el carro',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h) h.vinculo=clamp((h.vinculo||55)-8,0,100); if(chance(.5)) cerrar(e,'superado'); return 'Castigo ejemplar. En redes aplaudieron al papá y se burlaron del hijo.'; }},
+         {t:'Defenderlo: "lo provocaron"',f:()=>{ crecer(ev(),1); return 'Mala idea. Ahora el meme eres tú.'; }},DEJAR()]});
+    E({p:.45,c:()=>adulto()&&!!hijoEntre(20,40),
+      t:()=>{ const h=hijoEntre(20,40); S._h129=h.nombre; S._d129=costo(.012,20); abrir('hijos','Las deudas de juego de '+P1(h.nombre),1,h.nombre); return '<b>Escándalo con los hijos.</b> '+esc(h.nombre)+' perdió '+fmt(S._d129)+' en el casino y le debe a gente que no cobra con abogados. Ya se sabe en el club.'; },
+      o:[{t:()=>'Pagar la deuda ('+fmt(S._d129||0)+')',f:()=>{ const e=ev(); if(S.efectivo<S._d129) return 'No tenías esa plata.'; S.efectivo-=S._d129; cerrar(e,'superado'); return 'Pagaste. '+P1(S._h129)+' juró que nunca más.'; }},
+         {t:'Que se las arregle',f:()=>{ const h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h){ h.vinculo=clamp((h.vinculo||55)-15,0,100); h.salud=clamp((h.salud||80)-15,0,100); } return 'Una noche llegó golpeado. Pagó como pudo.'; }}]});
+    E({p:.4,c:()=>adulto()&&S.anio>=1960&&!!S.emp&&!!hijoEntre(17,28),
+      t:()=>{ const h=hijoEntre(17,28); S._h129=h.nombre; abrir('hijos',P1(h.nombre)+' marcha contra la familia',1,h.nombre); return '<b>Escándalo con los hijos.</b> '+esc(h.nombre)+' encabezó una marcha estudiantil contra '+esc(S.emp.nombre)+'. Su foto con megáfono salió en primera página.'; },
+      o:[{t:'Respetar sus ideas en público',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h) h.vinculo=clamp((h.vinculo||55)+12,0,100); if(chance(.6)) cerrar(e,'superado'); return '"Mis hijos piensan por sí mismos." La frase te dio puntos inesperados.'; }},
+         {t:'Cortarle la mesada',f:()=>{ const h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); if(h) h.vinculo=clamp((h.vinculo||55)-20,0,100); return 'Se fue de la casa. Ahora marcha con más ganas.'; }},DEJAR()]});
+    // --- empresariales ---
+    E({p:.45,c:()=>adulto()&&!!S.emp&&S.anio>=1960,
+      t:()=>{ abrir('empresa','El río de '+S.emp.nombre,2); return '<b>Escándalo empresarial.</b> El río junto a la planta de '+esc(S.emp.nombre)+' amaneció lleno de peces muertos. Los pescadores bloquearon la carretera.'; },
+      o:[{t:()=>'Indemnizar y limpiar el río ('+fmt(Math.max(20,S.emp.ingresos*.05))+')',f:()=>{ const e=ev(); S.emp.caja-=Math.max(20,S.emp.ingresos*.05); cerrar(e,'superado'); S.emp.marca=clamp((S.emp.marca||50)+3,0,100); return 'Pagaste y limpiaste. Salió caro, pero la marca quedó mejor parada.'; }},
+         {t:'Culpar a un contratista',f:()=>{ const e=ev(); if(chance(.45)){ cerrar(e,'desmentido'); return 'El contratista cargó con la culpa.'; } crecer(e,1); return 'El contratista mostró los correos. La culpa era tuya.'; }},NEGAR(),DEJAR()]});
+    E({p:.4,c:()=>adulto()&&!!S.emp&&(S.emp.empleados||0)>=50,
+      t:()=>{ abrir('empresa','Los obreros de '+S.emp.nombre,1); return '<b>Escándalo empresarial.</b> Un exempleado contó en televisión cómo tratan a los obreros en '+esc(S.emp.nombre)+': turnos de catorce horas y nada de seguridad.'; },
+      o:[{t:'Mejorar las condiciones',f:()=>{ const e=ev(); S.emp.costos=(S.emp.costos||0)*1.03; S.emp.moral=clamp((S.emp.moral||50)+10,0,100); cerrar(e,'superado'); return 'Subieron los costos, pero la planta trabaja más contenta.'; }},NEGAR(),DEJAR()]});
+    E({p:.35,c:()=>adulto()&&!!S.emp&&S.anio>=1970,
+      t:()=>{ abrir('empresa','El producto retirado de '+S.emp.nombre,1); return '<b>Escándalo empresarial.</b> Hubo que retirar del mercado un producto de '+esc(S.emp.nombre)+' por defectuoso. Las fotos de los clientes afectados están en todas partes.'; },
+      o:[{t:'Retirarlo todo y devolver la plata',f:()=>{ const e=ev(); S.emp.caja-=S.emp.ingresos*.03; cerrar(e,'superado'); return 'Costó, pero la gente valoró que respondieras rápido.'; }},NEGAR(),DEJAR()]});
+    // --- fiscal ---
+    E({p:.5,c:()=>adulto()&&S.anio>=2016&&pat()>2000,
+      t:()=>{ abrir('fiscal','Los papeles de los paraísos fiscales',2); return '<b>Escándalo fiscal.</b> Una filtración internacional de cuentas en paraísos fiscales trae el apellido '+esc(S.p.apellido)+'. La DIAN ya pidió información.'; },
+      o:[{t:()=>'Pagarle a la DIAN y regularizar ('+fmt(costo(.02,30))+')',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.02,30)); cerrar(e,'superado'); return 'Pagaste impuestos atrasados y sanciones. Caso cerrado.'; }},
+         {t:'"Todo era legal"',f:()=>{ const e=ev(); if(chance(.5)){ cerrar(e,'desmentido'); return 'Las estructuras eran legales. Feas, pero legales.'; } crecer(e,1); if(typeof registrarDelito==='function') registrarDelito('evasión de impuestos',4,'cuentas en paraísos fiscales'); return 'La DIAN no te creyó: abrieron investigación por evasión.'; }},DEJAR()]});
+    // --- familiar ---
+    E({p:.7,c:()=>adulto()&&S.sucesion119&&!S.sucesion119.cerrada&&S.sucesion119.via==='judicial',
+      t:()=>{ abrir('familia','La pelea por la herencia',1); return '<b>Escándalo familiar.</b> La pelea por la herencia de '+esc(S.sucesion119.causante)+' salió en la prensa: uno de los herederos dio una entrevista contando todo.'; },
+      o:[{t:'Llamar a los demás y bajar el tono',f:()=>{ const e=ev(); if(chance(.6)){ cerrar(e,'superado'); return 'Firmaron un pacto de silencio.'; } return 'No contestaron.'; }},{t:'Dar tu propia entrevista',f:()=>{ crecer(ev(),1); return 'Ahora la pelea es pública y en las dos versiones.'; }},DEJAR()]});
+    window.__SA129_EV=true;
+  }
+
+  /* --- con los años se olvidan; el registro y el contador se mantienen de acuerdo --- */
+  function anual129(){
+    if(!S||!S.p) return;
+    abiertos().forEach(e=>{ const edad=S.anio-e.anio; if(edad>=2&&chance(.22+edad*.04)) cerrar(e,'olvidado'); });
+    let suma=abiertos().reduce((a,e)=>a+e.intens,0), n=S.p.escandalos||0;
+    while(suma>n&&abiertos().length){ const e=abiertos()[0]; e.estado='olvidado'; e.cierre=S.anio; suma-=e.intens; }   // otras partes del juego bajaron el contador
+    if(n>suma){ const e={id:'g'+S.anio,tipo:'negocios',titulo:'Preguntas sobre los negocios de la familia',anio:S.anio,intens:n-suma,estado:'abierto'}; L().push(e); }   // escándalos genéricos de antes
+    if(L().length>60) S.esc129=L().slice(-60);
+  }
+  function wrapPaso129(){ const old=window.pasarAnio; if(typeof old!=='function'||old.__v129) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual129(); }catch(e){} return r; }; window.pasarAnio.__v129=true; }
+
+  /* --- la lista de escándalos abiertos --- */
+  function escena129(){
+    const A=abiertos().slice().sort((a,b)=>b.intens-a.intens||b.anio-a.anio);
+    const html='<div class="esc129">'+(A.length?A.map(e=>'<div class="fila"><span class="tipo '+e.tipo+'">'+TIPOS[e.tipo]+'</span><div class="q"><b>'+esc(e.titulo)+'</b><span>'+e.anio+' · intensidad '+'●'.repeat(Math.min(3,e.intens))+'○'.repeat(Math.max(0,3-Math.min(3,e.intens)))+'</span></div></div>').join(''):'<div class="nota">No hay escándalos abiertos.</div>')+'</div>';
+    const top=A[0], ops=[];
+    if(top){ ultimo=top;
+      ops.push({t:'Dar la cara por "'+esc(top.titulo)+'"',cat:'familia',d:'Pedir perdón en público. Suele apagarlo.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ S.mov--; ultimo=top; const r=DAR_CARA().f(); log(r); cerrarModal(); render(); }});
+      ops.push({t:'Pagar para taparlo',cat:'riesgo',d:'Cuesta '+fmt(costo(.015,20))+'. Si sale mal, crece.',dis:S.efectivo<costo(.015,20)?'No te alcanza':S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ S.mov--; ultimo=top; const r=TAPAR(true).f(); log(r); cerrarModal(); render(); }});
+      if(S.fundacion) ops.push({t:'Una gala benéfica de la fundación',cat:'legado',d:'Buenas noticias para tapar las malas. Puede cerrar el más viejo.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ S.mov--; const v=A.slice().sort((a,b)=>a.anio-b.anio)[0]; if(chance(.6)) cerrar(v,'olvidado','La gala ocupó todas las páginas sociales y se olvidó "'+v.titulo+'".'); else log('La gala salió bien, pero no tapó nada.'); cerrarModal(); render(); }});
+    }
+    escena({rubro:'La prensa',titulo:'Los escándalos de la casa',ancho:true,cerrable:true,cuerpo:A.length?'Cada escándalo abierto le pesa a la compañía, a la Fiscalía y al apellido. Con los años se olvidan, si no los alimentas.':'Por ahora, el apellido está limpio.',html,opciones:ops});
+  }
+  function wrapAcciones129(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__v129) return;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments); try{ if(Array.isArray(A)&&adulto()&&abiertos().length&&!A.some(a=>a.t==='Los escándalos de la casa')){ const n=abiertos().length; A.push({t:'Los escándalos de la casa',cat:'riesgo',d:n+' abierto'+(n===1?'':'s')+'. El más fuerte: '+abiertos().slice().sort((a,b)=>b.intens-a.intens)[0].titulo+'.',mov:0,modal:true,run:()=>escena129()}); } }catch(e){} return A; };
+    window.listaAcciones.__v129=true; }
+  function wrapCat129(){ const old=window.catDe; if(typeof old!=='function'||old.__v129) return; window.catDe=function(t){ return t==='Los escándalos de la casa'?'riesgo':old.apply(this,arguments); }; window.catDe.__v129=true; }
+  function init129(){ instalar(); wrapPaso129(); wrapAcciones129(); wrapCat129(); Object.assign(window,{escandalos129:L,abrirEscandalo129:abrir,cerrarEscandalo129:cerrar,escenaEscandalos129:escena129,anualEscandalos129:anual129,ultimoEscandalo129:()=>ultimo&&ultimo.estado==='abierto'?ultimo.titulo:null}); }
+  setTimeout(init129,40); setTimeout(init129,220); setTimeout(init129,650);
+  window.__SA129={version:V129};
 })();
 </script>
 
