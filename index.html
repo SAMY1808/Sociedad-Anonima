@@ -989,7 +989,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v125</div>
+<div class="version-badge" id="versionBadge">v126</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24502,21 +24502,26 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const cada=(k,anios)=>{ const a=S&&S.anio; if(ultimo[k]!==undefined&&a-ultimo[k]<anios) return false; ultimo[k]=a; return true; };
 
   /* --- hitos de la casa --- */
-  const HITOS=[
-    [/^Se divorció de (.+)/,'divorcio',m=>'Te divorciaste de '+m[1]],
-    [/^Enviudó de (.+)/,'viudez',m=>'Murió '+m[1]],
-    [/^(Se mudó a|Se fue a vivir a|Se instaló en) (.+)/,'mudanza',m=>'Nueva casa en '+m[2],2],
-    [/^Fundó (?!un club|el club)(.+)/,'fundacion_empresa',m=>'Nace '+m[1]],
-    [/^Quebró (.+)/,'quiebra',m=>'Quebró '+m[1]],
-    [/^Intervinieron (.+)/,'intervencion',m=>'Intervinieron '+m[1]],
-    [/^Abrió (Banco .+)/,'banco_apertura',m=>'Abrió sus puertas el '+m[1]],
-    [/^(Fue (re)?elegid|Fue designado\/a alcalde)/,'eleccion',m=>m.input],
-    [/^Obtuvo (.+)/,'graduacion',m=>'Te graduaste: '+m[1],3]
+  const oa=()=>S&&S.p&&S.p.sexo==='m'?'a':'o';
+  const HITOS=[   // [patrón, ilustración, (m)=>[título, texto], años mínimos entre láminas]
+    [/^Se divorció de (.+)/,'divorcio',m=>['Te divorciaste de '+m[1].split(' ')[0],'Se acabó el matrimonio. Ahora toca repartir lo que había.']],
+    [/^Enviudó de (.+)/,'viudez',m=>['Murió '+m[1],'Quedaste viud'+oa()+'. La casa está de luto.']],
+    [/^Se mudó a (.+?) por (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Por tu nuevo cargo: '+m[2]+'.'],2],
+    [/^Se instaló en (.+?) · (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Nueva casa en '+m[2]+'.'],2],
+    [/^(Se mudó a|Se fue a vivir a|Se instaló en) (.+)$/,'mudanza',m=>['Te mudaste a '+m[2],'Cajas, baúles y una vida nueva.'],2],
+    [/^Fundó (?!un club|el club)(.+)$/,'fundacion_empresa',m=>['Nace '+m[1].replace(/ \(.*$/,'').replace(/ en \d{4}$/,''),'Una compañía nueva con el apellido de la casa.']],
+    [/^Quebró (.+)$/,'quiebra',m=>['Quebró '+m[1],'Los acreedores se reparten lo que queda.']],
+    [/^Intervinieron (.+)$/,'intervencion',m=>['Intervinieron '+m[1],'Los funcionarios del Estado tomaron el control.']],
+    [/^Abrió (Banco .+)$/,'banco_apertura',m=>['Abrió el '+m[1],'Desde hoy capta los ahorros del público.']],
+    [/^Fue reelegido (.+)$/,'eleccion',m=>['Reelegid'+oa()+' '+m[1],'Ganaste otra vez.']],
+    [/^Fue elegido\/a (.+)$/,'eleccion',m=>['Elegid'+oa()+' '+m[1],'Ganaste la elección.']],
+    [/^Fue designado\/a (alcalde.*)$/,'eleccion',m=>['Te nombraron '+m[1],'Ahora gobiernas la ciudad.']],
+    [/^Obtuvo (.+)$/,'graduacion',m=>['Te graduaste','Obtuviste '+m[1]+'.'],3]
   ];
   function wrapHito122(){
     const old=window.hito; if(typeof old!=='function'||old.__v122) return;
     window.hito=function(t){ const r=old.apply(this,arguments);
-      try{ const s=plano(t); for(const [re,k,tit,anios] of HITOS){ const m=s.match(re); if(m){ if(!anios||cada(k,anios)) M(k,tit(m),''); break; } } }catch(e){}
+      try{ const s=plano(t); for(const [re,k,tx,anios] of HITOS){ const m=s.match(re); if(m){ if(!anios||cada(k,anios)){ const [ti,cu]=tx(m); M(k,ti,cu); } break; } } }catch(e){}
       return r; };
     window.hito.__v122=true;
   }
