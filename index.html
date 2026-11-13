@@ -991,7 +991,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v121</div>
+<div class="version-badge" id="versionBadge">v122</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24185,7 +24185,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       if(pr) pr.herencia119={key:x.key,hijos:Math.max(1,suc.her.filter(y=>!y._cony&&/hij/.test(y.rel)).length),causante:causante}; });
     log('Se abrió <b>la sucesión de '+esc(causante)+'</b>. '+(p>0?'Te corresponde el '+pctTxt(p)+'; recibiste un anticipo de '+fmt(anticipo)+'.':'No te corresponde herencia: '+(plan.base==='ley'?'la ley llama a otros.':'el testamento no te incluye.')),'hito');
     if(nino()){ suc.via='notarial'; suc.duracion=1; suc.tutor=true; log('Tu tutor llevó la sucesión a la notaría.'); }
-    else setTimeout(()=>{ try{ if(!document.querySelector('#escenaHost .lienzo')) escenaVia119(); else S._via119pend=true; }catch(e){} },120);
+    else { let n=0; const intentar=()=>{ try{ if(!SUC()||SUC().via) return; if(!document.querySelector('#escenaHost .lienzo')) escenaVia119(); else if(++n<25) setTimeout(intentar,300); else S._via119pend=true; }catch(e){} }; setTimeout(intentar,120); }
   }
   function adjudicar(suc,b,x,motivo){
     const v=neto(b); x.E-=v; suc.bienes=suc.bienes.filter(u=>u!==b.uid);
@@ -24394,12 +24394,16 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
    ========================================================================== */
 (function(){
   const V120='v120';
-  const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion'];
+  const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion',
+    /* v122 */ 'mayoria_edad','graduacion','luna_miel','divorcio','viudez','duelo_hijo','hospital','mudanza','infidelidad','fundacion_empresa','bolsa','quiebra','crisis','banco_apertura','corrida','intervencion','piramide','eleccion','carcel','libertad','escandalo','portada'];
   const ok={};
   function precargar(){ if(window.__SA120_PRE) return; window.__SA120_PRE=true;
     IMGS.forEach(n=>{ const im=new Image(); im.onload=()=>{ ok[n]=true; }; im.onerror=()=>{ ok[n]=false; }; im.src='img/eventos/'+n+'.jpg'; }); }
   const PIE={nacimiento_hijo:'Un nacimiento en la casa',nacimiento_nieto:'Llegó la siguiente generación',boda_intima:'Una boda íntima',boda_normal:'Una boda como se debe',boda_elite:'Boda de sociedad',
-    funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión'};
+    funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión',
+    mayoria_edad:'La mayoría de edad',graduacion:'El grado',luna_miel:'La luna de miel',divorcio:'El divorcio',viudez:'El luto',duelo_hijo:'Un hijo que se va antes',hospital:'En la clínica',mudanza:'La mudanza',infidelidad:'La infidelidad',
+    fundacion_empresa:'La fundación de la compañía',bolsa:'La Bolsa de Bogotá',quiebra:'La quiebra',crisis:'La crisis',banco_apertura:'Un banco con el apellido',corrida:'La corrida bancaria',intervencion:'La intervención',piramide:'La pirámide',
+    eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada'};
   const figura=(k,pie)=>'<figure class="momento120" data-momento="'+k+'"><img src="img/eventos/'+k+'.jpg" alt="'+esc(PIE[k]||'')+'"><figcaption>'+esc(pie||PIE[k]||'')+'</figcaption></figure>';
   const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
 
@@ -24409,6 +24413,15 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function detectar(o){
     const ti=plano(o.titulo), cu=plano(o.cuerpo), ru=plano(o.rubro);
     if(ti==='¿Cómo se va a llamar?') return 'nacimiento_hijo';
+    /* v122 */
+    const raw=String(o.cuerpo||'');
+    if(ti==='Cumpliste 18') return 'mayoria_edad';
+    if(ti==='Luna de miel') return 'luna_miel';
+    if(/Corrida bancaria/.test(cu)) return 'corrida';
+    if(/captadora/.test(cu)) return 'piramide';
+    if(/^\s*(Sufriste|Te diagnosticaron) /.test(cu)) return 'hospital';
+    if(/se está viendo con otra persona/.test(cu)) return 'infidelidad';
+    if(/^<b>[^<]*<\/b>$/.test(raw.trim())&&/\bcrisis\b|se desploma|quiebran empresas|recesión|\bcrac\b|se hunde la bolsa/i.test(cu)) return 'crisis';
     if(/Llegó el día del juicio/.test(cu)) return 'juicio';
     if(ti==='Así queda la herencia'||ti==='¿Notaría o juzgado?'||/^La sucesión de /.test(ti)||/está lista para la partición/.test(cu)) return 'sucesion';
     if((ti==='¿Con quién sigue la casa?'||ti==='La casa necesita un sucesor')&&!/Retiro|en vida/.test(ru)) return funeralPropio();
@@ -24437,13 +24450,14 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
 
   /* --- 2. momentos que solo quedaban en la crónica: una lámina aparte --- */
-  const cola120=[]; let corriendo=false;
-  function momento(k,titulo,texto){ if(!ok[k]) return; if(cola120.some(m=>m.k===k&&m.titulo===titulo)) return; cola120.push({k,titulo,texto}); if(!corriendo) setTimeout(siguiente,60); }
+  const cola120=[]; let corriendo=false, libre120=0;
+  function momento(k,titulo,texto){ if(!ok[k]) return; if(cola120.some(m=>m.k===k&&m.titulo===titulo)) return; cola120.push({k,titulo,texto}); if(!corriendo){ corriendo=true; setTimeout(siguiente,450); } }   // espera: las escenas del juego van primero
   function siguiente(){
     if(!cola120.length){ corriendo=false; return; }
     corriendo=true;
-    if(document.querySelector('#escenaHost .lienzo')){ setTimeout(siguiente,400); return; }
-    const m=cola120.shift();
+    if(document.querySelector('#escenaHost .lienzo')){ libre120=0; setTimeout(siguiente,400); return; }
+    if(++libre120<2){ setTimeout(siguiente,300); return; }   // la pantalla tiene que seguir libre: las escenas del juego van primero
+    libre120=0; const m=cola120.shift();
     window.__momento120=true;
     try{ const caja=escena({rubro:'Año '+S.anio,titulo:esc(m.titulo),clase:'momento120caja',cuerpo:m.texto,opciones:[{t:'Seguir',cat:'familia'}]}); if(caja&&!caja.querySelector('.momento120')) caja.insertAdjacentHTML('afterbegin',figura(m.k)); }catch(e){}
     window.__momento120=false;
@@ -24469,6 +24483,77 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function init120(){ precargar(); wrapEscena120(); wrapLog120(); Object.assign(window,{momento120:momento,momentosCargados120:ok,detectarMomento120:detectar}); }
   setTimeout(init120,40); setTimeout(init120,220); setTimeout(init120,650);
   window.__SA120={version:V120}; window.__SA121={version:'v121'};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v122 · MÁS MOMENTOS ILUSTRADOS
+   22 ilustraciones nuevas: mayoría de edad, grado, luna de miel, divorcio,
+   viudez, muerte de un hijo, clínica, mudanza, infidelidad, fundación de la
+   compañía, salida a bolsa, quiebra, crisis, banco propio, corrida,
+   intervención, pirámide, elección, cárcel, libertad, escándalo y portada.
+   Unas van dentro de la escena que ya existe (v120); estas otras salen como
+   lámina cuando el juego anota el hito o cambia el estado.
+   ========================================================================== */
+(function(){
+  const V122='v122';
+  const M=(k,t,x)=>{ try{ if(typeof window.momento120==='function') window.momento120(k,t,x); }catch(e){} };
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const ultimo={};   // para no repetir la misma lámina año tras año
+  const cada=(k,anios)=>{ const a=S&&S.anio; if(ultimo[k]!==undefined&&a-ultimo[k]<anios) return false; ultimo[k]=a; return true; };
+
+  /* --- hitos de la casa --- */
+  const HITOS=[
+    [/^Se divorció de (.+)/,'divorcio',m=>'Te divorciaste de '+m[1]],
+    [/^Enviudó de (.+)/,'viudez',m=>'Murió '+m[1]],
+    [/^(Se mudó a|Se fue a vivir a|Se instaló en) (.+)/,'mudanza',m=>'Nueva casa en '+m[2],2],
+    [/^Fundó (?!un club|el club)(.+)/,'fundacion_empresa',m=>'Nace '+m[1]],
+    [/^Quebró (.+)/,'quiebra',m=>'Quebró '+m[1]],
+    [/^Intervinieron (.+)/,'intervencion',m=>'Intervinieron '+m[1]],
+    [/^Abrió (Banco .+)/,'banco_apertura',m=>'Abrió sus puertas el '+m[1]],
+    [/^(Fue (re)?elegid|Fue designado\/a alcalde)/,'eleccion',m=>m.input],
+    [/^Obtuvo (.+)/,'graduacion',m=>'Te graduaste: '+m[1],3]
+  ];
+  function wrapHito122(){
+    const old=window.hito; if(typeof old!=='function'||old.__v122) return;
+    window.hito=function(t){ const r=old.apply(this,arguments);
+      try{ const s=plano(t); for(const [re,k,tit,anios] of HITOS){ const m=s.match(re); if(m){ if(!anios||cada(k,anios)) M(k,tit(m),''); break; } } }catch(e){}
+      return r; };
+    window.hito.__v122=true;
+  }
+  /* --- la crónica --- */
+  function wrapLog122(){
+    const old=window.log; if(typeof old!=='function'||old.__v122) return;
+    window.log=function(txt,clase){ const r=old.apply(this,arguments);
+      try{ const s=plano(txt);
+        if(/empezó a cotizar en la BVC/.test(s)) M('bolsa','Salimos a bolsa',s);
+        else if(/^Logro de la casa:/.test(s)&&S&&S._m122&&cada('portada',8)) M('portada','La casa en la portada',s.replace(/^Logro de la casa:\s*/,''));
+      }catch(e){}
+      return r; };
+    window.log.__v122=true;
+  }
+  /* --- cambios de estado: cárcel, libertad, hijos que mueren, escándalos --- */
+  function fallecidosN(){ try{ return typeof window.fallecidos108==='function'?window.fallecidos108().length:0; }catch(e){ return 0; } }
+  function estado(){ return {pres:!!(S.penal&&S.penal.prisionRestante>0), muertos:fallecidosN(), esc:(S.p&&S.p.escandalos)||0}; }
+  function revisar122(){
+    if(!S||!S.p) return;
+    const ahora=estado();
+    const antes=S._m122; S._m122=ahora;
+    if(!antes) return;   // primera vez en esta generación: solo se toma la foto
+    if(ahora.pres&&!antes.pres) M('carcel','A la cárcel',(S.penal&&S.penal.motivoCondena?'Culpable de '+S.penal.motivoCondena+'. ':'')+'Te quedan '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de condena.');
+    if(!ahora.pres&&antes.pres&&!S.muerto&&!(S.penal&&S.penal.penaMuerte)) M('libertad','Libre otra vez','Cumpliste la condena. Afuera, el apellido te espera.');
+    if(ahora.muertos>antes.muertos){ try{ const f=window.fallecidos108(); const u=f[f.length-1]; if(u) M('duelo_hijo','Murió '+u.nombre,'Tenía '+(u.edad||0)+' año'+(u.edad===1?'':'s')+'. '+(u.causa?String(u.causa).charAt(0).toUpperCase()+String(u.causa).slice(1)+'.':'')); }catch(e){} }
+    if(ahora.esc>antes.esc&&cada('escandalo',3)) M('escandalo','El escándalo','Tu nombre está en todos los periódicos, y no por buenas razones.');
+  }
+  function wrapRender122(){
+    const old=window.render; if(typeof old!=='function'||old.__v122) return;
+    window.render=function(){ const r=old.apply(this,arguments); try{ revisar122(); }catch(e){} return r; };
+    window.render.__v122=true;
+  }
+  function init122(){ wrapHito122(); wrapLog122(); wrapRender122(); Object.assign(window,{revisarMomentos122:revisar122}); }
+  setTimeout(init122,40); setTimeout(init122,220); setTimeout(init122,650);
+  window.__SA122={version:V122};
 })();
 </script>
 
