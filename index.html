@@ -1000,7 +1000,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v129</div>
+<div class="version-badge" id="versionBadge">v131</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24889,5 +24889,145 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 </script>
 
 
+<script>
+/* Sociedad Anónima v131 — Atlas genealógico dinástico. Compatible con v129. */
+(function(){'use strict';
+const KEY='atlas130', MAX=550, FIRST=['Ana','Lucía','María','Elena','Isabel','Clara','Sofía','Julia','Teresa','Valentina'], MALE=['Juan','Carlos','Miguel','José','Andrés','Luis','Felipe','Santiago','Tomás','Daniel'], SURNAMES=['Giraldo','Valencia','Restrepo','Arango','Londoño','Mejía','Gómez','Salazar','Córdoba','Escobar','Montoya','Jaramillo'];
+const state=()=>typeof S!=='undefined'&&S&&S.p?S:null;
+const random=a=>a[Math.floor(Math.random()*a.length)];
+const yr=()=>state()?.anio||2026;
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(){const s=state();if(!s)return null;s.legado=s.legado||{};let d=s.legado[KEY];if(!d||!Array.isArray(d.people))d=s.legado[KEY]={people:[],seq:0,version:130};return d;}
+const REALES=/^(protagonista|antecesor|descendiente|pariente|pareja)$/;
+/* v131b: la familia real siempre se registra; el tope solo frena las ramas inventadas. Si se pasa, se podan inventados lejanos ya muertos. */
+function podar(d){if(d.people.length<MAX)return;const usados=new Set();d.people.forEach(p=>{if(REALES.test(p.kind)){p.parents.forEach(x=>usados.add(x));p.spouses.forEach(x=>usados.add(x));}});
+ const fuera=new Set(d.people.filter(p=>!REALES.test(p.kind)&&p.death&&!usados.has(p.id)).sort((a,b)=>a.birth-b.birth).slice(0,Math.max(20,d.people.length-MAX+20)).map(p=>p.id));
+ if(!fuera.size)return;d.people=d.people.filter(p=>!fuera.has(p.id));d.people.forEach(p=>{p.parents=p.parents.filter(x=>!fuera.has(x));p.spouses=p.spouses.filter(x=>!fuera.has(x));});}
+function add(d,name,sex,birth,house,parents=[],kind='colateral'){if(!REALES.test(kind)&&d.people.length>=MAX)return null;if(REALES.test(kind)&&d.people.length>=MAX)podar(d);if(d.people.length>=MAX+400)return null;const id='g130_'+(++d.seq);const p={id,name,sex,birth,house,parents:parents.filter(Boolean),spouses:[],kind,death:null};muerteInventada(p);d.people.push(p);return p;}
+/* v131b: los ancestros inventados que ya serían muy viejos traen su fecha de muerte */
+function muerteInventada(p){if(p.death||!/^(ancestro|colateral|afin)$/.test(p.kind))return;const age=yr()-p.birth;if(age>80)p.death=Math.min(yr()-1,p.birth+62+Math.floor(Math.random()*31));}
+function connect(a,b){if(!a||!b||a.id===b.id)return; if(!a.spouses.includes(b.id))a.spouses.push(b.id);if(!b.spouses.includes(a.id))b.spouses.push(a.id);}
+function byName(d,name,kind){return d.people.find(p=>p.name===name&&(!kind||p.kind===kind));}
+function seedHouse(d,root){if(!root||root.seeded130)return;root.seeded130=true;const born=root.birth, h=root.house;const dad=add(d,random(MALE)+' '+h,'h',born-29,h,[],'ancestro');const momHouse=random(SURNAMES.filter(x=>x!==h));const mom=add(d,random(FIRST)+' '+momHouse,'m',born-27,momHouse,[],'ancestro');if(!dad||!mom)return;connect(dad,mom);root.parents=[dad.id,mom.id];
+for(const parent of [dad,mom]){const gh=parent.house;const granddad=add(d,random(MALE)+' '+gh,'h',parent.birth-29,gh,[],'ancestro');const grandmomHouse=random(SURNAMES.filter(x=>x!==gh));const grandma=add(d,random(FIRST)+' '+grandmomHouse,'m',parent.birth-27,grandmomHouse,[],'ancestro');if(granddad&&grandma){connect(granddad,grandma);parent.parents=[granddad.id,grandma.id];const count=2+Math.floor(Math.random()*3);for(let i=0;i<count;i++){const sex=Math.random()<.5?'m':'h';const sibling=add(d,random(sex==='m'?FIRST:MALE)+' '+gh,sex,parent.birth-5+i*3,gh,[granddad.id,grandma.id]);if(!sibling)break;const partnerHouse=random(SURNAMES.filter(x=>x!==gh));const partnerSex=sex==='m'?'h':'m';const partner=add(d,random(partnerSex==='m'?FIRST:MALE)+' '+partnerHouse,partnerSex,sibling.birth+(Math.floor(Math.random()*9)-4),partnerHouse,[],'afin');if(!partner)break;connect(sibling,partner);const n=1+Math.floor(Math.random()*3);for(let j=0;j<n;j++){const sx=Math.random()<.5?'m':'h';const surname=sex==='h'?gh:partnerHouse;const cousin=add(d,random(sx==='m'?FIRST:MALE)+' '+surname,sx,Math.max(sibling.birth,partner.birth)+24+j*3,surname,[sibling.id,partner.id]);if(cousin&&Math.random()<.7)extendBranch(d,cousin,2);}}}}}
+function extendBranch(d,person,levels){if(!person||levels<=0||d.people.length>=MAX)return;const sex=person.sex==='m'?'h':'m', house=random(SURNAMES.filter(x=>x!==person.house));const spouse=add(d,random(sex==='m'?FIRST:MALE)+' '+house,sex,person.birth+Math.floor(Math.random()*9)-4,house,[],'afin');if(!spouse)return;connect(person,spouse);const n=1+Math.floor(Math.random()*3);for(let i=0;i<n;i++){const sx=Math.random()<.5?'m':'h', surname=person.sex==='h'?person.house:house;const child=add(d,random(sx==='m'?FIRST:MALE)+' '+surname,sx,Math.max(person.birth,spouse.birth)+23+i*3,surname,[person.id,spouse.id]);if(child&&levels>1&&Math.random()<.65)extendBranch(d,child,levels-1);}}
+// v131b: el atlas usa la familia real del juego (padres, abuelos, hermanos, tíos, sobrinos) y solo inventa
+// las ramas lejanas cuando el juego no tiene a esas personas. Al heredar, el hijo pasa a ser el protagonista.
+function seedMarcado(d,root){const antes=d.people.length;seedHouse(d,root);for(let i=antes;i<d.people.length;i++)d.people[i].seedOf=root.id;}
+function quitarSemilla(d,root){if(!root)return;const fuera=new Set(d.people.filter(p=>p.seedOf===root.id).map(p=>p.id));if(!fuera.size)return;d.people=d.people.filter(p=>!fuera.has(p.id));d.people.forEach(p=>{p.parents=p.parents.filter(x=>!fuera.has(x));p.spouses=p.spouses.filter(x=>!fuera.has(x));});}
+function ensure(){const s=state(),d=store();if(!s||!d)return null;const mainName=[s.p.nombre,s.p.apellido].filter(Boolean).join(' '), mainHouse=s.p.apellido||s.dinastia||'Casa';
+d.people.forEach(muerteInventada);   // partidas guardadas con centenarios inventados
+// 1. parientes reales del juego: se reutiliza a quien ya esté en el atlas con el mismo nombre (p. ej. el protagonista anterior)
+const old=(s.parientes||[]).filter(p=>p&&p.pid);const idMap=new Map();
+for(const p of old){let x=d.people.find(x=>x.sourcePid===p.pid);const name=[p.nombre,p.apellido||mainHouse].filter(Boolean).join(' ');if(!x)x=d.people.find(x=>x.name===name&&!x.sourcePid&&/protagonista|antecesor|descendiente|pareja/.test(x.kind));if(!x){x=add(d,name,p.sexo,yr()-(p.edad||0),p.apellido||mainHouse,[],'pariente');}if(x){x.sourcePid=p.pid;idMap.set(p.pid,x);if(p.vivo===false)x.death=x.death||yr();}}
+const rel=re=>old.filter(p=>re.test(p.rel||'')).map(p=>[p,idMap.get(p.pid)]).filter(x=>x[1]);
+// 2. el protagonista: el de esta generación, o el hijo que heredó, o uno nuevo
+let main=d.people.find(x=>x.id===d.mainId&&x.name===mainName)||byName(d,mainName,'protagonista')||byName(d,mainName,'descendiente');
+if(!main){main=add(d,mainName,s.p.sexo,yr()-(s.p.edad||30),mainHouse,[],'protagonista');}
+if(!main)return d;
+if(d.mainId&&d.mainId!==main.id){const prev=d.people.find(x=>x.id===d.mainId);if(prev&&prev.kind==='protagonista')prev.kind='antecesor';}
+main.kind='protagonista';d.mainId=main.id;
+// 3. padres: los del juego mandan; si no hay, se inventa la ascendencia (solo una vez)
+const padres=rel(/^(padre|madre)$/);
+if(padres.length){quitarSemilla(d,main);main.seeded130=true;const reales=padres.map(x=>x[1]);const yaEran=main.parents.map(id=>d.people.find(x=>x.id===id)).filter(x=>x&&!x.seedOf&&!reales.some(r=>r.id===x.id)&&!reales.some(r=>r.sex===x.sex));main.parents=[...new Set(reales.concat(yaEran).slice(0,2).map(x=>x.id))];const pp=main.parents.map(id=>d.people.find(x=>x.id===id));if(pp.length===2)connect(pp[0],pp[1]);}   // los del juego mandan; el que ya no figura (p. ej. el padre muerto) se conserva
+else if(!main.parents.length&&!main.seeded130)seedMarcado(d,main);
+const padreDe=ap=>{const p=padres.find(([g])=>(g.apellido||mainHouse)===ap);return p?p[1]:null;};
+for(const [g,x] of rel(/^herman/)){if(!x.parents.length&&main.parents.length)x.parents=[...main.parents];}
+for(const [g,x] of rel(/^abuel/)){const hijo=padreDe(g.apellido||mainHouse)||(padres[0]&&padres[0][1]);if(hijo&&!hijo.parents.includes(x.id)&&hijo.parents.length<2)hijo.parents.push(x.id);}
+for(const [g,x] of rel(/^t[ií]/)){const hno=padreDe(g.apellido||mainHouse);if(hno&&!x.parents.length&&hno.parents.length)x.parents=[...hno.parents];}
+for(const [g,x] of rel(/^sobrin/)){const h=rel(/^herman/).find(([hg])=>(hg.apellido||mainHouse)===(g.apellido||mainHouse));if(h&&!x.parents.length)x.parents=[h[1].id];}
+for(const p of old){const x=idMap.get(p.pid);const parent=idMap.get(p.padrePid);if(x&&parent&&!x.parents.includes(parent.id))x.parents.push(parent.id);}
+// 4. pareja e hijos
+const partner=s.familia&&s.familia.pareja;if(partner&&partner.nombre){let sp=byName(d,partner.nombre,'pareja');if(!sp){const house=partner.casa?.apellido||partner.nombre.trim().split(/\s+/).slice(-1)[0]||random(SURNAMES);sp=add(d,partner.nombre,partner.sexo,yr()-(partner.edad||s.p.edad),house,[],'pareja');if(sp)seedMarcado(d,sp);}connect(main,sp);}
+for(const child of s.familia?.hijos||[]){const name=child.nombre+' '+(child.apellido||mainHouse);let p=byName(d,name,'descendiente');if(!p){p=add(d,name,child.sexo,yr()-(child.edad||0),mainHouse,[main.id,...(main.spouses.length?[main.spouses[main.spouses.length-1]]:[])],'descendiente');}if(p){p.parents=[...new Set([main.id,...p.parents.filter(x=>x!==main.id)])];if(child.vivo===false||child.muerto)p.death=p.death||yr();}}
+return d;}
+function advance(){const d=ensure();if(!d)return;podar(d);const year=yr();for(const p of d.people.slice()){if(p.death||p.kind==='protagonista'||p.kind==='antecesor'||p.kind==='descendiente'||p.kind==='pariente')continue;const age=year-p.birth;if(age<0)continue;if(age>80&&Math.random()<Math.min(.42,(age-77)*.014))p.death=year;if(age<22||age>43||p.spouses.length||Math.random()>.055||d.people.length>=MAX-12)continue;extendBranch(d,p,2);} }
+function ancestorDistances(d,id){const map=new Map(d.people.map(p=>[p.id,p])),dist=new Map([[id,0]]),q=[id];for(let i=0;i<q.length;i++){const p=map.get(q[i]);if(!p)continue;for(const pid of p.parents){if(!dist.has(pid)){dist.set(pid,dist.get(p.id)+1);q.push(pid);}}}return dist;}
+function kin(d,a,b){if(a.id===b.id)return 'La misma persona';if(a.spouses.includes(b.id))return 'Cónyuges / unión familiar';const A=ancestorDistances(d,a.id),B=ancestorDistances(d,b.id);if(A.has(b.id))return 'Descendiente, '+A.get(b.id)+' generación(es)';if(B.has(a.id))return 'Antepasado, '+B.get(a.id)+' generación(es)';let best=null;for(const [id,da] of A){if(!B.has(id))continue;const db=B.get(id);if(!best||da+db<best.da+best.db)best={da,db};}if(!best)return 'Familias vinculadas o parentesco no documentado';const {da,db}=best;if(da===1&&db===1)return 'Hermanos';if(Math.min(da,db)===1)return 'Tío/a o sobrino/a, con '+Math.abs(da-db)+' generación(es) de diferencia';const degree=Math.min(da,db)-1;const names=['','primos hermanos','primos segundos','primos terceros','primos cuartos','primos quintos'];return (names[degree]||'primos de grado '+degree)+(da===db?'':' · '+Math.abs(da-db)+' generación(es) de diferencia');}
+let focus=null,house='todas',showDead=true;
+function panel(){const d=ensure();if(!d)return;const overlay=document.getElementById('atlas130-overlay');if(overlay)overlay.remove();const root=document.createElement('div');root.id='atlas130-overlay';root.innerHTML='<div class="atlas130-modal" role="dialog" aria-modal="true" aria-label="Atlas genealógico"><div class="atlas130-head"><div><small>ARCHIVO DINÁSTICO · v130</small><h2>Atlas de las casas</h2></div><button id="atlas130-close" aria-label="Cerrar">✕</button></div><div class="atlas130-tools"><label>Casa <select id="atlas130-house"></select></label><label><input type="checkbox" id="atlas130-dead" checked> Incluir fallecidos</label><button id="atlas130-export">Exportar genealogía</button></div><div id="atlas130-summary"></div><div id="atlas130-tree"></div><div id="atlas130-detail"></div></div>';document.body.appendChild(root);root.querySelector('#atlas130-close').onclick=()=>root.remove();root.onclick=e=>{if(e.target===root)root.remove();};const sel=root.querySelector('#atlas130-house');sel.innerHTML='<option value="todas">Todas las casas</option>'+[...new Set(d.people.map(p=>p.house).filter(Boolean))].sort().map(h=>'<option value="'+safe(h)+'">Casa '+safe(h)+'</option>').join('');sel.value=house;sel.onchange=()=>{house=sel.value;draw();};root.querySelector('#atlas130-dead').checked=showDead;root.querySelector('#atlas130-dead').onchange=e=>{showDead=e.target.checked;draw();};root.querySelector('#atlas130-export').onclick=()=>{const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Sociedad-Anonima-genealogia-'+yr()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),500);};draw();}
+function draw(){const d=ensure(),root=document.getElementById('atlas130-overlay');if(!d||!root)return;const map=new Map(d.people.map(p=>[p.id,p]));const people=d.people.filter(p=>p.birth<=yr()&&(house==='todas'||p.house===house)&&(showDead||!p.death));root.querySelector('#atlas130-summary').textContent=d.people.length+' integrantes registrados · '+new Set(d.people.map(p=>p.house)).size+' casas · relaciones y generaciones navegables';const tree=root.querySelector('#atlas130-tree');tree.innerHTML='';const groups=new Map();for(const p of people){const generation=Math.floor(p.birth/25)*25;if(!groups.has(generation))groups.set(generation,[]);groups.get(generation).push(p);}for(const [generation,persons] of [...groups].sort((a,b)=>a[0]-b[0])){const section=document.createElement('section');section.className='atlas130-era';const title=document.createElement('h3');title.textContent='Nacidos entre '+generation+' y '+(generation+24);section.appendChild(title);const cards=document.createElement('div');cards.className='atlas130-cards';for(const p of persons.sort((a,b)=>a.birth-b.birth)){const b=document.createElement('button');b.className='atlas130-person'+(p.death?' atlas130-dead':'');b.innerHTML='<strong>'+safe(p.name)+'</strong><span>'+p.birth+(p.death?' – '+p.death:' · '+Math.max(0,yr()-p.birth)+' años')+'</span><small>Casa '+safe(p.house)+'</small>';b.onclick=()=>{focus=p.id;detail();};cards.appendChild(b);}section.appendChild(cards);tree.appendChild(section);}detail();}
+function detail(){const d=ensure(),root=document.getElementById('atlas130-overlay');if(!d||!root)return;const map=new Map(d.people.map(p=>[p.id,p]));const p=map.get(focus)||d.people.find(p=>p.id===d.mainId)||d.people.find(p=>p.kind==='protagonista')||d.people[0];if(!p)return;focus=p.id;const children=d.people.filter(x=>x.parents.includes(p.id));const related=[...p.parents.map(id=>['Padre/madre',map.get(id)]),...p.spouses.map(id=>['Unión con',map.get(id)]),...children.map(x=>['Hijo/a',x])].filter(x=>x[1]);const area=root.querySelector('#atlas130-detail');area.innerHTML='<h3>'+safe(p.name)+'</h3><p>Casa '+safe(p.house)+' · '+p.birth+(p.death?'–'+p.death:'')+'</p><div class="atlas130-links">'+related.map(([rel,x])=>'<button data-id="'+safe(x.id)+'">'+safe(rel)+': '+safe(x.name)+'</button>').join('')+'</div><label>Comparar parentesco <select id="atlas130-compare"><option value="">Selecciona otra persona</option>'+d.people.filter(x=>x.id!==p.id).map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+'</option>').join('')+'</select></label><p id="atlas130-kin"></p>';area.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{focus=b.dataset.id;detail();});area.querySelector('#atlas130-compare').onchange=e=>{const q=map.get(e.target.value);area.querySelector('#atlas130-kin').textContent=q?kin(d,p,q):'';};}
+function install(){if(state())ensure();   /* v131b: se instala aunque el juego arranque en la portada */if(!window.__atlas130Step&&typeof window.pasarAnio==='function'){const old=window.pasarAnio;window.pasarAnio=function(){const result=old.apply(this,arguments);try{advance();}catch(e){console.warn('Atlas 130:',e);}return result;};window.__atlas130Step=true;}if(!window.__atlas130Render&&typeof window.renderLienzo==='function'){const old=window.renderLienzo;window.renderLienzo=function(){const result=old.apply(this,arguments);try{const host=document.getElementById('lienzoJuego');if(host&&host.querySelector('.arbol107')&&!host.querySelector('.atlas130-launch')){const b=document.createElement('button');b.className='atlas130-launch';b.textContent='🌳 Explorar árbol extensivo y casas aliadas';b.onclick=panel;host.querySelector('.arbol107').insertAdjacentElement('beforebegin',b);}}catch(e){console.warn(e);}return result;};window.__atlas130Render=true;} }
+const css=document.createElement('style');css.textContent='.atlas130-launch{display:block;width:100%;margin:12px 0;padding:13px;border:1px solid #d6a648;border-radius:12px;background:#233c2d;color:#f0e7d5;font-size:14px;cursor:pointer}.atlas130-launch:hover{background:#34533d}#atlas130-overlay{position:fixed;inset:0;z-index:10000;background:rgba(3,10,6,.88);padding:14px;overflow:auto}.atlas130-modal{max-width:1150px;margin:0 auto;background:#14251c;border:1px solid #8a6d2e;border-radius:18px;padding:20px;color:#f0e7d5}.atlas130-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.atlas130-head small{color:#d6a648;letter-spacing:.14em}.atlas130-head h2{font-size:30px;margin:4px 0}.atlas130-head button,.atlas130-tools button,.atlas130-links button{border:1px solid #8a6d2e;border-radius:9px;background:#20382a;color:#f0e7d5;padding:9px;cursor:pointer}.atlas130-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}.atlas130-tools select,#atlas130-compare{background:#0e1c15;color:#f0e7d5;border:1px solid #8a6d2e;border-radius:7px;padding:8px}.atlas130-era{border-top:1px solid #38523c;padding:14px 0}.atlas130-era h3{font-size:17px;color:#d6a648;margin-bottom:10px}.atlas130-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:8px}.atlas130-person{display:flex;flex-direction:column;gap:4px;text-align:left;padding:11px;border:1px solid #38523c;border-radius:10px;background:#1c3426;color:#f0e7d5;cursor:pointer}.atlas130-person:hover{border-color:#d6a648}.atlas130-person span,.atlas130-person small{color:#a7b5a9;font-size:11px}.atlas130-dead{filter:grayscale(.8);opacity:.65}#atlas130-detail{position:sticky;bottom:0;background:#22392b;border:1px solid #8a6d2e;border-radius:12px;padding:15px;margin-top:15px;box-shadow:0 -10px 35px #0a130c}#atlas130-detail h3{font-size:23px}#atlas130-detail p{font-size:12px;color:#c1cabc;margin:7px 0}.atlas130-links{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}#atlas130-detail label{font-size:12px}@media(max-width:600px){.atlas130-modal{padding:12px}.atlas130-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.atlas130-person{font-size:12px}}';document.head.appendChild(css);
+window.__SA130={open:panel,ensure,kin,version:130};[80,350,1000].forEach(t=>setTimeout(install,t));
+})();
+
+</script>
+<script>
+/* v131 · Retratos vintage procedurales, estables y variados, sin imágenes externas. */
+(function(){'use strict';
+const skins=['#e6c6a8','#d9ac87','#bd896b','#a97759','#865b44','#f0d4b9','#c99d7f'];
+const hairs=['#241e1b','#3b3028','#624a36','#917052','#b29a76','#d5c4a4','#5d5149','#a66c46'];
+const coats=['#293b39','#493a38','#384456','#5b4b3b','#353b36','#53434a','#324847','#564c42'];
+const backs=['#4d493e','#4b554e','#555047','#414e50','#595147','#495047'];
+function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rand(seed){let x=seed||1;return ()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296;};}
+function pick(r,a){return a[Math.floor(r()*a.length)];}
+function vintage(nombre,op){
+ op=op||{};const age=Number.isFinite(+op.edad)?Math.max(0,+op.edad):35;
+ const sex=op.sexo==='m'?'m':'h',female=sex==='m';
+ // Identidad persistente: el mismo nombre/sexo/ID siempre conserva sus facciones.
+ // Si la simulación entrega ID propio, dos homónimos también se distinguen.
+ const identity=String(op.pid??op.id??op.personaId??op.semilla??nombre)+'|'+sex;
+ const r=rand(hash(identity+'|retrato131'));
+ const faceWidth=12.1+r()*3.8,faceHeight=16.0+r()*3.1;
+ const jaw=8.4+r()*3.2,eyeGap=4.6+r()*2.3,eyeY=27.0+r()*2.5;
+ const eyeW=1.45+r()*.55,eyeH=.48+r()*.45;
+ const noseLen=3.2+r()*2.5,noseWidth=1.2+r()*1.6;
+ const mouthWidth=3.0+r()*2.8,mouthY=37.4+r()*2.1;
+ const browAngle=(r()-.5)*1.7,style=Math.floor(r()*8),part=r()>.5;
+ const skin=skins[Number.isFinite(op.pielIdx)?Math.max(0,Math.min(skins.length-1,op.pielIdx)):Math.floor(r()*skins.length)];
+ let hair=hairs[Number.isFinite(op.peloIdx)?Math.max(0,Math.min(hairs.length-1,op.peloIdx)):Math.floor(r()*hairs.length)];
+ const bg=pick(r,backs),coat=pick(r,coats),collar=pick(r,['#d2c5af','#ddd0ba','#c7c1b4']);
+ const mustache=!female&&age>24&&r()<.38,beard=!female&&age>32&&r()<.14;
+ const glasses=age>17&&r()<.15,earrings=female&&age>14&&r()<.38;
+ const browWeight=.7+r()*.6,lip='#825c50',young=age<13,elder=age>60;
+ if(elder)hair=pick(r,['#b7ad9c','#d4cabc','#85817c',hair]);
+ const tam=Number(op.tam)||44,parts=[];
+ const add=x=>parts.push(x);
+ add('<defs><radialGradient id="bg131" cx="48%" cy="34%" r="72%"><stop stop-color="'+bg+'"/><stop offset="1" stop-color="#242722"/></radialGradient><linearGradient id="skin131" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="'+skin+'"/><stop offset=".57" stop-color="'+skin+'"/><stop offset="1" stop-color="#805b49" stop-opacity=".68"/></linearGradient><linearGradient id="coat131" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+coat+'"/><stop offset="1" stop-color="#181d1d"/></linearGradient></defs>');
+ add('<rect width="64" height="64" fill="url(#bg131)"/>');
+ add('<path d="M4 64 Q7 50 23 47 L41 47 Q57 50 60 64Z" fill="url(#coat131)"/>');
+ add('<path d="M27 42 L27 50 Q32 54 37 50 L37 42Z" fill="'+skin+'"/>');
+ add('<path d="M22 48 L32 59 L42 48 L37 47 L32 52 L27 47Z" fill="'+collar+'" opacity=".95"/>');
+ if(!female&&!young){add('<path d="M30.5 53 L33.5 53 L34.5 64 L29.5 64Z" fill="'+pick(r,['#55413b','#283b41','#6a5444'])+'"/>');}
+ const fw=young?faceWidth*.93:faceWidth,fh=young?faceHeight*.88:faceHeight;
+ const top=27-fh,bot=27+fh;
+ add('<path d="M32 '+top+' C'+(32-fw*.75)+' '+top+' '+(32-fw)+' '+(top+4)+' '+(32-fw)+' 26 C'+(32-fw)+' 37 '+(32-jaw)+' '+(bot-4)+' 32 '+bot+' C'+(32+jaw)+' '+(bot-4)+' '+(32+fw)+' 37 '+(32+fw)+' 26 C'+(32+fw)+' '+(top+4)+' '+(32+fw*.75)+' '+top+' 32 '+top+'Z" fill="url(#skin131)" stroke="#4e3a30" stroke-opacity=".28" stroke-width=".45"/>');
+ add('<path d="M'+(32-fw)+' 27 q-3-3-3 1 q0 5 3 5 M'+(32+fw)+' 27 q3-3 3 1 q0 5-3 5" fill="'+skin+'" stroke="#795b4b" stroke-opacity=".45" stroke-width=".5"/>');
+ // Cabello: siluetas sobrias con raya y volumen variables.
+ const hTop=top-1.7;
+ if(!(age>49&&!female&&style===0)){
+  add('<path d="M'+(32-fw-1)+' 27 Q'+(31-fw)+' '+(hTop-4)+' 32 '+(hTop-2)+' Q'+(32+fw+3)+' '+(hTop-4)+' '+(32+fw+1)+' 27 L'+(32+fw-1)+' '+(top+8)+' Q'+(part?38:28)+' '+(top+1)+' 32 '+(top+4)+' Q'+(part?25:39)+' '+(top+7)+' '+(32-fw+1)+' '+(top+9)+'Z" fill="'+hair+'"/>');
+  if(female&&style%3===0)add('<path d="M'+(32-fw)+' 23 Q'+(32-fw-4)+' 36 '+(32-fw-1)+' 46 L'+(32-fw+4)+' 47 Q'+(32-fw+1)+' 34 '+(32-fw+3)+' 25 M'+(32+fw)+' 23 Q'+(32+fw+4)+' 36 '+(32+fw+1)+' 46 L'+(32+fw-4)+' 47 Q'+(32+fw-1)+' 34 '+(32+fw-3)+' 25" fill="'+hair+'"/>');
+  if(style%4===1)add('<path d="M'+(32-fw+2)+' '+(top+7)+' Q32 '+(top-4)+' '+(32+fw-1)+' '+(top+6)+'" stroke="#d7c5a4" stroke-opacity=".13" stroke-width="1" fill="none"/>');
+ }
+ const lx=32-eyeGap,rx=32+eyeGap;
+ for(const x of [lx,rx]){
+  add('<path d="M'+(x-eyeW-1)+' '+(eyeY-3)+' Q'+x+' '+(eyeY-4+browAngle)+' '+(x+eyeW+1)+' '+(eyeY-3-browAngle)+'" stroke="'+hair+'" stroke-width="'+browWeight+'" fill="none" stroke-linecap="round"/>');
+  add('<path d="M'+(x-eyeW-1)+' '+eyeY+' Q'+x+' '+(eyeY-eyeH*1.6)+' '+(x+eyeW+1)+' '+eyeY+' Q'+x+' '+(eyeY+eyeH*1.1)+' '+(x-eyeW-1)+' '+eyeY+'" fill="#d7c9b3" opacity=".7"/>');
+  add('<ellipse cx="'+x+'" cy="'+eyeY+'" rx=".72" ry=".86" fill="'+pick(r,['#3c352b','#4d4a3a','#4b5b52','#3c464e'])+'"/>');
+  add('<path d="M'+(x-eyeW-1)+' '+eyeY+' Q'+x+' '+(eyeY-eyeH*1.6)+' '+(x+eyeW+1)+' '+eyeY+'" fill="none" stroke="#41352e" stroke-width=".85"/>');
+ }
+ add('<path d="M32 '+(eyeY+1)+' q'+(noseWidth*.35)+' '+(noseLen*.6)+' '+(noseWidth*.1)+' '+noseLen+' q'+(-noseWidth)+' 1 '+(-noseWidth*1.1)+' -.25" stroke="#775747" stroke-width=".7" opacity=".65" fill="none"/>');
+ add('<path d="M'+(32-mouthWidth)+' '+mouthY+' Q32 '+(mouthY+.7)+' '+(32+mouthWidth)+' '+mouthY+'" stroke="'+lip+'" stroke-width=".85" fill="none" stroke-linecap="round"/>');
+ add('<path d="M'+(32-mouthWidth*.65)+' '+(mouthY+1.1)+' Q32 '+(mouthY+1.8)+' '+(32+mouthWidth*.65)+' '+(mouthY+1.1)+'" stroke="#744f43" opacity=".35" stroke-width=".45" fill="none"/>');
+ if(mustache)add('<path d="M32 '+(mouthY-1.6)+' q-3-2-6 .2 q3 1 6 .1 q3 .9 6-.1 q-3-2.2-6-.2" fill="'+hair+'" opacity=".9"/>');
+ if(beard)add('<path d="M'+(32-jaw*.75)+' '+(mouthY+1)+' Q'+(32-jaw*.8)+' '+(bot-1)+' 32 '+(bot+1)+' Q'+(32+jaw*.8)+' '+(bot-1)+' '+(32+jaw*.75)+' '+(mouthY+1)+' Q'+(32+jaw*.55)+' '+(bot-4)+' 32 '+(bot-2)+' Q'+(32-jaw*.55)+' '+(bot-4)+' '+(32-jaw*.75)+' '+(mouthY+1)+'" fill="'+hair+'" opacity=".6"/>');
+ if(elder){for(const x of [21,43])add('<path d="M'+x+' 34 q-1 1 0 2 M'+(x-2)+' 38 q2 1 4 0" stroke="#614e42" stroke-opacity=".4" stroke-width=".45" fill="none"/>');add('<path d="M25 41 Q32 43 39 41" stroke="#765748" opacity=".22" stroke-width=".5" fill="none"/>');}
+ if(glasses)add('<g fill="none" stroke="#b9a78a" stroke-width=".7"><ellipse cx="'+lx+'" cy="'+eyeY+'" rx="4.1" ry="3.2"/><ellipse cx="'+rx+'" cy="'+eyeY+'" rx="4.1" ry="3.2"/><path d="M'+(lx+4.1)+' '+eyeY+' H'+(rx-4.1)+'"/></g>');
+ if(earrings)add('<circle cx="'+(32-fw-1)+'" cy="34" r=".85" fill="#cbb889"/><circle cx="'+(32+fw+1)+'" cy="34" r=".85" fill="#cbb889"/>');
+ add('<rect width="64" height="64" fill="#b3a17b" opacity=".075"/>');
+ // Punteado fotográfico ligero, fijo por identidad; no genera caras nuevas al repintar.
+ for(let i=0;i<28;i++){const x=(r()*64).toFixed(1),y=(r()*64).toFixed(1);add('<circle cx="'+x+'" cy="'+y+'" r=".24" fill="#e6d9bd" opacity=".17"/>');}
+ add('<rect x=".8" y=".8" width="62.4" height="62.4" rx="1" fill="none" stroke="#c2ae87" stroke-opacity=".5" stroke-width="1.5"/>');
+ const unique='p'+hash(identity).toString(36);const artwork=parts.join('').replace(/bg131|skin131|coat131/g,m=>m+unique);
+ return '<svg class="cara sa-vintage131" viewBox="0 0 64 64" width="'+tam+'" height="'+tam+'" aria-hidden="true" style="border-radius:3px">'+artwork+'</svg>';
+}
+function install(){window.avatarSVG=vintage;window.__SA131_PORTRAITS={version:131,render:vintage};}
+install();setTimeout(install,1200);
+})();
+</script>
 </body>
 </html>
