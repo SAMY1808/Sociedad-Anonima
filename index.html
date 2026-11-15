@@ -1125,7 +1125,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v146</div>
+<div class="version-badge" id="versionBadge">v147</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6960,11 +6960,12 @@ function pasarAnio(){
 
   S.mov=Math.max(0, movidasBase()-movidasComprometidas()-(S.familia.movidasEmbarazo||0));
   S.familia.movidasEmbarazo=0;
-  S.resumen=res; S.flujo={ingreso,gasto};
+  S.resumen=res; S.flujo={ingreso,gasto}; S._cierre147={efectivo:S.efectivo,n:res.length,anio:S.anio};   /* v147: para cuadrar el informe */
 
   const pm = probMuerte();
-  if(chance(pm)||p.salud<=0){ procesarCola(()=>morir()); return; }
-  procesarCola(()=>finDeAnio());
+  /* v147: los eventos y el informe arrancan cuando todos los módulos ya cerraron su año (sus eventos y sus renglones también cuentan) */
+  if(chance(pm)||p.salud<=0){ setTimeout(()=>procesarCola(()=>morir()),0); return; }
+  setTimeout(()=>procesarCola(()=>finDeAnio()),0);
 }
 
 function probMuerte(){
@@ -25378,7 +25379,7 @@ install();setTimeout(install,1200);
   }
   function wrapPaso133(){
     const old=window.pasarAnio; if(typeof old!=='function'||window.__SA133_PASO) return; window.__SA133_PASO=true;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual133(); }catch(e){ console.error(e); } return r; };
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ const e0=S.efectivo; anual133(); window.anotar147&&window.anotar147('Cuidados de la vejez y la salud',S.efectivo-e0); }catch(e){ console.error(e); } return r; };
     window.pasarAnio.__v133=true;
   }
   function init133(){ enfermedades133(); eventos133(); wrapMovidas133(); wrapEtapa133(); wrapEscena133(); wrapPaso133();
@@ -25552,7 +25553,7 @@ install();setTimeout(install,1200);
   function wrapCat134(){ const old=window.catDe; if(typeof old!=='function'||window.__SA134_CAT) return; window.__SA134_CAT=true;
     window.catDe=function(t){ if(t==='Tus inquilinos') return 'casa'; return old.apply(this,arguments); }; }
   function wrapPaso134(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA134_PASO) return; window.__SA134_PASO=true;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual134(); }catch(e){ console.error(e); } return r; }; }
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ const e0=S.efectivo; anual134(); window.anotar147&&window.anotar147('Inquilinos: atrasos, restituciones y daños',S.efectivo-e0); }catch(e){ console.error(e); } return r; }; }
   function init134(){ wrapEscena134(); wrapAcciones134(); wrapCat134(); wrapPaso134();
     Object.assign(window,{PERFILES_INQUILINO_134:PERF,inquilinoNuevo134:nuevo,anualInquilinos134:anual134,escenaInquilinos134,puntualidad134:puntualidad}); }
   setTimeout(init134,40); setTimeout(init134,220); setTimeout(init134,650);
@@ -26592,7 +26593,7 @@ install();setTimeout(install,1200);
       else if(canal==='particular'&&chance(.05)){ ingreso=ventaC*precioVenta(f,'particular',cal)*.5; notas.push('el comprador particular quedó debiendo la mitad'); }
       else ingreso=ventaC*precioVenta(f,canal,cal);
       const costo=costos(f,cargas), neto=ingreso-costo;
-      S.efectivo+=neto; f.ult={anio:S.anio,cargas,ingreso,costo,neto,cal,canal,notas,precio:precioCarga(),ret};
+      S.efectivo+=neto; try{ window.anotar147&&window.anotar147('Café · '+b.nombre+' ('+Math.round(cargas).toLocaleString('es-CO')+' cargas'+(ret?', guardadas':'')+')',neto); }catch(e){} f.ult={anio:S.anio,cargas,ingreso,costo,neto,cal,canal,notas,precio:precioCarga(),ret};
       f.hist=f.hist||[]; f.hist.push([S.anio,Math.round(cargas),Math.round(neto)]); if(f.hist.length>40) f.hist.shift();
       log('Cosecha de <b>'+esc(b.nombre)+'</b>: '+Math.round(cargas).toLocaleString('es-CO')+' cargas'+(ret?' (las guardaste)':'')+'. '+(notas.length?notas.join('; ').replace(/^./,c=>c.toUpperCase())+'. ':'')+(neto>=0?'Quedaron ':'Se perdieron ')+fmt(Math.abs(neto))+'.',neto>=0?'bien':'mal');
     });
@@ -26797,7 +26798,7 @@ install();setTimeout(install,1200);
     if(f.procafecol>0&&S.anio>=2008){ const x=f.procafecol*rnd(.0,.05); if(x>0){ extra+=x; notas.push('Procafecol pagó '+fmt(x)+' de dividendos'); } f.procafecol*=1+rnd(-.05,.12); }
     if(f.cargo){ const c=CARGOS[cargoIx(f.cargo)]; f.influencia=clamp(f.influencia+(c.inf-f.influencia)*.3,0,100); if(f.cargo==='gerente'&&!(S.carrera&&S.carrera.ruta==='federacion')){ const sal=60; extra+=sal; notas.push('sueldo de Gerente General: '+fmt(sal)); } }
     else f.influencia=Math.max(0,f.influencia-3);
-    if(extra){ S.efectivo+=extra; log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
+    if(extra){ S.efectivo+=extra; try{ window.anotar147&&window.anotar147('Federación de Cafeteros: programas, excedentes y sueldos',extra); }catch(e){} log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
     // la elección cafetera
     if(eleccion(S.anio)&&f.candidato){ const c=CARGOS[cargoIx(f.candidato)]; const pr=clamp(.32+prest()/250+hectareas()/400+f.influencia/300+(f.campana||0)-cargoIx(c.id)*.06,.08,.88);
       if(chance(pr)){ f.cargo=c.id; f.desde=S.anio; log('<b>Elecciones cafeteras:</b> ganaste. Ahora estás en el '+c.n+'.','hito'); hito('Elegido al '+c.n); try{ moverPrestigio(3+cargoIx(c.id)*2,'cargo cafetero'); }catch(e){} }
@@ -26978,7 +26979,7 @@ install();setTimeout(install,1200);
       o:[{t:'Subir el pago por kilo',f:()=>{ L().forEach(b=>{ b.cafe141.pagaMas=true; b.cafe141.pagaDesde=S.anio; }); return 'Pagas más por kilo recogido. La cosecha se salva, el margen no.'; }},{t:'Recoger con lo que haya',f:()=>'Se va a caer grano al suelo. Y la broca se alimenta de ese grano.'}]}); }
     else if(!(G().escasez>=S.anio)) L().forEach(b=>{ if(b.cafe141.pagaMas&&S.anio-(b.cafe141.pagaDesde||S.anio)>2) b.cafe141.pagaMas=false; });
     // los turistas del Paisaje Cultural
-    const tur=L().filter(b=>b.cafe141.turismo); if(tur.length){ const x=tur.reduce((s,b)=>s+Math.min(40,b.cafe141.ha*.8),0); S.efectivo+=x; }
+    const tur=L().filter(b=>b.cafe141.turismo); if(tur.length){ const x=tur.reduce((s,b)=>s+Math.min(40,b.cafe141.ha*.8),0); S.efectivo+=x; try{ window.anotar147&&window.anotar147('Turismo en las fincas cafeteras',x); }catch(e){} }
   }
   function wrapPaso143(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA143_PASO) return; window.__SA143_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
@@ -27042,7 +27043,7 @@ install();setTimeout(install,1200);
     n.hoteles.forEach(h=>{ const b=(S.bienes||[]).find(x=>x.uid===h.uid); if(!b){ h.muerto=true; return; } const pais=mun(b).paisaje, r=(pais&&S.anio>=2011?55:S.anio>=1995?28:12)*rnd(.7,1.25)-(S.anio===2020?30:0)-(S.anio===1999&&/Quindío|Risaralda/.test(mun(b).dep||'')?20:0); h.ult=r; filas.push(['Hotel en '+b.cafe141.mun,r]); });
     n.hoteles=n.hoteles.filter(h=>!h.muerto);
     const tot=filas.reduce((s,f)=>s+f[1],0);
-    if(filas.length){ S.efectivo+=tot; n.hist.push([S.anio,Math.round(tot)]); if(n.hist.length>40) n.hist.shift();
+    if(filas.length){ S.efectivo+=tot; try{ filas.forEach(f=>window.anotar147&&window.anotar147('Café · '+f[0],f[1])); }catch(e){} n.hist.push([S.anio,Math.round(tot)]); if(n.hist.length>40) n.hist.shift();
       log('<b>Negocio cafetero:</b> '+filas.map(f=>f[0]+' '+(f[1]>=0?'+':'−')+fmt(Math.abs(f[1]))).join(' · ')+'.',tot>=0?'bien':'mal'); }
     // sucesos
     if(S._ev144!==S.anio){
@@ -27299,6 +27300,38 @@ install();setTimeout(install,1200);
   function init146(){ instalar(); wrapComprar(); wrapEscena(); Object.assign(window,{tamanoBien146:tamano,detalleTamano146:detalle,FOTOS_TAMANO_146}); }
   setTimeout(init146,80); setTimeout(init146,260); setTimeout(init146,720); setTimeout(init146,950);
   window.__SA146={version:V146};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v147 · EL INFORME ANUAL CUADRA
+   Varias cosas suman o restan plata después de que el año arma su informe
+   (la cosecha de las fincas cafeteras, los programas de la Federación, el
+   turismo y el negocio cafetero, los inquilinos, los cuidados de la vejez,
+   y otras de versiones anteriores). La plata sí entraba, pero no aparecía
+   la línea. Ahora cada una anota su renglón en el informe, y si al cerrar
+   queda algo sin explicar sale como "Otros movimientos del año", para que
+   lo que dice el informe cuadre con lo que tienes.
+   ========================================================================== */
+(function(){
+  const V147='v147';
+  function anotar(texto,monto){
+    try{ if(!S||!Array.isArray(S.resumen)||!isFinite(monto)||Math.abs(monto)<.5) return;
+      const c=S._cierre147; if(!c||c.anio!==S.anio) return;   // solo el informe del año que se acaba de cerrar
+      S.resumen.push([texto,monto,monto>=0?'pos':'neg']); c.anotado=(c.anotado||0)+monto; }catch(e){}
+  }
+  function cuadrar(){
+    try{ const c=S&&S._cierre147; if(!c||c.anio!==S.anio||c.cuadrado) return; c.cuadrado=true;
+      const resto=(S.efectivo-c.efectivo)-(c.anotado||0);
+      if(Math.abs(resto)>=.5) S.resumen.push(['Otros movimientos del año',resto,resto>=0?'pos':'neg']); }catch(e){}
+  }
+  function envolver(){ const old=window.pasarAnio; if(typeof old!=='function'||old.__v147) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); cuadrar(); return r; }; window.pasarAnio.__v147=true; }
+  window.anotar147=anotar;
+  // va por fuera de todos los demás: se instala de último y se reinstala si alguien envuelve después
+  setTimeout(envolver,1200); setTimeout(envolver,2500); setTimeout(envolver,5000);
+  window.__SA147={version:V147};
 })();
 </script>
 
