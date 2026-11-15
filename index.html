@@ -1040,10 +1040,19 @@ svg.foto116{display:block;background:#1d2a23}
 .grande136 .marco136 .pie136{margin-top:10px;font-family:var(--display);font-size:15px;color:#3a2f22;text-align:center}
 .grande136 .nombres136{margin-top:4px;font-size:12.5px;color:#6a5640;text-align:center}
 </style>
+<style id="estilos-v137">
+.prod137 .uso{height:9px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 10px}
+.prod137 .uso i{display:block;height:100%}
+.prod137 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.prod137 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.prod137 .k b{display:block;font-size:17px;font-family:var(--display)}
+.prod137 .k span{font-size:12px;color:var(--humo2)}
+.prod137-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v136</div>
+<div class="version-badge" id="versionBadge">v137</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25743,6 +25752,171 @@ install();setTimeout(install,1200);
     Object.assign(window,{album136:A,pegarEnAlbum136:pegar,escenaAlbum136,verFotoAlbum136:verFoto,retratoFamilia136:tomarRetrato}); }
   setTimeout(init136,40); setTimeout(init136,220); setTimeout(init136,650);
   window.__SA136={version:V136};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v137 · PRODUCCIÓN DE VERDAD
+   Las compañías que fabrican (moda, alimentos, construcción, energía,
+   agroindustria, salud y minería) tienen plantas con nombre, ciudad y
+   capacidad. Si la demanda supera lo que puedes producir, vendes menos;
+   si las plantas sobran, cuestan. Cada sector compra su materia prima
+   (algodón, trigo, acero, combustible…) a un precio que sube y baja con el
+   mundo: crisis del petróleo, 2008, la inflación de 2021. Se puede
+   asegurar el precio con contratos de suministro. La calidad cuenta: con
+   control de calidad la marca sube; sin él, llegan los defectos y los
+   retiros del mercado. Las plantas envejecen y se modernizan.
+   ========================================================================== */
+(function(){
+  const V137='v137';
+  const IND={moda:{ins:'algodón e hilazas',peso:.22,planta:'Planta de confección',dolar:.5},
+    alimentos:{ins:'trigo, azúcar y aceites',peso:.28,planta:'Planta de alimentos',dolar:.4},
+    construccion:{ins:'acero y cemento',peso:.26,planta:'Planta de prefabricados',dolar:.3},
+    energia:{ins:'combustible y turbinas',peso:.2,planta:'Central',dolar:.5,petroleo:1},
+    agro:{ins:'fertilizantes y empaques',peso:.22,planta:'Planta de beneficio',dolar:.6,petroleo:.5},
+    salud:{ins:'principios activos importados',peso:.18,planta:'Laboratorio',dolar:.8},
+    mineria:{ins:'combustible y explosivos',peso:.15,planta:'Planta de procesamiento',dolar:.3,petroleo:.8}};
+  const industrial=e=>!!(e&&IND[e.sector]);
+  const P1=n=>String(n||'').split(' ')[0];
+  const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
+
+  /* --- materias primas: un índice por sector --- */
+  function insumos(){ if(!S.insumos137||typeof S.insumos137!=='object') S.insumos137={}; return S.insumos137; }
+  function indice(sec){ const I=insumos(); if(!I[sec]) I[sec]={ind:1,ult:0,hist:[[S.anio,1]]}; return I[sec]; }
+  function choque(sec){ const A=S.anio, d=IND[sec]||{}; let x=0;
+    if((A===1973||A===1974)&&d.petroleo) x+=.22*d.petroleo; if(A===1979&&d.petroleo) x+=.15*d.petroleo;
+    if(A===1986&&d.petroleo) x-=.15*d.petroleo; if(A===2007||A===2008) x+=.12; if(A===2009) x-=.15;
+    if(A===2021||A===2022) x+=.14; if(A===2020) x-=.05; return x; }
+  function anualInsumos(){
+    const I=insumos(), m=S.macro||{}; if(I.__anio===S.anio) return; I.__anio=S.anio;
+    Object.keys(IND).forEach(sec=>{ const x=indice(sec), d=IND[sec];
+      const usd=isFinite(m.usd)&&I.__usd>0?clamp(m.usd/I.__usd-1,-.3,.5):0;
+      let g=rnd(-.07,.08)+choque(sec)+usd*d.dolar-(x.ind-1)*.18;
+      x.ind=clamp(x.ind*(1+g),.6,1.9); x.ult=g; x.hist.push([S.anio,x.ind]); if(x.hist.length>30) x.hist.shift(); });
+    I.__usd=m.usd;
+  }
+  const precioInsumo=e=>{ const x=indice(e.sector), p=e.prod137&&e.prod137.contrato; return p&&p.hasta>=S.anio?p.ind:x.ind; };
+
+  /* --- las plantas de cada compañía --- */
+  function P(e){
+    if(!e.prod137||typeof e.prod137!=='object'){
+      const d=IND[e.sector]||{planta:'Planta'};
+      e.prod137={plantas:[{id:'p'+Math.floor(Math.random()*1e6),n:d.planta+' de '+(e.ciudad||S.hogar.ciudad),ciudad:e.ciudad||S.hogar.ciudad,cap:Math.max(20,e.ingresos*1.5),desde:e.fundada||S.anio,mod:e.fundada||S.anio}],
+        calidad:clamp(48+((e.eficiencia||50)-50)*.3,20,80),pend:[],contrato:null,ultIng:e.ingresos,topeAviso:0};
+    }
+    const p=e.prod137; p.plantas=p.plantas||[]; p.pend=p.pend||[]; return p;
+  }
+  const capacidad=e=>P(e).plantas.reduce((s,x)=>s+(x.cap||0),0);
+  const uso=e=>{ const c=capacidad(e); return c>0?e.ingresos/c:1; };
+  const edad=pl=>S.anio-(pl.mod||pl.desde||S.anio);
+  function nivelMetodo(e){ return ({artesanal:0,estandar:1,semiauto:2,automatizada:3,inteligente:4})[e.metodoProduccion||'artesanal']||0; }
+
+  function antes(e){   // saltos de ingresos que no vienen del crecimiento normal (expansiones, adquisiciones, fusiones) traen su capacidad
+    const p=P(e), c=capacidad(e);
+    if(p.ultIng>0&&e.ingresos>p.ultIng*1.12&&e.ingresos>c*.95){ const extra=(e.ingresos-Math.max(p.ultIng,c*.95))*1.35;
+      if(extra>1) p.plantas.push({id:'p'+Math.floor(Math.random()*1e6),n:(IND[e.sector].planta)+' (expansión '+S.anio+')',ciudad:e.ciudad||S.hogar.ciudad,cap:extra,desde:S.anio,mod:S.anio}); }
+  }
+  function despues(e,res){
+    const p=P(e), d=IND[e.sector];
+    // plantas en obra que se terminan
+    p.pend=p.pend.filter(x=>{ if(x.listo>S.anio) return true;
+      if(x.tipo==='ampliar'){ const pl=p.plantas.find(y=>y.id===x.pid); if(pl){ pl.cap*=1.5; log('Terminó la ampliación de la <b>'+esc(pl.n)+'</b>.','bien'); } }
+      else { p.plantas.push({id:'p'+Math.floor(Math.random()*1e6),n:x.n,ciudad:x.ciudad,cap:x.cap,desde:S.anio,mod:S.anio}); hito('Inauguró la '+x.n); log('Inauguraste la <b>'+esc(x.n)+'</b>.','hito'); }
+      return false; });
+    let delta=0;
+    // 1. capacidad: tope y costo de lo que sobra
+    const cap=capacidad(e), tope=cap*1.05;
+    if(e.ingresos>tope){ const perdido=e.ingresos-tope, mg=e.ingresos>0?e.utilidad/e.ingresos:0; e.ingresos=tope; delta-=perdido*Math.max(0,mg);
+      e.moral=clamp(e.moral-2,0,100);
+      if(S.anio-(p.topeAviso||0)>=3){ p.topeAviso=S.anio; log('<b>'+esc(e.nombre)+'</b> trabaja al tope: dejó de vender '+fmt(perdido)+' porque las plantas no dan más.','mal'); } }
+    const u=e.ingresos/cap;
+    if(u<.55){ const c=Math.min(cap*.03*(.55-u)/.55,e.ingresos*.02); delta-=c;
+      if(u<.45){ p.plantas.forEach(x=>{ x.cap*=.9; }); if(S.anio-(p.ociosaAviso||0)>=4){ p.ociosaAviso=S.anio; log('En <b>'+esc(e.nombre)+'</b> hay máquinas paradas: la capacidad que no se usa se va dejando morir.',''); } } }
+    // 2. materia prima
+    const pi=precioInsumo(e); delta-=e.ingresos*d.peso*(pi-1)*.5;
+    // 3. calidad: hacia donde la llevan el método, la edad de las plantas y la eficiencia
+    const viejas=p.plantas.filter(x=>edad(x)>30).length/Math.max(1,p.plantas.length);
+    const meta=48+nivelMetodo(e)*6+((e.eficiencia||50)-50)*.2-viejas*10+(p.qc>=S.anio-3?10:0);
+    p.calidad=clamp(p.calidad+(meta-p.calidad)*.25+rnd(-3,3),5,98);
+    e.marca=clamp((e.marca||50)+(p.calidad-48)*.03,0,100);
+    if(viejas>0) e.eficiencia=clamp((e.eficiencia||50)-viejas*1.2,0,100);
+    // aplicar
+    if(delta){ e.utilidad+=delta; e.caja+=delta; }
+    p.ultIng=e.ingresos; p.ultDelta=delta;
+    // 4. defectos y retiros del mercado
+    if(p.calidad<40&&chance((40-p.calidad)/120)&&S.anio-(S._recall137||0)>=5){ S._recall137=S.anio; cola.push(evRetiro(e)); }
+  }
+  function wrapEmpresa137(){
+    const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA137_EMP) return; window.__SA137_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; let ok=false;
+      try{ if(industrial(e)){ anualInsumos(); antes(e); ok=true; } }catch(x){ console.error(x); }
+      const r=old.apply(this,arguments);
+      try{ if(ok&&companias().includes(e)) despues(e,res); }catch(x){ console.error(x); }
+      return r; };
+  }
+
+  /* --- retiros del mercado --- */
+  function evRetiro(e){ return {p:9,c:()=>companias().includes(e),
+    t:()=>{ const d=IND[e.sector]; S._e137=e.nombre; return '<b>'+esc(e.nombre)+': un lote salió defectuoso.</b> '+({alimentos:'Varios consumidores terminaron intoxicados.',salud:'Un medicamento salió con la dosis equivocada. El INVIMA ya preguntó.',moda:'Una tanda entera se destiñó en la primera lavada.',construccion:'Unas vigas no aguantaron la prueba de carga.'})[e.sector]||'Los clientes están devolviendo el producto.'; },
+    o:[{t:()=>'Retirar todo del mercado ('+fmt(Math.max(10,e.ingresos*.04))+')',f:()=>{ const c=Math.max(10,e.ingresos*.04); e.caja-=c; e.marca=clamp(e.marca-4,0,100); P(e).calidad=clamp(P(e).calidad+8,0,100); return 'Retiraste el lote y diste la cara. Costó '+fmt(c)+', pero la gente valoró la honestidad.'; }},
+       {t:'Negarlo y seguir vendiendo',f:()=>{ if(chance(.55)){ e.marca=clamp(e.marca-14,0,100); try{ if(window.abrirEscandalo129) window.abrirEscandalo129('empresa','El lote defectuoso de '+e.nombre,e.sector==='alimentos'||e.sector==='salud'?2:1); }catch(x){} return 'Salió en las noticias. El escándalo fue peor que el retiro.'; } return 'Nadie lo notó. Esta vez.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function costoAmpliar(pl){ return Math.max(15,pl.cap*.3); }
+  function escenaPlantas137(e){
+    e=e||S.emp; if(!industrial(e)) return;
+    const p=P(e), d=IND[e.sector], cap=capacidad(e), u=e.ingresos/cap, x=indice(e.sector), pi=precioInsumo(e);
+    const filas=p.plantas.map(pl=>'<tr><td>'+esc(pl.n)+'<br><span style="color:var(--humo2);font-size:12px">'+esc(pl.ciudad)+' · '+(edad(pl)>30?'<span class="mal">'+edad(pl)+' años sin modernizar</span>':edad(pl)+' años')+'</span></td><td>'+fmt(pl.cap)+'</td></tr>').join('')
+      +p.pend.map(o=>'<tr><td><i>'+(o.tipo==='ampliar'?'Ampliación en obra':esc(o.n)+' (en obra)')+'</i></td><td>lista en '+o.listo+'</td></tr>').join('');
+    const col=u>1?'#C46A55':u>.85?'#D6A648':u<.55?'#8C8C8C':'#8FB37A';
+    const ops=[];
+    const pago=(c,f)=>()=>{ const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene caja ni crédito para eso.','mal'); return; } S.mov=Math.max(0,S.mov-1); f(); cerrarModal(); render(); escenaPlantas137(e); };
+    const sinMov=S.mov<1?'No te quedan movidas':null;
+    p.plantas.slice(0,3).forEach(pl=>{ if(p.pend.some(o=>o.pid===pl.id)) return; const c=costoAmpliar(pl);
+      ops.push({t:'Ampliar la '+pl.n,cat:'compania',d:'+50% de capacidad en un año. '+fmt(c)+' de la compañía (caja o crédito). Una movida.',dis:sinMov,cerrar:false,run:pago(c,()=>{ p.pend.push({tipo:'ampliar',pid:pl.id,listo:S.anio+1}); log('Arrancó la ampliación de la <b>'+esc(pl.n)+'</b>.'); })}); });
+    const cN=Math.max(30,e.ingresos*.3);
+    ops.push({t:'Una planta nueva en otra ciudad',cat:'compania',d:'Capacidad para '+fmt(e.ingresos*.7)+' más de ventas, lista en dos años. '+fmt(cN)+'.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(e.nombre),titulo:'¿Dónde va la planta nueva?',cerrable:true,cuerpo:'Cerca del puerto exportas más barato; cerca del mercado vendes más rápido.',
+        opciones:ciudadesCol().slice(0,8).map(c=>({t:c,cat:'compania',d:/Barranquilla|Cartagena/.test(c)?'Puerto: salida al mar y zona franca.':/Bogotá/.test(c)?'El mercado más grande del país.':/Medellín/.test(c)?'Tradición industrial y mano de obra calificada.':'Tierra y mano de obra más baratas.',
+          run:()=>{ const r=financiarEmpresa(e,cN,true); if(!r.ok){ log('La compañía no tiene caja ni crédito para la planta.','mal'); return; } S.mov=Math.max(0,S.mov-1);
+            p.pend.push({tipo:'nueva',n:d.planta+' de '+c,ciudad:c,cap:e.ingresos*.7,listo:S.anio+2}); log('Arrancó la obra de la <b>'+d.planta+' de '+esc(c)+'</b>.'); render(); }}))}); }});
+    const vieja=p.plantas.slice().sort((a,b)=>edad(b)-edad(a))[0];
+    if(vieja&&edad(vieja)>15){ const c=Math.max(10,vieja.cap*.15); ops.push({t:'Modernizar la '+vieja.n,cat:'compania',d:'Tiene '+edad(vieja)+' años. Maquinaria y procesos al día: '+fmt(c)+'.',dis:sinMov,cerrar:false,run:pago(c,()=>{ vieja.mod=S.anio; e.eficiencia=clamp(e.eficiencia+4,0,100); log('Modernizaste la <b>'+esc(vieja.n)+'</b>.','bien'); })}); }
+    if(p.plantas.length>1&&u<.7){ const ch=p.plantas.slice().sort((a,b)=>a.cap-b.cap)[0];
+      ops.push({t:'Cerrar la '+ch.n,cat:'compania',d:'Sobra capacidad. Ahorras, pero '+Math.round(e.empleados*ch.cap/cap)+' personas quedan sin trabajo.',dis:sinMov,cerrar:false,run:()=>{ S.mov=Math.max(0,S.mov-1); p.plantas=p.plantas.filter(y=>y!==ch); const desp=Math.round(e.empleados*ch.cap/cap); e.empleados=Math.max(2,e.empleados-desp); e.moral=clamp(e.moral-15,0,100); e.caja-=Math.max(2,ch.cap*.04); try{ sind(e).fuerza=clamp(sind(e).fuerza+10,0,100); }catch(x){} log('Cerraste la <b>'+esc(ch.n)+'</b>. '+desp+' personas a la calle; el sindicato no lo olvida.','mal'); cerrarModal(); render(); escenaPlantas137(e); }}); }
+    const cC=Math.max(3,e.ingresos*.006), cont=p.contrato&&p.contrato.hasta>=S.anio;
+    ops.push({t:cont?'Contrato de suministro vigente':'Asegurar el precio de '+d.ins,cat:'compania',d:cont?'Pagas '+d.ins+' a '+Math.round(p.contrato.ind*100)+' hasta '+p.contrato.hasta+'.':'Contrato a tres años al precio de hoy más 3%. Prima: '+fmt(cC)+'. Te protege si sube; si baja, pierdes.',dis:cont?'Ya tienes contrato':sinMov,cerrar:false,
+      run:pago(cC,()=>{ p.contrato={ind:x.ind*1.03,hasta:S.anio+3,desde:S.anio}; log('Firmaste contratos de suministro de '+d.ins+' hasta '+(S.anio+3)+'.','bien'); })});
+    const cQ=Math.max(5,e.ingresos*.02);
+    ops.push({t:'Control de calidad',cat:'compania',d:'Laboratorio, inspectores y pruebas por lote. '+fmt(cQ)+'. La calidad sube y se sostiene tres años.',dis:p.qc===S.anio?'Ya lo hiciste este año':sinMov,cerrar:false,run:pago(cQ,()=>{ p.qc=S.anio; p.calidad=clamp(p.calidad+12,0,98); log('Montaste control de calidad en <b>'+esc(e.nombre)+'</b>.','bien'); })});
+    const trend=x.ult>=0?'subió '+pc(x.ult):'bajó '+pc(-x.ult);
+    escena({rubro:esc(e.nombre)+' · Producción',titulo:'Plantas e insumos',ancho:true,cerrable:true,clase:'prod137',
+      cuerpo:u>1?'Las plantas no dan abasto: estás dejando de vender.':u>.9?'Las plantas van casi al tope. Si sigues creciendo, toca ampliar.':u<.55?'Sobra capacidad: hay máquinas paradas que igual cuestan.':'Las plantas trabajan a buen ritmo.',
+      html:'<div class="k"><div><b>'+Math.round(u*100)+'%</b><span>uso de la capacidad</span></div><div><b>'+Math.round(p.calidad)+'/100</b><span>calidad</span></div><div><b>'+Math.round(pi*100)+'</b><span>precio de '+esc(d.ins)+' (100 = normal) · '+trend+'</span></div></div>'
+        +'<div class="uso"><i style="width:'+Math.min(100,u*100)+'%;background:'+col+'"></i></div>'
+        +'<table class="libro"><tr><td><b>Planta</b></td><td><b>Capacidad (ventas al año)</b></td></tr>'+filas+'</table>'
+        +(p.contrato&&p.contrato.hasta>=S.anio?'<div class="apunte">Contrato de suministro hasta '+p.contrato.hasta+' a '+Math.round(p.contrato.ind*100)+'.</div>':''),
+      opciones:ops});
+  }
+  function resumenHTML(e){ const p=P(e), u=uso(e), pi=precioInsumo(e);
+    return '<div class="prod137-panel"><b>Plantas e insumos</b><div class="apunte" style="margin:4px 0 8px">'+p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' · uso '+Math.round(u*100)+'% · calidad '+Math.round(p.calidad)+'/100 · '+esc(IND[e.sector].ins)+' a '+Math.round(pi*100)+'</div>'
+      +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Plantas e insumos">'+(typeof sello==='function'?sello('compania'):'')+'<div class="neg86-accion-info"><div class="nom">Plantas e insumos</div><div class="txt">Capacidad, plantas nuevas, materias primas y control de calidad.</div></div></div></div></div>'; }
+  function wrapPanel137(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v137) return;   // la v81 lo vuelve a registrar: se envuelve cada vez
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(industrial(e)&&(negCat==='produccion'||negCat==='resumen')) h+=resumenHTML(e); }catch(x){} return h; }; window.panelCompania86.__v137=true; }
+  function wrapAcciones137(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA137_ACC) return; window.__SA137_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&industrial(e)&&companias().includes(e)){ const p=P(e);
+        A.push({t:'Plantas e insumos',d:p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' al '+Math.round(uso(e)*100)+'% · calidad '+Math.round(p.calidad)+'.',mov:0,modal:true,run:()=>escenaPlantas137(e)});
+        const pl=A.find(a=>a.t==='Construir una planta nueva'); if(pl){ pl.d='Elige la ciudad y la capacidad en "Plantas e insumos".'; pl.mov=0; pl.modal=true; pl.dis=null; pl.run=()=>escenaPlantas137(e); } } }catch(x){}
+      return A; }; }
+  function wrapCat137(){ const old=window.catDe; if(typeof old!=='function'||window.__SA137_CAT) return; window.__SA137_CAT=true;
+    window.catDe=function(t){ if(t==='Plantas e insumos') return 'compania'; return old.apply(this,arguments); }; }
+  function init137(){ wrapEmpresa137(); wrapPanel137(); wrapAcciones137(); wrapCat137();
+    try{ if(Array.isArray(window.DECISIONES_COMPANIA_83)&&!window.DECISIONES_COMPANIA_83.includes('Plantas e insumos')) window.DECISIONES_COMPANIA_83.push('Plantas e insumos'); }catch(x){}
+    Object.assign(window,{INDUSTRIA_137:IND,produccion137:P,capacidad137:capacidad,escenaPlantas137,indiceInsumo137:indice,anualInsumos137:anualInsumos}); }
+  setTimeout(init137,40); setTimeout(init137,220); setTimeout(init137,650); setTimeout(init137,900);
+  window.__SA137={version:V137};
 })();
 </script>
 
