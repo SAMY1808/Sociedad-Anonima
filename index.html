@@ -1107,10 +1107,20 @@ svg.foto116{display:block;background:#1d2a23}
 .fede142 .escalera span{font-size:12.5px;padding:3px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:var(--humo2)}
 .fede142 .escalera span.si{background:rgba(214,166,72,.25);color:#F0CF86}
 </style>
+<style id="estilos-v144">
+.taza144 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.taza144 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.taza144 .k b{display:block;font-size:16px;font-family:var(--display)}
+.taza144 .k span{font-size:12px;color:var(--humo2)}
+.taza144 .eslabon{padding:9px 12px;margin:7px 0;border-radius:10px;background:rgba(111,75,53,.18);border:1px solid rgba(201,162,74,.22)}
+.taza144 .eslabon b{font-family:var(--display);font-size:16px;color:#E8D2A4}
+.taza144 .eslabon .det{font-size:13px;color:var(--humo2);margin-top:2px}
+.taza144 .eslabon.no{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v143</div>
+<div class="version-badge" id="versionBadge">v144</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -26970,6 +26980,127 @@ install();setTimeout(install,1200);
   function init143(){ wrapPaso143(); Object.assign(window,{HISTORIA_CAFE_143:H,anualHistoriaCafe143:anual}); }
   setTimeout(init143,40); setTimeout(init143,220); setTimeout(init143,650);
   window.__SA143={version:V143};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v144 · DEL GRANO A LA TAZA
+   La cadena del café, eslabón por eslabón:
+   - La trilladora: compra pergamino a los vecinos y lo convierte en café
+     verde (excelso). La pasilla, el grano que no pasa, va al consumo
+     interno.
+   - La exportadora: licencia, compra de café, contratos con importadores,
+     el diferencial del café colombiano sobre Nueva York, los fletes (más
+     baratos con la Flota Mercante Grancolombiana) y la cobertura en la
+     bolsa de Nueva York para no quedar expuesto si el precio se mueve.
+   - La tostadora: tu marca de café en las tiendas de Colombia, compitiendo
+     con las grandes. Con planta de solubles desde los sesenta.
+   - Las tiendas de café de especialidad (desde 2005), con baristas y
+     métodos: la tercera ola llega al país.
+   - El turismo cafetero: la casa de la finca como hotel, desde que abrió
+     el Parque del Café (1995) y más con el Paisaje Cultural (2011).
+   Microlotes para Japón, paros en Buenaventura, importadores que no pagan,
+   y la polémica del café importado en las tostadoras.
+   ========================================================================== */
+(function(){
+  const V144='v144';
+  const L=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
+  const pcarga=()=>{ try{ return window.precioCarga141(); }catch(e){ return 1.9; } };
+  const mun=b=>{ try{ return window.munCafe141(b.cafe141.mun); }catch(e){ return {}; } };
+  const cosechaPropia=()=>L().reduce((s,b)=>s+(b.cafe141.ult&&b.cafe141.ult.anio===S.anio?b.cafe141.ult.cargas:0),0);
+  const mejorTaza=()=>L().reduce((m,b)=>{ try{ return Math.max(m,window.calidadTaza141(b.cafe141)); }catch(e){ return m; } },0);
+  const N=()=>{ if(!S.neg144||typeof S.neg144!=='object') S.neg144={trilla:null,export:null,tostadora:null,tiendas:[],hoteles:[],hist:[]}; return S.neg144; };
+  const RIVALES_TOST=['Café La Sierra','Tostadora Andina','Café Montañero','Café del Abuelo','Café Real'];
+  const CIUDADES_T=['Bogotá','Medellín','Cali','Barranquilla','Bucaramanga','Manizales','Pereira','Armenia','Cartagena'];
+
+  /* --- el año de los negocios del café --- */
+  function anual(){
+    if(!S||!S.p||S.muerto) return; const n=N(); if(n.anio===S.anio) return; n.anio=S.anio;
+    const p=pcarga(), filas=[];
+    // trilladora
+    if(n.trilla){ const t=n.trilla, uso=clamp(rnd(.55,.95)-(S.anio>=1965?.08:0),.3,1), cargas=t.cap*uso, margen=cargas*p*.022, fijo=t.cap*.008;
+      const r=margen-fijo; t.ult={cargas,r}; filas.push(['La trilladora de '+t.mun,r]); }
+    // exportadora
+    if(n.export){ const x=n.export, propio=cosechaPropia()*(x.propio?1:0), comprado=x.volumen||0, V=propio+comprado;
+      const dif=S.anio>=2002&&S.anio<=2012?.12:.07, flete=(S.anio>=1946&&S.anio<=2000)?.015:.03;
+      let mov=rnd(-.15,.15); if(x.cobertura&&S.anio>=1972) mov*=.25;
+      const r=V*p*(dif-flete-.02+mov*.35)-(x.cobertura&&S.anio>=1972?V*p*.006:0)-20;
+      x.ult={V,r,mov}; filas.push(['La exportadora',r]); }
+    // tostadora
+    if(n.tostadora){ const t=n.tostadora, mercado=4500*(S.anio<1990?.7:1)*(S.anio>=2010?1.3:1);
+      t.not=clamp((t.not||10)-rnd(1,3),3,95); t.cuota=clamp((t.cuota||.02)+(t.not-30)/4000+rnd(-.004,.004),.005,.35);
+      const ventas=mercado*t.cuota, r=ventas*(.11-(p-1.9)*.03)-(t.solubles?-ventas*.03:0); t.ult={ventas,r}; filas.push(['Tostadora '+t.marca,r]); }
+    // tiendas
+    n.tiendas.forEach(ti=>{ const r=(S.anio<2012?14:24)*rnd(.6,1.3)-(S.anio===2020?20:0); ti.ult=r; filas.push(['Tienda en '+ti.ciudad,r]); });
+    // hoteles cafeteros
+    n.hoteles.forEach(h=>{ const b=(S.bienes||[]).find(x=>x.uid===h.uid); if(!b){ h.muerto=true; return; } const pais=mun(b).paisaje, r=(pais&&S.anio>=2011?55:S.anio>=1995?28:12)*rnd(.7,1.25)-(S.anio===2020?30:0)-(S.anio===1999&&/Quindío|Risaralda/.test(mun(b).dep||'')?20:0); h.ult=r; filas.push(['Hotel en '+b.cafe141.mun,r]); });
+    n.hoteles=n.hoteles.filter(h=>!h.muerto);
+    const tot=filas.reduce((s,f)=>s+f[1],0);
+    if(filas.length){ S.efectivo+=tot; n.hist.push([S.anio,Math.round(tot)]); if(n.hist.length>40) n.hist.shift();
+      log('<b>Negocio cafetero:</b> '+filas.map(f=>f[0]+' '+(f[1]>=0?'+':'−')+fmt(Math.abs(f[1]))).join(' · ')+'.',tot>=0?'bien':'mal'); }
+    // sucesos
+    if(S._ev144!==S.anio){
+      if(n.export&&mejorTaza()>=85&&S.anio>=2000&&chance(.18)){ S._ev144=S.anio; cola.push(evMicrolote()); }
+      else if(n.export&&chance(.08)){ S._ev144=S.anio; cola.push(pick([evBuenaventura,evImportador])()); }
+      else if(n.tostadora&&S.anio>=2012&&chance(.07)){ S._ev144=S.anio; cola.push(evImportado()); }
+    }
+  }
+  function wrapPaso144(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA144_PASO) return; window.__SA144_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
+
+  function evMicrolote(){ return {p:9,c:()=>!!N().export,t:()=>'<b>Un tostador de Tokio quiere tu microlote.</b> Probó tu mejor café en una feria y ofrece pagar varias veces el precio de Nueva York por una cosecha completa, si mantienes el proceso exacto.',
+    o:[{t:'Firmar el contrato de microlote',f:()=>{ const x=Math.round(pcarga()*40*3); S.efectivo+=x; try{ moverPrestigio(2,'microlote'); }catch(e){} hito('Exportó un microlote de café de especialidad al Japón'); return 'Cuarenta sacos a Japón a tres veces el precio. Tu nombre sale en la bolsa del café en una tienda de Shibuya.'; }},
+       {t:'No comprometer la cosecha',f:()=>'Preferiste venderlo como siempre.'}]}; }
+  function evBuenaventura(){ return {p:9,c:()=>!!N().export,t:()=>'<b>Paro en Buenaventura.</b> El puerto está bloqueado y tus contenedores no salen. El importador amenaza con cancelar si no llega a tiempo.',
+    o:[{t:'Sacarlo por Cartagena, más caro',f:()=>{ const x=Math.round(pcarga()*30); S.efectivo-=x; return 'Lo mandaste en camión hasta Cartagena: '+fmt(x)+' de sobrecosto, pero cumpliste.'; }},
+       {t:'Esperar y negociar un plazo',f:()=>{ if(chance(.5)) return 'El importador aceptó esperar.'; const x=Math.round(pcarga()*60); S.efectivo-=x; return 'Cancelaron el contrato. Tuviste que vender a otro, '+fmt(x)+' más barato.'; }}]}; }
+  function evImportador(){ return {p:9,c:()=>!!N().export,t:()=>'<b>Un importador no paga.</b> Recibió el café en Hamburgo y ahora dice que llegó con humedad.',
+    o:[{t:'Demandar en arbitraje internacional',f:()=>{ const c=15; S.efectivo-=c; if(chance(.55)){ const x=Math.round(pcarga()*50); S.efectivo+=x; return 'Ganaste el arbitraje y pagaron '+fmt(x)+'.'; } return 'El arbitraje se alargó y no recuperaste nada.'; }},
+       {t:'Darle un descuento y seguir con el cliente',f:()=>{ const x=Math.round(pcarga()*20); S.efectivo-=x; return 'Le diste '+fmt(x)+' de descuento. Sigue comprándote.'; }}]}; }
+  function evImportado(){ return {p:9,c:()=>!!N().tostadora,t:()=>'<b>La polémica del café importado.</b> Una investigación de prensa revela que varias tostadoras mezclan café barato del Perú y del Vietnam en el café "colombiano" de las tiendas. Te preguntan por el tuyo.',
+    o:[{t:'Certificar que es 100% colombiano',f:()=>{ const t=N().tostadora; t.not=clamp(t.not+8,0,95); t.cien=true; return 'Pusiste el sello de 100% café de Colombia. Te sube el costo y la confianza.'; }},
+       {t:'No decir nada',f:()=>{ const t=N().tostadora; if(chance(.4)){ t.not=clamp(t.not-12,0,95); try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','El café importado de '+t.marca,1); }catch(e){} return 'Salió tu nombre en la lista. Mala semana.'; } return 'Nadie preguntó más.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function escenaTaza144(){
+    const n=N(), p=pcarga(), sinMov=S.mov<1?'No te quedan movidas':null, reab=()=>{ cerrarModal(); render(); escenaTaza144(); };
+    const comprar=(c,fn)=>()=>{ if(S.efectivo<c){ log('No tienes '+fmt(c)+'.','mal'); return; } S.efectivo-=c; S.mov=Math.max(0,S.mov-1); fn(); reab(); };
+    const esl=(on,tit,det)=>'<div class="eslabon'+(on?'':' no')+'"><b>'+tit+'</b><div class="det">'+det+'</div></div>';
+    const ult=x=>x&&x.ult!==undefined?(typeof x.ult==='number'?x.ult:x.ult.r):null;
+    const fm=r=>r===null?'':(r>=0?' · el año pasado dejó ':' · el año pasado perdió ')+fmt(Math.abs(r));
+    let html='<div class="k"><div><b>'+fmt(p)+'</b><span>la carga de pergamino</span></div><div><b>'+Math.round(cosechaPropia())+'</b><span>cargas propias este año</span></div><div><b>'+(n.hist.length?fmt(n.hist[n.hist.length-1][1]):'—')+'</b><span>dejó la cadena el último año</span></div></div>';
+    html+=esl(!!L().length,'1. La finca',L().length?L().length+' finca'+(L().length>1?'s':'')+', '+L().reduce((s,b)=>s+b.cafe141.ha,0)+' hectáreas':'Sin finca: puedes comprar café a otros.');
+    html+=esl(!!n.trilla,'2. La trilladora',n.trilla?'En '+esc(n.trilla.mun)+', capacidad '+n.trilla.cap.toLocaleString('es-CO')+' cargas al año'+fm(ult(n.trilla)):'Compra pergamino y lo vuelve excelso. La pasilla va al consumo interno.');
+    html+=esl(!!n.export,'3. La exportadora',n.export?'Licencia desde '+n.export.licencia+'. Exporta '+(n.export.propio?'tu cosecha':'')+(n.export.propio&&n.export.volumen?' y ':'')+(n.export.volumen?n.export.volumen.toLocaleString('es-CO')+' cargas compradas':'')+(n.export.cobertura?' · con cobertura en Nueva York':' · sin cobertura')+fm(ult(n.export)):'Venderle directo al mundo: Nueva York, Hamburgo, Tokio.');
+    html+=esl(!!n.tostadora,'4. La tostadora',n.tostadora?esc(n.tostadora.marca)+' · '+(Math.round(n.tostadora.cuota*1000)/10)+'% del café de las tiendas · '+Math.round(n.tostadora.not)+'% de la gente la conoce'+(n.tostadora.solubles?' · con planta de solubles':'')+fm(ult(n.tostadora)):'Tu marca de café en las tiendas del país, contra '+RIVALES_TOST.slice(0,3).join(', ')+'.');
+    html+=esl(n.tiendas.length>0,'5. Las tiendas de especialidad',n.tiendas.length?n.tiendas.map(t=>esc(t.ciudad)).join(', '):(S.anio>=2005?'Barras de café con baristas, métodos y origen.':'Llegan con la tercera ola, después de 2005.'));
+    html+=esl(n.hoteles.length>0,'6. El turismo cafetero',n.hoteles.length?n.hoteles.length+' finca'+(n.hoteles.length>1?'s':'')+' con hotel':(S.anio>=1995?'La casa de la finca como hotel: recorridos, catación, el paisaje.':'Llega con el Parque del Café, en 1995.'));
+    const ops=[];
+    if(!n.trilla){ const c=Math.round(Math.max(300,p*600)); ops.push({t:'Montar una trilladora',cat:'compania',d:'10.000 cargas al año en '+(L()[0]?L()[0].cafe141.mun:'Chinchiná')+'. '+fmt(c)+'. Una movida.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.trilla={mun:L()[0]?L()[0].cafe141.mun:'Chinchiná',cap:10000,desde:S.anio}; hito('Montó una trilladora de café'); log('Montaste una trilladora en '+esc(n.trilla.mun)+'.','hito'); })}); }
+    else { const c=Math.round(p*700); ops.push({t:'Ampliar la trilladora (+10.000 cargas)',cat:'compania',d:fmt(c)+'.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.trilla.cap+=10000; })}); }
+    if(!n.export){ const c=Math.round(Math.max(150,p*250)); ops.push({t:'Sacar licencia de exportador',cat:'compania',d:(S.anio>=1927?'La Federación registra a los exportadores privados. ':'')+'Licencia, oficina en Bogotá y capital de trabajo: '+fmt(c)+'.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.export={licencia:S.anio,propio:L().length>0,volumen:0,cobertura:false}; hito('Se volvió exportador de café'); log('Ya eres exportador de café.','hito'); })}); }
+    else {
+      ops.push({t:n.export.propio?'Dejar de exportar tu propia cosecha':'Exportar tu propia cosecha',cat:'compania',d:n.export.propio?'Vuelves a venderla en Colombia.':'Te quedas con el diferencial que paga el mundo por el café colombiano.',cerrar:false,run:()=>{ n.export.propio=!n.export.propio; if(n.export.propio) L().forEach(b=>{ if(b.cafe141.canal==='cooperativa') b.cafe141.canal='particular'; }); reab(); }});
+      [0,5000,20000,60000].filter(v=>v!==n.export.volumen).forEach(v=>ops.push({t:v?'Comprar y exportar '+v.toLocaleString('es-CO')+' cargas al año':'No comprarle café a terceros',cat:'compania',d:v?'Más volumen, más margen y más riesgo si el precio se mueve.':'Solo lo tuyo.',cerrar:false,run:()=>{ n.export.volumen=v; reab(); }}));
+      if(S.anio>=1972) ops.push({t:n.export.cobertura?'Quitar la cobertura en Nueva York':'Cubrirse en la bolsa de Nueva York',cat:'capital',d:n.export.cobertura?'Ahorras la prima y quedas expuesto.':'Vendes futuros del contrato C: si el precio se cae entre la compra y el embarque, no pierdes.',cerrar:false,run:()=>{ n.export.cobertura=!n.export.cobertura; reab(); }});
+    }
+    if(!n.tostadora){ const c=Math.round(Math.max(150,p*150)); ops.push({t:'Montar una tostadora con marca propia',cat:'mercado',d:'Café tostado y molido para las tiendas de barrio y los supermercados. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); escena({rubro:'La tostadora',titulo:'¿Cómo se llama tu café?',cerrable:true,html:'<label class="campo">Marca<input type="text" id="t144" maxlength="26" value="Café '+esc(S.p.apellido)+'"></label>',
+      opciones:[{t:'Montar la tostadora',cat:'mercado',d:fmt(c)+'.',cerrar:false,run:()=>{ if(S.efectivo<c){ log('No tienes '+fmt(c)+'.','mal'); return; } S.efectivo-=c; S.mov=Math.max(0,S.mov-1); const el=document.getElementById('t144'); n.tostadora={marca:(el&&el.value.trim())||('Café '+S.p.apellido),not:15,cuota:.03,desde:S.anio}; hito('Lanzó la marca de café '+n.tostadora.marca); log('Lanzaste <b>'+esc(n.tostadora.marca)+'</b>.','hito'); cerrarModal(); render(); escenaTaza144(); }}]}); }}); }
+    else { const c=Math.round(n.tostadora.cuota*4500*.4+20); ops.push({t:'Campaña para '+n.tostadora.marca,cat:'mercado',d:(S.anio<1955?'Cuñas de radio y avisos en prensa':S.anio<2010?'Comerciales de televisión con jingle':'Televisión, redes y degustaciones')+'. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.tostadora.not=clamp(n.tostadora.not+rnd(8,15),0,95); })});
+      if(!n.tostadora.solubles&&S.anio>=1960){ const c2=Math.round(p*500); ops.push({t:'Planta de café soluble',cat:'compania',d:'Instantáneo para el mercado nacional y la exportación. Más margen. '+fmt(c2)+'.',dis:sinMov,cerrar:false,run:comprar(c2,()=>{ n.tostadora.solubles=S.anio; })}); } }
+    if(S.anio>=2005){ const libres=CIUDADES_T.filter(c=>!n.tiendas.some(t=>t.ciudad===c)); if(libres.length){ const c=Math.round(150); ops.push({t:'Abrir una tienda de especialidad en '+libres[0],cat:'mercado',d:'Barra, baristas, V60 y Chemex, cafés de origen'+(mejorTaza()>=84?' (incluido el tuyo)':'')+'. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.tiendas.push({ciudad:libres[0],desde:S.anio}); log('Abriste una tienda de café de especialidad en '+libres[0]+'.','bien'); })}); } }
+    if(S.anio>=1995){ const sinH=L().filter(b=>!n.hoteles.some(h=>h.uid===b.uid)); if(sinH.length){ const b=sinH[0], c=Math.round(Math.max(120,b.cafe141.ha*4)); ops.push({t:'Convertir la casa de '+b.nombre+' en hotel',cat:'casa',d:'Habitaciones, recorrido por el cafetal, catación y la vista. '+(mun(b).paisaje?'Está dentro del Paisaje Cultural Cafetero. ':'')+fmt(c)+'.',dis:sinMov,cerrar:false,run:comprar(c,()=>{ n.hoteles.push({uid:b.uid,desde:S.anio}); b.valor*=1.08; log('La casa de <b>'+esc(b.nombre)+'</b> ahora recibe turistas.','bien'); })}); } }
+    escena({rubro:'El negocio del café',titulo:'Del grano a la taza',ancho:true,cerrable:true,clase:'taza144',
+      cuerpo:'Quien solo cultiva se queda con la parte más pequeña del precio del café. Cada eslabón de la cadena tiene su margen y su riesgo.',html,opciones:ops});
+  }
+  function wrapEscena144(){ const old=window.escena; if(typeof old!=='function'||window.__SA144_ESC) return; window.__SA144_ESC=true;
+    window.escena=function(o){ try{ if(o&&o.titulo==='Caficultura'&&o.rubro==='El campo'&&Array.isArray(o.opciones)){
+        o=Object.assign({},o,{opciones:o.opciones.concat([{t:'Del grano a la taza',cat:'compania',d:'Trilladora, exportadora, tostadora con tu marca, tiendas de especialidad y turismo cafetero.',cerrar:false,run:()=>{ cerrarModal(); escenaTaza144(); }}])}); } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function init144(){ wrapPaso144(); wrapEscena144(); Object.assign(window,{negocioCafe144:N,escenaTaza144,anualNegocioCafe144:anual}); }
+  setTimeout(init144,40); setTimeout(init144,220); setTimeout(init144,650);
+  window.__SA144={version:V144};
 })();
 </script>
 
