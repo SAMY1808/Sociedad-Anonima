@@ -1002,10 +1002,17 @@ svg.foto116{display:block;background:#1d2a23}
 .vejez133 .fr133 i{display:block;height:100%;background:linear-gradient(90deg,#7FA36B,#D6A648,#B5553C)}
 .trat133 td.ef{color:var(--humo2);font-size:12.5px}
 </style>
+<style id="estilos-v134">
+.inq134{margin:10px 0 4px;padding:10px 12px;border-radius:10px;background:rgba(214,166,72,.07);border:1px solid rgba(214,166,72,.25)}
+.inq134 b{color:var(--oro,#D6A648)}
+.inq134 .p134{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:8px;font-size:12px;background:rgba(255,255,255,.07)}
+.inq134 .p134.mal{background:rgba(181,85,60,.25)}
+.lista134 td.s{color:var(--humo2);font-size:12.5px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v133</div>
+<div class="version-badge" id="versionBadge">v134</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25264,6 +25271,178 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaTratamientos133,escenaVejez133,fragilidad133:fragilidad,vejez133:V,TRATAMIENTOS_133:TRAT,tratamientosDe133:tratosDe}); }
   setTimeout(init133,40); setTimeout(init133,220); setTimeout(init133,650);
   window.__SA133={version:V133};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v134 · INQUILINOS CON NOMBRE
+   Cada inmueble arrendado tiene su inquilino: una familia, un pensionado,
+   estudiantes, un ejecutivo extranjero, una droguería, una multinacional…
+   Cada uno paga (o no) según quién es, cuida (o no) la propiedad y tiene su
+   historia: se atrasan, piden rebaja, ofrecen comprar, se van de noche.
+   Con los morosos: acuerdo de pago, proceso de restitución (lento, como en
+   Colombia), rebajar el canon o —en los años duros— mandar a alguien.
+   Y en los ochenta y noventa, el que paga un año por adelantado en efectivo
+   puede traer una extinción de dominio.
+   ========================================================================== */
+(function(){
+  const V134='v134';
+  const COMERCIAL=['local','bodega','oficina','consultorio'];
+  const esRenta=b=>b&&b.clase==='renta'&&b.tipo!=='hotel';
+  const intens=()=>{ try{ return typeof window.intensidad91==='function'?window.intensidad91():0; }catch(e){ return 0; } };
+  const canonDe=b=>Math.max(0,(b.valor||0)*(b.renta||0));
+  const P1=n=>String(n||'').split(' ')[0];
+  const APE=['Quintero','Mejía','Rodríguez','Gómez','Martínez','Ramírez','Torres','Rojas','Vargas','Moreno','Castro','Ortiz','Suárez','Pardo','Cárdenas','Osorio','Henao','Montoya','Duque','Cifuentes'];
+  const ape=()=>pick(typeof APELLIDOS!=='undefined'&&chance(.4)?APELLIDOS:APE);
+  const nom=(sx,b)=>{ try{ return nombreLocal((b&&b.ciudad)||S.hogar.ciudad,sx); }catch(e){ return sx==='h'?pick(['Jorge','Hernán','Luis','Carlos']):pick(['Gloria','Marta','Luz','Beatriz']); } };
+  const NEG=['Droguería','Almacén','Ferretería','Panadería','Papelería','Miscelánea','Restaurante','Peluquería'];
+  const NEGN=['El Progreso','La Esperanza','San José','Los Andes','El Éxito','La Económica','Central','Del Parque','La Sexta'];
+  // perfiles: punt = probabilidad de pagar a tiempo cada año; cuida = cuánto cuida; dur = años que suele quedarse
+  const PERF={
+    familia:{n:'Una familia',punt:.9,cuida:.75,dur:7,mk:b=>'la familia '+ape()},
+    pareja:{n:'Una pareja joven',punt:.86,cuida:.7,dur:4,mk:b=>nom('h',b)+' y '+nom('m',b)},
+    estudiantes:{n:'Estudiantes',punt:.74,cuida:.45,dur:3,mk:b=>'unos estudiantes de la '+pick(['Nacional','Javeriana','de Antioquia','del Valle','Industrial'])},
+    pensionado:{n:'Un pensionado',punt:.95,cuida:.88,dur:10,mk:b=>{ const s=pick(['h','m']); return (s==='h'?'don ':'doña ')+nom(s,b)+' '+ape(); }},
+    ejecutivo:{n:'Un ejecutivo extranjero',punt:.97,cuida:.85,dur:3,mk:b=>pick(['Mr. ','Herr ','Monsieur ','el señor '])+pick(['Thompson','Müller','Dubois','Rossi','Smith','Tanaka','García (de Madrid)'])},
+    conocido:{n:'Un recomendado',punt:.62,cuida:.55,dur:4,mk:b=>nom('h',b)+' '+ape()+', recomendado del portero'},
+    adelantado:{n:'Paga en efectivo y por adelantado',punt:1,cuida:.9,dur:3,mk:b=>'el señor '+ape()+', "comerciante"',sucio:true},
+    tienda:{n:'Un negocio de barrio',punt:.76,cuida:.6,dur:6,mk:b=>pick(NEG)+' '+pick(NEGN)},
+    empresa:{n:'Una empresa',punt:.94,cuida:.85,dur:8,mk:b=>pick(['Seguros','Inversiones','Comercializadora','Laboratorios','Ingeniería'])+' '+ape()+' '+pick(['S.A.','Ltda.','& Cía.'])},
+    multinacional:{n:'Una multinacional',punt:.98,cuida:.9,dur:5,mk:b=>pick(['Nestlé','Siemens','Bavaria','Kodak','Philips','Colgate','Unilever'])+' de Colombia'},
+    medico:{n:'Un consultorio',punt:.92,cuida:.85,dur:9,mk:b=>pick(['el doctor ','la doctora '])+ape()+', '+pick(['pediatra','odontólogo','dermatóloga','abogado','contador'])},
+    startup:{n:'Una startup',punt:.7,cuida:.7,dur:2,mk:b=>pick(['Rappi','Nubo','Tiendapp','Fintekia','Datalab','Kuepa'])+(chance(.5)?' Tech':'')},
+    varios:{n:'Varias familias',punt:.85,cuida:.65,dur:99,mk:b=>'varias familias (un apartamento por piso)'}
+  };
+  function elegirPerfil(b){
+    const t=b.tipo||'', A=S.anio, zona=isFinite(b.zona)?b.zona:1;
+    if(t==='edificio') return 'varios';
+    if(COMERCIAL.includes(t)){ const L=[['tienda',3],['empresa',2]]; if(t==='consultorio') L.push(['medico',5]); if(A>=1960&&t!=='local') L.push(['multinacional',1]); if(A>=2012) L.push(['startup',1.5]); if(intens()>=.6&&A<2008) L.push(['adelantado',.5]); return peso(L); }
+    const L=[['familia',4],['pareja',2],['pensionado',1.5],['conocido',1]];
+    if(t==='apartamento'||/^apto/.test(t)) L.push(['estudiantes',1.5]);
+    if(A>=1965&&(zona>=2||['penthouse','mansion','casa_grande'].includes(t))) L.push(['ejecutivo',['penthouse','mansion'].includes(t)?3:1]);
+    if(intens()>=.6&&A>=1978&&A<2008) L.push(['adelantado',['penthouse','mansion','casa_grande'].includes(t)?1.5:.6]);
+    return peso(L);
+  }
+  function peso(L){ let s=L.reduce((a,x)=>a+x[1],0), r=Math.random()*s; for(const [k,w] of L){ if((r-=w)<=0) return k; } return L[0][0]; }
+  function nuevo(b,perf){ const k=perf||elegirPerfil(b), P=PERF[k];
+    b.inq134={perf:k,n:P.mk(b),desde:S.anio,mora:0,restit:null,anios:0}; return b.inq134; }
+  const asegurar=b=>{ if(esRenta(b)&&b.arrendado&&!b.inq134) nuevo(b,b.contrato109>S.anio?'familia':null); return b.inq134; };
+  function puntualidad(b){ const q=b.inq134; if(!q) return 0; const P=PERF[q.perf]||PERF.familia; let p=P.punt;
+    try{ if(S.macro&&S.macro.ciclo<-.06) p-=.12; }catch(e){}
+    if(b.canon109==='alto') p-=.06; if(b.canon109==='bajo') p+=.04; if(b.admin109) p+=.04; if(b.contrato109>S.anio) p+=.05;
+    return clamp(p,.2,1); }
+  const etiq=b=>{ const q=b.inq134; if(!q) return b.arrendado?'':'Vacío'; if(q.restit) return 'En restitución hasta '+q.restit; if(q.mora>=2) return 'Moroso'; if(q.mora) return 'Atrasado'; return 'Al día'; };
+  const etiqPunt=b=>{ const p=puntualidad(b); return p>=.93?'Paga puntual':p>=.82?'Cumplido':p>=.7?'A veces se atrasa':'Mala paga'; };
+  const aviso=()=>S._ev134===S.anio?false:(S._ev134=S.anio,true);   // un aviso de inquilinos por año
+
+  /* --- el año de los inquilinos (después de cobrar el arriendo) --- */
+  function anual134(){
+    if(!S||!S.p||S.muerto) return;
+    (S.bienes||[]).forEach(b=>{
+      if(!esRenta(b)) return;
+      const q=b.inq134;
+      if(q&&q.restit){   // ocupado por el moroso: no paga
+        if(b.arrendado) S.efectivo-=canonDe(b);
+        if(S.anio>=q.restit){ b.inq134=null; b.arrendado=false; const dano=chance(.4);
+          if(dano) b.valor*=.95; log('Por fin el juzgado te devolvió <b>'+esc(b.nombre)+'</b>. '+(dano?'Lo dejaron hecho un desastre.':'Al menos lo dejaron en pie.'),'mal'); }
+        else b.arrendado=true;
+        return;
+      }
+      if(!b.arrendado){ if(q){ log(esc(may(q.n))+' entregó <b>'+esc(b.nombre)+'</b>. Queda vacío hasta encontrar otro inquilino.'); b.inq134=null; } return; }
+      if(!q){ const n=nuevo(b); log('Llegó inquilino a <b>'+esc(b.nombre)+'</b>: '+esc(n.n)+'.'); return; }
+      q.anios++;
+      const P=PERF[q.perf]||PERF.familia, c=canonDe(b);
+      if(P.sucio){ S.efectivo+=c*.25; if(chance(.06)&&aviso()){ cola.push(evExtincion(b)); return; } }
+      if(chance(1-puntualidad(b))){ q.mora++; S.efectivo-=c*.4; log(esc(may(q.n))+' se atrasó con el arriendo de <b>'+esc(b.nombre)+'</b>'+(q.mora>=2?' otra vez.':'.'),'mal');
+        if(q.mora>=2&&aviso()) cola.push(evMoroso(b)); }
+      else if(q.mora>0&&chance(.55)){ S.efectivo+=c*.4*q.mora*.6; log(esc(may(q.n))+' se puso al día con el arriendo de <b>'+esc(b.nombre)+'</b>.','bien'); q.mora=0; }
+      if(chance((1-P.cuida)*.14)){ if(!b.seguro109) b.valor*=.975; log('El inquilino de <b>'+esc(b.nombre)+'</b> '+pick(['dañó la cocina','rompió dos ventanas','dejó que se metiera la humedad','tumbó una pared sin permiso'])+'.'+(b.seguro109?' El seguro lo cubrió.':' La propiedad pierde algo de valor.'),'mal'); }
+      if(q.anios>=5&&!q.mora&&puntualidad(b)>=.85&&q.perf!=='varios'&&chance(.07)&&aviso()) cola.push(evOferta(b));
+      else if(q.anios>=2&&S.macro&&S.macro.ciclo<-.06&&chance(.25)&&!q.mora&&aviso()) cola.push(evRebaja(b));
+      else if(q.anios>=P.dur&&chance(.3)){ log(esc(may(q.n))+' se fue de <b>'+esc(b.nombre)+'</b> después de '+q.anios+' años.'); b.inq134=null; b.arrendado=false; }
+    });
+  }
+  const B=()=>(S.bienes||[]).find(x=>x.uid===S._b134);
+  const Q=()=>{ const b=B(); return b&&b.inq134; };
+  const Qn=()=>{ const q=Q(); return q?q.n:'el inquilino'; };
+  const may=s=>String(s).charAt(0).toUpperCase()+String(s).slice(1);
+
+  /* --- con los morosos --- */
+  function opcionesMoroso(b){
+    const q=b.inq134, c=canonDe(b), cr=Math.max(5,Math.round(b.valor*.015)), dur=S.anio<2003?'dos o tres años':'uno o dos años';
+    const ops=[
+      {t:'Un acuerdo de pago',d:'Le das plazo para ponerse al día.',f:()=>{ if(chance(.6)){ S.efectivo+=c*.4*q.mora*.5; q.mora=0; return 'Firmaron el acuerdo. Va pagando.'; } q.mora++; return 'Firmó el acuerdo y no cumplió ni la primera cuota.'; }},
+      {t:'Demandar: proceso de restitución ('+fmt(cr)+')',d:'El juzgado lo saca, pero tarda '+dur+'. Mientras, no paga.',f:()=>{ S.efectivo-=cr; q.restit=S.anio+(S.anio<2003?ri(2,3):ri(1,2)); try{ window.momento120&&window.momento120('juicio','La restitución',may(q.n)+' tiene que entregar '+b.nombre+'.'); }catch(e){} return 'Radicaste la demanda. El juez dice que para '+q.restit+' tienes el inmueble.'; }},
+      {t:'Rebajarle el canon para que se quede',d:'Entra menos, pero entra.',f:()=>{ b.canon109='bajo'; if(isFinite(b.rentaBase109)) b.renta=b.rentaBase109*.85; else b.renta*=.85; q.mora=0; return 'Le bajaste el arriendo. Se comprometió a no atrasarse más.'; }}
+    ];
+    if(intens()>=.35) ops.push({t:'Mandarle a unos "amigos"',d:'Rápido. Y nada legal.',f:()=>{ if(chance(.3)&&typeof registrarDelito==='function') registrarDelito('constreñimiento ilegal',2,'mandaste a sacar a un inquilino a la fuerza');
+      b.inq134=null; b.arrendado=false; S.p.reputacion=clamp(S.p.reputacion-2,0,100); return 'En una semana desocuparon. Nadie en el barrio quiere hablar del tema.'; }});
+    return ops;
+  }
+  function evMoroso(b){ return {p:9,c:()=>!!Q(),t:()=>{ S._b134=b.uid; return '<b>'+esc(may(Qn()))+' no paga.</b> Ya debe varios meses de <b>'+esc(b.nombre)+'</b> y no contesta el teléfono.'; },
+    o:opcionesMoroso(b).map(o=>({t:o.t,f:()=>{ const bb=B(); if(!bb||!bb.inq134) return 'Ya no hay nada que hacer.'; return o.f(); }}))}; }
+  function evOferta(b){ return {p:9,c:()=>!!Q(),t:()=>{ S._b134=b.uid; S._o134=Math.round(b.valor*rnd(1,1.12)); return '<b>'+esc(may(Qn()))+' te quiere comprar '+esc(b.nombre)+'.</b> Lleva años ahí y le tiene cariño. Ofrece '+fmt(S._o134)+(b.hipoteca>0?' (le quedan '+fmt(b.hipoteca)+' de hipoteca)':'')+'.'; },
+    o:[{t:'Vendérsela',f:()=>{ const bb=B(); if(!bb) return 'Ya no es tuya.'; const neto=S._o134-(bb.hipoteca||0); S.efectivo+=Math.max(0,neto); S.bienes=S.bienes.filter(x=>x.uid!==bb.uid); log('Le vendiste <b>'+esc(bb.nombre)+'</b> a tu inquilino por '+fmt(S._o134)+'.','bien'); return 'Se la vendiste sin comisión de inmobiliaria. Te quedaron '+fmt(Math.max(0,neto))+'.'; }},
+       {t:'No está en venta',f:()=>'Le dijiste que no. Sigue de inquilino, un poco desilusionado.'}]}; }
+  function evRebaja(b){ return {p:9,c:()=>!!Q(),t:()=>{ S._b134=b.uid; return '<b>'+esc(may(Qn()))+' pide rebaja.</b> Con la crisis no le alcanza para el arriendo de '+esc(b.nombre)+'.'; },
+    o:[{t:'Rebajarle un 15%',f:()=>{ const bb=B(); if(bb){ bb.canon109='bajo'; if(isFinite(bb.rentaBase109)) bb.renta=bb.rentaBase109*.85; else bb.renta*=.85; } return 'Se queda, agradecido.'; }},
+       {t:'No: el contrato es el contrato',f:()=>{ const bb=B(); if(bb&&chance(.45)){ bb.inq134=null; bb.arrendado=false; return 'Entregó el inmueble al mes. Ahora está vacío.'; } return 'Refunfuñó, pero sigue pagando.'; }}]}; }
+  function evExtincion(b){ return {p:9,c:()=>!!B(),t:()=>{ S._b134=b.uid; return '<b>La Fiscalía abrió extinción de dominio sobre '+esc(b.nombre)+'.</b> Tu inquilino, el que pagaba en efectivo y por adelantado, resultó ser testaferro de un cartel.'; },
+    o:[{t:()=>'Un penalista para demostrar tu buena fe ('+fmt(Math.max(10,Math.round(b.valor*.05)))+')',f:()=>{ const bb=B(); if(!bb) return '—'; S.efectivo-=Math.max(10,Math.round(bb.valor*.05)); bb.inq134=null; bb.arrendado=false;
+         if(chance(.62)) return 'Demostraste que no sabías nada. Te devolvieron el inmueble, vacío y con mala fama.';
+         S.bienes=S.bienes.filter(x=>x.uid!==bb.uid); if(bb.hipoteca>0) S.deuda=(S.deuda||0)+bb.hipoteca; hito('Perdió '+bb.nombre+' en una extinción de dominio'); return 'El juez no te creyó. El Estado se quedó con el inmueble'+(bb.hipoteca>0?' y tú con la hipoteca':'')+'.'; }},
+       {t:'Colaborar con la Fiscalía',f:()=>{ const bb=B(); if(!bb) return '—'; bb.inq134=null; bb.arrendado=false; S.p.felicidad=clamp(S.p.felicidad-6,0,100);
+         if(chance(.85)) return 'Entregaste todo lo que sabías. Recuperaste el inmueble; te tocó andar con escolta un tiempo.';
+         S.bienes=S.bienes.filter(x=>x.uid!==bb.uid); return 'Ni así: el inmueble pasó al Estado.'; }}]}; }
+
+  /* --- la ficha del inmueble y la lista de inquilinos --- */
+  function bloque(b){ const q=asegurar(b);
+    if(!q) return '<div class="inq134">'+(b.arrendado?'Arrendado.':'<b>Vacío.</b> Buscando inquilino.')+'</div>';
+    const P=PERF[q.perf]||PERF.familia, e=etiq(b);
+    return '<div class="inq134">Inquilino: <b>'+esc(may(q.n))+'</b> <span class="p134">'+esc(P.n)+'</span><br>Desde '+q.desde+' · '+etiqPunt(b)+' · <span class="'+(e==='Al día'?'bien':'mal')+'">'+esc(e)+'</span></div>'; }
+  function opsFicha(b){ const q=b.inq134; if(!q) return [];
+    const ops=[];
+    if(q.mora&&!q.restit) ops.push({t:(P1(q.n)==='la'?'Cobrarle a la familia':'Cobrarle a '+P1(q.n)),cat:'casa',d:'Debe '+(q.mora>=2?'varios meses':'unos meses')+'. Acuerdo, demanda o rebaja.',cerrar:false,run:()=>{ cerrarModal(); escenaMoroso(b); }});
+    if(!q.restit&&!(b.contrato109>S.anio)) ops.push({t:'Pedirle el inmueble',cat:'casa',d:'Le avisas con tres meses. Queda vacío.',cerrar:false,run:()=>{ b.inq134=null; b.arrendado=false; log('Le pediste <b>'+esc(b.nombre)+'</b> a '+esc(q.n)+'.'); cerrarModal(); render(); }});
+    return ops; }
+  function escenaMoroso(b){ S._b134=b.uid; const q=b.inq134; if(!q) return;
+    escena({rubro:esc(b.nombre),titulo:'Un inquilino que no paga',cerrable:true,cuerpo:esc(may(q.n))+' debe '+(q.mora>=2?'varios meses':'unos meses')+' de arriendo.',
+      opciones:opcionesMoroso(b).map(o=>({t:o.t,cat:'casa',d:o.d,run:()=>{ log(o.f(),'hito'); render(); }}))}); }
+  function escenaInquilinos134(){
+    const L=(S.bienes||[]).filter(esRenta); L.forEach(asegurar);
+    const filas=L.map(b=>{ const q=b.inq134, e=etiq(b); return '<tr><td>'+esc(b.nombre)+'<br><span class="s">'+(q?esc(may(q.n))+' · desde '+q.desde:'')+'</span></td><td class="'+(e==='Al día'?'bien':'mal')+'">'+esc(e||'Arrendado')+(q&&!q.restit?'<br><span class="s">'+etiqPunt(b)+'</span>':'')+'</td></tr>'; }).join('');
+    const morosos=L.filter(b=>b.inq134&&b.inq134.mora&&!b.inq134.restit);
+    escena({rubro:'Renta inmobiliaria',titulo:'Tus inquilinos',ancho:true,cerrable:true,clase:'lista134',
+      cuerpo:L.length?'Quién vive (o trabaja) en cada uno de tus inmuebles, y cómo paga.':'No tienes inmuebles en arriendo.',
+      html:'<table class="libro">'+(filas||'')+'</table>',
+      opciones:morosos.length?morosos.map(b=>({t:'Cobrar: '+b.nombre,cat:'casa',d:may(b.inq134.n)+' está '+(b.inq134.mora>=2?'moroso':'atrasado')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaMoroso(b); }})):[{t:'Volver',cat:'casa'}]});
+  }
+  function wrapEscena134(){
+    const old=window.escena; if(typeof old!=='function'||window.__SA134_ESC) return; window.__SA134_ESC=true;
+    window.escena=function(o){
+      try{ if(o&&typeof o.html==='string'&&o.html.indexOf('class="ficha109"')>=0&&S&&S.bienes){
+        const b=S.bienes.find(x=>esRenta(x)&&esc(x.nombre)===o.titulo);
+        if(b){ o=Object.assign({},o,{html:o.html+bloque(b),opciones:opsFicha(b).concat(o.opciones||[])}); }
+      } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1)));
+    };
+  }
+  function wrapAcciones134(){
+    const old=window.listaAcciones; if(typeof old!=='function'||window.__SA134_ACC) return; window.__SA134_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&(S.bienes||[]).some(esRenta)){ const L=S.bienes.filter(esRenta), m=L.filter(b=>b.inq134&&b.inq134.mora&&!b.inq134.restit).length;
+        A.push({t:'Tus inquilinos',d:L.length+' inmueble'+(L.length>1?'s':'')+' en arriendo'+(m?', '+m+' con el arriendo atrasado':'')+'. Quién paga y quién no.',mov:0,modal:true,run:()=>escenaInquilinos134()}); } }catch(e){}
+      return A; };
+  }
+  function wrapCat134(){ const old=window.catDe; if(typeof old!=='function'||window.__SA134_CAT) return; window.__SA134_CAT=true;
+    window.catDe=function(t){ if(t==='Tus inquilinos') return 'casa'; return old.apply(this,arguments); }; }
+  function wrapPaso134(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA134_PASO) return; window.__SA134_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual134(); }catch(e){ console.error(e); } return r; }; }
+  function init134(){ wrapEscena134(); wrapAcciones134(); wrapCat134(); wrapPaso134();
+    Object.assign(window,{PERFILES_INQUILINO_134:PERF,inquilinoNuevo134:nuevo,anualInquilinos134:anual134,escenaInquilinos134,puntualidad134:puntualidad}); }
+  setTimeout(init134,40); setTimeout(init134,220); setTimeout(init134,650);
+  window.__SA134={version:V134};
 })();
 </script>
 
