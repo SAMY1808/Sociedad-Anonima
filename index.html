@@ -1120,7 +1120,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v144</div>
+<div class="version-badge" id="versionBadge">v145</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -27101,6 +27101,97 @@ install();setTimeout(install,1200);
   function init144(){ wrapPaso144(); wrapEscena144(); Object.assign(window,{negocioCafe144:N,escenaTaza144,anualNegocioCafe144:anual}); }
   setTimeout(init144,40); setTimeout(init144,220); setTimeout(init144,650);
   window.__SA144={version:V144};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v145 · TRABAJAR EN EL MUNDO DEL CAFÉ
+   Tres carreras nuevas, con sus niveles, sueldos y ascensos:
+   - La carrera en la Federación Nacional de Cafeteros (desde 1927): del
+     auxiliar del Comité al extensionista, el director del Comité
+     Departamental y la gerencia técnica o comercial en Bogotá.
+   - Las legaciones cafeteras en el exterior (desde 1930): las oficinas de
+     la Federación en Nueva York, Londres, Hamburgo y Tokio, el agregado
+     cafetero en la embajada y la delegación ante la Organización
+     Internacional del Café.
+   - La cooperativa de caficultores (desde 1960): del punto de compra y la
+     báscula a catador, jefe de compras y gerente de la cooperativa.
+   Cada una tiene sus sucesos, y el trabajo en el gremio da influencia en
+   la Federación (v142).
+   ========================================================================== */
+(function(){
+  const V145='v145';
+  const NUEVAS={
+    federacion:{n:'Carrera en la Federación de Cafeteros',desde:1927,niveles:[
+      {n:'Auxiliar del Comité de Cafeteros',s:24,edu:1},{n:'Extensionista',s:46,edu:1},{n:'Coordinador de extensión',s:78,edu:2},
+      {n:'Director seccional',s:120,edu:2},{n:'Director del Comité Departamental',s:180,edu:3},{n:'Gerente técnico de la Federación',s:300,edu:4},{n:'Gerente comercial de la Federación',s:420,edu:4}]},
+    legaciones:{n:'Legaciones cafeteras en el exterior',desde:1930,niveles:[
+      {n:'Asistente en la oficina de Nueva York',s:52,edu:2},{n:'Agregado cafetero',s:85,edu:2},{n:'Representante de la Federación en el exterior',s:150,edu:3},
+      {n:'Director de la oficina de Nueva York',s:260,edu:4},{n:'Delegado ante la Organización Internacional del Café',s:380,edu:4}]},
+    cooperativa:{n:'Cooperativa de caficultores',desde:1960,niveles:[
+      {n:'Auxiliar del punto de compra',s:18,edu:0},{n:'Catador',s:32,edu:1},{n:'Jefe de compras',s:58,edu:1},
+      {n:'Subgerente de la cooperativa',s:92,edu:2},{n:'Gerente de la cooperativa',s:150,edu:2},{n:'Gerente de la cooperativa departamental',s:230,edu:3}]}
+  };
+  const DEP={'Manizales':'Caldas','Pereira':'Risaralda','Armenia':'Quindío','Medellín':'Antioquia','La Estrella':'Antioquia','Bogotá':'Cundinamarca','Cali':'Valle','Bucaramanga':'Santander','Montería':'Córdoba','Cartagena':'Bolívar','Barranquilla':'Atlántico'};
+  const MUNI={'Manizales':'Chinchiná','Pereira':'Santa Rosa de Cabal','Armenia':'Calarcá','Medellín':'Andes','La Estrella':'Fredonia','Bogotá':'Viotá','Cali':'Sevilla','Bucaramanga':'San Gil'};
+  const OFIC=['Nueva York','Londres','Hamburgo','Tokio','Bruselas','Montreal'];
+  const fincas=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
+  const depto=()=>{ const f=fincas()[0]; try{ if(f) return window.munCafe141(f.cafe141.mun).dep; }catch(e){} return DEP[S.hogar&&S.hogar.ciudad]||'Caldas'; };
+  const muni=()=>{ const f=fincas()[0]; if(f) return f.cafe141.mun; return MUNI[S.hogar&&S.hogar.ciudad]||'Chinchiná'; };
+  function empleador(k,nivel){
+    if(k==='federacion') return nivel>=5?'la Federación Nacional de Cafeteros, en Bogotá':nivel>=4?'el Comité Departamental de Cafeteros de '+depto():'el Comité de Cafeteros de '+depto();
+    if(k==='legaciones'){ const c=S.carrera; const of=(c&&c.oficina145)||pick(OFIC); if(c) c.oficina145=of; return nivel>=4?'la Organización Internacional del Café, en Londres':nivel===3?'la oficina de la Federación en Nueva York':nivel===1?'la embajada de Colombia en '+({'Nueva York':'Washington','Londres':'Londres','Hamburgo':'Bonn','Tokio':'Tokio','Bruselas':'Bruselas','Montreal':'Ottawa'})[of]:'la oficina de la Federación en '+of; }
+    if(k==='cooperativa') return nivel>=5?'la cooperativa departamental de caficultores de '+depto():'la Cooperativa de Caficultores de '+muni();
+    return null;
+  }
+  function registrar(){ if(typeof RUTAS==='undefined') return; Object.keys(NUEVAS).forEach(k=>{ if(!RUTAS[k]) RUTAS[k]=NUEVAS[k]; }); }
+
+  function wrapAcciones145(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA145_ACC) return; window.__SA145_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p){ const c=S.carrera;
+        Object.keys(NUEVAS).forEach(k=>{ const r=NUEVAS[k], a=A.find(x=>x.t==='Emplearte: '+r.n); if(!a) return;
+          if(S.anio<r.desde){ a.dis=k==='cooperativa'?'Todavía no hay cooperativas de caficultores':k==='federacion'?'La Federación todavía no existe':'La Federación todavía no tiene oficinas afuera'; return; }
+          a.d=({federacion:'Del Comité de Cafeteros de '+depto()+' a la gerencia en Bogotá. ',legaciones:'Vender el café de Colombia en el mundo: Nueva York, Londres, Hamburgo, Tokio. ',cooperativa:'La cooperativa de '+muni()+': comprar la cosecha a los vecinos, catar y pagar a tiempo. '})[k]+(a.d||'');
+          const run=a.run; a.run=function(){ const r0=run.apply(this,arguments); try{ if(S.carrera&&S.carrera.ruta===k){ S.carrera.empleador=empleador(k,S.carrera.nivel); } }catch(e){} return r0; }; });
+        const g=A.find(x=>x.t==='Buscar empleo'); if(g&&!/café/.test(g.d||'')) g.d=String(g.d||'').replace(' o planta.',', planta o el mundo del café (la Federación, sus oficinas en el exterior y las cooperativas).');
+        if(c&&NUEVAS[c.ruta]){ const a=A.find(x=>/^Pedir el ascenso a /.test(x.t)); if(a){ const run=a.run; a.run=function(){ const n0=c.nivel, r0=run.apply(this,arguments); try{ if(c.nivel!==n0){ c.empleador=empleador(c.ruta,c.nivel); if(c.ruta==='federacion'&&S.fede142) S.fede142.influencia=(S.fede142.influencia||0)+5; } }catch(e){} return r0; }; } }
+      } }catch(e){}
+      return A; }; }
+  function anual(){
+    if(!S||!S.p||!S.carrera) return; const c=S.carrera; if(!NUEVAS[c.ruta]) return;
+    try{ if(window.fede142){ const F=window.fede142(); if(c.ruta==='federacion') F.influencia=clamp((F.influencia||0)+1+c.nivel,0,100); if(c.ruta==='cooperativa') F.influencia=clamp((F.influencia||0)+.5+c.nivel*.5,0,100); } }catch(e){}
+    if(c.ruta==='legaciones') S.p.redes=clamp(S.p.redes+1,0,100);
+    if(c.ruta==='federacion'&&c.nivel>=1) fincas().forEach(b=>{ b.cafe141.extension=true; });   // el extensionista también cuida lo suyo
+  }
+  function wrapPaso145(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA145_PASO) return; window.__SA145_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
+
+  /* --- sucesos de cada carrera --- */
+  function eventos145(){
+    if(window.__SA145_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o), en=k=>S&&S.carrera&&S.carrera.ruta===k, des=d=>{ S.carrera.desempeno=clamp((S.carrera.desempeno||50)+d,0,100); };
+    E({id145:1,p:1,c:()=>en('federacion')&&S.carrera.nivel<=2,t:()=>'Te mandan de extensionista a una vereda de '+depto()+' donde nadie le cree a la Federación. Los caficultores dicen que los técnicos no saben de café.',
+      o:[{t:'Ir finca por finca, con la bota en el barro',f:()=>{ des(10); S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Al tercer mes ya te invitaban a almorzar. Los resultados de la vereda mejoraron.'; }},{t:'Dar las charlas en el pueblo y volver',f:()=>{ des(-6); return 'Cumpliste el informe. En la vereda siguieron igual.'; }}]});
+    E({id145:1,p:.8,c:()=>en('federacion')&&S.carrera.nivel>=3,t:()=>'En el Comité Departamental hay que decidir a qué municipios van las obras del año: los que más café producen o los más pobres.',
+      o:[{t:'Los que más producen',f:()=>{ des(6); return 'La gerencia en Bogotá aplaudió la eficiencia.'; }},{t:'Los más pobres',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+4,0,100); try{ moverPrestigio(1,''); }catch(e){} return 'En las veredas olvidadas te recuerdan con cariño.'; }}]});
+    E({id145:1,p:1,c:()=>en('legaciones')&&S.anio>=1962&&S.anio<=1989,t:()=>'En Londres se renegocian las cuotas del Acuerdo Internacional del Café. Brasil quiere más; los tostadores, precio más bajo; Colombia te manda a la mesa.',
+      o:[{t:'Defender la cuota colombiana a toda costa',f:()=>{ des(chance(.6)?12:-5); return 'Fueron tres semanas de noches largas. Colombia salió con su cuota casi intacta.'; }},{t:'Hacer alianza con los africanos contra Brasil',f:()=>{ des(8); S.p.redes=clamp(S.p.redes+5,0,100); return 'Una jugada que nadie esperaba. Te ganaste amigos en Abiyán y Nairobi.'; }}]});
+    E({id145:1,p:.8,c:()=>en('legaciones')&&S.anio>=1959&&S.anio<1975,t:()=>'La oficina de Nueva York prepara la campaña de Juan Valdez para la televisión de Estados Unidos. Te piden escoger al caficultor que va a salir en los comerciales.',
+      o:[{t:'Un caficultor de verdad, de una finca',f:()=>{ des(8); return 'La autenticidad funcionó: las cartas de los consumidores llegan por sacos.'; }},{t:'Un actor con bigote y sombrero',f:()=>{ des(4); return 'Funciona igual. Juan Valdez es más grande que cualquiera que lo interprete.'; }}]});
+    E({id145:1,p:.8,c:()=>en('legaciones')&&S.anio>=1998,t:()=>'En la feria de cafés especiales de Seattle, un comprador quiere lotes de un solo origen, de una sola finca. La Federación vende café mezclado por volumen.',
+      o:[{t:'Abrir el programa de cafés de origen',f:()=>{ des(10); return 'Lanzaste los cafés regionales: Huila, Nariño, Cauca. Hoy son marcas.'; }},{t:'Defender el modelo de volumen',f:()=>{ des(-3); return 'Otros países se quedaron con ese mercado.'; }}]});
+    E({id145:1,p:1,c:()=>en('cooperativa'),t:()=>'Cosecha récord en '+muni()+'. Los caficultores hacen fila en la báscula y a la cooperativa no le alcanza la plata para pagarles de contado.',
+      o:[{t:'Pedir un crédito de tesorería al banco',f:()=>{ des(8); return 'Pagaste a todos de contado. La cooperativa quedó endeudada, pero con prestigio.'; }},{t:'Pagar con vales a quince días',f:()=>{ des(-6); S.p.reputacion=clamp(S.p.reputacion-2,0,100); return 'Varios socios se fueron a venderle a un particular.'; }}]});
+    E({id145:1,p:.7,c:()=>en('cooperativa')&&S.carrera.nivel>=2,t:()=>'Descubres que el bodeguero del punto de compra le "ajustaba" el peso a la báscula. Lleva años robándoles kilos a los caficultores.',
+      o:[{t:'Denunciarlo y devolverles a los socios',f:()=>{ des(10); S.p.reputacion=clamp(S.p.reputacion+4,0,100); return 'Devolviste lo robado con plata de la cooperativa. Los socios confían más que nunca.'; }},{t:'Despedirlo sin escándalo',f:()=>{ des(2); return 'Se fue. Los socios nunca supieron cuánto les quitaron.'; }}]});
+    window.__SA145_EV=true;
+  }
+  function init145(){ registrar(); wrapAcciones145(); wrapPaso145(); eventos145();
+    Object.assign(window,{RUTAS_CAFE_145:NUEVAS,empleadorCafe145:empleador}); }
+  registrar();
+  setTimeout(init145,40); setTimeout(init145,220); setTimeout(init145,650);
+  window.__SA145={version:V145};
 })();
 </script>
 
