@@ -7107,7 +7107,7 @@ const EVENTOS=[
   o:[{t:'Bajar el ritmo en serio',f:()=>{S.p.salud=clamp(S.p.salud+16,0,100);if(S.emp)S.emp.crecimiento-=.02;return 'Delegaste y dormiste. Salud en '+Math.round(S.p.salud)+'.';}},
      {t:'Seguir igual',f:()=>{S.p.salud=clamp(S.p.salud-9,0,100);return 'Seguiste con el mismo ritmo. Ya sabes cómo termina eso.';}}]},
  {p:1.2,c:()=>S.emp&&!S.emp.publica&&S.emp.ingresos>4000,t:()=>'Un banco de inversión te propone estructurar la salida a bolsa.',
-  o:[{t:'Escuchar la propuesta',f:()=>{S.emp.preIPO=true;return 'Quedó el estudio listo: cuando quieras emitir, el proceso será más rápido y más barato.';}},
+  o:[{t:'Escuchar la propuesta',f:()=>{if(S.emp) S.emp.preIPO=true;return 'Quedó el estudio listo: cuando quieras emitir, el proceso será más rápido y más barato.';}},
      {t:'Nada de bolsa',f:()=>'Prefieres no rendirle cuentas a nadie. Por ahora.'}]},
  {p:1.2,c:()=>S.familia.pareja&&S.familia.pareja.paciencia<40,t:()=>esc(S.familia.pareja.nombre)+' te dice que te ha perdido: o cambias, o esto se termina.',
   o:[{t:'Dar el año a la familia',f:()=>{S.familia.pareja.paciencia=clamp(S.familia.pareja.paciencia+35,0,100);S.p.felicidad+=10;if(S.emp)S.emp.crecimiento-=.01;return 'Estuviste presente todo el año. Se arregló.';}},
@@ -25933,14 +25933,14 @@ install();setTimeout(install,1200);
   }
   function resumenHTML(e){ const p=P(e), u=uso(e), pi=precioInsumo(e);
     return '<div class="prod137-panel"><b>Plantas e insumos</b><div class="apunte" style="margin:4px 0 8px">'+p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' · uso '+Math.round(u*100)+'% · calidad '+Math.round(p.calidad)+'/100 · '+esc(IND[e.sector].ins)+' a '+Math.round(pi*100)+'</div>'
-      +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Plantas e insumos">'+(typeof sello==='function'?sello('compania'):'')+'<div class="neg86-accion-info"><div class="nom">Plantas e insumos</div><div class="txt">Capacidad, plantas nuevas, materias primas y control de calidad.</div></div></div></div></div>'; }
+      +'<button type="button" class="btn" data-neg-accion="Plantas e insumos">Ver plantas e insumos</button></div>'; }
   function wrapPanel137(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v137) return;   // la v81 lo vuelve a registrar: se envuelve cada vez
     window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(industrial(e)&&(negCat==='produccion'||negCat==='resumen')) h+=resumenHTML(e); }catch(x){} return h; }; window.panelCompania86.__v137=true; }
   function wrapAcciones137(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA137_ACC) return; window.__SA137_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const e=S&&S.emp; if(Array.isArray(A)&&industrial(e)&&companias().includes(e)){ const p=P(e);
         A.push({t:'Plantas e insumos',d:p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' al '+Math.round(uso(e)*100)+'% · calidad '+Math.round(p.calidad)+'.',mov:0,modal:true,run:()=>escenaPlantas137(e)});
-        const pl=A.find(a=>a.t==='Construir una planta nueva'); if(pl){ pl.d='Elige la ciudad y la capacidad en "Plantas e insumos".'; pl.mov=0; pl.modal=true; pl.dis=null; pl.run=()=>escenaPlantas137(e); } } }catch(x){}
+ } }catch(x){}
       return A; }; }
   function wrapCat137(){ const old=window.catDe; if(typeof old!=='function'||window.__SA137_CAT) return; window.__SA137_CAT=true;
     window.catDe=function(t){ if(t==='Plantas e insumos') return 'compania'; return old.apply(this,arguments); }; }
