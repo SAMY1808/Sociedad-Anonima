@@ -1081,10 +1081,23 @@ svg.foto116{display:block;background:#1d2a23}
 .proc140 .cert span.no{background:rgba(255,255,255,.06);color:var(--humo2)}
 .proc140-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
 </style>
+<style id="estilos-v141">
+.cafe141 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.cafe141 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.cafe141 .k b{display:block;font-size:17px;font-family:var(--display)}
+.cafe141 .k span{font-size:12px;color:var(--humo2)}
+.cafe141 .finca{padding:10px 12px;margin:8px 0;border-radius:10px;background:rgba(93,122,69,.12);border:1px solid rgba(143,179,122,.25)}
+.cafe141 .finca b{font-family:var(--display);font-size:17px}
+.cafe141 .finca .det{font-size:13px;color:var(--humo2);margin-top:3px}
+.cafe141 .nota{font-size:13px;color:var(--humo2);margin:6px 0}
+.cafe141 svg{display:block;margin:4px 0 8px}
+.cafe141 .taza{font-style:italic;color:#D9C29A}
+.cafe141 table.libro td{vertical-align:top}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v140</div>
+<div class="version-badge" id="versionBadge">v141</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1819,8 +1832,9 @@ const HISTORIA=[
      return 'Los contratos públicos quedan en manos de quien tenga padrino en los dos partidos.'; }},
   {anio:1975,t:'Bonanza cafetera: el precio del grano se dispara y entra una montaña de dólares al país.',
    f:()=>{ S.macro.ciclo=.14; S.macro.inflacion=clamp(S.macro.inflacion+.06,0,.4);
-     let extra=0; (S.bienes||[]).forEach(b=>{ if(b.tipo==='cafe'){ b.valor*=1.55; extra+=b.valor*.2; } });
+     let extra=0; (S.bienes||[]).forEach(b=>{ if(b.tipo==='cafe'&&!b.cafe141){ b.valor*=1.55; extra+=b.valor*.2; } else if(b.cafe141) b.valor*=1.3; });   /* v141: la cosecha de las fincas nuevas ya cobra el precio de la bonanza */
      if(extra>0){ S.efectivo+=extra; return 'Tus cafetales valen casi el doble y entraron '+fmt(extra)+' de más.'; }
+     if((S.bienes||[]).some(b=>b.cafe141)) return 'Tus cafetales se valorizaron y la cosecha de estos años se vende a precio de oro.';
      return 'El que tenga café sembrado está haciendo el año de su vida. Tú no.'; }},
   {anio:1982,t:'Se cae el sistema financiero: el gobierno interviene bancos y la plata se vuelve cara.',
    f:()=>{ S.macro.tasa=clamp(S.macro.tasa+.10,0,.45); S.macro.ciclo=-.10;
@@ -7273,7 +7287,7 @@ const EVENTOS=[
          return 'En '+esc(g.corto)+' no les gustó y te dejaron por fuera del comité. Te saliste.'; }
        return 'No firmaste. En la próxima junta directiva del gremio te lo van a recordar.'; }}]},
 
- {p:1.8,c:()=>afiliado('fedecafe')&&tengoFinca(['cafe']),
+ {p:1.8,c:()=>afiliado('fedecafe')&&tengoFinca(['cafe'])&&!window.__SA141,   /* v141: el precio lo maneja la caficultura */
   t:()=>'La Federación anuncia el precio de sustentación del año. Está por debajo de lo que esperaba el mercado, '
     +'pero es un piso garantizado pase lo que pase.',
   o:[{t:'Vender toda la cosecha a la Federación',f:()=>{
@@ -26386,6 +26400,291 @@ install();setTimeout(install,1200);
     Object.assign(window,{procesos140:P,escenaProcesos140,CERTIFICACIONES_140:CERT,escenaFyA140}); }
   setTimeout(init140,40); setTimeout(init140,220); setTimeout(init140,650); setTimeout(init140,900);
   window.__SA140={version:V140};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v141 · LA FINCA CAFETERA
+   El café deja de ser "una finca que rinde un porcentaje". Ahora:
+   - Compras en un municipio cafetero de verdad (el Eje, Antioquia, el Valle,
+     Tolima, Huila, Cauca, Nariño, Santander, Cundinamarca, la Sierra
+     Nevada, Norte de Santander), con su altura, su precio por hectárea, su
+     taza y su cosecha principal y su mitaca.
+   - Siembras una variedad según la época: Típica, Borbón, Caturra (1970),
+     Variedad Colombia (1982), Tabi (2002), Castillo (2005), Cenicafé 1
+     (2016) o Geisha para cafés especiales.
+   - El cafetal envejece: levante, plena producción, decadencia; se renueva
+     por zoca o con siembra nueva.
+   - La cosecha se mide en cargas de café pergamino seco (125 kg) y
+     depende del sombrío, la densidad, la fertilización, la roya (desde
+     1983), la broca (desde 1988), El Niño y La Niña, y de conseguir
+     recolectores.
+   - El beneficio (despulpado, fermentación, lavado, secado al sol, en
+     marquesina o en silo) y la altura definen la calidad de la taza.
+   - Vendes a la cooperativa con garantía de compra, a un particular o, si
+     la taza da, como café especial. También puedes retener la cosecha.
+   - El precio sigue al mercado de Nueva York, a lo largo de un siglo.
+   ========================================================================== */
+(function(){
+  const V141='v141';
+  // municipio: departamento, región, altura de los cafetales, precio de la hectárea (millones de hoy), taza, cosecha principal
+  const M=(n,dep,reg,alt,ha,taza,cos,extra)=>Object.assign({n,dep,reg,alt,ha,taza,cos},extra||{});
+  const PRINC_EJE='octubre a diciembre (mitaca en abril y mayo)', PRINC_SUR='abril a junio (mitaca a fin de año)', PRINC_NORTE='septiembre a diciembre';
+  const MUNICIPIOS=[
+    M('Chinchiná','Caldas','eje',1360,82,'suave, equilibrada, de acidez media',PRINC_EJE,{paisaje:true,nota:'Aquí está Cenicafé.'}),
+    M('Manizales','Caldas','eje',1600,78,'suave, dulce, con cuerpo medio',PRINC_EJE,{paisaje:true}),
+    M('Palestina','Caldas','eje',1500,76,'equilibrada, notas de panela',PRINC_EJE,{paisaje:true}),
+    M('Salamina','Caldas','eje',1775,62,'acidez brillante, floral',PRINC_EJE,{paisaje:true}),
+    M('Aguadas','Caldas','eje',1650,55,'cítrica, cuerpo ligero',PRINC_EJE,{paisaje:true}),
+    M('Riosucio','Caldas','eje',1780,52,'frutal, acidez media alta',PRINC_EJE,{paisaje:true}),
+    M('Pereira','Risaralda','eje',1450,74,'suave, achocolatada',PRINC_EJE,{paisaje:true}),
+    M('Santa Rosa de Cabal','Risaralda','eje',1700,70,'acidez media, caramelo',PRINC_EJE,{paisaje:true}),
+    M('Belén de Umbría','Risaralda','eje',1600,58,'dulce, notas frutales',PRINC_EJE,{paisaje:true}),
+    M('Apía','Risaralda','eje',1650,56,'floral, cuerpo medio',PRINC_EJE,{paisaje:true}),
+    M('Armenia','Quindío','eje',1480,80,'suave, nuez y chocolate',PRINC_EJE,{paisaje:true}),
+    M('Calarcá','Quindío','eje',1550,72,'equilibrada, panela',PRINC_EJE,{paisaje:true}),
+    M('Montenegro','Quindío','eje',1300,70,'cuerpo medio, chocolate',PRINC_EJE,{paisaje:true}),
+    M('Filandia','Quindío','eje',1900,74,'acidez alta, floral',PRINC_EJE,{paisaje:true}),
+    M('Salento','Quindío','eje',1850,78,'brillante y limpia',PRINC_EJE,{paisaje:true}),
+    M('Pijao','Quindío','eje',1650,54,'frutal, dulce',PRINC_EJE,{paisaje:true}),
+    M('Fredonia','Antioquia','antioquia',1800,60,'balanceada, cuerpo pleno',PRINC_EJE),
+    M('Andes','Antioquia','antioquia',1400,58,'chocolate y caramelo',PRINC_EJE),
+    M('Jardín','Antioquia','antioquia',1750,66,'floral, acidez media alta',PRINC_EJE),
+    M('Ciudad Bolívar','Antioquia','antioquia',1300,52,'cuerpo pleno, panela',PRINC_EJE),
+    M('Támesis','Antioquia','antioquia',1600,56,'cítrica, dulce',PRINC_EJE),
+    M('Concordia','Antioquia','antioquia',1900,50,'acidez alta',PRINC_EJE),
+    M('Urrao','Antioquia','antioquia',1850,44,'frutos rojos, compleja',PRINC_EJE),
+    M('Sevilla','Valle','valle',1650,58,'equilibrada, caramelo',PRINC_EJE,{paisaje:true,nota:'La capital cafetera del Valle.'}),
+    M('Caicedonia','Valle','valle',1250,54,'cuerpo medio, chocolate',PRINC_EJE,{paisaje:true}),
+    M('Trujillo','Valle','valle',1500,46,'frutal',PRINC_EJE),
+    M('El Cairo','Valle','valle',1900,48,'acidez brillante',PRINC_EJE,{paisaje:true}),
+    M('Líbano','Tolima','tolima',1600,46,'frutal, panela',PRINC_EJE),
+    M('Planadas','Tolima','tolima',1700,42,'frutos rojos, muy dulce',PRINC_SUR),
+    M('Chaparral','Tolima','tolima',1500,38,'chocolate, frutal',PRINC_SUR),
+    M('Ataco','Tolima','tolima',1600,34,'cítrica, dulce',PRINC_SUR),
+    M('Pitalito','Huila','huila',1500,56,'acidez alta, frutal, compleja',PRINC_SUR),
+    M('Garzón','Huila','huila',1600,50,'frutal, caramelo',PRINC_SUR),
+    M('La Plata','Huila','huila',1700,46,'floral, acidez alta',PRINC_SUR),
+    M('Acevedo','Huila','huila',1650,48,'frutos amarillos, dulce',PRINC_SUR),
+    M('San Agustín','Huila','huila',1750,50,'compleja, vinosa',PRINC_SUR),
+    M('Popayán','Cauca','cauca',1760,44,'floral, caramelo',PRINC_SUR),
+    M('Inzá','Cauca','cauca',1850,40,'floral, frutal, delicada',PRINC_SUR),
+    M('Piendamó','Cauca','cauca',1800,42,'dulce, acidez media',PRINC_SUR),
+    M('Buesaco','Nariño','narino',1950,44,'acidez muy alta, dulce, aromática',PRINC_SUR),
+    M('La Unión','Nariño','narino',1750,40,'cítrica, panela',PRINC_SUR),
+    M('Sandoná','Nariño','narino',1850,38,'dulce, floral',PRINC_SUR),
+    M('San Gil','Santander','santander',1250,34,'cuerpo alto, baja acidez',PRINC_NORTE,{sombra:true}),
+    M('Socorro','Santander','santander',1300,32,'chocolate, cuerpo pleno',PRINC_NORTE,{sombra:true}),
+    M('Viotá','Cundinamarca','cundinamarca',1250,36,'suave, cuerpo medio',PRINC_EJE,{nota:'Tierra de haciendas cafeteras desde el siglo XIX.'}),
+    M('La Mesa','Cundinamarca','cundinamarca',1300,40,'dulce, panela',PRINC_EJE),
+    M('Minca','Magdalena','sierra',1100,30,'cuerpo pleno, chocolate, baja acidez',PRINC_NORTE,{sombra:true,nota:'En la Sierra Nevada de Santa Marta.'}),
+    M('Salazar de las Palmas','Norte de Santander','norte',1100,28,'cuerpo, nuez',PRINC_NORTE,{sombra:true,nota:'Dicen que por aquí entró el café al país.'})
+  ];
+  const REG={eje:'Eje Cafetero',antioquia:'Antioquia',valle:'Valle del Cauca',tolima:'Tolima',huila:'Huila',cauca:'Cauca',narino:'Nariño',santander:'Santander',cundinamarca:'Cundinamarca',sierra:'Sierra Nevada',norte:'Norte de Santander'};
+  const VAR=[
+    {id:'tipica',n:'Típica (arábigo)',desde:0,prod:8,roya:1,taza:.6,d:'La de los abuelos: alta, bajo sombra, muy buena taza y poca producción.'},
+    {id:'borbon',n:'Borbón',desde:1930,prod:10,roya:1,taza:.8,d:'Más productiva que la Típica y de taza dulce. Le da roya.'},
+    {id:'caturra',n:'Caturra',desde:1970,prod:17,roya:1,taza:0,d:'Bajita, a libre exposición y muy productiva. La que cambió el paisaje. Le da roya.'},
+    {id:'colombia',n:'Variedad Colombia',desde:1982,prod:17,roya:.15,taza:-.3,d:'La sacó Cenicafé para resistir la roya, que acaba de llegar.'},
+    {id:'tabi',n:'Tabi',desde:2002,prod:13,roya:.15,taza:.7,d:'Alta, resistente a la roya y de buena taza.'},
+    {id:'castillo',n:'Castillo',desde:2005,prod:20,roya:.08,taza:-.1,d:'Productiva y resistente: la de la gran renovación.'},
+    {id:'cenicafe1',n:'Cenicafé 1',desde:2016,prod:21,roya:.05,taza:.1,d:'La más nueva de Cenicafé: resistente y de porte bajo.'},
+    {id:'geisha',n:'Geisha',desde:2006,prod:7,roya:.8,taza:3,d:'Poquísima producción y delicada, pero la taza se paga en subastas.'}
+  ];
+  const varDe=id=>VAR.find(v=>v.id===id)||VAR[0];
+  const munDe=n=>MUNICIPIOS.find(m=>m.n===n)||MUNICIPIOS[0];
+  const TAM=[{n:'Una finca pequeña',ha:5},{n:'Una finca mediana',ha:15},{n:'Una finca grande',ha:40},{n:'Una hacienda',ha:120}];
+  const P1=n=>String(n||'').split(' ')[0];
+
+  /* --- el mercado: Nueva York, a lo largo de un siglo (índice real, 1 ≈ el precio de 2019) --- */
+  const HIST=[[1900,1.5],[1910,1.3],[1920,1.5],[1927,1.4],[1929,1.2],[1932,.75],[1937,.85],[1940,.6],[1946,1.2],[1950,2.5],[1954,3.3],[1958,2.3],[1962,1.7],[1970,1.9],[1975,2.0],[1976,3.2],[1977,4.0],[1978,2.9],[1980,2.5],[1986,2.4],[1988,1.6],[1989,1.1],[1990,.8],[1992,.6],[1994,1.6],[1995,1.4],[1997,1.9],[1999,1.1],[2001,.6],[2002,.55],[2004,.7],[2006,1.0],[2008,1.2],[2010,1.6],[2011,2.4],[2012,1.6],[2013,1.1],[2014,1.6],[2016,1.3],[2018,1.0],[2019,.95],[2020,1.05],[2021,1.7],[2022,1.9],[2023,1.5],[2024,2.4],[2025,3.0]];
+  function histIdx(a){ if(a<=HIST[0][0]) return HIST[0][1]; for(let i=1;i<HIST.length;i++){ if(a<=HIST[i][0]){ const [a0,v0]=HIST[i-1],[a1,v1]=HIST[i]; return v0+(v1-v0)*(a-a0)/(a1-a0); } } return null; }
+  const LABOR=a=>a<1930?.3:a<1950?.38:a<1970?.5:a<1990?.68:a<2010?.85:1;    // jornal relativo a hoy
+  function G(){ if(!S.cafe141||typeof S.cafe141!=='object') S.cafe141={nivel:1,anio:null,idx:histIdx(S.anio)||1.2,interno:0,clima:'normal',hist:[],jornal:1}; return S.cafe141; }
+  function anualMercado(){
+    const g=G(); if(g.anio===S.anio) return; const primera=g.anio===null; g.anio=S.anio;
+    g.nivel=1;   // pesos constantes, como el resto del juego
+    const h=histIdx(S.anio); g.idx=h!==null?h*rnd(.9,1.1):clamp(g.idx*(1+rnd(-.22,.25))-(g.idx-1.4)*.15,.45,3.6);
+    if(g.choque&&g.choque.hasta>=S.anio) g.idx*=g.choque.f;
+    // el precio interno: la Federación suaviza los saltos mientras existe el Fondo y el pacto de cuotas
+    const fondo=S.anio>=1940&&S.anio<=1989;
+    g.interno=1.9*Math.pow(g.idx,fondo?.62:.92)*(S.anio<1927?.92:1);
+    // el clima: El Niño, La Niña (los grandes, en su año)
+    const N={1972:'nino',1982:'nino',1983:'nino',1987:'nino',1991:'nino',1992:'nino',1997:'nino',1998:'nino',2009:'nino',2015:'nino',2016:'nino',2023:'nino',2024:'nino',1988:'nina',1999:'nina',2008:'nina',2010:'nina',2011:'nina',2021:'nina',2022:'nina'};
+    g.clima=N[S.anio]||(S.anio>2026?(chance(.15)?'nino':chance(.15)?'nina':'normal'):'normal');
+    g.jornal=LABOR(S.anio)*(g.escasez&&g.escasez>=S.anio?1.25:1);
+    g.hist.push([S.anio,g.interno,g.idx]); if(g.hist.length>60) g.hist.shift();
+  }
+  const precioCarga=()=>G().interno*G().nivel;
+  const roya=()=>S.anio>=1983, broca=()=>S.anio>=1988, especiales=()=>S.anio>=1998, almacafe=()=>S.anio>=1965;
+
+  /* --- la finca --- */
+  function F(b){ return b&&b.cafe141; }
+  const misFincas=()=>(S.bienes||[]).filter(b=>b.cafe141);
+  function edadFactor(a){ return a<2?0:a<3?.35:a<4?.75:a<=6?1:a<=7?.9:a<=8?.8:Math.max(.3,.8-(a-8)*.09); }
+  function calidad(f){ const m=munDe(f.mun), v=varDe(f.var);
+    let q=79.5+(m.alt-1400)/350+v.taza+(f.sombrio?.5:0)+(f.secado==='silo'?.3:f.secado==='marquesina'?.6:0)+(f.beneficio==='ecologico'?.4:0)+(f.proceso==='honey'?.8:f.proceso==='natural'?1.2:0)+(f.mayordomo?.3:0);
+    if(['huila','narino','cauca'].includes(m.reg)) q+=.6; if(m.reg==='sierra'||m.reg==='santander') q-=.2;
+    return clamp(q,76,92); }
+  function cosecha(f){ const v=varDe(f.var), g=G(), m=munDe(f.mun);
+    const ed=S.anio-f.siembra, ef=f.ciclica&&ed>=4?.88:edadFactor(ed);
+    let c=f.ha*v.prod*Math.sqrt((f.densidad||5000)/5000)*ef*(f.sombrio?.8:1)*(f.fertiliza?1:.72)*(f.mayordomo?1:.93);
+    const notas=[];
+    if(roya()&&v.roya>.3){ const ep=S.anio>=2008&&S.anio<=2011?1.6:1; const p=clamp(v.roya*.35*ep*(f.fungicida?.35:1),0,.7); c*=1-p; if(p>.15) notas.push('la roya se llevó el '+Math.round(p*100)+'%'); }
+    if(broca()){ const p=f.manejoBroca?.03:.14; c*=1-p; if(p>.1) notas.push('la broca dañó parte del grano'); }
+    if(g.clima==='nino'){ const p=f.sombrio||m.sombra?.05:.16; c*=1-p; notas.push('El Niño secó los cafetales'); }
+    if(g.clima==='nina'){ const p=S.anio===2010||S.anio===2011?.28:.15; c*=1-p; notas.push('La Niña: lluvias, poca florescencia y hongos'); }
+    if(g.escasez&&g.escasez>=S.anio&&!f.pagaMas){ c*=.85; notas.push('faltaron recolectores y se cayó grano al suelo'); }
+    if(f.extension) c*=1.05;
+    return {cargas:Math.max(0,c*rnd(.9,1.1)),notas};
+  }
+  function costos(f,cargas){ const g=G(), fert=(()=>{ try{ return window.indiceInsumo137?window.indiceInsumo137('agro').ind:1; }catch(e){ return 1; } })();
+    const dn=clamp((f.densidad||5000)/5000,.4,1.6), labores=f.ha*9*g.jornal*(.6+.4*dn), abono=f.fertiliza?f.ha*6*fert*dn*(S.anio<1970?.6:1):0, mb=f.manejoBroca?f.ha*1:0, fung=f.fungicida?f.ha*1.4:0;
+    const ciclo=f.ciclica&&S.anio-f.siembra>=4?f.ha*1.1*g.jornal:0, recol=cargas*.6*g.jornal*(f.pagaMas?1.2:1), benef=cargas*(f.beneficio==='ecologico'?.06:.08), may=f.mayordomo?22*g.jornal:0;
+    return (labores+abono+mb+fung+recol+benef+may+ciclo)*g.nivel; }
+  function precioVenta(f,canal,cal){ const p=precioCarga(); let pr=p;
+    if(cal<80.5) pr*=.94;   // factor de rendimiento malo: descuento
+    if(canal==='particular') pr*=rnd(.94,1.07);
+    if(canal==='especial') pr*=1+clamp((cal-83)*.09,0,1.1);
+    if(f.certs&&Object.keys(f.certs).length&&especiales()) pr*=1.04;
+    return pr; }
+
+  /* --- el año de las fincas --- */
+  function anual(){
+    if(!S||!S.p||S.muerto) return; anualMercado(); const g=G();
+    misFincas().forEach(b=>{ const f=F(b); if(f.anio===S.anio) return; f.anio=S.anio;
+      b.renta=0;   // la producción la maneja este módulo, no la renta genérica
+      if(broca()&&f.mayordomo&&!f.manejoBroca&&!f.brocaAviso){ f.brocaAviso=1; f.manejoBroca=true; log('Llegó la broca a <b>'+esc(b.nombre)+'</b>. El mayordomo arrancó con el re-re: recoger hasta el último grano.',''); }
+      const {cargas,notas}=cosecha(f), cal=calidad(f); let canal=f.canal||'cooperativa';
+      if(canal==='especial'&&(!especiales()||cal<84)) canal='cooperativa';
+      let ventaC=cargas, ret=0; if(canal==='retener'){ ret=cargas; ventaC=0; f.bodega=(f.bodega||0)+cargas; canal='cooperativa'; }
+      let ingreso=0;
+      if(canal==='especial'){ const parte=clamp(.35+(cal-84)*.1,.35,.8); ingreso=ventaC*parte*precioVenta(f,'especial',cal)+ventaC*(1-parte)*precioVenta(f,'cooperativa',cal); }
+      else if(canal==='particular'&&chance(.05)){ ingreso=ventaC*precioVenta(f,'particular',cal)*.5; notas.push('el comprador particular quedó debiendo la mitad'); }
+      else ingreso=ventaC*precioVenta(f,canal,cal);
+      const costo=costos(f,cargas), neto=ingreso-costo;
+      S.efectivo+=neto; f.ult={anio:S.anio,cargas,ingreso,costo,neto,cal,canal,notas,precio:precioCarga(),ret};
+      f.hist=f.hist||[]; f.hist.push([S.anio,Math.round(cargas),Math.round(neto)]); if(f.hist.length>40) f.hist.shift();
+      log('Cosecha de <b>'+esc(b.nombre)+'</b>: '+Math.round(cargas).toLocaleString('es-CO')+' cargas'+(ret?' (las guardaste)':'')+'. '+(notas.length?notas.join('; ').replace(/^./,c=>c.toUpperCase())+'. ':'')+(neto>=0?'Quedaron ':'Se perdieron ')+fmt(Math.abs(neto))+'.',neto>=0?'bien':'mal');
+    });
+  }
+  function wrapPaso141(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA141_PASO) return; window.__SA141_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
+
+  /* --- comprar una finca cafetera --- */
+  function valorFinca(m,ha){ return Math.round(m.ha*ha*(m.paisaje&&S.anio>=2011?1.12:1)); }
+  function escenaComprar141(){
+    const regs=[...new Set(MUNICIPIOS.map(m=>m.reg))];
+    escena({rubro:'Caficultura',titulo:'¿Dónde compras finca?',ancho:true,cerrable:true,clase:'cafe141',
+      cuerpo:'Cada región tiene su taza, su altura y su calendario de cosecha. El Eje Cafetero es lo tradicional y lo más caro; el sur (Huila, Cauca, Nariño) da las tazas más premiadas.',
+      opciones:regs.map(r=>({t:REG[r],cat:'casa',d:MUNICIPIOS.filter(m=>m.reg===r).map(m=>m.n).join(', ')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRegion(r); }}))});
+  }
+  function escenaRegion(r){
+    escena({rubro:'Caficultura · '+REG[r],titulo:'Elige el municipio',ancho:true,cerrable:true,clase:'cafe141',
+      opciones:MUNICIPIOS.filter(m=>m.reg===r).map(m=>({t:m.n+', '+m.dep,cat:'casa',d:m.alt+' metros. Taza '+m.taza+'. Cosecha de '+m.cos+'. Hectárea a unos '+fmt(m.ha)+'.'+(m.nota?' '+m.nota:''),cerrar:false,run:()=>{ cerrarModal(); escenaTam(m); }}))});
+  }
+  function escenaTam(m){
+    escena({rubro:'Caficultura · '+esc(m.n),titulo:'¿De qué tamaño?',cerrable:true,clase:'cafe141',
+      opciones:TAM.map(t=>{ const v=valorFinca(m,t.ha); return {t:t.n+' · '+t.ha+' hectáreas',cat:'casa',d:'Unos '+fmt(v)+'. Puedes pagar el 40% y financiar el resto.',dis:S.efectivo<v*.4?'Necesitas al menos '+fmt(v*.4):S.mov<1?'No te quedan movidas':null,cerrar:false,
+        run:()=>{ cerrarModal(); escenaVariedad(m,t,v); }}; })});
+  }
+  function escenaVariedad(m,t,v){
+    const disp=VAR.filter(x=>x.desde<=S.anio&&!(x.id==='geisha'&&m.alt<1600));
+    escena({rubro:'Caficultura · '+esc(m.n),titulo:'¿Qué tiene sembrado?',ancho:true,cerrable:true,clase:'cafe141',
+      cuerpo:'La finca viene con un cafetal de unos cinco años. Elige la variedad; podrás renovarla después.',
+      opciones:disp.map(x=>({t:x.n,cat:'casa',d:x.d+' Unas '+x.prod+' cargas por hectárea en plena producción.',
+        run:()=>{ const b=comprarBien({clase:'finca',tipo:'cafe',nombre:'Finca cafetera en '+m.n,valor:v,mant:.012,renta:0,vol:0,ciudad:m.n,cuotaInicial:S.efectivo>=v?1:.4,anios:12});
+          if(!b) return; S.mov=Math.max(0,S.mov-1);
+          b.cafe141={mun:m.n,ha:t.ha,var:x.id,siembra:S.anio-5,densidad:x.id==='tipica'||x.id==='borbon'||x.id==='geisha'?2500:5000,sombrio:x.id==='tipica'||x.id==='borbon'||!!m.sombra,fertiliza:true,manejoBroca:broca(),fungicida:false,ciclica:true,mayordomo:t.ha>=15,beneficio:'tradicional',secado:'sol',proceso:'lavado',canal:'cooperativa',certs:{},desde:S.anio};
+          S.p.felicidad=clamp(S.p.felicidad+3,0,100); hito('Compró una finca cafetera en '+m.n); log('Compraste <b>'+t.ha+' hectáreas de café en '+esc(m.n)+'</b> ('+esc(m.dep)+'), sembradas en '+x.n+'.','hito'); render(); }}))});
+  }
+  // las fincas cafeteras viejas (de antes de esta versión) pasan al modelo nuevo
+  function migrar(){
+    (S.bienes||[]).forEach(b=>{ if(b.tipo!=='cafe'||b.clase!=='finca'||b.cafe141) return;
+      const m=/Manizales|Pereira|Armenia/.test(b.ciudad||'')?munDe('Chinchiná'):/Medell|Estrella/.test(b.ciudad||'')?munDe('Fredonia'):/Bogot/.test(b.ciudad||'')?munDe('Viotá'):/Bucaramanga/.test(b.ciudad||'')?munDe('San Gil'):/Cali/.test(b.ciudad||'')?munDe('Sevilla'):munDe('Fredonia');
+      const ha=Math.max(3,Math.round((b.valor||1000)/m.ha));
+      b.cafe141={mun:m.n,ha,var:S.anio>=2005?'castillo':S.anio>=1982?'colombia':S.anio>=1970?'caturra':'borbon',siembra:S.anio-5,densidad:5000,sombrio:S.anio<1970,fertiliza:true,manejoBroca:broca(),fungicida:false,ciclica:true,mayordomo:ha>=15,beneficio:'tradicional',secado:'sol',proceso:'lavado',canal:'cooperativa',certs:{},desde:S.anio};
+      b.renta=0; if(!/en /.test(b.nombre)) b.nombre='Finca cafetera en '+m.n; });
+  }
+
+  /* --- la pantalla de la caficultura --- */
+  function spark(){ const h=G().hist.slice(-25); if(h.length<2) return ''; const W=260,H=44, xs=h.map(x=>x[1]), mn=Math.min(...xs), mx=Math.max(...xs), r=(mx-mn)||1;
+    const pts=xs.map((v,i)=>(i*(W/(xs.length-1))).toFixed(1)+','+(H-3-(v-mn)/r*(H-8)).toFixed(1)).join(' ');
+    return '<svg width="100%" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="height:46px" aria-label="Precio interno de los últimos años"><polyline points="'+pts+'" fill="none" stroke="#C9A24A" stroke-width="1.8"/></svg><div class="nota">Precio interno de la carga, '+h[0][0]+'–'+h[h.length-1][0]+'</div>'; }
+  function escenaCafe141(){
+    migrar(); anualMercado(); const g=G(), L=misFincas();
+    const fincas=L.map(b=>{ const f=F(b), v=varDe(f.var), a=S.anio-f.siembra, u=f.ult;
+      return '<div class="finca"><b>'+esc(b.nombre)+'</b><div class="det">'+f.ha+' ha · '+esc(v.n)+(f.ciclica&&a>=4?' · renovado por ciclos':' · cafetal de '+a+' año'+(a===1?'':'s')+(a<2?' (en levante)':a>8?' (envejecido)':''))+' · taza '+calidad(f).toFixed(1)+' puntos</div>'
+        +(u?'<div class="det">Cosecha de '+u.anio+': '+Math.round(u.cargas).toLocaleString('es-CO')+' cargas · '+(u.neto>=0?'ganó ':'perdió ')+fmt(Math.abs(u.neto))+'</div>':'<div class="det">Todavía no ha cosechado contigo.</div>')+'</div>'; }).join('');
+    const ops=[{t:'Comprar una finca cafetera',cat:'casa',d:'En el Eje, Antioquia, el Valle, Tolima, Huila, Cauca, Nariño, Santander, Cundinamarca o la Sierra Nevada.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar141(); }}]
+      .concat(L.map(b=>({t:'Manejar '+b.nombre,cat:'casa',d:'Variedad, renovación, abono, roya y broca, beneficio, secado y a quién le vendes.',cerrar:false,run:()=>{ cerrarModal(); escenaFinca141(b); }})));
+    const cl={normal:'Clima normal',nino:'Año de El Niño: sequía',nina:'Año de La Niña: lluvias'}[g.clima];
+    escena({rubro:'El campo',titulo:'Caficultura',ancho:true,cerrable:true,clase:'cafe141',
+      cuerpo:L.length?'Tus cafetales y el mercado del café.':'Todavía no tienes café sembrado. El café hizo las grandes fortunas del país, y también las quebró.',
+      html:'<div class="k"><div><b>'+fmt(precioCarga())+'</b><span>precio interno de la carga de 125 kg</span></div><div><b>'+(g.idx>=1.8?'Muy alto':g.idx>=1.2?'Bueno':g.idx>=.8?'Regular':'De crisis')+'</b><span>el café en Nueva York</span></div><div><b>'+cl+'</b><span>'+S.anio+'</span></div><div><b>'+L.reduce((s,b)=>s+F(b).ha,0)+' ha</b><span>sembradas en café</span></div></div>'+spark()+fincas,
+      opciones:ops});
+  }
+  function escenaFinca141(b){
+    const f=F(b); if(!f) return; const m=munDe(f.mun), v=varDe(f.var), a=S.anio-f.siembra, cal=calidad(f), sinMov=S.mov<1?'No te quedan movidas':null;
+    const reab=()=>{ cerrarModal(); render(); escenaFinca141(b); };
+    const caja=(c,fn)=>()=>{ if(S.efectivo<c){ log('No tienes '+fmt(c)+'.','mal'); return; } S.efectivo-=c; fn(); reab(); };
+    const nv=G().nivel, ops=[];
+    // renovar
+    const cZ=Math.round(f.ha*4*nv), cS=Math.round(f.ha*12*nv);
+    ops.push({t:'Renovar por zoca',cat:'casa',d:'Cortas los cafetos a 30 cm para que rebroten. Dos años sin cosecha en lo renovado y vuelve a producir como nuevo. '+fmt(cZ)+'.',dis:a<6?'El cafetal todavía está joven':sinMov,cerrar:false,run:caja(cZ,()=>{ S.mov--; f.siembra=S.anio-0; log('Renovaste por zoca la <b>'+esc(b.nombre)+'</b>.'); })});
+    VAR.filter(x=>x.desde<=S.anio&&x.id!==f.var&&!(x.id==='geisha'&&m.alt<1600)).forEach(x=>ops.push({t:'Sembrar '+x.n,cat:'casa',d:x.d+' Almácigo, trazo y siembra: '+fmt(cS)+'. Dos años de levante.',dis:sinMov,cerrar:false,run:caja(cS,()=>{ S.mov--; f.var=x.id; f.siembra=S.anio; f.densidad=x.id==='tipica'||x.id==='borbon'||x.id==='geisha'?2500:5000; f.sombrio=x.id==='tipica'||x.id==='borbon'?true:f.sombrio; log('Sembraste <b>'+esc(x.n)+'</b> en '+esc(b.nombre)+'.','hito'); })}));
+    ops.push({t:f.ciclica?'Dejar la renovación por ciclos':'Renovar por ciclos',cat:'casa',d:f.ciclica?'Dejas de renovar un quinto del cafetal cada año: ahorras, pero el cafetal envejece.':'Cada año renuevas un quinto del cafetal (zoca o siembra). La producción se mantiene estable año tras año.',cerrar:false,run:()=>{ f.ciclica=!f.ciclica; reab(); }});
+    // manejo
+    ops.push({t:f.sombrio?'Quitar el sombrío (libre exposición)':'Sembrar sombrío (guamo, plátano, nogal)',cat:'casa',d:f.sombrio?'Más producción, pero más sensible a la sequía y a la broca.':'Menos producción, mejor taza, protege del sol y de El Niño, y cuida el agua.',cerrar:false,run:()=>{ f.sombrio=!f.sombrio; reab(); }});
+    ops.push({t:f.fertiliza?'Dejar de abonar':'Volver a abonar',cat:'casa',d:f.fertiliza?'Ahorras abono; la producción cae casi un 30%.':'Abono cada año: cuesta, pero sostiene la cosecha.',cerrar:false,run:()=>{ f.fertiliza=!f.fertiliza; reab(); }});
+    if(broca()) ops.push({t:f.manejoBroca?'Suspender el manejo de la broca':'Manejo integrado de la broca',cat:'casa',d:f.manejoBroca?'Ahorras, pero la broca daña el grano.':'Re-re (recoger todo el grano caído), trampas y control biológico.',cerrar:false,run:()=>{ f.manejoBroca=!f.manejoBroca; reab(); }});
+    if(roya()&&v.roya>.3) ops.push({t:f.fungicida?'Suspender el fungicida':'Fumigar contra la roya',cat:'casa',d:f.fungicida?'Ahorras, pero la roya vuelve con toda.':'Tu variedad es susceptible: con fungicida la roya se controla, pero cuesta cada año.',cerrar:false,run:()=>{ f.fungicida=!f.fungicida; reab(); }});
+    ops.push({t:f.mayordomo?'Prescindir del mayordomo':'Contratar un mayordomo',cat:'casa',d:f.mayordomo?'Te ahorras su sueldo; sin él la finca se descuida.':'Alguien de confianza que viva en la finca y cuide cada detalle.',cerrar:false,run:()=>{ f.mayordomo=!f.mayordomo; reab(); }});
+    // beneficio y secado
+    if(S.anio>=1995&&f.beneficio!=='ecologico'){ const c=Math.round(Math.max(8,f.ha*1.5)*nv); ops.push({t:'Beneficio ecológico',cat:'casa',d:'Despulpadora sin agua y manejo de mieles (el Becolsub de Cenicafé). Ahorra agua, contamina menos y mejora la taza. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:caja(c,()=>{ S.mov--; f.beneficio='ecologico'; log('Montaste beneficio ecológico en <b>'+esc(b.nombre)+'</b>.','bien'); })}); }
+    if(f.secado==='sol'){ const c=Math.round(Math.max(6,f.ha*.8)*nv); ops.push({t:'Construir una marquesina',cat:'casa',d:'Secado bajo plástico: el grano no se moja con el aguacero y la taza mejora. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:caja(c,()=>{ S.mov--; f.secado='marquesina'; })}); }
+    if(f.secado!=='silo'&&f.ha>=15&&S.anio>=1950){ const c=Math.round(Math.max(20,f.ha*1.6)*nv); ops.push({t:'Comprar un silo secador',cat:'casa',d:'Para fincas grandes: secas toda la cosecha a tiempo, llueva o no. '+fmt(c)+'.',dis:sinMov,cerrar:false,run:caja(c,()=>{ S.mov--; f.secado='silo'; })}); }
+    if(especiales()&&cal>=83) ops.push({t:'Proceso: '+({lavado:'pasar a honey',honey:'pasar a natural',natural:'volver al lavado'})[f.proceso||'lavado'],cat:'casa',d:'Lavado es lo tradicional colombiano. Honey y natural secan con la miel o con la cereza: tazas más dulces y exóticas para el mercado de especiales, con más riesgo.',cerrar:false,run:()=>{ f.proceso=({lavado:'honey',honey:'natural',natural:'lavado'})[f.proceso||'lavado']; reab(); }});
+    // venta
+    const CAN={cooperativa:'A la cooperativa (garantía de compra)',particular:'A un comprador particular',especial:'Como café especial',retener:'Guardar la cosecha y vender después'};
+    Object.keys(CAN).filter(k=>k!==(f.canal||'cooperativa')).forEach(k=>{ const dis=k==='especial'&&!especiales()?'Todavía no existe el mercado de cafés especiales':k==='especial'&&cal<84?'Tu taza da '+cal.toFixed(1)+': hacen falta 84 puntos':null;
+      ops.push({t:'Vender: '+CAN[k].toLowerCase(),cat:'capital',d:({cooperativa:'Te compran todo al precio interno del día. Sin sorpresas.',particular:'A veces pagan más; a veces se quedan debiendo.',especial:'Tostadores e importadores pagan prima por taza. Solo una parte sale como especial; el resto va a la cooperativa.',retener:(almacafe()?'En Almacafé, con bono de prenda':'En la bodega de la finca')+': no vendes este año y apuestas a que el precio suba.'})[k],dis,cerrar:false,run:()=>{ f.canal=k; reab(); }}); });
+    if(f.bodega>0){ const val=f.bodega*precioVenta(f,'cooperativa',cal); ops.push({t:'Vender lo guardado ('+Math.round(f.bodega)+' cargas)',cat:'capital',d:'Hoy valen '+fmt(val)+'.',cerrar:false,run:()=>{ S.efectivo+=val; log('Vendiste '+Math.round(f.bodega)+' cargas guardadas por '+fmt(val)+'.','bien'); f.bodega=0; reab(); }}); }
+    // ampliar
+    const cA=Math.round(m.ha*10); ops.push({t:'Comprarle 10 hectáreas al vecino',cat:'casa',d:'Ya sembradas, del mismo cafetal. '+fmt(cA)+'.',dis:sinMov,cerrar:false,run:caja(cA,()=>{ S.mov--; f.ha+=10; b.valor+=cA; b.precioCompra=(b.precioCompra||0)+cA; log('La <b>'+esc(b.nombre)+'</b> creció a '+f.ha+' hectáreas.','bien'); })});
+    const u=f.ult;
+    const tabla='<table class="libro">'
+      +'<tr><td>Municipio</td><td>'+esc(m.n)+', '+esc(m.dep)+' · '+m.alt+' m</td></tr>'
+      +'<tr><td>Cafetal</td><td>'+f.ha+' ha de '+esc(v.n)+', '+(f.densidad||5000).toLocaleString('es-CO')+' árboles por ha, '+(f.sombrio?'bajo sombrío':'a libre exposición')+'. '+a+' año'+(a===1?'':'s')+(a<2?' · en levante, sin cosecha':f.ciclica&&a>=4?' · renovado por ciclos':a>8?' · ya envejecido: toca renovar':'')+'</td></tr>'
+      +'<tr><td>Cosecha</td><td>Principal de '+esc(m.cos)+'</td></tr>'
+      +'<tr><td>Taza</td><td><span class="taza">'+esc(m.taza)+'</span> · '+cal.toFixed(1)+' puntos'+(cal>=84?' (especial)':'')+'</td></tr>'
+      +'<tr><td>Beneficio</td><td>'+(f.beneficio==='ecologico'?'Ecológico':'Tradicional')+', secado '+({sol:'al sol en patio',marquesina:'en marquesina',silo:'en silo'})[f.secado]+', proceso '+(f.proceso||'lavado')+'</td></tr>'
+      +'<tr><td>Manejo</td><td>'+[f.fertiliza?'abona':'sin abono',broca()?(f.manejoBroca?'controla la broca':'sin control de broca'):'',roya()&&v.roya>.3?(f.fungicida?'fumiga contra la roya':'sin control de roya'):'',f.mayordomo?'con mayordomo':'sin mayordomo'].filter(Boolean).join(' · ')+'</td></tr>'
+      +'<tr><td>Vende</td><td>'+CAN[f.canal||'cooperativa']+(f.bodega>0?' · '+Math.round(f.bodega)+' cargas guardadas':'')+'</td></tr>'
+      +(u?'<tr><td>Cosecha de '+u.anio+'</td><td>'+Math.round(u.cargas).toLocaleString('es-CO')+' cargas a '+fmt(u.precio)+' · ingresos '+fmt(u.ingreso)+', costos '+fmt(u.costo)+' · <span class="'+(u.neto>=0?'bien':'mal')+'">'+(u.neto>=0?'ganó ':'perdió ')+fmt(Math.abs(u.neto))+'</span>'+(u.notas.length?'<br><span class="nota">'+esc(u.notas.join('; '))+'</span>':'')+'</td></tr>':'')
+      +'</table>';
+    escena({rubro:'Caficultura',titulo:esc(b.nombre),ancho:true,cerrable:true,clase:'cafe141',html:tabla,opciones:ops});
+  }
+
+  /* --- enganches --- */
+  function wrapEscena141(){ const old=window.escena; if(typeof old!=='function'||window.__SA141_ESC) return; window.__SA141_ESC=true;
+    window.escena=function(o){
+      try{ if(o&&o.titulo==='Comprar finca'&&Array.isArray(o.opciones)){ o=Object.assign({},o,{opciones:o.opciones.map(op=>/cafeter/i.test(String(op.t))?Object.assign({},op,{d:'Elige el municipio, el tamaño y la variedad: del Eje Cafetero a Nariño.',dis:null,cerrar:false,run:()=>{ cerrarModal(); escenaComprar141(); }}):op)}); }
+        if(o&&typeof o.html==='string'&&o.html.indexOf('class="ficha109"')>=0&&S&&S.bienes){ const b=S.bienes.find(x=>x.cafe141&&esc(x.nombre)===o.titulo); if(b) o=Object.assign({},o,{opciones:[{t:'Manejar el cafetal',cat:'casa',d:'Variedad, renovación, abono, roya y broca, beneficio y venta.',cerrar:false,run:()=>{ cerrarModal(); escenaFinca141(b); }}].concat(o.opciones||[])}); }
+      }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function wrapAcciones141(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA141_ACC) return; window.__SA141_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())){ migrar(); const L=misFincas();
+        A.push({t:'Caficultura',d:L.length?L.length+' finca'+(L.length>1?'s':'')+', '+L.reduce((s,b)=>s+F(b).ha,0)+' ha de café. La carga está a '+fmt(precioCarga())+'.':'Comprar finca en un municipio cafetero, sembrar, cosechar y vender.',mov:0,modal:true,run:()=>escenaCafe141()}); } }catch(e){}
+      return A; }; }
+  function wrapCat141(){ const old=window.catDe; if(typeof old!=='function'||window.__SA141_CAT) return; window.__SA141_CAT=true;
+    window.catDe=function(t){ if(t==='Caficultura') return 'casa'; return old.apply(this,arguments); }; }
+  function init141(){ wrapPaso141(); wrapEscena141(); wrapAcciones141(); wrapCat141();
+    Object.assign(window,{MUNICIPIOS_CAFE_141:MUNICIPIOS,VARIEDADES_141:VAR,cafe141:G,fincasCafe141:misFincas,escenaCafe141,escenaFinca141,escenaComprarCafe141:escenaComprar141,anualCafe141:anual,precioCarga141:precioCarga,calidadTaza141:calidad,cosecha141:cosecha,costosCafe141:costos,munCafe141:munDe,varCafe141:varDe,migrarCafe141:migrar,precioVentaCafe141:precioVenta}); }
+  setTimeout(init141,40); setTimeout(init141,220); setTimeout(init141,650);
+  window.__SA141={version:V141};
 })();
 </script>
 
