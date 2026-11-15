@@ -1049,10 +1049,23 @@ svg.foto116{display:block;background:#1d2a23}
 .prod137 .k span{font-size:12px;color:var(--humo2)}
 .prod137-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
 </style>
+<style id="estilos-v138">
+.mer138 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.mer138 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.mer138 .k b{display:block;font-size:17px;font-family:var(--display)}
+.mer138 .k span{font-size:12px;color:var(--humo2)}
+.mer138 .cuota{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 46px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.mer138 .cuota .bar{height:8px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden}
+.mer138 .cuota .bar i{display:block;height:100%;background:#8C8574}
+.mer138 .cuota.tu .bar i{background:var(--oro,#D6A648)}
+.mer138 .cuota.tu{font-weight:600}
+.mer138 .tipo{font-size:11.5px;color:var(--humo2)}
+.mer138 .cmp{margin-top:12px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v137</div>
+<div class="version-badge" id="versionBadge">v138</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25917,6 +25930,152 @@ install();setTimeout(install,1200);
     Object.assign(window,{INDUSTRIA_137:IND,produccion137:P,capacidad137:capacidad,escenaPlantas137,indiceInsumo137:indice,anualInsumos137:anualInsumos}); }
   setTimeout(init137,40); setTimeout(init137,220); setTimeout(init137,650); setTimeout(init137,900);
   window.__SA137={version:V137};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v138 · MERCADO Y COMPETENCIA
+   Cada sector tiene un tamaño de mercado que crece con la economía, y
+   competidores con nombre: empresas nacionales, las casas rivales,
+   multinacionales que llegan (sobre todo con la apertura de 1991),
+   importaciones y, después, plataformas. Tu cuota sale de cuánto vendes
+   frente a todo el mercado, y se mueve con tu marca, la calidad, la
+   innovación y la estrategia de precio que elijas (barato para ganar
+   volumen, caro para ganar margen). Guerras de precios, competidores que
+   quiebran, el contrabando, y la Superintendencia si te vuelves dominante.
+   ========================================================================== */
+(function(){
+  const V138='v138';
+  const C=(n,tipo,desde,atr)=>({n,tipo,desde,atr});
+  const COMP={
+    moda:[C('Textiles del Aburrá','nacional',1907,55),C('Hilanderías del Valle','nacional',1930,50),C('Confecciones La Moda','nacional',1960,48),C('Una cadena española de moda rápida','multinacional',1998,66),C('Importaciones de Asia','importados',2004,52)],
+    alimentos:[C('Industrias La Constancia','nacional',1920,58),C('Galletas El Sol','nacional',1930,50),C('Lácteos del Prado','nacional',1945,54),C('Alimentaria Helvética','multinacional',1944,64),C('Productos importados','importados',1992,46)],
+    tech:[C('Sistemas Andinos','nacional',1975,50),C('Datos de Colombia','nacional',1990,52),C('Un gigante de Silicon Valley','multinacional',1995,72),C('Startups con capital de riesgo','nacional',2012,58)],
+    construccion:[C('Concretos Andinos','nacional',1950,55),C('Constructora del Norte','nacional',1960,52),C('Inversiones Urbanas','nacional',1975,50),C('Una constructora española','multinacional',1995,60)],
+    energia:[C('La electrificadora pública','publico',1930,48),C('Generadora del Oriente','nacional',1995,55),C('Una eléctrica española','multinacional',1997,64)],
+    agro:[C('La cooperativa de caficultores','nacional',1927,56),C('Ingenios del Valle','nacional',1930,54),C('Exportadora de Frutas','nacional',1980,50),C('Una comercializadora suiza','multinacional',1960,62)],
+    financiero:[C('Banco de los Andes','nacional',1900,58),C('Banco Industrial','nacional',1950,54),C('Corporación de Ahorro y Vivienda','nacional',1972,52),C('Un banco español','multinacional',1996,66),C('Billeteras digitales','nacional',2016,58)],
+    logistica:[C('Transportes del Río','nacional',1920,50),C('Flota Nacional','nacional',1950,52),C('Mensajería Rápida','nacional',1970,54),C('Una naviera danesa','multinacional',1990,64)],
+    salud:[C('Laboratorios Andinos','nacional',1940,54),C('Genéricos Nacionales','nacional',1985,52),C('Una farmacéutica alemana','multinacional',1950,68)],
+    retail:[C('Las tiendas de barrio','atomizado',1900,45),C('Almacenes La Feria','nacional',1940,54),C('Supermercados del Pueblo','nacional',1960,52),C('Una cadena francesa de hipermercados','multinacional',1999,64),C('Las tiendas de descuento','nacional',2010,60),C('El comercio electrónico','plataforma',2015,62)],
+    medios:[C('El Diario Nacional','nacional',1911,58),C('Radio Cadena','nacional',1940,55),C('Un canal privado','nacional',1998,60),C('Las plataformas extranjeras','plataforma',2010,70)],
+    mineria:[C('Minera del Cauca','nacional',1930,50),C('Carbones del Cesar','nacional',1985,55),C('Una minera canadiense','multinacional',1995,64)],
+    juridico:[C('El bufete tradicional bogotano','nacional',1920,60),C('Abogados del Valle','nacional',1960,50),C('Una firma global','multinacional',2000,66)],
+    seguros:[C('Seguros Andinos','nacional',1920,55),C('Aseguradora del Pacífico','nacional',1960,52),C('Una reaseguradora suiza','multinacional',1950,64)],
+    turismo:[C('Hoteles del Caribe','nacional',1950,52),C('Las agencias de viaje','nacional',1960,48),C('Una cadena hotelera estadounidense','multinacional',1970,64),C('Las plataformas de alquiler','plataforma',2014,64)],
+    juegos:[C('Los estudios estadounidenses y japoneses','multinacional',1985,75),C('Estudios locales','nacional',2005,48)]
+  };
+  const GEN=[C('Competidores nacionales','nacional',1900,52),C('Competidores extranjeros','multinacional',1960,60)];
+  const TIPO={nacional:'nacional',multinacional:'multinacional',importados:'importaciones',publico:'del Estado',atomizado:'muchos pequeños',plataforma:'plataforma digital',casa:'casa rival'};
+  const PRECIO={bajo:{n:'Precio bajo',d:'Más volumen y cuota; menos margen.',g:.03,m:-.035},medio:{n:'Precio de mercado',d:'Lo normal del sector.',g:0,m:0},alto:{n:'Precio alto',d:'Más margen; pierdes cuota si la marca no lo respalda.',g:-.03,m:.035}};
+  const pct=x=>Math.round(x*1000)/10+'%';
+  const secN=id=>{ try{ return (SECTORES.find(s=>s.id===id)||{n:id}).n; }catch(e){ return id; } };
+  function M(){ if(!S.mercados138||typeof S.mercados138!=='object') S.mercados138={}; return S.mercados138; }
+  const mias=sec=>companias().filter(e=>e.sector===sec);
+  const misVentas=sec=>mias(sec).reduce((s,e)=>s+Math.max(0,e.ingresos||0),0);
+  function mercado(sec){
+    const Mk=M(); let m=Mk[sec];
+    if(!m){ const v=Math.max(50,misVentas(sec)); m=Mk[sec]={tam:v/rnd(.05,.11),comp:[],hist:[],anio:S.anio}; }
+    else if(m.hist.length<3&&misVentas(sec)>m.tam*.6) m.tam=misVentas(sec)/rnd(.06,.12);   // recién llegas: arrancas pequeño
+    // competidores según la época, y las casas rivales del sector
+    (COMP[sec]||GEN).forEach(c=>{ if(c.desde<=S.anio&&!m.comp.some(x=>x.n===c.n)) m.comp.push({n:c.n,tipo:c.tipo,atr:c.atr+rnd(-4,4),w:c.tipo==='multinacional'&&m.comp.length?.6:c.tipo==='atomizado'?2:1,desde:S.anio}); });
+    try{ (rivalesVivas()||[]).filter(r=>r.sector===sec).forEach(r=>{ const n='Los '+r.apellido; if(!m.comp.some(x=>x.rid===r.rid)) m.comp.push({n,tipo:'casa',atr:50+((r.prestigio||50)-50)*.3,w:1,rid:r.rid}); });
+      m.comp=m.comp.filter(x=>!x.rid||(rivalesVivas()||[]).some(r=>r.rid===x.rid)); }catch(e){}
+    return m;
+  }
+  function cuotas(sec){ const m=mercado(sec), mine=misVentas(sec), yo=clamp(mine/m.tam,0,.95), resto=1-yo, W=m.comp.reduce((s,x)=>s+x.w,0)||1;
+    return {yo,comp:m.comp.map(x=>({...x,cuota:resto*x.w/W})).sort((a,b)=>b.cuota-a.cuota)}; }
+  const calidadDe=e=>e.prod137&&isFinite(e.prod137.calidad)?e.prod137.calidad:50;
+  function atractivo(e){ const p=PRECIO[e.precio138||'medio']; return (e.marca||50)*.4+(e.innovacion||50)*.25+calidadDe(e)*.2+((e.eficiencia||50))*.15+(p===PRECIO.bajo?6:p===PRECIO.alto?-6+((e.marca||50)-60)*.25:0); }
+  const atrComp=sec=>{ const m=mercado(sec), W=m.comp.reduce((s,x)=>s+x.w,0)||1; return m.comp.reduce((s,x)=>s+x.atr*x.w,0)/W; };
+
+  /* --- el año del mercado --- */
+  function anualSector(sec){
+    const m=mercado(sec); if(m.anio===S.anio&&m.__hecho) return; m.anio=S.anio; m.__hecho=true;
+    const s=SECTORES.find(x=>x.id===sec)||{g:.04}, ciclo=(S.macro&&S.macro.ciclo)||0;
+    let v=0; try{ v=vientoDe(sec); }catch(e){}
+    m.tam=Math.max(50,m.tam*(1+(s.g||.04)*.8+ciclo*.6+v*.03+rnd(-.02,.02)));
+    m.comp.forEach(x=>{ x.atr=clamp(x.atr+rnd(-2,2.2)+(x.tipo==='multinacional'?.15:0),20,90); x.w=clamp(x.w*(1+(x.atr-55)/400+rnd(-.05,.05)),.1,4); if(x.guerra&&x.guerra<S.anio) x.guerra=0; });
+    if(S.anio===1991||S.anio===1992) m.comp.forEach(x=>{ if(x.tipo==='multinacional'||x.tipo==='importados'){ x.w*=1.25; x.atr+=3; } });
+    const c=cuotas(sec); m.hist.push([S.anio,c.yo]); if(m.hist.length>30) m.hist.shift();
+  }
+  function ajustar(e){
+    const sec=e.sector, m=mercado(sec), p=PRECIO[e.precio138||'medio'];
+    const yo=clamp(misVentas(sec)/m.tam,0,.95);
+    let g=(atractivo(e)-atrComp(sec))/100*.04+p.g;
+    if(yo>.5) g-=(yo-.5)*.35;   // cuanto más grande, más cuesta seguir ganando
+    if(m.comp.some(x=>x.guerra>=S.anio)&&e.guerra138!=='igualar') g-=.04;
+    if(e.guerra138==='igualar'&&m.comp.some(x=>x.guerra>=S.anio)) g+=0;
+    g=clamp(g,-.06,.06);
+    const ing0=e.ingresos, mg=ing0>0?e.utilidad/ing0:0; let ing=ing0*(1+g);
+    if(e.prod137&&typeof window.capacidad137==='function') ing=Math.min(ing,Math.max(ing0,window.capacidad137(e)*1.05));
+    let dm=p.m; if(e.guerra138==='igualar'&&m.comp.some(x=>x.guerra>=S.anio)) dm-=.04;
+    const delta=(ing-ing0)*Math.max(0,mg)+ing*dm;
+    e.ingresos=ing; e.utilidad+=delta; e.caja+=delta; e.mer138={g,dm,anio:S.anio};
+  }
+  function wrapEmpresa138(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA138_EMP) return; window.__SA138_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&companias().includes(e)&&e.sector){ anualSector(e.sector); ajustar(e); revisarEventos(e); } }catch(x){ console.error(x); }
+      return r; }; }
+
+  /* --- sucesos del mercado --- */
+  const B=()=>companias().find(x=>x.nombre===S._e138);
+  function revisarEventos(e){
+    if(S._ev138===S.anio) return; const sec=e.sector, m=mercado(sec), c=cuotas(sec);
+    const pon=ev=>{ S._ev138=S.anio; S._e138=e.nombre; cola.push(ev); };
+    if(c.yo>.4&&S.anio>=1968&&chance(.12)) return pon(evSIC(e));
+    const fuerte=m.comp.filter(x=>x.tipo!=='atomizado'&&!x.guerra).sort((a,b)=>b.atr-a.atr)[0];
+    if(fuerte&&c.yo>.06&&chance(.07)) return pon(evGuerra(e,fuerte));
+    if(m.comp.length>2&&chance(.04)) return pon(evQuiebra(e));
+    if(['moda','retail'].includes(sec)&&S.anio>=1980&&S.anio<=2008&&chance(.06)) return pon(evContrabando(e));
+    if(S.anio===1991&&!S._ap138){ S._ap138=1; return pon(evApertura(e)); }
+  }
+  function evGuerra(e,x){ return {p:9,c:()=>!!B(),t:()=>'<b>Guerra de precios.</b> '+esc(x.n)+' bajó sus precios 20% para quitarle clientes a '+esc(e.nombre)+'.',
+    o:[{t:'Igualar los precios',f:()=>{ const b=B(); x.guerra=S.anio+2; if(b) b.guerra138='igualar'; return 'Igualaste. Dos años de márgenes flacos, pero no pierdes clientes.'; }},
+       {t:'Diferenciarte con marca y calidad',f:()=>{ const b=B(); x.guerra=S.anio+2; if(!b) return '—'; const c=Math.max(5,b.ingresos*.04); b.caja-=c; b.marca=clamp(b.marca+6,0,100); b.guerra138='marca'; return 'Invertiste '+fmt(c)+' en que la gente entienda por qué vale más. Algunos se van igual.'; }},
+       {t:'No responder',f:()=>{ const b=B(); x.guerra=S.anio+2; if(b) b.guerra138=null; return 'Mantuviste los precios. Vas a perder algo de cuota mientras dure.'; }}]}; }
+  function evQuiebra(e){ return {p:9,c:()=>!!B(),t:()=>{ const m=mercado(e.sector), x=pick(m.comp.filter(y=>y.tipo==='nacional'||y.tipo==='casa'))||m.comp[0]; S._q138=x.n;
+      const c=cuotas(e.sector).comp.find(y=>y.n===x.n), v=Math.round(m.tam*(c?c.cuota:.05)*.35); S._qv138=v; return '<b>'+esc(x.n)+' entró en liquidación.</b> Sus clientes, sus marcas y una planta están en venta por '+fmt(v)+'.'; },
+    o:[{t:()=>'Comprar sus clientes y activos ('+fmt(S._qv138||0)+')',f:()=>{ const b=B(), m=mercado(e.sector), x=m.comp.find(y=>y.n===S._q138); if(!b||!x) return '—'; const r=financiarEmpresa(b,S._qv138,true); if(!r.ok) return 'La compañía no tuvo cómo financiarlo.';
+         const c=cuotas(e.sector).comp.find(y=>y.n===x.n), gana=m.tam*(c?c.cuota:.05)*.6; b.ingresos+=gana; m.comp=m.comp.filter(y=>y!==x); if(b.prod137&&typeof window.produccion137==='function') window.produccion137(b).plantas.push({id:'q'+S.anio,n:'Planta de '+x.n,ciudad:b.ciudad||S.hogar.ciudad,cap:gana*1.3,desde:S.anio-20,mod:S.anio-20});
+         hito('Compró los activos de '+x.n); return 'Te quedaste con sus clientes. '+esc(b.nombre)+' vende '+fmt(gana)+' más al año.'; }},
+       {t:'Dejar que otro la compre',f:()=>{ const m=mercado(e.sector), x=m.comp.find(y=>y.n===S._q138); if(x){ m.comp=m.comp.filter(y=>y!==x); const o=pick(m.comp); if(o) o.w+=x.w; } return 'Otro competidor se quedó con todo.'; }}]}; }
+  function evSIC(e){ return {p:9,c:()=>!!B(),t:()=>'<b>La Superintendencia de Industria y Comercio abrió una investigación.</b> Dicen que '+esc(e.nombre)+' abusa de su posición dominante en '+esc(secN(e.sector).toLowerCase())+'.',
+    o:[{t:'Aceptar compromisos: bajar precios y abrir el mercado',f:()=>{ const b=B(); if(b){ b.precio138='bajo'; mercado(b.sector).comp.forEach(x=>x.w*=1.1); } return 'Firmaste compromisos con la Superintendencia. Ganas menos, pero sin multa.'; }},
+       {t:'Pelear la investigación',f:()=>{ const b=B(); if(!b) return '—'; const c=Math.max(10,b.ingresos*.01); b.caja-=c; if(chance(.5)) return 'Tus abogados ganaron. Costó '+fmt(c)+'.'; const multa=Math.max(20,b.ingresos*.05); b.caja-=multa; b.marca=clamp(b.marca-5,0,100); try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La multa de la Superintendencia a '+b.nombre,1); }catch(x){} return 'Perdiste: multa de '+fmt(multa)+' y titulares feos.'; }}]}; }
+  function evContrabando(e){ return {p:9,c:()=>!!B(),t:()=>'<b>El contrabando.</b> En los sanandresitos venden lo mismo que '+esc(e.nombre)+' a mitad de precio, sin pagar aranceles.',
+    o:[{t:'Denunciar y presionar a la DIAN con el gremio',f:()=>{ const b=B(); if(b){ b.caja-=Math.max(3,b.ingresos*.005); } return chance(.5)?'Hubo operativos. El contrabando bajó un tiempo.':'Hicieron dos operativos para la foto. Todo siguió igual.'; }},
+       {t:'Lanzar una línea más barata',f:()=>{ const b=B(); if(b){ b.marca=clamp(b.marca-3,0,100); b.ingresos*=1.02; } return 'Competiste en precio. Vendes, pero la marca se abarata.'; }}]}; }
+  function evApertura(e){ return {p:9,c:()=>!!B(),t:()=>'<b>La apertura económica.</b> Bajaron los aranceles: las multinacionales y los importados llegan a competir con '+esc(e.nombre)+' en su propia casa.',
+    o:[{t:'Modernizarse a la carrera',f:()=>{ const b=B(); if(!b) return '—'; const c=Math.max(10,b.ingresos*.08); const r=financiarEmpresa(b,c,true); if(!r.ok) return 'No hubo con qué.'; b.eficiencia=clamp(b.eficiencia+10,0,100); b.innovacion=clamp(b.innovacion+8,0,100); return 'Maquinaria nueva y procesos nuevos: '+fmt(c)+'. Llegas en forma.'; }},
+       {t:'Buscar un socio extranjero',f:()=>{ const b=B(); if(!b) return '—'; b.innovacion=clamp(b.innovacion+12,0,100); b.marca=clamp(b.marca+4,0,100); b.caja+=Math.max(10,b.ingresos*.05); return 'Un socio extranjero trae tecnología y plata. A cambio, opina en todo.'; }},
+       {t:'Pedir protección al gobierno',f:()=>{ return chance(.3)?'Te dieron unos años de salvaguardia.':'El gobierno te dijo que el mundo cambió.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function escenaMercado138(e){
+    e=e||S.emp; if(!e) return; const sec=e.sector, m=mercado(sec), c=cuotas(sec), ac=atractivo(e), ak=atrComp(sec), p=e.precio138||'medio';
+    const fila=(n,t,q,tu)=>'<div class="cuota'+(tu?' tu':'')+'"><span>'+n+(t?' <span class="tipo">· '+t+'</span>':'')+'</span><span class="bar"><i style="width:'+Math.min(100,q*100/Math.max(.01,Math.max(c.yo,...c.comp.map(x=>x.cuota))))+'%"></i></span><span>'+pct(q)+'</span></div>';
+    const filas=fila(mias(sec).length>1?'Tus compañías':esc(e.nombre),'tú',c.yo,true)+c.comp.slice(0,8).map(x=>fila(esc(x.n),TIPO[x.tipo]||x.tipo,x.cuota)).join('');
+    const h=m.hist, g0=h.length>1?h[h.length-1][1]-h[h.length-2][1]:0;
+    const cmp=[['Marca',e.marca],['Innovación',e.innovacion],['Calidad',calidadDe(e)],['Eficiencia',e.eficiencia]].map(([n,v])=>medida(n.toLowerCase(),v||0,100)).join('');
+    escena({rubro:esc(e.nombre)+' · Mercadeo',titulo:'Tu mercado: '+esc(secN(sec).toLowerCase()),ancho:true,cerrable:true,clase:'mer138',
+      cuerpo:ac>ak+5?'Los clientes te prefieren: tu oferta es más atractiva que la de la competencia.':ac<ak-5?'La competencia está siendo más atractiva que tú. Vas a perder cuota si no haces algo.':'Estás parejo con la competencia.',
+      html:'<div class="k"><div><b>'+fmt(m.tam)+'</b><span>tamaño del mercado al año</span></div><div><b>'+pct(c.yo)+'</b><span>tu cuota'+(h.length>1?' ('+(g0>=0?'+':'−')+Math.abs(Math.round(g0*1000)/10)+' pts)':'')+'</span></div><div><b>'+Math.round(ac)+' vs '+Math.round(ak)+'</b><span>tu atractivo frente a la competencia</span></div><div><b>'+PRECIO[p].n+'</b><span>tu estrategia de precio</span></div></div>'
+        +filas+'<div class="cmp">'+cmp+'</div>',
+      opciones:Object.keys(PRECIO).filter(k=>k!==p).map(k=>({t:'Pasar a '+PRECIO[k].n.toLowerCase(),cat:'mercado',d:PRECIO[k].d+' Una movida.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,
+        run:()=>{ S.mov--; e.precio138=k; log('<b>'+esc(e.nombre)+'</b> pasó a '+PRECIO[k].n.toLowerCase()+'.'); cerrarModal(); render(); escenaMercado138(e); }}))});
+  }
+  function wrapAcciones138(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA138_ACC) return; window.__SA138_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)&&e.sector){ const c=cuotas(e.sector);
+        const a={t:'Cuota de mercado de tu sector',cat:'mercado',d:'Tienes el '+pct(c.yo)+' de un mercado de '+fmt(mercado(e.sector).tam)+' al año. Competidores, atractivo y precio.',mov:0,modal:true,run:()=>escenaMercado138(e)};
+        const i=A.findIndex(x=>x.t==='Cuota de mercado de tu sector'); if(i>=0) A[i]=Object.assign({},A[i],a); else A.push(a); } }catch(x){}
+      return A; }; }
+  function init138(){ wrapEmpresa138(); wrapAcciones138();
+    Object.assign(window,{COMPETIDORES_138:COMP,mercadoSector138:mercado,cuotasSector138:cuotas,escenaMercado138,atractivo138:atractivo,anualSector138:anualSector}); }
+  setTimeout(init138,40); setTimeout(init138,220); setTimeout(init138,650);
+  window.__SA138={version:V138};
 })();
 </script>
 
