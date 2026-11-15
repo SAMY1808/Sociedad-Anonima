@@ -22094,7 +22094,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            if(S.prensa105) S.prensa105.imagen=clamp(S.prensa105.imagen+6,0,100); anotar(h,'Se volvió famos'+o(h)+' como '+ofi(h,OFICIOS_FAMA.find(x=>x.id===fid))+'.','bien'); return 'La familia sale en las revistas. Por primera vez, por algo bueno.'; }},
          {t:'Pedirle que no use el apellido',f:()=>{ const [n,fid]=S._f103; const h=porNombre(n); h.famoso103=fid; vinc(h,-10); anotar(h,'Se volvió famos'+o(h)+'; le pediste que no usara el apellido.',''); return 'Ahora firma con un nombre artístico. En las entrevistas habla poco de su familia.'; }}]});
     E({p:.6,c:()=>hijos(16,30).some(h=>h.atr&&h.atr.intelecto>=7),
-      t:()=>{ const h=pick(hijos(16,30).filter(x=>x.atr&&x.atr.intelecto>=7)); S._b103=h.nombre; return '<b>'+esc(h.nombre)+'</b> ganó una beca completa '+pick(['para un doctorado en el exterior','en un concurso nacional de ciencias','por mérito, sin que nadie moviera una palanca'])+'.'; },
+      t:()=>{ const L_=(hijos(16,30).filter(x=>x.atr&&x.atr.intelecto>=7)); if(!L_.length) return null; const h=pick(L_); S._b103=h.nombre; return '<b>'+esc(h.nombre)+'</b> ganó una beca completa '+pick(['para un doctorado en el exterior','en un concurso nacional de ciencias','por mérito, sin que nadie moviera una palanca'])+'.'; },
       o:[{t:'Hacer una comida para celebrarlo',f:()=>{ const h=H('_b103'); vinc(h,8); h.formacion=clamp((h.formacion||0)+8,0,100); anotar(h,'Ganó una beca por mérito propio.','bien'); return 'Por una vez, la plata no tuvo nada que ver.'; }}]});
     window.__SA103_EV=true;
   }
@@ -22213,7 +22213,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const E=x=>EVENTOS_LOCALES.push(x);
     const R=()=>rivalesVivas().find(x=>x.rid===S._r104);
     E({p:1.1,c:()=>rivalesVivas().some(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo)),
-      t:()=>{ const r=pick(rivalesVivas().filter(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo))); S._r104=r.rid; const j=jefe(r);
+      t:()=>{ const L_=(rivalesVivas().filter(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo))); if(!L_.length) return null; const r=pick(L_); S._r104=r.rid; const j=jefe(r);
         const golpe=S.emp?pick(['se llevó a tu mejor cliente con una oferta que no tiene sentido','compró a tu gerente comercial','le contó a un periodista lo que sabe de tus cuentas']):pick(['le contó a un periodista lo que sabe de tus cuentas','te cerró la puerta en el club','habló mal de tu familia en una comida con el ministro']);
         S._g104=golpe; const m=j.memoria.filter(x=>x.peso<0).slice(-1)[0];
         return '<b>'+esc(nomJ(r))+'</b> '+golpe+'.'+(m?' No es casualidad: '+(j.sexo==='m'?'ella':'él')+' no olvida que '+esc(m.txt.charAt(0).toLowerCase()+m.txt.slice(1)).replace(/\.$/,'')+'.':' Es su forma de decir que no te quiere en su camino.'); },
@@ -22224,7 +22224,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            if(chance(p)){ recordar(r,'Le buscaste para hacer las paces.',3); return 'Almorzaron. No son amigos, pero la guerra fría se acabó. ('+fmt(c)+' en el gesto.)'; }
            recordar(r,'Le buscaste para hacer las paces y te rechazó.',-1); return 'Te dejó esperando en el restaurante. Gastaste '+fmt(c)+' y el orgullo.'; }}]});
     E({p:.8,c:()=>rivalesVivas().some(r=>(r.generacion||1)>1&&!jefe(r).visita104),
-      t:()=>{ const r=pick(rivalesVivas().filter(r=>(r.generacion||1)>1&&!jefe(r).visita104)); S._r104=r.rid; const j=jefe(r); j.visita104=true; const v=rel(r);
+      t:()=>{ const L_=(rivalesVivas().filter(r=>(r.generacion||1)>1&&!jefe(r).visita104)); if(!L_.length) return null; const r=pick(L_); S._r104=r.rid; const j=jefe(r); j.visita104=true; const v=rel(r);
         return '<b>'+esc(nomJ(r))+'</b>, '+(j.sexo==='m'?'la nueva jefa':'el nuevo jefe')+' de los '+esc(r.apellido)+', pide una cita contigo. '+(v<40?'Llega con la herencia de un pleito viejo con tu casa.':v>=60?'Dice que quiere seguir la amistad que tenían las dos casas.':'Viene a medirte.'); },
       o:[{t:'Tenderle la mano',f:()=>{ const r=R(); if(r) recordar(r,'Le tendiste la mano cuando tomó el mando.',2); return 'Salió de tu oficina con una sonrisa. Veremos.'; }},
          {t:()=>{ const r=rivalesVivas().find(x=>x.rid===S._r104); return 'Recibirl'+(r&&jefe(r).sexo==='m'?'a':'o')+' con frialdad'; },f:()=>{ const r=R(); if(r) recordar(r,'Le recibiste con frialdad cuando tomó el mando.',-2); return 'Diez minutos y la puerta. Entendió el mensaje.'; }}]});
@@ -23233,7 +23233,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
          {t:'Arrendarla así, más barata',f:()=>{ const b=B(); if(b){ b.valor*=.96; b.canon109='bajo'; aplicarCanon(b); } return 'La arrendaste como estaba, con canon bajo. La propiedad perdió algo de valor.'; }},
          {t:'Contratar una inmobiliaria para que no vuelva a pasar',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b){ b.admin109=true; aplicarCanon(b); } return 'Arreglaste y entregaste las llaves a una inmobiliaria. Cobran 8%, pero duermes tranquilo.'; }}]});
     E({p:.7,c:()=>(S.bienes||[]).length>0,
-      t:()=>{ const b=pick(S.bienes); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
+      t:()=>{ const L_=(S.bienes); if(!L_||!L_.length) return null; const b=pick(L_); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
         return S._q109+' <b>'+esc(b.nombre)+'</b>. El arreglo vale '+fmt(S._c109)+'.'+(b.seguro109?' Menos mal estaba asegurada.':''); },
       o:[{t:()=>{ const b=B(); return b&&b.seguro109?'Cobrar el seguro':'Pagar el arreglo'; },f:()=>{ const b=B(); if(b&&b.seguro109) return 'El seguro pagó todo. Para eso era.'; S.efectivo-=Math.min(S.efectivo,S._c109); return 'Pagaste '+fmt(S._c109)+' de tu bolsillo.'; }},
          {t:'Dejarla así por ahora',f:()=>{ const b=B(); if(b&&b.seguro109) return 'Igual el seguro lo cubrió.'; if(b){ b.valor*=.88; if(b.clase==='renta') b.arrendado=false; } return 'No la arreglaste. Perdió valor'+(b&&b.clase==='renta'?' y quedó vacía':'')+'.'; }}]});
@@ -23429,31 +23429,31 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const E=x=>EVENTOS_LOCALES.push(x), B=()=>(S.bienes||[]).find(b=>b.uid===S._n110);
     const con=f=>negocios().filter(b=>!b.neg110.cerrado&&f(b));
     E({p:1,c:()=>con(b=>!b.neg110.admin).length>0,
-      t:()=>{ const b=pick(con(b=>!b.neg110.admin)); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.03)); return 'El contador encontró el hueco: el encargado de <b>'+esc(b.nombre)+'</b> llevaba meses sacando plata de la caja. Faltan '+fmt(S._c110)+'.'; },
+      t:()=>{ const L_=(con(b=>!b.neg110.admin)); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.03)); return 'El contador encontró el hueco: el encargado de <b>'+esc(b.nombre)+'</b> llevaba meses sacando plata de la caja. Faltan '+fmt(S._c110)+'.'; },
       o:[{t:'Denunciarlo',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110); return chance(.4)?'Lo condenaron y devolvió una parte. La otra no apareció.':'El proceso va lento. La plata no volvió.'; }},
          {t:'Echarlo y poner un administrador profesional',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c110); if(b) b.neg110.admin=true; return 'Lo echaste. Ahora maneja un profesional: cobra 10%, pero no roba.'; }}]});
     E({p:.9,c:()=>(typeof enColombia91!=='function'||enColombia91())&&S.anio>=1980&&con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id))); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.04));
+      t:()=>{ const L_=(con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.04));
         return 'Dos tipos en moto pasaron por <b>'+esc(b.nombre)+'</b>: la "vacuna" es de '+fmt(S._c110)+' al mes… y dejaron claro qué pasa si no se paga.'; },
       o:[{t:'Pagar',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110*3); const b=B(); if(b) b.neg110.margen=Math.max(.02,b.neg110.margen-.01); return 'Pagas. El negocio sigue abierto, pero deja menos.'; }},
          {t:'Denunciar al Gaula',f:()=>{ if(chance(.55)) return 'Capturaron a los dos de la moto. Por ahora, nadie volvió.'; const b=B(); if(b){ b.valor*=.85; b.neg110.ult=0; } return 'A la semana quemaron la entrada del negocio. Lo tuviste que cerrar un mes.'; }},
          {t:'Cerrarlo y venderlo',f:()=>{ const b=B(); if(!b) return ''; const n=venderBien(b,.2); return 'Lo vendiste de afán: te quedaron '+fmt(Math.max(0,n))+'. Nadie quiere un negocio "vacunado".'; }}]});
     E({p:.9,c:()=>con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id))); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.05));
+      t:()=>{ const L_=(con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.05));
         return 'Llegó la inspección '+(b.neg110.id==='colegio'?'de la Secretaría de Educación':'sanitaria')+' a <b>'+esc(b.nombre)+'</b>. Encontraron fallas y amenazan con sellarlo.'; },
       o:[{t:()=>'Hacer las reformas ('+fmt(S._c110||0)+')',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110); const b=B(); if(b) b.valor*=1.03; return 'Quedó todo en regla. Hasta subió el valor.'; }},
          {t:'Arreglar al inspector',f:()=>{ S.efectivo-=Math.min(S.efectivo,Math.round(S._c110*.3)); if(typeof registrarDelito==='function') registrarDelito('soborno',1,'a un inspector'); return 'Un sobre y el acta salió limpia. Las fallas siguen ahí.'; }},
          {t:'Dejar que lo sellen un tiempo',f:()=>{ const b=B(); if(b){ b.neg110.cerrado=true; } return 'Lo sellaron. Queda cerrado hasta que decidas reabrirlo.'; }}]});
     E({p:.8,c:()=>con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id))); S._n110=b.uid; return S.anio>=2008?'Un influenciador con millones de seguidores subió un video en <b>'+esc(b.nombre)+'</b>. Se volvió viral.':'Una revista nacional dedicó dos páginas a <b>'+esc(b.nombre)+'</b>: "el sitio del que todos hablan".'; },
+      t:()=>{ const L_=(con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; return S.anio>=2008?'Un influenciador con millones de seguidores subió un video en <b>'+esc(b.nombre)+'</b>. Se volvió viral.':'Una revista nacional dedicó dos páginas a <b>'+esc(b.nombre)+'</b>: "el sitio del que todos hablan".'; },
       o:[{t:'Aprovechar la ola y subir precios',f:()=>{ const b=B(); if(b){ b.valor*=1.12; b.neg110.margen+=.015; } return 'Llenos todas las noches, con precios nuevos.'; }},
          {t:'Abrir una segunda sede',f:()=>{ const b=B(); if(!b) return ''; const c=Math.round(b.valor*.5); if(S.efectivo<c) return 'No tenías los '+fmt(c)+' para la segunda sede. La ola pasó.'; S.efectivo-=c; b.valor*=1.55; b.neg110.margen+=.005; return 'Abriste la segunda sede ('+fmt(c)+'). Ahora es una marca.'; }}]});
     E({p:.7,c:()=>con(b=>b.valor>=200).length>0,
-      t:()=>{ const b=pick(con(b=>b.valor>=200)); S._n110=b.uid; S._c110=Math.round(b.valor*rnd(1.25,1.6)); return 'Una cadena '+pick(['nacional','extranjera','de inversionistas'])+' quiere comprar <b>'+esc(b.nombre)+'</b>. Ofrecen '+fmt(S._c110)+'; vale '+fmt(b.valor)+'.'; },
+      t:()=>{ const L_=(con(b=>b.valor>=200)); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.round(b.valor*rnd(1.25,1.6)); return 'Una cadena '+pick(['nacional','extranjera','de inversionistas'])+' quiere comprar <b>'+esc(b.nombre)+'</b>. Ofrecen '+fmt(S._c110)+'; vale '+fmt(b.valor)+'.'; },
       o:[{t:'Vender',f:()=>{ const b=B(); if(!b) return ''; const n=Math.max(0,S._c110-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Vendiste. Te quedaron '+fmt(n)+'.'; }},
          {t:'No se vende',f:()=>{ const b=B(); if(b) b.valor*=1.05; return 'Dijiste que no. Ahora sabes cuánto vale de verdad.'; }}]});
     E({p:.7,c:()=>con(b=>['hotel','fincahotel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['hotel','fincahotel'].includes(b.neg110.id))); S._n110=b.uid; return 'Temporada récord: '+esc(b.nombre)+' está lleno desde diciembre hasta Reyes y hay lista de espera.'; },
+      t:()=>{ const L_=(con(b=>['hotel','fincahotel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; return 'Temporada récord: '+esc(b.nombre)+' está lleno desde diciembre hasta Reyes y hay lista de espera.'; },
       o:[{t:'Celebrarlo',f:()=>{ const b=B(); if(b){ const x=Math.round(b.valor*.04); S.efectivo+=x; return 'Entraron '+fmt(x)+' extra en la temporada.'; } return ''; }}]});
     window.__SA110_EV=true;
   }
