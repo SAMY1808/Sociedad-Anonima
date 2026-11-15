@@ -26790,7 +26790,7 @@ install();setTimeout(install,1200);
     if(S.anio>=2021&&window.cafe141&&window.cafe141().idx<.9&&cosechado>0){ const x=cosechado*.12; extra+=x; notas.push('el Fondo de Estabilización compensó el mal precio con '+fmt(x)); }
     if(f.coop&&f.coop.aporte>0){ const x=f.coop.aporte*rnd(.03,.08); extra+=x; notas.push('la cooperativa repartió '+fmt(x)+' de excedentes'); }
     if(f.procafecol>0&&S.anio>=2008){ const x=f.procafecol*rnd(.0,.05); if(x>0){ extra+=x; notas.push('Procafecol pagó '+fmt(x)+' de dividendos'); } f.procafecol*=1+rnd(-.05,.12); }
-    if(f.cargo){ const c=CARGOS[cargoIx(f.cargo)]; f.influencia=clamp(f.influencia+(c.inf-f.influencia)*.3,0,100); if(f.cargo==='gerente'){ const sal=60; extra+=sal; notas.push('sueldo de Gerente General: '+fmt(sal)); } }
+    if(f.cargo){ const c=CARGOS[cargoIx(f.cargo)]; f.influencia=clamp(f.influencia+(c.inf-f.influencia)*.3,0,100); if(f.cargo==='gerente'&&!(S.carrera&&S.carrera.ruta==='federacion')){ const sal=60; extra+=sal; notas.push('sueldo de Gerente General: '+fmt(sal)); } }
     else f.influencia=Math.max(0,f.influencia-3);
     if(extra){ S.efectivo+=extra; log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
     // la elección cafetera
@@ -27125,7 +27125,7 @@ install();setTimeout(install,1200);
   const NUEVAS={
     federacion:{n:'Carrera en la Federación de Cafeteros',desde:1927,niveles:[
       {n:'Auxiliar del Comité de Cafeteros',s:24,edu:1},{n:'Extensionista',s:46,edu:1},{n:'Coordinador de extensión',s:78,edu:2},
-      {n:'Director seccional',s:120,edu:2},{n:'Director del Comité Departamental',s:180,edu:3},{n:'Gerente técnico de la Federación',s:300,edu:4},{n:'Gerente comercial de la Federación',s:420,edu:4}]},
+      {n:'Director seccional',s:120,edu:2},{n:'Director del Comité Departamental',s:180,edu:3},{n:'Gerente técnico de la Federación',s:300,edu:4},{n:'Gerente comercial de la Federación',s:420,edu:4},{n:'Gerente General de la Federación',s:700,edu:4}]},
     legaciones:{n:'Legaciones cafeteras en el exterior',desde:1930,niveles:[
       {n:'Asistente en la oficina de Nueva York',s:52,edu:2},{n:'Agregado cafetero',s:85,edu:2},{n:'Representante de la Federación en el exterior',s:150,edu:3},
       {n:'Director de la oficina de Nueva York',s:260,edu:4},{n:'Delegado ante la Organización Internacional del Café',s:380,edu:4}]},
@@ -27140,7 +27140,7 @@ install();setTimeout(install,1200);
   const depto=()=>{ const f=fincas()[0]; try{ if(f) return window.munCafe141(f.cafe141.mun).dep; }catch(e){} return DEP[S.hogar&&S.hogar.ciudad]||'Caldas'; };
   const muni=()=>{ const f=fincas()[0]; if(f) return f.cafe141.mun; return MUNI[S.hogar&&S.hogar.ciudad]||'Chinchiná'; };
   function empleador(k,nivel){
-    if(k==='federacion') return nivel>=5?'la Federación Nacional de Cafeteros, en Bogotá':nivel>=4?'el Comité Departamental de Cafeteros de '+depto():'el Comité de Cafeteros de '+depto();
+    if(k==='federacion') return nivel>=7?'la Gerencia General de la Federación Nacional de Cafeteros':nivel>=5?'la Federación Nacional de Cafeteros, en Bogotá':nivel>=4?'el Comité Departamental de Cafeteros de '+depto():'el Comité de Cafeteros de '+depto();
     if(k==='legaciones'){ const c=S.carrera; const of=(c&&c.oficina145)||pick(OFIC); if(c) c.oficina145=of; return nivel>=4?'la Organización Internacional del Café, en Londres':nivel===3?'la oficina de la Federación en Nueva York':nivel===1?'la embajada de Colombia en '+({'Nueva York':'Washington','Londres':'Londres','Hamburgo':'Bonn','Tokio':'Tokio','Bruselas':'Bruselas','Montreal':'Ottawa'})[of]:'la oficina de la Federación en '+of; }
     if(k==='cooperativa') return nivel>=5?'la cooperativa departamental de caficultores de '+depto():'la Cooperativa de Caficultores de '+muni();
     return null;
@@ -27155,11 +27155,21 @@ install();setTimeout(install,1200);
           a.d=({federacion:'Del Comité de Cafeteros de '+depto()+' a la gerencia en Bogotá. ',legaciones:'Vender el café de Colombia en el mundo: Nueva York, Londres, Hamburgo, Tokio. ',cooperativa:'La cooperativa de '+muni()+': comprar la cosecha a los vecinos, catar y pagar a tiempo. '})[k]+(a.d||'');
           const run=a.run; a.run=function(){ const r0=run.apply(this,arguments); try{ if(S.carrera&&S.carrera.ruta===k){ S.carrera.empleador=empleador(k,S.carrera.nivel); } }catch(e){} return r0; }; });
         const g=A.find(x=>x.t==='Buscar empleo'); if(g&&!/café/.test(g.d||'')) g.d=String(g.d||'').replace(' o planta.',', planta o el mundo del café (la Federación, sus oficinas en el exterior y las cooperativas).');
+        if(c&&c.ruta==='federacion'&&c.nivel===6){ const a=A.find(x=>/^Pedir el ascenso a /.test(x.t)); if(a){ const pr=(()=>{ try{ return prestigio(); }catch(e){ return 40; } })();
+          a.t='Postularte a la Gerencia General de la Federación'; a.d='La elige el Congreso Cafetero. Pesan tu desempeño, tu prestigio, tu influencia en el gremio y tus contactos. Es el cargo más poderoso del campo colombiano.';
+          if(!a.dis&&pr<45) a.dis='El Congreso Cafetero todavía no te conoce lo suficiente (prestigio '+Math.round(pr)+'/45)';
+          a.run=function(){ const F=window.fede142?window.fede142():{influencia:0}; const p=clamp(.2+(c.desempeno-60)/120+pr/220+(F.influencia||0)/250+S.p.redes/500,.08,.8);
+            if(chance(p)){ c.nivel=7; c.anios=0; c.empleador=empleador('federacion',7); F.cargo='gerente'; F.desde=S.anio; F.viaCarrera=true; F.influencia=Math.max(F.influencia||0,70);
+              S.p.reputacion=clamp(S.p.reputacion+8,0,100); try{ moverPrestigio(10,'gerente de la Federación'); }catch(e){} hito('Fue elegido Gerente General de la Federación Nacional de Cafeteros');
+              log('El Congreso Cafetero te eligió <b>Gerente General de la Federación Nacional de Cafeteros</b>. Un millón de familias cafeteras dependen de tus decisiones.','hito'); }
+            else { c.desempeno=clamp(c.desempeno-5,0,100); log('El Congreso Cafetero eligió a otro Gerente General. Sigues en la gerencia comercial.','mal'); } }; } }
         if(c&&NUEVAS[c.ruta]){ const a=A.find(x=>/^Pedir el ascenso a /.test(x.t)); if(a){ const run=a.run; a.run=function(){ const n0=c.nivel, r0=run.apply(this,arguments); try{ if(c.nivel!==n0){ c.empleador=empleador(c.ruta,c.nivel); if(c.ruta==='federacion'&&S.fede142) S.fede142.influencia=(S.fede142.influencia||0)+5; } }catch(e){} return r0; }; } }
       } }catch(e){}
       return A; }; }
   function anual(){
-    if(!S||!S.p||!S.carrera) return; const c=S.carrera; if(!NUEVAS[c.ruta]) return;
+    if(!S||!S.p||!S.carrera) return; const c=S.carrera;
+    try{ const F=S.fede142; if(F&&F.viaCarrera&&F.cargo==='gerente'&&!(c.ruta==='federacion'&&c.nivel>=7)){ F.cargo=null; F.viaCarrera=false; log('Dejaste la Gerencia General de la Federación.'); } }catch(e){}
+    if(!NUEVAS[c.ruta]) return;
     try{ if(window.fede142){ const F=window.fede142(); if(c.ruta==='federacion') F.influencia=clamp((F.influencia||0)+1+c.nivel,0,100); if(c.ruta==='cooperativa') F.influencia=clamp((F.influencia||0)+.5+c.nivel*.5,0,100); } }catch(e){}
     if(c.ruta==='legaciones') S.p.redes=clamp(S.p.redes+1,0,100);
     if(c.ruta==='federacion'&&c.nivel>=1) fincas().forEach(b=>{ b.cafe141.extension=true; });   // el extensionista también cuida lo suyo
@@ -27185,6 +27195,13 @@ install();setTimeout(install,1200);
       o:[{t:'Pedir un crédito de tesorería al banco',f:()=>{ des(8); return 'Pagaste a todos de contado. La cooperativa quedó endeudada, pero con prestigio.'; }},{t:'Pagar con vales a quince días',f:()=>{ des(-6); S.p.reputacion=clamp(S.p.reputacion-2,0,100); return 'Varios socios se fueron a venderle a un particular.'; }}]});
     E({id145:1,p:.7,c:()=>en('cooperativa')&&S.carrera.nivel>=2,t:()=>'Descubres que el bodeguero del punto de compra le "ajustaba" el peso a la báscula. Lleva años robándoles kilos a los caficultores.',
       o:[{t:'Denunciarlo y devolverles a los socios',f:()=>{ des(10); S.p.reputacion=clamp(S.p.reputacion+4,0,100); return 'Devolviste lo robado con plata de la cooperativa. Los socios confían más que nunca.'; }},{t:'Despedirlo sin escándalo',f:()=>{ des(2); return 'Se fue. Los socios nunca supieron cuánto les quitaron.'; }}]});
+    const gerente=()=>S&&S.fede142&&S.fede142.cargo==='gerente';
+    E({id145:1,p:1.2,c:()=>gerente(),t:()=>'<b>Desde la Gerencia General.</b> El Ministro de Hacienda quiere subir la contribución cafetera para tapar el hueco fiscal. Los caficultores dicen que ya no aguantan más.',
+      o:[{t:'Plantarse: ni un peso más',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+4,0,100); if(S.fede142) S.fede142.influencia=clamp(S.fede142.influencia+5,0,100); return 'El Gobierno retiró la propuesta. En el campo te aplauden; en Hacienda te tienen anotado.'; }},{t:'Negociar a cambio de obras para las zonas cafeteras',f:()=>{ try{ moverPrestigio(2,''); }catch(e){} return 'Subió un poco la contribución y llegaron carreteras y escuelas. Nadie quedó del todo contento.'; }}]});
+    E({id145:1,p:1,c:()=>gerente()&&S.anio>=2002,t:()=>'<b>Desde la Gerencia General.</b> Procafecol quiere abrir tiendas Juan Valdez en Estados Unidos, España y Chile. Puede ser la marca colombiana más grande del mundo o un hueco en las cuentas del Fondo.',
+      o:[{t:'Expandir la marca',f:()=>{ if(chance(.55)){ try{ moverPrestigio(4,'Juan Valdez en el mundo'); }catch(e){} return 'Las tiendas en el exterior funcionaron. Juan Valdez está en los aeropuertos del mundo.'; } S.p.reputacion=clamp(S.p.reputacion-4,0,100); return 'Varias tiendas cerraron con pérdidas. La prensa lo llama el despilfarro de Juan Valdez.'; }},{t:'Crecer despacio, primero en Colombia',f:()=>'Prudencia. La marca crece sin sustos.'}]});
+    E({id145:1,p:.8,c:()=>gerente(),t:()=>'<b>Desde la Gerencia General.</b> Un grupo de caficultores acusa a la Federación de gastar el Fondo en burocracia y no en el precio. Piden tu renuncia en la prensa.',
+      o:[{t:'Abrir las cuentas del Fondo y dar la cara',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Mostraste las cuentas. Bajó el ruido.'; }},{t:'Ignorarlos: son una minoría',f:()=>{ try{ if(window.abrirEscandalo129) window.abrirEscandalo129('politico','La burocracia de la Federación',1); }catch(e){} return 'El ruido creció. Ya hay un debate en el Congreso.'; }}]});
     window.__SA145_EV=true;
   }
   function init145(){ registrar(); wrapAcciones145(); wrapPaso145(); eventos145();
