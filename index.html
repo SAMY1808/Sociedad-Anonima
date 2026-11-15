@@ -1023,10 +1023,27 @@ svg.foto116{display:block;background:#1d2a23}
 .mer135 .tu{color:var(--oro,#D6A648)}
 @media (max-width:560px){.mer135 svg{width:62px}.mer135 td .nota135{display:none}.mer135 table.libro td{padding-left:4px;padding-right:4px}}
 </style>
+<style id="estilos-v136">
+.album136 .gen136{margin:16px 0 6px;font-family:var(--display);font-size:17px;letter-spacing:.03em;color:var(--oro,#D6A648);border-bottom:1px solid rgba(214,166,72,.25);padding-bottom:4px}
+.album136 .gen136 span{color:var(--humo2);font-family:inherit;font-size:13px;letter-spacing:0;margin-left:6px}
+.album136 .grid136{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.album136 .foto136{all:unset;cursor:pointer;display:block;background:#EFE6D2;padding:7px 7px 9px;border-radius:3px;box-shadow:0 6px 14px rgba(0,0,0,.35);transform:rotate(var(--r,0deg));transition:transform .15s}
+.album136 .foto136:hover,.album136 .foto136:focus-visible{transform:rotate(0) scale(1.03);outline:2px solid var(--oro,#D6A648)}
+.album136 .foto136 .img136{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#2a241c;filter:sepia(.35) saturate(.85) contrast(1.02)}
+.album136 .foto136 .ret136{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;align-content:center;gap:2px;aspect-ratio:4/3;background:radial-gradient(circle at 50% 40%,#6b5a43,#2b241b);filter:sepia(.45);overflow:hidden;padding:6px 4px 0;box-sizing:border-box}
+.album136 .foto136 .pie136{display:block;margin-top:6px;font-family:var(--display);font-size:12.5px;line-height:1.25;color:#3a2f22}
+.album136 .foto136 .pie136 b{display:block;font-size:11px;color:#7a6446;font-family:inherit;letter-spacing:.04em}
+.album136 .vacio136{padding:22px;text-align:center;color:var(--humo2)}
+.grande136 .marco136{background:#EFE6D2;padding:12px 12px 16px;border-radius:4px;box-shadow:0 12px 30px rgba(0,0,0,.4);margin-bottom:12px}
+.grande136 .marco136 img{display:block;width:100%;height:auto;filter:sepia(.3) saturate(.9)}
+.grande136 .marco136 .ret136{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;align-content:center;gap:8px;min-height:180px;padding-bottom:18px!important;background:radial-gradient(circle at 50% 40%,#6b5a43,#2b241b);filter:sepia(.45);padding:16px 10px 0}
+.grande136 .marco136 .pie136{margin-top:10px;font-family:var(--display);font-size:15px;color:#3a2f22;text-align:center}
+.grande136 .nombres136{margin-top:4px;font-size:12.5px;color:#6a5640;text-align:center}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v135</div>
+<div class="version-badge" id="versionBadge">v136</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25627,6 +25644,105 @@ install();setTimeout(install,1200);
     Object.assign(window,{mercado135:M,ciudadMercado135:ciudad,zonaMercado135:zona,factorMercado135:factor,anualMercado135:anual135,escenaMercado135,FASES_MERCADO_135:FASES}); }
   setTimeout(init135,40); setTimeout(init135,220); setTimeout(init135,650);
   window.__SA135={version:V135};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v136 · EL ÁLBUM FAMILIAR
+   Cada momento ilustrado de la vida (nacimientos, bodas, funerales, grados,
+   juicios, la cárcel, la salida a bolsa…) queda pegado en el álbum de la
+   familia, con su año y su protagonista, generación tras generación.
+   Además puedes llevar a la familia al estudio del fotógrafo para el
+   retrato del año. El álbum se abre desde "El álbum familiar".
+   ========================================================================== */
+(function(){
+  const V136='v136', MAX=400;
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const corta=(x,n)=>{ x=plano(x); return x.length>n?x.slice(0,n-1).trim()+'…':x; };
+  const P1=n=>String(n||'').split(' ')[0];
+  function A(){ if(!Array.isArray(S.album136)) S.album136=[]; return S.album136; }
+  const quien=()=>S&&S.p?(S.p.nombre+' '+(S.p.apellido||'')).trim():'';
+  function pegar(e){
+    if(!S||!S.p) return null; const L=A();
+    if(L.some(x=>x.k===e.k&&x.anio===S.anio&&x.titulo===e.titulo)) return null;
+    const f=Object.assign({anio:S.anio,gen:S.gen||1,quien:quien(),edad:S.p.edad,r:Math.round((Math.random()*6-3)*10)/10},e);
+    f.titulo=corta(f.titulo,70); f.texto=corta(f.texto,220);
+    L.push(f); if(L.length>MAX){ const i=L.findIndex(x=>x.k!=='retrato'); L.splice(i>=0?i:0,1); }
+    return f;
+  }
+  /* --- cada lámina y cada escena ilustrada queda en el álbum --- */
+  function wrapEscena136(){
+    const old=window.escena; if(typeof old!=='function'||window.__SA136_ESC) return; window.__SA136_ESC=true;
+    window.escena=function(o){
+      const caja=old.apply(this,arguments);
+      try{ if(o&&!o.__album136&&caja&&caja.querySelector){
+        const ver=()=>{ const fig=caja.querySelector('figure.momento120'); if(!fig) return false; const k=fig.getAttribute('data-momento'), cap=fig.querySelector('figcaption');
+          pegar({k,titulo:plano(o.titulo)||plano(cap&&cap.textContent),texto:plano(o.cuerpo)||plano(cap&&cap.textContent)}); return true; };
+        if(!ver()) setTimeout(()=>{ try{ ver(); }catch(e){} },0); } }catch(e){}
+      return caja;
+    };
+  }
+  /* --- el retrato de familia --- */
+  function miembros(){
+    const F=S.familia||{}, L=[{nombre:quien(),sexo:S.p.sexo,edad:S.p.edad,yo:true}];
+    if(F.pareja) L.push({nombre:F.pareja.nombre,sexo:F.pareja.sexo,edad:F.pareja.edad});
+    (F.hijos||[]).filter(h=>h.vivo!==false&&!h.muerto).slice(0,8).forEach(h=>L.push({nombre:h.nombre+' '+(h.apellido||S.p.apellido||''),sexo:h.sexo,edad:h.edad}));
+    return L;
+  }
+  const costoFoto=()=>{ let p=0; try{ p=patrimonio(); }catch(e){} return Math.max(1,Math.round(Math.max(0,p)*.0008)); };
+  function cara(m,tam){ try{ return (window.avatarSVG||avatarSVG)(m.nombre,{sexo:m.sexo,edad:m.edad,tam}); }catch(e){ return ''; } }
+  function retratoHTML(f,tam){ return '<span class="ret136">'+(f.miembros||[]).map(m=>cara(m,Math.round(tam*((m.edad||30)<14?.72:(m.edad||30)<18?.86:1)))).join('')+'</span>'; }
+  function tomarRetrato(){
+    const M=miembros(), c=costoFoto(); S.efectivo-=c; S.p.felicidad=clamp(S.p.felicidad+2,0,100);
+    const n=M.length, txt=n===1?'Solo, de corbata, frente al telón del estudio.':'De pie '+(S.familia.pareja?'los dos':'tú')+(n>2?', con '+(n-2+(S.familia.pareja?0:1))+' hijo'+(n-2+(S.familia.pareja?0:1)>1?'s':'')+' adelante':'')+'. Nadie sonríe del todo.';
+    const f=pegar({k:'retrato',titulo:'Retrato de familia, '+S.anio,texto:txt,miembros:M}); S.retrato136=S.anio;
+    log('Llevaste a la familia al estudio del fotógrafo. El retrato de '+S.anio+' quedó en el álbum.','bien');
+    return f;
+  }
+  /* --- el álbum --- */
+  function fotoHTML(f,i){
+    const img=f.k==='retrato'?retratoHTML(f,(f.miembros||[]).length>4?27:36):'<img class="img136" loading="lazy" src="img/eventos/'+esc(f.k)+'.jpg" alt="'+esc(f.titulo)+'" onerror="this.style.visibility=\'hidden\'">';
+    return '<button class="foto136" data-i="'+i+'" style="--r:'+(f.r||0)+'deg" aria-label="'+esc(f.titulo+', '+f.anio)+'">'+img+'<span class="pie136"><b>'+f.anio+'</b>'+esc(f.titulo)+'</span></button>';
+  }
+  function escenaAlbum136(){
+    const L=A(); const gens={};
+    L.forEach((f,i)=>{ (gens[f.gen]=gens[f.gen]||[]).push([f,i]); });
+    const html=L.length?Object.keys(gens).sort((a,b)=>b-a).map(g=>{ const fs=gens[g], q=fs[0][0].quien, a0=fs[0][0].anio, a1=fs[fs.length-1][0].anio;
+        return '<div class="gen136">'+(+g===(S.gen||1)?'Tu generación':'Generación '+g)+'<span>'+esc(q)+' · '+a0+(a1!==a0?'–'+a1:'')+'</span></div><div class="grid136">'+fs.slice().reverse().map(([f,i])=>fotoHTML(f,i)).join('')+'</div>'; }).join('')
+      :'<div class="vacio136">El álbum está vacío. Los momentos importantes de la vida se irán pegando aquí solos.</div>';
+    const c=costoFoto(), ya=S.retrato136===S.anio;
+    const caja=escena({__album136:true,rubro:'La familia '+esc(S.p.apellido||''),titulo:'El álbum familiar',ancho:true,cerrable:true,clase:'album136',
+      cuerpo:L.length?L.length+' foto'+(L.length>1?'s':'')+' en '+Object.keys(gens).length+' generaci'+(Object.keys(gens).length>1?'ones':'ón')+'. Toca una para verla.':'',
+      html,
+      opciones:[{t:'Una foto de familia en el estudio',cat:'familia',d:ya?'Ya se tomaron la de este año.':'El fotógrafo de siempre, con telón y todo. '+fmt(c)+'.',dis:ya?'Ya hay retrato de '+S.anio:S.efectivo<c?'No te alcanza':null,cerrar:false,
+        run:()=>{ tomarRetrato(); cerrarModal(); render(); escenaAlbum136(); }}]});
+    try{ caja.querySelectorAll('.foto136').forEach(b=>b.onclick=()=>{ cerrarModal(); verFoto(+b.dataset.i); }); }catch(e){}
+    return caja;
+  }
+  function verFoto(i){
+    const L=A(), f=L[i]; if(!f) return escenaAlbum136();
+    const img=f.k==='retrato'?retratoHTML(f,(f.miembros||[]).length>5?84:118):'<img src="img/eventos/'+esc(f.k)+'.jpg" alt="'+esc(f.titulo)+'">';
+    const nombres=f.k==='retrato'?'<div class="nombres136">'+(f.miembros||[]).map(m=>esc(P1(m.nombre))+' ('+m.edad+')').join(' · ')+'</div>':'';
+    const ops=[];
+    if(i<L.length-1) ops.push({t:'La siguiente',cat:'familia',cerrar:false,run:()=>{ cerrarModal(); verFoto(i+1); }});
+    if(i>0) ops.push({t:'La anterior',cat:'familia',cerrar:false,run:()=>{ cerrarModal(); verFoto(i-1); }});
+    ops.push({t:'Volver al álbum',cat:'familia',cerrar:false,run:()=>{ cerrarModal(); escenaAlbum136(); }});
+    escena({__album136:true,rubro:f.anio+' · '+esc(f.quien)+(isFinite(f.edad)?', '+f.edad+' años':''),titulo:esc(f.titulo),ancho:true,cerrable:true,clase:'grande136',
+      html:'<div class="marco136">'+img+'<div class="pie136">'+esc(f.titulo)+'</div>'+nombres+'</div>',cuerpo:esc(f.texto||''),opciones:ops});
+  }
+  /* --- enganches --- */
+  function wrapAcciones136(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA136_ACC) return; window.__SA136_ACC=true;
+    window.listaAcciones=function(){ const R=old.apply(this,arguments);
+      try{ if(Array.isArray(R)&&S&&S.p&&!(window.esNino94&&window.esNino94())){ const n=A().length;
+        R.push({t:'El álbum familiar',d:(n?n+' foto'+(n>1?'s':'')+' de la familia':'Todavía vacío')+'. Los momentos de la vida, generación tras generación, y el retrato del año.',mov:0,modal:true,run:()=>escenaAlbum136()}); } }catch(e){}
+      return R; }; }
+  function wrapCat136(){ const old=window.catDe; if(typeof old!=='function'||window.__SA136_CAT) return; window.__SA136_CAT=true;
+    window.catDe=function(t){ if(t==='El álbum familiar') return 'familia'; return old.apply(this,arguments); }; }
+  function init136(){ wrapEscena136(); wrapAcciones136(); wrapCat136();
+    Object.assign(window,{album136:A,pegarEnAlbum136:pegar,escenaAlbum136,verFotoAlbum136:verFoto,retratoFamilia136:tomarRetrato}); }
+  setTimeout(init136,40); setTimeout(init136,220); setTimeout(init136,650);
+  window.__SA136={version:V136};
 })();
 </script>
 
