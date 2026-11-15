@@ -1117,10 +1117,15 @@ svg.foto116{display:block;background:#1d2a23}
 .taza144 .eslabon .det{font-size:13px;color:var(--humo2);margin-top:2px}
 .taza144 .eslabon.no{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06)}
 </style>
+<style id="estilos-v146">
+.tam146{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--humo2)}
+.tam146 i{display:inline-block;width:5px;height:11px;border-radius:2px;background:rgba(255,255,255,.18)}
+.tam146 i.on{background:var(--oro,#D6A648)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v145</div>
+<div class="version-badge" id="versionBadge">v146</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -27209,6 +27214,91 @@ install();setTimeout(install,1200);
   registrar();
   setTimeout(init145,40); setTimeout(init145,220); setTimeout(init145,650);
   window.__SA145={version:V145};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v146 · EL TAMAÑO SE VE
+   Cada propiedad recuerda su tamaño: compacta, normal o amplia (pequeña,
+   mediana o grande en locales, bodegas, oficinas y fincas). Se ve en la
+   foto, con un rótulo de metros cuadrados y habitaciones (o hectáreas) y
+   una barrita de tres niveles; la foto de lo compacto se ve más chica
+   dentro del marco. Las propiedades de antes
+   deducen su tamaño de lo que valen frente a lo normal de su tipo.
+   Queda listo el lugar para fotos por tamaño: cuando exista
+   img/ciudades/{ciudad}_{tipo}_{compacto|normal|amplio}.jpg y esté en la
+   lista FOTOS_TAMANO_146, se usa sola.
+   ========================================================================== */
+(function(){
+  const V146='v146';
+  const FOTOS_TAMANO_146=[];   // p. ej. 'bogota_casa_amplio' cuando lleguen las fotos
+  const NIV=['compacto','normal','amplio'];
+  const BASE={apartamento:.68,apto:.68,casa:.95,casa_pequena:.8,casa_grande:1.15,mansion:1.55,penthouse:1.7};
+  const AREA={apartamento:[48,72,115],casa:[85,140,220],casa_pequena:[55,75,95],casa_grande:[150,210,300],mansion:[380,600,950],penthouse:[170,260,420],
+    local:[40,90,250],bodega:[400,900,2500],oficina:[60,140,400],consultorio:[30,55,90],edificio:[600,1200,2400],hotel:[300,700,1500]};
+  const HAB={apartamento:[1,3,4],casa:[3,4,5],casa_pequena:[2,3,3],casa_grande:[4,5,6],mansion:[6,8,12],penthouse:[3,4,5]};
+  const P1={compacto:{v:'Compacta',r:'Pequeño'},normal:{v:'Normal',r:'Mediano'},amplio:{v:'Amplia',r:'Grande'}};
+  const tipoV=b=>{ const t=String(b.tipo||'').toLowerCase(); if(/penthouse/.test(t)) return 'penthouse'; if(/mansi/.test(t)) return 'mansion'; if(/casa_grande|duplex|dúplex/.test(t)) return 'casa_grande'; if(/casa_peq/.test(t)) return 'casa_pequena'; if(/casa/.test(t)) return 'casa'; if(/apart|apto/.test(t)) return 'apartamento'; return null; };
+  const esVivienda=b=>b&&(b.clase==='vivienda'||b.exVivienda109)&&!!tipoV(b);
+  const deRatio=r=>r<.93?'compacto':r>1.12?'amplio':'normal';
+  function tamano(b){
+    if(!b) return null;
+    if(b.cafe141){ const h=b.cafe141.ha||0; return h<10?'compacto':h<40?'normal':'amplio'; }   // las fincas cafeteras crecen: se mide cada vez
+    if(b.tam146) return b.tam146;
+    let t=null;
+    try{
+      if(esVivienda(b)){ const tv=tipoV(b), base=BASE[tv]||1, ref=precioVivienda(b.ciudad||S.hogar.ciudad,isFinite(b.zona)?b.zona:(S.hogar.zona||0),base); t=deRatio((b.precioCompra||b.valor)/Math.max(1,ref)); }
+      else if(b.clase==='renta'){ const r=(typeof RENTAS!=='undefined'?RENTAS:[]).find(x=>x.id===b.tipo); if(r){ t=deRatio((b.precioCompra||b.valor)/Math.max(1,r.base*(typeof multCiudad==='function'?multCiudad(b.ciudad||S.hogar.ciudad):1))); } }
+      else if(b.clase==='finca'){ const f=(typeof FINCAS!=='undefined'?FINCAS:[]).find(x=>x.id===b.tipo); if(f) t=deRatio((b.precioCompra||b.valor)/Math.max(1,f.base)); }
+    }catch(e){}
+    if(t) b.tam146=t; return t;
+  }
+  function detalle(b){ const t=tamano(b); if(!t) return null; const i=NIV.indexOf(t);
+    if(b.cafe141) return {t,etq:P1[t].r==='Pequeño'?'Pequeña':P1[t].r==='Mediano'?'Mediana':'Grande',extra:b.cafe141.ha+' ha'};
+    if(esVivienda(b)){ const tv=tipoV(b), a=(AREA[tv]||AREA.casa)[i], h=(HAB[tv]||HAB.casa)[i]; return {t,etq:P1[t].v,extra:'≈ '+a+' m² · '+h+' hab.'}; }
+    const a=AREA[b.tipo]; return {t,etq:P1[t].r,extra:a?'≈ '+a[i].toLocaleString('es-CO')+' m²':''};
+  }
+  const barras=t=>{ const i=NIV.indexOf(t); return [0,1,2].map(k=>'<i class="'+(k<=i?'on':'')+'"></i>').join(''); };
+  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena'};
+  const TIPOF={apartamento:'apartamento',casa:'casa',casa_pequena:'casa',casa_grande:'duplex',mansion:'mansion',penthouse:'penthouse'};
+  function decorar(svg,b,mini){
+    if(typeof svg!=='string'||mini||!/<\/svg>\s*$/.test(svg)) return svg;
+    const d=detalle(b); if(!d) return svg;
+    // foto específica por tamaño, si existe
+    try{ if(esVivienda(b)){ const k=CIU[b.ciudad||S.hogar.ciudad]+'_'+TIPOF[tipoV(b)]+'_'+d.t; if(FOTOS_TAMANO_146.includes(k)) svg=svg.replace(/img\/ciudades\/[a-z_]+\.jpg/g,'img/ciudades/'+k+'.jpg'); } }catch(e){}
+    // lo compacto se ve más chico en el marco (lo amplio se ve completo, sin recortar)
+    const ult=svg.lastIndexOf('<image ');
+    if(ult>=0){ const fin=svg.indexOf('/>',ult)+2, img=svg.slice(ult,fin);
+      let nuevo=img;
+      if(d.t==='compacto') nuevo='<rect width="240" height="160" fill="#0e1512" opacity=".35"/><g transform="translate(30 20) scale(.75)">'+img+'</g>';
+      svg=svg.slice(0,ult)+nuevo+svg.slice(fin); }
+    const txt=esc(d.etq+(d.extra?' · '+d.extra:'')), w=Math.min(232,24+txt.length*5.6);
+    const badge='<g class="tam146svg"><rect x="6" y="132" rx="6" ry="6" width="'+w+'" height="22" fill="#10140f" opacity=".78"/>'
+      +[0,1,2].map(k=>'<rect x="'+(12+k*5)+'" y="'+(146-k*3)+'" width="3.5" height="'+(4+k*3)+'" rx="1" fill="'+(k<=NIV.indexOf(d.t)?'#D6A648':'#5a5a52')+'"/>').join('')
+      +'<text x="31" y="147" font-size="11" fill="#F2E6CE" font-family="system-ui,sans-serif">'+txt+'</text></g>';
+    return svg.replace(/<\/svg>\s*$/,badge+'</svg>');
+  }
+  function instalar(){ const prev=window.dibujoPropiedad115; if(typeof prev!=='function'||prev.__v146) return;
+    window.dibujoPropiedad115=function(b,w,h,mini){ const r=prev.apply(this,arguments); try{ return decorar(r,b,mini); }catch(e){ return r; } };
+    window.dibujoPropiedad115.__v146=true; }
+  // al comprar: se guarda el tamaño elegido
+  function wrapComprar(){ const old=window.comprarBien; if(typeof old!=='function'||old.__v146) return;
+    window.comprarBien=function(o){ const b=old.apply(this,arguments); try{ if(b&&window.__tam146&&o&&(o.clase==='vivienda'||o.clase==='renta')&&esVivienda(Object.assign({},b,{exVivienda109:true}))) b.tam146=window.__tam146; }catch(e){} window.__tam146=null; return b; };
+    window.comprarBien.__v146=true; }
+  // el control de tamaño de las pantallas de compra deja dicho el tamaño
+  document.addEventListener('input',e=>{ try{ const el=e.target; if(!el||el.type!=='range') return;
+    if(el.id==='vHol'){ const v=+el.value; window.__tam146=v<95?'compacto':v>110?'amplio':'normal'; if(+el.max>130) window.__tam146=v<90?'compacto':v>130?'amplio':'normal'; }
+    if(el.id==='a127hol'){ const v=+el.value; window.__tam146=v<95?'compacto':v>110?'amplio':'normal'; } }catch(x){} },true);
+  document.addEventListener('click',e=>{ try{ const t=e.target; if(t&&t.closest&&t.closest('#escenaHost')&&(document.getElementById('vHol')||document.getElementById('a127hol'))&&!window.__tam146) window.__tam146='normal'; }catch(x){} },true);
+  // en la ficha del inmueble
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||window.__SA146_ESC) return; window.__SA146_ESC=true;
+    window.escena=function(o){ try{ if(o&&typeof o.html==='string'&&o.html.indexOf('class="ficha109"')>=0&&S&&S.bienes){ const b=S.bienes.find(x=>esc(x.nombre)===o.titulo); const d=b&&detalle(b);
+        if(d) o=Object.assign({},o,{html:o.html.replace('</table></div>','<tr><td>Tamaño</td><td><span class="tam146">'+barras(d.t)+' '+esc(d.etq)+(d.extra?' · '+esc(d.extra):'')+'</span></td></tr></table></div>')}); } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function init146(){ instalar(); wrapComprar(); wrapEscena(); Object.assign(window,{tamanoBien146:tamano,detalleTamano146:detalle,FOTOS_TAMANO_146}); }
+  setTimeout(init146,80); setTimeout(init146,260); setTimeout(init146,720); setTimeout(init146,950);
+  window.__SA146={version:V146};
 })();
 </script>
 
