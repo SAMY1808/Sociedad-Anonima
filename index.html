@@ -1062,10 +1062,19 @@ svg.foto116{display:block;background:#1d2a23}
 .mer138 .tipo{font-size:11.5px;color:var(--humo2)}
 .mer138 .cmp{margin-top:12px}
 </style>
+<style id="estilos-v139">
+.marcas139 .m139{padding:10px 12px;margin:8px 0;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.marcas139 .m139 .cab{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.marcas139 .m139 .cab b{font-family:var(--display);font-size:18px}
+.marcas139 .m139 .pos{font-size:12px;padding:1px 8px;border-radius:8px;background:rgba(214,166,72,.18);color:#F0CF86}
+.marcas139 .m139 .esl{font-style:italic;color:var(--humo2);font-size:13.5px;margin:2px 0 6px}
+.marcas139 .m139 .nota{font-size:12.5px;color:var(--humo2)}
+.marca139-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v138</div>
+<div class="version-badge" id="versionBadge">v139</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -26076,6 +26085,148 @@ install();setTimeout(install,1200);
     Object.assign(window,{COMPETIDORES_138:COMP,mercadoSector138:mercado,cuotasSector138:cuotas,escenaMercado138,atractivo138:atractivo,anualSector138:anualSector}); }
   setTimeout(init138,40); setTimeout(init138,220); setTimeout(init138,650);
   window.__SA138={version:V138};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v139 · MARCAS COMERCIALES
+   Cada compañía tiene sus marcas, con nombre, posicionamiento (popular,
+   media o premium), eslogan, notoriedad (cuánta gente la conoce) y
+   lealtad (cuánta la prefiere). La "marca" de la compañía ahora sale de
+   ellas. Las campañas dependen de la época: prensa, radio, vallas,
+   televisión, patrocinio deportivo, telenovelas, internet, redes e
+   influenciadores. Puedes lanzar marcas para otros segmentos, registrarlas
+   (o que te las registre otro), venderlas, y enfrentar falsificaciones,
+   comerciales polémicos y la celebridad que quiere ser tu imagen. Las
+   marcas fuertes valen: suben la valoración de la compañía.
+   ========================================================================== */
+(function(){
+  const V139='v139';
+  const POS={popular:{n:'Popular',d:'Para todo el mundo. Vende volumen.'},media:{n:'Media',d:'La clase media que compara.'},premium:{n:'Premium',d:'Pocos clientes que pagan más.'}};
+  const MEDIOS=[
+    {id:'prensa',n:'Avisos en prensa',desde:1900,c:.010,not:6,leal:1,fit:{premium:1.2,media:1.1,popular:.7}},
+    {id:'radio',n:'Cuñas de radio',desde:1930,c:.014,not:8,leal:2,fit:{popular:1.3,media:1,premium:.6}},
+    {id:'vallas',n:'Vallas en las ciudades',desde:1950,c:.012,not:6,leal:0,fit:{popular:1,media:1,premium:.8}},
+    {id:'tv',n:'Comerciales de televisión',desde:1955,c:.040,not:14,leal:2,fit:{popular:1.2,media:1.2,premium:.9}},
+    {id:'futbol',n:'Patrocinar un equipo de fútbol',desde:1950,c:.025,not:9,leal:5,fit:{popular:1.4,media:1,premium:.5}},
+    {id:'novela',n:'Aparecer en una telenovela',desde:1980,c:.030,not:11,leal:3,fit:{popular:1.3,media:1.1,premium:.6}},
+    {id:'evento',n:'Un evento exclusivo',desde:1960,c:.018,not:4,leal:6,fit:{premium:1.5,media:.8,popular:.4}},
+    {id:'web',n:'Publicidad en internet',desde:2000,c:.010,not:7,leal:1,fit:{popular:1,media:1.1,premium:1}},
+    {id:'redes',n:'Redes e influenciadores',desde:2012,c:.016,not:10,leal:3,fit:{popular:1.2,media:1.2,premium:1},riesgo:.15}
+  ];
+  const ESL={popular:['"{n}: la de siempre"','"{n}, para toda la familia"','"Con {n} rinde más"','"{n}: lo bueno no tiene que ser caro"'],
+    media:['"{n}. Calidad que se nota"','"{n}, hecho en Colombia"','"Confíe en {n}"','"{n}: de aquí, para usted"'],
+    premium:['"{n}. Para quien sabe"','"{n}: lo excepcional"','"Hay cosas que no se improvisan. {n}"','"{n}. Desde '+'{a}"']};
+  const P1=n=>String(n||'').split(' ')[0];
+  const eslogan=(n,pos,a)=>pick(ESL[pos]||ESL.media).replace('{n}',n).replace('{a}',a);
+  const fuerza=m=>m.notoriedad*.55+m.lealtad*.45;
+  function L(e){
+    if(!Array.isArray(e.marcas139)){ const n=String(e.nombre||'Marca').replace(/\s+(S\.A\.S?|Ltda\.?|& Cía\.?|S\.A)$/i,'');
+      e.marcas139=[{id:'m'+Math.floor(Math.random()*1e6),n,pos:'media',notoriedad:clamp(e.marca||45,10,90),lealtad:clamp((e.marca||45)*.8,10,85),desde:e.fundada||S.anio,eslogan:eslogan(n,'media',e.fundada||S.anio),reg:false}]; }
+    return e.marcas139;
+  }
+  const fuerzaCompania=e=>{ const M=L(e); return M.reduce((s,m)=>s+fuerza(m),0)/Math.max(1,M.length); };
+  const valorMarca=(e,m)=>{ const M=L(e), tot=M.reduce((t,x)=>t+fuerza(x),0)||1; return Math.max(0,(e.ingresos||0)*(fuerza(m)/tot)*(fuerza(m)/100)*.9); };
+  const calidad=e=>e.prod137&&isFinite(e.prod137.calidad)?e.prod137.calidad:50;
+
+  /* --- el año de las marcas --- */
+  function anual(e){
+    const M=L(e), pr=e.precio138||'medio';
+    M.forEach(m=>{
+      m.notoriedad=clamp(m.notoriedad-rnd(1.5,3.5)+(m.ult===S.anio-1?1:0),3,99);
+      let dl=(calidad(e)-50)*.06+rnd(-1,1)+(m.notoriedad>60?.5:0);
+      if(m.pos==='premium'&&pr==='bajo') dl-=3; if(m.pos==='popular'&&pr==='alto') dl-=2;
+      m.lealtad=clamp(m.lealtad+dl,3,98);
+    });
+    // la marca de la compañía sigue a sus marcas
+    e.marca=clamp(e.marca+(fuerzaCompania(e)-e.marca)*.35,0,100);
+    // cubrir más segmentos vende un poco más
+    M.slice(1).filter(m=>S.anio-m.desde<=5&&m.pos!==M[0].pos).forEach(m=>{ const x=e.ingresos*.02*clamp(m.notoriedad/50,0,1.5), mg=e.utilidad/Math.max(1,e.ingresos); e.ingresos+=x; e.utilidad+=x*Math.max(0,mg); });   // una marca nueva abre un segmento durante sus primeros años
+    // registro: el que no registra se arriesga
+    if(M.some(m=>!m.reg)&&S.anio-(e.regAviso139||0)>=6&&chance(.05)&&S._ev139!==S.anio){ S._ev139=S.anio; e.regAviso139=S.anio; cola.push(evRegistro(e,M.find(m=>!m.reg))); }
+    else if(S._ev139!==S.anio&&chance(.05)){ const ev=pick([evFalsif,evCelebridad])(e); if(ev){ S._ev139=S.anio; cola.push(ev); } }
+  }
+  function wrapEmpresa139(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA139_EMP) return; window.__SA139_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  function wrapValuar139(){ const old=window.valuar; if(typeof old!=='function'||window.__SA139_VAL) return; window.__SA139_VAL=true;
+    window.valuar=function(e){ const v=old.apply(this,arguments); try{ if(e&&Array.isArray(e.marcas139)&&v>0) return v*(1+clamp((fuerzaCompania(e)-50)/400,-.08,.12)); }catch(x){} return v; }; }
+
+  /* --- sucesos --- */
+  const B=()=>companias().find(x=>x.nombre===S._e139);
+  function evRegistro(e,m){ S._e139=e.nombre; S._m139=m.id; return {p:9,c:()=>!!B(),
+    t:()=>'<b>Alguien registró "'+esc(m.n)+'" antes que tú.</b> Un avivato fue a la Superintendencia de Industria y Comercio y la puso a su nombre. Ahora te pide plata para devolvértela.',
+    o:[{t:()=>'Pagarle ('+fmt(Math.max(5,e.ingresos*.01))+')',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(5,b.ingresos*.01); const mm=L(b).find(x=>x.id===S._m139); if(mm) mm.reg=true; return 'Pagaste y la registraste de una vez a tu nombre.'; }},
+       {t:'Demandarlo',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(3,b.ingresos*.004); const mm=L(b).find(x=>x.id===S._m139); if(chance(.6)){ if(mm) mm.reg=true; return 'Probaste que la usabas desde antes. Te la devolvieron.'; } if(mm){ mm.n=mm.n+' de Colombia'; mm.notoriedad*=.6; } return 'Perdiste. Te tocó cambiarle el nombre y empezar casi de cero.'; }}]}; }
+  function evFalsif(e){ const M=L(e).filter(m=>m.notoriedad>45); if(!M.length) return null; const m=pick(M); S._e139=e.nombre; S._m139=m.id;
+    return {p:9,c:()=>!!B(),t:()=>'<b>Falsificaciones de '+esc(m.n)+'.</b> En San Victorino venden copias con tu logo a la mitad del precio. Algunos clientes creen que es lo tuyo y se quejan de la calidad.',
+      o:[{t:'Denunciar y hacer decomisos',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(3,b.ingresos*.005); return chance(.6)?'La Policía decomisó bodegas enteras. La marca respira.':'Decomisaron un poco. Las copias siguen.'; }},
+         {t:'Ignorarlo: copiarte es un halago',f:()=>{ const b=B(); const mm=b&&L(b).find(x=>x.id===S._m139); if(mm){ mm.lealtad=clamp(mm.lealtad-6,0,100); mm.notoriedad=clamp(mm.notoriedad+2,0,100); } return 'Más gente conoce la marca, pero la asocian con lo barato.'; }}]}; }
+  function evCelebridad(e){ const m=pick(L(e)); S._e139=e.nombre; S._m139=m.id; const quien=S.anio<1970?'una reina de belleza':S.anio<1995?'una estrella de telenovela':S.anio<2012?'un futbolista de la selección':'una influenciadora con millones de seguidores';
+    return {p:9,c:()=>!!B(),t:()=>'<b>'+quien.charAt(0).toUpperCase()+quien.slice(1)+' quiere ser la imagen de '+esc(m.n)+'.</b> Pide '+fmt(Math.max(8,e.ingresos*.02))+' por dos años.',
+      o:[{t:'Firmar',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(8,b.ingresos*.02); const mm=L(b).find(x=>x.id===S._m139); if(!mm) return '—';
+           if(chance(.82)){ mm.notoriedad=clamp(mm.notoriedad+14,0,99); mm.lealtad=clamp(mm.lealtad+4,0,98); return 'Las ventas lo notaron: todo el país sabe qué es '+mm.n+'.'; }
+           mm.lealtad=clamp(mm.lealtad-10,0,98); try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La imagen de '+mm.n,1); }catch(x){} return 'A los tres meses tu imagen salió en un escándalo. Arrastró la marca con ella.'; }},
+         {t:'No, gracias',f:()=>'La firmó tu competencia.'}]}; }
+
+  /* --- la pantalla --- */
+  function escenaMarcas139(e){
+    e=e||S.emp; if(!e) return; const M=L(e), sinMov=S.mov<1?'No te quedan movidas':null;
+    const cards=M.map(m=>'<div class="m139"><div class="cab"><b>'+esc(m.n)+'</b><span class="pos">'+POS[m.pos].n+'</span></div><div class="esl">'+esc(m.eslogan||'')+'</div>'
+      +medida('notoriedad',m.notoriedad,100)+medida('lealtad',m.lealtad,100)
+      +'<div class="nota">Desde '+m.desde+' · vale unos '+fmt(valorMarca(e,m))+' · '+(m.reg?'registrada':'<span class="mal">sin registrar</span>')+(m.ult?' · última campaña en '+m.ult:'')+'</div></div>').join('');
+    const ops=[];
+    ops.push({t:'Hacer una campaña',cat:'mercado',d:'Elige la marca y el medio. Lo que funciona depende de la época y del público.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); M.length>1?elegirMarca(e):escenaCampana(e,M[0]); }});
+    if(M.length<4) ops.push({t:'Lanzar una marca nueva',cat:'mercado',d:'Para llegar a otro segmento. Cuesta '+fmt(Math.max(15,e.ingresos*.05))+' de la compañía.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); escenaNueva(e); }});
+    const sinReg=M.filter(m=>!m.reg); if(sinReg.length) ops.push({t:'Registrar '+(sinReg.length>1?'las marcas':'la marca')+' en la Superintendencia',cat:'mercado',d:'Trámite barato ('+fmt(Math.max(1,sinReg.length*2))+'). Nadie te la puede quitar.',cerrar:false,run:()=>{ e.caja-=Math.max(1,sinReg.length*2); sinReg.forEach(m=>m.reg=true); log('Registraste '+(sinReg.length>1?'las marcas':'la marca')+' de <b>'+esc(e.nombre)+'</b>.','bien'); cerrarModal(); escenaMarcas139(e); }});
+    if(M.length>1){ const m=M.slice().sort((a,b)=>fuerza(a)-fuerza(b))[0]; ops.push({t:'Vender la marca '+m.n,cat:'mercado',d:'Un competidor ofrece '+fmt(valorMarca(e,m)*1.2)+'. Pierdes sus clientes.',dis:S.anio-m.desde<3?'Es muy nueva: nadie la compra todavía':sinMov,cerrar:false,
+      run:()=>{ const v=valorMarca(e,m)*1.2, tot=M.reduce((t,x)=>t+fuerza(x),0)||1; e.caja+=v; e.ingresos*=1-fuerza(m)/tot*.6; e.marcas139=M.filter(x=>x!==m); S.mov--; log('Vendiste la marca <b>'+esc(m.n)+'</b> por '+fmt(v)+'.','hito'); cerrarModal(); render(); escenaMarcas139(e); }}); }
+    escena({rubro:esc(e.nombre)+' · Mercadeo',titulo:'Las marcas de la compañía',ancho:true,cerrable:true,clase:'marcas139',
+      cuerpo:'La fuerza de tus marcas es la marca de la compañía ('+Math.round(fuerzaCompania(e))+'/100). Sin campañas, la gente se olvida; sin calidad, deja de preferirte.',html:cards,opciones:ops});
+  }
+  function elegirMarca(e){ escena({rubro:esc(e.nombre),titulo:'¿Para qué marca es la campaña?',cerrable:true,opciones:L(e).map(m=>({t:m.n,cat:'mercado',d:POS[m.pos].n+' · notoriedad '+Math.round(m.notoriedad)+'.',cerrar:false,run:()=>{ cerrarModal(); escenaCampana(e,m); }}))}); }
+  function escenaCampana(e,m){
+    const ops=MEDIOS.filter(x=>x.desde<=S.anio).map(x=>{ const c=Math.max(3,e.ingresos*x.c), f=x.fit[m.pos]||1;
+      return {t:x.n,cat:'mercado',d:fmt(c)+'. '+(f>=1.2?'Le llega muy bien a este público.':f<=.7?'No es el medio para este público.':'Funciona bien.')+' Una movida.',dis:S.mov<1?'No te quedan movidas':null,
+        run:()=>{ const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene con qué pagar la campaña.','mal'); return; } S.mov--;
+          const sube=x.not*f*(1-m.notoriedad/120)*rnd(.8,1.25); m.notoriedad=clamp(m.notoriedad+sube,0,99); m.lealtad=clamp(m.lealtad+x.leal*f,0,98); m.ult=S.anio;
+          if(x.id==='futbol'){ try{ const club=S.club96||S.club; if(club) m.lealtad=clamp(m.lealtad+3,0,98); }catch(z){} }
+          let extra=''; if(x.riesgo&&chance(x.riesgo)){ m.lealtad=clamp(m.lealtad-8,0,98); extra=' Pero un video se volvió viral por las razones equivocadas: hubo boicot en redes.'; }
+          e.marca=clamp(e.marca+sube*.4,0,100);
+          log('Campaña de <b>'+esc(m.n)+'</b>: '+x.n.toLowerCase()+'. Ahora la conoce el '+Math.round(m.notoriedad)+'% de la gente.'+extra,extra?'mal':'bien'); render(); }}; });
+    escena({rubro:esc(m.n)+' · '+POS[m.pos].n,titulo:'¿Dónde sale la campaña?',ancho:true,cerrable:true,cuerpo:'Medios disponibles en '+S.anio+'. Cada uno le llega distinto a cada público.',opciones:ops});
+  }
+  function escenaNueva(e){
+    const M=L(e), base=String(e.nombre).split(' ')[0];
+    const sug={popular:pick(['Doña '+pick(['Rosa','Tere','Chela']),'El Rendidor','Super'+base,'La Económica']),media:pick([base+' Clásico','Del Valle','Andina','La Sabana']),premium:pick(['Maison '+base,base+' Reserva','Gran '+base,'Origen'])};
+    escena({rubro:esc(e.nombre),titulo:'Una marca nueva',cerrable:true,cuerpo:'¿Para qué público? Una marca para cada segmento llega a más gente.',
+      html:'<label class="campo">Nombre<input type="text" id="m139n" maxlength="28" value=""></label>',
+      opciones:Object.keys(POS).map(k=>({t:POS[k].n+(M.some(m=>m.pos===k)?' (ya tienes una)':''),cat:'mercado',d:POS[k].d+' Si no escribes nombre: "'+sug[k]+'".',cerrar:false,
+        run:()=>{ const c=Math.max(15,e.ingresos*.05); const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene con qué lanzar la marca.','mal'); return; } S.mov=Math.max(0,S.mov-1);
+          const el=document.getElementById('m139n'); const n=(el&&el.value.trim())||sug[k];
+          M.push({id:'m'+Math.floor(Math.random()*1e6),n,pos:k,notoriedad:12,lealtad:20,desde:S.anio,eslogan:eslogan(n,k,S.anio),reg:false});
+          hito('Lanzó la marca '+n); log('<b>'+esc(e.nombre)+'</b> lanzó la marca <b>'+esc(n)+'</b>, '+POS[k].n.toLowerCase()+'.','hito'); cerrarModal(); render(); escenaMarcas139(e); }}))});
+  }
+
+  /* --- enganches --- */
+  function panelHTML(e){ const M=L(e);
+    return '<div class="marca139-panel"><b>Las marcas</b><div class="apunte" style="margin:4px 0 8px">'+M.map(m=>esc(m.n)+' ('+POS[m.pos].n.toLowerCase()+', '+Math.round(m.notoriedad)+'% la conoce)').join(' · ')+'</div>'
+      +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Las marcas de la compañía">'+(typeof sello==='function'?sello('mercado'):'')+'<div class="neg86-accion-info"><div class="nom">Las marcas de la compañía</div><div class="txt">Campañas por medio y época, marcas nuevas, registro y venta.</div></div></div></div></div>'; }
+  function wrapPanel139(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v139) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='mercadeo') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v139=true; }
+  function wrapAcciones139(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA139_ACC) return; window.__SA139_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const M=L(e);
+        A.push({t:'Las marcas de la compañía',d:M.length+' marca'+(M.length>1?'s':'')+' · fuerza '+Math.round(fuerzaCompania(e))+'/100.',mov:0,modal:true,run:()=>escenaMarcas139(e)});
+        const c=A.find(a=>a.t==='Campaña de marca'); if(c){ c.d='Elige la marca y el medio: prensa, radio, televisión, redes…'; c.mov=0; c.modal=true; c.dis=null; c.run=()=>{ M.length>1?elegirMarca(e):escenaCampana(e,M[0]); }; } } }catch(x){}
+      return A; }; }
+  function wrapCat139(){ const old=window.catDe; if(typeof old!=='function'||window.__SA139_CAT) return; window.__SA139_CAT=true;
+    window.catDe=function(t){ if(t==='Las marcas de la compañía') return 'mercado'; return old.apply(this,arguments); }; }
+  function init139(){ wrapEmpresa139(); wrapValuar139(); wrapPanel139(); wrapAcciones139(); wrapCat139();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Las marcas de la compañía')) D.push('Las marcas de la compañía'); }catch(x){}
+    Object.assign(window,{marcasCompania139:L,escenaMarcas139,MEDIOS_139:MEDIOS,fuerzaMarcas139:fuerzaCompania}); }
+  setTimeout(init139,40); setTimeout(init139,220); setTimeout(init139,650); setTimeout(init139,900);
+  window.__SA139={version:V139};
 })();
 </script>
 
