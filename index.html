@@ -1040,10 +1040,51 @@ svg.foto116{display:block;background:#1d2a23}
 .grande136 .marco136 .pie136{margin-top:10px;font-family:var(--display);font-size:15px;color:#3a2f22;text-align:center}
 .grande136 .nombres136{margin-top:4px;font-size:12.5px;color:#6a5640;text-align:center}
 </style>
+<style id="estilos-v137">
+.prod137 .uso{height:9px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 10px}
+.prod137 .uso i{display:block;height:100%}
+.prod137 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.prod137 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.prod137 .k b{display:block;font-size:17px;font-family:var(--display)}
+.prod137 .k span{font-size:12px;color:var(--humo2)}
+.prod137-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
+<style id="estilos-v138">
+.mer138 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.mer138 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.mer138 .k b{display:block;font-size:17px;font-family:var(--display)}
+.mer138 .k span{font-size:12px;color:var(--humo2)}
+.mer138 .cuota{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 46px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.mer138 .cuota .bar{height:8px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden}
+.mer138 .cuota .bar i{display:block;height:100%;background:#8C8574}
+.mer138 .cuota.tu .bar i{background:var(--oro,#D6A648)}
+.mer138 .cuota.tu{font-weight:600}
+.mer138 .tipo{font-size:11.5px;color:var(--humo2)}
+.mer138 .cmp{margin-top:12px}
+</style>
+<style id="estilos-v139">
+.marcas139 .m139{padding:10px 12px;margin:8px 0;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.marcas139 .m139 .cab{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.marcas139 .m139 .cab b{font-family:var(--display);font-size:18px}
+.marcas139 .m139 .pos{font-size:12px;padding:1px 8px;border-radius:8px;background:rgba(214,166,72,.18);color:#F0CF86}
+.marcas139 .m139 .esl{font-style:italic;color:var(--humo2);font-size:13.5px;margin:2px 0 6px}
+.marcas139 .m139 .nota{font-size:12.5px;color:var(--humo2)}
+.marca139-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
+<style id="estilos-v140">
+.proc140 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.proc140 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.proc140 .k b{display:block;font-size:16px;font-family:var(--display)}
+.proc140 .k span{font-size:12px;color:var(--humo2)}
+.proc140 .cert{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.proc140 .cert span{font-size:12.5px;padding:2px 9px;border-radius:9px;background:rgba(127,163,107,.2);color:#B9D3A5}
+.proc140 .cert span.no{background:rgba(255,255,255,.06);color:var(--humo2)}
+.proc140-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v136</div>
+<div class="version-badge" id="versionBadge">v140</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3524,7 +3565,7 @@ function abrirPuerta(p,acciones){
       const sinMov=(a.mov||0)>S.mov;
       const dis=a.dis||(sinMov?'Te quedan '+S.mov+' movidas y esta cuesta '+(a.mov||1):null);
       return {t:a.t,cat:catDe(a.t),d:dis||a.d,dis:dis,cerrar:false,
-        run:()=>{ cerrarModal(); a.run(); if(!a.modal) S.mov-=(a.mov||1); render(); }};
+        run:()=>{ cerrarModal(); a.run(); if(!a.modal) S.mov-=(a.mov===0?0:(a.mov||1)); render(); }};
     }).concat([{t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); render(); }}])});
 }
 /* devuelve la lista de la mesa: las sueltas, más una carta por puerta que valga la pena */
@@ -7066,7 +7107,7 @@ const EVENTOS=[
   o:[{t:'Bajar el ritmo en serio',f:()=>{S.p.salud=clamp(S.p.salud+16,0,100);if(S.emp)S.emp.crecimiento-=.02;return 'Delegaste y dormiste. Salud en '+Math.round(S.p.salud)+'.';}},
      {t:'Seguir igual',f:()=>{S.p.salud=clamp(S.p.salud-9,0,100);return 'Seguiste con el mismo ritmo. Ya sabes cómo termina eso.';}}]},
  {p:1.2,c:()=>S.emp&&!S.emp.publica&&S.emp.ingresos>4000,t:()=>'Un banco de inversión te propone estructurar la salida a bolsa.',
-  o:[{t:'Escuchar la propuesta',f:()=>{S.emp.preIPO=true;return 'Quedó el estudio listo: cuando quieras emitir, el proceso será más rápido y más barato.';}},
+  o:[{t:'Escuchar la propuesta',f:()=>{if(S.emp) S.emp.preIPO=true;return 'Quedó el estudio listo: cuando quieras emitir, el proceso será más rápido y más barato.';}},
      {t:'Nada de bolsa',f:()=>'Prefieres no rendirle cuentas a nadie. Por ahora.'}]},
  {p:1.2,c:()=>S.familia.pareja&&S.familia.pareja.paciencia<40,t:()=>esc(S.familia.pareja.nombre)+' te dice que te ha perdido: o cambias, o esto se termina.',
   o:[{t:'Dar el año a la familia',f:()=>{S.familia.pareja.paciencia=clamp(S.familia.pareja.paciencia+35,0,100);S.p.felicidad+=10;if(S.emp)S.emp.crecimiento-=.01;return 'Estuviste presente todo el año. Se arregló.';}},
@@ -7293,7 +7334,7 @@ const EVENTOS=[
        return 'Alguien habló y quedó como lo que era: un acuerdo entre competidores.'; }}]},
 
  {p:1.8,c:()=>S.emp&&valuar(S.emp)>2000&&rivalesVivas().some(r=>r.patrimonio>valuar(S.emp)*1.2),
-  t:()=>{ const c=rivalesVivas().filter(r=>r.patrimonio>valuar(S.emp)*1.2); if(!c.length) return null;
+  t:()=>{ if(!S.emp) return null; const c=rivalesVivas().filter(r=>r.patrimonio>valuar(S.emp)*1.2); if(!c.length) return null;
     const r=pick(c); S._r=r.rid;
     return 'Los <b>'+esc(r.apellido)+'</b> mandaron una oferta formal para comprarte '+esc(S.emp.nombre)+'. '
       +'Pagan bien y no están pidiendo permiso para insistir.'; },
@@ -7978,7 +8019,7 @@ function baraja(acciones,conGrupos){
     if(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat)) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
     const clave=/Fundar|a bolsa|Vender la compañía|Ronda|Retirarte|Asumir|Adquirir/.test(a.t);
     const riesgo=/palancas|Recortar/.test(a.t);
-    let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov||1);k++) fichas+='<i></i>';
+    let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov===0?0:(a.mov||1));k++) fichas+='<i></i>';
     h+='<button class="carta'+(a.puerta?' puerta':'')+(riesgo?' riesgo':'')+(clave&&!riesgo?' clave':'')+'" data-i="'+LISTA.indexOf(a)+'"'
       +(dis?' disabled':'')+' style="--d:'+Math.min(i*26,420)+'ms;--tilt:'+((i%3)-1)*.35+'deg">'
       +'<span class="fichas">'+fichas+'</span>'
@@ -8014,7 +8055,7 @@ function conectarCartas(){
       const a=LISTA[+b.dataset.i];
       if(!a||a.dis||(a.mov||0)>S.mov) return;
       a.run();
-      if(!a.modal) S.mov-=(a.mov||1);
+      if(!a.modal) S.mov-=(a.mov===0?0:(a.mov||1));
       render();
     };
   });
@@ -13253,7 +13294,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       if(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat)) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
       const clave=/Fundar|a bolsa|Vender la compañía|Ronda|Retirarte|Asumir|Adquirir/.test(a.t);
       const riesgo=/palancas|Recortar/.test(a.t);
-      let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov||1);k++) fichas+='<i></i>';
+      let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov===0?0:(a.mov||1));k++) fichas+='<i></i>';
       h+='<button class="carta'+(a.puerta?' puerta':'')+(riesgo?' riesgo':'')+(clave&&!riesgo?' clave':'')+'" data-i="'+LISTA.indexOf(a)+'"'
         +(dis?' disabled':'')+' style="--d:'+Math.min(i*26,420)+'ms;--tilt:'+((i%3)-1)*.35+'deg">'
         +'<span class="fichas">'+fichas+'</span>'
@@ -14127,7 +14168,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const accion=((window.accionesCrudas91?window.accionesCrudas91():listaAcciones())||[]).find(a=>a.t==='Construir una planta nueva');
     if(!accion||!e||accion.dis||(accion.mov||1)>S.mov){ if(accion&&(accion.mov||1)>S.mov) aviso('No te quedan movidas este año.'); render(); return; }
     accion.run();
-    if(!accion.modal) S.mov=Math.max(0,S.mov-(accion.mov||1));
+    if(!accion.modal) S.mov=Math.max(0,S.mov-(accion.mov===0?0:(accion.mov||1)));
     e.plantas57=e.plantas57||[];
     e.plantas57.push({ciudad,anio:S.anio,restan:3});
     render();
@@ -16958,7 +16999,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       if(key==='rivales') a=A.find(x=>x.t==='Las casas rivales del país');
       else if(key==='politica') a=A.find(x=>/^(Entrar en política|Gestionar carrera política|Gobernar el país|Gobernar la alcaldía|Gobernar la gobernación)/.test(x.t));
       else if(key==='medios') a=A.find(x=>x.t==='Tu imperio mediático');
-      if(a){ if(a.dis||(a.mov||0)>S.mov) return; a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1)); render(); }
+      if(a){ if(a.dis||(a.mov||0)>S.mov) return; a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov===0?0:(a.mov||1))); render(); }
     }catch(e){}
   }
   function conectarHub80(){
@@ -17104,7 +17145,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(!a||a.dis||(a.mov||0)>S.mov) return false;
     if(a.modal){ a.run(); return true; }
     a.run();
-    S.mov=Math.max(0,S.mov-(a.mov||1));
+    S.mov=Math.max(0,S.mov-(a.mov===0?0:(a.mov||1)));
     renderPestanas(); renderLienzo();
     return true;
   }
@@ -17231,7 +17272,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(negSel==='otras'){
       const A=listaAcciones(); const a=A.find(x=>x.t===titulo);
       if(!a||a.dis||(a.mov||0)>S.mov) return;
-      a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
+      a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov===0?0:(a.mov||1)));
       renderPestanas(); renderLienzo();
       return;
     }
@@ -19022,7 +19063,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function ejecutarAccion91(a){
     if(!a||a.dis||(a.mov||0)>S.mov) return false;
-    a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov||1));
+    a.run(); if(!a.modal) S.mov=Math.max(0,S.mov-(a.mov===0?0:(a.mov||1)));
     render(); return true;
   }
 
@@ -25743,6 +25784,608 @@ install();setTimeout(install,1200);
     Object.assign(window,{album136:A,pegarEnAlbum136:pegar,escenaAlbum136,verFotoAlbum136:verFoto,retratoFamilia136:tomarRetrato}); }
   setTimeout(init136,40); setTimeout(init136,220); setTimeout(init136,650);
   window.__SA136={version:V136};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v137 · PRODUCCIÓN DE VERDAD
+   Las compañías que fabrican (moda, alimentos, construcción, energía,
+   agroindustria, salud y minería) tienen plantas con nombre, ciudad y
+   capacidad. Si la demanda supera lo que puedes producir, vendes menos;
+   si las plantas sobran, cuestan. Cada sector compra su materia prima
+   (algodón, trigo, acero, combustible…) a un precio que sube y baja con el
+   mundo: crisis del petróleo, 2008, la inflación de 2021. Se puede
+   asegurar el precio con contratos de suministro. La calidad cuenta: con
+   control de calidad la marca sube; sin él, llegan los defectos y los
+   retiros del mercado. Las plantas envejecen y se modernizan.
+   ========================================================================== */
+(function(){
+  const V137='v137';
+  const IND={moda:{ins:'algodón e hilazas',peso:.22,planta:'Planta de confección',dolar:.5},
+    alimentos:{ins:'trigo, azúcar y aceites',peso:.28,planta:'Planta de alimentos',dolar:.4},
+    construccion:{ins:'acero y cemento',peso:.26,planta:'Planta de prefabricados',dolar:.3},
+    energia:{ins:'combustible y turbinas',peso:.2,planta:'Central',dolar:.5,petroleo:1},
+    agro:{ins:'fertilizantes y empaques',peso:.22,planta:'Planta de beneficio',dolar:.6,petroleo:.5},
+    salud:{ins:'principios activos importados',peso:.18,planta:'Laboratorio',dolar:.8},
+    mineria:{ins:'combustible y explosivos',peso:.15,planta:'Planta de procesamiento',dolar:.3,petroleo:.8}};
+  const industrial=e=>!!(e&&IND[e.sector]);
+  const P1=n=>String(n||'').split(' ')[0];
+  const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
+
+  /* --- materias primas: un índice por sector --- */
+  function insumos(){ if(!S.insumos137||typeof S.insumos137!=='object') S.insumos137={}; return S.insumos137; }
+  function indice(sec){ const I=insumos(); if(!I[sec]) I[sec]={ind:1,ult:0,hist:[[S.anio,1]]}; return I[sec]; }
+  function choque(sec){ const A=S.anio, d=IND[sec]||{}; let x=0;
+    if((A===1973||A===1974)&&d.petroleo) x+=.22*d.petroleo; if(A===1979&&d.petroleo) x+=.15*d.petroleo;
+    if(A===1986&&d.petroleo) x-=.15*d.petroleo; if(A===2007||A===2008) x+=.12; if(A===2009) x-=.15;
+    if(A===2021||A===2022) x+=.14; if(A===2020) x-=.05; return x; }
+  function anualInsumos(){
+    const I=insumos(), m=S.macro||{}; if(I.__anio===S.anio) return; I.__anio=S.anio;
+    Object.keys(IND).forEach(sec=>{ const x=indice(sec), d=IND[sec];
+      const usd=isFinite(m.usd)&&I.__usd>0?clamp(m.usd/I.__usd-1,-.3,.5):0;
+      let g=rnd(-.07,.08)+choque(sec)+usd*d.dolar-(x.ind-1)*.18;
+      x.ind=clamp(x.ind*(1+g),.6,1.9); x.ult=g; x.hist.push([S.anio,x.ind]); if(x.hist.length>30) x.hist.shift(); });
+    I.__usd=m.usd;
+  }
+  const precioInsumo=e=>{ const x=indice(e.sector), p=e.prod137&&e.prod137.contrato; return p&&p.hasta>=S.anio?p.ind:x.ind; };
+
+  /* --- las plantas de cada compañía --- */
+  function P(e){
+    if(!e.prod137||typeof e.prod137!=='object'){
+      const d=IND[e.sector]||{planta:'Planta'};
+      e.prod137={plantas:[{id:'p'+Math.floor(Math.random()*1e6),n:d.planta+' de '+(e.ciudad||S.hogar.ciudad),ciudad:e.ciudad||S.hogar.ciudad,cap:Math.max(20,e.ingresos*1.5),desde:e.fundada||S.anio,mod:e.fundada||S.anio}],
+        calidad:clamp(48+((e.eficiencia||50)-50)*.3,20,80),pend:[],contrato:null,ultIng:e.ingresos,topeAviso:0};
+    }
+    const p=e.prod137; p.plantas=p.plantas||[]; p.pend=p.pend||[]; return p;
+  }
+  const capacidad=e=>P(e).plantas.reduce((s,x)=>s+(x.cap||0),0);
+  const uso=e=>{ const c=capacidad(e); return c>0?e.ingresos/c:1; };
+  const edad=pl=>S.anio-(pl.mod||pl.desde||S.anio);
+  function nivelMetodo(e){ return ({artesanal:0,estandar:1,semiauto:2,automatizada:3,inteligente:4})[e.metodoProduccion||'artesanal']||0; }
+
+  function antes(e){   // saltos de ingresos que no vienen del crecimiento normal (expansiones, adquisiciones, fusiones) traen su capacidad
+    const p=P(e), c=capacidad(e);
+    if(p.ultIng>0&&e.ingresos>p.ultIng*1.12&&e.ingresos>c*.95){ const extra=(e.ingresos-Math.max(p.ultIng,c*.95))*1.35;
+      if(extra>1) p.plantas.push({id:'p'+Math.floor(Math.random()*1e6),n:(IND[e.sector].planta)+' (expansión '+S.anio+')',ciudad:e.ciudad||S.hogar.ciudad,cap:extra,desde:S.anio,mod:S.anio}); }
+  }
+  function despues(e,res){
+    const p=P(e), d=IND[e.sector];
+    // plantas en obra que se terminan
+    p.pend=p.pend.filter(x=>{ if(x.listo>S.anio) return true;
+      if(x.tipo==='ampliar'){ const pl=p.plantas.find(y=>y.id===x.pid); if(pl){ pl.cap*=1.5; log('Terminó la ampliación de la <b>'+esc(pl.n)+'</b>.','bien'); } }
+      else { p.plantas.push({id:'p'+Math.floor(Math.random()*1e6),n:x.n,ciudad:x.ciudad,cap:x.cap,desde:S.anio,mod:S.anio}); hito('Inauguró la '+x.n); log('Inauguraste la <b>'+esc(x.n)+'</b>.','hito'); }
+      return false; });
+    let delta=0;
+    // 1. capacidad: tope y costo de lo que sobra
+    const cap=capacidad(e), tope=cap*1.05;
+    if(e.ingresos>tope){ const perdido=e.ingresos-tope, mg=e.ingresos>0?e.utilidad/e.ingresos:0; e.ingresos=tope; delta-=perdido*Math.max(0,mg);
+      e.moral=clamp(e.moral-2,0,100);
+      if(S.anio-(p.topeAviso||0)>=3){ p.topeAviso=S.anio; log('<b>'+esc(e.nombre)+'</b> trabaja al tope: dejó de vender '+fmt(perdido)+' porque las plantas no dan más.','mal'); } }
+    const u=e.ingresos/cap;
+    if(u<.55){ const c=Math.min(cap*.03*(.55-u)/.55,e.ingresos*.02); delta-=c;
+      if(u<.45){ p.plantas.forEach(x=>{ x.cap*=.9; }); if(S.anio-(p.ociosaAviso||0)>=4){ p.ociosaAviso=S.anio; log('En <b>'+esc(e.nombre)+'</b> hay máquinas paradas: la capacidad que no se usa se va dejando morir.',''); } } }
+    // 2. materia prima
+    const pi=precioInsumo(e); delta-=e.ingresos*d.peso*(pi-1)*.5;
+    // 3. calidad: hacia donde la llevan el método, la edad de las plantas y la eficiencia
+    const viejas=p.plantas.filter(x=>edad(x)>30).length/Math.max(1,p.plantas.length);
+    const meta=48+nivelMetodo(e)*6+((e.eficiencia||50)-50)*.2-viejas*10+(p.qc>=S.anio-3?10:0);
+    p.calidad=clamp(p.calidad+(meta-p.calidad)*.25+rnd(-3,3),5,98);
+    e.marca=clamp((e.marca||50)+(p.calidad-48)*.03,0,100);
+    if(viejas>0) e.eficiencia=clamp((e.eficiencia||50)-viejas*1.2,0,100);
+    // aplicar
+    if(delta){ e.utilidad+=delta; e.caja+=delta; }
+    p.ultIng=e.ingresos; p.ultDelta=delta;
+    // 4. defectos y retiros del mercado
+    if(p.calidad<40&&chance((40-p.calidad)/120)&&S.anio-(S._recall137||0)>=5){ S._recall137=S.anio; cola.push(evRetiro(e)); }
+  }
+  function wrapEmpresa137(){
+    const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA137_EMP) return; window.__SA137_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; let ok=false;
+      try{ if(industrial(e)){ anualInsumos(); antes(e); ok=true; } }catch(x){ console.error(x); }
+      const r=old.apply(this,arguments);
+      try{ if(ok&&companias().includes(e)) despues(e,res); }catch(x){ console.error(x); }
+      return r; };
+  }
+
+  /* --- retiros del mercado --- */
+  function evRetiro(e){ return {p:9,c:()=>companias().includes(e),
+    t:()=>{ const d=IND[e.sector]; S._e137=e.nombre; return '<b>'+esc(e.nombre)+': un lote salió defectuoso.</b> '+({alimentos:'Varios consumidores terminaron intoxicados.',salud:'Un medicamento salió con la dosis equivocada. El INVIMA ya preguntó.',moda:'Una tanda entera se destiñó en la primera lavada.',construccion:'Unas vigas no aguantaron la prueba de carga.'})[e.sector]||'Los clientes están devolviendo el producto.'; },
+    o:[{t:()=>'Retirar todo del mercado ('+fmt(Math.max(10,e.ingresos*.04))+')',f:()=>{ const c=Math.max(10,e.ingresos*.04); e.caja-=c; e.marca=clamp(e.marca-4,0,100); P(e).calidad=clamp(P(e).calidad+8,0,100); return 'Retiraste el lote y diste la cara. Costó '+fmt(c)+', pero la gente valoró la honestidad.'; }},
+       {t:'Negarlo y seguir vendiendo',f:()=>{ if(chance(.55)){ e.marca=clamp(e.marca-14,0,100); try{ if(window.abrirEscandalo129) window.abrirEscandalo129('empresa','El lote defectuoso de '+e.nombre,e.sector==='alimentos'||e.sector==='salud'?2:1); }catch(x){} return 'Salió en las noticias. El escándalo fue peor que el retiro.'; } return 'Nadie lo notó. Esta vez.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function costoAmpliar(pl){ return Math.max(15,pl.cap*.3); }
+  function escenaPlantas137(e){
+    e=e||S.emp; if(!industrial(e)) return;
+    const p=P(e), d=IND[e.sector], cap=capacidad(e), u=e.ingresos/cap, x=indice(e.sector), pi=precioInsumo(e);
+    const filas=p.plantas.map(pl=>'<tr><td>'+esc(pl.n)+'<br><span style="color:var(--humo2);font-size:12px">'+esc(pl.ciudad)+' · '+(edad(pl)>30?'<span class="mal">'+edad(pl)+' años sin modernizar</span>':edad(pl)+' años')+'</span></td><td>'+fmt(pl.cap)+'</td></tr>').join('')
+      +p.pend.map(o=>'<tr><td><i>'+(o.tipo==='ampliar'?'Ampliación en obra':esc(o.n)+' (en obra)')+'</i></td><td>lista en '+o.listo+'</td></tr>').join('');
+    const col=u>1?'#C46A55':u>.85?'#D6A648':u<.55?'#8C8C8C':'#8FB37A';
+    const ops=[];
+    const pago=(c,f)=>()=>{ const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene caja ni crédito para eso.','mal'); return; } S.mov=Math.max(0,S.mov-1); f(); cerrarModal(); render(); escenaPlantas137(e); };
+    const sinMov=S.mov<1?'No te quedan movidas':null;
+    p.plantas.slice(0,3).forEach(pl=>{ if(p.pend.some(o=>o.pid===pl.id)) return; const c=costoAmpliar(pl);
+      ops.push({t:'Ampliar la '+pl.n,cat:'compania',d:'+50% de capacidad en un año. '+fmt(c)+' de la compañía (caja o crédito). Una movida.',dis:sinMov,cerrar:false,run:pago(c,()=>{ p.pend.push({tipo:'ampliar',pid:pl.id,listo:S.anio+1}); log('Arrancó la ampliación de la <b>'+esc(pl.n)+'</b>.'); })}); });
+    const cN=Math.max(30,e.ingresos*.3);
+    ops.push({t:'Una planta nueva en otra ciudad',cat:'compania',d:'Capacidad para '+fmt(e.ingresos*.7)+' más de ventas, lista en dos años. '+fmt(cN)+'.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(e.nombre),titulo:'¿Dónde va la planta nueva?',cerrable:true,cuerpo:'Cerca del puerto exportas más barato; cerca del mercado vendes más rápido.',
+        opciones:ciudadesCol().slice(0,8).map(c=>({t:c,cat:'compania',d:/Barranquilla|Cartagena/.test(c)?'Puerto: salida al mar y zona franca.':/Bogotá/.test(c)?'El mercado más grande del país.':/Medellín/.test(c)?'Tradición industrial y mano de obra calificada.':'Tierra y mano de obra más baratas.',
+          run:()=>{ const r=financiarEmpresa(e,cN,true); if(!r.ok){ log('La compañía no tiene caja ni crédito para la planta.','mal'); return; } S.mov=Math.max(0,S.mov-1);
+            p.pend.push({tipo:'nueva',n:d.planta+' de '+c,ciudad:c,cap:e.ingresos*.7,listo:S.anio+2}); log('Arrancó la obra de la <b>'+d.planta+' de '+esc(c)+'</b>.'); render(); }}))}); }});
+    const vieja=p.plantas.slice().sort((a,b)=>edad(b)-edad(a))[0];
+    if(vieja&&edad(vieja)>15){ const c=Math.max(10,vieja.cap*.15); ops.push({t:'Modernizar la '+vieja.n,cat:'compania',d:'Tiene '+edad(vieja)+' años. Maquinaria y procesos al día: '+fmt(c)+'.',dis:sinMov,cerrar:false,run:pago(c,()=>{ vieja.mod=S.anio; e.eficiencia=clamp(e.eficiencia+4,0,100); log('Modernizaste la <b>'+esc(vieja.n)+'</b>.','bien'); })}); }
+    if(p.plantas.length>1&&u<.7){ const ch=p.plantas.slice().sort((a,b)=>a.cap-b.cap)[0];
+      ops.push({t:'Cerrar la '+ch.n,cat:'compania',d:'Sobra capacidad. Ahorras, pero '+Math.round(e.empleados*ch.cap/cap)+' personas quedan sin trabajo.',dis:sinMov,cerrar:false,run:()=>{ S.mov=Math.max(0,S.mov-1); p.plantas=p.plantas.filter(y=>y!==ch); const desp=Math.round(e.empleados*ch.cap/cap); e.empleados=Math.max(2,e.empleados-desp); e.moral=clamp(e.moral-15,0,100); e.caja-=Math.max(2,ch.cap*.04); try{ sind(e).fuerza=clamp(sind(e).fuerza+10,0,100); }catch(x){} log('Cerraste la <b>'+esc(ch.n)+'</b>. '+desp+' personas a la calle; el sindicato no lo olvida.','mal'); cerrarModal(); render(); escenaPlantas137(e); }}); }
+    const cC=Math.max(3,e.ingresos*.006), cont=p.contrato&&p.contrato.hasta>=S.anio;
+    ops.push({t:cont?'Contrato de suministro vigente':'Asegurar el precio de '+d.ins,cat:'compania',d:cont?'Pagas '+d.ins+' a '+Math.round(p.contrato.ind*100)+' hasta '+p.contrato.hasta+'.':'Contrato a tres años al precio de hoy más 3%. Prima: '+fmt(cC)+'. Te protege si sube; si baja, pierdes.',dis:cont?'Ya tienes contrato':sinMov,cerrar:false,
+      run:pago(cC,()=>{ p.contrato={ind:x.ind*1.03,hasta:S.anio+3,desde:S.anio}; log('Firmaste contratos de suministro de '+d.ins+' hasta '+(S.anio+3)+'.','bien'); })});
+    const cQ=Math.max(5,e.ingresos*.02);
+    ops.push({t:'Control de calidad',cat:'compania',d:'Laboratorio, inspectores y pruebas por lote. '+fmt(cQ)+'. La calidad sube y se sostiene tres años.',dis:p.qc===S.anio?'Ya lo hiciste este año':sinMov,cerrar:false,run:pago(cQ,()=>{ p.qc=S.anio; p.calidad=clamp(p.calidad+12,0,98); log('Montaste control de calidad en <b>'+esc(e.nombre)+'</b>.','bien'); })});
+    const trend=x.ult>=0?'subió '+pc(x.ult):'bajó '+pc(-x.ult);
+    escena({rubro:esc(e.nombre)+' · Producción',titulo:'Plantas e insumos',ancho:true,cerrable:true,clase:'prod137',
+      cuerpo:u>1?'Las plantas no dan abasto: estás dejando de vender.':u>.9?'Las plantas van casi al tope. Si sigues creciendo, toca ampliar.':u<.55?'Sobra capacidad: hay máquinas paradas que igual cuestan.':'Las plantas trabajan a buen ritmo.',
+      html:'<div class="k"><div><b>'+Math.round(u*100)+'%</b><span>uso de la capacidad</span></div><div><b>'+Math.round(p.calidad)+'/100</b><span>calidad</span></div><div><b>'+Math.round(pi*100)+'</b><span>precio de '+esc(d.ins)+' (100 = normal) · '+trend+'</span></div></div>'
+        +'<div class="uso"><i style="width:'+Math.min(100,u*100)+'%;background:'+col+'"></i></div>'
+        +'<table class="libro"><tr><td><b>Planta</b></td><td><b>Capacidad (ventas al año)</b></td></tr>'+filas+'</table>'
+        +(p.contrato&&p.contrato.hasta>=S.anio?'<div class="apunte">Contrato de suministro hasta '+p.contrato.hasta+' a '+Math.round(p.contrato.ind*100)+'.</div>':''),
+      opciones:ops});
+  }
+  function resumenHTML(e){ const p=P(e), u=uso(e), pi=precioInsumo(e);
+    return '<div class="prod137-panel"><b>Plantas e insumos</b><div class="apunte" style="margin:4px 0 8px">'+p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' · uso '+Math.round(u*100)+'% · calidad '+Math.round(p.calidad)+'/100 · '+esc(IND[e.sector].ins)+' a '+Math.round(pi*100)+'</div>'
+      +'<button type="button" class="btn" data-neg-accion="Plantas e insumos">Ver plantas e insumos</button></div>'; }
+  function wrapPanel137(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v137) return;   // la v81 lo vuelve a registrar: se envuelve cada vez
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(industrial(e)&&(negCat==='produccion'||negCat==='resumen')) h+=resumenHTML(e); }catch(x){} return h; }; window.panelCompania86.__v137=true; }
+  function wrapAcciones137(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA137_ACC) return; window.__SA137_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&industrial(e)&&companias().includes(e)){ const p=P(e);
+        A.push({t:'Plantas e insumos',d:p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' al '+Math.round(uso(e)*100)+'% · calidad '+Math.round(p.calidad)+'.',mov:0,modal:true,run:()=>escenaPlantas137(e)});
+ } }catch(x){}
+      return A; }; }
+  function wrapCat137(){ const old=window.catDe; if(typeof old!=='function'||window.__SA137_CAT) return; window.__SA137_CAT=true;
+    window.catDe=function(t){ if(t==='Plantas e insumos') return 'compania'; return old.apply(this,arguments); }; }
+  function init137(){ wrapEmpresa137(); wrapPanel137(); wrapAcciones137(); wrapCat137();
+    try{ if(Array.isArray(window.DECISIONES_COMPANIA_83)&&!window.DECISIONES_COMPANIA_83.includes('Plantas e insumos')) window.DECISIONES_COMPANIA_83.push('Plantas e insumos'); }catch(x){}
+    Object.assign(window,{INDUSTRIA_137:IND,produccion137:P,capacidad137:capacidad,escenaPlantas137,indiceInsumo137:indice,anualInsumos137:anualInsumos}); }
+  setTimeout(init137,40); setTimeout(init137,220); setTimeout(init137,650); setTimeout(init137,900);
+  window.__SA137={version:V137};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v138 · MERCADO Y COMPETENCIA
+   Cada sector tiene un tamaño de mercado que crece con la economía, y
+   competidores con nombre: empresas nacionales, las casas rivales,
+   multinacionales que llegan (sobre todo con la apertura de 1991),
+   importaciones y, después, plataformas. Tu cuota sale de cuánto vendes
+   frente a todo el mercado, y se mueve con tu marca, la calidad, la
+   innovación y la estrategia de precio que elijas (barato para ganar
+   volumen, caro para ganar margen). Guerras de precios, competidores que
+   quiebran, el contrabando, y la Superintendencia si te vuelves dominante.
+   ========================================================================== */
+(function(){
+  const V138='v138';
+  const C=(n,tipo,desde,atr)=>({n,tipo,desde,atr});
+  const COMP={
+    moda:[C('Textiles del Aburrá','nacional',1907,55),C('Hilanderías del Valle','nacional',1930,50),C('Confecciones La Moda','nacional',1960,48),C('Una cadena española de moda rápida','multinacional',1998,66),C('Importaciones de Asia','importados',2004,52)],
+    alimentos:[C('Industrias La Constancia','nacional',1920,58),C('Galletas El Sol','nacional',1930,50),C('Lácteos del Prado','nacional',1945,54),C('Alimentaria Helvética','multinacional',1944,64),C('Productos importados','importados',1992,46)],
+    tech:[C('Sistemas Andinos','nacional',1975,50),C('Datos de Colombia','nacional',1990,52),C('Un gigante de Silicon Valley','multinacional',1995,72),C('Startups con capital de riesgo','nacional',2012,58)],
+    construccion:[C('Concretos Andinos','nacional',1950,55),C('Constructora del Norte','nacional',1960,52),C('Inversiones Urbanas','nacional',1975,50),C('Una constructora española','multinacional',1995,60)],
+    energia:[C('La electrificadora pública','publico',1930,48),C('Generadora del Oriente','nacional',1995,55),C('Una eléctrica española','multinacional',1997,64)],
+    agro:[C('La cooperativa de caficultores','nacional',1927,56),C('Ingenios del Valle','nacional',1930,54),C('Exportadora de Frutas','nacional',1980,50),C('Una comercializadora suiza','multinacional',1960,62)],
+    financiero:[C('Banco de los Andes','nacional',1900,58),C('Banco Industrial','nacional',1950,54),C('Corporación de Ahorro y Vivienda','nacional',1972,52),C('Un banco español','multinacional',1996,66),C('Billeteras digitales','nacional',2016,58)],
+    logistica:[C('Transportes del Río','nacional',1920,50),C('Flota Nacional','nacional',1950,52),C('Mensajería Rápida','nacional',1970,54),C('Una naviera danesa','multinacional',1990,64)],
+    salud:[C('Laboratorios Andinos','nacional',1940,54),C('Genéricos Nacionales','nacional',1985,52),C('Una farmacéutica alemana','multinacional',1950,68)],
+    retail:[C('Las tiendas de barrio','atomizado',1900,45),C('Almacenes La Feria','nacional',1940,54),C('Supermercados del Pueblo','nacional',1960,52),C('Una cadena francesa de hipermercados','multinacional',1999,64),C('Las tiendas de descuento','nacional',2010,60),C('El comercio electrónico','plataforma',2015,62)],
+    medios:[C('El Diario Nacional','nacional',1911,58),C('Radio Cadena','nacional',1940,55),C('Un canal privado','nacional',1998,60),C('Las plataformas extranjeras','plataforma',2010,70)],
+    mineria:[C('Minera del Cauca','nacional',1930,50),C('Carbones del Cesar','nacional',1985,55),C('Una minera canadiense','multinacional',1995,64)],
+    juridico:[C('El bufete tradicional bogotano','nacional',1920,60),C('Abogados del Valle','nacional',1960,50),C('Una firma global','multinacional',2000,66)],
+    seguros:[C('Seguros Andinos','nacional',1920,55),C('Aseguradora del Pacífico','nacional',1960,52),C('Una reaseguradora suiza','multinacional',1950,64)],
+    turismo:[C('Hoteles del Caribe','nacional',1950,52),C('Las agencias de viaje','nacional',1960,48),C('Una cadena hotelera estadounidense','multinacional',1970,64),C('Las plataformas de alquiler','plataforma',2014,64)],
+    juegos:[C('Los estudios estadounidenses y japoneses','multinacional',1985,75),C('Estudios locales','nacional',2005,48)]
+  };
+  const GEN=[C('Competidores nacionales','nacional',1900,52),C('Competidores extranjeros','multinacional',1960,60)];
+  const TIPO={nacional:'nacional',multinacional:'multinacional',importados:'importaciones',publico:'del Estado',atomizado:'muchos pequeños',plataforma:'plataforma digital',casa:'casa rival'};
+  const PRECIO={bajo:{n:'Precio bajo',d:'Más volumen y cuota; menos margen.',g:.03,m:-.035},medio:{n:'Precio de mercado',d:'Lo normal del sector.',g:0,m:0},alto:{n:'Precio alto',d:'Más margen; pierdes cuota si la marca no lo respalda.',g:-.03,m:.035}};
+  const pct=x=>Math.round(x*1000)/10+'%';
+  const secN=id=>{ try{ return (SECTORES.find(s=>s.id===id)||{n:id}).n; }catch(e){ return id; } };
+  function M(){ if(!S.mercados138||typeof S.mercados138!=='object') S.mercados138={}; return S.mercados138; }
+  const mias=sec=>companias().filter(e=>e.sector===sec);
+  const misVentas=sec=>mias(sec).reduce((s,e)=>s+Math.max(0,e.ingresos||0),0);
+  function mercado(sec){
+    const Mk=M(); let m=Mk[sec];
+    if(!m){ const v=Math.max(50,misVentas(sec)); m=Mk[sec]={tam:v/rnd(.05,.11),comp:[],hist:[],anio:S.anio}; }
+    else if(m.hist.length<3&&misVentas(sec)>m.tam*.6) m.tam=misVentas(sec)/rnd(.06,.12);   // recién llegas: arrancas pequeño
+    // competidores según la época, y las casas rivales del sector
+    (COMP[sec]||GEN).forEach(c=>{ if(c.desde<=S.anio&&!m.comp.some(x=>x.n===c.n)) m.comp.push({n:c.n,tipo:c.tipo,atr:c.atr+rnd(-4,4),w:c.tipo==='multinacional'&&m.comp.length?.6:c.tipo==='atomizado'?2:1,desde:S.anio}); });
+    try{ (rivalesVivas()||[]).filter(r=>r.sector===sec).forEach(r=>{ const n='Los '+r.apellido; if(!m.comp.some(x=>x.rid===r.rid)) m.comp.push({n,tipo:'casa',atr:50+((r.prestigio||50)-50)*.3,w:1,rid:r.rid}); });
+      m.comp=m.comp.filter(x=>!x.rid||(rivalesVivas()||[]).some(r=>r.rid===x.rid)); }catch(e){}
+    return m;
+  }
+  function cuotas(sec){ const m=mercado(sec), mine=misVentas(sec), yo=clamp(mine/m.tam,0,.95), resto=1-yo, W=m.comp.reduce((s,x)=>s+x.w,0)||1;
+    return {yo,comp:m.comp.map(x=>({...x,cuota:resto*x.w/W})).sort((a,b)=>b.cuota-a.cuota)}; }
+  const calidadDe=e=>e.prod137&&isFinite(e.prod137.calidad)?e.prod137.calidad:50;
+  function atractivo(e){ const p=PRECIO[e.precio138||'medio']; return (e.marca||50)*.4+(e.innovacion||50)*.25+calidadDe(e)*.2+((e.eficiencia||50))*.15+(p===PRECIO.bajo?6:p===PRECIO.alto?-6+((e.marca||50)-60)*.25:0); }
+  const atrComp=sec=>{ const m=mercado(sec), W=m.comp.reduce((s,x)=>s+x.w,0)||1; return m.comp.reduce((s,x)=>s+x.atr*x.w,0)/W; };
+
+  /* --- el año del mercado --- */
+  function anualSector(sec){
+    const m=mercado(sec); if(m.anio===S.anio&&m.__hecho) return; m.anio=S.anio; m.__hecho=true;
+    const s=SECTORES.find(x=>x.id===sec)||{g:.04}, ciclo=(S.macro&&S.macro.ciclo)||0;
+    let v=0; try{ v=vientoDe(sec); }catch(e){}
+    m.tam=Math.max(50,m.tam*(1+(s.g||.04)*.8+ciclo*.6+v*.03+rnd(-.02,.02)));
+    m.comp.forEach(x=>{ x.atr=clamp(x.atr+rnd(-2,2.2)+(x.tipo==='multinacional'?.15:0),20,90); x.w=clamp(x.w*(1+(x.atr-55)/400+rnd(-.05,.05)),.1,4); if(x.guerra&&x.guerra<S.anio) x.guerra=0; });
+    if(S.anio===1991||S.anio===1992) m.comp.forEach(x=>{ if(x.tipo==='multinacional'||x.tipo==='importados'){ x.w*=1.25; x.atr+=3; } });
+    const c=cuotas(sec); m.hist.push([S.anio,c.yo]); if(m.hist.length>30) m.hist.shift();
+  }
+  function ajustar(e){
+    const sec=e.sector, m=mercado(sec), p=PRECIO[e.precio138||'medio'];
+    const yo=clamp(misVentas(sec)/m.tam,0,.95);
+    let g=(atractivo(e)-atrComp(sec))/100*.04+p.g;
+    if(yo>.5) g-=(yo-.5)*.35;   // cuanto más grande, más cuesta seguir ganando
+    if(m.comp.some(x=>x.guerra>=S.anio)&&e.guerra138!=='igualar') g-=.04;
+    if(e.guerra138==='igualar'&&m.comp.some(x=>x.guerra>=S.anio)) g+=0;
+    g=clamp(g,-.06,.06);
+    const ing0=e.ingresos, mg=ing0>0?e.utilidad/ing0:0; let ing=ing0*(1+g);
+    if(e.prod137&&typeof window.capacidad137==='function') ing=Math.min(ing,Math.max(ing0,window.capacidad137(e)*1.05));
+    let dm=p.m; if(e.guerra138==='igualar'&&m.comp.some(x=>x.guerra>=S.anio)) dm-=.04;
+    const delta=(ing-ing0)*Math.max(0,mg)+ing*dm;
+    e.ingresos=ing; e.utilidad+=delta; e.caja+=delta; e.mer138={g,dm,anio:S.anio};
+  }
+  function wrapEmpresa138(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA138_EMP) return; window.__SA138_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&companias().includes(e)&&e.sector){ anualSector(e.sector); ajustar(e); revisarEventos(e); } }catch(x){ console.error(x); }
+      return r; }; }
+
+  /* --- sucesos del mercado --- */
+  const B=()=>companias().find(x=>x.nombre===S._e138);
+  function revisarEventos(e){
+    if(S._ev138===S.anio) return; const sec=e.sector, m=mercado(sec), c=cuotas(sec);
+    const pon=ev=>{ S._ev138=S.anio; S._e138=e.nombre; cola.push(ev); };
+    if(c.yo>.4&&S.anio>=1968&&chance(.12)) return pon(evSIC(e));
+    const fuerte=m.comp.filter(x=>x.tipo!=='atomizado'&&!x.guerra).sort((a,b)=>b.atr-a.atr)[0];
+    if(fuerte&&c.yo>.06&&chance(.07)) return pon(evGuerra(e,fuerte));
+    if(m.comp.length>2&&chance(.04)) return pon(evQuiebra(e));
+    if(['moda','retail'].includes(sec)&&S.anio>=1980&&S.anio<=2008&&chance(.06)) return pon(evContrabando(e));
+    if(S.anio===1991&&!S._ap138){ S._ap138=1; return pon(evApertura(e)); }
+  }
+  function evGuerra(e,x){ return {p:9,c:()=>!!B(),t:()=>'<b>Guerra de precios.</b> '+esc(x.n)+' bajó sus precios 20% para quitarle clientes a '+esc(e.nombre)+'.',
+    o:[{t:'Igualar los precios',f:()=>{ const b=B(); x.guerra=S.anio+2; if(b) b.guerra138='igualar'; return 'Igualaste. Dos años de márgenes flacos, pero no pierdes clientes.'; }},
+       {t:'Diferenciarte con marca y calidad',f:()=>{ const b=B(); x.guerra=S.anio+2; if(!b) return '—'; const c=Math.max(5,b.ingresos*.04); b.caja-=c; b.marca=clamp(b.marca+6,0,100); b.guerra138='marca'; return 'Invertiste '+fmt(c)+' en que la gente entienda por qué vale más. Algunos se van igual.'; }},
+       {t:'No responder',f:()=>{ const b=B(); x.guerra=S.anio+2; if(b) b.guerra138=null; return 'Mantuviste los precios. Vas a perder algo de cuota mientras dure.'; }}]}; }
+  function evQuiebra(e){ return {p:9,c:()=>!!B(),t:()=>{ const m=mercado(e.sector), x=pick(m.comp.filter(y=>y.tipo==='nacional'||y.tipo==='casa'))||m.comp[0]; S._q138=x.n;
+      const c=cuotas(e.sector).comp.find(y=>y.n===x.n), v=Math.round(m.tam*(c?c.cuota:.05)*.35); S._qv138=v; return '<b>'+esc(x.n)+' entró en liquidación.</b> Sus clientes, sus marcas y una planta están en venta por '+fmt(v)+'.'; },
+    o:[{t:()=>'Comprar sus clientes y activos ('+fmt(S._qv138||0)+')',f:()=>{ const b=B(), m=mercado(e.sector), x=m.comp.find(y=>y.n===S._q138); if(!b||!x) return '—'; const r=financiarEmpresa(b,S._qv138,true); if(!r.ok) return 'La compañía no tuvo cómo financiarlo.';
+         const c=cuotas(e.sector).comp.find(y=>y.n===x.n), gana=m.tam*(c?c.cuota:.05)*.6; b.ingresos+=gana; m.comp=m.comp.filter(y=>y!==x); if(b.prod137&&typeof window.produccion137==='function') window.produccion137(b).plantas.push({id:'q'+S.anio,n:'Planta de '+x.n,ciudad:b.ciudad||S.hogar.ciudad,cap:gana*1.3,desde:S.anio-20,mod:S.anio-20});
+         hito('Compró los activos de '+x.n); return 'Te quedaste con sus clientes. '+esc(b.nombre)+' vende '+fmt(gana)+' más al año.'; }},
+       {t:'Dejar que otro la compre',f:()=>{ const m=mercado(e.sector), x=m.comp.find(y=>y.n===S._q138); if(x){ m.comp=m.comp.filter(y=>y!==x); const o=pick(m.comp); if(o) o.w+=x.w; } return 'Otro competidor se quedó con todo.'; }}]}; }
+  function evSIC(e){ return {p:9,c:()=>!!B(),t:()=>'<b>La Superintendencia de Industria y Comercio abrió una investigación.</b> Dicen que '+esc(e.nombre)+' abusa de su posición dominante en '+esc(secN(e.sector).toLowerCase())+'.',
+    o:[{t:'Aceptar compromisos: bajar precios y abrir el mercado',f:()=>{ const b=B(); if(b){ b.precio138='bajo'; mercado(b.sector).comp.forEach(x=>x.w*=1.1); } return 'Firmaste compromisos con la Superintendencia. Ganas menos, pero sin multa.'; }},
+       {t:'Pelear la investigación',f:()=>{ const b=B(); if(!b) return '—'; const c=Math.max(10,b.ingresos*.01); b.caja-=c; if(chance(.5)) return 'Tus abogados ganaron. Costó '+fmt(c)+'.'; const multa=Math.max(20,b.ingresos*.05); b.caja-=multa; b.marca=clamp(b.marca-5,0,100); try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La multa de la Superintendencia a '+b.nombre,1); }catch(x){} return 'Perdiste: multa de '+fmt(multa)+' y titulares feos.'; }}]}; }
+  function evContrabando(e){ return {p:9,c:()=>!!B(),t:()=>'<b>El contrabando.</b> En los sanandresitos venden lo mismo que '+esc(e.nombre)+' a mitad de precio, sin pagar aranceles.',
+    o:[{t:'Denunciar y presionar a la DIAN con el gremio',f:()=>{ const b=B(); if(b){ b.caja-=Math.max(3,b.ingresos*.005); } return chance(.5)?'Hubo operativos. El contrabando bajó un tiempo.':'Hicieron dos operativos para la foto. Todo siguió igual.'; }},
+       {t:'Lanzar una línea más barata',f:()=>{ const b=B(); if(b){ b.marca=clamp(b.marca-3,0,100); b.ingresos*=1.02; } return 'Competiste en precio. Vendes, pero la marca se abarata.'; }}]}; }
+  function evApertura(e){ return {p:9,c:()=>!!B(),t:()=>'<b>La apertura económica.</b> Bajaron los aranceles: las multinacionales y los importados llegan a competir con '+esc(e.nombre)+' en su propia casa.',
+    o:[{t:'Modernizarse a la carrera',f:()=>{ const b=B(); if(!b) return '—'; const c=Math.max(10,b.ingresos*.08); const r=financiarEmpresa(b,c,true); if(!r.ok) return 'No hubo con qué.'; b.eficiencia=clamp(b.eficiencia+10,0,100); b.innovacion=clamp(b.innovacion+8,0,100); return 'Maquinaria nueva y procesos nuevos: '+fmt(c)+'. Llegas en forma.'; }},
+       {t:'Buscar un socio extranjero',f:()=>{ const b=B(); if(!b) return '—'; b.innovacion=clamp(b.innovacion+12,0,100); b.marca=clamp(b.marca+4,0,100); b.caja+=Math.max(10,b.ingresos*.05); return 'Un socio extranjero trae tecnología y plata. A cambio, opina en todo.'; }},
+       {t:'Pedir protección al gobierno',f:()=>{ return chance(.3)?'Te dieron unos años de salvaguardia.':'El gobierno te dijo que el mundo cambió.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function escenaMercado138(e){
+    e=e||S.emp; if(!e) return; const sec=e.sector, m=mercado(sec), c=cuotas(sec), ac=atractivo(e), ak=atrComp(sec), p=e.precio138||'medio';
+    const fila=(n,t,q,tu)=>'<div class="cuota'+(tu?' tu':'')+'"><span>'+n+(t?' <span class="tipo">· '+t+'</span>':'')+'</span><span class="bar"><i style="width:'+Math.min(100,q*100/Math.max(.01,Math.max(c.yo,...c.comp.map(x=>x.cuota))))+'%"></i></span><span>'+pct(q)+'</span></div>';
+    const filas=fila(mias(sec).length>1?'Tus compañías':esc(e.nombre),'tú',c.yo,true)+c.comp.slice(0,8).map(x=>fila(esc(x.n),TIPO[x.tipo]||x.tipo,x.cuota)).join('');
+    const h=m.hist, g0=h.length>1?h[h.length-1][1]-h[h.length-2][1]:0;
+    const cmp=[['Marca',e.marca],['Innovación',e.innovacion],['Calidad',calidadDe(e)],['Eficiencia',e.eficiencia]].map(([n,v])=>medida(n.toLowerCase(),v||0,100)).join('');
+    escena({rubro:esc(e.nombre)+' · Mercadeo',titulo:'Tu mercado: '+esc(secN(sec).toLowerCase()),ancho:true,cerrable:true,clase:'mer138',
+      cuerpo:ac>ak+5?'Los clientes te prefieren: tu oferta es más atractiva que la de la competencia.':ac<ak-5?'La competencia está siendo más atractiva que tú. Vas a perder cuota si no haces algo.':'Estás parejo con la competencia.',
+      html:'<div class="k"><div><b>'+fmt(m.tam)+'</b><span>tamaño del mercado al año</span></div><div><b>'+pct(c.yo)+'</b><span>tu cuota'+(h.length>1?' ('+(g0>=0?'+':'−')+Math.abs(Math.round(g0*1000)/10)+' pts)':'')+'</span></div><div><b>'+Math.round(ac)+' vs '+Math.round(ak)+'</b><span>tu atractivo frente a la competencia</span></div><div><b>'+PRECIO[p].n+'</b><span>tu estrategia de precio</span></div></div>'
+        +filas+'<div class="cmp">'+cmp+'</div>',
+      opciones:Object.keys(PRECIO).filter(k=>k!==p).map(k=>({t:'Pasar a '+PRECIO[k].n.toLowerCase(),cat:'mercado',d:PRECIO[k].d+' Una movida.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,
+        run:()=>{ S.mov--; e.precio138=k; log('<b>'+esc(e.nombre)+'</b> pasó a '+PRECIO[k].n.toLowerCase()+'.'); cerrarModal(); render(); escenaMercado138(e); }}))});
+  }
+  function wrapAcciones138(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA138_ACC) return; window.__SA138_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)&&e.sector){ const c=cuotas(e.sector);
+        const a={t:'Cuota de mercado de tu sector',cat:'mercado',d:'Tienes el '+pct(c.yo)+' de un mercado de '+fmt(mercado(e.sector).tam)+' al año. Competidores, atractivo y precio.',mov:0,modal:true,run:()=>escenaMercado138(e)};
+        const i=A.findIndex(x=>x.t==='Cuota de mercado de tu sector'); if(i>=0) A[i]=Object.assign({},A[i],a); else A.push(a); } }catch(x){}
+      return A; }; }
+  function init138(){ wrapEmpresa138(); wrapAcciones138();
+    Object.assign(window,{COMPETIDORES_138:COMP,mercadoSector138:mercado,cuotasSector138:cuotas,escenaMercado138,atractivo138:atractivo,anualSector138:anualSector}); }
+  setTimeout(init138,40); setTimeout(init138,220); setTimeout(init138,650);
+  window.__SA138={version:V138};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v139 · MARCAS COMERCIALES
+   Cada compañía tiene sus marcas, con nombre, posicionamiento (popular,
+   media o premium), eslogan, notoriedad (cuánta gente la conoce) y
+   lealtad (cuánta la prefiere). La "marca" de la compañía ahora sale de
+   ellas. Las campañas dependen de la época: prensa, radio, vallas,
+   televisión, patrocinio deportivo, telenovelas, internet, redes e
+   influenciadores. Puedes lanzar marcas para otros segmentos, registrarlas
+   (o que te las registre otro), venderlas, y enfrentar falsificaciones,
+   comerciales polémicos y la celebridad que quiere ser tu imagen. Las
+   marcas fuertes valen: suben la valoración de la compañía.
+   ========================================================================== */
+(function(){
+  const V139='v139';
+  const POS={popular:{n:'Popular',d:'Para todo el mundo. Vende volumen.'},media:{n:'Media',d:'La clase media que compara.'},premium:{n:'Premium',d:'Pocos clientes que pagan más.'}};
+  const MEDIOS=[
+    {id:'prensa',n:'Avisos en prensa',desde:1900,c:.010,not:6,leal:1,fit:{premium:1.2,media:1.1,popular:.7}},
+    {id:'radio',n:'Cuñas de radio',desde:1930,c:.014,not:8,leal:2,fit:{popular:1.3,media:1,premium:.6}},
+    {id:'vallas',n:'Vallas en las ciudades',desde:1950,c:.012,not:6,leal:0,fit:{popular:1,media:1,premium:.8}},
+    {id:'tv',n:'Comerciales de televisión',desde:1955,c:.040,not:14,leal:2,fit:{popular:1.2,media:1.2,premium:.9}},
+    {id:'futbol',n:'Patrocinar un equipo de fútbol',desde:1950,c:.025,not:9,leal:5,fit:{popular:1.4,media:1,premium:.5}},
+    {id:'novela',n:'Aparecer en una telenovela',desde:1980,c:.030,not:11,leal:3,fit:{popular:1.3,media:1.1,premium:.6}},
+    {id:'evento',n:'Un evento exclusivo',desde:1960,c:.018,not:4,leal:6,fit:{premium:1.5,media:.8,popular:.4}},
+    {id:'web',n:'Publicidad en internet',desde:2000,c:.010,not:7,leal:1,fit:{popular:1,media:1.1,premium:1}},
+    {id:'redes',n:'Redes e influenciadores',desde:2012,c:.016,not:10,leal:3,fit:{popular:1.2,media:1.2,premium:1},riesgo:.15}
+  ];
+  const ESL={popular:['"{n}: la de siempre"','"{n}, para toda la familia"','"Con {n} rinde más"','"{n}: lo bueno no tiene que ser caro"'],
+    media:['"{n}. Calidad que se nota"','"{n}, hecho en Colombia"','"Confíe en {n}"','"{n}: de aquí, para usted"'],
+    premium:['"{n}. Para quien sabe"','"{n}: lo excepcional"','"Hay cosas que no se improvisan. {n}"','"{n}. Desde '+'{a}"']};
+  const P1=n=>String(n||'').split(' ')[0];
+  const eslogan=(n,pos,a)=>pick(ESL[pos]||ESL.media).replace('{n}',n).replace('{a}',a);
+  const fuerza=m=>m.notoriedad*.55+m.lealtad*.45;
+  function L(e){
+    if(!Array.isArray(e.marcas139)){ const n=String(e.nombre||'Marca').replace(/\s+(S\.A\.S?|Ltda\.?|& Cía\.?|S\.A)$/i,'');
+      e.marcas139=[{id:'m'+Math.floor(Math.random()*1e6),n,pos:'media',notoriedad:clamp(e.marca||45,10,90),lealtad:clamp((e.marca||45)*.8,10,85),desde:e.fundada||S.anio,eslogan:eslogan(n,'media',e.fundada||S.anio),reg:false}]; }
+    return e.marcas139;
+  }
+  const fuerzaCompania=e=>{ const M=L(e); return M.reduce((s,m)=>s+fuerza(m),0)/Math.max(1,M.length); };
+  const valorMarca=(e,m)=>{ const M=L(e), tot=M.reduce((t,x)=>t+fuerza(x),0)||1; return Math.max(0,(e.ingresos||0)*(fuerza(m)/tot)*(fuerza(m)/100)*.9); };
+  const calidad=e=>e.prod137&&isFinite(e.prod137.calidad)?e.prod137.calidad:50;
+
+  /* --- el año de las marcas --- */
+  function anual(e){
+    const M=L(e), pr=e.precio138||'medio';
+    M.forEach(m=>{
+      m.notoriedad=clamp(m.notoriedad-rnd(1.5,3.5)+(m.ult===S.anio-1?1:0),3,99);
+      let dl=(calidad(e)-50)*.06+rnd(-1,1)+(m.notoriedad>60?.5:0);
+      if(m.pos==='premium'&&pr==='bajo') dl-=3; if(m.pos==='popular'&&pr==='alto') dl-=2;
+      m.lealtad=clamp(m.lealtad+dl,3,98);
+    });
+    // la marca de la compañía sigue a sus marcas
+    e.marca=clamp(e.marca+(fuerzaCompania(e)-e.marca)*.35,0,100);
+    // cubrir más segmentos vende un poco más
+    M.slice(1).filter(m=>S.anio-m.desde<=5&&m.pos!==M[0].pos).forEach(m=>{ const x=e.ingresos*.02*clamp(m.notoriedad/50,0,1.5), mg=e.utilidad/Math.max(1,e.ingresos); e.ingresos+=x; e.utilidad+=x*Math.max(0,mg); });   // una marca nueva abre un segmento durante sus primeros años
+    // registro: el que no registra se arriesga
+    if(M.some(m=>!m.reg)&&S.anio-(e.regAviso139||0)>=6&&chance(.05)&&S._ev139!==S.anio){ S._ev139=S.anio; e.regAviso139=S.anio; cola.push(evRegistro(e,M.find(m=>!m.reg))); }
+    else if(S._ev139!==S.anio&&chance(.05)){ const ev=pick([evFalsif,evCelebridad])(e); if(ev){ S._ev139=S.anio; cola.push(ev); } }
+  }
+  function wrapEmpresa139(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA139_EMP) return; window.__SA139_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  function wrapValuar139(){ const old=window.valuar; if(typeof old!=='function'||window.__SA139_VAL) return; window.__SA139_VAL=true;
+    window.valuar=function(e){ const v=old.apply(this,arguments); try{ if(e&&Array.isArray(e.marcas139)&&v>0) return v*(1+clamp((fuerzaCompania(e)-50)/400,-.08,.12)); }catch(x){} return v; }; }
+
+  /* --- sucesos --- */
+  const B=()=>companias().find(x=>x.nombre===S._e139);
+  function evRegistro(e,m){ S._e139=e.nombre; S._m139=m.id; return {p:9,c:()=>!!B(),
+    t:()=>'<b>Alguien registró "'+esc(m.n)+'" antes que tú.</b> Un avivato fue a la Superintendencia de Industria y Comercio y la puso a su nombre. Ahora te pide plata para devolvértela.',
+    o:[{t:()=>'Pagarle ('+fmt(Math.max(5,e.ingresos*.01))+')',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(5,b.ingresos*.01); const mm=L(b).find(x=>x.id===S._m139); if(mm) mm.reg=true; return 'Pagaste y la registraste de una vez a tu nombre.'; }},
+       {t:'Demandarlo',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(3,b.ingresos*.004); const mm=L(b).find(x=>x.id===S._m139); if(chance(.6)){ if(mm) mm.reg=true; return 'Probaste que la usabas desde antes. Te la devolvieron.'; } if(mm){ mm.n=mm.n+' de Colombia'; mm.notoriedad*=.6; } return 'Perdiste. Te tocó cambiarle el nombre y empezar casi de cero.'; }}]}; }
+  function evFalsif(e){ const M=L(e).filter(m=>m.notoriedad>45); if(!M.length) return null; const m=pick(M); S._e139=e.nombre; S._m139=m.id;
+    return {p:9,c:()=>!!B(),t:()=>'<b>Falsificaciones de '+esc(m.n)+'.</b> En San Victorino venden copias con tu logo a la mitad del precio. Algunos clientes creen que es lo tuyo y se quejan de la calidad.',
+      o:[{t:'Denunciar y hacer decomisos',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(3,b.ingresos*.005); return chance(.6)?'La Policía decomisó bodegas enteras. La marca respira.':'Decomisaron un poco. Las copias siguen.'; }},
+         {t:'Ignorarlo: copiarte es un halago',f:()=>{ const b=B(); const mm=b&&L(b).find(x=>x.id===S._m139); if(mm){ mm.lealtad=clamp(mm.lealtad-6,0,100); mm.notoriedad=clamp(mm.notoriedad+2,0,100); } return 'Más gente conoce la marca, pero la asocian con lo barato.'; }}]}; }
+  function evCelebridad(e){ const m=pick(L(e)); S._e139=e.nombre; S._m139=m.id; const quien=S.anio<1970?'una reina de belleza':S.anio<1995?'una estrella de telenovela':S.anio<2012?'un futbolista de la selección':'una influenciadora con millones de seguidores';
+    return {p:9,c:()=>!!B(),t:()=>'<b>'+quien.charAt(0).toUpperCase()+quien.slice(1)+' quiere ser la imagen de '+esc(m.n)+'.</b> Pide '+fmt(Math.max(8,e.ingresos*.02))+' por dos años.',
+      o:[{t:'Firmar',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(8,b.ingresos*.02); const mm=L(b).find(x=>x.id===S._m139); if(!mm) return '—';
+           if(chance(.82)){ mm.notoriedad=clamp(mm.notoriedad+14,0,99); mm.lealtad=clamp(mm.lealtad+4,0,98); return 'Las ventas lo notaron: todo el país sabe qué es '+mm.n+'.'; }
+           mm.lealtad=clamp(mm.lealtad-10,0,98); try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La imagen de '+mm.n,1); }catch(x){} return 'A los tres meses tu imagen salió en un escándalo. Arrastró la marca con ella.'; }},
+         {t:'No, gracias',f:()=>'La firmó tu competencia.'}]}; }
+
+  /* --- la pantalla --- */
+  function escenaMarcas139(e){
+    e=e||S.emp; if(!e) return; const M=L(e), sinMov=S.mov<1?'No te quedan movidas':null;
+    const cards=M.map(m=>'<div class="m139"><div class="cab"><b>'+esc(m.n)+'</b><span class="pos">'+POS[m.pos].n+'</span></div><div class="esl">'+esc(m.eslogan||'')+'</div>'
+      +medida('notoriedad',m.notoriedad,100)+medida('lealtad',m.lealtad,100)
+      +'<div class="nota">Desde '+m.desde+' · vale unos '+fmt(valorMarca(e,m))+' · '+(m.reg?'registrada':'<span class="mal">sin registrar</span>')+(m.ult?' · última campaña en '+m.ult:'')+'</div></div>').join('');
+    const ops=[];
+    ops.push({t:'Hacer una campaña',cat:'mercado',d:'Elige la marca y el medio. Lo que funciona depende de la época y del público.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); M.length>1?elegirMarca(e):escenaCampana(e,M[0]); }});
+    if(M.length<4) ops.push({t:'Lanzar una marca nueva',cat:'mercado',d:'Para llegar a otro segmento. Cuesta '+fmt(Math.max(15,e.ingresos*.05))+' de la compañía.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); escenaNueva(e); }});
+    const sinReg=M.filter(m=>!m.reg); if(sinReg.length) ops.push({t:'Registrar '+(sinReg.length>1?'las marcas':'la marca')+' en la Superintendencia',cat:'mercado',d:'Trámite barato ('+fmt(Math.max(1,sinReg.length*2))+'). Nadie te la puede quitar.',cerrar:false,run:()=>{ e.caja-=Math.max(1,sinReg.length*2); sinReg.forEach(m=>m.reg=true); log('Registraste '+(sinReg.length>1?'las marcas':'la marca')+' de <b>'+esc(e.nombre)+'</b>.','bien'); cerrarModal(); escenaMarcas139(e); }});
+    if(M.length>1){ const m=M.slice().sort((a,b)=>fuerza(a)-fuerza(b))[0]; ops.push({t:'Vender la marca '+m.n,cat:'mercado',d:'Un competidor ofrece '+fmt(valorMarca(e,m)*1.2)+'. Pierdes sus clientes.',dis:S.anio-m.desde<3?'Es muy nueva: nadie la compra todavía':sinMov,cerrar:false,
+      run:()=>{ const v=valorMarca(e,m)*1.2, tot=M.reduce((t,x)=>t+fuerza(x),0)||1; e.caja+=v; e.ingresos*=1-fuerza(m)/tot*.6; e.marcas139=M.filter(x=>x!==m); S.mov--; log('Vendiste la marca <b>'+esc(m.n)+'</b> por '+fmt(v)+'.','hito'); cerrarModal(); render(); escenaMarcas139(e); }}); }
+    escena({rubro:esc(e.nombre)+' · Mercadeo',titulo:'Las marcas de la compañía',ancho:true,cerrable:true,clase:'marcas139',
+      cuerpo:'La fuerza de tus marcas es la marca de la compañía ('+Math.round(fuerzaCompania(e))+'/100). Sin campañas, la gente se olvida; sin calidad, deja de preferirte.',html:cards,opciones:ops});
+  }
+  function elegirMarca(e){ escena({rubro:esc(e.nombre),titulo:'¿Para qué marca es la campaña?',cerrable:true,opciones:L(e).map(m=>({t:m.n,cat:'mercado',d:POS[m.pos].n+' · notoriedad '+Math.round(m.notoriedad)+'.',cerrar:false,run:()=>{ cerrarModal(); escenaCampana(e,m); }}))}); }
+  function escenaCampana(e,m){
+    const ops=MEDIOS.filter(x=>x.desde<=S.anio).map(x=>{ const c=Math.max(3,e.ingresos*x.c), f=x.fit[m.pos]||1;
+      return {t:x.n,cat:'mercado',d:fmt(c)+'. '+(f>=1.2?'Le llega muy bien a este público.':f<=.7?'No es el medio para este público.':'Funciona bien.')+' Una movida.',dis:S.mov<1?'No te quedan movidas':null,
+        run:()=>{ const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene con qué pagar la campaña.','mal'); return; } S.mov--;
+          const sube=x.not*f*(1-m.notoriedad/120)*rnd(.8,1.25); m.notoriedad=clamp(m.notoriedad+sube,0,99); m.lealtad=clamp(m.lealtad+x.leal*f,0,98); m.ult=S.anio;
+          if(x.id==='futbol'){ try{ const club=S.club96||S.club; if(club) m.lealtad=clamp(m.lealtad+3,0,98); }catch(z){} }
+          let extra=''; if(x.riesgo&&chance(x.riesgo)){ m.lealtad=clamp(m.lealtad-8,0,98); extra=' Pero un video se volvió viral por las razones equivocadas: hubo boicot en redes.'; }
+          e.marca=clamp(e.marca+sube*.4,0,100);
+          log('Campaña de <b>'+esc(m.n)+'</b>: '+x.n.toLowerCase()+'. Ahora la conoce el '+Math.round(m.notoriedad)+'% de la gente.'+extra,extra?'mal':'bien'); render(); }}; });
+    escena({rubro:esc(m.n)+' · '+POS[m.pos].n,titulo:'¿Dónde sale la campaña?',ancho:true,cerrable:true,cuerpo:'Medios disponibles en '+S.anio+'. Cada uno le llega distinto a cada público.',opciones:ops});
+  }
+  function escenaNueva(e){
+    const M=L(e), base=String(e.nombre).split(' ')[0];
+    const sug={popular:pick(['Doña '+pick(['Rosa','Tere','Chela']),'El Rendidor','Super'+base,'La Económica']),media:pick([base+' Clásico','Del Valle','Andina','La Sabana']),premium:pick(['Maison '+base,base+' Reserva','Gran '+base,'Origen'])};
+    escena({rubro:esc(e.nombre),titulo:'Una marca nueva',cerrable:true,cuerpo:'¿Para qué público? Una marca para cada segmento llega a más gente.',
+      html:'<label class="campo">Nombre<input type="text" id="m139n" maxlength="28" value=""></label>',
+      opciones:Object.keys(POS).map(k=>({t:POS[k].n+(M.some(m=>m.pos===k)?' (ya tienes una)':''),cat:'mercado',d:POS[k].d+' Si no escribes nombre: "'+sug[k]+'".',cerrar:false,
+        run:()=>{ const c=Math.max(15,e.ingresos*.05); const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene con qué lanzar la marca.','mal'); return; } S.mov=Math.max(0,S.mov-1);
+          const el=document.getElementById('m139n'); const n=(el&&el.value.trim())||sug[k];
+          M.push({id:'m'+Math.floor(Math.random()*1e6),n,pos:k,notoriedad:12,lealtad:20,desde:S.anio,eslogan:eslogan(n,k,S.anio),reg:false});
+          hito('Lanzó la marca '+n); log('<b>'+esc(e.nombre)+'</b> lanzó la marca <b>'+esc(n)+'</b>, '+POS[k].n.toLowerCase()+'.','hito'); cerrarModal(); render(); escenaMarcas139(e); }}))});
+  }
+
+  /* --- enganches --- */
+  function panelHTML(e){ const M=L(e);
+    return '<div class="marca139-panel"><b>Las marcas</b><div class="apunte" style="margin:4px 0 8px">'+M.map(m=>esc(m.n)+' ('+POS[m.pos].n.toLowerCase()+', '+Math.round(m.notoriedad)+'% la conoce)').join(' · ')+'</div>'
+      +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Las marcas de la compañía">'+(typeof sello==='function'?sello('mercado'):'')+'<div class="neg86-accion-info"><div class="nom">Las marcas de la compañía</div><div class="txt">Campañas por medio y época, marcas nuevas, registro y venta.</div></div></div></div></div>'; }
+  function wrapPanel139(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v139) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='mercadeo') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v139=true; }
+  function wrapAcciones139(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA139_ACC) return; window.__SA139_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const M=L(e);
+        A.push({t:'Las marcas de la compañía',d:M.length+' marca'+(M.length>1?'s':'')+' · fuerza '+Math.round(fuerzaCompania(e))+'/100.',mov:0,modal:true,run:()=>escenaMarcas139(e)});
+        const c=A.find(a=>a.t==='Campaña de marca'); if(c){ c.d='Elige la marca y el medio: prensa, radio, televisión, redes…'; c.mov=0; c.modal=true; c.dis=null; c.run=()=>{ M.length>1?elegirMarca(e):escenaCampana(e,M[0]); }; } } }catch(x){}
+      return A; }; }
+  function wrapCat139(){ const old=window.catDe; if(typeof old!=='function'||window.__SA139_CAT) return; window.__SA139_CAT=true;
+    window.catDe=function(t){ if(t==='Las marcas de la compañía') return 'mercado'; return old.apply(this,arguments); }; }
+  function init139(){ wrapEmpresa139(); wrapValuar139(); wrapPanel139(); wrapAcciones139(); wrapCat139();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Las marcas de la compañía')) D.push('Las marcas de la compañía'); }catch(x){}
+    Object.assign(window,{marcasCompania139:L,escenaMarcas139,MEDIOS_139:MEDIOS,fuerzaMarcas139:fuerzaCompania}); }
+  setTimeout(init139,40); setTimeout(init139,220); setTimeout(init139,650); setTimeout(init139,900);
+  window.__SA139={version:V139};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v140 · PROCESOS Y CONTROL
+   Cómo funciona la compañía por dentro:
+   - Certificaciones según la época y el sector: ISO 9001 (calidad),
+     ISO 14001 (ambiental), BPM del INVIMA (alimentos y salud) y el sistema
+     de seguridad y salud en el trabajo. Sin ellas: sanciones, cierres
+     temporales, multas ambientales y accidentes.
+   - Sistemas: de los libros a mano a la contabilidad sistematizada, el ERP
+     y la nube. Más eficiencia y más control (y el susto del año 2000).
+   - Control interno y auditoría: revisor fiscal, firma auditora
+     internacional, código de buen gobierno. Con poco control aparecen el
+     desfalco del contador, las comisiones del jefe de compras y el robo de
+     inventario.
+   - Mejora de procesos: reingeniería en los noventa, lean y six sigma.
+   Además, revisión de lo que ya existía: las acciones gratuitas (como ir al
+   mapa) ya no cobran una movida, y comprar una casa rival en crisis se
+   paga con la compañía del sector y suma según su tamaño.
+   ========================================================================== */
+(function(){
+  const V140='v140';
+  const CERT={
+    iso9001:{n:'ISO 9001',d:'Gestión de calidad. Abre puertas para exportar y sostiene la calidad.',desde:1990,c:.012,anual:.002},
+    iso14001:{n:'ISO 14001',d:'Gestión ambiental. Evita multas y le gusta a la gente.',desde:1997,c:.010,anual:.002,sectores:['mineria','energia','agro','construccion','alimentos','moda','salud','logistica']},
+    bpm:{n:'BPM del INVIMA',d:'Buenas prácticas de manufactura. Sin ellas el INVIMA puede cerrarte.',desde:1995,c:.010,anual:.002,sectores:['alimentos','salud']},
+    sst:{n:'Seguridad y salud en el trabajo',d:'Obligatorio desde 2015. Menos accidentes y menos demandas.',desde:2012,c:.006,anual:.002}
+  };
+  const SIST=[
+    {id:'manual',n:'Libros a mano',desde:0,ctrl:0,ef:0},
+    {id:'contable',n:'Contabilidad sistematizada',desde:1970,ctrl:15,ef:3,c:.010},
+    {id:'erp',n:'Un ERP para toda la compañía',desde:1995,ctrl:28,ef:6,c:.030},
+    {id:'nube',n:'Nube, datos y tableros',desde:2012,ctrl:35,ef:9,c:.025}
+  ];
+  const AUD={ninguna:{n:'Sin auditoría',ctrl:0,c:0},revisor:{n:'Revisor fiscal',ctrl:10,c:.002},big:{n:'Firma auditora internacional',ctrl:22,c:.006,desde:1975}};
+  const P1=n=>String(n||'').split(' ')[0];
+  function P(e){ if(!e.proc140||typeof e.proc140!=='object') e.proc140={cert:{},sis:'manual',aud:e.publica?'revisor':'ninguna',gob:false,mejora:0,control:30}; const p=e.proc140; p.cert=p.cert||{}; return p; }
+  const sisDe=p=>SIST.find(x=>x.id===p.sis)||SIST[0];
+  const aplica=(k,e)=>{ const c=CERT[k]; return S.anio>=c.desde&&(!c.sectores||c.sectores.includes(e.sector)); };
+  function controlMeta(e){ const p=P(e); return clamp(25+sisDe(p).ctrl+AUD[p.aud].ctrl+(p.gob?12:0)+(p.cert.iso9001?5:0),5,98); }
+
+  /* --- el año --- */
+  function anual(e){
+    const p=P(e); p.control=clamp(p.control+(controlMeta(e)-p.control)*.3,0,100);
+    // mantener certificaciones y auditoría cuesta
+    let costo=0; Object.keys(p.cert).forEach(k=>{ if(p.cert[k]&&CERT[k]) costo+=e.ingresos*CERT[k].anual; }); costo+=e.ingresos*AUD[p.aud].c;
+    if(costo>0){ e.caja-=costo; e.utilidad-=costo; }
+    // lo que dan
+    const s=sisDe(p); if(s.ef) e.eficiencia=clamp(e.eficiencia+s.ef*.08,0,100);
+    if(p.cert.iso9001&&e.prod137) e.prod137.calidad=clamp(e.prod137.calidad+1.2,0,98);
+    if(p.cert.iso9001&&e.exportaciones) e.ingresos*=1.004;
+    if(p.cert.iso14001) e.marca=clamp(e.marca+.4,0,100);
+    if(p.gob&&e.publica&&isFinite(e.primaMercado)) e.primaMercado=Math.max(e.primaMercado,1.03);
+    if(p.mejora&&S.anio-p.mejora<=4) e.eficiencia=clamp(e.eficiencia+.8,0,100);
+    // lo que pasa sin procesos (un suceso por año)
+    if(S._ev140===S.anio) return; const pon=ev=>{ S._ev140=S.anio; S._e140=e.nombre; cola.push(ev); };
+    if(chance((100-p.control)/100*.07)) return pon(evFraude(e));
+    if(aplica('bpm',e)&&!p.cert.bpm&&S.anio>=1998&&chance(.07)) return pon(evInvima(e));
+    if(aplica('iso14001',e)&&!p.cert.iso14001&&['mineria','energia','agro','construccion'].includes(e.sector)&&chance(.06)) return pon(evAmbiental(e));
+    if(!p.cert.sst&&S.anio>=2016&&e.empleados>50&&chance(.04)) return pon(evAccidente(e));
+    if(S.anio===1999&&!p.y2k&&p.sis!=='manual'){ p.y2k=1; return pon(evY2K(e)); }
+  }
+  function wrapEmpresa140(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA140_EMP) return; window.__SA140_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+
+  /* --- sucesos --- */
+  const B=()=>companias().find(x=>x.nombre===S._e140);
+  function evFraude(e){ const tipo=pick(['contador','compras','inventario']), p=P(e), monto=Math.max(5,Math.round(e.ingresos*rnd(.01,.04)*(1.4-p.control/100)));
+    S._f140=monto; const quien=nombreLocal?(()=>{ try{ return nombreLocal(e.ciudad||S.hogar.ciudad,'h')+' '+pick(['Gómez','Ruiz','Cardona','Patiño','Lozano']); }catch(x){ return 'el contador'; } })():'el contador';
+    const txt={contador:'<b>Desfalco en '+esc(e.nombre)+'.</b> '+esc(quien)+', el contador de toda la vida, llevaba años desviando plata a cuentas propias. Faltan '+fmt(monto)+'.',
+      compras:'<b>Comisiones en '+esc(e.nombre)+'.</b> El jefe de compras, '+esc(quien)+', les cobraba a los proveedores por escogerlos. La compañía pagó '+fmt(monto)+' de más.',
+      inventario:'<b>Robo de inventario en '+esc(e.nombre)+'.</b> Se perdían camiones enteros de mercancía. Van '+fmt(monto)+'.'}[tipo];
+    e.caja-=monto; e.utilidad-=monto;
+    return {p:9,c:()=>!!B(),t:()=>txt,
+      o:[{t:'Denunciar ante la Fiscalía',f:()=>{ const b=B(); if(!b) return '—'; if(chance(.4)){ b.caja+=S._f140*.5; return 'Lo condenaron y recuperaste la mitad.'; } return 'El proceso va para largo. La plata no aparece.'; }},
+         {t:'Arreglarlo por debajo para que no salga en prensa',f:()=>{ const b=B(); if(b) b.moral=clamp(b.moral-3,0,100); return 'Lo despediste sin escándalo. Los demás aprendieron que robar sale barato.'; }},
+         {t:()=>'Montar control interno de verdad',f:()=>{ const b=B(); if(!b) return '—'; const pp=P(b); if(pp.aud==='ninguna') pp.aud='revisor'; pp.control=clamp(pp.control+12,0,100); b.caja-=Math.max(2,b.ingresos*.004); return 'Contrataste revisor fiscal y separaste funciones: el que compra no paga y el que paga no cuenta.'; }}]}; }
+  function evInvima(e){ return {p:9,c:()=>!!B(),t:()=>'<b>El INVIMA cerró temporalmente la planta de '+esc(e.nombre)+'.</b> En la visita no encontraron buenas prácticas de manufactura.',
+    o:[{t:()=>'Certificarse a la carrera ('+fmt(Math.max(10,e.ingresos*.02))+')',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(10,b.ingresos*.02); P(b).cert.bpm=S.anio; b.ingresos*=.95; return 'Tres meses parados y una inversión grande, pero quedaste certificado.'; }},
+       {t:'Pagar la multa y seguir igual',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(5,b.ingresos*.01); b.ingresos*=.9; b.marca=clamp(b.marca-5,0,100); return 'Pagaste y reabriste. Salió en las noticias; la gente se acuerda.'; }}]}; }
+  function evAmbiental(e){ return {p:9,c:()=>!!B(),t:()=>'<b>La autoridad ambiental multó a '+esc(e.nombre)+'.</b> '+({mineria:'Vertimientos al río.',energia:'Emisiones por encima de la norma.',agro:'Quema y uso de agua sin permiso.',construccion:'Escombros en un humedal.'})[e.sector],
+    o:[{t:()=>'Pagar y certificarse en ISO 14001',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(8,b.ingresos*.025); P(b).cert.iso14001=S.anio; return 'Multa, plan de manejo y certificación. Ahora tienes con qué mostrar.'; }},
+       {t:'Apelar',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(3,b.ingresos*.004); if(chance(.4)) return 'Ganaste la apelación por un tecnicismo.'; b.caja-=Math.max(8,b.ingresos*.02); b.marca=clamp(b.marca-4,0,100); return 'Perdiste la apelación y la multa subió.'; }}]}; }
+  function evAccidente(e){ return {p:9,c:()=>!!B(),t:()=>'<b>Un accidente de trabajo en '+esc(e.nombre)+'.</b> Un operario perdió una mano. La familia demanda y el Ministerio de Trabajo abrió investigación.',
+    o:[{t:'Responder, indemnizar y montar el sistema de seguridad',f:()=>{ const b=B(); if(!b) return '—'; b.caja-=Math.max(5,b.ingresos*.012); P(b).cert.sst=S.anio; b.moral=clamp(b.moral+5,0,100); return 'Indemnizaste a la familia y montaste el sistema. Los trabajadores lo notaron.'; }},
+       {t:'Que lo pague la ARL y ya',f:()=>{ const b=B(); if(!b) return '—'; b.moral=clamp(b.moral-8,0,100); try{ sind(b).fuerza=clamp(sind(b).fuerza+8,0,100); }catch(x){} b.caja-=Math.max(3,b.ingresos*.006); return 'La multa del Ministerio llegó igual, y el sindicato tomó nota.'; }}]}; }
+  function evY2K(e){ return {p:9,c:()=>!!B(),t:()=>'<b>El año 2000.</b> Los sistemas de '+esc(e.nombre)+' guardan el año con dos dígitos. Dicen que el 1.º de enero todo puede fallar.',
+    o:[{t:()=>'Actualizar todo a tiempo ('+fmt(Math.max(4,e.ingresos*.008))+')',f:()=>{ const b=B(); if(b) b.caja-=Math.max(4,b.ingresos*.008); return 'Pasó la medianoche y no pasó nada. Nunca sabrás si fue por la plata que pusiste.'; }},
+       {t:'Es puro cuento',f:()=>{ const b=B(); if(b&&chance(.25)){ b.caja-=Math.max(4,b.ingresos*.015); return 'La facturación se enloqueció la primera semana de enero.'; } return 'Tenías razón: no pasó nada.'; }}]}; }
+
+  /* --- la pantalla --- */
+  function escenaProcesos140(e){
+    e=e||S.emp; if(!e) return; const p=P(e), s=sisDe(p), sinMov=S.mov<1?'No te quedan movidas':null;
+    const pago=(c,f,mov)=>()=>{ const r=financiarEmpresa(e,c,true); if(!r.ok){ log('La compañía no tiene con qué.','mal'); return; } S.mov=Math.max(0,S.mov-(mov===0?0:1)); f(); cerrarModal(); render(); escenaProcesos140(e); };
+    const certs=Object.keys(CERT).filter(k=>aplica(k,e));
+    const ops=[];
+    certs.filter(k=>!p.cert[k]).forEach(k=>{ const c=Math.max(4,e.ingresos*CERT[k].c); ops.push({t:'Certificarse: '+CERT[k].n,cat:'compania',d:CERT[k].d+' '+fmt(c)+', y mantenerla cuesta cada año.',dis:sinMov,cerrar:false,run:pago(c,()=>{ p.cert[k]=S.anio; hito(e.nombre+' obtuvo la certificación '+CERT[k].n); log('<b>'+esc(e.nombre)+'</b> se certificó en '+CERT[k].n+'.','bien'); })}); });
+    const sig=SIST.find((x,i)=>i>SIST.indexOf(s)&&x.desde<=S.anio);
+    if(sig){ const c=Math.max(5,e.ingresos*sig.c); ops.push({t:'Pasar a '+sig.n.charAt(0).toLowerCase()+sig.n.slice(1),cat:'compania',d:'Más eficiencia y más control. '+fmt(c)+'.'+(sig.id==='erp'?' El primer año es un caos: todos aprenden el sistema a la vez.':''),dis:sinMov,cerrar:false,run:pago(c,()=>{ p.sis=sig.id; if(sig.id==='erp') e.moral=clamp(e.moral-6,0,100); log('<b>'+esc(e.nombre)+'</b> pasó a '+sig.n.toLowerCase()+'.','bien'); })}); }
+    Object.keys(AUD).filter(k=>k!==p.aud&&(!AUD[k].desde||AUD[k].desde<=S.anio)&&AUD[k].ctrl>AUD[p.aud].ctrl).forEach(k=>ops.push({t:'Contratar '+AUD[k].n.toLowerCase(),cat:'compania',d:'Más control: los fraudes se descubren antes. '+fmt(Math.max(1,e.ingresos*AUD[k].c))+' al año.',cerrar:false,run:()=>{ p.aud=k; log('<b>'+esc(e.nombre)+'</b> contrató '+AUD[k].n.toLowerCase()+'.'); cerrarModal(); render(); escenaProcesos140(e); }}));
+    if(!p.gob&&S.anio>=1995) ops.push({t:'Adoptar un código de buen gobierno',cat:'compania',d:'Miembros independientes en la junta, reglas para la familia y conflictos de interés. Más control y el mercado lo premia.'+(e.publica?' En bolsa es casi obligatorio.':''),dis:sinMov,cerrar:false,run:()=>{ S.mov--; p.gob=S.anio; try{ (S.junta||[]).forEach(j=>{ if(j.arq==='familiar') j.lealtad=clamp(j.lealtad-6,0,100); }); }catch(x){} log('<b>'+esc(e.nombre)+'</b> adoptó un código de buen gobierno. A la familia no le gustó del todo.','bien'); cerrarModal(); render(); escenaProcesos140(e); }});
+    if(S.anio>=1990&&(!p.mejora||S.anio-p.mejora>6)){ const n=S.anio<2000?'Reingeniería de procesos':'Lean y six sigma', c=Math.max(5,e.ingresos*.015);
+      ops.push({t:n,cat:'compania',d:'Consultores que redibujan cómo se hace todo. Sube la eficiencia unos años'+(S.anio<2000?'; en los noventa, casi siempre con despidos.':'.')+' '+fmt(c)+'.',dis:sinMov,cerrar:false,run:pago(c,()=>{ p.mejora=S.anio; e.eficiencia=clamp(e.eficiencia+6,0,100); if(S.anio<2000){ e.moral=clamp(e.moral-8,0,100); e.empleados=Math.max(2,Math.round(e.empleados*.94)); } log(n+' en <b>'+esc(e.nombre)+'</b>.','bien'); })}); }
+    escena({rubro:esc(e.nombre)+' · Personal y procesos',titulo:'Procesos y control',ancho:true,cerrable:true,clase:'proc140',
+      cuerpo:p.control<35?'Aquí cada quien hace lo que puede y nadie revisa. Es cuestión de tiempo que alguien meta la mano.':p.control<60?'Hay controles básicos, con huecos.':'La compañía tiene procesos claros y controles que funcionan.',
+      html:'<div class="k"><div><b>'+Math.round(p.control)+'/100</b><span>control interno</span></div><div><b>'+esc(s.n)+'</b><span>sistemas</span></div><div><b>'+esc(AUD[p.aud].n)+'</b><span>auditoría</span></div><div><b>'+(p.gob?'Sí, desde '+p.gob:'No')+'</b><span>código de buen gobierno</span></div></div>'
+        +'<div class="cert">'+(certs.length?certs.map(k=>'<span class="'+(p.cert[k]?'':'no')+'">'+CERT[k].n+(p.cert[k]?' · '+p.cert[k]:'')+'</span>').join(''):'<span class="no">Todavía no existen certificaciones para esta época</span>')+'</div>',
+      opciones:ops.length?ops:[{t:'Volver',cat:'compania'}]});
+  }
+  function panelHTML(e){ const p=P(e);
+    return '<div class="proc140-panel"><b>Procesos y control</b><div class="apunte" style="margin:4px 0 8px">Control interno '+Math.round(p.control)+'/100 · '+esc(sisDe(p).n.toLowerCase())+' · '+esc(AUD[p.aud].n.toLowerCase())+' · '+Object.keys(p.cert).filter(k=>p.cert[k]).length+' certificación(es)</div>'
+      +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Procesos y control">'+(typeof sello==='function'?sello('empleo'):'')+'<div class="neg86-accion-info"><div class="nom">Procesos y control</div><div class="txt">Certificaciones, sistemas, auditoría, buen gobierno y mejora de procesos.</div></div></div></div></div>'; }
+  function wrapPanel140(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v140) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v140=true; }
+
+  /* --- revisión: comprar una casa rival en crisis --- */
+  function escenaFyA140(){
+    let objetivos=[]; try{ objetivos=rivalesVivas().filter(r=>r.patrimonio<patrimonio()*.55); }catch(x){}
+    escena({rubro:'Fusiones y adquisiciones',titulo:'Empresas en dificultades',ancho:true,cerrable:true,
+      cuerpo:objetivos.length?'Estas casas están golpeadas y venden su negocio. Si tienes una compañía del mismo sector, ella lo compra y lo absorbe; si no, lo compras tú como una participación.':'Por ahora ninguna casa rival está lo bastante golpeada como para vender barato.',
+      opciones:objetivos.map(r=>{ if(!isFinite(r._precio140)||r._anio140!==S.anio){ r._precio140=Math.round(r.patrimonio*rnd(.6,.85)); r._anio140=S.anio; } const precio=r._precio140;
+        const dest=companias().filter(e=>e.sector===r.sector).sort((a,b)=>b.ingresos-a.ingresos)[0];
+        const puede=dest?(dest.caja+capacidadDeudaDe(dest)+S.efectivo>=precio):S.efectivo>=precio;
+        return {t:'Adquirir a los '+r.apellido,cat:'compania',d:'Patrimonio estimado '+fmt(r.patrimonio)+'. Piden '+fmt(precio)+'. '+(dest?'Lo absorbe '+dest.nombre+' (con su caja y su crédito; lo que falte, de tu bolsillo).':'Ninguna de tus compañías es del sector: lo pagas tú y queda como participación.'),
+          dis:puede?(S.mov<1?'No te quedan movidas':null):'No alcanza: piden '+fmt(precio),
+          run:()=>{ S.mov=Math.max(0,S.mov-1);
+            if(dest){ const r1=financiarEmpresa(dest,Math.min(precio,dest.caja+capacidadDeudaDe(dest)),true); const falta=precio-(r1.ok?Math.min(precio,r1.caja+r1.deuda):0); if(falta>0) S.efectivo-=falta;
+              const gana=Math.min(r.patrimonio*.45,dest.ingresos*1.2); dest.ingresos+=gana; dest.empleados=Math.round(dest.empleados*(1+gana/Math.max(1,dest.ingresos))); dest.eficiencia=clamp(dest.eficiencia-4,0,100);
+              log('<b>'+esc(dest.nombre)+'</b> absorbió el negocio de los <b>'+esc(r.apellido)+'</b> por '+fmt(precio)+'. Vende '+fmt(gana)+' más al año.','hito'); }
+            else { S.efectivo-=precio; S.portafolio=S.portafolio||[]; S.portafolio.push({nombre:'Negocio de los '+r.apellido,ticker:'ADQ',valor:precio*1.1,tipo:'participación'}); log('Compraste el negocio de los <b>'+esc(r.apellido)+'</b> por '+fmt(precio)+'. Quedó como participación en tu portafolio.','hito'); }
+            r.viva=false; try{ moverPrestigio(4,'te quedaste con la casa '+r.apellido); }catch(x){} hito('Absorbió a los '+r.apellido); render(); }}; })});
+  }
+
+  function wrapAcciones140(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA140_ACC) return; window.__SA140_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp;
+        if(Array.isArray(A)&&e&&companias().includes(e)){ const p=P(e); A.push({t:'Procesos y control',d:'Control interno '+Math.round(p.control)+'/100 · '+Object.keys(p.cert).filter(k=>p.cert[k]).length+' certificación(es).',mov:0,modal:true,run:()=>escenaProcesos140(e)}); }
+        if(Array.isArray(A)){ const f=A.find(a=>a.t==='Fusiones y adquisiciones'); if(f){ f.run=()=>escenaFyA140(); f.mov=0; f.modal=true; }
+          const m=A.find(a=>a.t==='Marcas'); if(m) m.d='La marca sombrilla de la familia, para agrupar varias compañías u hoteles. '+(m.d||''); } }catch(x){}
+      return A; }; }
+  function wrapCat140(){ const old=window.catDe; if(typeof old!=='function'||window.__SA140_CAT) return; window.__SA140_CAT=true;
+    window.catDe=function(t){ if(t==='Procesos y control') return 'compania'; return old.apply(this,arguments); }; }
+  function init140(){ wrapEmpresa140(); wrapPanel140(); wrapAcciones140(); wrapCat140();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Procesos y control')) D.push('Procesos y control'); }catch(x){}
+    Object.assign(window,{procesos140:P,escenaProcesos140,CERTIFICACIONES_140:CERT,escenaFyA140}); }
+  setTimeout(init140,40); setTimeout(init140,220); setTimeout(init140,650); setTimeout(init140,900);
+  window.__SA140={version:V140};
 })();
 </script>
 
