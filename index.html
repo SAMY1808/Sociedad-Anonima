@@ -1117,10 +1117,15 @@ svg.foto116{display:block;background:#1d2a23}
 .taza144 .eslabon .det{font-size:13px;color:var(--humo2);margin-top:2px}
 .taza144 .eslabon.no{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06)}
 </style>
+<style id="estilos-v146">
+.tam146{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--humo2)}
+.tam146 i{display:inline-block;width:5px;height:11px;border-radius:2px;background:rgba(255,255,255,.18)}
+.tam146 i.on{background:var(--oro,#D6A648)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v145</div>
+<div class="version-badge" id="versionBadge">v147</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6955,11 +6960,12 @@ function pasarAnio(){
 
   S.mov=Math.max(0, movidasBase()-movidasComprometidas()-(S.familia.movidasEmbarazo||0));
   S.familia.movidasEmbarazo=0;
-  S.resumen=res; S.flujo={ingreso,gasto};
+  S.resumen=res; S.flujo={ingreso,gasto}; S._cierre147={efectivo:S.efectivo,n:res.length,anio:S.anio};   /* v147: para cuadrar el informe */
 
   const pm = probMuerte();
-  if(chance(pm)||p.salud<=0){ procesarCola(()=>morir()); return; }
-  procesarCola(()=>finDeAnio());
+  /* v147: los eventos y el informe arrancan cuando todos los módulos ya cerraron su año (sus eventos y sus renglones también cuentan) */
+  if(chance(pm)||p.salud<=0){ setTimeout(()=>procesarCola(()=>morir()),0); return; }
+  setTimeout(()=>procesarCola(()=>finDeAnio()),0);
 }
 
 function probMuerte(){
@@ -22088,7 +22094,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            if(S.prensa105) S.prensa105.imagen=clamp(S.prensa105.imagen+6,0,100); anotar(h,'Se volvió famos'+o(h)+' como '+ofi(h,OFICIOS_FAMA.find(x=>x.id===fid))+'.','bien'); return 'La familia sale en las revistas. Por primera vez, por algo bueno.'; }},
          {t:'Pedirle que no use el apellido',f:()=>{ const [n,fid]=S._f103; const h=porNombre(n); h.famoso103=fid; vinc(h,-10); anotar(h,'Se volvió famos'+o(h)+'; le pediste que no usara el apellido.',''); return 'Ahora firma con un nombre artístico. En las entrevistas habla poco de su familia.'; }}]});
     E({p:.6,c:()=>hijos(16,30).some(h=>h.atr&&h.atr.intelecto>=7),
-      t:()=>{ const h=pick(hijos(16,30).filter(x=>x.atr&&x.atr.intelecto>=7)); S._b103=h.nombre; return '<b>'+esc(h.nombre)+'</b> ganó una beca completa '+pick(['para un doctorado en el exterior','en un concurso nacional de ciencias','por mérito, sin que nadie moviera una palanca'])+'.'; },
+      t:()=>{ const L_=(hijos(16,30).filter(x=>x.atr&&x.atr.intelecto>=7)); if(!L_.length) return null; const h=pick(L_); S._b103=h.nombre; return '<b>'+esc(h.nombre)+'</b> ganó una beca completa '+pick(['para un doctorado en el exterior','en un concurso nacional de ciencias','por mérito, sin que nadie moviera una palanca'])+'.'; },
       o:[{t:'Hacer una comida para celebrarlo',f:()=>{ const h=H('_b103'); vinc(h,8); h.formacion=clamp((h.formacion||0)+8,0,100); anotar(h,'Ganó una beca por mérito propio.','bien'); return 'Por una vez, la plata no tuvo nada que ver.'; }}]});
     window.__SA103_EV=true;
   }
@@ -22207,7 +22213,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const E=x=>EVENTOS_LOCALES.push(x);
     const R=()=>rivalesVivas().find(x=>x.rid===S._r104);
     E({p:1.1,c:()=>rivalesVivas().some(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo)),
-      t:()=>{ const r=pick(rivalesVivas().filter(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo))); S._r104=r.rid; const j=jefe(r);
+      t:()=>{ const L_=(rivalesVivas().filter(r=>rel(r)<35&&['vengativo','soberbio','calculador'].includes(jefe(r).rasgo))); if(!L_.length) return null; const r=pick(L_); S._r104=r.rid; const j=jefe(r);
         const golpe=S.emp?pick(['se llevó a tu mejor cliente con una oferta que no tiene sentido','compró a tu gerente comercial','le contó a un periodista lo que sabe de tus cuentas']):pick(['le contó a un periodista lo que sabe de tus cuentas','te cerró la puerta en el club','habló mal de tu familia en una comida con el ministro']);
         S._g104=golpe; const m=j.memoria.filter(x=>x.peso<0).slice(-1)[0];
         return '<b>'+esc(nomJ(r))+'</b> '+golpe+'.'+(m?' No es casualidad: '+(j.sexo==='m'?'ella':'él')+' no olvida que '+esc(m.txt.charAt(0).toLowerCase()+m.txt.slice(1)).replace(/\.$/,'')+'.':' Es su forma de decir que no te quiere en su camino.'); },
@@ -22218,7 +22224,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
            if(chance(p)){ recordar(r,'Le buscaste para hacer las paces.',3); return 'Almorzaron. No son amigos, pero la guerra fría se acabó. ('+fmt(c)+' en el gesto.)'; }
            recordar(r,'Le buscaste para hacer las paces y te rechazó.',-1); return 'Te dejó esperando en el restaurante. Gastaste '+fmt(c)+' y el orgullo.'; }}]});
     E({p:.8,c:()=>rivalesVivas().some(r=>(r.generacion||1)>1&&!jefe(r).visita104),
-      t:()=>{ const r=pick(rivalesVivas().filter(r=>(r.generacion||1)>1&&!jefe(r).visita104)); S._r104=r.rid; const j=jefe(r); j.visita104=true; const v=rel(r);
+      t:()=>{ const L_=(rivalesVivas().filter(r=>(r.generacion||1)>1&&!jefe(r).visita104)); if(!L_.length) return null; const r=pick(L_); S._r104=r.rid; const j=jefe(r); j.visita104=true; const v=rel(r);
         return '<b>'+esc(nomJ(r))+'</b>, '+(j.sexo==='m'?'la nueva jefa':'el nuevo jefe')+' de los '+esc(r.apellido)+', pide una cita contigo. '+(v<40?'Llega con la herencia de un pleito viejo con tu casa.':v>=60?'Dice que quiere seguir la amistad que tenían las dos casas.':'Viene a medirte.'); },
       o:[{t:'Tenderle la mano',f:()=>{ const r=R(); if(r) recordar(r,'Le tendiste la mano cuando tomó el mando.',2); return 'Salió de tu oficina con una sonrisa. Veremos.'; }},
          {t:()=>{ const r=rivalesVivas().find(x=>x.rid===S._r104); return 'Recibirl'+(r&&jefe(r).sexo==='m'?'a':'o')+' con frialdad'; },f:()=>{ const r=R(); if(r) recordar(r,'Le recibiste con frialdad cuando tomó el mando.',-2); return 'Diez minutos y la puerta. Entendió el mensaje.'; }}]});
@@ -23227,7 +23233,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
          {t:'Arrendarla así, más barata',f:()=>{ const b=B(); if(b){ b.valor*=.96; b.canon109='bajo'; aplicarCanon(b); } return 'La arrendaste como estaba, con canon bajo. La propiedad perdió algo de valor.'; }},
          {t:'Contratar una inmobiliaria para que no vuelva a pasar',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b){ b.admin109=true; aplicarCanon(b); } return 'Arreglaste y entregaste las llaves a una inmobiliaria. Cobran 8%, pero duermes tranquilo.'; }}]});
     E({p:.7,c:()=>(S.bienes||[]).length>0,
-      t:()=>{ const b=pick(S.bienes); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
+      t:()=>{ const L_=(S.bienes); if(!L_||!L_.length) return null; const b=pick(L_); S._b109=b.uid; const finca=b.clase==='finca'; S._c109=Math.max(3,Math.round(b.valor*.12)); S._q109=finca?'Un incendio forestal quemó parte de':'Se reventó un tubo y se inundó';
         return S._q109+' <b>'+esc(b.nombre)+'</b>. El arreglo vale '+fmt(S._c109)+'.'+(b.seguro109?' Menos mal estaba asegurada.':''); },
       o:[{t:()=>{ const b=B(); return b&&b.seguro109?'Cobrar el seguro':'Pagar el arreglo'; },f:()=>{ const b=B(); if(b&&b.seguro109) return 'El seguro pagó todo. Para eso era.'; S.efectivo-=Math.min(S.efectivo,S._c109); return 'Pagaste '+fmt(S._c109)+' de tu bolsillo.'; }},
          {t:'Dejarla así por ahora',f:()=>{ const b=B(); if(b&&b.seguro109) return 'Igual el seguro lo cubrió.'; if(b){ b.valor*=.88; if(b.clase==='renta') b.arrendado=false; } return 'No la arreglaste. Perdió valor'+(b&&b.clase==='renta'?' y quedó vacía':'')+'.'; }}]});
@@ -23423,31 +23429,31 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const E=x=>EVENTOS_LOCALES.push(x), B=()=>(S.bienes||[]).find(b=>b.uid===S._n110);
     const con=f=>negocios().filter(b=>!b.neg110.cerrado&&f(b));
     E({p:1,c:()=>con(b=>!b.neg110.admin).length>0,
-      t:()=>{ const b=pick(con(b=>!b.neg110.admin)); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.03)); return 'El contador encontró el hueco: el encargado de <b>'+esc(b.nombre)+'</b> llevaba meses sacando plata de la caja. Faltan '+fmt(S._c110)+'.'; },
+      t:()=>{ const L_=(con(b=>!b.neg110.admin)); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.03)); return 'El contador encontró el hueco: el encargado de <b>'+esc(b.nombre)+'</b> llevaba meses sacando plata de la caja. Faltan '+fmt(S._c110)+'.'; },
       o:[{t:'Denunciarlo',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110); return chance(.4)?'Lo condenaron y devolvió una parte. La otra no apareció.':'El proceso va lento. La plata no volvió.'; }},
          {t:'Echarlo y poner un administrador profesional',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c110); if(b) b.neg110.admin=true; return 'Lo echaste. Ahora maneja un profesional: cobra 10%, pero no roba.'; }}]});
     E({p:.9,c:()=>(typeof enColombia91!=='function'||enColombia91())&&S.anio>=1980&&con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id))); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.04));
+      t:()=>{ const L_=(con(b=>['discoteca','parqueadero','restaurante','gasolinera','motel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.04));
         return 'Dos tipos en moto pasaron por <b>'+esc(b.nombre)+'</b>: la "vacuna" es de '+fmt(S._c110)+' al mes… y dejaron claro qué pasa si no se paga.'; },
       o:[{t:'Pagar',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110*3); const b=B(); if(b) b.neg110.margen=Math.max(.02,b.neg110.margen-.01); return 'Pagas. El negocio sigue abierto, pero deja menos.'; }},
          {t:'Denunciar al Gaula',f:()=>{ if(chance(.55)) return 'Capturaron a los dos de la moto. Por ahora, nadie volvió.'; const b=B(); if(b){ b.valor*=.85; b.neg110.ult=0; } return 'A la semana quemaron la entrada del negocio. Lo tuviste que cerrar un mes.'; }},
          {t:'Cerrarlo y venderlo',f:()=>{ const b=B(); if(!b) return ''; const n=venderBien(b,.2); return 'Lo vendiste de afán: te quedaron '+fmt(Math.max(0,n))+'. Nadie quiere un negocio "vacunado".'; }}]});
     E({p:.9,c:()=>con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id))); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.05));
+      t:()=>{ const L_=(con(b=>['restaurante','clinica','colegio','motel','panaderia','hotel','fincahotel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.max(2,Math.round(b.valor*.05));
         return 'Llegó la inspección '+(b.neg110.id==='colegio'?'de la Secretaría de Educación':'sanitaria')+' a <b>'+esc(b.nombre)+'</b>. Encontraron fallas y amenazan con sellarlo.'; },
       o:[{t:()=>'Hacer las reformas ('+fmt(S._c110||0)+')',f:()=>{ S.efectivo-=Math.min(S.efectivo,S._c110); const b=B(); if(b) b.valor*=1.03; return 'Quedó todo en regla. Hasta subió el valor.'; }},
          {t:'Arreglar al inspector',f:()=>{ S.efectivo-=Math.min(S.efectivo,Math.round(S._c110*.3)); if(typeof registrarDelito==='function') registrarDelito('soborno',1,'a un inspector'); return 'Un sobre y el acta salió limpia. Las fallas siguen ahí.'; }},
          {t:'Dejar que lo sellen un tiempo',f:()=>{ const b=B(); if(b){ b.neg110.cerrado=true; } return 'Lo sellaron. Queda cerrado hasta que decidas reabrirlo.'; }}]});
     E({p:.8,c:()=>con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id))); S._n110=b.uid; return S.anio>=2008?'Un influenciador con millones de seguidores subió un video en <b>'+esc(b.nombre)+'</b>. Se volvió viral.':'Una revista nacional dedicó dos páginas a <b>'+esc(b.nombre)+'</b>: "el sitio del que todos hablan".'; },
+      t:()=>{ const L_=(con(b=>['restaurante','hotel','fincahotel','discoteca','gimnasio'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; return S.anio>=2008?'Un influenciador con millones de seguidores subió un video en <b>'+esc(b.nombre)+'</b>. Se volvió viral.':'Una revista nacional dedicó dos páginas a <b>'+esc(b.nombre)+'</b>: "el sitio del que todos hablan".'; },
       o:[{t:'Aprovechar la ola y subir precios',f:()=>{ const b=B(); if(b){ b.valor*=1.12; b.neg110.margen+=.015; } return 'Llenos todas las noches, con precios nuevos.'; }},
          {t:'Abrir una segunda sede',f:()=>{ const b=B(); if(!b) return ''; const c=Math.round(b.valor*.5); if(S.efectivo<c) return 'No tenías los '+fmt(c)+' para la segunda sede. La ola pasó.'; S.efectivo-=c; b.valor*=1.55; b.neg110.margen+=.005; return 'Abriste la segunda sede ('+fmt(c)+'). Ahora es una marca.'; }}]});
     E({p:.7,c:()=>con(b=>b.valor>=200).length>0,
-      t:()=>{ const b=pick(con(b=>b.valor>=200)); S._n110=b.uid; S._c110=Math.round(b.valor*rnd(1.25,1.6)); return 'Una cadena '+pick(['nacional','extranjera','de inversionistas'])+' quiere comprar <b>'+esc(b.nombre)+'</b>. Ofrecen '+fmt(S._c110)+'; vale '+fmt(b.valor)+'.'; },
+      t:()=>{ const L_=(con(b=>b.valor>=200)); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; S._c110=Math.round(b.valor*rnd(1.25,1.6)); return 'Una cadena '+pick(['nacional','extranjera','de inversionistas'])+' quiere comprar <b>'+esc(b.nombre)+'</b>. Ofrecen '+fmt(S._c110)+'; vale '+fmt(b.valor)+'.'; },
       o:[{t:'Vender',f:()=>{ const b=B(); if(!b) return ''; const n=Math.max(0,S._c110-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Vendiste. Te quedaron '+fmt(n)+'.'; }},
          {t:'No se vende',f:()=>{ const b=B(); if(b) b.valor*=1.05; return 'Dijiste que no. Ahora sabes cuánto vale de verdad.'; }}]});
     E({p:.7,c:()=>con(b=>['hotel','fincahotel'].includes(b.neg110.id)).length>0,
-      t:()=>{ const b=pick(con(b=>['hotel','fincahotel'].includes(b.neg110.id))); S._n110=b.uid; return 'Temporada récord: '+esc(b.nombre)+' está lleno desde diciembre hasta Reyes y hay lista de espera.'; },
+      t:()=>{ const L_=(con(b=>['hotel','fincahotel'].includes(b.neg110.id))); if(!L_||!L_.length) return null; const b=pick(L_); S._n110=b.uid; return 'Temporada récord: '+esc(b.nombre)+' está lleno desde diciembre hasta Reyes y hay lista de espera.'; },
       o:[{t:'Celebrarlo',f:()=>{ const b=B(); if(b){ const x=Math.round(b.valor*.04); S.efectivo+=x; return 'Entraron '+fmt(x)+' extra en la temporada.'; } return ''; }}]});
     window.__SA110_EV=true;
   }
@@ -25373,7 +25379,7 @@ install();setTimeout(install,1200);
   }
   function wrapPaso133(){
     const old=window.pasarAnio; if(typeof old!=='function'||window.__SA133_PASO) return; window.__SA133_PASO=true;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual133(); }catch(e){ console.error(e); } return r; };
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ const e0=S.efectivo; anual133(); window.anotar147&&window.anotar147('Cuidados de la vejez y la salud',S.efectivo-e0); }catch(e){ console.error(e); } return r; };
     window.pasarAnio.__v133=true;
   }
   function init133(){ enfermedades133(); eventos133(); wrapMovidas133(); wrapEtapa133(); wrapEscena133(); wrapPaso133();
@@ -25547,7 +25553,7 @@ install();setTimeout(install,1200);
   function wrapCat134(){ const old=window.catDe; if(typeof old!=='function'||window.__SA134_CAT) return; window.__SA134_CAT=true;
     window.catDe=function(t){ if(t==='Tus inquilinos') return 'casa'; return old.apply(this,arguments); }; }
   function wrapPaso134(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA134_PASO) return; window.__SA134_PASO=true;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual134(); }catch(e){ console.error(e); } return r; }; }
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ const e0=S.efectivo; anual134(); window.anotar147&&window.anotar147('Inquilinos: atrasos, restituciones y daños',S.efectivo-e0); }catch(e){ console.error(e); } return r; }; }
   function init134(){ wrapEscena134(); wrapAcciones134(); wrapCat134(); wrapPaso134();
     Object.assign(window,{PERFILES_INQUILINO_134:PERF,inquilinoNuevo134:nuevo,anualInquilinos134:anual134,escenaInquilinos134,puntualidad134:puntualidad}); }
   setTimeout(init134,40); setTimeout(init134,220); setTimeout(init134,650);
@@ -26587,7 +26593,7 @@ install();setTimeout(install,1200);
       else if(canal==='particular'&&chance(.05)){ ingreso=ventaC*precioVenta(f,'particular',cal)*.5; notas.push('el comprador particular quedó debiendo la mitad'); }
       else ingreso=ventaC*precioVenta(f,canal,cal);
       const costo=costos(f,cargas), neto=ingreso-costo;
-      S.efectivo+=neto; f.ult={anio:S.anio,cargas,ingreso,costo,neto,cal,canal,notas,precio:precioCarga(),ret};
+      S.efectivo+=neto; try{ window.anotar147&&window.anotar147('Café · '+b.nombre+' ('+Math.round(cargas).toLocaleString('es-CO')+' cargas'+(ret?', guardadas':'')+')',neto); }catch(e){} f.ult={anio:S.anio,cargas,ingreso,costo,neto,cal,canal,notas,precio:precioCarga(),ret};
       f.hist=f.hist||[]; f.hist.push([S.anio,Math.round(cargas),Math.round(neto)]); if(f.hist.length>40) f.hist.shift();
       log('Cosecha de <b>'+esc(b.nombre)+'</b>: '+Math.round(cargas).toLocaleString('es-CO')+' cargas'+(ret?' (las guardaste)':'')+'. '+(notas.length?notas.join('; ').replace(/^./,c=>c.toUpperCase())+'. ':'')+(neto>=0?'Quedaron ':'Se perdieron ')+fmt(Math.abs(neto))+'.',neto>=0?'bien':'mal');
     });
@@ -26792,7 +26798,7 @@ install();setTimeout(install,1200);
     if(f.procafecol>0&&S.anio>=2008){ const x=f.procafecol*rnd(.0,.05); if(x>0){ extra+=x; notas.push('Procafecol pagó '+fmt(x)+' de dividendos'); } f.procafecol*=1+rnd(-.05,.12); }
     if(f.cargo){ const c=CARGOS[cargoIx(f.cargo)]; f.influencia=clamp(f.influencia+(c.inf-f.influencia)*.3,0,100); if(f.cargo==='gerente'&&!(S.carrera&&S.carrera.ruta==='federacion')){ const sal=60; extra+=sal; notas.push('sueldo de Gerente General: '+fmt(sal)); } }
     else f.influencia=Math.max(0,f.influencia-3);
-    if(extra){ S.efectivo+=extra; log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
+    if(extra){ S.efectivo+=extra; try{ window.anotar147&&window.anotar147('Federación de Cafeteros: programas, excedentes y sueldos',extra); }catch(e){} log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
     // la elección cafetera
     if(eleccion(S.anio)&&f.candidato){ const c=CARGOS[cargoIx(f.candidato)]; const pr=clamp(.32+prest()/250+hectareas()/400+f.influencia/300+(f.campana||0)-cargoIx(c.id)*.06,.08,.88);
       if(chance(pr)){ f.cargo=c.id; f.desde=S.anio; log('<b>Elecciones cafeteras:</b> ganaste. Ahora estás en el '+c.n+'.','hito'); hito('Elegido al '+c.n); try{ moverPrestigio(3+cargoIx(c.id)*2,'cargo cafetero'); }catch(e){} }
@@ -26973,7 +26979,7 @@ install();setTimeout(install,1200);
       o:[{t:'Subir el pago por kilo',f:()=>{ L().forEach(b=>{ b.cafe141.pagaMas=true; b.cafe141.pagaDesde=S.anio; }); return 'Pagas más por kilo recogido. La cosecha se salva, el margen no.'; }},{t:'Recoger con lo que haya',f:()=>'Se va a caer grano al suelo. Y la broca se alimenta de ese grano.'}]}); }
     else if(!(G().escasez>=S.anio)) L().forEach(b=>{ if(b.cafe141.pagaMas&&S.anio-(b.cafe141.pagaDesde||S.anio)>2) b.cafe141.pagaMas=false; });
     // los turistas del Paisaje Cultural
-    const tur=L().filter(b=>b.cafe141.turismo); if(tur.length){ const x=tur.reduce((s,b)=>s+Math.min(40,b.cafe141.ha*.8),0); S.efectivo+=x; }
+    const tur=L().filter(b=>b.cafe141.turismo); if(tur.length){ const x=tur.reduce((s,b)=>s+Math.min(40,b.cafe141.ha*.8),0); S.efectivo+=x; try{ window.anotar147&&window.anotar147('Turismo en las fincas cafeteras',x); }catch(e){} }
   }
   function wrapPaso143(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA143_PASO) return; window.__SA143_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
@@ -27037,7 +27043,7 @@ install();setTimeout(install,1200);
     n.hoteles.forEach(h=>{ const b=(S.bienes||[]).find(x=>x.uid===h.uid); if(!b){ h.muerto=true; return; } const pais=mun(b).paisaje, r=(pais&&S.anio>=2011?55:S.anio>=1995?28:12)*rnd(.7,1.25)-(S.anio===2020?30:0)-(S.anio===1999&&/Quindío|Risaralda/.test(mun(b).dep||'')?20:0); h.ult=r; filas.push(['Hotel en '+b.cafe141.mun,r]); });
     n.hoteles=n.hoteles.filter(h=>!h.muerto);
     const tot=filas.reduce((s,f)=>s+f[1],0);
-    if(filas.length){ S.efectivo+=tot; n.hist.push([S.anio,Math.round(tot)]); if(n.hist.length>40) n.hist.shift();
+    if(filas.length){ S.efectivo+=tot; try{ filas.forEach(f=>window.anotar147&&window.anotar147('Café · '+f[0],f[1])); }catch(e){} n.hist.push([S.anio,Math.round(tot)]); if(n.hist.length>40) n.hist.shift();
       log('<b>Negocio cafetero:</b> '+filas.map(f=>f[0]+' '+(f[1]>=0?'+':'−')+fmt(Math.abs(f[1]))).join(' · ')+'.',tot>=0?'bien':'mal'); }
     // sucesos
     if(S._ev144!==S.anio){
@@ -27209,6 +27215,123 @@ install();setTimeout(install,1200);
   registrar();
   setTimeout(init145,40); setTimeout(init145,220); setTimeout(init145,650);
   window.__SA145={version:V145};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v146 · EL TAMAÑO SE VE
+   Cada propiedad recuerda su tamaño: compacta, normal o amplia (pequeña,
+   mediana o grande en locales, bodegas, oficinas y fincas). Se ve en la
+   foto, con un rótulo de metros cuadrados y habitaciones (o hectáreas) y
+   una barrita de tres niveles; la foto de lo compacto se ve más chica
+   dentro del marco. Las propiedades de antes
+   deducen su tamaño de lo que valen frente a lo normal de su tipo.
+   Queda listo el lugar para fotos por tamaño: cuando exista
+   img/ciudades/{ciudad}_{tipo}_{compacto|normal|amplio}.jpg y esté en la
+   lista FOTOS_TAMANO_146, se usa sola.
+   ========================================================================== */
+(function(){
+  const V146='v146';
+  const FOTOS_TAMANO_146=[];   // p. ej. 'bogota_casa_amplio' cuando lleguen las fotos
+  const NIV=['compacto','normal','amplio'];
+  const BASE={apartamento:.68,apto:.68,casa:.95,casa_pequena:.8,casa_grande:1.15,mansion:1.55,penthouse:1.7};
+  const AREA={apartamento:[48,72,115],casa:[85,140,220],casa_pequena:[55,75,95],casa_grande:[150,210,300],mansion:[380,600,950],penthouse:[170,260,420],
+    local:[40,90,250],bodega:[400,900,2500],oficina:[60,140,400],consultorio:[30,55,90],edificio:[600,1200,2400],hotel:[300,700,1500]};
+  const HAB={apartamento:[1,3,4],casa:[3,4,5],casa_pequena:[2,3,3],casa_grande:[4,5,6],mansion:[6,8,12],penthouse:[3,4,5]};
+  const P1={compacto:{v:'Compacta',r:'Pequeño'},normal:{v:'Normal',r:'Mediano'},amplio:{v:'Amplia',r:'Grande'}};
+  const tipoV=b=>{ const t=String(b.tipo||'').toLowerCase(); if(/penthouse/.test(t)) return 'penthouse'; if(/mansi/.test(t)) return 'mansion'; if(/casa_grande|duplex|dúplex/.test(t)) return 'casa_grande'; if(/casa_peq/.test(t)) return 'casa_pequena'; if(/casa/.test(t)) return 'casa'; if(/apart|apto/.test(t)) return 'apartamento'; return null; };
+  const esVivienda=b=>b&&(b.clase==='vivienda'||b.exVivienda109)&&!!tipoV(b);
+  const deRatio=r=>r<.93?'compacto':r>1.12?'amplio':'normal';
+  function tamano(b){
+    if(!b) return null;
+    if(b.cafe141){ const h=b.cafe141.ha||0; return h<10?'compacto':h<40?'normal':'amplio'; }   // las fincas cafeteras crecen: se mide cada vez
+    if(b.tam146) return b.tam146;
+    let t=null;
+    try{
+      if(esVivienda(b)){ const tv=tipoV(b), base=BASE[tv]||1, ref=precioVivienda(b.ciudad||S.hogar.ciudad,isFinite(b.zona)?b.zona:(S.hogar.zona||0),base); t=deRatio((b.precioCompra||b.valor)/Math.max(1,ref)); }
+      else if(b.clase==='renta'){ const r=(typeof RENTAS!=='undefined'?RENTAS:[]).find(x=>x.id===b.tipo); if(r){ t=deRatio((b.precioCompra||b.valor)/Math.max(1,r.base*(typeof multCiudad==='function'?multCiudad(b.ciudad||S.hogar.ciudad):1))); } }
+      else if(b.clase==='finca'){ const f=(typeof FINCAS!=='undefined'?FINCAS:[]).find(x=>x.id===b.tipo); if(f) t=deRatio((b.precioCompra||b.valor)/Math.max(1,f.base)); }
+    }catch(e){}
+    if(t) b.tam146=t; return t;
+  }
+  function detalle(b){ const t=tamano(b); if(!t) return null; const i=NIV.indexOf(t);
+    if(b.cafe141) return {t,etq:P1[t].r==='Pequeño'?'Pequeña':P1[t].r==='Mediano'?'Mediana':'Grande',extra:b.cafe141.ha+' ha'};
+    if(esVivienda(b)){ const tv=tipoV(b), a=(AREA[tv]||AREA.casa)[i], h=(HAB[tv]||HAB.casa)[i]; return {t,etq:P1[t].v,extra:'≈ '+a+' m² · '+h+' hab.'}; }
+    const a=AREA[b.tipo]; return {t,etq:P1[t].r,extra:a?'≈ '+a[i].toLocaleString('es-CO')+' m²':''};
+  }
+  const barras=t=>{ const i=NIV.indexOf(t); return [0,1,2].map(k=>'<i class="'+(k<=i?'on':'')+'"></i>').join(''); };
+  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena'};
+  const TIPOF={apartamento:'apartamento',casa:'casa',casa_pequena:'casa',casa_grande:'duplex',mansion:'mansion',penthouse:'penthouse'};
+  function decorar(svg,b,mini){
+    if(typeof svg!=='string'||mini||!/<\/svg>\s*$/.test(svg)) return svg;
+    const d=detalle(b); if(!d) return svg;
+    // foto específica por tamaño, si existe
+    try{ if(esVivienda(b)){ const k=CIU[b.ciudad||S.hogar.ciudad]+'_'+TIPOF[tipoV(b)]+'_'+d.t; if(FOTOS_TAMANO_146.includes(k)) svg=svg.replace(/img\/ciudades\/[a-z_]+\.jpg/g,'img/ciudades/'+k+'.jpg'); } }catch(e){}
+    // lo compacto se ve más chico en el marco (lo amplio se ve completo, sin recortar)
+    const ult=svg.lastIndexOf('<image ');
+    if(ult>=0){ const fin=svg.indexOf('/>',ult)+2, img=svg.slice(ult,fin);
+      let nuevo=img;
+      if(d.t==='compacto') nuevo='<rect width="240" height="160" fill="#0e1512" opacity=".35"/><g transform="translate(30 20) scale(.75)">'+img+'</g>';
+      svg=svg.slice(0,ult)+nuevo+svg.slice(fin); }
+    const txt=esc(d.etq+(d.extra?' · '+d.extra:'')), w=Math.min(232,24+txt.length*5.6);
+    const badge='<g class="tam146svg"><rect x="6" y="132" rx="6" ry="6" width="'+w+'" height="22" fill="#10140f" opacity=".78"/>'
+      +[0,1,2].map(k=>'<rect x="'+(12+k*5)+'" y="'+(146-k*3)+'" width="3.5" height="'+(4+k*3)+'" rx="1" fill="'+(k<=NIV.indexOf(d.t)?'#D6A648':'#5a5a52')+'"/>').join('')
+      +'<text x="31" y="147" font-size="11" fill="#F2E6CE" font-family="system-ui,sans-serif">'+txt+'</text></g>';
+    return svg.replace(/<\/svg>\s*$/,badge+'</svg>');
+  }
+  function instalar(){ const prev=window.dibujoPropiedad115; if(typeof prev!=='function'||prev.__v146) return;
+    window.dibujoPropiedad115=function(b,w,h,mini){ const r=prev.apply(this,arguments); try{ return decorar(r,b,mini); }catch(e){ return r; } };
+    window.dibujoPropiedad115.__v146=true; }
+  // al comprar: se guarda el tamaño elegido
+  function wrapComprar(){ const old=window.comprarBien; if(typeof old!=='function'||old.__v146) return;
+    window.comprarBien=function(o){ const b=old.apply(this,arguments); try{ if(b&&window.__tam146&&o&&(o.clase==='vivienda'||o.clase==='renta')&&esVivienda(Object.assign({},b,{exVivienda109:true}))) b.tam146=window.__tam146; }catch(e){} window.__tam146=null; return b; };
+    window.comprarBien.__v146=true; }
+  // el control de tamaño de las pantallas de compra deja dicho el tamaño
+  document.addEventListener('input',e=>{ try{ const el=e.target; if(!el||el.type!=='range') return;
+    if(el.id==='vHol'){ const v=+el.value; window.__tam146=v<95?'compacto':v>110?'amplio':'normal'; if(+el.max>130) window.__tam146=v<90?'compacto':v>130?'amplio':'normal'; }
+    if(el.id==='a127hol'){ const v=+el.value; window.__tam146=v<95?'compacto':v>110?'amplio':'normal'; } }catch(x){} },true);
+  document.addEventListener('click',e=>{ try{ const t=e.target; if(t&&t.closest&&t.closest('#escenaHost')&&(document.getElementById('vHol')||document.getElementById('a127hol'))&&!window.__tam146) window.__tam146='normal'; }catch(x){} },true);
+  // en la ficha del inmueble
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||window.__SA146_ESC) return; window.__SA146_ESC=true;
+    window.escena=function(o){ try{ if(o&&typeof o.html==='string'&&o.html.indexOf('class="ficha109"')>=0&&S&&S.bienes){ const b=S.bienes.find(x=>esc(x.nombre)===o.titulo); const d=b&&detalle(b);
+        if(d) o=Object.assign({},o,{html:o.html.replace('</table></div>','<tr><td>Tamaño</td><td><span class="tam146">'+barras(d.t)+' '+esc(d.etq)+(d.extra?' · '+esc(d.extra):'')+'</span></td></tr></table></div>')}); } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function init146(){ instalar(); wrapComprar(); wrapEscena(); Object.assign(window,{tamanoBien146:tamano,detalleTamano146:detalle,FOTOS_TAMANO_146}); }
+  setTimeout(init146,80); setTimeout(init146,260); setTimeout(init146,720); setTimeout(init146,950);
+  window.__SA146={version:V146};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v147 · EL INFORME ANUAL CUADRA
+   Varias cosas suman o restan plata después de que el año arma su informe
+   (la cosecha de las fincas cafeteras, los programas de la Federación, el
+   turismo y el negocio cafetero, los inquilinos, los cuidados de la vejez,
+   y otras de versiones anteriores). La plata sí entraba, pero no aparecía
+   la línea. Ahora cada una anota su renglón en el informe, y si al cerrar
+   queda algo sin explicar sale como "Otros movimientos del año", para que
+   lo que dice el informe cuadre con lo que tienes.
+   ========================================================================== */
+(function(){
+  const V147='v147';
+  function anotar(texto,monto){
+    try{ if(!S||!Array.isArray(S.resumen)||!isFinite(monto)||Math.abs(monto)<.5) return;
+      const c=S._cierre147; if(!c||c.anio!==S.anio) return;   // solo el informe del año que se acaba de cerrar
+      S.resumen.push([texto,monto,monto>=0?'pos':'neg']); c.anotado=(c.anotado||0)+monto; }catch(e){}
+  }
+  function cuadrar(){
+    try{ const c=S&&S._cierre147; if(!c||c.anio!==S.anio||c.cuadrado) return; c.cuadrado=true;
+      const resto=(S.efectivo-c.efectivo)-(c.anotado||0);
+      if(Math.abs(resto)>=.5) S.resumen.push(['Otros movimientos del año',resto,resto>=0?'pos':'neg']); }catch(e){}
+  }
+  function envolver(){ const old=window.pasarAnio; if(typeof old!=='function'||old.__v147) return;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); cuadrar(); return r; }; window.pasarAnio.__v147=true; }
+  window.anotar147=anotar;
+  // va por fuera de todos los demás: se instala de último y se reinstala si alguien envuelve después
+  setTimeout(envolver,1200); setTimeout(envolver,2500); setTimeout(envolver,5000);
+  window.__SA147={version:V147};
 })();
 </script>
 
