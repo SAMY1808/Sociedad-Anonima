@@ -997,10 +997,15 @@ svg.foto116{display:block;background:#1d2a23}
 .esc129 .q b{display:block;font-weight:500;color:var(--marfil)}
 .esc129 .q span{font-size:12.5px;color:var(--humo2)}
 </style>
+<style id="estilos-v133">
+.vejez133 .fr133{height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 2px}
+.vejez133 .fr133 i{display:block;height:100%;background:linear-gradient(90deg,#7FA36B,#D6A648,#B5553C)}
+.trat133 td.ef{color:var(--humo2);font-size:12.5px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v132</div>
+<div class="version-badge" id="versionBadge">v133</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25029,5 +25034,238 @@ function install(){window.avatarSVG=vintage;window.__SA131_PORTRAITS={version:13
 install();setTimeout(install,1200);
 })();
 </script>
+
+<script>
+/* ==========================================================================
+   v133 · SALUD, VEJEZ Y TRATAMIENTOS
+   - Más enfermedades: artritis, cataratas, párkinson, EPOC, derrame cerebral,
+     fractura de cadera y, antes de 1965, tuberculosis. El cáncer y el
+     infarto se curan más a medida que avanza la medicina.
+   - Tratamientos según la época: cirugía, quimioterapia, tratarte en el
+     exterior, tratamientos experimentales, rehabilitación y el yerbatero.
+   - La vejez: tercera edad y ancianidad, fragilidad, menos movidas después
+     de los 80, quién te cuida (enfermera, un hijo, un hogar geriátrico),
+     voluntad anticipada, apoderado e interdicción, caídas, olvidos,
+     cumpleaños redondos y la soledad de ver irse a los amigos.
+   ========================================================================== */
+(function(){
+  const V133='v133';
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const prepagada=()=>{ try{ return !!(S.seguros&&S.seguros.salud); }catch(e){ return false; } };
+  const costo=(f,min,cubre)=>Math.max(min||3,Math.round(pat()*f*(cubre!==false&&prepagada()?.5:1)));
+  const sal=()=>window.salud97?window.salud97():{enfermedades:[],vicios:{}};
+  const ENF=()=>window.ENF_97||[];
+  const enf=id=>ENF().find(e=>e.id===id);
+  const activas=()=>sal().enfermedades.filter(d=>!d.curada&&enf(d.id));
+  const activa=id=>activas().some(d=>d.id===id);
+  const hijos=()=>((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&!h.muerto);
+  const adultos=()=>hijos().filter(h=>(h.edad||0)>=20);
+  const P1=n=>String(n||'').split(' ')[0];
+  const sube=(k,d)=>{ S.p[k]=clamp((S.p[k]||0)+d,0,100); };
+
+  /* --- 1. más enfermedades, y la medicina que avanza con los años --- */
+  function enfermedades133(){
+    const L=ENF(); if(!L.length||L.__v133) return;
+    const A=(o)=>{ if(!L.some(e=>e.id===o.id)) L.push(o); };
+    A({id:'artritis',n:'artritis',min:55,p:.03,cronica:true,dano:1,felicidad:-4,costo:.002,cura:0,v133:true});
+    A({id:'cataratas',n:'cataratas',min:60,p:.035,cronica:true,dano:.8,costo:.0015,cura:0,v133:true,vista:true});
+    A({id:'parkinson',n:'párkinson',min:58,p:.008,cronica:true,dano:2.5,muerte:.015,costo:.006,cura:0,v133:true});
+    A({id:'epoc',n:'EPOC',min:50,p:.006,cronica:true,dano:2,muerte:.02,costo:.004,cura:0,vicio:'tabaco',v133:true});
+    A({id:'acv',n:'un derrame cerebral',min:55,p:.012,aguda:true,dano:22,muerte:.16,costo:.015,cura:.7,estres:true,v133:true});
+    A({id:'cadera',n:'una fractura de cadera',min:70,p:.02,aguda:true,dano:15,muerte:.08,costo:.012,cura:.75,v133:true});
+    const tb={id:'tuberculosis',n:'tuberculosis',min:0,grave:true,dano:12,muerte:.15,costo:.02,v133:true};
+    Object.defineProperty(tb,'p',{get:()=>!S?0:S.anio<1950?.008:S.anio<1965?.004:0,enumerable:true});
+    Object.defineProperty(tb,'cura',{get:()=>!S?.5:S.anio<1946?.35:.8,enumerable:true});   // la estreptomicina llega a mediados de los cuarenta
+    A(tb);
+    const ca=enf('cancer'); if(ca&&!ca.__v133){ Object.defineProperty(ca,'cura',{get:()=>!S?.55:clamp(.25+(S.anio-1940)*.006,.25,.7),enumerable:true}); ca.__v133=true; }
+    const inf=enf('infarto'); if(inf&&!inf.__v133){ Object.defineProperty(inf,'cura',{get:()=>!S?.8:clamp(.62+(S.anio-1940)*.004,.62,.9),enumerable:true}); inf.__v133=true; }
+    L.__v133=true;
+  }
+
+  /* --- 2. los tratamientos de cada época --- */
+  const HOSP=()=>S.anio<1960?pick(['Nueva York','París']):S.anio<1990?pick(['Houston','Boston','Nueva York']):pick(['Houston','Boston','Madrid','Cleveland']);
+  const TRAT=[
+    {id:'cirugia',n:e=>({cataratas:'Operarte las cataratas',cadera:'Prótesis de cadera',cancer:'Operar el tumor',parkinson:'Estimulación cerebral profunda',epoc:'Cirugía de pulmón',acv:'Cirugía vascular'})[e.id]||'Cirugía',
+      para:e=>({cataratas:1950,cadera:1965,cancer:1940,parkinson:1997,acv:1985,epoc:1995})[e.id]!==undefined&&S.anio>=({cataratas:1950,cadera:1965,cancer:1940,parkinson:1997,acv:1985,epoc:1995})[e.id],
+      costo:e=>costo(e.id==='cataratas'?.004:.02,e.id==='cataratas'?6:20),
+      d:e=>e.id==='cataratas'?'Una operación corta. Casi siempre vuelves a ver bien.':e.id==='cancer'?'Sacar el tumor. Si sale bien, quedas libre; el quirófano tiene su riesgo.':'Una operación seria. Puede cambiarlo todo.',
+      run:(d,e)=>{ const riesgo=e.id==='cataratas'?0:S.anio<1970?.06:S.anio<2000?.03:.015;
+        if(chance(riesgo)){ sube('salud',-25); return 'La operación se complicó. Pasaste semanas en cuidados intensivos y saliste muy débil.'; }
+        const ex={cataratas:.92,cadera:.85,cancer:clamp((e.cura||.5)+.15,0,.9),parkinson:0,acv:.5,epoc:.35}[e.id];
+        if(e.id==='parkinson'){ d.controlada=true; d.tratada=true; sube('salud',8); return 'Te pusieron unos electrodos en el cerebro. El temblor bajó muchísimo.'; }
+        if(chance(ex)){ d.curada=true; d.tratada=true; sube('salud',e.id==='cataratas'?4:10); return e.id==='cataratas'?'Te operaron las cataratas. Volviste a ver las caras con nitidez.':'La cirugía salió bien.'; }
+        d.tratada=true; d.controlada=!!e.cronica; sube('salud',2); return 'La cirugía ayudó, pero no resolvió todo.'; }},
+    {id:'quimio',n:()=>S.anio<1995?'Quimioterapia':'Quimio y radioterapia',para:e=>e.id==='cancer'&&S.anio>=1950,costo:()=>costo(.025,25),
+      d:()=>'Meses duros: se te cae el pelo y pierdes peso. Pero sube mucho la probabilidad de salir.',
+      run:(d,e)=>{ sube('salud',-6); sube('felicidad',-5); if(chance(clamp((e.cura||.5)+(S.anio<1980?.05:.18),0,.9))){ d.curada=true; d.tratada=true; sube('salud',14); return 'Terminaste el tratamiento. Los exámenes salieron limpios: estás en remisión.'; }
+        d.tratada=true; return 'El tratamiento fue durísimo y el cáncer sigue ahí. Los médicos quieren intentar otra cosa.'; }},
+    {id:'exterior',n:()=>'Tratarte en el exterior',para:e=>e.grave||e.cronica,costo:e=>costo(e.grave?.06:.03,e.grave?60:30,false),mov:2,
+      d:()=>'Los mejores hospitales del mundo. La prepagada no lo cubre y te vas dos movidas del año.',
+      run:(d,e)=>{ const c=HOSP(); if(e.cronica&&!(e.cura>0)){ d.controlada=true; d.tratada=true; d.exterior133=c; sube('salud',9); return 'En '+c+' te ajustaron el tratamiento. Volviste mucho mejor.'; }
+        if(chance(clamp((e.cura||.3)+.25,0,.95))){ d.curada=true; d.tratada=true; sube('salud',12); return 'Te trataron en '+c+'. Volviste sano.'; }
+        d.tratada=true; d.controlada=!!e.cronica; sube('salud',3); return 'En '+c+' hicieron lo que pudieron. Volviste con más esperanza que resultados.'; }},
+    {id:'experimental',n:()=>'Un tratamiento experimental',para:e=>S.anio>=1985&&['cancer','alzheimer','parkinson','epoc','cirrosis'].includes(e.id),costo:()=>costo(.04,40,false),
+      d:()=>'Un ensayo clínico que todavía no está aprobado. Puede ser un milagro o un desastre.',
+      run:(d,e)=>{ const r=Math.random();
+        if(r<.3){ if(e.cura>0||e.grave){ d.curada=true; } else d.controlada=true; d.tratada=true; sube('salud',15); return 'Funcionó. Los médicos del ensayo publicaron tu caso.'; }
+        if(r<.45){ sube('salud',-14); return 'Los efectos secundarios fueron terribles. Lo suspendieron a tiempo.'; }
+        return 'No hizo ninguna diferencia. Plata y meses perdidos.'; }},
+    {id:'rehab',n:()=>'Rehabilitación y fisioterapia',para:e=>['acv','cadera','artritis','parkinson','epoc','infarto'].includes(e.id),costo:()=>costo(.004,5),
+      d:()=>'Ejercicios todos los días con un terapeuta. Lento, pero devuelve movilidad.',
+      run:(d,e)=>{ sube('salud',6); if(e.cronica) d.controlada=true; d.tratada=true; sube('felicidad',2); return 'Meses de terapia. Recuperaste buena parte de lo que habías perdido.'; }},
+    {id:'yerbatero',n:()=>S.anio<1975?'Ir donde un yerbatero':'Medicina alternativa',para:()=>true,costo:()=>Math.max(1,Math.round(pat()*.0005)),
+      d:()=>'Baratísimo. Bebedizos, agujas o gotas. Lo que no hace es curar.',
+      run:(d,e)=>{ if(e.grave&&!d.tratada) sube('salud',-5); sube('felicidad',2); if(chance(.06)&&!e.grave&&!e.cronica){ d.curada=true; return 'Te mejoraste. Nadie sabe si fue el bebedizo o el tiempo.'; } return 'Te sentiste acompañado, pero la enfermedad siguió igual.'; }}
+  ];
+  const tratosDe=d=>{ const e=enf(d.id); return e?TRAT.filter(t=>{ try{ return t.para(e); }catch(x){ return false; } }):[]; };
+  function escenaTratamientos133(){
+    const A=activas();
+    const filas=A.map(d=>{ const e=enf(d.id); const ts=(d.trat133||[]); return '<tr><td>'+esc(e.n.charAt(0).toUpperCase()+e.n.slice(1))+' <span style="color:var(--humo2)">desde '+d.desde+'</span></td><td class="'+(d.controlada?'':'mal')+'">'+(d.controlada?'controlada':e.aguda?'en recuperación':'sin tratar')+'</td></tr>'+(ts.length?'<tr><td class="ef" colspan="2">Ya probaste: '+ts.map(x=>esc(x)).join(', ')+'</td></tr>':''); }).join('');
+    const ops=[];
+    A.forEach(d=>{ const e=enf(d.id); tratosDe(d).forEach(t=>{
+      const c=t.costo(e), mov=t.mov||1, hecho=d.ult133&&d.ult133[t.id]===S.anio;
+      ops.push({t:t.n(e)+(A.length>1?' · '+e.n.replace(/^(un|una) /,''):''),cat:'salud',d:t.d(e)+' Cuesta '+fmt(c)+' y '+(mov===1?'una movida':mov+' movidas')+'.',
+        dis:hecho?'Ya lo intentaste este año':S.mov<mov?'No te quedan movidas':S.efectivo<c?'No tienes '+fmt(c):null,cerrar:false,
+        run:()=>{ S.efectivo-=c; S.mov=Math.max(0,S.mov-mov); d.ult133=d.ult133||{}; d.ult133[t.id]=S.anio; d.trat133=(d.trat133||[]); const nn=t.n(e); if(!d.trat133.includes(nn)) d.trat133.push(nn);
+          const txt=t.run(d,e); log(nn+': '+txt,d.curada||d.controlada?'bien':'mal');
+          if(t.id==='cirugia'||t.id==='exterior') try{ window.momento120&&window.momento120('hospital',nn,txt); }catch(x){}
+          cerrarModal(); render(); setTimeout(()=>{ if(activas().length) escenaTratamientos133(); },80); }}); }); });
+    escena({rubro:'Tu salud',titulo:'Tratamientos y especialistas',ancho:true,cerrable:true,clase:'trat133',
+      cuerpo:A.length?'Lo que la medicina de '+S.anio+' puede ofrecerte. Cada tratamiento se intenta una vez al año.'+(prepagada()?' Tu prepagada cubre la mitad de lo que se hace en Colombia.':''):'No tienes enfermedades que tratar. Que siga así.',
+      html:'<table class="libro">'+(filas||'<tr><td>Sin enfermedades activas</td><td class="bien">bien</td></tr>')+'</table>',
+      opciones:ops.length?ops:[{t:'Volver',cat:'salud'}]});
+  }
+
+  /* --- 3. la vejez --- */
+  function V(){ if(!S.vejez133||typeof S.vejez133!=='object') S.vejez133={cuidado:'ninguno',hijo:null,voluntad:false,apoderado:null,cumple:{}}; const v=S.vejez133; v.cumple=v.cumple||{}; return v; }
+  const etapa=ed=>ed<50?null:ed<65?'Madurez':ed<80?'Tercera edad':'Ancianidad';
+  function fragilidad(){ const p=S.p; if(!p) return 0; const cr=activas().filter(d=>{ const e=enf(d.id); return e&&(e.cronica||e.grave); }).length;
+    return Math.round(clamp(Math.max(0,p.edad-60)*1.6+(100-p.salud)*.55+cr*6,0,100)); }
+  const CUIDADO={
+    ninguno:{n:'Te las arreglas solo',d:'Nadie te ayuda en casa.'},
+    enfermera:{n:'Una enfermera en la casa',d:'Atención todo el día sin salir de tu casa. Cuesta cada año.',costo:()=>costo(.004,6,false),salud:2,fel:1},
+    hijo:{n:'Te cuida un hijo',d:'Uno de tus hijos se hace cargo. Gratis, y los acerca; a él le pesa.',salud:1.2,fel:3},
+    hogar:{n:'Un hogar geriátrico',d:'Te atienden bien y cuesta menos, pero la casa queda lejos y la familia te visita poco.',costo:()=>costo(.002,3,false),salud:1.5,fel:-3}
+  };
+  const hijoCuida=()=>{ const v=V(); return v.hijo?hijos().find(h=>h.nombre===v.hijo):null; };
+  function ponerCuidado(k,h){ const v=V(); v.cuidado=k; v.hijo=h?h.nombre:null; v.desde=S.anio;
+    if(k==='hijo'&&h){ h.vinculo=clamp((h.vinculo||50)+8,0,100); log(esc(P1(h.nombre))+' se va a encargar de cuidarte.','bien'); }
+    else if(k==='hogar'){ sube('felicidad',-6); log('Te mudaste a un hogar geriátrico. Las enfermeras son amables, pero no es tu casa.','mal'); }
+    else if(k==='enfermera') log('Contrataste una enfermera de planta para la casa.','bien');
+    else log('Decidiste seguir sin ayuda en la casa.'); }
+  function anual133(){
+    if(!S||!S.p||S.muerto||nino()) return;
+    const p=S.p, v=V();
+    if(p.edad>=60&&v.cuidado!=='ninguno'){
+      const c=CUIDADO[v.cuidado]; let h=null;
+      if(v.cuidado==='hijo'){ h=hijoCuida(); if(!h){ v.cuidado='ninguno'; v.hijo=null; log('Ya no tienes quién te cuide en la casa.','mal'); } else h.vinculo=clamp((h.vinculo||50)+3,0,100); }
+      if(v.cuidado!=='ninguno'){ if(c.costo) S.efectivo-=c.costo();
+        sube('salud',c.salud); sube('felicidad',c.fel);
+        if(v.cuidado==='hogar') hijos().forEach(x=>{ x.vinculo=clamp((x.vinculo||50)-1,0,100); }); }
+    }
+    if(p.edad>=70&&p.salud<30){   // el final
+      if(v.voluntad){ S.efectivo-=costo(.002,3); sube('felicidad',3); }
+      else { S.efectivo-=costo(.01,10); sube('salud',3); if(chance(.3)) log('La familia insiste en que se haga todo lo posible: otra semana en cuidados intensivos.','mal'); }
+    }
+    // cumpleaños redondos
+    [80,90,100].forEach(n=>{ if(p.edad===n&&!v.cumple[n]){ v.cumple[n]=S.anio; cola.push(eventoCumple(n)); } });
+  }
+  function eventoCumple(n){
+    return {p:9,c:()=>true,
+      t:()=>'<b>Cumpliste '+n+' años.</b> '+(n>=100?'Un siglo. El periódico quiere una entrevista y el alcalde manda flores.':n>=90?'Pocos llegan. Tus nietos ya te hacen preguntas sobre cómo era todo antes.':'Ocho décadas. La familia quiere celebrarlo.'),
+      o:[{t:'Una fiesta con toda la familia y la sociedad',f:()=>{ const c=costo(.003,8,false); S.efectivo-=c; sube('felicidad',10); sube('reputacion',3); hijos().forEach(h=>{ h.vinculo=clamp((h.vinculo||50)+4,0,100); }); try{ moverPrestigio(2,''); }catch(e){} hito('Celebró sus '+n+' años'); return 'Vinieron todos. Hubo discursos, lágrimas y un vals con '+(S.familia.pareja?P1(S.familia.pareja.nombre):'tu nieta mayor')+'. Costó '+fmt(c)+'.'; }},
+         {t:'Un almuerzo íntimo en la casa',f:()=>{ sube('felicidad',6); adultos().forEach(h=>{ h.vinculo=clamp((h.vinculo||50)+2,0,100); }); hito('Celebró sus '+n+' años'); return 'Un sancocho, tus hijos y una torta. No hacía falta más.'; }}]};
+  }
+  // menos movidas en la ancianidad
+  function wrapMovidas133(){
+    const old=window.movidasBase; if(typeof old!=='function'||window.__SA133_MOV) return; window.__SA133_MOV=true;
+    window.movidasBase=function(){ let n=old.apply(this,arguments); try{ if(S&&S.p&&!nino()){ const e=S.p.edad, s=S.p.salud; if(e>=80&&s<75) n-=1; if(e>=90) n-=1; n=Math.max(1,n); } }catch(x){} return n; };
+    window.movidasBase.__v133=true;
+  }
+  function wrapEtapa133(){
+    const old=window.etapaDashboard; if(typeof old!=='function'||window.__SA133_ETAPA) return; window.__SA133_ETAPA=true;
+    window.etapaDashboard=function(ed){ if(ed>=80) return 'Ancianidad'; if(ed>=65) return 'Tercera edad'; return old.apply(this,arguments); };
+    window.etapaDashboard.__v133=true;
+  }
+  function escenaVejez133(){
+    const p=S.p, v=V(), f=fragilidad(), h=hijoCuida();
+    const cand=adultos().filter(x=>!(x===h));
+    const ops=[];
+    Object.keys(CUIDADO).filter(k=>k!==v.cuidado&&k!=='hijo').forEach(k=>{ const c=CUIDADO[k];
+      ops.push({t:c.n,cat:'salud',d:c.d+(c.costo?' Unos '+fmt(c.costo())+' al año.':''),cerrar:false,run:()=>{ ponerCuidado(k); cerrarModal(); render(); escenaVejez133(); }}); });
+    cand.slice(0,3).forEach(x=>ops.push({t:'Que te cuide '+P1(x.nombre),cat:'familia',d:CUIDADO.hijo.d+' Vínculo con '+P1(x.nombre)+': '+Math.round(x.vinculo||50)+'.',
+      dis:(x.vinculo||50)<35?P1(x.nombre)+' no quiere hacerse cargo':null,cerrar:false,run:()=>{ ponerCuidado('hijo',x); cerrarModal(); render(); escenaVejez133(); }}));
+    ops.push({t:'Caminatas, sol y ejercicio suave',cat:'salud',d:'Un año de rutina tranquila. Sube algo de salud y de ánimo. Una movida.',dis:S.mov<1?'No te quedan movidas':null,
+      run:()=>{ S.mov--; sube('salud',4); sube('felicidad',3); log('Un año de caminatas por la mañana y siesta por la tarde.','bien'); render(); }});
+    if(!v.voluntad) ops.push({t:'Firmar una voluntad anticipada',cat:'legado',d:'Dejas escrito qué tratamientos quieres y cuáles no si llega lo peor. Al final gastas mucho menos y te vas en paz.',
+      run:()=>{ v.voluntad=S.anio; sube('felicidad',3); log('Firmaste ante notario tu voluntad anticipada: nada de tratamientos que solo alarguen el final.','bien'); hito('Firmó su voluntad anticipada'); render(); }});
+    if(!v.apoderado&&adultos().length) ops.push({t:'Nombrar un apoderado',cat:'legado',d:'Un hijo de confianza firma por ti si un día no puedes. Evita que la familia pida tu interdicción.',cerrar:false,
+      run:()=>{ cerrarModal(); escena({rubro:'La vejez',titulo:'¿Quién firma por ti?',cerrable:true,cuerpo:'Elige a quién le das poder general para manejar tus asuntos si te falla la cabeza.',
+        opciones:adultos().slice(0,4).map(x=>({t:x.nombre,cat:'familia',d:'Vínculo '+Math.round(x.vinculo||50)+'.',run:()=>{ v.apoderado=x.nombre; x.vinculo=clamp((x.vinculo||50)+5,0,100); log('Le diste poder general a <b>'+esc(x.nombre)+'</b> para manejar tus asuntos si un día no puedes.','bien'); render(); }}))}); }});
+    const cuid=v.cuidado==='hijo'&&h?'Te cuida '+esc(P1(h.nombre)):CUIDADO[v.cuidado].n;
+    escena({rubro:'Tu salud',titulo:'La vejez',ancho:true,cerrable:true,clase:'vejez133',
+      cuerpo:'<b>'+esc(etapa(p.edad)||'Madurez')+'</b>, '+p.edad+' años. '+cuid+'.'+(v.voluntad?' Tienes voluntad anticipada desde '+v.voluntad+'.':'')+(v.apoderado?' Tu apoderado es '+esc(P1(v.apoderado))+'.':''),
+      html:'<div>Fragilidad <b>'+f+'/100</b>'+(f>=70?' · cualquier caída es peligrosa':f>=40?' · hay que cuidarse':'')+'</div><div class="fr133"><i style="width:'+f+'%"></i></div>'
+        +'<div class="apunte">'+(p.edad>=80?(p.salud<75?'A esta edad el año rinde menos: tienes una movida menos.':'Llegaste entero: todavía tienes todas tus movidas.'):'Después de los 80 el año rinde menos, a menos que llegues con buena salud.')+'</div>',
+      opciones:ops});
+  }
+
+  /* --- 4. sucesos de la vejez --- */
+  function eventos133(){
+    if(window.__SA133_EV||typeof EVENTOS_LOCALES==='undefined') return;
+    const E=o=>EVENTOS_LOCALES.push(o), viejo=n=>S&&S.p&&!nino()&&S.p.edad>=n;
+    E({id133:'caida',p:.9,c:()=>viejo(72)&&V().cuidado==='ninguno'&&!activa('cadera'),t:()=>'<b>Te caíste en el baño.</b> Estuviste una hora en el piso hasta que alguien te oyó.',
+      o:[{t:'Contratar una enfermera para la casa',f:()=>{ ponerCuidado('enfermera'); sube('salud',-3); return 'Desde ahora alguien te acompaña día y noche.'; }},
+         {t:'No fue nada',f:()=>{ sube('salud',-6); if(chance(.35)){ const d={id:'cadera',desde:S.anio,tratada:false,curada:false}; sal().enfermedades.push(d); sube('salud',-12); return 'Sí fue algo: te fracturaste la cadera. Te espera el quirófano.'; } return 'Un morado grande y un susto. Esta vez.'; }}]});
+    E({id133:'olvidos',p:.7,c:()=>viejo(74)&&(activa('alzheimer')||viejo(82))&&!V().apoderado&&adultos().length>0,t:()=>'<b>Los olvidos.</b> Firmaste dos veces el mismo cheque y no recordabas a quién le habías prestado la plata.',
+      o:[{t:'Pedirle ayuda a un hijo con los papeles',f:()=>{ const h=adultos().sort((a,b)=>(b.vinculo||0)-(a.vinculo||0))[0]; V().apoderado=h.nombre; h.vinculo=clamp((h.vinculo||50)+5,0,100); return P1(h.nombre)+' va a revisar todo lo que firmes.'; }},
+         {t:'Negarlo: tienes la cabeza perfecta',f:()=>{ const x=costo(.01,5,false); S.efectivo-=x; sube('reputacion',-2); return 'Perdiste '+fmt(x)+' entre pagos dobles y préstamos que nadie te devolvió.'; }}]});
+    E({id133:'interdiccion',p:1,c:()=>viejo(75)&&activa('alzheimer')&&!V().apoderado&&!V().interdicto&&adultos().length>=1,t:()=>'<b>Tus hijos le pidieron al juez que te declare interdicto.</b> Dicen que ya no estás en condiciones de manejar tu plata.',
+      o:[{t:'Aceptarlo',f:()=>{ const h=adultos().sort((a,b)=>(b.vinculo||0)-(a.vinculo||0))[0]; const v=V(); v.interdicto=S.anio; v.apoderado=h.nombre; sube('felicidad',-8); adultos().forEach(x=>{ x.vinculo=clamp((x.vinculo||50)+3,0,100); }); return 'El juez nombró a '+P1(h.nombre)+' como tu curador. Te duele, pero tus hijos respiran.'; }},
+         {t:'Pelearlo en el juzgado',f:()=>{ const c=costo(.008,10,false); S.efectivo-=c; adultos().forEach(x=>{ x.vinculo=clamp((x.vinculo||50)-12,0,100); });
+           if(chance(.45)){ sube('reputacion',-1); return 'El perito dijo que estabas lúcido. Ganaste, pero en Navidad nadie se habla.'; }
+           const v=V(), h=adultos()[0]; v.interdicto=S.anio; v.apoderado=h.nombre; sube('felicidad',-12);
+           try{ if(window.abrirEscandalo129) window.abrirEscandalo129('familia','La interdicción',1); }catch(e){}
+           return 'Perdiste. El juez te declaró interdicto y la pelea salió en las páginas sociales. Costó '+fmt(c)+'.'; }}]});
+    E({id133:'amigos',p:.6,c:()=>viejo(70),t:()=>'<b>Se están yendo los amigos.</b> Este año fuiste a tres entierros. En el club ya casi no queda nadie de tu tiempo.',
+      o:[{t:'Rodearte de los nietos',f:()=>{ sube('felicidad',5); hijos().forEach(h=>{ h.vinculo=clamp((h.vinculo||50)+2,0,100); }); return 'Los domingos la casa se llena otra vez.'; }},
+         {t:'Encerrarte en tus recuerdos',f:()=>{ sube('felicidad',-6); sube('salud',-2); return 'Pasas las tardes mirando fotos viejas.'; }}]});
+    E({id133:'voluntad',p:.5,c:()=>viejo(68)&&!V().voluntad&&S.anio>=1997,t:()=>'Tu médico, con mucho tacto, te pregunta qué quieres que hagan si un día llega lo peor.',
+      o:[{t:'Dejarlo por escrito: nada de alargar el final',f:()=>{ V().voluntad=S.anio; sube('felicidad',3); return 'Firmaste tu voluntad anticipada.'; }},
+         {t:'Que hagan todo lo posible',f:()=>'El médico anotó: "todas las medidas".'}]});
+    E({id133:'agotado',p:.5,c:()=>viejo(65)&&V().cuidado==='hijo'&&hijoCuida(),t:()=>{ const h=hijoCuida(); return '<b>'+esc(P1(h.nombre))+' está agotado.</b> Cuidarte le está costando el trabajo y el matrimonio.'; },
+      o:[{t:'Contratar una enfermera para aliviarlo',f:()=>{ const h=hijoCuida(); ponerCuidado('enfermera'); if(h) h.vinculo=clamp((h.vinculo||50)+6,0,100); return 'Ahora '+(h?P1(h.nombre):'tu hijo')+' viene de visita, no de turno.'; }},
+         {t:'Pedirle que aguante un poco más',f:()=>{ const h=hijoCuida(); if(h) h.vinculo=clamp((h.vinculo||50)-8,0,100); return 'Aguantó. Pero algo se rompió entre ustedes.'; }}]});
+    window.__SA133_EV=true;
+  }
+
+  /* --- 5. en "Tu salud": tratamientos y vejez --- */
+  function wrapEscena133(){
+    const old=window.escena; if(typeof old!=='function'||window.__SA133_ESC) return; window.__SA133_ESC=true;
+    window.escena=function(o){
+      try{ if(o&&o.rubro==='Tú'&&o.titulo==='Tu salud'&&Array.isArray(o.opciones)&&S&&S.p){
+        const n=activas().length, extra=[];
+        extra.push({t:'Tratamientos y especialistas',cat:'salud',d:n?'Cirugías, quimioterapia, el exterior o lo experimental, según la medicina de '+S.anio+'.':'Sin enfermedades activas.',dis:n?null:'No tienes nada que tratar',cerrar:false,run:()=>{ cerrarModal(); escenaTratamientos133(); }});
+        if(S.p.edad>=60) extra.push({t:'La vejez',cat:'salud',d:'Quién te cuida, la voluntad anticipada, tu apoderado y tu fragilidad ('+fragilidad()+'/100).',cerrar:false,run:()=>{ cerrarModal(); escenaVejez133(); }});
+        const et=etapa(S.p.edad);
+        o=Object.assign({},o,{opciones:o.opciones.concat(extra),cuerpo:(o.cuerpo||'')+(et&&S.p.edad>=65?' Estás en la <b>'+et.toLowerCase()+'</b>.':'')});
+      } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1)));
+    };
+    window.escena.__v133=true;
+  }
+  function wrapPaso133(){
+    const old=window.pasarAnio; if(typeof old!=='function'||window.__SA133_PASO) return; window.__SA133_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual133(); }catch(e){ console.error(e); } return r; };
+    window.pasarAnio.__v133=true;
+  }
+  function init133(){ enfermedades133(); eventos133(); wrapMovidas133(); wrapEtapa133(); wrapEscena133(); wrapPaso133();
+    Object.assign(window,{escenaTratamientos133,escenaVejez133,fragilidad133:fragilidad,vejez133:V,TRATAMIENTOS_133:TRAT,tratamientosDe133:tratosDe}); }
+  setTimeout(init133,40); setTimeout(init133,220); setTimeout(init133,650);
+  window.__SA133={version:V133};
+})();
+</script>
+
 </body>
 </html>
