@@ -26628,7 +26628,7 @@ install();setTimeout(install,1200);
       const m=/Manizales|Pereira|Armenia/.test(b.ciudad||'')?munDe('Chinchiná'):/Medell|Estrella/.test(b.ciudad||'')?munDe('Fredonia'):/Bogot/.test(b.ciudad||'')?munDe('Viotá'):/Bucaramanga/.test(b.ciudad||'')?munDe('San Gil'):/Cali/.test(b.ciudad||'')?munDe('Sevilla'):munDe('Fredonia');
       const ha=Math.max(3,Math.round((b.valor||1000)/m.ha));
       b.cafe141={mun:m.n,ha,var:S.anio>=2005?'castillo':S.anio>=1982?'colombia':S.anio>=1970?'caturra':'borbon',siembra:S.anio-5,densidad:5000,sombrio:S.anio<1970,fertiliza:true,manejoBroca:broca(),fungicida:false,ciclica:true,mayordomo:ha>=15,beneficio:'tradicional',secado:'sol',proceso:'lavado',canal:'cooperativa',certs:{},desde:S.anio};
-      b.renta=0; if(!/en /.test(b.nombre)) b.nombre='Finca cafetera en '+m.n; });
+      b.renta=0; if(b.nombre==='Finca cafetera') b.nombre='Finca cafetera en '+m.n; });
   }
 
   /* --- la pantalla de la caficultura --- */
