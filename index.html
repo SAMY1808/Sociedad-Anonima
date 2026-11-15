@@ -1009,10 +1009,24 @@ svg.foto116{display:block;background:#1d2a23}
 .inq134 .p134.mal{background:rgba(181,85,60,.25)}
 .lista134 td.s{color:var(--humo2);font-size:12.5px}
 </style>
+<style id="estilos-v135">
+.mer135 table.libro td{vertical-align:middle}
+.mer135 .fase{display:inline-block;padding:1px 8px;border-radius:8px;font-size:12px;white-space:nowrap}
+.mer135 .f-auge,.mer135 .f-recuperacion{background:rgba(127,163,107,.22);color:#B9D3A5}
+.mer135 .f-burbuja{background:rgba(214,166,72,.25);color:#F0CF86}
+.mer135 .f-estallido{background:rgba(181,85,60,.3);color:#F0A48E}
+.mer135 .f-estancado{background:rgba(255,255,255,.08);color:var(--humo2)}
+.mer135 .f-estable{background:rgba(255,255,255,.05);color:var(--humo)}
+.mer135 svg{display:block}
+.mer135 .barrios{margin-top:12px}
+.mer135 .barrios div{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.mer135 .tu{color:var(--oro,#D6A648)}
+@media (max-width:560px){.mer135 svg{width:62px}.mer135 td .nota135{display:none}.mer135 table.libro td{padding-left:4px;padding-right:4px}}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v134</div>
+<div class="version-badge" id="versionBadge">v135</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25443,6 +25457,176 @@ install();setTimeout(install,1200);
     Object.assign(window,{PERFILES_INQUILINO_134:PERF,inquilinoNuevo134:nuevo,anualInquilinos134:anual134,escenaInquilinos134,puntualidad134:puntualidad}); }
   setTimeout(init134,40); setTimeout(init134,220); setTimeout(init134,650);
   window.__SA134={version:V134};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v135 · UN MERCADO INMOBILIARIO VIVO
+   Cada ciudad tiene su propio ciclo: estable, en auge, burbuja, se desinfla,
+   estancada, recuperándose. Los barrios se mueven: se ponen de moda, llega
+   el metro, se deterioran, llega la inseguridad. Lo que tienes y lo que vas
+   a comprar sube y baja con eso. La historia pesa: la crisis del UPAC
+   (1998-99), la apertura, el boom de los 2000 en Bogotá y Medellín, 2008
+   en las ciudades del exterior, la pandemia.
+   Oportunidades y riesgos: preventas sobre planos en las burbujas (con
+   constructoras que quiebran) y remates bancarios cuando todo se cae.
+   ========================================================================== */
+(function(){
+  const V135='v135';
+  const FASES={
+    estable:{n:'Estable',g:[-.01,.02]},
+    auge:{n:'En auge',g:[.04,.08]},
+    burbuja:{n:'Burbuja',g:[.08,.15]},
+    estallido:{n:'Se desinfla',g:[-.22,-.10]},
+    estancado:{n:'Estancado',g:[-.04,0]},
+    recuperacion:{n:'Recuperándose',g:[.01,.04]}
+  };
+  const pct=x=>(x>=0?'+':'−')+Math.abs(Math.round(x*1000)/10)+'%';
+  const global=c=>{ try{ return esCiudadGlobal(c); }catch(e){ return false; } };
+  function M(){ if(!S.mercado135||typeof S.mercado135!=='object') S.mercado135={c:{},z:{},anio:S.anio}; const m=S.mercado135; m.c=m.c||{}; m.z=m.z||{}; return m; }
+  function ciudad(c){ const m=M(); if(!m.c[c]){ const f=pick(['estable','estable','auge','recuperacion','estancado']); m.c[c]={fase:f,anios:ri(0,2),ind:1,ult:0,hist:[[S.anio,1]]}; } return m.c[c]; }
+  function zona(c,i){ const k=c+'|'+i, m=M(); if(!m.z[k]) m.z[k]={ind:1,tend:0,hasta:0,motivo:''}; return m.z[k]; }
+  const factor=(c,i)=>{ try{ const x=ciudad(c).ind*(isFinite(i)?zona(c,i).ind:1); return clamp(x,.35,4); }catch(e){ return 1; } };
+  function ciudadesVivas(){ const s=new Set(Object.keys(typeof ZONAS!=='undefined'?ZONAS:{}).filter(c=>c!=='La Estrella'));
+    if(S.hogar&&S.hogar.ciudad) s.add(S.hogar.ciudad); (S.bienes||[]).forEach(b=>{ if(b.ciudad) s.add(b.ciudad); }); return [...s]; }
+
+  /* --- la historia que pesa --- */
+  function forzar(c,f){ const x=ciudad(c); if(x.fase!==f){ x.fase=f; x.anios=0; } }
+  function historia(c){ const A=S.anio, g=global(c);
+    if(!g){ if(A===1991||A===1992) { if(chance(.6)) forzar(c,'auge'); }
+      if(A===1996) forzar(c,'burbuja'); if(A===1998) forzar(c,'estallido'); if(A===2000) forzar(c,'estancado');
+      if(A>=2004&&A<=2006&&['Bogotá','Medellín','Cartagena'].includes(c)&&chance(.5)) forzar(c,'auge');
+      if(A===2016&&c==='Barranquilla') forzar(c,'auge'); }
+    else { if(A===2006) forzar(c,'burbuja'); if(A===2008) forzar(c,'estallido'); }
+    if(A===2020) forzar(c,'estancado');
+  }
+  function transicion(x){ const ciclo=(S.macro&&S.macro.ciclo)||0, n=x.anios;
+    const T={estable:()=>chance(.13+(ciclo>.04?.15:0))?'auge':chance(.05+(ciclo<-.04?.1:0))?'estancado':null,
+      auge:()=>n>=2&&chance(.25)?'burbuja':n>=2&&chance(.15)?'estable':null,
+      burbuja:()=>n>=1&&chance(x.ind>1.8||n>=3?.75:.4)?'estallido':null,
+      estallido:()=>n>=1&&chance(.5)?'estancado':null,
+      estancado:()=>n>=2&&chance(.35)?'recuperacion':null,
+      recuperacion:()=>n>=2&&chance(.35)?'estable':n>=2&&chance(.1)?'auge':null};
+    const nx=(T[x.fase]||T.estable)(); if(nx){ x.fase=nx; x.anios=0; } else x.anios++; }
+
+  /* --- los barrios que se mueven --- */
+  function transporte(c){ const A=S.anio;
+    if(c==='Medellín'&&A>=1995) return 'llegó el metro'; if(c==='Bogotá'&&A>=2000) return 'llegó TransMilenio'; if(c==='Cali'&&A>=2009) return 'llegó el MIO';
+    if(c==='Barranquilla'&&A>=2010) return 'llegó Transmetro'; if(c==='Cartagena'&&A>=2015) return 'llegó Transcaribe'; return 'abrieron una avenida nueva'; }
+  const MOTIVOS=[
+    {k:'moda',t:'se puso de moda',tend:[.05,.08],anios:[4,6],pmax:3,bien:true},
+    {k:'transporte',t:null,tend:[.04,.06],anios:[3,4],bien:true,valorizacion:true},
+    {k:'centro',t:'abrió un centro comercial',tend:[.03,.05],anios:[2,3],bien:true},
+    {k:'deterioro',t:'se está deteriorando',tend:[-.06,-.03],anios:[3,5],pmin:2},
+    {k:'inseguridad',t:'llegó la inseguridad',tend:[-.07,-.04],anios:[2,4]}
+  ];
+  function nuevoBarrio(){
+    const vivas=ciudadesVivas().filter(c=>!global(c)); if(!vivas.length) return;
+    const mias=new Set([(S.hogar&&S.hogar.ciudad)].concat((S.bienes||[]).map(b=>b.ciudad)));
+    const c=chance(.55)&&[...mias].filter(x=>x&&vivas.includes(x)).length?pick([...mias].filter(x=>x&&vivas.includes(x))):pick(vivas);
+    const zs=zonasVivienda(c); if(!zs||!zs.length) return; const i=ri(0,zs.length-1), z=zona(c,i); if(z.hasta>S.anio) return;
+    const ok=MOTIVOS.filter(m=>(!m.pmax||zs[i].p<=m.pmax)&&(!m.pmin||zs[i].p>=m.pmin)); const mo=pick(ok);
+    z.tend=rnd(mo.tend[0],mo.tend[1]); z.hasta=S.anio+ri(mo.anios[0],mo.anios[1]); z.motivo=mo.t||transporte(c); z.bien=!!mo.bien; z.desde=S.anio;
+    const tit=zs[i].n+', '+c+': '+z.motivo;
+    const mios=(S.bienes||[]).filter(b=>b.ciudad===c&&b.zona===i&&b.clase!=='negocio');
+    let extra='';
+    if(mo.valorizacion&&mios.length){ const cuota=Math.round(mios.reduce((s,b)=>s+b.valor,0)*.02); S.efectivo-=cuota; extra=' Te llegó la contribución por valorización: '+fmt(cuota)+'.'; }
+    log('<b>'+esc(tit.charAt(0).toUpperCase()+tit.slice(1))+'</b>. '+(mo.bien?'Los precios del barrio van a subir.':'Los precios del barrio van a bajar.')+(mios.length?' Tienes '+mios.length+' propiedad'+(mios.length>1?'es':'')+' ahí.':'')+extra,mios.length?(mo.bien?'bien':'mal'):'');
+    try{ if(window.__SA44&&window.__SA44.publicar&&mios.length) window.__SA44.publicar(tit.toUpperCase(),'',mo.bien?'bien':'mal'); }catch(e){}
+  }
+
+  /* --- el año del mercado --- */
+  function anual135(){
+    if(!S||!S.p||S.muerto) return;
+    const m=M(); if(m.anio===S.anio&&m.__hecho) return; m.anio=S.anio; m.__hecho=true;
+    const crec={};
+    ciudadesVivas().forEach(c=>{ const x=ciudad(c); historia(c); const F=FASES[x.fase]||FASES.estable;
+      let g=rnd(F.g[0],F.g[1])-(x.ind-1)*.03; x.ind=clamp(x.ind*(1+g),.4,3.5); x.ult=g; x.hist.push([S.anio,x.ind]); if(x.hist.length>40) x.hist.shift(); crec[c]=g; transicion(x); });
+    Object.keys(m.z).forEach(k=>{ const z=m.z[k]; let g=0; if(z.hasta>S.anio) g=z.tend*rnd(.7,1.2); else if(z.tend){ z.tend=0; z.motivo=''; } g-=(z.ind-1)*.02; z.ind=clamp(z.ind*(1+g),.5,2.5); z.ult=g; });
+    if(chance(.22)) nuevoBarrio();
+    // lo que tienes sube y baja con su ciudad y su barrio
+    (S.bienes||[]).forEach(b=>{ if(b.clase==='negocio'||b.suc119) return; const c=b.ciudad||(S.hogar&&S.hogar.ciudad); if(!c||crec[c]===undefined) return;
+      let g=crec[c]; if(isFinite(b.zona)){ const z=m.z[c+'|'+b.zona]; if(z&&z.ult) g+=z.ult; } if(b.clase==='finca') g*=.4;
+      b.valor=Math.max(1,b.valor*(1+g)); });
+    // preventas que se entregan
+    (m.prev||[]).filter(p=>!p.hecho&&p.entrega<=S.anio).forEach(p=>{ p.hecho=true; cola.push(evEntrega(p)); });
+    // avisos de fase en tu ciudad
+    const c=S.hogar&&S.hogar.ciudad, x=c&&m.c[c];
+    if(x&&x.anios===0&&x.hist.length>2){ const t={auge:'El mercado inmobiliario de '+c+' arrancó a subir.',burbuja:'En '+c+' todo el mundo está comprando apartamentos. Huele a burbuja.',estallido:'Se desinfló el mercado inmobiliario de '+c+'. Los precios caen.',estancado:'En '+c+' nadie compra ni vende: el mercado está quieto.',recuperacion:'Los precios en '+c+' empiezan a recuperarse.'}[x.fase];
+      if(t) log('<b>Finca raíz.</b> '+esc(t),x.fase==='estallido'?'mal':''); }
+  }
+
+  /* --- preventas sobre planos y remates --- */
+  function evPlanos(){ return {id135:'planos',p:.9,c:()=>adulto()&&['auge','burbuja'].includes(fase())&&!(M().prev||[]).some(p=>!p.hecho),
+    t:()=>{ const c=S.hogar.ciudad, zs=zonasVivienda(c), i=clamp(Math.max(1,zs.length-2),0,zs.length-1); const v=precioVivienda(c,i,.9); S._p135={c,i,precio:Math.round(v*.85),valor:v,z:zs[i].n};
+      return '<b>Sobre planos.</b> Una constructora lanza un edificio en '+esc(zs[i].n)+'. Si separas hoy, el apartamento te sale en '+fmt(S._p135.precio)+' (15% menos que terminado). Pagas el 30% ahora y el resto en la entrega, en dos años.'+(fase()==='burbuja'?' Todo el mundo está comprando así.':''); },
+    o:[{t:()=>'Separar el apartamento ('+fmt(Math.round((S._p135||{precio:0}).precio*.3))+')',f:()=>{ const p=S._p135; const ini=Math.round(p.precio*.3); if(S.efectivo<ini) return 'No tenías la cuota inicial.'; S.efectivo-=ini;
+         const m=M(); m.prev=(m.prev||[]); m.prev.push({c:p.c,i:p.i,z:p.z,precio:p.precio,pagado:ini,entrega:S.anio+2,desde:S.anio}); return 'Firmaste la promesa de compraventa. Entregan en '+(S.anio+2)+'.'; }},
+       {t:'No comprar sobre planos',f:()=>'Preferiste esperar a ver el edificio terminado.'}]}; }
+  function evEntrega(p){ return {p:9,c:()=>true,
+    t:()=>{ if(p.quiebra===undefined) p.quiebra=chance(fase(p.c)==='estallido'||fase(p.c)==='estancado'?.3:.1); const quiebra=p.quiebra;
+      return quiebra?'<b>La constructora quebró.</b> El edificio de '+esc(p.z)+' quedó en obra negra y los dueños de la plata hacen fila en la Superintendencia. Pagaste '+fmt(p.pagado)+'.':'<b>Te entregan el apartamento en '+esc(p.z)+'.</b> Falta pagar el saldo: '+fmt(p.precio-p.pagado)+'. Hoy vale '+fmt(precioVivienda(p.c,p.i,.9))+'.'; },
+    o:[{t:()=>p.quiebra?'Unirte a la demanda colectiva':'Pagar el saldo y recibirlo',f:()=>{
+         if(p.quiebra){ const rec=chance(.4)?Math.round(p.pagado*rnd(.3,.6)):0; S.efectivo+=rec; return rec?'Años después, el liquidador te devolvió '+fmt(rec)+'.':'Nunca recuperaste un peso.'; }
+         const saldo=p.precio-p.pagado, val=precioVivienda(p.c,p.i,.9);
+         if(S.efectivo<saldo){ const neto=Math.max(0,Math.round(val*.9-saldo)); S.efectivo+=neto; return 'No tenías el saldo: cediste el contrato a otro comprador y te quedaron '+fmt(neto)+'.'; }
+         const b=comprarBien({clase:'renta',tipo:'apartamento',nombre:'Apartamento en '+p.z,valor:saldo,mant:.02,renta:.056,vac:.07,ciudad:p.c,zona:p.i,cuotaInicial:1});
+         if(!b) return 'Algo falló en la escrituración.'; b.valor=val; b.precioCompra=p.precio; b.exVivienda109=true; b.compradaParaArrendar127=true; b.arrendado=true;
+         log('Recibiste el apartamento en <b>'+esc(p.z)+'</b>. Pagaste '+fmt(p.precio)+' y hoy vale '+fmt(val)+'.',val>=p.precio?'bien':'mal'); return 'Te dieron las llaves. Ya está en arriendo.'; }},
+       {t:()=>p.quiebra?'Darlo por perdido':'Ceder el contrato a otro comprador',f:()=>{ if(p.quiebra) return 'Lo diste por perdido.'; const val=precioVivienda(p.c,p.i,.9), neto=Math.max(0,Math.round(val*.92-(p.precio-p.pagado))); S.efectivo+=neto; return 'Vendiste el derecho antes de escriturar. Te quedaron '+fmt(neto)+'.'; }}]}; }
+  function evRemate(){ return {id135:'remate',p:1,c:()=>adulto()&&['estallido','estancado'].includes(fase()),
+    t:()=>{ const c=S.hogar.ciudad, zs=zonasVivienda(c), i=ri(0,zs.length-1); const v=precioVivienda(c,i,1); S._r135={c,i,v,z:zs[i].n,precio:Math.round(v*rnd(.58,.7))};
+      return '<b>Remates bancarios.</b> Con la crisis, los bancos están rematando casas de gente que no pudo pagar. Hay una en '+esc(zs[i].n)+' por '+fmt(S._r135.precio)+'; vale '+fmt(v)+'.'; },
+    o:[{t:()=>'Comprarla de contado ('+fmt((S._r135||{precio:0}).precio)+')',f:()=>{ const r=S._r135; if(S.efectivo<r.precio) return 'No tenías esa plata de contado.';
+         const b=comprarBien({clase:'renta',tipo:'casa',nombre:'Casa rematada en '+r.z,valor:r.precio,mant:.02,renta:.055,vac:.08,ciudad:r.c,zona:r.i,cuotaInicial:1}); if(!b) return 'El banco se echó para atrás.';
+         b.valor=r.v; b.exVivienda109=true; b.compradaParaArrendar127=true; b.arrendado=true; S.p.reputacion=clamp(S.p.reputacion-1,0,100); return 'Compraste barato. La familia que vivía ahí se fue llorando; tú la pusiste en arriendo.'; }},
+       {t:'No aprovecharse de la desgracia ajena',f:()=>{ S.p.felicidad=clamp(S.p.felicidad+1,0,100); return 'Dejaste pasar la oportunidad.'; }}]}; }
+  const adulto=()=>S&&S.p&&S.p.edad>=22&&!(window.esNino94&&window.esNino94())&&S.hogar&&S.hogar.ciudad;
+  const fase=c=>{ c=c||(S.hogar&&S.hogar.ciudad); return c?ciudad(c).fase:'estable'; };
+  function eventos135(){ if(window.__SA135_EV||typeof EVENTOS_LOCALES==='undefined') return; EVENTOS_LOCALES.push(evPlanos(),evRemate()); window.__SA135_EV=true; }
+
+  /* --- la pantalla del mercado --- */
+  function spark(h){ if(!h||h.length<2) return ''; const W=110,H=26, xs=h.map(x=>x[1]), mn=Math.min(...xs), mx=Math.max(...xs), r=(mx-mn)||1;
+    const pts=xs.map((v,i)=>(i*(W/(xs.length-1))).toFixed(1)+','+(H-2-(v-mn)/r*(H-4)).toFixed(1)).join(' ');
+    const up=xs[xs.length-1]>=xs[0]; return '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline points="'+pts+'" fill="none" stroke="'+(up?'#9DBF85':'#D98A72')+'" stroke-width="1.6"/></svg>'; }
+  function escenaMercado135(){
+    const m=M(), mia=S.hogar&&S.hogar.ciudad, propias=new Set((S.bienes||[]).map(b=>b.ciudad).filter(Boolean));
+    const L=ciudadesVivas().sort((a,b)=>(b===mia)-(a===mia)||(propias.has(b))-(propias.has(a))||a.localeCompare(b));
+    const filas=L.map(c=>{ const x=ciudad(c), h=x.hist.slice(-15); return '<tr><td>'+(c===mia?'<span class="tu">'+esc(c)+'</span>':esc(c))+(propias.has(c)?' <span class="nota135" style="color:var(--humo2);font-size:12px">· tienes propiedades</span>':'')+'</td><td><span class="fase f-'+x.fase+'">'+FASES[x.fase].n+'</span></td><td class="'+(x.ult>=0?'bien':'mal')+'">'+(x.hist.length>1?pct(x.ult):'—')+'</td><td>'+spark(h)+'</td></tr>'; }).join('');
+    const bar=Object.keys(m.z).filter(k=>m.z[k].hasta>S.anio&&m.z[k].motivo).map(k=>{ const [c,i]=k.split('|'), z=m.z[k], zs=zonasVivienda(c), n=(zs[+i]||{n:'?'}).n, mios=(S.bienes||[]).filter(b=>b.ciudad===c&&b.zona===+i).length;
+      return '<div><b>'+esc(n)+'</b>, '+esc(c)+': '+esc(z.motivo)+' <span class="'+(z.tend>=0?'bien':'mal')+'">('+pct(z.tend)+' al año hasta '+z.hasta+')</span>'+(mios?' <span class="tu">· tienes '+mios+' ahí</span>':'')+'</div>'; }).join('');
+    const x=mia&&ciudad(mia);
+    const consejo=!x?'':x.fase==='burbuja'?'Los precios ya no tienen relación con los arriendos. El que compra hoy puede perder mañana.':x.fase==='estallido'?'Es mal momento para vender y buen momento para comprar, si tienes caja.':x.fase==='auge'?'Lo que compres ahora probablemente se valorice. No te endeudes de más.':x.fase==='estancado'?'Nada se mueve. Los arriendos son lo único que rinde.':x.fase==='recuperacion'?'Los precios vuelven a subir despacio. Buen momento para entrar.':'Precios estables.';
+    escena({rubro:'Finca raíz · '+S.anio,titulo:'El mercado inmobiliario',ancho:true,cerrable:true,clase:'mer135',
+      cuerpo:(mia?'En <b>'+esc(mia)+'</b>: '+FASES[x.fase].n.toLowerCase()+'. ':'')+consejo,
+      html:'<table class="libro"><tr><td><b>Ciudad</b></td><td><b>Momento</b></td><td><b>Último año</b></td><td><b>15 años</b></td></tr>'+filas+'</table>'
+        +(bar?'<div class="barrios"><b>Barrios que se mueven</b>'+bar+'</div>':'')
+        +((M().prev||[]).filter(p=>!p.hecho).map(p=>'<div class="apunte">Compraste sobre planos en '+esc(p.z)+': entregan en '+p.entrega+'. Pagaste '+fmt(p.pagado)+' de '+fmt(p.precio)+'.</div>').join('')),
+      opciones:[{t:'Volver',cat:'casa'}]});
+  }
+
+  /* --- enganches --- */
+  function wrapPrecio135(){ const old=window.precioVivienda; if(typeof old!=='function'||window.__SA135_PRECIO) return; window.__SA135_PRECIO=true;
+    window.precioVivienda=function(c,i){ const v=old.apply(this,arguments); try{ if(S&&c) return v*factor(c,i); }catch(e){} return v; }; }
+  function wrapPaso135(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA135_PASO) return; window.__SA135_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual135(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones135(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA135_ACC) return; window.__SA135_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&S.hogar&&S.hogar.ciudad){ const x=ciudad(S.hogar.ciudad);
+        A.push({t:'El mercado inmobiliario',d:esc(S.hogar.ciudad)+': '+FASES[x.fase].n.toLowerCase()+(x.hist.length>1?' ('+pct(x.ult)+' el último año)':'')+'. Ciclos por ciudad y barrios que se mueven.',mov:0,modal:true,run:()=>escenaMercado135()}); } }catch(e){}
+      return A; }; }
+  function wrapCat135(){ const old=window.catDe; if(typeof old!=='function'||window.__SA135_CAT) return; window.__SA135_CAT=true;
+    window.catDe=function(t){ if(t==='El mercado inmobiliario') return 'casa'; return old.apply(this,arguments); }; }
+  function wrapEscena135(){ const old=window.escena; if(typeof old!=='function'||window.__SA135_ESC) return; window.__SA135_ESC=true;
+    window.escena=function(o){
+      try{ if(o&&S&&S.hogar&&typeof o.titulo==='string'&&(/^Comprar para arrendar en /.test(o.titulo)||/^Comprar casa en /.test(o.titulo))){ const x=ciudad(S.hogar.ciudad);
+        o=Object.assign({},o,{cuerpo:(o.cuerpo||'')+' <span class="apunte">Mercado en '+esc(S.hogar.ciudad)+': <b>'+FASES[x.fase].n.toLowerCase()+'</b>'+(x.hist.length>1?' ('+pct(x.ult)+' el último año)':'')+'.</span>'}); } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function init135(){ wrapPrecio135(); wrapPaso135(); wrapAcciones135(); wrapCat135(); wrapEscena135(); eventos135();
+    Object.assign(window,{mercado135:M,ciudadMercado135:ciudad,zonaMercado135:zona,factorMercado135:factor,anualMercado135:anual135,escenaMercado135,FASES_MERCADO_135:FASES}); }
+  setTimeout(init135,40); setTimeout(init135,220); setTimeout(init135,650);
+  window.__SA135={version:V135};
 })();
 </script>
 
