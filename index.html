@@ -1094,10 +1094,23 @@ svg.foto116{display:block;background:#1d2a23}
 .cafe141 .taza{font-style:italic;color:#D9C29A}
 .cafe141 table.libro td{vertical-align:top}
 </style>
+<style id="estilos-v142">
+.fede142 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 12px}
+.fede142 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.fede142 .k b{display:block;font-size:16px;font-family:var(--display)}
+.fede142 .k span{font-size:12px;color:var(--humo2)}
+.fede142 .inst{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.fede142 .inst b{color:#E8D2A4}
+.fede142 .inst span{color:var(--humo2);font-size:12.5px}
+.fede142 details summary{cursor:pointer;color:#E8D2A4;font-size:14px;margin:4px 0 6px}
+.fede142 .escalera{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.fede142 .escalera span{font-size:12.5px;padding:3px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:var(--humo2)}
+.fede142 .escalera span.si{background:rgba(214,166,72,.25);color:#F0CF86}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v141</div>
+<div class="version-badge" id="versionBadge">v142</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -26650,7 +26663,7 @@ install();setTimeout(install,1200);
     const CAN={cooperativa:'A la cooperativa (garantía de compra)',particular:'A un comprador particular',especial:'Como café especial',retener:'Guardar la cosecha y vender después'};
     Object.keys(CAN).filter(k=>k!==(f.canal||'cooperativa')).forEach(k=>{ const dis=k==='especial'&&!especiales()?'Todavía no existe el mercado de cafés especiales':k==='especial'&&cal<84?'Tu taza da '+cal.toFixed(1)+': hacen falta 84 puntos':null;
       ops.push({t:'Vender: '+CAN[k].toLowerCase(),cat:'capital',d:({cooperativa:'Te compran todo al precio interno del día. Sin sorpresas.',particular:'A veces pagan más; a veces se quedan debiendo.',especial:'Tostadores e importadores pagan prima por taza. Solo una parte sale como especial; el resto va a la cooperativa.',retener:(almacafe()?'En Almacafé, con bono de prenda':'En la bodega de la finca')+': no vendes este año y apuestas a que el precio suba.'})[k],dis,cerrar:false,run:()=>{ f.canal=k; reab(); }}); });
-    if(f.bodega>0){ const val=f.bodega*precioVenta(f,'cooperativa',cal); ops.push({t:'Vender lo guardado ('+Math.round(f.bodega)+' cargas)',cat:'capital',d:'Hoy valen '+fmt(val)+'.',cerrar:false,run:()=>{ S.efectivo+=val; log('Vendiste '+Math.round(f.bodega)+' cargas guardadas por '+fmt(val)+'.','bien'); f.bodega=0; reab(); }}); }
+    if(f.bodega>0){ const val=f.bodega*precioVenta(f,'cooperativa',cal); ops.push({t:'Vender lo guardado ('+Math.round(f.bodega)+' cargas)',cat:'capital',d:'Hoy valen '+fmt(val)+'.',cerrar:false,run:()=>{ const deuda=(f.prenda||0)*1.08; S.efectivo+=val-deuda; log('Vendiste '+Math.round(f.bodega)+' cargas guardadas por '+fmt(val)+(deuda?'; pagaste '+fmt(deuda)+' del bono de prenda':'')+'.','bien'); f.bodega=0; f.prenda=0; reab(); }}); }
     // ampliar
     const cA=Math.round(m.ha*10); ops.push({t:'Comprarle 10 hectáreas al vecino',cat:'casa',d:'Ya sembradas, del mismo cafetal. '+fmt(cA)+'.',dis:sinMov,cerrar:false,run:caja(cA,()=>{ S.mov--; f.ha+=10; b.valor+=cA; b.precioCompra=(b.precioCompra||0)+cA; log('La <b>'+esc(b.nombre)+'</b> creció a '+f.ha+' hectáreas.','bien'); })});
     const u=f.ult;
@@ -26685,6 +26698,172 @@ install();setTimeout(install,1200);
     Object.assign(window,{MUNICIPIOS_CAFE_141:MUNICIPIOS,VARIEDADES_141:VAR,cafe141:G,fincasCafe141:misFincas,escenaCafe141,escenaFinca141,escenaComprarCafe141:escenaComprar141,anualCafe141:anual,precioCarga141:precioCarga,calidadTaza141:calidad,cosecha141:cosecha,costosCafe141:costos,munCafe141:munDe,varCafe141:varDe,migrarCafe141:migrar,precioVentaCafe141:precioVenta}); }
   setTimeout(init141,40); setTimeout(init141,220); setTimeout(init141,650);
   window.__SA141={version:V141};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v142 · LA FEDERACIÓN POR DENTRO
+   La Federación Nacional de Cafeteros (1927), con todo lo suyo:
+   - La cédula cafetera y el registro en el SICA: ser federado.
+   - La garantía de compra, el precio interno y la contribución cafetera
+     que alimenta el Fondo Nacional del Café (1940).
+   - El Servicio de Extensión (1959): el extensionista en tu finca.
+   - Cenicafé (1938, Chinchiná), Almacafé (1965) con bono de prenda, las
+     cooperativas de caficultores, el Banco Cafetero (1953-2005), la Flota
+     Mercante Grancolombiana (1946-2000), Buencafé liofilizado (1973), la
+     Fundación Manuel Mejía (1960), Juan Valdez (1959) y las tiendas de
+     Procafecol (2002), de las que los caficultores pueden ser accionistas.
+   - Los programas: Permanencia, Sostenibilidad y Futuro para renovar
+     (2008-2013), la Protección del Ingreso Cafetero (2013-2014), el
+     subsidio a fertilizantes (2022) y el Fondo de Estabilización (2021).
+   - Las elecciones cafeteras cada cuatro años: Comité Municipal, Comité
+     Departamental, delegado al Congreso Cafetero, Comité Directivo y, en
+     la cima, la Gerencia General. Con cada cargo, más influencia: obras
+     para tu municipio (escuelas, caminos, acueductos, luz) y votos en el
+     Congreso Cafetero.
+   ========================================================================== */
+(function(){
+  const V142='v142';
+  const CARGOS=[
+    {id:'municipal',n:'Comité Municipal de Cafeteros',inf:12,min:{ha:3}},
+    {id:'departamental',n:'Comité Departamental',inf:25,min:{ha:15,prest:25}},
+    {id:'congreso',n:'Delegado al Congreso Cafetero',inf:40,min:{ha:30,prest:35}},
+    {id:'directivo',n:'Comité Directivo de la Federación',inf:60,min:{ha:60,prest:50}},
+    {id:'gerente',n:'Gerente General de la Federación',inf:90,min:{ha:0,prest:65}}
+  ];
+  const cargoIx=id=>CARGOS.findIndex(c=>c.id===id);
+  const INST=[
+    ['La Federación',1927,'Nace en Medellín, en el segundo Congreso Cafetero. Agremia, compra, exporta y hace política cafetera.'],
+    ['Cenicafé',1938,'El centro de investigación en Chinchiná: variedades resistentes, manejo de la broca, beneficio ecológico.'],
+    ['El Fondo Nacional del Café',1940,'La plata de la contribución cafetera: con ella se garantiza la compra, se estabiliza el precio y se hacen obras.'],
+    ['La Flota Mercante Grancolombiana',1946,'Los barcos de la Federación para llevar el café al mundo. Se liquidó en el 2000.'],
+    ['El Banco Cafetero',1953,'El crédito del campo cafetero. En 2005 pasó a ser Bancafé y lo compró un banco privado.'],
+    ['El Servicio de Extensión',1959,'El extensionista que visita la finca y enseña a sembrar, abonar y renovar.'],
+    ['Juan Valdez',1959,'El caficultor con su mula Conchita: la cara del Café de Colombia en el mundo.'],
+    ['La Fundación Manuel Mejía',1960,'Capacitación para caficultores, mayordomos y sus hijos.'],
+    ['Las cooperativas de caficultores',1960,'Compran la cosecha en cada pueblo con garantía de compra y reparten excedentes a sus socios.'],
+    ['Almacafé',1965,'Las bodegas: trillan, guardan y dan bonos de prenda sobre el café almacenado.'],
+    ['Buencafé',1973,'La fábrica de café liofilizado en Chinchiná.'],
+    ['El SICA',1993,'El Sistema de Información Cafetera: cada finca, cada lote, cada árbol registrado.'],
+    ['Procafecol y las tiendas Juan Valdez',2002,'Tiendas de café en Colombia y el mundo. Los caficultores pueden ser accionistas.'],
+    ['La denominación de origen',2007,'Café de Colombia como origen protegido, también en Europa.'],
+    ['El Fondo de Estabilización de Precios',2021,'Un colchón para cuando el precio se cae.']
+  ];
+  const P1=n=>String(n||'').split(' ')[0];
+  const F=()=>{ if(!S.fede142||typeof S.fede142!=='object') S.fede142={cedula:null,cargo:null,desde:null,influencia:0,coop:null,procafecol:0,candidato:null,obras:[],capacitado:false,ultCongreso:0}; return S.fede142; };
+  const fincas=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
+  const hectareas=()=>fincas().reduce((s,b)=>s+(b.cafe141.ha||0),0);
+  const federado=()=>!!F().cedula&&(typeof afiliado!=='function'||afiliado('fedecafe'));
+  const municipio=()=>{ const L=fincas().slice().sort((a,b)=>b.cafe141.ha-a.cafe141.ha); return L.length?L[0].cafe141.mun:null; };
+  const depto=()=>{ const m=municipio(); try{ return m?window.munCafe141(m).dep:null; }catch(e){ return null; } };
+  const prest=()=>{ try{ return prestigio(); }catch(e){ return 40; } };
+  const eleccion=a=>a>=1930&&a%4===2;
+  const pc2=x=>Math.round(x*100)+'%';
+
+  /* --- la cédula cafetera --- */
+  function sacarCedula(){ const f=F(); f.cedula=S.anio; try{ if(!afiliado('fedecafe')) gremios().push('fedecafe'); }catch(e){}
+    log('Sacaste la cédula cafetera. Ya eres federado'+(S.anio>=1993?' y tus fincas quedaron en el SICA':'')+'.','hito'); hito('Se volvió federado de la Federación Nacional de Cafeteros'); }
+
+  /* --- el año --- */
+  function anual(){
+    if(!S||!S.p||S.muerto) return; const f=F(); if(f.anio===S.anio) return; f.anio=S.anio;
+    if(f.cedula&&!federado()){ f.cedula=null; f.cargo=null; }   // te saliste del gremio por otro lado
+    const L=fincas(); if(!L.length&&!f.cargo) return;
+    // servicios del federado
+    L.forEach(b=>{ const c=b.cafe141; c.extension=federado()&&S.anio>=1959; });
+    if(!federado()) return;
+    let extra=0, notas=[];
+    const cosechado=L.reduce((s,b)=>s+(b.cafe141.ult&&b.cafe141.ult.anio===S.anio?b.cafe141.ult.cargas:0),0);
+    if((S.anio===2013||S.anio===2014)&&cosechado>0){ const x=cosechado*.165; extra+=x; notas.push('la Protección del Ingreso Cafetero te pagó '+fmt(x)); }
+    if(S.anio===2022&&cosechado>0){ const x=hectareas()*.6; extra+=x; notas.push('el subsidio a fertilizantes te devolvió '+fmt(x)); }
+    if(S.anio>=2021&&window.cafe141&&window.cafe141().idx<.9&&cosechado>0){ const x=cosechado*.12; extra+=x; notas.push('el Fondo de Estabilización compensó el mal precio con '+fmt(x)); }
+    if(f.coop&&f.coop.aporte>0){ const x=f.coop.aporte*rnd(.03,.08); extra+=x; notas.push('la cooperativa repartió '+fmt(x)+' de excedentes'); }
+    if(f.procafecol>0&&S.anio>=2008){ const x=f.procafecol*rnd(.0,.05); if(x>0){ extra+=x; notas.push('Procafecol pagó '+fmt(x)+' de dividendos'); } f.procafecol*=1+rnd(-.05,.12); }
+    if(f.cargo){ const c=CARGOS[cargoIx(f.cargo)]; f.influencia=clamp(f.influencia+(c.inf-f.influencia)*.3,0,100); if(f.cargo==='gerente'){ const sal=60; extra+=sal; notas.push('sueldo de Gerente General: '+fmt(sal)); } }
+    else f.influencia=Math.max(0,f.influencia-3);
+    if(extra){ S.efectivo+=extra; log('<b>Federación:</b> '+notas.join('; ')+'.','bien'); }
+    // la elección cafetera
+    if(eleccion(S.anio)&&f.candidato){ const c=CARGOS[cargoIx(f.candidato)]; const pr=clamp(.32+prest()/250+hectareas()/400+f.influencia/300+(f.campana||0)-cargoIx(c.id)*.06,.08,.88);
+      if(chance(pr)){ f.cargo=c.id; f.desde=S.anio; log('<b>Elecciones cafeteras:</b> ganaste. Ahora estás en el '+c.n+'.','hito'); hito('Elegido al '+c.n); try{ moverPrestigio(3+cargoIx(c.id)*2,'cargo cafetero'); }catch(e){} }
+      else log('<b>Elecciones cafeteras:</b> perdiste la elección al '+c.n+'.','mal');
+      f.candidato=null; f.campana=0; }
+    // el Congreso Cafetero, cada diciembre, si eres delegado o más
+    if(f.cargo&&cargoIx(f.cargo)>=2&&S.anio-f.ultCongreso>=1&&S._ev142!==S.anio){ f.ultCongreso=S.anio; S._ev142=S.anio; cola.push(evCongreso()); }
+    // la Gerencia General queda vacante de vez en cuando
+    if(f.cargo==='directivo'&&prest()>=60&&chance(.08)&&S._ev142!==S.anio){ S._ev142=S.anio; cola.push(evGerencia()); }
+  }
+  function wrapPaso142(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA142_PASO) return; window.__SA142_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
+  // los cargos altos se comen una movida
+  function wrapMovidas142(){ const old=window.movidasBase; if(typeof old!=='function'||window.__SA142_MOV) return; window.__SA142_MOV=true;
+    window.movidasBase=function(){ let n=old.apply(this,arguments); try{ const f=S&&S.fede142; if(f&&f.cargo&&cargoIx(f.cargo)>=3) n=Math.max(1,n-1); }catch(e){} return n; }; }
+
+  /* --- el Congreso Cafetero --- */
+  function evCongreso(){ const A=S.anio;
+    const temas=[];
+    if(A<1989) temas.push({t:'<b>Congreso Cafetero.</b> El Pacto de cuotas limita lo que se exporta. ¿Se retiene café en el Fondo para sostener el precio, o se le paga más al productor ya?',o:[
+      {t:'Retener y sostener el precio',f:()=>{ F().influencia+=3; return 'El Congreso votó retener. El precio interno se mantiene, la plata llega despacio.'; }},
+      {t:'Trasladarle más precio al productor',f:()=>{ try{ window.cafe141().choque={f:1.05,hasta:S.anio+1}; }catch(e){} S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Ganó tu propuesta: los caficultores reciben más este año, el Fondo queda más flaco.'; }}]});
+    if(A>=1989&&A<2002) temas.push({t:'<b>Congreso Cafetero.</b> Se acabó el Pacto y el precio se desplomó. ¿Se gasta el Fondo para sostener el precio interno?',o:[
+      {t:'Sí: gastar el Fondo y sostener a los caficultores',f:()=>{ try{ window.cafe141().choque={f:1.08,hasta:S.anio+1}; }catch(e){} F().influencia+=4; return 'El Fondo se va desocupando, pero este año nadie quiebra.'; }},
+      {t:'No: cuidar el Fondo para lo que viene',f:()=>{ S.p.reputacion=clamp(S.p.reputacion-2,0,100); return 'La decisión fue impopular en los pueblos, pero el Fondo aguanta.'; }}]});
+    if(A>=2002) temas.push({t:'<b>Congreso Cafetero.</b> Se discute si apostarle a los cafés especiales y a las tiendas Juan Valdez, o concentrarse en sostener el ingreso de los pequeños.',o:[
+      {t:'Cafés especiales y marca',f:()=>{ F().influencia+=3; (fincas()).forEach(b=>{ b.cafe141.certs=b.cafe141.certs||{}; }); return 'Ganó la apuesta por el valor agregado. A los que tienen buena taza les conviene.'; }},
+      {t:'El ingreso de los pequeños primero',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Se aprobaron más programas para pequeños productores. En las veredas te lo agradecen.'; }}]});
+    temas.push({t:'<b>Congreso Cafetero.</b> El Comité de tu departamento pide recursos del Fondo para obras: vías terciarias, escuelas y acueductos veredales.',o:[
+      {t:'Pelear las obras para '+(depto()||'tu departamento'),f:()=>{ const f=F(); f.influencia=Math.max(0,f.influencia-5); try{ moverPrestigio(2,'obras cafeteras'); }catch(e){} S.p.reputacion=clamp(S.p.reputacion+3,0,100); f.obras.push({anio:S.anio,n:'Vías terciarias en '+(depto()||'el departamento')}); return 'Conseguiste las obras. En tu departamento se acordarán en las próximas elecciones.'; }},
+      {t:'Apoyar las prioridades nacionales',f:()=>{ F().influencia+=4; return 'Ganaste puntos en Chinchiná y en Bogotá; en tu departamento, menos.'; }}]});
+    const t=pick(temas); return {p:9,c:()=>!!F().cargo,t:()=>t.t,o:t.o}; }
+  function evGerencia(){ return {p:9,c:()=>F().cargo==='directivo',t:()=>'<b>La Gerencia General de la Federación quedó vacante.</b> Varios miembros del Comité Directivo te proponen como candidato. Es el cargo más poderoso del campo colombiano: se negocia con el Gobierno, con los compradores del mundo y con un millón de familias cafeteras.',
+    o:[{t:'Aceptar la candidatura',f:()=>{ const f=F(); if(chance(clamp(.3+prest()/200+f.influencia/300,.2,.8))){ f.cargo='gerente'; f.desde=S.anio; hito('Fue elegido Gerente General de la Federación Nacional de Cafeteros'); try{ moverPrestigio(10,'gerente de la Federación'); }catch(e){} return 'El Congreso Cafetero te eligió Gerente General. La casa de la calle 73 en Bogotá ahora es tu oficina.'; } return 'El Congreso eligió a otro candidato por pocos votos.'; }},
+       {t:'No: el cargo se come la vida',f:()=>'Le dejaste el puesto a otro. Tu familia lo agradeció.'}]}; }
+
+  /* --- la pantalla --- */
+  function escenaFede142(){
+    const f=F(), fed=federado(), L=fincas(), sinMov=S.mov<1?'No te quedan movidas':null, reab=()=>{ cerrarModal(); render(); escenaFede142(); };
+    const inst=INST.filter(x=>x[1]<=S.anio).map(([n,a,d])=>'<div class="inst"><b>'+n+'</b> <span>· desde '+a+(n==='La Flota Mercante Grancolombiana'&&S.anio>2000?', liquidada en el 2000':n==='El Banco Cafetero'&&S.anio>2005?', hoy en manos privadas':'')+'</span><br><span>'+d+'</span></div>').join('');
+    const ops=[];
+    if(!fed) ops.push({t:'Sacar la cédula cafetera',cat:'casa',d:L.length?'Te vuelves federado: extensionista en la finca, crédito, programas y derecho a voto en las elecciones cafeteras.':'Necesitas una finca cafetera.',dis:L.length?null:'Primero compra una finca cafetera',run:()=>{ sacarCedula(); reab(); },cerrar:false});
+    if(fed){
+      if(S.anio>=1960&&!f.coop){ const ap=Math.max(5,Math.round(hectareas()*1.5)); ops.push({t:'Hacerte socio de la Cooperativa de Caficultores de '+(municipio()||'tu pueblo'),cat:'capital',d:'Aporte de '+fmt(ap)+'. Cada año reparte excedentes y te tienen en cuenta para el crédito.',dis:S.efectivo<ap?'No tienes '+fmt(ap):null,cerrar:false,run:()=>{ S.efectivo-=ap; f.coop={aporte:ap,desde:S.anio}; log('Te hiciste socio de la cooperativa de caficultores de '+esc(municipio()||'tu pueblo')+'.','bien'); reab(); }}); }
+      if(S.anio>=1960&&!f.capacitado) ops.push({t:'Cursos de la Fundación Manuel Mejía',cat:'formacion',d:'Para ti y tus mayordomos: buenas prácticas, catación, administración de la finca. Sube la productividad y la taza.',dis:sinMov,cerrar:false,run:()=>{ S.mov--; f.capacitado=S.anio; L.forEach(b=>{ b.cafe141.mayordomo=true; }); try{ S.p.atr.intelecto=clamp((S.p.atr.intelecto||5)+1,1,10); }catch(e){} log('Hiciste los cursos de la Fundación Manuel Mejía.','bien'); reab(); }});
+      if(S.anio>=2002){ const c=20; ops.push({t:'Comprar acciones de Procafecol (Juan Valdez)',cat:'capital',d:'Las tiendas Juan Valdez son de los caficultores. '+fmt(c)+' por paquete.'+(f.procafecol?' Tienes '+fmt(f.procafecol)+'.':''),dis:S.efectivo<c?'No tienes '+fmt(c):null,cerrar:false,run:()=>{ S.efectivo-=c; f.procafecol=(f.procafecol||0)+c; log('Compraste acciones de Procafecol.','bien'); reab(); }}); }
+      if(S.anio>=2008&&S.anio<=2013) ops.push({t:'Renovar con el programa PSF',cat:'casa',d:'Permanencia, Sostenibilidad y Futuro: crédito barato e incentivo para renovar con Castillo, resistente a la roya. La Federación pone buena parte.',dis:!L.length?'Sin fincas':sinMov,cerrar:false,run:()=>{ S.mov--; L.forEach(b=>{ const c=b.cafe141; c.var='castillo'; c.siembra=S.anio; c.densidad=5000; }); const costo=Math.round(hectareas()*4); S.efectivo-=costo; log('Renovaste con el PSF: '+hectareas()+' hectáreas en Castillo. Pusiste '+fmt(costo)+'; el resto lo puso el programa.','hito'); hito('Renovó sus cafetales con el programa PSF'); reab(); }});
+      if(S.anio>=1965){ const conB=L.filter(b=>b.cafe141.bodega>0&&!b.cafe141.prenda); if(conB.length) ops.push({t:'Bono de prenda en Almacafé',cat:'capital',d:'Te prestan el 70% de lo que vale el café guardado, mientras esperas mejor precio.',cerrar:false,run:()=>{ let x=0; conB.forEach(b=>{ const c=b.cafe141, v=c.bodega*window.precioCarga141()*.7; c.prenda=v; x+=v; }); S.efectivo+=x; log('Almacafé te dio '+fmt(x)+' en bonos de prenda sobre el café guardado.','bien'); reab(); }}); }
+      // elecciones
+      const ix=f.cargo?cargoIx(f.cargo):-1, sig=CARGOS[ix+1];
+      const proxima=(()=>{ let a=S.anio; while(!eleccion(a)) a++; return a; })();
+      if(sig&&sig.id!=='gerente'){ const okHa=hectareas()>=sig.min.ha, okP=prest()>=(sig.min.prest||0);
+        ops.push({t:f.candidato?'Ya eres candidato al '+CARGOS[cargoIx(f.candidato)].n:'Lanzarte al '+sig.n,cat:'junta',d:'Elecciones cafeteras en '+proxima+'. '+(okHa&&okP?'Cuentan tus hectáreas, tu prestigio y tu influencia.':'Necesitas '+(okHa?'':sig.min.ha+' hectáreas de café')+(okHa||okP?'':' y ')+(okP?'':'más prestigio en la región')+'.'),
+          dis:f.candidato?'Ya estás en campaña':!okHa||!okP?'No cumples los requisitos':sinMov,cerrar:false,run:()=>{ S.mov--; f.candidato=sig.id; f.campana=0; log('Te inscribiste como candidato al '+sig.n+' para las elecciones cafeteras de '+proxima+'.'); reab(); }}); }
+      if(f.candidato){ const c=Math.max(10,Math.round(20+cargoIx(f.candidato)*25)); ops.push({t:'Hacer campaña en las veredas',cat:'junta',d:'Reuniones en las veredas, tamales y discursos. '+fmt(c)+'. Sube tus opciones.',dis:S.efectivo<c?'No tienes '+fmt(c):(f.campana||0)>=.2?'Ya hiciste toda la campaña posible':null,cerrar:false,run:()=>{ S.efectivo-=c; f.campana=(f.campana||0)+.1; reab(); }}); }
+      if(f.cargo&&f.influencia>=10){ const OB=['Una escuela veredal','La pavimentación de la vía terciaria','El acueducto de la vereda','La electrificación de la vereda','Un puesto de salud','Un centro de acopio de la cooperativa'];
+        ops.push({t:'Gestionar una obra para '+(municipio()||'tu municipio'),cat:'junta',d:'Con plata del Comité: '+OB.join(', ').toLowerCase()+'. Gastas influencia; ganas gratitud y prestigio.',dis:sinMov,cerrar:false,run:()=>{ S.mov--; const o=pick(OB); f.influencia=Math.max(0,f.influencia-10); f.obras.push({anio:S.anio,n:o+' en '+(municipio()||'el municipio')}); try{ moverPrestigio(3,'obra cafetera'); }catch(e){} S.p.reputacion=clamp(S.p.reputacion+3,0,100); S.p.felicidad=clamp(S.p.felicidad+2,0,100); log('Gestionaste '+o.toLowerCase()+' en '+esc(municipio()||'tu municipio')+' con recursos del Comité de Cafeteros.','hito'); hito('Gestionó '+o.toLowerCase()+' en '+(municipio()||'su municipio')); reab(); }}); }
+      if(f.cargo) ops.push({t:'Renunciar al '+CARGOS[cargoIx(f.cargo)].n,cat:'junta',d:'Dejas el cargo y recuperas tu tiempo.',cerrar:false,run:()=>{ log('Renunciaste al '+CARGOS[cargoIx(f.cargo)].n+'.'); f.cargo=null; reab(); }});
+    }
+    const esc_=CARGOS.map((c,i)=>'<span class="'+(f.cargo&&cargoIx(f.cargo)>=i?'si':'')+'">'+c.n+'</span>').join('');
+    const g=window.cafe141?window.cafe141():null;
+    escena({rubro:'El gremio cafetero',titulo:'La Federación Nacional de Cafeteros',ancho:true,cerrable:true,clase:'fede142',
+      cuerpo:S.anio<1927?'La Federación todavía no existe: los cafeteros negocian cada uno por su lado con los exportadores.':fed?'Eres federado desde '+f.cedula+'.'+(f.cargo?' Hoy estás en el <b>'+CARGOS[cargoIx(f.cargo)].n+'</b>.':''):'No eres federado.',
+      html:'<div class="k"><div><b>'+(g?fmt(g.interno*g.nivel):'—')+'</b><span>precio interno que garantiza la compra</span></div><div><b>'+(S.anio>=1940?'Sí':'No')+'</b><span>contribución cafetera al Fondo Nacional del Café</span></div><div><b>'+Math.round(f.influencia)+'/100</b><span>tu influencia en el gremio</span></div><div><b>'+(f.obras.length||0)+'</b><span>obras que has gestionado</span></div></div>'
+        +'<div class="escalera">'+esc_+'</div>'+(inst?'<details><summary>Las instituciones de la Federación ('+INST.filter(x=>x[1]<=S.anio).length+')</summary>'+inst+'</details>':''),
+      opciones:ops.length?ops:[{t:'Volver',cat:'casa'}]});
+  }
+  function wrapEscena142(){ const old=window.escena; if(typeof old!=='function'||window.__SA142_ESC) return; window.__SA142_ESC=true;
+    window.escena=function(o){ try{ if(o&&o.titulo==='Caficultura'&&o.rubro==='El campo'&&Array.isArray(o.opciones)&&S.anio>=1927){ const f=F();
+        o=Object.assign({},o,{opciones:o.opciones.concat([{t:'La Federación Nacional de Cafeteros',cat:'junta',d:(federado()?'Federado'+(f.cargo?' · '+CARGOS[cargoIx(f.cargo)].n:''):'Sacar la cédula cafetera')+'. Comités, elecciones, Cenicafé, Almacafé, cooperativas, Juan Valdez y programas.',cerrar:false,run:()=>{ cerrarModal(); escenaFede142(); }}])}); } }catch(e){}
+      return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
+  function wrapAcciones142(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA142_ACC) return; window.__SA142_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const f=F(); if(Array.isArray(A)&&S&&S.p&&f.cargo) A.push({t:'Tu cargo en la Federación',d:CARGOS[cargoIx(f.cargo)].n+' · influencia '+Math.round(f.influencia)+'/100.',mov:0,modal:true,run:()=>escenaFede142()}); }catch(e){}
+      return A; }; }
+  function wrapCat142(){ const old=window.catDe; if(typeof old!=='function'||window.__SA142_CAT) return; window.__SA142_CAT=true;
+    window.catDe=function(t){ if(t==='Tu cargo en la Federación') return 'junta'; return old.apply(this,arguments); }; }
+  function init142(){ wrapPaso142(); wrapMovidas142(); wrapEscena142(); wrapAcciones142(); wrapCat142();
+    Object.assign(window,{fede142:F,escenaFede142,CARGOS_CAFETEROS_142:CARGOS,INSTITUCIONES_CAFE_142:INST,anualFede142:anual,sacarCedula142:sacarCedula}); }
+  setTimeout(init142,40); setTimeout(init142,220); setTimeout(init142,650);
+  window.__SA142={version:V142};
 })();
 </script>
 
