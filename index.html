@@ -1110,7 +1110,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v142</div>
+<div class="version-badge" id="versionBadge">v143</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8425,7 +8425,7 @@ function renderLienzo(){
         const f=FINCAS.find(x=>x.id===b.tipo);
         let estado = esVivienda? 'Es donde viven'
           : b.clase==='renta'? (b.arrendado?'Arrendado: entran '+fmt(b.valor*b.renta)+' al año':'Vacío este año, no entra nada')
-          : b.clase==='finca'? (b.renta>0?'Produce cerca de '+fmt(b.valor*b.renta)+' al año, según clima y dólar':'No produce; cuesta mantenerla')
+          : b.clase==='finca'? (b.cafe141?(b.cafe141.ult?'Última cosecha: '+Math.round(b.cafe141.ult.cargas).toLocaleString('es-CO')+' cargas, '+(b.cafe141.ult.neto>=0?'ganó ':'perdió ')+fmt(Math.abs(b.cafe141.ult.neto)):b.cafe141.ha+' hectáreas de café'):b.renta>0?'Produce cerca de '+fmt(b.valor*b.renta)+' al año, según clima y dólar':'No produce; cuesta mantenerla')
           : '';
         h+='<div class="retrato '+(esVivienda?'propio':(b.clase==='renta'&&!b.arrendado?'hostil':'leal'))+'"><div class="fila-r">'
           +iconoBien(b.tipo,b.clase,46,b.uid||b.nombre)
@@ -23132,11 +23132,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(b.clase==='negocio'&&b.neg110){ const g=b.neg110; return g.cerrado?{t:'Cerrado',c:'mal'}:(g.ult!==null&&g.ult!==undefined&&g.ult<0)?{t:'Con pérdidas',c:'mal'}:{t:'Abierto',c:'ok'}; }
     if(esHogar(b)) return {t:'Vives aquí',c:'casa'};
     if(b.clase==='renta') return b.arrendado?{t:'Arrendado',c:'ok'}:{t:'Vacío',c:'mal'};
-    if(b.clase==='finca') return b.renta>0?{t:'Produce',c:'ok'}:{t:'Sin producir',c:''};
+    if(b.clase==='finca') return (b.renta>0||b.cafe141)?{t:b.cafe141?'Cafetal':'Produce',c:'ok'}:{t:'Sin producir',c:''};
     if(b.clase==='vivienda') return {t:'Casa de descanso',c:''};
     return {t:tipoDe(b)==='lote'?'Lote':'En tu poder',c:''};
   }
-  const rentaDe=b=>b.clase==='negocio'&&b.neg110?Math.max(0,(b.neg110.ult!==null&&b.neg110.ult!==undefined)?b.neg110.ult:(typeof window.esperadaNegocio110==='function'?window.esperadaNegocio110(b):0)):(b.clase==='renta'&&b.arrendado)||(b.clase==='finca'&&b.renta>0)?b.valor*(b.renta||0):0;
+  const rentaDe=b=>b.cafe141?Math.max(0,(b.cafe141.ult&&b.cafe141.ult.neto)||0):b.clase==='negocio'&&b.neg110?Math.max(0,(b.neg110.ult!==null&&b.neg110.ult!==undefined)?b.neg110.ult:(typeof window.esperadaNegocio110==='function'?window.esperadaNegocio110(b):0)):(b.clase==='renta'&&b.arrendado)||(b.clase==='finca'&&b.renta>0)?b.valor*(b.renta||0):0;
   const plus=b=>isFinite(b.precioCompra)&&b.precioCompra>0?b.valor/b.precioCompra-1:0;
   const CANON={bajo:{n:'Canon bajo',d:'Casi nunca queda vacío, pero entra menos.',r:.85,v:.45},mercado:{n:'Canon de mercado',d:'Lo normal del barrio.',r:1,v:1},alto:{n:'Canon alto',d:'Entra más cuando hay inquilino; queda vacío más seguido.',r:1.22,v:2.1}};
   function aplicarCanon(b){
@@ -23212,7 +23212,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(window.__SA109_EV||typeof EVENTOS_LOCALES==='undefined') return;
     const E=x=>EVENTOS_LOCALES.push(x), B=()=>bien(S._b109);
     E({p:1,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!b.admin109),
-      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!b.admin109)); S._b109=b.uid; S._c109=Math.max(2,Math.round(b.valor*.03)); return 'El inquilino de <b>'+esc(b.nombre)+'</b> se fue de noche. Dejó dos meses sin pagar, una pared tumbada y la cocina sin gabinetes.'; },
+      t:()=>{ const L_=(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!b.admin109)); if(!L_.length) return null; const b=pick(L_); S._b109=b.uid; S._c109=Math.max(2,Math.round(b.valor*.03)); return 'El inquilino de <b>'+esc(b.nombre)+'</b> se fue de noche. Dejó dos meses sin pagar, una pared tumbada y la cocina sin gabinetes.'; },
       o:[{t:()=>'Arreglar todo ('+fmt(S._c109||0)+')',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b) b.arrendado=false; return 'Quedó como nueva. Ahora a buscar otro inquilino.'; }},
          {t:'Arrendarla así, más barata',f:()=>{ const b=B(); if(b){ b.valor*=.96; b.canon109='bajo'; aplicarCanon(b); } return 'La arrendaste como estaba, con canon bajo. La propiedad perdió algo de valor.'; }},
          {t:'Contratar una inmobiliaria para que no vuelva a pasar',f:()=>{ const b=B(); S.efectivo-=Math.min(S.efectivo,S._c109); if(b){ b.admin109=true; aplicarCanon(b); } return 'Arreglaste y entregaste las llaves a una inmobiliaria. Cobran 8%, pero duermes tranquilo.'; }}]});
@@ -23222,16 +23222,16 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       o:[{t:()=>{ const b=B(); return b&&b.seguro109?'Cobrar el seguro':'Pagar el arreglo'; },f:()=>{ const b=B(); if(b&&b.seguro109) return 'El seguro pagó todo. Para eso era.'; S.efectivo-=Math.min(S.efectivo,S._c109); return 'Pagaste '+fmt(S._c109)+' de tu bolsillo.'; }},
          {t:'Dejarla así por ahora',f:()=>{ const b=B(); if(b&&b.seguro109) return 'Igual el seguro lo cubrió.'; if(b){ b.valor*=.88; if(b.clase==='renta') b.arrendado=false; } return 'No la arreglaste. Perdió valor'+(b&&b.clase==='renta'?' y quedó vacía':'')+'.'; }}]});
     E({p:.8,c:()=>(S.bienes||[]).some(b=>!esHogar(b)&&!(b.contrato109>S.anio)),
-      t:()=>{ const b=pick(S.bienes.filter(b=>!esHogar(b)&&!(b.contrato109>S.anio))); S._b109=b.uid; S._c109=Math.round(b.valor*rnd(1.2,1.4)); return 'Una constructora quiere <b>'+esc(b.nombre)+'</b> para un proyecto. Ofrece '+fmt(S._c109)+', bastante más de lo que vale hoy ('+fmt(b.valor)+').'; },
+      t:()=>{ const L_=(S.bienes.filter(b=>!esHogar(b)&&!(b.contrato109>S.anio))); if(!L_.length) return null; const b=pick(L_); S._b109=b.uid; S._c109=Math.round(b.valor*rnd(1.2,1.4)); return 'Una constructora quiere <b>'+esc(b.nombre)+'</b> para un proyecto. Ofrece '+fmt(S._c109)+', bastante más de lo que vale hoy ('+fmt(b.valor)+').'; },
       o:[{t:'Vender',f:()=>{ const b=B(); if(!b) return ''; const n=Math.max(0,S._c109-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Vendiste. Te quedaron '+fmt(n)+'.'; }},
          {t:'Pedir más',f:()=>{ const b=B(); if(!b) return ''; if(chance(.4)){ const p=Math.round(S._c109*1.15), n=Math.max(0,p-(b.hipoteca||0)); S.efectivo+=n; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); return 'Subieron a '+fmt(p)+'. Vendiste.'; } return 'Se fueron a comprar el lote de al lado.'; }},
          {t:'No está en venta',f:()=>{ const b=B(); if(b) b.valor*=1.04; return 'Dijiste que no. Pero ya sabes que la zona se está moviendo.'; }}]});
     E({p:.8,c:()=>(S.bienes||[]).some(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio)),
-      t:()=>{ const b=pick(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio))); S._b109=b.uid; return 'El inquilino de <b>'+esc(b.nombre)+'</b> es de los buenos: paga puntual y cuida. Te propone un contrato a cinco años si le sostienes el canon.'; },
+      t:()=>{ const L_=(S.bienes.filter(b=>b.clase==='renta'&&b.arrendado&&!(b.contrato109>S.anio))); if(!L_.length) return null; const b=pick(L_); S._b109=b.uid; return 'El inquilino de <b>'+esc(b.nombre)+'</b> es de los buenos: paga puntual y cuida. Te propone un contrato a cinco años si le sostienes el canon.'; },
       o:[{t:'Firmar a cinco años',f:()=>{ const b=B(); if(b){ b.contrato109=S.anio+5; b.arrendado=true; } return 'Firmaron. Cinco años sin preocuparte por esa propiedad (tampoco puedes venderla).'; }},
          {t:'Mejor año a año',f:()=>'Prefieres tener las manos libres.'}]});
-    E({p:.6,c:()=>(S.bienes||[]).some(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0)))),
-      t:()=>{ const b=pick(S.bienes.filter(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0))))); S._b109=b.uid; return 'Te avisa un vecino: hay gente levantando ranchos en <b>'+esc(b.nombre)+'</b>. Si pasan los meses, sacarlos va a ser casi imposible.'; },
+    E({p:.6,c:()=>(S.bienes||[]).some(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0)&&!b.cafe141))),
+      t:()=>{ const L_=(S.bienes.filter(b=>(tipoDe(b)==='lote'||(b.clase==='finca'&&!(b.renta>0)&&!b.cafe141)))); if(!L_.length) return null; const b=pick(L_); S._b109=b.uid; return 'Te avisa un vecino: hay gente levantando ranchos en <b>'+esc(b.nombre)+'</b>. Si pasan los meses, sacarlos va a ser casi imposible.'; },
       o:[{t:'Abogado y policía, ya',f:()=>{ const c=Math.max(3,Math.round(pat()*.004)); S.efectivo-=Math.min(S.efectivo,c); if(chance(.75)) return 'Los desalojaron a tiempo ('+fmt(c)+'). Pusiste un cuidandero.'; const b=B(); if(b) b.valor*=.7; return 'El proceso se enredó ('+fmt(c)+'). Recuperaste solo una parte del terreno.'; }},
          {t:'Negociar: venderles una parte barata',f:()=>{ const b=B(); if(b){ const x=Math.round(b.valor*.12); S.efectivo+=x; b.valor*=.75; S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Les vendiste una franja por '+fmt(x)+'. Quedaste bien con el barrio.'; } return ''; }},
          {t:'No hacer nada',f:()=>{ const b=B(); if(b) b.valor*=.5; return 'Pasó un año. Ya hay calles, tiendas y una escuela. Medio terreno ya no es tuyo.'; }}]});
@@ -26864,6 +26864,112 @@ install();setTimeout(install,1200);
     Object.assign(window,{fede142:F,escenaFede142,CARGOS_CAFETEROS_142:CARGOS,INSTITUCIONES_CAFE_142:INST,anualFede142:anual,sacarCedula142:sacarCedula}); }
   setTimeout(init142,40); setTimeout(init142,220); setTimeout(init142,650);
   window.__SA142={version:V142};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v143 · UN SIGLO DE CAFÉ
+   La historia cafetera llega a tu finca, año por año, con decisiones:
+   la fundación de la Federación (1927), Cenicafé (1938), el Fondo y el
+   pacto interamericano (1940), la Violencia en las zonas cafeteras, el
+   precio récord de 1954, Juan Valdez (1959), el Acuerdo Internacional del
+   Café (1962), la tecnificación con Caturra, la helada del Brasil y la
+   bonanza (1975-1977), la roya (1983), la broca (1988), la ruptura del
+   pacto de cuotas (1989), la helada de 1994, el terremoto del Eje (1999),
+   la crisis de 2001, la Taza de la Excelencia (2005), la denominación de
+   origen (2007), la epidemia de roya con La Niña (2008-2011), el Paisaje
+   Cultural Cafetero (2011), el paro cafetero (2013), la pandemia, los
+   fertilizantes de 2022 y los precios récord de 2024.
+   ========================================================================== */
+(function(){
+  const V143='v143';
+  const L=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
+  const G=()=>typeof window.cafe141==='function'?window.cafe141():{};
+  const mun=b=>{ try{ return window.munCafe141(b.cafe141.mun); }catch(e){ return {}; } };
+  const en=(...regs)=>L().filter(b=>regs.includes(mun(b).reg));
+  const dep=(...deps)=>L().filter(b=>deps.includes(mun(b).dep));
+  const ha=()=>L().reduce((s,b)=>s+b.cafe141.ha,0);
+  const fed=()=>{ try{ return !!(S.fede142&&S.fede142.cedula); }catch(e){ return false; } };
+  const pat=()=>{ try{ return Math.max(0,patrimonio()); }catch(e){ return 0; } };
+  const susc=()=>L().filter(b=>{ try{ return window.varCafe141(b.cafe141.var).roya>.3; }catch(e){ return false; } });
+  const nom=bs=>bs.map(b=>b.cafe141.mun).filter((x,i,a)=>a.indexOf(x)===i).join(', ');
+  const H=[
+    {a:1927,c:()=>L().length&&!fed(),t:()=>'<b>Nace la Federación Nacional de Cafeteros.</b> En Medellín, el segundo Congreso Cafetero crea el gremio que va a comprar, exportar y defender el café colombiano.',
+      o:[{t:'Afiliarse desde el principio',f:()=>{ try{ window.sacarCedula142(); }catch(e){} return 'Eres de los fundadores. En el gremio se acordarán de tu apellido.'; }},{t:'Seguir negociando por su cuenta',f:()=>'Seguiste vendiéndole a los exportadores de siempre.'}]},
+    {a:1938,c:()=>L().length,t:()=>'<b>Se funda Cenicafé en Chinchiná.</b> La Federación va a investigar el café: suelos, variedades, enfermedades.',
+      o:[{t:'Donar para la investigación',f:()=>{ const x=Math.max(5,Math.round(ha()*.5)); S.efectivo-=x; try{ moverPrestigio(2,'Cenicafé'); }catch(e){} return 'Pusiste '+fmt(x)+'. En Chinchiná hay una placa con tu apellido.'; }},{t:'Que investigue el Gobierno',f:()=>'Allá ellos.'}]},
+    {a:1940,c:()=>L().length,t:()=>'<b>Nace el Fondo Nacional del Café</b> y se firma el pacto interamericano de cuotas: Colombia exporta lo que le toca, y lo que sobra se retiene para sostener el precio.',
+      o:[{t:'Entendido',f:()=>'Desde ahora, parte del precio de tu café se queda en el Fondo. A cambio, el precio interno ya no salta tanto.'}]},
+    {a:1950,c:()=>en('tolima','eje','valle').length,t:()=>'<b>La Violencia llega a las veredas cafeteras.</b> En '+nom(en('tolima','eje','valle'))+' aparecen cuadrillas que exigen plata, queman beneficiaderos y desplazan familias. Hay vecinos que venden su finca por nada.',
+      o:[{t:'Pagar "protección" para seguir trabajando',f:()=>{ const x=Math.max(10,Math.round(ha()*2)); S.efectivo-=x; return 'Pagaste '+fmt(x)+'. Sigues produciendo, y sabes que vendrán por más.'; }},
+         {t:'Comprarles la tierra a los vecinos que se van',f:()=>{ const b=en('tolima','eje','valle')[0]; const x=Math.round(b.cafe141.ha*.6*window.munCafe141(b.cafe141.mun).ha*.35); if(S.efectivo<x) return 'No tenías la plata.'; S.efectivo-=x; b.cafe141.ha=Math.round(b.cafe141.ha*1.6); b.valor+=x*2; S.p.reputacion=clamp(S.p.reputacion-6,0,100); return 'Compraste a menos de la mitad de lo que valía. La finca creció; en la vereda no te lo perdonan.'; }},
+         {t:'Irse a la ciudad hasta que pase',f:()=>{ en('tolima','eje','valle').forEach(b=>{ b.cafe141.mayordomo=false; b.cafe141.fertiliza=false; }); return 'Dejaste las fincas solas unos años. Se enmalezaron, pero estás vivo.'; }}]},
+    {a:1954,c:()=>L().length,t:()=>'<b>El café a precio récord.</b> Una helada en el Brasil secó los cafetales del vecino y el precio en Nueva York está por las nubes.',
+      o:[{t:'Comprar más tierra',f:()=>{ const b=L()[0], x=Math.round(window.munCafe141(b.cafe141.mun).ha*10*1.3); if(S.efectivo<x) return 'No alcanzaba: la tierra también está carísima.'; S.efectivo-=x; b.cafe141.ha+=10; b.valor+=x; return 'Compraste 10 hectáreas más, caras. Si el precio aguanta, se pagan.'; }},{t:'Ahorrar la ganancia',f:()=>{ S.p.felicidad=clamp(S.p.felicidad+3,0,100); return 'Guardaste. Los precios altos nunca duran.'; }}]},
+    {a:1959,c:()=>L().length&&fed(),t:()=>'<b>Nace Juan Valdez.</b> La Federación lanza en Estados Unidos un personaje: un caficultor con su mula y su carriel. El mundo empieza a pedir café de Colombia por su nombre.',
+      o:[{t:'Que suene el apellido también',f:()=>{ try{ moverPrestigio(1,'Juan Valdez'); }catch(e){} return 'Mandaste fotos de tu finca para la campaña. Una salió en una revista gringa.'; }}]},
+    {a:1962,c:()=>L().length,t:()=>'<b>El Acuerdo Internacional del Café.</b> Los países productores y consumidores firman en Nueva York un sistema de cuotas de exportación. Precio estable, pero no se puede vender todo lo que se produce.',
+      o:[{t:'Entendido',f:()=>'Durante casi treinta años, el pacto va a mantener el precio en una banda.'}]},
+    {a:1970,c:()=>L().filter(b=>['tipica','borbon'].includes(b.cafe141.var)).length,t:()=>'<b>La tecnificación.</b> La Federación promueve la Caturra: sembrada densa, a pleno sol, produce el doble que el café tradicional bajo sombra. Hay crédito del Banco Cafetero para cambiar.',
+      o:[{t:'Tecnificar: Caturra a libre exposición',f:()=>{ L().filter(b=>['tipica','borbon'].includes(b.cafe141.var)).forEach(b=>{ const c=b.cafe141; c.var='caturra'; c.siembra=S.anio; c.densidad=5000; c.sombrio=false; }); const x=Math.round(ha()*6); S.efectivo-=x; return 'Tumbaste el sombrío y sembraste Caturra. Dos años sin cosecha, '+fmt(x)+' de inversión, y después el doble de café.'; }},
+         {t:'Seguir con el café tradicional bajo sombra',f:()=>'Te quedaste con lo de siempre: menos café, mejor taza y los pájaros todavía en la finca.'}]},
+    {a:1975,c:()=>L().length,t:()=>'<b>Helada en el Brasil.</b> Esta noche se congelaron millones de cafetos en Paraná. El precio del café se va a disparar: viene la bonanza.',
+      o:[{t:'Retener la cosecha para vender en la bonanza',f:()=>{ L().forEach(b=>b.cafe141.canal='retener'); return 'Guardaste todo. Si la bonanza llega como dicen, valdrá el doble.'; }},{t:'Vender como siempre',f:()=>'Vendiste. El que espera, a veces gana más.'}]},
+    {a:1977,c:()=>L().length,t:()=>'<b>La bonanza cafetera.</b> Nunca se había pagado tanto por el café. En los pueblos cafeteros hay plata para todo: carros, casas, viajes, y también para lo que no conviene.',
+      o:[{t:'Invertir: más tierra y beneficio nuevo',f:()=>{ L().forEach(b=>{ b.cafe141.secado=b.cafe141.ha>=15?'silo':'marquesina'; }); const x=Math.round(ha()*3); S.efectivo-=x; return 'Compraste silos y marquesinas. La finca quedó lista para los años malos.'; }},
+         {t:'Darse gusto: la familia lo merece',f:()=>{ S.p.felicidad=clamp(S.p.felicidad+10,0,100); S.efectivo-=Math.max(20,Math.round(pat()*.03)); return 'Carro nuevo, viaje a Miami y la fiesta de quince más sonada del pueblo.'; }}]},
+    {a:1983,c:()=>susc().length,t:()=>'<b>Llegó la roya.</b> Cenicafé la confirmó en Caldas: un hongo anaranjado en el envés de la hoja que tumba las hojas y la cosecha. Tus cafetales de '+nom(susc())+' son susceptibles.',
+      o:[{t:'Fumigar con fungicida',f:()=>{ susc().forEach(b=>b.cafe141.fungicida=true); return 'Montaste el plan de fumigación. Cuesta todos los años, pero salvas la cosecha.'; }},
+         {t:'Renovar con la Variedad Colombia',f:()=>{ susc().forEach(b=>{ b.cafe141.var='colombia'; b.cafe141.siembra=S.anio; }); const x=Math.round(ha()*8); S.efectivo-=x; return 'Sembraste la variedad que Cenicafé sacó justo a tiempo. '+fmt(x)+' y dos años de levante.'; }},
+         {t:'Esperar a ver qué tan grave es',f:()=>'La roya no espera.'}]},
+    {a:1988,c:()=>L().length,t:()=>'<b>Llegó la broca.</b> Un cucarroncito que se mete en el grano y lo daña por dentro. Entró por Nariño y se va regando.',
+      o:[{t:'Manejo integrado: re-re y control biológico',f:()=>{ L().forEach(b=>b.cafe141.manejoBroca=true); return 'Recoger hasta el último grano, del árbol y del suelo. Más mano de obra, menos broca.'; }},{t:'Fumigar con insecticida',f:()=>{ L().forEach(b=>b.cafe141.manejoBroca=true); S.p.salud=clamp(S.p.salud-2,0,100); return 'El endosulfán la controla, y también enferma a los que fumigan.'; }}]},
+    {a:1989,c:()=>L().length,t:()=>'<b>Se rompió el pacto de cuotas.</b> En Londres no hubo acuerdo y el sistema que sostuvo el precio por casi treinta años se acabó. El café se va a desplomar.',
+      o:[{t:'Bajar costos: menos abono, menos jornales',f:()=>{ L().forEach(b=>{ b.cafe141.fertiliza=false; }); return 'Apretaste el cinturón. La cosecha va a bajar, pero pierdes menos.'; }},
+         {t:'Diversificar: sembrar plátano y aguacate entre el café',f:()=>{ L().forEach(b=>b.cafe141.sombrio=true); S.efectivo+=Math.round(ha()*1.5); return 'El plátano da sombra y se vende. No reemplaza al café, pero ayuda.'; }},
+         {t:'Aguantar: el precio volverá',f:()=>'Te sostienes con el Fondo y con fe.'}]},
+    {a:1994,c:()=>L().length,t:()=>'<b>Otra helada en el Brasil.</b> El precio se recupera después de cinco años malos.',o:[{t:'Por fin',f:()=>{ S.p.felicidad=clamp(S.p.felicidad+4,0,100); return 'Un respiro.'; }}]},
+    {a:1999,c:()=>dep('Quindío','Risaralda','Caldas','Valle').length,t:()=>'<b>Terremoto en el Eje Cafetero.</b> El 25 de enero a la 1:19 de la tarde tembló en Armenia. La ciudad quedó en el suelo; en las fincas se cayeron casas, beneficiaderos y tanques.',
+      o:[{t:'Reconstruir la finca con el FOREC y la Federación',f:()=>{ const bs=dep('Quindío','Risaralda','Caldas','Valle'); const x=Math.round(bs.reduce((s,b)=>s+b.cafe141.ha,0)*2); S.efectivo-=x; return 'Reconstruiste. Pusiste '+fmt(x)+'; el resto llegó del Fondo para la Reconstrucción.'; }},
+         {t:'Ayudar primero a los trabajadores y a la vereda',f:()=>{ const x=Math.round(ha()*3.5); S.efectivo-=x; S.p.reputacion=clamp(S.p.reputacion+8,0,100); try{ moverPrestigio(4,'terremoto del Eje'); }catch(e){} return 'Levantaste las casas de los trabajadores antes que la tuya. En la vereda nadie lo olvida.'; }}]},
+    {a:2001,c:()=>L().length,t:()=>'<b>La peor crisis de precios en cien años.</b> El café se paga por debajo de lo que cuesta producirlo. Vietnam inundó el mundo de café barato. Hay caficultores arrancando cafetales para sembrar otra cosa.',
+      o:[{t:'Aguantar con la Federación',f:()=>'Te sostienes. El Fondo hace lo que puede.'},
+         {t:'Vender parte de la tierra',f:()=>{ const b=L().slice().sort((a,b)=>b.cafe141.ha-a.cafe141.ha)[0]; const q=Math.round(b.cafe141.ha*.3); if(q<1) return 'No había qué vender.'; const x=Math.round(b.valor*.3*.75); b.cafe141.ha-=q; b.valor*=.7; S.efectivo+=x; return 'Vendiste '+q+' hectáreas por '+fmt(x)+'. Malos tiempos para vender, peores para no tener caja.'; }},
+         {t:'Apostarle a la calidad: cafés especiales',f:()=>{ L().forEach(b=>{ b.cafe141.beneficio='ecologico'; b.cafe141.secado=b.cafe141.secado==='sol'?'marquesina':b.cafe141.secado; }); const x=Math.round(ha()*2); S.efectivo-=x; return 'Invertiste '+fmt(x)+' en beneficio y secado. Si tu taza da, el especial se paga aparte.'; }}]},
+    {a:2005,c:()=>L().some(b=>{ try{ return window.calidadTaza141(b.cafe141)>=85; }catch(e){ return false; } }),t:()=>'<b>La primera Taza de la Excelencia en Colombia.</b> Un concurso con jueces internacionales; los mejores lotes se subastan por internet a tostadores de todo el mundo. Tu taza da para competir.',
+      o:[{t:'Inscribir tu mejor lote',f:()=>{ const b=L().slice().sort((a,b)=>window.calidadTaza141(b.cafe141)-window.calidadTaza141(a.cafe141))[0]; const q=window.calidadTaza141(b.cafe141);
+           if(chance(clamp((q-84)/5,.1,.8))){ const x=Math.round(30+(q-84)*15); S.efectivo+=x; try{ moverPrestigio(4,'Taza de la Excelencia'); }catch(e){} hito('Ganó la Taza de la Excelencia con el café de '+b.cafe141.mun); return 'Tu lote de '+b.cafe141.mun+' quedó entre los ganadores. En la subasta pagaron '+fmt(x)+' por unos pocos sacos.'; }
+           return 'Quedaste de doce. No ganaste, pero un tostador japonés pidió tu contacto.'; }},{t:'No exponerse',f:()=>'Será otro año.'}]},
+    {a:2008,c:()=>susc().length,t:()=>'<b>La roya vuelve con todo.</b> Con las lluvias de La Niña, la epidemia está tumbando la producción del país. La Federación lanza el programa para renovar con Castillo.',
+      o:[{t:'Renovar con Castillo',f:()=>{ susc().forEach(b=>{ b.cafe141.var='castillo'; b.cafe141.siembra=S.anio; }); const x=Math.round(ha()*(fed()?4:10)); S.efectivo-=x; return 'Renovaste'+(fed()?' con el crédito y el incentivo del PSF':'')+': '+fmt(x)+'.'; }},{t:'Fumigar y aguantar',f:()=>{ susc().forEach(b=>b.cafe141.fungicida=true); return 'Fumigas con todo. Es caro, pero conservas tu variedad.'; }}]},
+    {a:2011,c:()=>L().some(b=>mun(b).paisaje),t:()=>'<b>La UNESCO declara el Paisaje Cultural Cafetero patrimonio de la humanidad.</b> Tus tierras en '+nom(L().filter(b=>mun(b).paisaje))+' quedan dentro. Empiezan a llegar turistas que quieren ver cómo se hace el café.',
+      o:[{t:'Abrir la finca al turismo',f:()=>{ L().filter(b=>mun(b).paisaje).forEach(b=>{ b.cafe141.turismo=S.anio; b.valor*=1.1; }); return 'Recorridos, catación y almuerzo en la casa de la finca. Entra plata los fines de semana.'; }},{t:'Mantenerla como finca de trabajo',f:()=>{ L().filter(b=>mun(b).paisaje).forEach(b=>b.valor*=1.05); return 'Igual se valorizó.'; }}]},
+    {a:2013,c:()=>L().length,t:()=>'<b>Paro cafetero.</b> Miles de caficultores bloquean las vías en Caldas, Huila, Antioquia y el Cauca. Piden un precio que cubra los costos. Los de tu vereda te preguntan si te sumas.',
+      o:[{t:'Sumarse al paro',f:()=>{ S.p.reputacion=clamp(S.p.reputacion+4,0,100); try{ if(S.fede142&&S.fede142.cargo) S.fede142.influencia=Math.max(0,S.fede142.influencia-8); }catch(e){} return 'Te sumaste. El Gobierno cedió: viene la Protección del Ingreso Cafetero. En la Federación no les gustó.'; }},
+         {t:'Quedarse con la Federación',f:()=>{ try{ if(S.fede142) S.fede142.influencia=(S.fede142.influencia||0)+6; }catch(e){} return 'Te quedaste del lado del gremio. Tus vecinos te miran raro.'; }}]},
+    {a:2020,c:()=>L().length,t:()=>'<b>La pandemia.</b> Cerraron las vías y los pueblos. La cosecha está lista y no llegan los recolectores de otras regiones.',
+      o:[{t:'Pagar más y dar alojamiento con protocolos',f:()=>{ L().forEach(b=>{ b.cafe141.pagaMas=true; b.cafe141.pagaDesde=S.anio; }); return 'Conseguiste gente. La cosecha se recogió, más cara.'; }},{t:'Recoger con lo que haya',f:()=>{ G().escasez=S.anio+1; return 'Se va a caer café al suelo.'; }}]},
+    {a:2022,c:()=>L().length,t:()=>'<b>Los fertilizantes por las nubes.</b> Con la guerra en Ucrania, el abono cuesta el doble. Y el café está a precios altísimos.',
+      o:[{t:'Abonar igual: el precio lo paga',f:()=>'Abonaste. Con el precio de este año, se justifica.'},{t:'Abonar a medias',f:()=>{ L().forEach(b=>b.cafe141.fertiliza=false); return 'Ahorraste en abono. El año que viene se va a notar.'; }}]},
+    {a:2024,c:()=>L().length,t:()=>'<b>Precios récord.</b> Sequías en Brasil y Vietnam disparan el café a máximos de casi cincuenta años. La carga se paga como nunca.',
+      o:[{t:'Vender todo lo que haya',f:()=>{ L().forEach(b=>{ const c=b.cafe141; if(c.bodega>0){ const v=c.bodega*window.precioCarga141()-(c.prenda||0)*1.08; S.efectivo+=v; c.bodega=0; c.prenda=0; } }); return 'Vendiste hasta lo guardado.'; }},{t:'Invertir en la finca',f:()=>{ L().forEach(b=>{ b.cafe141.beneficio='ecologico'; }); return 'Aprovechaste para modernizar.'; }}]}
+  ];
+  // recolectores: la coca y la violencia se llevan la mano de obra en los noventa y dos mil
+  function anual(){
+    if(!S||!S.p||S.muerto) return; const st=S.hist143||(S.hist143={});
+    H.forEach(h=>{ if(h.a===S.anio&&!st[h.a]){ let ok=false; try{ ok=!!h.c(); }catch(e){} if(ok){ st[h.a]=1; cola.push({p:9,c:()=>true,t:h.t,o:h.o}); } } });
+    if(L().length&&S.anio>=1990&&S.anio<=2008&&chance(.12)&&!(G().escasez>=S.anio)){ G().escasez=S.anio+1; cola.push({p:9,c:()=>true,t:()=>'<b>No hay recolectores.</b> Los muchachos se fueron a raspar coca, donde pagan el doble. La cosecha está madura en el árbol.',
+      o:[{t:'Subir el pago por kilo',f:()=>{ L().forEach(b=>{ b.cafe141.pagaMas=true; b.cafe141.pagaDesde=S.anio; }); return 'Pagas más por kilo recogido. La cosecha se salva, el margen no.'; }},{t:'Recoger con lo que haya',f:()=>'Se va a caer grano al suelo. Y la broca se alimenta de ese grano.'}]}); }
+    else if(!(G().escasez>=S.anio)) L().forEach(b=>{ if(b.cafe141.pagaMas&&S.anio-(b.cafe141.pagaDesde||S.anio)>2) b.cafe141.pagaMas=false; });
+    // los turistas del Paisaje Cultural
+    const tur=L().filter(b=>b.cafe141.turismo); if(tur.length){ const x=tur.reduce((s,b)=>s+Math.min(40,b.cafe141.ha*.8),0); S.efectivo+=x; }
+  }
+  function wrapPaso143(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA143_PASO) return; window.__SA143_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual(); }catch(e){ console.error(e); } return r; }; }
+  function init143(){ wrapPaso143(); Object.assign(window,{HISTORIA_CAFE_143:H,anualHistoriaCafe143:anual}); }
+  setTimeout(init143,40); setTimeout(init143,220); setTimeout(init143,650);
+  window.__SA143={version:V143};
 })();
 </script>
 
