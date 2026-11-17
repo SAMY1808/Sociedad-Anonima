@@ -1122,10 +1122,19 @@ svg.foto116{display:block;background:#1d2a23}
 .tam146 i{display:inline-block;width:5px;height:11px;border-radius:2px;background:rgba(255,255,255,.18)}
 .tam146 i.on{background:var(--oro,#D6A648)}
 </style>
+<style id="estilos-v149">
+.eq149 .tam{display:inline-block;padding:2px 10px;border-radius:9px;background:rgba(214,166,72,.18);color:#F0CF86;font-size:12.5px;margin-bottom:8px}
+.eq149 .rol{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.eq149 .rol b{display:block;font-size:14.5px}
+.eq149 .rol span{font-size:12.5px;color:var(--humo2)}
+.eq149 .rol .vac{color:#E8A08F}
+.eq149 .rol .c{font-family:var(--display);font-size:16px;color:#E8D2A4;white-space:nowrap}
+.eq149-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v148</div>
+<div class="version-badge" id="versionBadge">v149</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -27406,6 +27415,140 @@ install();setTimeout(install,1200);
   function init148(){ wrapEmpresa(); wrapPaso(); wrapEscena(); Object.assign(window,{empresaCafe148:empresa,migrarEmpresasCafe148:migrar,crearEmpresaCafe148:crear}); }
   setTimeout(init148,40); setTimeout(init148,220); setTimeout(init148,650);
   window.__SA148={version:V148};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v149 · QUIÉN MANDA EN CADA COMPAÑÍA
+   Cada compañía necesita gente según su tamaño:
+   - Pequeña (menos de 80 empleados): un administrador de fábrica (o del
+     negocio) que esté encima de todo.
+   - Mediana (hasta 500): gerente de planta, director financiero y
+     director comercial.
+   - Grande: directores de área (financiero, comercial, de operaciones, de
+     gestión humana y jurídico) y un director por cada filial en el
+     exterior.
+   Cada directivo tiene nombre, competencia, honradez, lealtad y sueldo. Se
+   contrata entre candidatos (cazatalentos, alguien de adentro o un
+   familiar), se despide o se le sube el sueldo. Cada cargo mueve algo de la
+   compañía (margen, crecimiento, eficiencia, moral, riesgos legales, las
+   filiales), y una vacante cuesta. Hay robos, cazatalentos de la
+   competencia que se los llevan y directivos que se jubilan.
+   ========================================================================== */
+(function(){
+  const V149='v149';
+  const ROLES={
+    admin:{n:'Administrador de fábrica',d:'Está encima de todo: producción, compras, nómina.'},
+    planta:{n:'Gerente de planta',d:'La operación del día a día.'},
+    financiero:{n:'Director financiero',d:'Caja, deuda, bancos y márgenes.'},
+    comercial:{n:'Director comercial',d:'Ventas, clientes, distribución.'},
+    operaciones:{n:'Director de operaciones',d:'Plantas, logística, eficiencia.'},
+    humana:{n:'Director de gestión humana',d:'Contratación, clima laboral, sindicato.'},
+    juridico:{n:'Director jurídico',d:'Contratos, demandas, cumplimiento.'}
+  };
+  const P1=n=>String(n||'').split(' ')[0];
+  const APE=['Gómez','Restrepo','Vélez','Ospina','Sarmiento','Pombo','Holguín','Lleras','Escobar','Botero','Cuéllar','Parra','Lozano','Santamaría','Herrera','Uribe','Cárdenas','Valencia'];
+  function tamano(e){ const em=e.empleados||0; return em<80&&e.ingresos<1500?'pequena':em<500&&e.ingresos<8000?'mediana':'grande'; }
+  const TAMN={pequena:'Compañía pequeña',mediana:'Compañía mediana',grande:'Compañía grande'};
+  function rolesDe(e){ const t=tamano(e); const base=t==='pequena'?['admin']:t==='mediana'?['planta','financiero','comercial']:['financiero','comercial','operaciones','humana','juridico'];
+    const fil=t==='grande'?((e.filiales||[]).map(f=>'filial:'+f.pais)):[]; return base.concat(fil); }
+  const nomRol=(r,e)=>{ if(/^filial:/.test(r)){ const f=(e.filiales||[]).find(x=>'filial:'+x.pais===r); return 'Director de la filial'+(f?' en '+(f.n||f.pais):''); } return ROLES[r].n; };
+  const EQ=e=>{ if(!e.eq149||typeof e.eq149!=='object'){ e.eq149={}; try{ rolesDe(e).forEach(r=>{ const c=candidato(e,r,'adentro'); c.comp=5; c.leal=65; c.sueldo=estandar(e,r,5); c.desde=e.fundada||S.anio; e.eq149[r]=c; }); }catch(x){} } return e.eq149; };   // el equipo que venía
+  const estandar=(e,r,comp)=>Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
+  const escala=e=>clamp(Math.sqrt(Math.max(50,e.ingresos||50)/1000),.4,6);
+  function candidato(e,r,origen){
+    const sx=pick(['h','m']); let nombre; try{ nombre=nombreLocal(e.ciudad||S.hogar.ciudad,sx)+' '+pick(APE); }catch(x){ nombre=(sx==='h'?'Jorge':'Marta')+' '+pick(APE); }
+    let comp=ri(4,9), hon=ri(3,10), leal=ri(40,70), sueldo=Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
+    if(origen==='adentro'){ comp=ri(3,7); leal=ri(70,92); sueldo=Math.round(sueldo*.7); }
+    if(origen==='cazatalentos'){ comp=ri(7,10); sueldo=Math.round(sueldo*1.35); }
+    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=22&&!h.cargo149); const h=H.length?pick(H):null; if(!h) return null;
+      nombre=h.nombre+' '+(h.apellido||S.p.apellido); comp=clamp(Math.round(((h.formacion||40)/12)+rnd(0,2)),2,9); hon=ri(6,10); leal=95; sueldo=Math.round(sueldo*.8); return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,hijo:h.nombre,edad:h.edad}; }
+    return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,edad:ri(32,58)};
+  }
+  /* --- el año: lo que hace cada cargo, y lo que cuesta no tenerlo --- */
+  function anual(e){
+    const eq=EQ(e), R=rolesDe(e); let g=0, dm=0, sueldos=0; const vac=[];
+    // quien ya no tiene cargo (la compañía cambió de tamaño) se queda como asesor un año y sale
+    Object.keys(eq).forEach(k=>{ if(!R.includes(k)&&eq[k]){ if(eq[k].sobra149&&eq[k].sobra149<S.anio){ delete eq[k]; } else eq[k].sobra149=eq[k].sobra149||S.anio; } });
+    R.forEach(r=>{ const x=eq[r];
+      if(!x){ vac.push(r); return; }
+      x.edad=(x.edad||45)+1; sueldos+=Math.max(0,x.sueldo-estandar(e,r,5)); const d=(x.comp-5);   // lo normal ya está en los costos; pesa lo que se paga de más
+      if(r==='admin'){ e.eficiencia=clamp(e.eficiencia+d*.4,0,100); e.moral=clamp(e.moral+d*.2,0,100); dm+=d*.002; }
+      if(r==='planta'||r==='operaciones'){ e.eficiencia=clamp(e.eficiencia+d*.35,0,100); if(e.prod137) e.prod137.calidad=clamp(e.prod137.calidad+d*.3,0,98); }
+      if(r==='financiero'){ dm+=d*.004; }
+      if(r==='comercial'){ g+=d*.005; e.marca=clamp(e.marca+d*.2,0,100); }
+      if(r==='humana'){ e.moral=clamp(e.moral+d*.5,0,100); try{ const s=sind(e); s.fuerza=clamp(s.fuerza-d*.4,0,100); }catch(z){} }
+      if(r==='juridico'){ if(e.proc140) e.proc140.control=clamp(e.proc140.control+d*.4,0,100); try{ if(S.penal) S.penal.riesgo=clamp((S.penal.riesgo||0)-d*.3,0,100); }catch(z){} }
+      if(/^filial:/.test(r)){ g+=d*.002; }
+      x.leal=clamp(x.leal+(x.sueldo>=Math.round(escala(e)*(6+x.comp*2.2))?1:-2),0,100);
+    });
+    // las vacantes cuestan: más en compañías grandes
+    vac.forEach(r=>{ if(r==='admin'){ e.eficiencia=clamp(e.eficiencia-1.2,0,100); dm-=.004; } else if(/^filial:/.test(r)){ g-=.006; } else { dm-=.004; g-=.003; } });
+    const ing0=e.ingresos, mg=ing0>0?e.utilidad/ing0:0; const ing=ing0*(1+clamp(g,-.05,.05)); const delta=(ing-ing0)*Math.max(0,mg)+ing*clamp(dm,-.04,.04)-sueldos;
+    e.ingresos=ing; e.utilidad+=delta; e.caja+=delta; e.eqUlt149={sueldos,vac:vac.length,anio:S.anio};
+    if(vac.length&&tamano(e)!=='pequena'&&S.anio-(e.avisoVac149||0)>=4){ e.avisoVac149=S.anio; log('<b>'+esc(e.nombre)+'</b> tiene '+vac.length+' cargo'+(vac.length>1?'s':'')+' directivo'+(vac.length>1?'s':'')+' sin nadie: '+vac.map(r=>nomRol(r,e).toLowerCase()).join(', ')+'.','mal'); }
+    // sucesos
+    if(S._ev149===S.anio) return;
+    const conN=R.filter(r=>eq[r]); if(!conN.length) return;
+    const ladron=conN.find(r=>eq[r].hon<=4&&chance((5-eq[r].hon)*.03));
+    if(ladron){ S._ev149=S.anio; cola.push(evRobo(e,ladron)); return; }
+    const estrella=conN.find(r=>eq[r].comp>=8&&chance(.06));
+    if(estrella){ S._ev149=S.anio; cola.push(evCazatalentos(e,estrella)); return; }
+    const viejo=conN.find(r=>eq[r].edad>=66&&chance(.35));
+    if(viejo){ const x=eq[viejo]; delete eq[viejo]; log(esc(x.nombre)+' se jubiló como '+nomRol(viejo,e).toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.',''); if(x.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===x.hijo); if(h) h.cargo149=null; } }
+  }
+  function evRobo(e,r){ const x=EQ(e)[r], monto=Math.max(5,Math.round(e.ingresos*rnd(.01,.04))); e.caja-=monto; e.utilidad-=monto;
+    return {p:9,c:()=>companias().includes(e),t:()=>'<b>'+esc(x.nombre)+', '+nomRol(r,e).toLowerCase()+' de '+esc(e.nombre)+', se robó '+fmt(monto)+'.</b> Facturas infladas con proveedores amigos durante años.',
+      o:[{t:'Despedirlo y denunciarlo',f:()=>{ delete EQ(e)[r]; if(chance(.4)){ e.caja+=monto*.5; return 'Lo condenaron y recuperaste la mitad.'; } return 'Lo echaste. La plata no apareció.'; }},
+         {t:'Despedirlo sin ruido',f:()=>{ delete EQ(e)[r]; return 'Se fue sin escándalo. En el gremio se supo igual.'; }}]}; }
+  function evCazatalentos(e,r){ const x=EQ(e)[r], rival=(()=>{ try{ const L=rivalesVivas(); return L.length?'los '+pick(L).apellido:'una multinacional'; }catch(z){ return 'una multinacional'; } })();
+    return {p:9,c:()=>companias().includes(e)&&!!EQ(e)[r],t:()=>'<b>'+esc(rival.charAt(0).toUpperCase()+rival.slice(1))+' le ofrecen el doble a '+esc(x.nombre)+'</b>, tu '+nomRol(r,e).toLowerCase()+' en '+esc(e.nombre)+'.',
+      o:[{t:()=>'Igualar la oferta (el sueldo pasa a '+fmt(x.sueldo*1.8)+')',f:()=>{ const y=EQ(e)[r]; if(!y) return ''; y.sueldo=Math.round(y.sueldo*1.8); y.leal=clamp(y.leal+15,0,100); return 'Se queda. Te sale caro, pero no se va con tus secretos.'; }},
+         {t:'Dejarlo ir',f:()=>{ delete EQ(e)[r]; return 'Se fue a la competencia, con tu lista de clientes en la cabeza.'; }}]}; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA149_EMP) return; window.__SA149_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+
+  /* --- la pantalla --- */
+  function escenaEquipo149(e){
+    e=e||S.emp; if(!e) return; const eq=EQ(e), R=rolesDe(e), t=tamano(e), reab=()=>{ cerrarModal(); render(); escenaEquipo149(e); };
+    const filas=R.map(r=>{ const x=eq[r]; return '<div class="rol"><div><b>'+esc(nomRol(r,e))+'</b>'+(x?'<span>'+esc(x.nombre)+' · competencia '+x.comp+'/10 · lealtad '+Math.round(x.leal)+' · desde '+x.desde+(x.origen==='familia'?' · de la familia':'')+'</span>':'<span class="vac">Vacante. '+(ROLES[r]?esc(ROLES[r].d):'La filial anda sola.')+'</span>')+'</div><div class="c">'+(x?fmt(x.sueldo)+'/año':'—')+'</div></div>'; }).join('');
+    const ops=[];
+    R.forEach(r=>{ const x=eq[r];
+      if(!x) ops.push({t:'Contratar: '+nomRol(r,e).toLowerCase(),cat:'empleo',d:'Ves tres candidatos: un cazatalentos, alguien de adentro o un familiar.',cerrar:false,run:()=>{ cerrarModal(); elegir(e,r); }});
+      else { ops.push({t:'Despedir a '+P1(x.nombre)+' ('+nomRol(r,e).toLowerCase()+')',cat:'empleo',d:'Indemnización de medio sueldo anual. El cargo queda vacante.',cerrar:false,run:()=>{ e.caja-=x.sueldo*.5; if(x.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===x.hijo); if(h){ h.cargo149=null; h.vinculo=clamp((h.vinculo||50)-15,0,100); } } delete eq[r]; log('Despediste a '+esc(x.nombre)+' de <b>'+esc(e.nombre)+'</b>.'); reab(); }});
+        if(x.leal<55) ops.push({t:'Subirle el sueldo a '+P1(x.nombre),cat:'empleo',d:'+25%. Su lealtad está en '+Math.round(x.leal)+': se lo pueden llevar.',cerrar:false,run:()=>{ x.sueldo=Math.round(x.sueldo*1.25); x.leal=clamp(x.leal+20,0,100); reab(); }}); }
+    });
+    const u=e.eqUlt149;
+    escena({rubro:esc(e.nombre)+' · Personal',titulo:'El equipo directivo',ancho:true,cerrable:true,clase:'eq149',
+      cuerpo:t==='pequena'?'Una compañía pequeña necesita a alguien de confianza encima de la fábrica.':t==='mediana'?'Ya no la manejas sola: necesita gerente de planta y directores financiero y comercial.':'Una compañía grande se maneja por áreas, y cada filial en el exterior necesita su director.',
+      html:'<span class="tam">'+TAMN[t]+' · '+(e.empleados||0).toLocaleString('es-CO')+' empleados</span>'+filas+(u?'<div class="apunte">El año pasado los sueldos por encima de lo normal costaron '+fmt(u.sueldos)+(u.vac?'; '+u.vac+' vacante'+(u.vac>1?'s':'')+' le restaron a la compañía':'')+'.</div>':''),
+      opciones:ops.length?ops:[{t:'Volver',cat:'empleo'}]});
+  }
+  function elegir(e,r){
+    const C=['cazatalentos','adentro','familia'].map(o=>candidato(e,r,o)).filter(Boolean);
+    escena({rubro:esc(e.nombre),titulo:nomRol(r,e),ancho:true,cerrable:true,cuerpo:'Tres opciones para el cargo. El cazatalentos trae a los mejores, a precio de mercado; alguien de adentro conoce la casa; un familiar es leal, pero no siempre el más capaz.',
+      opciones:C.map(c=>({t:c.nombre+' · '+({cazatalentos:'del cazatalentos',adentro:'de adentro de la compañía',familia:'de la familia'})[c.origen],cat:'empleo',d:'Competencia '+c.comp+'/10. '+(c.origen==='familia'?'Lealtad total. ':'')+'Pide '+fmt(c.sueldo)+' al año.'+(c.origen==='cazatalentos'?' El cazatalentos cobra '+fmt(c.sueldo*.3)+'.':''),
+        run:()=>{ if(c.origen==='cazatalentos') e.caja-=c.sueldo*.3; EQ(e)[r]=c; if(c.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===c.hijo); if(h){ h.cargo149=e.nombre; h.vinculo=clamp((h.vinculo||50)+8,0,100); } }
+          log('<b>'+esc(c.nombre)+'</b> es '+(c.origen==='familia'?'el nuevo ':'')+nomRol(r,e).toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.','bien'); render(); }}))});
+  }
+  function panelHTML(e){ const R=rolesDe(e), eq=EQ(e), vac=R.filter(r=>!eq[r]).length;
+    return '<div class="eq149-panel"><b>El equipo directivo</b><div class="apunte" style="margin:4px 0 8px">'+TAMN[tamano(e)]+' · '+(R.length-vac)+' de '+R.length+' cargos con alguien'+(vac?' · <span class="mal">'+vac+' vacante'+(vac>1?'s':'')+'</span>':'')+'</div>'
+      +'<button type="button" class="btn" data-neg-accion="El equipo directivo">Ver el equipo directivo</button></div>'; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v149) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v149=true; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA149_ACC) return; window.__SA149_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const R=rolesDe(e), vac=R.filter(r=>!EQ(e)[r]).length;
+        A.push({t:'El equipo directivo',d:TAMN[tamano(e)]+': '+(vac?vac+' cargo'+(vac>1?'s':'')+' sin nadie.':'todos los cargos cubiertos.'),mov:0,modal:true,run:()=>escenaEquipo149(e)}); } }catch(x){}
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA149_CAT) return; window.__SA149_CAT=true;
+    window.catDe=function(t){ if(t==='El equipo directivo') return 'empleo'; return old.apply(this,arguments); }; }
+  function init149(){ wrapEmpresa(); wrapPanel(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('El equipo directivo')) D.push('El equipo directivo'); }catch(x){}
+    Object.assign(window,{equipo149:EQ,rolesEquipo149:rolesDe,tamanoCompania149:tamano,escenaEquipo149,candidato149:candidato}); }
+  setTimeout(init149,40); setTimeout(init149,220); setTimeout(init149,650); setTimeout(init149,950);
+  window.__SA149={version:V149};
 })();
 </script>
 
