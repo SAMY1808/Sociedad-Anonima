@@ -28233,7 +28233,10 @@ install();setTimeout(install,1200);
           const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)+8,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)+8,0,100); return 'La junta aprobó el préstamo. '+esc(q.nombre)+' no lo va a olvidar.'; }},
          {t:'Votar en contra',f:()=>{ const q=S._pide153; if(!q) return ''; const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)-10,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)-10,0,100); return 'Votaste en contra y la junta lo negó. En el próximo almuerzo familiar hubo un silencio largo.'; }}]}; }
   /* --- enganches --- */
-  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v153) return; window.miPct=function(e){ const v=old.apply(this,arguments); try{ return v+foPct(e); }catch(x){ return v; } }; window.miPct.__v153=true; }
+  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v153) return; window.miPct=function(e){ const v=old.apply(this,arguments); try{ const f=foPct(e); if(f>0) S._venta153={e,efectivo:S.efectivo}; return v+f; }catch(x){ return v; } }; window.miPct.__v153=true; }
+  /* si la compañía se vende o se liquida, la parte de la plata que corresponde a las acciones del family office es del family office */
+  function wrapSalida(){ const old=window.sacarDelGrupo; if(typeof old!=='function'||old.__v153) return;
+    window.sacarDelGrupo=function(e){ try{ const fo=FO(), s=S._venta153, f=foPct(e); if(fo&&f>0&&s&&s.e===e){ const tot=miPct(e), d=S.efectivo-s.efectivo; if(d>0&&tot>0){ const x=d*f/tot; S.efectivo-=x; meter(fo,x); log('De lo que dejó '+esc(e.nombre)+', '+fmt(x)+' fueron para el family office, dueño de '+pct(f)+' de la compañía.'); } } S._venta153=null; }catch(x){} return old.apply(this,arguments); }; window.sacarDelGrupo.__v153=true; }
   function wrapValor(){ const old=window.valorFamilyOffice; if(typeof old!=='function'||old.__v153) return;
     window.valorFamilyOffice=function(){ let v=old.apply(this,arguments); try{ const fo=FO(); if(fo&&Array.isArray(fo.prest153)) v+=fo.prest153.filter(p=>p.tipo!=='tu').reduce((s,p)=>s+p.saldo,0); }catch(x){} return v; }; window.valorFamilyOffice.__v153=true; }
   function wrapDividendos(){ const old=window.repartirDividendos; if(typeof old!=='function'||old.__v153) return;
@@ -28255,7 +28258,7 @@ install();setTimeout(install,1200);
     return '<div class="socios153"><b>Los accionistas</b><table class="libro">'+e.holders.slice(0,6).map(h=>'<tr><td>'+esc(h.id==='tu'?'Tú':h.nombre)+' <small>'+(h.id==='fo153'?'family office':h.id==='tu'?'':(TIPO_N[h.tipo]||''))+'</small></td><td>'+pct(h.n/tot)+'</td></tr>').join('')+'</table>'+(L.length?'<button type="button" class="btn" data-neg-accion="Comprarles acciones a los socios">Ofrecer por sus acciones</button>':'')+'</div>'; }
   function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v153) return;
     window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='finanzas') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v153=true; }
-  function init153(){ wrapMiPct(); wrapValor(); wrapDividendos(); wrapEscena(); wrapPaso(); wrapAcciones(); wrapCat(); wrapPanel();
+  function init153(){ wrapMiPct(); wrapSalida(); wrapValor(); wrapDividendos(); wrapEscena(); wrapPaso(); wrapAcciones(); wrapCat(); wrapPanel();
     try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Comprarles acciones a los socios')) D.push('Comprarles acciones a los socios'); }catch(x){}
     Object.assign(window,{escenaFO153,escenaSocios153,beneficiariosFO153:beneficiarios,juntaFO153:junta,votarFO153:votar,aportarAccionesFO153:aportarAcciones,anualFO153:anual,unirBancaFO153:unir,aceptacion153:aceptacion}); }
   setTimeout(init153,40); setTimeout(init153,220); setTimeout(init153,650); setTimeout(init153,950);
