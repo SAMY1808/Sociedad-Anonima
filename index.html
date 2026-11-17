@@ -1131,10 +1131,20 @@ svg.foto116{display:block;background:#1d2a23}
 .eq149 .rol .c{font-family:var(--display);font-size:16px;color:#E8D2A4;white-space:nowrap}
 .eq149-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
 </style>
+<style id="estilos-v150">
+.lic150 .lic{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.lic150 .lic b{display:block;font-size:14.5px}
+.lic150 .lic span{font-size:12.5px;color:var(--humo2)}
+.lic150 .est{font-size:12.5px;padding:2px 9px;border-radius:9px;white-space:nowrap}
+.lic150 .est.ok{background:rgba(127,163,107,.22);color:#B9D3A5}
+.lic150 .est.tr{background:rgba(214,166,72,.22);color:#F0CF86}
+.lic150 .est.no{background:rgba(181,85,60,.28);color:#F0A48E}
+.lic150-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v149</div>
+<div class="version-badge" id="versionBadge">v150</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -27549,6 +27559,128 @@ install();setTimeout(install,1200);
     Object.assign(window,{equipo149:EQ,rolesEquipo149:rolesDe,tamanoCompania149:tamano,escenaEquipo149,candidato149:candidato}); }
   setTimeout(init149,40); setTimeout(init149,220); setTimeout(init149,650); setTimeout(init149,950);
   window.__SA149={version:V149};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v150 · LAS LICENCIAS
+   Cada actividad necesita sus permisos, según el sector y la época:
+   licencia de funcionamiento de la Superintendencia (bancos, financieras,
+   aseguradoras), título minero, licencia ambiental (desde 1993), registro
+   sanitario del INVIMA (desde 1995; antes, del Ministerio de Salud),
+   habilitación de servicios de salud, licencias de construcción ante la
+   curaduría (desde 1997), concesión de frecuencias de radio y de
+   televisión, habilitación de transporte, registro de exportador de café,
+   registro nacional de turismo, permisos de energía ante la CREG.
+   Sin licencia la compañía opera a medias y se arriesga a multas y
+   cierres. El trámite tarda y cuesta: por la vía normal, con un gestor, o
+   "por debajo de la mesa" (rápido, y delito). Las licencias se renuevan;
+   un escándalo o un incumplimiento pueden suspenderlas.
+   Las compañías que ya existían conservan las licencias que tenían.
+   ========================================================================== */
+(function(){
+  const V150='v150';
+  const L=(id,n,ent,desde,anios,vig,c,d)=>({id,n,ent,desde,anios,vig,c,d});
+  const LIC={
+    superfin:L('superfin','Licencia de funcionamiento','la Superintendencia Financiera',1923,2,0,.03,'Sin ella no se puede captar ni prestar plata del público.'),
+    aseguradora:L('aseguradora','Licencia de aseguradora','la Superintendencia Financiera',1923,2,0,.03,'Para vender pólizas hay que demostrar reservas y capital.'),
+    titulo:L('titulo','Título minero','el Ministerio de Minas',1900,2,30,.02,'La concesión para explorar y explotar una zona.'),
+    ambiental:L('ambiental','Licencia ambiental','la ANLA y las corporaciones autónomas',1993,2,0,.015,'Estudio de impacto, consulta previa y plan de manejo.'),
+    invima:L('invima','Registro sanitario','el INVIMA',1995,1,10,.008,'Cada producto que se come o se toma necesita su registro.'),
+    minsalud:L('minsalud','Licencia sanitaria','el Ministerio de Salud',1950,1,10,.006,'El permiso para fabricar alimentos y medicamentos.'),
+    habilitacion:L('habilitacion','Habilitación de servicios de salud','la Secretaría de Salud',2002,1,4,.006,'Para atender pacientes hay que cumplir los estándares.'),
+    curaduria:L('curaduria','Licencias de urbanismo y construcción','las curadurías urbanas',1997,1,3,.01,'Cada proyecto necesita su licencia antes de poner un ladrillo.'),
+    planeacion:L('planeacion','Licencias de construcción','las oficinas de planeación municipal',1950,1,3,.008,'El permiso de la alcaldía para cada obra.'),
+    radio:L('radio','Concesión de frecuencias de radio','el Ministerio de Comunicaciones',1930,1,10,.01,'El espectro es del Estado: se concesiona.'),
+    tv:L('tv','Concesión de televisión','la Comisión Nacional de Televisión',1998,2,10,.05,'Los canales privados nacionales llegan en 1998.'),
+    transporte:L('transporte','Habilitación de transporte','el Ministerio de Transporte',1990,1,0,.006,'Rutas, vehículos y seguros en regla.'),
+    exportador:L('exportador','Registro de exportador de café','la Federación de Cafeteros',1927,1,0,.004,'Calidades, contratos y contribución cafetera.'),
+    turismo:L('turismo','Registro Nacional de Turismo','el Ministerio de Comercio',1996,1,1,.003,'Todo prestador de servicios turísticos se registra.'),
+    creg:L('creg','Registro ante la CREG','la Comisión de Regulación de Energía',1994,1,0,.006,'Para generar o vender energía en el mercado mayorista.')
+  };
+  function requeridas(e){ const A=S.anio, s=e.sector, r=[];
+    const add=id=>{ if(LIC[id]&&A>=LIC[id].desde) r.push(id); };
+    if(s==='financiero') add('superfin');
+    if(s==='seguros') add('aseguradora');
+    if(s==='mineria'){ add('titulo'); add('ambiental'); }
+    if(s==='energia'){ add('ambiental'); add('creg'); }
+    if(s==='construccion'){ if(A>=1997) add('curaduria'); else add('planeacion'); }
+    if(s==='alimentos'||s==='salud'){ if(A>=1995) add('invima'); else add('minsalud'); }
+    if(s==='salud') add('habilitacion');
+    if(s==='medios'){ add('radio'); if((e.ingresos||0)>3000) add('tv'); }
+    if(s==='logistica') add('transporte');
+    if(s==='turismo') add('turismo');
+    if(e.cafe148&&e.cafe148.k==='export') add('exportador');
+    return r; }
+  const R=e=>{ if(!e.lic150||typeof e.lic150!=='object'){ e.lic150={}; requeridas(e).forEach(id=>{ e.lic150[id]={estado:'vigente',desde:e.fundada||S.anio,hasta:LIC[id].vig?S.anio+LIC[id].vig:null}; }); e.lic150.__nueva=(e.fundada||0)>=S.anio; } return e.lic150; };
+  const costo=(e,id)=>Math.max(4,Math.round((e.ingresos||100)*LIC[id].c));
+  const vigente=(e,id)=>{ const x=R(e)[id]; return x&&x.estado==='vigente'; };
+  const faltan=e=>requeridas(e).filter(id=>!vigente(e,id));
+  /* --- el año --- */
+  function anual(e){
+    const lic=R(e); let pen=0;
+    if(e.banco112&&!e.banco112.intervenido&&!vigente(e,'superfin')&&requeridas(e).includes('superfin')) lic.superfin={estado:'vigente',desde:e.banco112.desde||S.anio,hasta:null};   // el banco de la v112 ya tiene su licencia
+    requeridas(e).forEach(id=>{ if(!lic[id]&&(e.fundada||S.anio)<LIC[id].desde&&!lic.__nueva){ lic[id]={estado:'vigente',desde:S.anio,hasta:Math.max(S.anio,LIC[id].desde)+3,transicion:true};
+      log('Nueva exigencia para <b>'+esc(e.nombre)+'</b>: '+LIC[id].n.toLowerCase()+' ante '+LIC[id].ent+'. Tiene tres años de transición.',''); } });
+    requeridas(e).forEach(id=>{ const x=lic[id];
+      if(x&&x.estado==='tramite'&&x.listo<=S.anio){ if(chance(x.p||.7)){ lic[id]={estado:'vigente',desde:S.anio,hasta:LIC[id].vig?S.anio+LIC[id].vig:null}; log('<b>'+esc(e.nombre)+'</b> obtuvo su '+LIC[id].n.toLowerCase()+' de '+LIC[id].ent+'.','bien'); hito(e.nombre+' obtuvo su '+LIC[id].n.toLowerCase()); }
+        else { lic[id]={estado:'negada',anio:S.anio}; log(LIC[id].ent.charAt(0).toUpperCase()+LIC[id].ent.slice(1)+' le negó a <b>'+esc(e.nombre)+'</b> la '+LIC[id].n.toLowerCase()+'. Toca volver a radicar.','mal'); } }
+      const y=lic[id];
+      if(y&&y.estado==='vigente'&&y.hasta&&y.hasta<=S.anio){ const c=costo(e,id); if(e.caja>=c){ e.caja-=c; y.hasta=S.anio+LIC[id].vig; } else { y.estado='vencida'; log('Se venció la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> y no había caja para renovarla.','mal'); } }
+      if(y&&y.estado==='suspendida'&&y.hasta<=S.anio){ y.estado='vigente'; y.hasta=LIC[id].vig?S.anio+LIC[id].vig:null; log('Levantaron la suspensión de la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.','bien'); }
+      if(!vigente(e,id)) pen+=.1;
+    });
+    if(pen>0){ const p=Math.min(.3,pen), perd=e.ingresos*p, mg=e.ingresos>0?e.utilidad/e.ingresos:0; e.ingresos-=perd; const d=-perd*Math.max(0,mg); e.utilidad+=d; e.caja+=d;
+      if(S._ev150!==S.anio&&chance(.25)){ S._ev150=S.anio; cola.push(evSancion(e,faltan(e)[0])); } }
+    // un escándalo abierto de la compañía puede traer una suspensión
+    try{ const esc_=(S.esc129||[]).filter(x=>x.estado==='abierto'&&x.tipo==='empresa'&&String(x.titulo||'').indexOf(e.nombre)>=0); const conLic=requeridas(e).filter(id=>vigente(e,id));
+      if(esc_.length&&conLic.length&&S._ev150!==S.anio&&chance(.2)){ S._ev150=S.anio; const id=pick(conLic); lic[id]={estado:'suspendida',desde:lic[id].desde,hasta:S.anio+1}; log('Por el escándalo, '+LIC[id].ent+' suspendió la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> por un año.','mal'); } }catch(x){}
+  }
+  function evSancion(e,id){ const L_=LIC[id]; return {p:9,c:()=>companias().includes(e)&&!vigente(e,id),t:()=>'<b>'+esc(L_.ent.charAt(0).toUpperCase()+L_.ent.slice(1))+' llegó a '+esc(e.nombre)+'.</b> Está operando sin '+L_.n.toLowerCase()+'. Amenazan con multa y cierre.',
+    o:[{t:()=>'Pagar la multa y radicar ya ('+fmt(costo(e,id)*2)+')',f:()=>{ e.caja-=costo(e,id)*2; R(e)[id]={estado:'tramite',listo:S.anio+L_.anios,p:.75}; return 'Pagaste la multa y empezó el trámite.'; }},
+       {t:'Cerrar mientras se tramita',f:()=>{ e.ingresos*=.8; R(e)[id]={estado:'tramite',listo:S.anio+L_.anios,p:.8}; return 'Cerraste unos meses. Perdiste ventas, pero ya no hay riesgo de sanción.'; }},
+       {t:'Un sobre para que miren para otro lado',f:()=>{ const c=costo(e,id); e.caja-=c; registrarDelito('cohecho',3,'sobornar a un funcionario de '+L_.ent); if(chance(.7)) return 'El funcionario se fue contento. El problema no se fue: sigues sin licencia.'; try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','El soborno de '+e.nombre,2); }catch(x){} return 'Era una trampa de la Fiscalía. Salió en todos los noticieros.'; }}]}; }
+  /* --- la pantalla --- */
+  function escenaLicencias150(e){
+    e=e||S.emp; if(!e) return; const lic=R(e), req=requeridas(e), reab=()=>{ cerrarModal(); render(); escenaLicencias150(e); };
+    const est=id=>{ const x=lic[id]; if(!x) return ['no','Sin licencia']; if(x.estado==='vigente') return ['ok','Vigente'+(x.hasta?' hasta '+x.hasta:'')]; if(x.estado==='tramite') return ['tr','En trámite · respuesta en '+x.listo]; if(x.estado==='suspendida') return ['no','Suspendida hasta '+x.hasta]; if(x.estado==='negada') return ['no','Negada en '+x.anio]; return ['no','Vencida']; };
+    const filas=req.map(id=>{ const [c,t]=est(id); return '<div class="lic"><div><b>'+esc(LIC[id].n)+'</b><span>'+esc(LIC[id].ent.charAt(0).toUpperCase()+LIC[id].ent.slice(1))+'. '+esc(LIC[id].d)+'</span></div><span class="est '+c+'">'+esc(t)+'</span></div>'; }).join('');
+    const ops=[];
+    req.filter(id=>{ const x=lic[id]; return !x||!['vigente','tramite','suspendida'].includes(x.estado); }).forEach(id=>{ const L_=LIC[id], c=costo(e,id);
+      ops.push({t:'Radicar: '+L_.n.toLowerCase(),cat:'compania',d:'Por la vía normal: '+fmt(c)+' en estudios y trámites. Respuesta en '+L_.anios+' año'+(L_.anios>1?'s':'')+'.',dis:e.caja<c?'La compañía no tiene '+fmt(c):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c; S.mov--; lic[id]={estado:'tramite',listo:S.anio+L_.anios,p:clamp(.55+S.p.reputacion/300,.4,.9)}; log('<b>'+esc(e.nombre)+'</b> radicó la solicitud de '+L_.n.toLowerCase()+'.'); reab(); }});
+      ops.push({t:'Con un gestor: '+L_.n.toLowerCase(),cat:'compania',d:'Un tramitador que conoce a todo el mundo: '+fmt(c*2)+'. Más rápido y más probable.',dis:e.caja<c*2?'La compañía no tiene '+fmt(c*2):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c*2; S.mov--; lic[id]={estado:'tramite',listo:S.anio+Math.max(1,L_.anios-1),p:clamp(.7+S.p.redes/300,.5,.95)}; log('<b>'+esc(e.nombre)+'</b> le pasó el trámite de '+L_.n.toLowerCase()+' a un gestor.'); reab(); }});
+      ops.push({t:'Por debajo de la mesa: '+L_.n.toLowerCase(),cat:'riesgo',d:'Sale ya. Cuesta '+fmt(c*3)+', es un delito y puede salir mal.',dis:e.caja<c*3?'La compañía no tiene '+fmt(c*3):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c*3; S.mov--; registrarDelito('cohecho',3,'comprar la '+L_.n.toLowerCase()+' de '+e.nombre);
+        if(chance(.75)){ lic[id]={estado:'vigente',desde:S.anio,hasta:L_.vig?S.anio+L_.vig:null,irregular:true}; log('La '+L_.n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> salió en una semana. Nadie preguntó cómo.','mal'); }
+        else { try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La licencia comprada de '+e.nombre,2); }catch(x){} log('El funcionario fue capturado con tu sobre. La licencia no salió y el escándalo sí.','mal'); } reab(); }}); });
+    escena({rubro:esc(e.nombre)+' · Expansión',titulo:'Licencias y permisos',ancho:true,cerrable:true,clase:'lic150',
+      cuerpo:req.length?(faltan(e).length?'Sin todas sus licencias la compañía opera a medias: vende menos y se arriesga a multas y cierres.':'La compañía tiene todos sus permisos en regla.'):'En '+S.anio+' esta actividad no necesita licencias especiales: basta el registro mercantil.',
+      html:filas,opciones:ops.length?ops:[{t:'Volver',cat:'compania'}]});
+  }
+  function panelHTML(e){ const req=requeridas(e); if(!req.length) return ''; const f=faltan(e).length;
+    return '<div class="lic150-panel"><b>Licencias y permisos</b><div class="apunte" style="margin:4px 0 8px">'+(req.length-f)+' de '+req.length+' en regla'+(f?' · <span class="mal">'+f+' pendiente'+(f>1?'s':'')+': la compañía opera a medias</span>':'')+'</div><button type="button" class="btn" data-neg-accion="Licencias y permisos">Ver las licencias</button></div>'; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA150_EMP) return; window.__SA150_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  // al fundar una compañía nueva, arranca sin licencias
+  function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||old.__v150) return;
+    window.fundarEn=function(){ const r=old.apply(this,arguments); try{ const g=companias(), e=g[g.length-1]; if(e&&!e.lic150){ e.lic150={}; if(requeridas(e).length) log('<b>'+esc(e.nombre)+'</b> necesita '+requeridas(e).map(id=>LIC[id].n.toLowerCase()).join(' y ')+' para operar del todo. Se tramitan en "Licencias y permisos".','mal'); } }catch(x){} return r; };
+    window.fundarEn.__v150=true; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v150) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&(negCat==='expansion'||negCat==='resumen')) h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v150=true; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA150_ACC) return; window.__SA150_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)&&requeridas(e).length){ const f=faltan(e).length;
+        A.push({t:'Licencias y permisos',d:f?f+' licencia'+(f>1?'s':'')+' pendiente'+(f>1?'s':'')+': la compañía opera a medias.':'Todo en regla.',mov:0,modal:true,run:()=>escenaLicencias150(e)}); } }catch(x){}
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA150_CAT) return; window.__SA150_CAT=true;
+    window.catDe=function(t){ if(t==='Licencias y permisos') return 'compania'; return old.apply(this,arguments); }; }
+  function init150(){ wrapEmpresa(); wrapFundar(); wrapPanel(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Licencias y permisos')) D.push('Licencias y permisos'); }catch(x){}
+    // las compañías que ya existían conservan lo que tenían
+    try{ if(S&&S.p) companias().forEach(e=>R(e)); }catch(x){}
+    Object.assign(window,{LICENCIAS_150:LIC,licenciasRequeridas150:requeridas,licencias150:R,escenaLicencias150,licenciasFaltantes150:faltan}); }
+  setTimeout(init150,40); setTimeout(init150,220); setTimeout(init150,650); setTimeout(init150,950);
+  window.__SA150={version:V150};
 })();
 </script>
 
