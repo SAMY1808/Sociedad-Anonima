@@ -1160,10 +1160,21 @@ svg.foto116{display:block;background:#1d2a23}
 .bolsa152 table.libro td small{color:var(--humo2)}
 .bolsa152 .vacio{color:var(--humo2);font-size:13px;padding:4px 0}
 </style>
+<style id="estilos-v153">
+.fo153 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.fo153 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.fo153 .k b{display:block;font-size:16px;font-family:var(--display)}
+.fo153 .k span{font-size:12px;color:var(--humo2)}
+.fo153 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.fo153 table.libro td{padding:5px 4px}
+.fo153 table.libro td small,.socios153 small{color:var(--humo2)}
+.socios153{margin-top:12px}
+.socios153 table.libro td{padding:4px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v152</div>
+<div class="version-badge" id="versionBadge">v153</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -28060,6 +28071,195 @@ install();setTimeout(install,1200);
   function init152(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo(); Object.assign(window,{escenaBolsa152,cuentaBolsa152:cuentaPF,mercadoBolsa152:mercado,comprarAccion152:comprar,venderAccion152:vender,anualBolsa152:anual,EMISORAS_152:EMI,cortar152:cortar,comprarTes152:comprarTes,comprarExt152:comprarExt}); }
   setTimeout(init152,40); setTimeout(init152,220); setTimeout(init152,650);
   window.__SA152={version:V152};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v153 · LA CASA FINANCIERA
+   La banca privada de la familia y el family office se vuelven una sola
+   entidad. Y la entidad tiene dueños:
+   - Beneficiarios: tú, tu pareja, tus hijos y nietos adultos, tus hermanos
+     y sobrinos. Con cada generación son más, y tu parte pesa menos.
+   - Junta del family office: tú, el director y los tres beneficiarios con
+     más peso. Sacar plata (un retiro, recuperar acciones) lo aprueba la
+     junta; si el monto es grande o la familia está resentida, te lo niegan.
+   - Crédito de la casa: te presta a ti, a tus compañías y a los familiares
+     por debajo del interés del mercado. La DIAN presume intereses cuando
+     una sociedad le presta barato a sus socios (desde 1990).
+   - Reparto anual a los beneficiarios.
+   - El family office puede ser accionista de tus compañías: las acciones
+     que le aportas votan contigo (cuentan en tu control), sus dividendos
+     son de la casa, y no se reparten ni pagan sucesión cuando mueres: el
+     control queda en un solo bloque.
+   - Comprarles acciones a los otros accionistas de tus compañías: a un
+     fondo, a un socio, a un pariente, al flotante de la bolsa, con prima o
+     sin ella, para ti o para el family office.
+   ========================================================================== */
+(function(){
+  const V153='v153';
+  const FO=()=>S&&S.familyOffice;
+  const pct=x=>(Math.round(x*1000)/10)+'%';
+  const tasaM=()=>clamp((S.macro&&S.macro.tasa)||.08,.02,.4);
+  function asegurar(){ const fo=FO(); if(!fo) return null; if(!Array.isArray(fo.prest153)) fo.prest153=[]; if(!isFinite(fo.distrib153)) fo.distrib153=0; if(!fo.rech153) fo.rech153={}; return fo; }
+  const liquido=fo=>Math.max(0,(fo.reserva||0)+(fo.inversiones||0));
+  function sacar(fo,x){ x=Math.min(x,liquido(fo)); const dr=Math.min(fo.reserva,x); fo.reserva-=dr; fo.inversiones=Math.max(0,fo.inversiones-(x-dr)); fo.activos=fo.reserva+fo.inversiones; return x; }
+  function meter(fo,x){ fo.reserva+=x; fo.activos=fo.reserva+fo.inversiones; }
+  /* --- unir la banca privada al family office --- */
+  function unir(){ const fo=asegurar(), b=S&&S.bancoFamilia; if(!fo||!b) return;
+    meter(fo,Math.max(0,b.capital||0));
+    (b.prestamosFamilia||[]).filter(p=>p.saldo>1).forEach(p=>fo.prest153.push({tipo:'familia',quien:p.nombre||'un familiar',pid:p.pid||null,saldo:p.saldo,tasa:p.tasa||.07,plazo:Math.max(1,(p.plazo||8)-(S.anio-(p.desde||S.anio))),riesgo:p.riesgo||.08,desde:p.desde||S.anio}));
+    fo.banca153={desde:b.desde||S.anio,nombre:b.nombre}; S.bancoFamilia=null;
+    log('La banca privada de la familia se fusionó con el <b>'+esc(fo.nombre)+'</b>: una sola entidad administra el patrimonio y presta a la casa.','hito'); }
+  /* --- los beneficiarios --- */
+  function beneficiarios(){ const L=[{key:'tu',nombre:(S.p&&S.p.nombre?S.p.nombre+' '+(S.p.apellido||S.dinastia):'Tú'),rel:'tú',w:3,afecto:100,yo:true}];
+    try{ const pa=S.familia&&S.familia.pareja; if(pa&&pa.nombre&&pa.vivo!==false) L.push({key:'pareja',nombre:pa.nombre,rel:'tu pareja',w:1,afecto:pa.paciencia||60}); }catch(x){}
+    try{ (S.familia.hijos||[]).filter(h=>h.edad>=18&&h.vivo!==false).forEach(h=>{ L.push({key:'h:'+(h.fid||h.nombre),nombre:h.nombre+' '+(h.apellido||S.dinastia),rel:etiquetaHijo(h),w:1,afecto:h.vinculo||60,h});
+        (h.hijos||[]).filter(n=>(n.edad||0)>=18).forEach(n=>L.push({key:'n:'+(n.fid||n.nombre),nombre:n.nombre+' '+(n.apellido||h.apellido||S.dinastia),rel:n.sexo==='m'?'nieta':'nieto',w:.5,afecto:60})); }); }catch(x){}
+    try{ parientesVivos().filter(p=>(p.edad||0)>=18&&/^(hermano|hermana|sobrino|sobrina)$/.test(p.rel)).forEach(p=>L.push({key:'p:'+p.pid,nombre:nombrePariente(p),rel:relacionPorSexo(p.rel,p.sexo),w:/hermano|hermana/.test(p.rel)?1:.5,afecto:p.afecto||55,p})); }catch(x){}
+    const tw=L.reduce((s,b)=>s+b.w,0); L.forEach(b=>b.parte=b.w/tw); return L; }
+  const miParte=()=>beneficiarios()[0].parte;
+  function junta(){ const fo=FO(), B=beneficiarios().filter(b=>!b.yo).sort((a,b)=>b.w-a.w||b.afecto-a.afecto).slice(0,3);
+    return [{nombre:'Tú',yo:true}].concat([{nombre:(fo.director&&fo.director.nombre)||'El director',dir:true,capaz:(fo.director&&fo.director.capaz)||7}]).concat(B); }
+  function votar(monto,tipo){ const fo=FO(), J=junta(), ratio=monto/Math.max(1,liquido(fo)), mora=(fo.prest153||[]).some(p=>p.tipo==='tu'&&p.mora>0), p0=miParte();
+    const votos=J.map(m=>{ if(m.yo) return {m,si:true};
+      let p=m.dir?.85-ratio*2.5+(m.capaz-7)*-.02:.72-ratio*3+((m.afecto||55)-55)/120;
+      if(tipo==='prestamo') p+=.15; if(tipo==='acciones') p-=.05; if(mora) p-=.3; p+=p0*.4; return {m,si:chance(clamp(p,.03,.97))}; });
+    const si=votos.filter(v=>v.si).length; return {ok:si>votos.length/2,si,de:votos.length,votos}; }
+  const resumenVoto=v=>v.votos.map(x=>(x.m.yo?'tú':esc(x.m.nombre.split(' ')[0]))+(x.si?' sí':' no')).join(', ');
+  /* --- acciones de la casa: el family office como accionista --- */
+  const foHolder=e=>e&&Array.isArray(e.holders)?e.holders.find(h=>h.id==='fo153'):null;
+  const foPct=e=>{ const h=foHolder(e); return h?h.n/totalAcciones(e):0; };
+  function aportarAcciones(e,frac){ const fo=asegurar(), mio=e.holders.find(h=>h.id==='tu'); if(!fo||!mio) return 0; const n=Math.round(mio.n*frac); if(n<1) return 0;
+    mio.n-=n; let h=foHolder(e); if(!h){ h={id:'fo153',nombre:fo.nombre,tipo:'familia',n:0}; e.holders.push(h); } h.n+=n; if(mio.n<=0) e.holders=e.holders.filter(x=>x!==mio); return n; }
+  function recuperarAcciones(e){ const h=foHolder(e); if(!h) return 0; let mio=e.holders.find(x=>x.id==='tu'); if(!mio){ mio={id:'tu',nombre:'Tú',tipo:'control',n:0}; e.holders.unshift(mio); } const n=h.n; mio.n+=n; e.holders=e.holders.filter(x=>x!==h); return n; }
+  /* --- comprarles acciones a los otros accionistas --- */
+  const TIPO_N={fondo:'Fondo de inversión',socio:'Socio',rival:'Otra familia',aliado:'Familia aliada',acreedor:'Acreedores',mercado:'Flotante en bolsa',familia:'Familia'};
+  function otros(e){ return (e&&e.holders||[]).filter(h=>h.id!=='tu'&&h.id!=='fo153'&&h.n>0); }
+  function aceptacion(h,prima){ const t=h.tipo||'socio';
+    if(t==='mercado') return 1;
+    if(t==='rival') return clamp(.03+prima*1.2,.02,.6);
+    if(t==='aliado') return clamp(.2+prima*1.4,.05,.85);
+    if(t==='fondo') return clamp(.3+prima*2,.05,.95);
+    if(t==='acreedor') return clamp(.55+prima*1.2,.1,.97);
+    if(t==='familia') return clamp(.22+prima*1.3+(h.heredero119?.1:0),.05,.85);
+    return clamp(.32+prima*1.6,.05,.9); }
+  function escenaSocios153(e){ e=e||S.emp; if(!e) return; const L=otros(e), pa=precioAccion(e), fo=asegurar();
+    const reab=()=>{ cerrarModal(); render(); escenaSocios153(e); };
+    const tot=totalAcciones(e), filas=e.holders.map(h=>'<tr><td>'+esc(h.id==='tu'?'Tú':h.nombre)+' <small>'+(h.id==='tu'?'':h.id==='fo153'?'family office, vota contigo':(TIPO_N[h.tipo]||h.tipo||''))+'</small></td><td>'+pct(h.n/tot)+'</td></tr>').join('');
+    const html='<table class="libro">'+filas+'</table><div class="apunte">Precio de referencia: $'+Math.round(pa*1e6).toLocaleString('es-CO')+' por acción ('+fmt(valuar(e))+' la compañía). Tu control, con lo del family office: <b>'+pct(miPct(e))+'</b>.</div>';
+    const ops=L.map(h=>{ const n=h.tipo==='mercado'?Math.round(h.n*.3):h.n, base=n*pa, vetado=S.anio===(e.rech153||{})[h.id];
+      return {t:(h.tipo==='mercado'?'Comprar flotante en la bolsa':'Ofrecerle a '+h.nombre),cat:'capital',d:(TIPO_N[h.tipo]||'Accionista')+' con '+pct(h.n/tot)+'. '+(h.tipo==='mercado'?'Hasta 30% del flotante al año, un poco por encima del precio.':'Su parte vale unos '+fmt(base)+' a precio de referencia.'),
+        dis:vetado?'Ya te dijo que no este año':(S.mov<1?'No te quedan movidas':null),cerrar:false,run:()=>{ cerrarModal(); ofertar(e,h,n,pa); }}; });
+    escena({rubro:esc(e.nombre),titulo:'Los accionistas',ancho:true,cerrable:true,clase:'fo153',cuerpo:'Quién más es dueño de la compañía. Puedes ofrecerles plata por sus acciones: para ti o para el family office'+(fo?'':' (si tuvieras uno)')+'.',html,opciones:ops.length?ops:[{t:'Volver',cat:'capital',run:()=>{}}]}); }
+  function ofertar(e,h,n,pa){ const fo=asegurar(), primas=h.tipo==='mercado'?[.05]:[0,.15,.35], ops=[];
+    primas.forEach(pr=>{ const precio=n*pa*(1+pr), prob=aceptacion(h,pr);
+      const hacer=(quien)=>()=>{ if(S.mov<1) return; S.mov--; const pagador=quien==='fo'?FO():null; const disp=pagador?liquido(pagador):S.efectivo; if(disp<precio){ log('No alcanzaba la plata para la oferta.','mal'); cerrarModal(); render(); return; }
+        if(!chance(prob)){ (e.rech153=e.rech153||{})[h.id]=S.anio; log('<b>'+esc(h.nombre)+'</b> no aceptó tu oferta por sus acciones de '+esc(e.nombre)+'.'+(h.tipo==='rival'?' "Esas acciones no están en venta."':''),'mal'); cerrarModal(); render(); return; }
+        if(pagador) sacar(pagador,precio); else S.efectivo-=precio;
+        h.n-=n; let dest=quien==='fo'?foHolder(e):e.holders.find(x=>x.id==='tu'); if(!dest){ dest=quien==='fo'?{id:'fo153',nombre:FO().nombre,tipo:'familia',n:0}:{id:'tu',nombre:'Tú',tipo:'control',n:0}; e.holders.push(dest); } dest.n+=n;
+        e.holders=e.holders.filter(x=>x.n>0); if(h.tipo==='rival'&&typeof moverPrestigio==='function') moverPrestigio(2,'les compró su parte a otra familia');
+        log('Le compraste a <b>'+esc(h.nombre)+'</b> su '+pct(n/totalAcciones(e))+' de '+esc(e.nombre)+' por '+fmt(precio)+(quien==='fo'?', para el family office':'')+'. Tu control queda en '+pct(miPct(e))+'.','bien'); cerrarModal(); render(); };
+      const et=h.tipo==='mercado'?'':(pr?'Con '+Math.round(pr*100)+'% de prima':'Al precio de referencia')+': ';
+      ops.push({t:et+fmt(precio),cat:'capital',d:'Pagas tú. '+(h.tipo==='mercado'?'Se compra en la rueda.':'Probabilidad de que acepte: '+(prob>.75?'alta':prob>.4?'media':'baja')+'.'),dis:S.efectivo<precio?'No tienes '+fmt(precio):null,cerrar:false,run:hacer('tu')});
+      if(fo) ops.push({t:et+fmt(precio)+' · paga el family office',cat:'capital',d:'Las acciones quedan en la casa: votan contigo y no se reparten en la sucesión.',dis:liquido(fo)<precio?'El family office no tiene '+fmt(precio)+' líquidos':null,cerrar:false,run:hacer('fo')}); });
+    escena({rubro:esc(e.nombre),titulo:h.tipo==='mercado'?'Comprar en la bolsa':'Oferta a '+esc(h.nombre),cerrable:true,cuerpo:(h.tipo==='mercado'?'Compras '+pct(n/totalAcciones(e))+' de la compañía en el mercado.':'Le ofreces plata por su '+pct(n/totalAcciones(e))+'. '+({fondo:'Un fondo vende si la cifra le cuadra.',rival:'Otra familia casi nunca vende: tendría que ser una oferta que no pueda rechazar.',familia:'Con la familia pesa más el apego que el precio.',acreedor:'Los acreedores quieren salir.',aliado:'Una familia aliada vende si le pagas bien.'}[h.tipo]||'Un socio vende si la oferta es buena.'))+' Cuesta una movida.',opciones:ops}); }
+  /* --- la pantalla del family office --- */
+  function escenaFO153(){ unir(); const fo=asegurar(); if(!fo){ if(typeof escenaFamilyOffice==='function') escenaFamilyOffice(); return; }
+    const reab=()=>{ cerrarModal(); render(); escenaFO153(); };
+    const B=beneficiarios(), J=junta(), liq=liquido(fo), ti=tasaM();
+    const accs=companias().filter(e=>foHolder(e)), vAcc=accs.reduce((s,e)=>s+foPct(e)*valuar(e),0), cartera=fo.prest153.reduce((s,p)=>s+p.saldo,0), deudaMia=fo.prest153.filter(p=>p.tipo==='tu').reduce((s,p)=>s+p.saldo,0);
+    let html='<div class="k"><div><b>'+fmt(liq)+'</b><span>inversiones y reserva</span></div><div><b>'+(vAcc>0?fmt(vAcc):'—')+'</b><span>acciones de la casa</span></div><div><b>'+(cartera>0?fmt(cartera):'—')+'</b><span>préstamos por cobrar</span></div><div><b>'+pct(B[0].parte)+'</b><span>tu parte · '+B.length+' beneficiario'+(B.length>1?'s':'')+'</span></div></div>';
+    html+='<h4>Beneficiarios</h4><table class="libro">'+B.slice(0,9).map(b=>'<tr><td>'+esc(b.nombre)+' <small>'+esc(b.rel)+'</small></td><td>'+pct(b.parte)+'</td></tr>').join('')+(B.length>9?'<tr><td><small>y '+(B.length-9)+' más</small></td><td></td></tr>':'')+'</table>';
+    html+='<h4>Junta</h4><div class="apunte">'+J.map(m=>esc(m.yo?'Tú':m.nombre)+(m.dir?' (director)':'')).join(' · ')+'. Los retiros y la devolución de acciones los aprueba la mayoría.</div>';
+    if(fo.prest153.length) html+='<h4>Créditos de la casa</h4><table class="libro">'+fo.prest153.map(p=>'<tr><td>'+esc(p.tipo==='tu'?'Tú':p.quien)+' <small>'+(Math.round(p.tasa*1000)/10)+'% · '+p.plazo+' años'+(p.mora?' · en mora':'')+'</small></td><td class="'+(p.mora?'mal':'')+'">'+fmt(p.saldo)+'</td></tr>').join('')+'</table>';
+    if(accs.length) html+='<h4>Acciones en compañías de la casa</h4><table class="libro">'+accs.map(e=>'<tr><td>'+esc(e.nombre)+'</td><td>'+pct(foPct(e))+' · '+fmt(foPct(e)*valuar(e))+'</td></tr>').join('')+'</table>';
+    const ops=[], sinMov=S.mov<1?'No te quedan movidas':null;
+    // retiro
+    ops.push({t:'Pedir un retiro',cat:'capital',d:'Sacar plata del family office a tu bolsillo. Lo vota la junta: tu parte es '+pct(B[0].parte)+' y cada retiro grande es plata de los demás.',dis:sinMov||(liq<50?'No hay liquidez':null),cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'¿Cuánto pides?',cerrable:true,opciones:[.05,.12,.25].map(f=>{ const x=Math.round(liq*f); return {t:fmt(x),cat:'capital',d:f<=.05?'Un retiro pequeño: casi siempre pasa.':f<=.12?'La junta lo discute.':'Un retiro grande: los demás beneficiarios lo ven como plata suya.',run:()=>{ S.mov--; const v=votar(x,'retiro');
+        if(v.ok){ sacar(fo,x); S.efectivo+=x; log('La junta del family office aprobó tu retiro de '+fmt(x)+' ('+resumenVoto(v)+').','bien'); } else { beneficiarios().filter(b=>b.h).forEach(b=>{ b.h.vinculo=clamp((b.h.vinculo||60)-2,0,100); }); log('La junta del family office <b>negó</b> tu retiro de '+fmt(x)+' ('+resumenVoto(v)+').','mal'); } }}; })}); }});
+    // préstamo para ti
+    const tPref=Math.max(.02,ti-.03);
+    ops.push({t:'Pedir un préstamo a la casa',cat:'capital',d:'Al '+pct(tPref)+' (el mercado está en '+pct(ti+.04)+'), a cinco años. Hasta 10% de la liquidez sin pasar por la junta.',dis:sinMov||(liq<50?'No hay liquidez':null),cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'Préstamo de la casa',cerrable:true,cuerpo:'Lo pagas en cuotas cada año, con intereses que vuelven al family office.'+(S.anio>=1990?' La DIAN presume intereses cuando una sociedad le presta a sus socios por debajo de la tasa del mercado: la casa paga algo de impuesto por la diferencia.':''),
+        opciones:[.1,.25].map(f=>{ const x=Math.round(liq*f); return {t:fmt(x)+(f>.1?' (lo vota la junta)':''),cat:'capital',run:()=>{ S.mov--; if(f>.1){ const v=votar(x,'prestamo'); if(!v.ok){ log('La junta negó tu préstamo de '+fmt(x)+' ('+resumenVoto(v)+').','mal'); return; } }
+          sacar(fo,x); S.efectivo+=x; fo.prest153.push({tipo:'tu',quien:'Tú',saldo:x,tasa:tPref,plazo:5,desde:S.anio,gen:S.gen}); log('El family office te prestó '+fmt(x)+' al '+pct(tPref)+'.','bien'); }}; })}); }});
+    // préstamo a una compañía
+    if(companias().length) ops.push({t:'Prestarle a una compañía de la casa',cat:'capital',d:'Plata para la compañía al '+pct(Math.max(.03,ti-.01))+', sin banco de por medio.',dis:sinMov||(liq<50?'No hay liquidez':null),cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'¿A cuál?',cerrable:true,opciones:companias().map(e=>{ const x=Math.round(Math.min(liq*.2,Math.max(30,e.ingresos*.1))); return {t:e.nombre+' · '+fmt(x),cat:'capital',d:'Caja de la compañía: '+fmt(e.caja)+'.',run:()=>{ S.mov--; sacar(fo,x); e.caja+=x; fo.prest153.push({tipo:'emp',quien:e.nombre,saldo:x,tasa:Math.max(.03,ti-.01),plazo:5,desde:S.anio}); log('El family office le prestó '+fmt(x)+' a <b>'+esc(e.nombre)+'</b>.','bien'); }}; })}); }});
+    // préstamo a un familiar
+    const fams=B.filter(b=>!b.yo);
+    if(fams.length) ops.push({t:'Prestarle a un familiar',cat:'familia',d:'Estudios, vivienda o un negocio. Barato, y no siempre lo pagan.',dis:sinMov||(liq<50?'No hay liquidez':null),cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'¿A quién?',cerrable:true,opciones:fams.slice(0,8).map(b=>{ const x=Math.round(Math.max(20,liq*.04)); return {t:b.nombre+' · '+fmt(x),cat:'familia',d:b.rel+'.',run:()=>{ S.mov--; sacar(fo,x); fo.prest153.push({tipo:'familia',quien:b.nombre,key:b.key,saldo:x,tasa:Math.max(.02,ti-.02),plazo:8,desde:S.anio,riesgo:b.afecto<45?.2:.08});
+        if(b.h) b.h.vinculo=clamp((b.h.vinculo||60)+6,0,100); if(b.p) b.p.afecto=clamp((b.p.afecto||55)+6,0,100); log('El family office le prestó '+fmt(x)+' a '+esc(b.nombre)+'.','bien'); }}; })}); }});
+    // pagar tu deuda
+    if(deudaMia>0) ops.push({t:'Pagar tu préstamo ('+fmt(deudaMia)+')',cat:'capital',dis:S.efectivo<deudaMia?'No te alcanza':null,cerrar:false,run:()=>{ S.efectivo-=deudaMia; meter(fo,deudaMia); fo.prest153=fo.prest153.filter(p=>p.tipo!=='tu'); reab(); }});
+    // acciones
+    const conAcc=companias().filter(e=>(e.holders||[]).some(h=>h.id==='tu'&&h.n>0));
+    if(conAcc.length) ops.push({t:'Aportar acciones de una compañía',cat:'capital',d:'El family office queda de accionista: esas acciones votan contigo, sus dividendos son de la casa y no se reparten ni pagan sucesión cuando mueras.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'¿Qué aportas?',cerrable:true,opciones:conAcc.flatMap(e=>[.25,.5,1].map(f=>({t:(f===1?'Todas tus acciones':Math.round(f*100)+'% de tus acciones')+' de '+e.nombre,cat:'capital',d:'Hoy tienes '+pct((e.holders.find(h=>h.id==='tu')||{n:0}).n/totalAcciones(e))+' a tu nombre.',run:()=>{ S.mov--; const n=aportarAcciones(e,f); log('Aportaste '+n.toLocaleString('es-CO')+' acciones de <b>'+esc(e.nombre)+'</b> al family office. El control sigue en tus manos ('+pct(miPct(e))+').','bien'); hito('El family office entró como accionista de '+e.nombre); }})))}); }});
+    if(accs.length) ops.push({t:'Recuperar acciones del family office',cat:'capital',d:'Volverlas a tu nombre. Lo vota la junta.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'¿Cuáles?',cerrable:true,opciones:accs.map(e=>({t:e.nombre+' · '+pct(foPct(e)),cat:'capital',run:()=>{ S.mov--; const v=votar(foPct(e)*valuar(e),'acciones'); if(!v.ok){ log('La junta no quiso devolverte las acciones de '+esc(e.nombre)+' ('+resumenVoto(v)+').','mal'); return; } recuperarAcciones(e); log('Las acciones de '+esc(e.nombre)+' volvieron a tu nombre.'); }}))}); }});
+    // reparto
+    ops.push({t:'Reparto anual a los beneficiarios',cat:'familia',d:'Hoy: '+(fo.distrib153?pct(fo.distrib153)+' de la liquidez cada año':'no se reparte')+'. A ti te toca tu parte; el resto sale para la familia.',cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:esc(fo.nombre),titulo:'Reparto anual',cerrable:true,opciones:[0,.02,.04,.06].map(r=>({t:r?pct(r)+' al año':'No repartir',cat:'familia',d:r?'Unos '+fmt(liq*r)+' el primer año; '+fmt(liq*r*B[0].parte)+' para ti.':'Todo se reinvierte.',run:()=>{ fo.distrib153=r; log('Política de reparto del family office: '+(r?pct(r)+' al año':'reinvertir todo')+'.'); }}))}); }});
+    ops.push({t:'Inversiones, director y políticas',cat:'capital',d:'Aportar patrimonio, rebalancear, cambiar de director, la ayuda educativa y la estrategia.',cerrar:false,run:()=>{ cerrarModal(); window.__fo153sub=true; try{ escenaFamilyOffice(); } finally { window.__fo153sub=false; } }});
+    escena({rubro:'Casa patrimonial',titulo:esc(fo.nombre),ancho:true,cerrable:true,clase:'fo153',cuerpo:'La oficina de la familia administra el patrimonio, le presta a la casa'+(fo.banca153?' (desde que absorbió la banca privada)':'')+' y puede ser accionista de tus compañías. No es tuya sola: tiene beneficiarios y una junta.',html,opciones:ops}); }
+  /* --- el año --- */
+  function anual(){ unir(); const fo=asegurar(); if(!fo) return;
+    let pagueYo=0, cobrado=0, dian=0; const malos=[];
+    fo.prest153.forEach(p=>{ if(p.saldo<=0) return; const interes=p.saldo*p.tasa, capital=p.saldo/Math.max(1,p.plazo), cuota=interes+capital;
+      if(p.tipo==='tu'){ if(p.gen!==undefined&&p.gen!==S.gen){ p.tipo='familia'; p.quien='La sucesión'; p.riesgo=.05; }
+        else if(S.efectivo>=cuota){ S.efectivo-=cuota; pagueYo+=cuota; p.saldo-=capital; p.plazo=Math.max(1,p.plazo-1); p.mora=0; cobrado+=cuota; }
+        else { p.mora=(p.mora||0)+1; p.saldo+=interes; malos.push('tú'); } }
+      if(p.tipo==='emp'){ const e=companias().find(x=>x.nombre===p.quien); if(!e){ p.saldo*=.3; p.tipo='familia'; p.riesgo=.6; return; }
+        if(e.caja>=cuota){ e.caja-=cuota; p.saldo-=capital; p.plazo=Math.max(1,p.plazo-1); cobrado+=cuota; } else { p.mora=(p.mora||0)+1; p.saldo+=interes; malos.push(e.nombre); } }
+      else if(p.tipo==='familia'){ if(chance((p.riesgo||.08)+(tasaM()>.13?.04:0))){ p.mora=(p.mora||0)+1; p.saldo+=interes*.5; if(p.mora>=4){ p.saldo*=.2; } malos.push(p.quien); }
+        else { p.saldo-=capital; p.plazo=Math.max(1,p.plazo-1); cobrado+=cuota; p.mora=0; } }
+      if(S.anio>=1990&&p.tipo==='tu'&&p.tasa<tasaM()) dian+=(tasaM()-p.tasa)*p.saldo*.33; });
+    fo.prest153=fo.prest153.filter(p=>p.saldo>1); meter(fo,cobrado); if(dian>0) sacar(fo,dian);
+    if(pagueYo&&window.anotar147) window.anotar147('Cuota del préstamo del family office',-pagueYo);
+    if(malos.length) log('Créditos del family office atrasados: '+esc(malos.slice(0,4).join(', '))+'.','mal');
+    // reparto a los beneficiarios
+    if(fo.distrib153>0){ const tot=liquido(fo)*fo.distrib153, mio=tot*miParte(); sacar(fo,tot); S.efectivo+=mio; if(window.anotar147) window.anotar147('Reparto del family office (tu parte)',mio);
+      beneficiarios().filter(b=>b.h).forEach(b=>{ b.h.vinculo=clamp((b.h.vinculo||60)+1,0,100); }); }
+    // un beneficiario pide plata
+    if(S._ev153!==S.anio&&chance(.12)){ const L=beneficiarios().filter(b=>!b.yo); if(L.length){ S._ev153=S.anio; cola.push(evPide(pick(L))); } }
+  }
+  function evPide(b){ const fo=FO(), x=Math.round(Math.max(20,liquido(fo)*rnd(.03,.08))), motivo=pick(['montar un negocio propio','comprar vivienda','una maestría en el exterior','salir de unas deudas que no ha contado','un proyecto que "no puede fallar"']); S._pide153={key:b.key,nombre:b.nombre,x,motivo};
+    return {p:6,id153:'pide',c:()=>!!FO(),t:()=>'<b>'+esc(b.nombre)+'</b>, '+esc(b.rel)+', le pide al '+esc(fo.nombre)+' '+fmt(x)+' para '+motivo+'. La solicitud llega a la junta y todos miran cómo votas tú.',
+      o:[{t:'Apoyarlo: que se le preste',f:()=>{ const q=S._pide153, f=FO(); if(!f||!q) return ''; sacar(f,q.x); asegurar(); f.prest153.push({tipo:'familia',quien:q.nombre,key:q.key,saldo:q.x,tasa:Math.max(.02,tasaM()-.02),plazo:8,desde:S.anio,riesgo:/deudas|no puede fallar/.test(q.motivo)?.3:.08});
+          const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)+8,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)+8,0,100); return 'La junta aprobó el préstamo. '+esc(q.nombre)+' no lo va a olvidar.'; }},
+         {t:'Votar en contra',f:()=>{ const q=S._pide153; if(!q) return ''; const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)-10,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)-10,0,100); return 'Votaste en contra y la junta lo negó. En el próximo almuerzo familiar hubo un silencio largo.'; }}]}; }
+  /* --- enganches --- */
+  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v153) return; window.miPct=function(e){ const v=old.apply(this,arguments); try{ return v+foPct(e); }catch(x){ return v; } }; window.miPct.__v153=true; }
+  function wrapValor(){ const old=window.valorFamilyOffice; if(typeof old!=='function'||old.__v153) return;
+    window.valorFamilyOffice=function(){ let v=old.apply(this,arguments); try{ const fo=FO(); if(fo&&Array.isArray(fo.prest153)) v+=fo.prest153.filter(p=>p.tipo!=='tu').reduce((s,p)=>s+p.saldo,0); }catch(x){} return v; }; window.valorFamilyOffice.__v153=true; }
+  function wrapDividendos(){ const old=window.repartirDividendos; if(typeof old!=='function'||old.__v153) return;
+    window.repartirDividendos=function(v){ const e=S.emp, f=foPct(e), fo=FO(); const r=old.apply(this,arguments); try{ if(f>0&&fo){ const x=v*f; S.efectivo-=x; meter(fo,x); log('De ese dividendo, '+fmt(x)+' fueron para el family office.'); } }catch(x){} return r; }; window.repartirDividendos.__v153=true; }
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||old.__v153) return;
+    window.escena=function(o){ try{ if(window.__fo153sub&&o&&Array.isArray(o.opciones)) o.opciones=o.opciones.filter(x=>x.t!=='Retirar parte del mandato'); }catch(x){} return old.apply(this,arguments); }; window.escena.__v153=true; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA153_PASO) return; window.__SA153_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA153_ACC) return; window.__SA153_ACC=true;
+    window.listaAcciones=function(){ let A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)) return A; unir();
+        if(FO()){ A=A.filter(a=>!/^(Crear banca privada de la familia|Administrar la banca privada familiar)$/.test(a.t)); const a=A.find(x=>x.t==='Administrar el family office'); if(a){ const fo=asegurar(); a.d='Administra '+fmt(valorFamilyOffice())+'. Le presta a la casa, es accionista de tus compañías y tiene '+beneficiarios().length+' beneficiarios con su junta.'; a.run=()=>escenaFO153(); } }
+        else { const b=A.find(x=>x.t==='Crear un family office'); if(b&&S.bancoFamilia) b.d=(b.d||'')+' La banca privada de la familia se integraría a él.'; }
+        if(S.emp&&otros(S.emp).length&&!A.some(x=>x.t==='Comprarles acciones a los socios')) A.push({t:'Comprarles acciones a los socios',cat:'capital',d:'Ofrecerles plata a los otros accionistas de '+esc(S.emp.nombre)+' por su parte.',mov:0,modal:true,run:()=>escenaSocios153(S.emp)}); }catch(x){ console.error(x); }
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA153_CAT) return; window.__SA153_CAT=true;
+    window.catDe=function(t){ if(t==='Comprarles acciones a los socios') return 'capital'; return old.apply(this,arguments); }; }
+  function panelHTML(e){ const L=otros(e); if(!L.length&&!foHolder(e)) return ''; const tot=totalAcciones(e);
+    return '<div class="socios153"><b>Los accionistas</b><table class="libro">'+e.holders.slice(0,6).map(h=>'<tr><td>'+esc(h.id==='tu'?'Tú':h.nombre)+' <small>'+(h.id==='fo153'?'family office':h.id==='tu'?'':(TIPO_N[h.tipo]||''))+'</small></td><td>'+pct(h.n/tot)+'</td></tr>').join('')+'</table>'+(L.length?'<button type="button" class="btn" data-neg-accion="Comprarles acciones a los socios">Ofrecer por sus acciones</button>':'')+'</div>'; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v153) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='finanzas') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v153=true; }
+  function init153(){ wrapMiPct(); wrapValor(); wrapDividendos(); wrapEscena(); wrapPaso(); wrapAcciones(); wrapCat(); wrapPanel();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Comprarles acciones a los socios')) D.push('Comprarles acciones a los socios'); }catch(x){}
+    Object.assign(window,{escenaFO153,escenaSocios153,beneficiariosFO153:beneficiarios,juntaFO153:junta,votarFO153:votar,aportarAccionesFO153:aportarAcciones,anualFO153:anual,unirBancaFO153:unir,aceptacion153:aceptacion}); }
+  setTimeout(init153,40); setTimeout(init153,220); setTimeout(init153,650); setTimeout(init153,950);
+  window.__SA153={version:V153};
 })();
 </script>
 
