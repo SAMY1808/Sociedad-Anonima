@@ -28049,12 +28049,15 @@ install();setTimeout(install,1200);
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA152_ACC) return; window.__SA152_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
-      try{ if(Array.isArray(A)&&S.anio>=1929&&!A.some(a=>a.t==='La bolsa')){ const pf=cuentaPF(false);
+      try{ const enGrupo=!window.__crudo91&&A.some(a=>a&&a.t==='Invertir tu plata'&&a.modal);
+        if(Array.isArray(A)&&S.anio>=1929&&!enGrupo&&!A.some(a=>a.t==='La bolsa')){ const pf=cuentaPF(false);
         A.push({t:'La bolsa',cat:'mercado',d:indiceN()+' en '+Math.round((S.macro&&S.macro.colcap)||0).toLocaleString('es-CO')+'. '+(pf?'Tu cuenta: '+fmt(pf.valor)+'. ':'')+'Acciones con nombre, órdenes, '+tesN()+(exteriorOK()?', bolsas del exterior':'')+(margenOK()?', margen':'')+(cortoOK()?' y cortos':'')+'.',mov:0,modal:true,run:()=>escenaBolsa152()}); } }catch(x){}
       return A; }; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA152_CAT) return; window.__SA152_CAT=true;
     window.catDe=function(t){ if(t==='La bolsa') return 'Inversión y mercado'; return old.apply(this,arguments); }; }
-  function init152(){ wrapPaso(); wrapAcciones(); wrapCat(); Object.assign(window,{escenaBolsa152,cuentaBolsa152:cuentaPF,mercadoBolsa152:mercado,comprarAccion152:comprar,venderAccion152:vender,anualBolsa152:anual,EMISORAS_152:EMI,cortar152:cortar,comprarTes152:comprarTes,comprarExt152:comprarExt}); }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='invertir'); if(!g||!Array.isArray(g.miembros)) return;
+    if(!g.miembros.some(m=>m[1]==='La bolsa')){ g.miembros.unshift(['Bolsa','La bolsa']); g.d='Portafolio, la bolsa con sus acciones y bonos, fondos, tesorería y divisas, en un solo lugar.'; } }
+  function init152(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo(); Object.assign(window,{escenaBolsa152,cuentaBolsa152:cuentaPF,mercadoBolsa152:mercado,comprarAccion152:comprar,venderAccion152:vender,anualBolsa152:anual,EMISORAS_152:EMI,cortar152:cortar,comprarTes152:comprarTes,comprarExt152:comprarExt}); }
   setTimeout(init152,40); setTimeout(init152,220); setTimeout(init152,650);
   window.__SA152={version:V152};
 })();
