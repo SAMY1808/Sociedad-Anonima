@@ -1171,10 +1171,23 @@ svg.foto116{display:block;background:#1d2a23}
 .socios153{margin-top:12px}
 .socios153 table.libro td{padding:4px}
 </style>
+<style id="estilos-v154">
+.pres154 .pf154{margin:6px 0 10px}
+.pres154 .pf154 b{display:block;font-size:17px;font-family:var(--display)}
+.pres154 .pf154 span{font-size:13px;color:var(--humo2)}
+.pres154 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0 12px}
+.pres154 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.pres154 .k b{display:block;font-size:15px;font-family:var(--display)}
+.pres154 .k span{font-size:12px;color:var(--humo2)}
+.pres154 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.pres154 .notas{display:flex;gap:6px;flex-wrap:wrap}
+.pres154 .notas span{padding:3px 8px;border-radius:7px;font-size:12px;background:rgba(255,255,255,.05)}
+.pres154 .notas .A{color:#8fe0b0}.pres154 .notas .D{color:#e79a8a}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v153</div>
+<div class="version-badge" id="versionBadge">v154</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -28263,6 +28276,161 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaFO153,escenaSocios153,beneficiariosFO153:beneficiarios,juntaFO153:junta,votarFO153:votar,aportarAccionesFO153:aportarAcciones,anualFO153:anual,unirBancaFO153:unir,aceptacion153:aceptacion}); }
   setTimeout(init153,40); setTimeout(init153,220); setTimeout(init153,650); setTimeout(init153,950);
   window.__SA153={version:V153};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v154 · ESCOGER AL PRESIDENTE
+   Las compañías que no diriges tú necesitan quien las dirija, y escogerlo
+   ya no es señalar un nombre:
+   - Cómo lo buscas: un cazatalentos (cobra, pero evalúa y verifica
+     referencias), alguien de tu equipo directivo (lo conoces bien, y deja
+     un hueco), un familiar (barato y leal; la capacidad es otra cosa) o
+     quitárselo a otra familia (caro, bueno, y los otros no lo olvidan).
+   - Lo que sabes del candidato depende del proceso: la capacidad es un
+     rango, la honradez es lo que dicen las referencias, si las revisaste.
+   - El contrato: sueldo fijo, sueldo con bono sobre utilidades (más
+     empuje, más tentación de maquillar cifras) o sueldo con acciones
+     (mira a largo plazo; diluye). Tres años, con indemnización.
+   - El mandato: crecer, rentabilidad, cuidar la caja o preparar la venta.
+     Un presidente rinde más cuando su estilo encaja con lo que le pides.
+   - Cada año, una nota. Y lo que pasa: fraudes contables, otras familias
+     que te lo quieren llevar, contratos que vencen, retiros, y el pariente
+     que no da la talla.
+   ========================================================================== */
+(function(){
+  const V154='v154';
+  const ESTILOS={constructor:{n:'Constructor',d:'hace crecer las compañías',m:'crecer'},financiero:{n:'Financiero',d:'exprime los márgenes',m:'rentabilidad'},conservador:{n:'Conservador',d:'cuida la caja y no se endeuda',m:'caja'},negociador:{n:'Negociador',d:'sabe vender y comprar compañías',m:'venta'}};
+  const MANDATOS={crecer:{n:'Crecer',d:'Más ventas, aunque el margen sufra.'},rentabilidad:{n:'Rentabilidad',d:'Margen antes que tamaño.'},caja:{n:'Cuidar la caja',d:'Pagar deuda y no arriesgar.'},venta:{n:'Preparar la venta',d:'Dejarla bonita para venderla: marca, eficiencia, orden.'}};
+  const CONTRATOS={fijo:{n:'Sueldo fijo',d:'Lo que pide, sin más.'},bono:{n:'Fijo más bono',d:'80% del sueldo y 3% de la utilidad. Empuja resultados y tienta a maquillarlos.'},acciones:{n:'Fijo más acciones',d:'70% del sueldo y hasta 2% de la compañía en cuatro años. Piensa a largo plazo.'}};
+  const ROLN={admin:'administrador de fábrica',planta:'gerente de planta',financiero:'director financiero',comercial:'director comercial',operaciones:'director de operaciones',humana:'director de gestión humana',juridico:'director jurídico'};
+  const APE=['Gómez','Vélez','Ospina','Sarmiento','Pombo','Holguín','Lleras','Botero','Cuéllar','Parra','Lozano','Santamaría','Herrera','Cárdenas','Valencia','Mejía','Arango','Echeverri'];
+  const SECN=id=>{ try{ const s=SECTORES.find(x=>x.id===id); return s?s.n.toLowerCase():id; }catch(x){ return id; } };
+  const base=e=>Math.round(Math.max(60,(e.ingresos||0)*.008+(typeof valuar==='function'?valuar(e):0)*.002));
+  const nombreNuevo=e=>{ const s=pick(['h','m']); let n; try{ n=nombreLocal(e.ciudad||S.hogar.ciudad,s)+' '+pick(APE); }catch(x){ n=(s==='h'?'Jaime':'Clara')+' '+pick(APE); } return {n,s}; };
+  /* --- los candidatos según el camino --- */
+  function candidatos(e,via){ const L=[], b=base(e);
+    if(via==='cazatalentos'){ for(let i=0;i<3;i++){ const {n,s}=nombreNuevo(e), cap=ri(6,10), hon=ri(2,10); L.push({nombre:n,sexo:s,origen:'cazatalentos',capaz:cap,honrado:hon,edad:ri(38,60),estilo:pick(Object.keys(ESTILOS)),sector:chance(.6),sueldo:Math.round(b*(1.1+(cap-6)*.14)),rango:1,verif:true,detecta:chance(.8),tray:pick(['vicepresidente de un grupo antioqueño','gerente regional de una multinacional','presidente de una compañía mediana','consultor que dirigió una reestructuración'])}); } }
+    if(via==='adentro'){ try{ const eq=window.equipo149?window.equipo149(e):{}; Object.keys(eq).forEach(r=>{ const x=eq[r]; if(!x) return; L.push({nombre:x.nombre,origen:'adentro',rol:r,capaz:clamp(x.comp,1,10),honrado:clamp(x.hon,1,10),edad:x.edad||48,estilo:r==='financiero'?'financiero':r==='comercial'?'constructor':r==='juridico'?'negociador':'conservador',sector:true,sueldo:Math.round(Math.max(b*.8,(x.sueldo||b)*1.5)),rango:0,verif:true,detecta:true,leal:x.leal||70,tray:'hoy '+(ROLN[r]||(/^filial/.test(r)?'director de una filial':r))}); }); }catch(x){} }
+    if(via==='familia'){ try{ parientesVivos().filter(p=>p.edad>=28&&p.edad<=70&&!p.presideA&&!p.gerenciaDe).slice(0,4).forEach(p=>L.push({nombre:nombrePariente(p),pid:p.pid,origen:'familia',rel:relacionPorSexo(p.rel,p.sexo),capaz:clamp(p.capaz||5,1,10),honrado:clamp(p.honrado||6,1,10),edad:p.edad,estilo:pick(Object.keys(ESTILOS)),sector:chance(.3),sueldo:Math.round(b*.8),rango:1,verif:false,tray:p.oficio||'de la familia'}));
+        (S.familia.hijos||[]).filter(h=>h.vivo!==false&&h.edad>=25&&!h.presideA154).forEach(h=>{ const a=h.atr||{}; const cap=clamp(Math.round(((a.intelecto||5)+(a.disciplina||5))/2+((h.formacion||40)-40)/25+rnd(-1,1)),2,10); L.push({nombre:h.nombre+' '+(h.apellido||S.p.apellido),hijo:h.fid||h.nombre,origen:'familia',rel:etiquetaHijo(h),capaz:cap,honrado:ri(6,10),edad:h.edad,estilo:pick(Object.keys(ESTILOS)),sector:chance(.25),sueldo:Math.round(b*.75),rango:1,verif:false,tray:h.carreraProf||h.rumbo||'recién llega al negocio'}); }); }catch(x){} }
+    if(via==='rival'){ try{ rivalesVivas().slice().sort((a,c)=>c.patrimonio-a.patrimonio).slice(0,2).forEach(r=>{ const {n,s}=nombreNuevo(e), cap=ri(8,10); L.push({nombre:n,sexo:s,origen:'rival',rival:r.rid,rivalN:r.apellido,capaz:cap,honrado:ri(4,10),edad:ri(42,60),estilo:pick(Object.keys(ESTILOS)),sector:chance(.5),sueldo:Math.round(b*1.8),prima:Math.round(b*.9),rango:2,verif:false,tray:'presidente de la compañía de los '+r.apellido}); }); }catch(x){} }
+    return L; }
+  const capTxt=c=>{ const lo=clamp(c.capaz-c.rango+(c.rango?ri(0,1)*0:0),1,10), hi=clamp(c.capaz+c.rango,1,10); return c.rango?'capacidad entre '+lo+' y '+hi:'capacidad '+c.capaz+' de 10'; };
+  const honTxt=c=>{ if(!c.verif) return 'referencias sin verificar'; if(c.honrado<=3) return c.detecta?'<span class="mal">las referencias hablan de manejos raros</span>':'referencias limpias'; return c.honrado>=7?'referencias impecables':'referencias sin nada grave'; };
+  /* --- buscar --- */
+  function escenaBuscar(e,gratis){
+    const vias=[{id:'cazatalentos',t:'Contratar un cazatalentos',d:'Busca, evalúa y verifica referencias. Cobra '+fmt(base(e)*.4)+'. Los mejores candidatos, los más caros.',cat:'empleo',costo:Math.round(base(e)*.4)},
+      {id:'adentro',t:'Promover a alguien del equipo directivo',d:'Los conoces: sabes exactamente qué tan buenos y qué tan honrados son. Dejan un hueco en su cargo.',cat:'empleo'},
+      {id:'familia',t:'Poner a alguien de la familia',d:'Más barato y leal. Que sepa dirigir es otro asunto.',cat:'familia'},
+      {id:'rival',t:'Quitárselo a otra familia',d:'Los mejores presidentes ya trabajan para alguien. Hay que pagarle la salida, y esa familia no lo va a olvidar.',cat:'riesgo'}];
+    const ops=vias.map(v=>{ const n=candidatos(e,v.id).length; return {t:v.t,cat:v.cat,d:v.d,dis:!n?'No hay candidatos por ese camino':(v.costo&&S.efectivo<v.costo&&e.caja<v.costo)?'No hay con qué pagarle':null,cerrar:false,run:()=>{ cerrarModal(); if(v.costo){ if(e.caja>=v.costo) e.caja-=v.costo; else S.efectivo-=v.costo; log('El cazatalentos cobró '+fmt(v.costo)+' por la búsqueda para '+esc(e.nombre)+'.'); } lista(e,v.id,gratis); }}; });
+    ops.push({t:'A dedo, sin proceso',cat:'empleo',d:'Escoges entre los nombres que suenan, sin saber mucho de ellos.',cerrar:false,run:()=>{ cerrarModal(); window.__pres154dedo=true; try{ OLD_PRES(e,gratis); } finally { window.__pres154dedo=false; } }});
+    escena({rubro:'Presidencia',titulo:'¿Quién va a dirigir '+esc(e.nombre)+'?',ancho:true,cerrable:true,cuerpo:'Tú no puedes estar en dos sillas a la vez. Cómo buscas al presidente decide qué tan bueno es y cuánto sabes de él antes de firmar. Sin presidente, la compañía pierde 5,5% de crecimiento al año.',opciones:ops}); }
+  function lista(e,via,gratis){ const L=candidatos(e,via);
+    escena({rubro:'Presidencia de '+esc(e.nombre),titulo:'Los candidatos',ancho:true,cerrable:true,clase:'pres154',cuerpo:via==='cazatalentos'?'El cazatalentos presenta tres finalistas, con evaluación y referencias.':via==='adentro'?'Tu equipo directivo. Los has visto trabajar.':via==='familia'?'La familia. Los quieres; no los has visto dirigir.':'Presidentes de las otras casas. Buenos, caros, y de otro equipo.',
+      opciones:L.map(c=>({t:'<span class="op-cara">'+avatarSVG(c.nombre,{edad:c.edad,tam:34})+'<span>'+esc(c.nombre)+'</span></span>',cat:c.origen==='familia'?'familia':'empleo',
+        d:(c.rel?'Tu '+c.rel+'. ':'')+esc(c.tray.charAt(0).toUpperCase()+c.tray.slice(1))+'. '+c.edad+' años. '+ESTILOS[c.estilo].n+': '+ESTILOS[c.estilo].d+'. '+(c.sector?'Conoce el negocio de '+SECN(e.sector)+'. ':'')+capTxt(c).charAt(0).toUpperCase()+capTxt(c).slice(1)+'; '+honTxt(c)+'. Pide '+fmt(c.sueldo)+' al año'+(c.prima?' y '+fmt(c.prima)+' para salir de donde está':'')+'.',
+        cerrar:false,run:()=>{ cerrarModal(); contrato(e,c,gratis); }}))}); }
+  function contrato(e,c,gratis){
+    escena({rubro:esc(c.nombre),titulo:'El contrato',cerrable:true,cuerpo:'Tres años, con indemnización si lo sacas antes. ¿Cómo le pagas?',
+      opciones:Object.keys(CONTRATOS).map(k=>({t:CONTRATOS[k].n,cat:'capital',d:CONTRATOS[k].d+' '+fmt(c.sueldo*(k==='fijo'?1:k==='bono'?.8:.7))+' de sueldo.',cerrar:false,run:()=>{ cerrarModal();
+        escena({rubro:esc(c.nombre),titulo:'¿Qué le pides?',cerrable:true,cuerpo:'El mandato. Rinde más cuando le pides lo que sabe hacer: '+ESTILOS[c.estilo].d+'.',
+          opciones:Object.keys(MANDATOS).map(m=>({t:MANDATOS[m].n+(ESTILOS[c.estilo].m===m?' · su fuerte':''),cat:'compania',d:MANDATOS[m].d,run:()=>nombrar(e,c,k,m,gratis)}))}); }}))}); }
+  function nombrar(e,c,k,m,gratis){
+    if(c.prima){ if(e.caja>=c.prima) e.caja-=c.prima; else S.efectivo-=c.prima; const r=(S.rivales||[]).find(x=>x.rid===c.rival); if(r) r.relacionCasa=clamp((r.relacionCasa||50)-15,0,100); }
+    if(c.origen==='adentro'){ try{ const eq=window.equipo149(e); delete eq[c.rol]; }catch(x){} }
+    if(c.pid){ const p=(S.parientes||[]).find(x=>x.pid===c.pid); if(p){ p.presideA=e.nombre; p.afecto=clamp((p.afecto||50)+18,0,100); } }
+    if(c.hijo){ const h=(S.familia.hijos||[]).find(x=>(x.fid||x.nombre)===c.hijo); if(h){ h.presideA154=e.nombre; h.vinculo=clamp((h.vinculo||60)+15,0,100); } }
+    const sueldo=Math.round(c.sueldo*(k==='fijo'?1:k==='bono'?.8:.7));
+    e.presidente={nombre:c.nombre,pid:c.pid||null,capaz:c.capaz,honrado:c.honrado,sueldo,tipo:c.origen==='familia'?'familia':'pro',
+      p154:{origen:c.origen,estilo:c.estilo,edad:c.edad,sector:c.sector,rango:c.rango,verif:c.verif,contrato:k,mandato:m,desde:S.anio,hasta:S.anio+3,leal:c.leal||(c.origen==='familia'?85:60),hist:[],hijo:c.hijo||null,rel:c.rel||null,acciones:0,ingAnt:e.ingresos}};
+    e.ceoExterno=null; if(!gratis&&S.mov>0) S.mov--;
+    log('<b>'+esc(c.nombre)+'</b> es el nuevo presidente de '+esc(e.nombre)+': '+CONTRATOS[k].n.toLowerCase()+', mandato de '+MANDATOS[m].n.toLowerCase()+'.','hito'); render(); }
+  /* --- la presidencia de una compañía --- */
+  function escenaPres(e){ const P=e.presidente; if(!P){ escenaBuscar(e); return; } const x=P.p154;
+    if(!x){ escena({rubro:'Presidencia',titulo:esc(e.nombre),cerrable:true,cuerpo:'La preside <b>'+esc(P.nombre)+'</b>, nombrado sin proceso: no hay contrato ni evaluaciones. Puedes buscar a alguien con un proceso de verdad.',
+      opciones:[{t:'Buscar un reemplazo',cat:'empleo',d:'Sale sin indemnización: nunca firmó contrato.',cerrar:false,run:()=>{ cerrarModal(); soltar(e,P); escenaBuscar(e); }},{t:'Dejarlo',cat:'legado',run:()=>{}}]}); return; }
+    const reab=()=>{ cerrarModal(); render(); escenaPres(e); };
+    const notas=x.hist.slice(-8).map(h=>'<span class="'+h.nota+'">'+h.anio+' · '+h.nota+'</span>').join('');
+    const indem=Math.round(P.sueldo*Math.max(.5,x.hasta-S.anio));
+    const html='<div class="pf154"><div><b>'+esc(P.nombre)+'</b><span>'+(x.rel?'Tu '+esc(x.rel)+' · ':'')+x.edad+' años · '+ESTILOS[x.estilo].n.toLowerCase()+' · desde '+x.desde+'</span></div></div>'
+      +'<div class="k"><div><b>'+(x.hist.length>=2?'~'+Math.round(P.capaz):x.rango?(clamp(P.capaz-x.rango,1,10)+'–'+clamp(P.capaz+x.rango,1,10)):P.capaz)+'</b><span>capacidad'+(x.hist.length>=2?' (ya lo has visto)':'')+'</span></div><div><b>'+MANDATOS[x.mandato].n+'</b><span>mandato</span></div><div><b>'+CONTRATOS[x.contrato].n+'</b><span>contrato hasta '+x.hasta+'</span></div><div><b>'+fmt(P.sueldo)+'</b><span>sueldo</span></div><div><b>'+(x.leal>=70?'Alta':x.leal>=45?'Media':'Baja')+'</b><span>lealtad</span></div></div>'
+      +'<h4>Notas</h4>'+(notas?'<div class="notas">'+notas+'</div>':'<div class="apunte">La primera evaluación llega al cerrar el año.</div>');
+    escena({rubro:'Presidencia',titulo:esc(e.nombre),ancho:true,cerrable:true,clase:'pres154',cuerpo:'Quien dirige la compañía mientras tú estás en otra parte.',html,opciones:[
+      {t:'Cambiar el mandato',cat:'compania',d:'Hoy: '+MANDATOS[x.mandato].n.toLowerCase()+'. Su fuerte: '+MANDATOS[ESTILOS[x.estilo].m].n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(e.nombre),titulo:'Mandato',cerrable:true,opciones:Object.keys(MANDATOS).filter(m=>m!==x.mandato).map(m=>({t:MANDATOS[m].n,cat:'compania',d:MANDATOS[m].d,cerrar:false,run:()=>{ x.mandato=m; reab(); }}))}); }},
+      {t:'Subirle el sueldo 15%',cat:'empleo',d:'Más lealtad: menos riesgo de que se lo lleven.',cerrar:false,run:()=>{ P.sueldo=Math.round(P.sueldo*1.15); x.leal=clamp(x.leal+15,0,100); reab(); }},
+      {t:'Despedirlo',cat:'riesgo',d:'Indemnización: '+fmt(indem)+'. La compañía queda sin cabeza hasta que nombres a otro.',dis:S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ S.mov--; if(e.caja>=indem) e.caja-=indem; else S.efectivo-=indem; despedido(e,P); log('Despediste a <b>'+esc(P.nombre)+'</b> de la presidencia de '+esc(e.nombre)+'. Indemnización: '+fmt(indem)+'.','mal'); cerrarModal(); render(); escenaBuscar(e,true); }},
+      {t:'Dejarlo trabajar',cat:'legado',run:()=>{}}]}); }
+  function soltar(e,P){ try{ if(P&&P.pid){ const p=(S.parientes||[]).find(z=>z.pid===P.pid); if(p) p.presideA=null; } if(P&&P.p154&&P.p154.hijo){ const h=(S.familia.hijos||[]).find(z=>(z.fid||z.nombre)===P.p154.hijo); if(h) h.presideA154=null; } }catch(x){} e.presidente=null; }
+  function despedido(e,P){ try{ if(P.pid){ const p=(S.parientes||[]).find(z=>z.pid===P.pid); if(p) p.afecto=clamp((p.afecto||50)-25,0,100); } if(P.p154&&P.p154.hijo){ const h=(S.familia.hijos||[]).find(z=>(z.fid||z.nombre)===P.p154.hijo); if(h) h.vinculo=clamp((h.vinculo||60)-25,0,100); } }catch(x){} soltar(e,P); }
+  /* --- el año --- */
+  function anual(e){ const P=e.presidente, x=P&&P.p154; if(!x||presides(e)) return;
+    x.edad++; const anios=S.anio-x.desde; let s; try{ s=SECTORES.find(z=>z.id===e.sector)||{g:.06,m:.1}; }catch(z){ s={g:.06,m:.1}; }
+    const cap=P.capaz+(ESTILOS[x.estilo].m===x.mandato?.6:0)+(x.sector&&anios<=3?.5:0)-(x.edad>66?.7:0)+(x.contrato==='bono'?.4:x.contrato==='acciones'?.3:0)-(x.leal<35?.8:0);
+    const d=cap-P.capaz; let ing=e.ingresos*(1+d*.01), u=e.utilidad;
+    if(x.mandato==='crecer'){ ing*=1.015; u-=ing*.006; }
+    if(x.mandato==='rentabilidad'){ u+=ing*.006*(cap/7); ing*=.995; }
+    if(x.mandato==='caja'){ ing*=.995; if(e.deuda>0&&e.caja>0){ const p=Math.min(e.deuda,e.caja*.1); e.deuda-=p; e.caja-=p; } }
+    if(x.mandato==='venta'){ e.marca=clamp((e.marca||50)+1,0,100); e.eficiencia=clamp((e.eficiencia||50)+1,0,100); }
+    u+=(ing-e.ingresos)*Math.max(0,s.m||.1);
+    let bono=0; if(x.contrato==='bono'&&u>0){ bono=u*.03; u-=bono; }
+    e.caja+=u-e.utilidad; e.ingresos=Math.max(1,ing); e.utilidad=u;
+    if(x.contrato==='acciones'&&x.acciones<4&&Array.isArray(e.holders)){ const n=Math.round(totalAcciones(e)*.005); let h=e.holders.find(z=>z.id==='pres154'); if(!h){ h={id:'pres154',nombre:P.nombre+' (presidente)',tipo:'socio',n:0}; e.holders.push(h); } h.nombre=P.nombre+' (presidente)'; h.n+=n; x.acciones++; }
+    // la nota
+    const crec=x.ingAnt>0?e.ingresos/x.ingAnt-1:0, marg=e.ingresos>0?e.utilidad/e.ingresos:0; x.ingAnt=e.ingresos;
+    const ref=.02+((S.macro&&S.macro.ciclo)||0)*.5, mAnt=isFinite(x.margAnt)?x.margAnt:marg; x.margAnt=marg;
+    const c2=x.hist.length?(crec+x.hist[x.hist.length-1].crec)/2:crec;
+    const pts=(c2-ref)*100*(x.mandato==='crecer'?.6:.4)+(marg-mAnt)*100*(x.mandato==='rentabilidad'?1.5:1)+(marg>0?.5:-2)+(cap-6)*1.1+(x.mandato==='caja'&&e.deuda<=0?1.5:0)+(x.mandato==='venta'?.5:0);
+    const nota=pts>=3.5?'A':pts>=-1.5?'B':pts>=-5?'C':'D'; x.hist.push({anio:S.anio,nota,crec,marg}); if(x.hist.length>30) x.hist.shift();
+    x.leal=clamp(x.leal+(nota==='A'?3:nota==='D'?-3:1),0,100);
+    // las cosas que pasan
+    if(S._ev154===S.anio) return; const N=nombreE(e);
+    if(P.honrado<=3&&chance(x.contrato==='bono'?.18:.09)){ S._ev154=S.anio; cola.push(evFraude(e)); return; }
+    if(P.capaz>=8&&x.leal<75&&chance(.07)){ S._ev154=S.anio; cola.push(evRobo(e)); return; }
+    if(S.anio>=x.hasta){ S._ev154=S.anio; cola.push(evRenovar(e)); return; }
+    if(x.edad>=68&&chance(.3)){ S._ev154=S.anio; cola.push(evRetiro(e)); return; }
+    if(x.origen==='familia'&&x.hist.slice(-2).filter(h=>h.nota==='D').length===2&&chance(.5)){ S._ev154=S.anio; cola.push(evFamilia(e)); return; }
+    void N; }
+  const nombreE=e=>e.nombre;
+  const EP=()=>companias().find(z=>z.nombre===S._pres154&&z.presidente&&z.presidente.p154);
+  function evFraude(e){ S._pres154=e.nombre; const P=e.presidente, hueco=Math.round(Math.max(30,e.ingresos*rnd(.05,.12)));
+    return {p:9,c:()=>!!EP(),t:()=>'<b>La auditoría encontró un hueco en '+esc(e.nombre)+'.</b> Durante años, '+esc(P.nombre)+' infló las ventas'+(P.p154.contrato==='bono'?' para cobrar el bono':'')+' y escondió pérdidas. Faltan '+fmt(hueco)+'.',
+      o:[{t:'Despedirlo y denunciarlo ante la Fiscalía',f:()=>{ const x=EP(); if(!x) return ''; x.caja-=hueco; x.marca=clamp((x.marca||50)-5,0,100); despedido(x,x.presidente); return 'Salió esposado en las noticias. La compañía perdió la plata y algo de nombre, pero quedó claro que en tu casa eso no se tapa.'; }},
+         {t:'Arreglo discreto: que se vaya callado',f:()=>{ const x=EP(); if(!x) return ''; x.caja-=Math.round(hueco*1.2); soltar(x,x.presidente); return 'Se fue con un acuerdo de confidencialidad. Nadie se enteró; la plata no volvió.'; }}]}; }
+  function evRobo(e){ S._pres154=e.nombre; const P=e.presidente, r=pick(rivalesVivas()||[{apellido:'un grupo extranjero'}]), quien=r&&r.apellido?'los '+r.apellido:'un grupo extranjero';
+    return {p:7,c:()=>!!EP(),t:()=>'<b>'+esc(P.nombre)+'</b> te cuenta, de frente, que '+esc(quien)+' le ofrecieron la presidencia de su grupo con el doble de sueldo.',
+      o:[{t:()=>'Igualar la oferta (sueldo a '+fmt(P.sueldo*1.4)+')',f:()=>{ const x=EP(); if(!x) return ''; const Q=x.presidente; Q.sueldo=Math.round(Q.sueldo*1.4); Q.p154.leal=clamp(Q.p154.leal+25,0,100); return 'Se queda. Cuesta más, pero la compañía no pierde el rumbo.'; }},
+         {t:'Desearle suerte',f:()=>{ const x=EP(); if(!x) return ''; soltar(x,x.presidente); return 'Se fue con los otros. '+esc(x.nombre)+' queda sin presidente: hay que nombrar a alguien.'; }}]}; }
+  function evRenovar(e){ S._pres154=e.nombre; const P=e.presidente, x=P.p154, buenas=x.hist.slice(-3).filter(h=>h.nota==='A'||h.nota==='B').length, pide=buenas>=2?.2:.08;
+    return {p:7,c:()=>!!EP(),t:()=>'Se vence el contrato de <b>'+esc(P.nombre)+'</b> en '+esc(e.nombre)+'. Notas recientes: '+x.hist.slice(-3).map(h=>h.nota).join(', ')+'. Pide '+Math.round(pide*100)+'% más para firmar otros tres años.',
+      o:[{t:'Renovar',f:()=>{ const z=EP(); if(!z) return ''; const Q=z.presidente; Q.sueldo=Math.round(Q.sueldo*(1+pide)); Q.p154.hasta=S.anio+3; Q.p154.leal=clamp(Q.p154.leal+10,0,100); return 'Firmaron otros tres años.'; }},
+         {t:'No renovar',f:()=>{ const z=EP(); if(!z) return ''; soltar(z,z.presidente); return 'Terminó su contrato y se fue sin indemnización. Hay que nombrar a otro.'; }}]}; }
+  function evRetiro(e){ S._pres154=e.nombre; const P=e.presidente;
+    return {p:6,c:()=>!!EP(),t:()=>'<b>'+esc(P.nombre)+'</b> tiene '+P.p154.edad+' años y quiere retirarse de la presidencia de '+esc(e.nombre)+'.',
+      o:[{t:'Pedirle un año más',f:()=>{ const z=EP(); if(!z) return ''; z.presidente.sueldo=Math.round(z.presidente.sueldo*1.15); return 'Aceptó un año más, mientras le buscas reemplazo.'; }},
+         {t:'Despedirlo con honores',f:()=>{ const z=EP(); if(!z) return ''; soltar(z,z.presidente); return 'Hubo homenaje y placa. Ahora hay que nombrar a otro.'; }}]}; }
+  function evFamilia(e){ S._pres154=e.nombre; const P=e.presidente;
+    return {p:7,c:()=>!!EP(),t:()=>'Dos años malos seguidos en <b>'+esc(e.nombre)+'</b>. La junta lo dice sin rodeos: '+esc(P.nombre)+' ('+esc(P.p154.rel||'de la familia')+') no da la talla. "Con todo respeto, esto no es una beneficencia."',
+      o:[{t:'Cambiarlo, aunque duela',f:()=>{ const z=EP(); if(!z) return ''; despedido(z,z.presidente); return 'Hablaste con él. No lo tomó bien. La compañía queda sin presidente mientras buscas a otro.'; }},
+         {t:'Sostenerlo: es familia',f:()=>{ const z=EP(); if(!z) return ''; z.moral=clamp((z.moral||50)-5,0,100); (S.junta||[]).forEach(j=>{ j.lealtad=clamp((j.lealtad||50)-5,0,100); }); return 'Lo sostuviste. La junta anotó tu decisión.'; }}]}; }
+  /* --- enganches --- */
+  let OLD_PRES=null;
+  function wrapPres(){ const old=window.escenaPresidente; if(typeof old!=='function'||old.__v154) return; OLD_PRES=old;
+    window.escenaPresidente=function(e,gratis){ if(window.__pres154dedo) return old.apply(this,arguments); try{ return escenaBuscar(e,gratis); }catch(x){ console.error(x); return old.apply(this,arguments); } }; window.escenaPresidente.__v154=true; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA154_EMP) return; window.__SA154_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA154_ACC) return; window.__SA154_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)) return A;
+        A.forEach(a=>{ const m=/^Nombrar presidente de (.+)$/.exec(a.t||''); if(!m) return; const e=companias().find(z=>z.nombre===m[1]); if(e){ a.run=()=>escenaBuscar(e); a.mov=0; a.d='Sin cabeza pierde 5,5% de crecimiento al año. Cazatalentos, alguien de adentro, la familia o quitárselo a otra casa.'; } });
+        companias().filter(e=>!presides(e)&&e.presidente&&!A.some(a=>a.t==='Nombrar presidente de '+e.nombre)).forEach(e=>{ const P=e.presidente, x=P.p154, ult=x&&x.hist.length?x.hist[x.hist.length-1].nota:null;
+          A.push({t:'Nombrar presidente de '+e.nombre,cat:'compania',d:'Hoy la preside '+esc(P.nombre)+(ult?' (última nota: '+ult+')':'')+'. Evaluarlo, cambiarle el mandato, subirle el sueldo o reemplazarlo.',mov:0,modal:true,run:()=>escenaPres(e)}); }); }catch(x){ console.error(x); }
+      return A; }; }
+  function init154(){ wrapPres(); wrapEmpresa(); wrapAcciones(); Object.assign(window,{escenaBuscarPresidente154:escenaBuscar,escenaPresidencia154:escenaPres,candidatosPres154:candidatos,nombrarPres154:nombrar,anualPres154:anual}); }
+  setTimeout(init154,40); setTimeout(init154,220); setTimeout(init154,650);
+  window.__SA154={version:V154};
 })();
 </script>
 
