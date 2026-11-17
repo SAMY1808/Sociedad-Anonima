@@ -1125,7 +1125,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v147</div>
+<div class="version-badge" id="versionBadge">v148</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25852,7 +25852,7 @@ install();setTimeout(install,1200);
     agro:{ins:'fertilizantes y empaques',peso:.22,planta:'Planta de beneficio',dolar:.6,petroleo:.5},
     salud:{ins:'principios activos importados',peso:.18,planta:'Laboratorio',dolar:.8},
     mineria:{ins:'combustible y explosivos',peso:.15,planta:'Planta de procesamiento',dolar:.3,petroleo:.8}};
-  const industrial=e=>!!(e&&IND[e.sector]);
+  const industrial=e=>!!(e&&IND[e.sector]&&!e.cafe148);   /* v148: las empresas del café llevan sus propias cuentas */
   const P1=n=>String(n||'').split(' ')[0];
   const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
 
@@ -26545,7 +26545,7 @@ install();setTimeout(install,1200);
     g.jornal=LABOR(S.anio)*(g.escasez&&g.escasez>=S.anio?1.25:1);
     g.hist.push([S.anio,g.interno,g.idx]); if(g.hist.length>60) g.hist.shift();
   }
-  const precioCarga=()=>G().interno*G().nivel;
+  const precioCarga=()=>{ const g=G(); if(!g.interno){ const h=histIdx(S.anio); g.interno=1.9*Math.pow(h!==null?h:(g.idx||1.2),S.anio>=1940&&S.anio<=1989?.62:.92); } return g.interno*g.nivel; };   // v148: si todavía no se calculó el año, se calcula ya
   const roya=()=>S.anio>=1983, broca=()=>S.anio>=1988, especiales=()=>S.anio>=1998, almacafe=()=>S.anio>=1965;
 
   /* --- la finca --- */
@@ -27014,29 +27014,30 @@ install();setTimeout(install,1200);
   const L=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
   const pcarga=()=>{ try{ return window.precioCarga141(); }catch(e){ return 1.9; } };
   const mun=b=>{ try{ return window.munCafe141(b.cafe141.mun); }catch(e){ return {}; } };
-  const cosechaPropia=()=>L().reduce((s,b)=>s+(b.cafe141.ult&&b.cafe141.ult.anio===S.anio?b.cafe141.ult.cargas:0),0);
+  const cosechaPropia=()=>L().reduce((s,b)=>s+(b.cafe141.ult&&b.cafe141.ult.anio>=S.anio-1?b.cafe141.ult.cargas:0),0);   // v148: la cosecha más reciente (las compañías cierran antes que el campo)
   const mejorTaza=()=>L().reduce((m,b)=>{ try{ return Math.max(m,window.calidadTaza141(b.cafe141)); }catch(e){ return m; } },0);
   const N=()=>{ if(!S.neg144||typeof S.neg144!=='object') S.neg144={trilla:null,export:null,tostadora:null,tiendas:[],hoteles:[],hist:[]}; return S.neg144; };
   const RIVALES_TOST=['Café La Sierra','Tostadora Andina','Café Montañero','Café del Abuelo','Café Real'];
   const CIUDADES_T=['Bogotá','Medellín','Cali','Barranquilla','Bucaramanga','Manizales','Pereira','Armenia','Cartagena'];
 
   /* --- el año de los negocios del café --- */
-  function anual(){
-    if(!S||!S.p||S.muerto) return; const n=N(); if(n.anio===S.anio) return; n.anio=S.anio;
-    const p=pcarga(), filas=[];
-    // trilladora
-    if(n.trilla){ const t=n.trilla, uso=clamp(rnd(.55,.95)-(S.anio>=1965?.08:0),.3,1), cargas=t.cap*uso, margen=cargas*p*.022, fijo=t.cap*.008;
-      const r=margen-fijo; t.ult={cargas,r}; filas.push(['La trilladora de '+t.mun,r]); }
-    // exportadora
-    if(n.export){ const x=n.export, propio=cosechaPropia()*(x.propio?1:0), comprado=x.volumen||0, V=propio+comprado;
+  function calc(k){ const n=N(), p=pcarga();
+    if(k==='trilla'&&n.trilla){ const t=n.trilla, uso=clamp(rnd(.55,.95)-(S.anio>=1965?.08:0),.3,1), cargas=t.cap*uso, margen=cargas*p*.022, fijo=t.cap*.008;
+      const r=margen-fijo; t.ult={cargas,r}; return {nombre:'La trilladora de '+t.mun,r,ing:cargas*p*.09}; }
+    if(k==='export'&&n.export){ const x=n.export, propio=cosechaPropia()*(x.propio?1:0), comprado=x.volumen||0, V=propio+comprado;
       const dif=S.anio>=2002&&S.anio<=2012?.12:.07, flete=(S.anio>=1946&&S.anio<=2000)?.015:.03;
       let mov=rnd(-.15,.15); if(x.cobertura&&S.anio>=1972) mov*=.25;
       const r=V*p*(dif-flete-.02+mov*.35)-(x.cobertura&&S.anio>=1972?V*p*.006:0)-20;
-      x.ult={V,r,mov}; filas.push(['La exportadora',r]); }
-    // tostadora
-    if(n.tostadora){ const t=n.tostadora, mercado=4500*(S.anio<1990?.7:1)*(S.anio>=2010?1.3:1);
+      x.ult={V,r,mov}; return {nombre:'La exportadora',r,ing:Math.max(20,V*p*1.07)}; }
+    if(k==='tostadora'&&n.tostadora){ const t=n.tostadora, mercado=4500*(S.anio<1990?.7:1)*(S.anio>=2010?1.3:1);
       t.not=clamp((t.not||10)-rnd(1,3),3,95); t.cuota=clamp((t.cuota||.02)+(t.not-30)/4000+rnd(-.004,.004),.005,.35);
-      const ventas=mercado*t.cuota, r=ventas*(.11-(p-1.9)*.03)-(t.solubles?-ventas*.03:0); t.ult={ventas,r}; filas.push(['Tostadora '+t.marca,r]); }
+      const ventas=mercado*t.cuota, r=ventas*(.11-(p-1.9)*.03)-(t.solubles?-ventas*.03:0); t.ult={ventas,r}; return {nombre:'Tostadora '+t.marca,r,ing:ventas}; }
+    return null; }
+  function anual(){
+    if(!S||!S.p||S.muerto) return; const n=N(); if(n.anio===S.anio) return; n.anio=S.anio;
+    const p=pcarga(), filas=[];
+    // trilladora, exportadora y tostadora: si ya son compañías (v148), sus números van por la compañía
+    ['trilla','export','tostadora'].forEach(k=>{ if(n[k]&&!(window.empresaCafe148&&window.empresaCafe148(k))){ const c=calc(k); if(c) filas.push([c.nombre,c.r]); } });
     // tiendas
     n.tiendas.forEach(ti=>{ const r=(S.anio<2012?14:24)*rnd(.6,1.3)-(S.anio===2020?20:0); ti.ult=r; filas.push(['Tienda en '+ti.ciudad,r]); });
     // hoteles cafeteros
@@ -27104,7 +27105,7 @@ install();setTimeout(install,1200);
     window.escena=function(o){ try{ if(o&&o.titulo==='Caficultura'&&o.rubro==='El campo'&&Array.isArray(o.opciones)){
         o=Object.assign({},o,{opciones:o.opciones.concat([{t:'Del grano a la taza',cat:'compania',d:'Trilladora, exportadora, tostadora con tu marca, tiendas de especialidad y turismo cafetero.',cerrar:false,run:()=>{ cerrarModal(); escenaTaza144(); }}])}); } }catch(e){}
       return old.apply(this,[o].concat([].slice.call(arguments,1))); }; }
-  function init144(){ wrapPaso144(); wrapEscena144(); Object.assign(window,{negocioCafe144:N,escenaTaza144,anualNegocioCafe144:anual}); }
+  function init144(){ wrapPaso144(); wrapEscena144(); Object.assign(window,{calcCafe144:calc,negocioCafe144:N,escenaTaza144,anualNegocioCafe144:anual}); }
   setTimeout(init144,40); setTimeout(init144,220); setTimeout(init144,650);
   window.__SA144={version:V144};
 })();
@@ -27332,6 +27333,79 @@ install();setTimeout(install,1200);
   // va por fuera de todos los demás: se instala de último y se reinstala si alguien envuelve después
   setTimeout(envolver,1200); setTimeout(envolver,2500); setTimeout(envolver,5000);
   window.__SA147={version:V147};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v148 · LAS EMPRESAS DEL CAFÉ
+   La trilladora, la exportadora y la tostadora dejan de ser escalones del
+   "negocio cafetero" y pasan a ser compañías de verdad del grupo: tienen su
+   ficha en Negocios, su caja, su gerente, su junta, su valoración, sus
+   marcas y sus procesos; se pueden vender, fusionar o sacar a bolsa. Sus
+   resultados salen del negocio del café (cargas trilladas, café exportado,
+   ventas de la tostadora) y ya no van directo a tu bolsillo: van a la caja
+   de la compañía. Las que ya tenías se convierten solas, con lo que
+   invertiste como capital.
+   ========================================================================== */
+(function(){
+  const V148='v148';
+  const TIPOS={trilla:{sector:'agro',nom:n=>'Trilladora de '+(n.trilla&&n.trilla.mun||'Chinchiná'),d:'Trilla café pergamino y vende excelso.'},
+    export:{sector:'agro',nom:()=>'Exportadora '+(S.p.apellido||'')+' S.A.',d:'Exporta café colombiano al mundo.'},
+    tostadora:{sector:'alimentos',nom:n=>(n.tostadora&&n.tostadora.marca||'Café '+S.p.apellido)+' S.A.',d:'Tuesta y vende café con marca propia.'}};
+  const N=()=>window.negocioCafe144?window.negocioCafe144():null;
+  const pc=()=>{ try{ return window.precioCarga141(); }catch(e){ return 1.9; } };
+  function empresa(k){ try{ return companias().find(e=>e.cafe148&&e.cafe148.k===k)||null; }catch(e){ return null; } }
+  const gerente=()=>{ try{ return nombreLocal(S.hogar.ciudad,pick(['h','m']))+' '+pick(['Botero','Gaviria','Londoño','Arango','Jaramillo','Mejía','Correa','Echeverri']); }catch(e){ return 'un gerente de confianza'; } };
+  function crear(k,capital){
+    const n=N(), t=TIPOS[k]; if(!n||!n[k]) return null;
+    const nombre=t.nom(n), ing=Math.max(30,capital*1.2);
+    const e={nombre,ticker:typeof ticker==='function'?ticker(nombre):nombre.slice(0,4).toUpperCase(),sector:t.sector,fundada:n[k].desde||S.anio,
+      ingresos:ing,costos:ing*.95,utilidad:0,caja:Math.max(10,capital*.35),deuda:0,innovacion:45,marca:k==='tostadora'?clamp(n.tostadora.not||15,5,90):40,moral:62,eficiencia:55,
+      empleados:k==='trilla'?Math.max(20,Math.round(n.trilla.cap/300)):k==='export'?25:60,crecimiento:0,publica:false,aniosMalos:0,historia:[],productos:[],
+      holders:[{id:'tu',nombre:'Tú',tipo:'fundador',n:1000000}],junta:[],ciudad:k==='trilla'?n.trilla.mun:S.hogar.ciudad,
+      presidente:{nombre:gerente(),capaz:6,honrado:7,sueldo:Math.max(3,Math.round(capital*.02)),tipo:'gerente'},cafe148:{k,desde:S.anio}};
+    n[k].emp148=true;
+    try{ S.grupo=companias(); S.grupo.push(e); if(!S.emp) sentarseEn(S.grupo.length-1); }catch(x){}
+    log('<b>'+esc(nombre)+'</b> quedó constituida como compañía del grupo. '+t.d+' La gerencia la tiene '+esc(e.presidente.nombre)+'.','hito');
+    return e;
+  }
+  // lo que ya existía como "escalón" pasa a ser compañía; si la compañía se vendió, el negocio ya no es tuyo
+  function migrar(){ const n=N(); if(!n||!S||!S.p) return;
+    const p=pc();
+    if(n.trilla&&!empresa('trilla')){ if(n.trilla.emp148){ n.trilla=null; } else crear('trilla',Math.round(Math.max(300,p*600)*(n.trilla.cap/10000))); }
+    if(n.export&&!empresa('export')){ if(n.export.emp148){ n.export=null; } else crear('export',Math.round(Math.max(150,p*250))); }
+    if(n.tostadora&&!empresa('tostadora')){ if(n.tostadora.emp148){ n.tostadora=null; } else crear('tostadora',Math.round(Math.max(150,p*150))); }
+  }
+  // los números de la compañía salen del negocio del café
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA148_EMP) return; window.__SA148_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&e.cafe148&&window.calcCafe144){ const c=window.calcCafe144(e.cafe148.k); if(c){
+          const util=c.r, delta=util-e.utilidad;
+          e.ingresos=Math.max(1,c.ing); e.utilidad=util; e.costos=e.ingresos-util; e.caja+=delta;
+          const h=e.historia&&e.historia[e.historia.length-1]; if(h&&h.anio===S.anio){ h.ing=e.ingresos; h.ut=e.utilidad; try{ h.val=valuar(e); }catch(x){} }
+          if(e.caja<0){ const f=-e.caja; e.deuda+=f; e.caja=0; } } } }catch(x){ console.error(x); }
+      return r; }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA148_PASO) return; window.__SA148_PASO=true;
+    window.pasarAnio=function(){ try{ migrar(); }catch(e){} return old.apply(this,arguments); }; }
+  // en "Del grano a la taza": cada eslabón con compañía lleva a su ficha; lo que se invierte sale de la caja de la compañía
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||window.__SA148_ESC) return; window.__SA148_ESC=true;
+    window.escena=function(o){
+      try{ if(o&&o.titulo==='Del grano a la taza'){ migrar(); const extra=[];
+          ['trilla','export','tostadora'].forEach(k=>{ const e=empresa(k); if(!e) return; const i=companias().indexOf(e);
+            extra.push({t:'Ver la compañía: '+e.nombre,cat:'compania',d:'Ingresos '+fmt(e.ingresos)+' · utilidad '+fmt(e.utilidad)+' · caja '+fmt(e.caja)+'. Gerente: '+((e.presidente&&e.presidente.nombre)||'sin gerente')+'.',cerrar:false,
+              run:()=>{ cerrarModal(); try{ tab='compania'; negSel=i; negCat='resumen'; renderPestanas(); renderLienzo(); }catch(x){ render(); } }}); });
+          const ops=(o.opciones||[]).map(op=>{ const t=String(op.t||'');
+            const k=/trilladora/i.test(t)&&/Ampliar/.test(t)?'trilla':/^Campaña para|Planta de café soluble/.test(t)?'tostadora':null;
+            const e=k&&empresa(k); if(!e||typeof op.run!=='function') return op;
+            return Object.assign({},op,{d:(op.d||'')+' Lo paga la compañía.',run:function(){ const ef0=S.efectivo; const r=op.run.apply(this,arguments); const gasto=ef0-S.efectivo; if(gasto>0){ const f=financiarEmpresa(e,gasto,true); if(f.ok) S.efectivo+=gasto; } return r; }}); });
+          o=Object.assign({},o,{opciones:extra.concat(ops)}); } }catch(x){}
+      const caja=old.apply(this,[o].concat([].slice.call(arguments,1)));
+      try{ if(o&&o.titulo==='Del grano a la taza'&&caja) caja.querySelectorAll('.eslabon b').forEach(b=>{ const k=/trilladora/.test(b.textContent)?'trilla':/exportadora/.test(b.textContent)?'export':/tostadora/.test(b.textContent)?'tostadora':null; const e=k&&empresa(k); if(e) b.insertAdjacentHTML('beforeend',' <span style="font-size:12px;color:var(--humo2)">· compañía: '+esc(e.nombre)+'</span>'); }); }catch(x){}
+      return caja; }; }
+  function init148(){ wrapEmpresa(); wrapPaso(); wrapEscena(); Object.assign(window,{empresaCafe148:empresa,migrarEmpresasCafe148:migrar,crearEmpresaCafe148:crear}); }
+  setTimeout(init148,40); setTimeout(init148,220); setTimeout(init148,650);
+  window.__SA148={version:V148};
 })();
 </script>
 
