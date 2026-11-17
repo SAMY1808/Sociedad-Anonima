@@ -1141,10 +1141,19 @@ svg.foto116{display:block;background:#1d2a23}
 .lic150 .est.no{background:rgba(181,85,60,.28);color:#F0A48E}
 .lic150-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
 </style>
+<style id="estilos-v151">
+.banco151 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.banco151 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.banco151 .k b{display:block;font-size:16px;font-family:var(--display)}
+.banco151 .k span{font-size:12px;color:var(--humo2)}
+.banco151 .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.banco151 h4{margin:10px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.banco151 table.libro td{padding:5px 4px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v150</div>
+<div class="version-badge" id="versionBadge">v151</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -23698,7 +23707,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function correrBancos112(){
     const m=S.macro||{ciclo:0,tasa:.1}; const ciclo=m.ciclo||0;
-    bancos().forEach(e=>{ const b=e.banco112, pol=POL[b.pol]||POL.normal;
+    bancos().forEach(e=>{ if(e.banco151) return; const b=e.banco112, pol=POL[b.pol]||POL.normal;
       const crisis=ciclo<-.05?1+(-ciclo)*14:1;
       b.dep=Math.max(0,b.dep*(1+pol.crece+(e.marca-50)/500+ciclo*.6));
       const cartera=b.dep*(1-b.reserva);
@@ -27681,6 +27690,149 @@ install();setTimeout(install,1200);
     Object.assign(window,{LICENCIAS_150:LIC,licenciasRequeridas150:requeridas,licencias150:R,escenaLicencias150,licenciasFaltantes150:faltan}); }
   setTimeout(init150,40); setTimeout(init150,220); setTimeout(init150,650); setTimeout(init150,950);
   window.__SA150={version:V150};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v151 · LA BANCA POR DENTRO
+   El banco propio deja de ser "depósitos y una política de crédito" y se
+   administra como un banco:
+   - Pasivos: cuentas de ahorro, cuentas corrientes y CDT, cada uno con su
+     costo. La tasa de captación decide cuánta plata llega.
+   - Activos: el encaje que exige el Banco de la República y la cartera,
+     repartida en comercial, consumo, hipotecaria, tarjetas de crédito
+     (desde 1970) y microcrédito (desde 2000), cada una con su tasa, su
+     mora y su peso en la solvencia.
+   - Tasas de colocación con tope de usura (el interés bancario corriente
+     por 1,5). El UPAC (1972-1999) para la vivienda, hasta la crisis.
+   - Provisiones, gastos de la red (oficinas, cajeros desde 1980, banca
+     digital desde 2010), comisiones, el 4 por mil (desde 1998).
+   - Solvencia mínima (9%), liquidez, corridas, Fogafín (desde 1985) y la
+     intervención de la Superfinanciera.
+   - Control de lavado de activos (SARLAFT) y la "lista Clinton" (desde
+     1995): sin control, la plata caliente llega sola.
+   - Emisión de bonos, compra de cartera, capitalizar y repartir.
+   ========================================================================== */
+(function(){
+  const V151='v151';
+  const SEG={comercial:{n:'Comercial',sp:.06,mora:.03,rw:1,desde:0},consumo:{n:'Consumo',sp:.12,mora:.05,rw:1,desde:0},hipotecaria:{n:'Hipotecaria',sp:.04,mora:.03,rw:.5,desde:0},
+    tarjetas:{n:'Tarjetas de crédito',sp:.17,mora:.07,rw:1,desde:1970},micro:{n:'Microcrédito',sp:.22,mora:.08,rw:1,desde:2000}};
+  const ESTR={equilibrada:{n:'Equilibrada',w:{comercial:.35,consumo:.25,hipotecaria:.2,tarjetas:.12,micro:.08}},corporativa:{n:'Corporativa',w:{comercial:.7,consumo:.1,hipotecaria:.1,tarjetas:.07,micro:.03}},
+    consumo:{n:'De consumo',w:{comercial:.15,consumo:.4,hipotecaria:.1,tarjetas:.3,micro:.05}},vivienda:{n:'De vivienda',w:{comercial:.2,consumo:.1,hipotecaria:.6,tarjetas:.07,micro:.03}},
+    popular:{n:'Popular y microcrédito',w:{comercial:.1,consumo:.25,hipotecaria:.1,tarjetas:.15,micro:.4}}};
+  const pct=x=>(Math.round(x*1000)/10)+'%';
+  const bancos=()=>{ try{ return companias().filter(e=>e.banco112&&!e.banco112.intervenido); }catch(e){ return []; } };
+  const tasaBR=()=>clamp((S.macro&&S.macro.tasa)||.08,.02,.4);
+  const usura=()=>(tasaBR()+.08)*1.5;
+  const encajeLegal=()=>S.anio<1990?.25:S.anio<2000?.15:.08;
+  const solvMin=()=>S.anio>=1990?.09:.08;
+  function B(e){
+    if(e.banco151) return e.banco151;
+    const b=e.banco112, dep=Math.max(50,b.dep||e.caja*2.5), car=dep*(1-(b.reserva||.15));
+    const w=ESTR[b.pol==='agresivo'?'consumo':b.pol==='conservador'?'corporativa':'equilibrada'].w;
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde), tw=disp.reduce((s,k)=>s+w[k],0);
+    e.banco151={dep:{ahorro:dep*.45,corriente:dep*.25,cdt:dep*.3},car:Object.fromEntries(Object.keys(SEG).map(k=>[k,disp.includes(k)?car*w[k]/tw:0])),
+      capt:'mercado',estr:b.pol==='agresivo'?'consumo':b.pol==='conservador'?'corporativa':'equilibrada',col:'prudente',prov:'prudentes',
+      oficinas:Math.max(3,Math.round(dep/250)),cajeros:S.anio>=1980?Math.round(dep/150):0,digital:false,sarlaft:S.anio>=1995,bonos:0,ult:null,hist:[]};
+    return e.banco151;
+  }
+  const totDep=b=>b.dep.ahorro+b.dep.corriente+b.dep.cdt;
+  const totCar=b=>Object.values(b.car).reduce((s,x)=>s+x,0);
+  const rwa=b=>Object.keys(SEG).reduce((s,k)=>s+b.car[k]*SEG[k].rw,0);
+  function anual(e){
+    const b=B(e), m=S.macro||{}, ciclo=m.ciclo||0, i=tasaBR(), U=usura();
+    const crisis=ciclo<-.05?1+(-ciclo)*12:1, upac=S.anio>=1998&&S.anio<=2000;
+    // 1. los depósitos
+    const D0=totDep(b), solv0=e.caja/Math.max(1,rwa(b));
+    let g=.05+ciclo*.5+({baja:-.04,mercado:0,alta:.07})[b.capt]+Math.log10(Math.max(1,b.oficinas))*.01+(b.digital?.03:0)+(b.cajeros>0?.01:0)-(solv0<solvMin()?.08:0)-(S.anio>=1998?.005:0);
+    try{ if((S.esc129||[]).some(x=>x.estado==='abierto'&&String(x.titulo||'').indexOf(e.nombre)>=0)) g-=.06; }catch(x){}
+    const mix=b.capt==='alta'?{ahorro:.35,corriente:.2,cdt:.45}:b.capt==='baja'?{ahorro:.5,corriente:.3,cdt:.2}:{ahorro:.45,corriente:.25,cdt:.3};
+    const D1=Math.max(10,D0*(1+clamp(g,-.3,.3))); Object.keys(mix).forEach(k=>{ b.dep[k]=b.dep[k]*.7+D1*mix[k]*.3; }); const f=D1/totDep(b); Object.keys(b.dep).forEach(k=>b.dep[k]*=f);
+    const costoDep=b.dep.ahorro*i*.35+b.dep.cdt*(i*.95+(b.capt==='alta'?.015:b.capt==='baja'?-.01:0));
+    // 2. la cartera: crece hasta lo que permiten los depósitos y el encaje, repartida según la estrategia
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde), W=ESTR[b.estr].w, tw=disp.reduce((s,k)=>s+W[k],0);
+    const tope=(totDep(b)+b.bonos)*(1-encajeLegal()-.05)+Math.max(0,e.caja)*.8, C0=totCar(b), C1=Math.max(0,Math.min(tope,C0*1.25+10));
+    disp.forEach(k=>{ b.car[k]=b.car[k]*.85+C1*W[k]/tw*.15; });
+    const fc=C1/Math.max(1,totCar(b)); disp.forEach(k=>b.car[k]*=fc);
+    // 3. lo que rinde y lo que se pierde
+    let ingInt=0, perdida=0; const moras={};
+    disp.forEach(k=>{ const s=SEG[k]; let tasa=i+s.sp*(b.col==='maxima'?1.25:1); const tope_=k==='micro'?U*1.4:U; if(tasa>tope_) tasa=tope_;
+      let mo=s.mora*crisis*(b.col==='maxima'?1.3:1)*(k==='hipotecaria'&&upac?5:1)*(e.gerente112==='amigos'?2:1); mo=clamp(mo,.005,.6); moras[k]=mo;
+      ingInt+=b.car[k]*tasa*(1-mo*.5); const prov=({minimas:.8,prudentes:1,contraciclicas:ciclo>0?1.15:.8})[b.prov]; perdida+=b.car[k]*mo*.55*prov; b.car[k]*=1-mo*.5; });
+    const comis=b.car.tarjetas*.04+totDep(b)*.004;
+    const opex=b.oficinas*1.5*(b.digital?.88:1)+b.cajeros*.08+(b.digital?6:0)+(totDep(b)+totCar(b))*.008+(b.sarlaft?Math.max(2,totDep(b)*.001):0);
+    const intBonos=b.bonos*(i+.02);
+    const antesImp=ingInt+comis-costoDep-perdida-opex-intBonos, util=antesImp>0?antesImp*.67:antesImp;
+    // 4. a las cuentas de la compañía (el capital del banco es su caja)
+    const delta=util-e.utilidad; e.ingresos=Math.max(1,ingInt+comis); e.utilidad=util; e.costos=e.ingresos-util; e.caja+=delta;
+    const h=e.historia&&e.historia[e.historia.length-1]; if(h&&h.anio===S.anio){ h.ing=e.ingresos; h.ut=e.utilidad; try{ h.val=valuar(e); }catch(x){} }
+    e.banco112.dep=totDep(b); e.banco112.util=util; e.banco112.mora=disp.reduce((s,k)=>s+b.car[k]*moras[k],0)/Math.max(1,totCar(b));
+    const solv=e.caja/Math.max(1,rwa(b)), liq=((totDep(b)+b.bonos+Math.max(0,e.caja))-totCar(b))/Math.max(1,totDep(b)); e.banco112.solv=solv;
+    b.ult={anio:S.anio,ingInt,comis,costoDep,perdida,opex,intBonos,util,moras,solv,liq,roe:util/Math.max(1,e.caja)}; b.hist.push([S.anio,Math.round(util)]); if(b.hist.length>40) b.hist.shift();
+    // 5. el regulador y la confianza
+    if(solv<solvMin()*.5){ intervenir(e,'la solvencia cayó a '+pct(solv)+', muy por debajo del mínimo'); return; }
+    if(solv<solvMin()&&S._ev151!==S.anio){ S._ev151=S.anio; cola.push(evCapitalizar(e)); return; }
+    const pCorr=(liq<.12?.12:0)+(crisis>1.5?.05:0)+(solv<solvMin()*1.2?.05:0); if(S._ev151!==S.anio&&chance(pCorr*(S.anio>=1985?.5:1))){ S._ev151=S.anio; cola.push(evCorrida(e)); return; }
+    if(!b.sarlaft&&S.anio>=1978&&S.anio-(b.calienteAviso||0)>=5&&chance(.12)&&S._ev151!==S.anio){ b.calienteAviso=S.anio; S._ev151=S.anio; cola.push(evCaliente(e)); return; }
+    if(upac&&b.car.hipotecaria>totCar(b)*.25&&!b.upacAviso&&S._ev151!==S.anio){ b.upacAviso=1; S._ev151=S.anio; cola.push(evUpac(e)); }
+  }
+  function intervenir(e,motivo){ const b=e.banco112; b.intervenido=S.anio; e.ceoExterno='la Superintendencia Financiera'; e.caja=Math.max(0,e.caja*.1); e.ingresos*=.35;
+    S.p.reputacion=clamp(S.p.reputacion-12,0,100); try{ moverPrestigio(-8,'la intervención de su banco'); }catch(x){}
+    log('<b>La Superintendencia Financiera intervino '+esc(e.nombre)+'</b>: '+esc(motivo)+'. Los ahorradores hacen fila'+(S.anio>=1985?'; Fogafín les responde hasta el tope del seguro de depósitos.':'.'),'mal'); hito('Intervinieron '+e.nombre); }
+  const BK=()=>bancos().find(x=>x.nombre===S._b151);
+  function evCapitalizar(e){ S._b151=e.nombre; const b=B(e), falta=Math.max(10,Math.round(rwa(b)*solvMin()-e.caja+rwa(b)*.01));
+    return {p:9,c:()=>!!BK(),t:()=>'<b>La Superintendencia Financiera le exige capital a '+esc(e.nombre)+'.</b> La solvencia está en '+pct(e.caja/Math.max(1,rwa(b)))+' y el mínimo es '+pct(solvMin())+'. Faltan unos '+fmt(falta)+'.',
+      o:[{t:()=>'Ponerlo de tu bolsillo ('+fmt(falta)+')',f:()=>{ const x=BK(); if(!x) return ''; const p=Math.min(S.efectivo,falta); S.efectivo-=p; x.caja+=p; return p>=falta?'Capitalizaste el banco. La Superintendencia queda tranquila.':'Pusiste lo que tenías: no alcanzó del todo.'; }},
+         {t:'Frenar el crédito y vender cartera',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x); Object.keys(bb.car).forEach(k=>bb.car[k]*=.8); x.caja+=totCar(bb)*.02; return 'Vendiste cartera con descuento y dejaste de prestar. El banco se encoge, pero sale del rojo.'; }}]}; }
+  function evCorrida(e){ S._b151=e.nombre; const b=B(e), ret=Math.round(totDep(b)*rnd(.2,.35));
+    return {p:9,c:()=>!!BK(),t:()=>'<b>Corrida en '+esc(e.nombre)+'.</b> Un rumor en la radio y las filas le dan la vuelta a la cuadra. Quieren sacar '+fmt(ret)+' en una semana.'+(S.anio>=1985?' Fogafín tranquiliza a algunos.':''),
+      o:[{t:'Pagarle a todo el mundo, ventanilla por ventanilla',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x), liq=(totDep(bb)+bb.bonos+Math.max(0,x.caja))-totCar(bb); const f=ret/totDep(bb); Object.keys(bb.dep).forEach(k=>bb.dep[k]*=1-f); if(liq<ret){ Object.keys(bb.car).forEach(k=>bb.car[k]*=1-(ret-liq)/Math.max(1,totCar(bb))); x.caja-=(ret-liq)*.15; } return 'Pagaste todo. La fila se acabó al tercer día: el que ve que le pagan, deja de pedir.'; }},
+         {t:'Pedir un apoyo de liquidez al Banco de la República',f:()=>{ const x=BK(); if(!x) return ''; x.deuda=(x.deuda||0)+ret*.6; const bb=B(x); Object.keys(bb.dep).forEach(k=>bb.dep[k]*=1-ret*.6/totDep(bb)); return 'El Emisor te prestó, caro. Sobreviviste, con la Superintendencia encima.'; }}]}; }
+  function evCaliente(e){ S._b151=e.nombre; return {p:9,c:()=>!!BK(),t:()=>'<b>Plata caliente.</b> Un cliente nuevo de '+esc(e.nombre)+' abre cuentas con maletas de efectivo y CDT a nombre de terceros. Tu oficina de '+esc(e.ciudad||'Medellín')+' está feliz con las metas.',
+    o:[{t:'Montar control de lavado de activos y cerrarle las cuentas',f:()=>{ const x=BK(); if(x){ B(x).sarlaft=true; x.caja-=Math.max(3,totDep(B(x))*.002); } return 'Montaste el control y le cerraste las cuentas. Perdiste depósitos y ganaste paz.'; }},
+       {t:'No preguntar: la plata es plata',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x); bb.dep.cdt+=totDep(bb)*.08; registrarDelito('lavado de activos',4,'recibir depósitos de origen ilícito en '+x.nombre);
+         if(S.anio>=1995&&chance(.3)){ x.ingresos*=.5; bb.dep.corriente*=.5; try{ window.abrirEscandalo129&&window.abrirEscandalo129('fiscal','La lista Clinton y '+x.nombre,3); }catch(z){} return 'Al año siguiente, '+x.nombre+' apareció en la lista Clinton. Los bancos corresponsales de Nueva York cortaron todo.'; }
+         return 'Los depósitos crecieron. Nadie preguntó. Todavía.'; }}]}; }
+  function evUpac(e){ S._b151=e.nombre; return {p:9,c:()=>!!BK(),t:()=>'<b>La crisis del UPAC.</b> Las tasas se dispararon y las cuotas de vivienda subieron más que lo que valen las casas. Miles de deudores de '+esc(e.nombre)+' devuelven las llaves. La Corte Constitucional declara inconstitucional el sistema.',
+    o:[{t:'Reestructurar los créditos y aliviar a los deudores',f:()=>{ const x=BK(); if(!x) return ''; x.caja-=B(x).car.hipotecaria*.06; S.p.reputacion=clamp(S.p.reputacion+5,0,100); return 'Reliquidaste los créditos al nuevo sistema (UVR). Perdiste plata y ganaste clientes.'; }},
+       {t:'Rematar las casas',f:()=>{ const x=BK(); if(!x) return ''; B(x).car.hipotecaria*=.85; S.p.reputacion=clamp(S.p.reputacion-8,0,100); try{ window.abrirEscandalo129&&window.abrirEscandalo129('sociedad','Los remates de '+x.nombre,1); }catch(z){} return 'Recuperaste algo con los remates. En los noticieros salen las familias en la calle.'; }}]}; }
+  /* --- la pantalla --- */
+  function escenaBanco151(e){
+    e=e||bancos()[0]; if(!e) return; const b=B(e), u=b.ult, sinMov=S.mov<1?'No te quedan movidas':null, reab=()=>{ cerrarModal(); render(); escenaBanco151(e); };
+    const f=(a,c,cl)=>'<tr><td>'+a+'</td><td class="'+(cl||'')+'">'+c+'</td></tr>';
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde);
+    const activos='<table class="libro">'+f('Encaje y disponible',fmt(Math.max(0,totDep(b)+b.bonos+Math.max(0,e.caja)-totCar(b))))+disp.map(k=>f('Cartera '+SEG[k].n.toLowerCase(),fmt(b.car[k])+(u&&u.moras[k]!==undefined?' · mora '+pct(u.moras[k]):''),u&&u.moras[k]>.08?'mal':'')).join('')+'</table>';
+    const pasivos='<table class="libro">'+f('Cuentas de ahorro',fmt(b.dep.ahorro))+f('Cuentas corrientes',fmt(b.dep.corriente))+f('CDT',fmt(b.dep.cdt))+(b.bonos?f('Bonos emitidos',fmt(b.bonos)):'')+f('Patrimonio',fmt(e.caja),'bien')+'</table>';
+    const pyg=u?'<table class="libro">'+f('Intereses de la cartera',fmt(u.ingInt))+f('Comisiones',fmt(u.comis))+f('Intereses de los depósitos',fmt(-u.costoDep),'mal')+f('Provisiones',fmt(-u.perdida),'mal')+f('Oficinas, cajeros y nómina',fmt(-u.opex),'mal')+(u.intBonos?f('Intereses de los bonos',fmt(-u.intBonos),'mal'):'')+f('Utilidad',fmt(u.util),u.util>=0?'bien':'mal')+'</table>':'<div class="apunte">El primer año completo con estos números se ve al cerrar el año.</div>';
+    const solv=e.caja/Math.max(1,rwa(b));
+    const html='<div class="k"><div><b class="'+(solv<solvMin()?'mal':'')+'">'+pct(solv)+'</b><span>solvencia (mínimo '+pct(solvMin())+')</span></div><div><b>'+pct(Math.max(0,(totDep(b)+b.bonos+Math.max(0,e.caja)-totCar(b))/Math.max(1,totDep(b))))+'</b><span>liquidez</span></div><div><b>'+pct(tasaBR())+'</b><span>tasa del Banco de la República</span></div><div><b>'+pct(usura())+'</b><span>tasa de usura</span></div><div><b>'+b.oficinas+(b.cajeros?' · '+b.cajeros:'')+'</b><span>oficinas'+(b.cajeros?' · cajeros':'')+(b.digital?' · digital':'')+'</span></div><div><b>'+(u?pct(u.roe):'—')+'</b><span>rentabilidad del patrimonio</span></div></div>'
+      +'<div class="dos"><div><h4>Activos</h4>'+activos+'</div><div><h4>Pasivos y patrimonio</h4>'+pasivos+'</div></div><h4>El año pasado</h4>'+pyg;
+    const ops=[];
+    const elegir=(tit,cuerpo,dic,key)=>({t:tit,cat:'capital',d:cuerpo+' Hoy: '+String((dic[b[key]]||{}).n||dic[b[key]]).toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(e.nombre),titulo:tit,cerrable:true,opciones:Object.keys(dic).filter(k=>k!==b[key]).map(k=>({t:dic[k].n||dic[k],cat:'capital',d:dic[k].d||'',cerrar:false,run:()=>{ b[key]=k; reab(); }}))}); }});
+    ops.push(elegir('Tasa de captación','Pagar más por los CDT trae depósitos, y cuesta.',{baja:{n:'Por debajo del mercado',d:'Depósitos baratos, que crecen poco.'},mercado:{n:'De mercado'},alta:{n:'Por encima del mercado',d:'Los ahorradores llegan, y salen caros.'}},'capt'));
+    ops.push(elegir('Estrategia de cartera','A quién le prestas.',ESTR,'estr'));
+    ops.push(elegir('Tasas de colocación','Cobrar hasta la usura deja más margen y trae peores clientes.',{prudente:{n:'Prudentes',d:'Clientes buenos y mora baja.'},maxima:{n:'Hasta el tope de la usura',d:'Más margen, más mora.'}},'col'));
+    ops.push(elegir('Provisiones','Cuánto se reserva para lo que no van a pagar.',{minimas:{n:'Mínimas',d:'Más utilidad hoy; más golpe en la crisis.'},prudentes:{n:'Prudentes'},contraciclicas:{n:'Contracíclicas',d:'Guardar en los años buenos para los malos.'}},'prov'));
+    const cO=Math.round(Math.max(20,b.oficinas*2)); ops.push({t:'Abrir 10 oficinas',cat:'casa',d:'Más depósitos y más clientes. '+fmt(cO)+' de inversión y más gastos cada año.',dis:e.caja<cO?'El banco no tiene '+fmt(cO):sinMov,cerrar:false,run:()=>{ e.caja-=cO; S.mov--; b.oficinas+=10; log('<b>'+esc(e.nombre)+'</b> abrió diez oficinas nuevas.','bien'); reab(); }});
+    if(b.oficinas>10) ops.push({t:'Cerrar 10 oficinas',cat:'casa',d:'Menos gasto; algunos clientes se van.',cerrar:false,run:()=>{ b.oficinas-=10; Object.keys(b.dep).forEach(k=>b.dep[k]*=.97); reab(); }});
+    if(S.anio>=1980){ const cC=Math.round(Math.max(10,b.oficinas*.8)); ops.push({t:'Instalar 50 cajeros automáticos',cat:'casa',d:'Plata a cualquier hora. '+fmt(cC)+'.',dis:e.caja<cC?'El banco no tiene '+fmt(cC):null,cerrar:false,run:()=>{ e.caja-=cC; b.cajeros+=50; reab(); }}); }
+    if(S.anio>=2010&&!b.digital){ const cD=Math.round(Math.max(30,totDep(b)*.01)); ops.push({t:'Banca digital y app',cat:'casa',d:'Abrir cuentas desde el celular. Baja el costo de las oficinas y atrae a los jóvenes. '+fmt(cD)+'.',dis:e.caja<cD?'El banco no tiene '+fmt(cD):sinMov,cerrar:false,run:()=>{ e.caja-=cD; S.mov--; b.digital=true; log('<b>'+esc(e.nombre)+'</b> lanzó su banca digital.','bien'); reab(); }}); }
+    if(S.anio>=1990) ops.push({t:b.sarlaft?'Control de lavado de activos: activo':'Montar control de lavado de activos',cat:'riesgo',d:b.sarlaft?'Oficial de cumplimiento y revisión de clientes. Cuesta cada año.':'Sin él, la plata caliente llega sola, y con ella la Fiscalía.',dis:b.sarlaft?'Ya está montado':null,cerrar:false,run:()=>{ b.sarlaft=true; reab(); }});
+    if(S.anio>=1995){ const m=Math.round(totDep(b)*.1); ops.push({t:'Emitir bonos por '+fmt(m),cat:'capital',d:'Plata a cinco años para prestar más, a la tasa del mercado más 2%.',dis:sinMov,cerrar:false,run:()=>{ S.mov--; b.bonos+=m; log('<b>'+esc(e.nombre)+'</b> emitió bonos por '+fmt(m)+'.'); reab(); }}); }
+    const cap=Math.round(Math.max(10,rwa(b)*.02)); ops.push({t:'Capitalizar el banco ('+fmt(cap)+')',cat:'capital',d:'De tu bolsillo al patrimonio del banco. Sube la solvencia.',dis:S.efectivo<cap?'No tienes '+fmt(cap):null,cerrar:false,run:()=>{ S.efectivo-=cap; e.caja+=cap; reab(); }});
+    if(u&&u.util>0&&solv>solvMin()+.03){ const div=Math.round(u.util*.5*Math.max(0,Math.min(1,(solv-solvMin())/.05))); if(div>0) ops.push({t:'Repartir dividendos ('+fmt(div*miPct(e))+' para ti)',cat:'capital',d:'La mitad de la utilidad, si la solvencia lo permite.',cerrar:false,run:()=>{ e.caja-=div; S.efectivo+=div*miPct(e); log('<b>'+esc(e.nombre)+'</b> repartió '+fmt(div)+' en dividendos.','bien'); reab(); }}); }
+    escena({rubro:'Tu banco',titulo:esc(e.nombre),ancho:true,cerrable:true,clase:'banco151',cuerpo:'Captas plata del público, la prestas y respondes por ella. El negocio es el margen; el riesgo es la mora, la liquidez y la confianza.',html,opciones:ops});
+  }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA151_EMP) return; window.__SA151_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e.banco112&&!e.banco112.intervenido&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA151_ACC) return; window.__SA151_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const a=Array.isArray(A)&&A.find(x=>x.t==='Tu banco'); if(a){ const e=bancos()[0]; if(e){ const b=B(e); a.d=esc(e.nombre)+': '+fmt(totDep(b))+' en depósitos, solvencia '+pct(e.caja/Math.max(1,rwa(b)))+'. Captación, cartera, tasas, provisiones, red y cumplimiento.'; a.run=()=>escenaBanco151(e); } } }catch(x){}
+      return A; }; }
+  function init151(){ wrapEmpresa(); wrapAcciones(); Object.assign(window,{banco151:B,escenaBanco151,anualBanco151:anual,SEGMENTOS_151:SEG,usura151:usura}); }
+  setTimeout(init151,40); setTimeout(init151,220); setTimeout(init151,650);
+  window.__SA151={version:V151};
 })();
 </script>
 
