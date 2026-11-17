@@ -24545,7 +24545,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.escenaPropiedad109=function(uid){ const r=old.apply(this,arguments);
       try{ const b=(S.bienes||[]).find(x=>x.uid===uid); if(b&&b.suc119&&SUC()){ document.querySelectorAll('#eleccion .carta').forEach(c=>{ if(/Venderla|hipoteca|Hipotecar/i.test(c.textContent)){ c.disabled=true; const t=c.querySelector('.txt'); if(t) t.textContent='Está en la sucesión: no se puede vender ni hipotecar hasta la partición.'; } }); } }catch(e){}
       return r; };
-    window.escenaPropiedad109.__v119=true; window.__SA119_FI=true;
+    window.escenaPropiedad109.__v119=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaPropiedad109[k]=true; }); window.__SA119_FI=true;
   }
   function escenaSucesion119(){
     const suc=SUC(); if(!suc) return;
@@ -24646,7 +24646,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         return caja;
       }catch(e){ return old.apply(this,arguments); }
     };
-    window.escena.__v120=true;
+    window.escena.__v120=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escena[k]=true; });
   }
 
   /* --- 2. momentos que solo quedaban en la crónica: una lámina aparte --- */
@@ -24678,7 +24678,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         if(/^\s*Embargo\.\s+El juzgado embargó/.test(t)) momento('embargo','El embargo',t.replace(/^\s*Embargo\.\s*/,'').replace(/\s+/g,' ').trim());
       }catch(e){}
       return r; };
-    window.log.__v120=true;
+    window.log.__v120=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.log[k]=true; });
   }
   function init120(){ precargar(); wrapEscena120(); wrapLog120(); Object.assign(window,{momento120:momento,momentosCargados120:ok,detectarMomento120:detectar}); }
   setTimeout(init120,40); setTimeout(init120,220); setTimeout(init120,650);
@@ -24725,7 +24725,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.hito=function(t){ const r=old.apply(this,arguments);
       try{ const s=plano(t); for(const [re,k,tx,anios] of HITOS){ const m=s.match(re); if(m){ if(!anios||cada(k,anios)){ const [ti,cu]=tx(m); M(k,ti,cu); } break; } } }catch(e){}
       return r; };
-    window.hito.__v122=true;
+    window.hito.__v122=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.hito[k]=true; });
   }
   /* --- la crónica --- */
   function wrapLog122(){
@@ -24736,7 +24736,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         else if(/^Logro de la casa:/.test(s)&&S&&S._m122&&cada('portada',8)) M('portada','La casa en la portada',s.replace(/^Logro de la casa:\s*/,''));
       }catch(e){}
       return r; };
-    window.log.__v122=true;
+    window.log.__v122=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.log[k]=true; });
   }
   /* --- cambios de estado: cárcel, libertad, hijos que mueren, escándalos --- */
   function fallecidosN(){ try{ return typeof window.fallecidos108==='function'?window.fallecidos108().length:0; }catch(e){ return 0; } }
@@ -24754,7 +24754,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function wrapRender122(){
     const old=window.render; if(typeof old!=='function'||old.__v122) return;
     window.render=function(){ const r=old.apply(this,arguments); try{ revisar122(); }catch(e){} return r; };
-    window.render.__v122=true;
+    window.render.__v122=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.render[k]=true; });
   }
   function init122(){ wrapHito122(); wrapLog122(); wrapRender122(); Object.assign(window,{revisarMomentos122:revisar122}); }
   setTimeout(init122,40); setTimeout(init122,220); setTimeout(init122,650);
@@ -24804,7 +24804,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function instalar125(){
     const prev=window.dibujoPropiedad115; if(typeof prev!=='function'||prev.__v125) return;
     window.dibujoPropiedad115=function(b,w,h,mini){ try{ const k=claveDe(b); if(k&&ok[k]) return svg125(k,b,w,h,mini); }catch(e){} return prev.apply(this,arguments); };
-    window.dibujoPropiedad115.__v125=true;
+    window.dibujoPropiedad115.__v125=true; Object.keys(prev).forEach(k=>{ if(/^__v\d+$/.test(k)) window.dibujoPropiedad115[k]=true; });
   }
   function init125(){ instalar125(); precargar(); Object.assign(window,{fotoCiudad125:claveDe,fotosCiudad125:ok}); }
   setTimeout(init125,60); setTimeout(init125,240); setTimeout(init125,700);
@@ -24879,7 +24879,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function wrapRenta127(){
     const old=window.escenaRenta; if(typeof old!=='function'||old.__v127) return;
     window.escenaRenta=function(){ try{ if(typeof zonasVivienda==='function'&&typeof precioVivienda==='function') return escenaRenta127(old); }catch(e){ console.error(e); } return old.apply(this,arguments); };
-    window.escenaRenta.__v127=true;
+    window.escenaRenta.__v127=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaRenta[k]=true; });
   }
   function init127(){ wrapRenta127(); Object.assign(window,{TIPOS_ARRIENDO_127:TIPOS_ARR}); }
   setTimeout(init127,40); setTimeout(init127,220); setTimeout(init127,650);
@@ -24909,7 +24909,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(bienes||acc) log('Se corrigió tu testamento: '+(bienes?bienes+' propiedad'+(bienes===1?'':'es'):'')+(bienes&&acc?' y ':'')+(acc?'las acciones legadas':'')+' vuelven a ser tuyas hasta que mueras; el legado sigue escrito.','hito');
   }
   function wrapRender128(){ const old=window.render; if(typeof old!=='function'||old.__v128) return;
-    window.render=function(){ try{ migrar128(); }catch(e){} return old.apply(this,arguments); }; window.render.__v128=true; }
+    window.render=function(){ try{ migrar128(); }catch(e){} return old.apply(this,arguments); }; window.render.__v128=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.render[k]=true; }); }
   function init128(){ wrapRender128(); Object.assign(window,{migrarTestamento128:migrar128}); }
   setTimeout(init128,40); setTimeout(init128,220); setTimeout(init128,650);
   window.__SA128={version:V128};
@@ -25053,7 +25053,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(L().length>60) S.esc129=L().slice(-60);
   }
   function wrapPaso129(){ const old=window.pasarAnio; if(typeof old!=='function'||old.__v129) return;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual129(); }catch(e){} return r; }; window.pasarAnio.__v129=true; }
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ anual129(); }catch(e){} return r; }; window.pasarAnio.__v129=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.pasarAnio[k]=true; }); }
 
   /* --- la lista de escándalos abiertos --- */
   function escena129(){
@@ -25069,8 +25069,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function wrapAcciones129(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__v129) return;
     window.listaAcciones=function(){ const A=old.apply(this,arguments); try{ if(Array.isArray(A)&&adulto()&&abiertos().length&&!A.some(a=>a.t==='Los escándalos de la casa')){ const n=abiertos().length; A.push({t:'Los escándalos de la casa',cat:'riesgo',d:n+' abierto'+(n===1?'':'s')+'. El más fuerte: '+abiertos().slice().sort((a,b)=>b.intens-a.intens)[0].titulo+'.',mov:0,modal:true,run:()=>escena129()}); } }catch(e){} return A; };
-    window.listaAcciones.__v129=true; }
-  function wrapCat129(){ const old=window.catDe; if(typeof old!=='function'||old.__v129) return; window.catDe=function(t){ return t==='Los escándalos de la casa'?'riesgo':old.apply(this,arguments); }; window.catDe.__v129=true; }
+    window.listaAcciones.__v129=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.listaAcciones[k]=true; }); }
+  function wrapCat129(){ const old=window.catDe; if(typeof old!=='function'||old.__v129) return; window.catDe=function(t){ return t==='Los escándalos de la casa'?'riesgo':old.apply(this,arguments); }; window.catDe.__v129=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.catDe[k]=true; }); }
   function init129(){ instalar(); wrapPaso129(); wrapAcciones129(); wrapCat129(); Object.assign(window,{escandalos129:L,abrirEscandalo129:abrir,cerrarEscandalo129:cerrar,escenaEscandalos129:escena129,anualEscandalos129:anual129,ultimoEscandalo129:()=>ultimo&&ultimo.estado==='abierto'?ultimo.titulo:null}); }
   setTimeout(init129,40); setTimeout(init129,220); setTimeout(init129,650);
   window.__SA129={version:V129};
@@ -25365,12 +25365,12 @@ install();setTimeout(install,1200);
   function wrapMovidas133(){
     const old=window.movidasBase; if(typeof old!=='function'||window.__SA133_MOV) return; window.__SA133_MOV=true;
     window.movidasBase=function(){ let n=old.apply(this,arguments); try{ if(S&&S.p&&!nino()){ const e=S.p.edad, s=S.p.salud; if(e>=80&&s<75) n-=1; if(e>=90) n-=1; n=Math.max(1,n); } }catch(x){} return n; };
-    window.movidasBase.__v133=true;
+    window.movidasBase.__v133=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.movidasBase[k]=true; });
   }
   function wrapEtapa133(){
     const old=window.etapaDashboard; if(typeof old!=='function'||window.__SA133_ETAPA) return; window.__SA133_ETAPA=true;
     window.etapaDashboard=function(ed){ if(ed>=80) return 'Ancianidad'; if(ed>=65) return 'Tercera edad'; return old.apply(this,arguments); };
-    window.etapaDashboard.__v133=true;
+    window.etapaDashboard.__v133=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.etapaDashboard[k]=true; });
   }
   function escenaVejez133(){
     const p=S.p, v=V(), f=fragilidad(), h=hijoCuida();
@@ -25437,12 +25437,12 @@ install();setTimeout(install,1200);
       } }catch(e){}
       return old.apply(this,[o].concat([].slice.call(arguments,1)));
     };
-    window.escena.__v133=true;
+    window.escena.__v133=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escena[k]=true; });
   }
   function wrapPaso133(){
     const old=window.pasarAnio; if(typeof old!=='function'||window.__SA133_PASO) return; window.__SA133_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ const e0=S.efectivo; anual133(); window.anotar147&&window.anotar147('Cuidados de la vejez y la salud',S.efectivo-e0); }catch(e){ console.error(e); } return r; };
-    window.pasarAnio.__v133=true;
+    window.pasarAnio.__v133=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.pasarAnio[k]=true; });
   }
   function init133(){ enfermedades133(); eventos133(); wrapMovidas133(); wrapEtapa133(); wrapEscena133(); wrapPaso133();
     Object.assign(window,{escenaTratamientos133,escenaVejez133,fragilidad133:fragilidad,vejez133:V,TRATAMIENTOS_133:TRAT,tratamientosDe133:tratosDe}); }
@@ -26040,7 +26040,7 @@ install();setTimeout(install,1200);
     return '<div class="prod137-panel"><b>Plantas e insumos</b><div class="apunte" style="margin:4px 0 8px">'+p.plantas.length+' planta'+(p.plantas.length>1?'s':'')+' · uso '+Math.round(u*100)+'% · calidad '+Math.round(p.calidad)+'/100 · '+esc(IND[e.sector].ins)+' a '+Math.round(pi*100)+'</div>'
       +'<button type="button" class="btn" data-neg-accion="Plantas e insumos">Ver plantas e insumos</button></div>'; }
   function wrapPanel137(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v137) return;   // la v81 lo vuelve a registrar: se envuelve cada vez
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(industrial(e)&&(negCat==='produccion'||negCat==='resumen')) h+=resumenHTML(e); }catch(x){} return h; }; window.panelCompania86.__v137=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(industrial(e)&&(negCat==='produccion'||negCat==='resumen')) h+=resumenHTML(e); }catch(x){} return h; }; window.panelCompania86.__v137=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function wrapAcciones137(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA137_ACC) return; window.__SA137_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const e=S&&S.emp; if(Array.isArray(A)&&industrial(e)&&companias().includes(e)){ const p=P(e);
@@ -26328,7 +26328,7 @@ install();setTimeout(install,1200);
     return '<div class="marca139-panel"><b>Las marcas</b><div class="apunte" style="margin:4px 0 8px">'+M.map(m=>esc(m.n)+' ('+POS[m.pos].n.toLowerCase()+', '+Math.round(m.notoriedad)+'% la conoce)').join(' · ')+'</div>'
       +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Las marcas de la compañía">'+(typeof sello==='function'?sello('mercado'):'')+'<div class="neg86-accion-info"><div class="nom">Las marcas de la compañía</div><div class="txt">Campañas por medio y época, marcas nuevas, registro y venta.</div></div></div></div></div>'; }
   function wrapPanel139(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v139) return;
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='mercadeo') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v139=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='mercadeo') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v139=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function wrapAcciones139(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA139_ACC) return; window.__SA139_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const M=L(e);
@@ -26457,7 +26457,7 @@ install();setTimeout(install,1200);
     return '<div class="proc140-panel"><b>Procesos y control</b><div class="apunte" style="margin:4px 0 8px">Control interno '+Math.round(p.control)+'/100 · '+esc(sisDe(p).n.toLowerCase())+' · '+esc(AUD[p.aud].n.toLowerCase())+' · '+Object.keys(p.cert).filter(k=>p.cert[k]).length+' certificación(es)</div>'
       +'<div class="neg86-acciones"><div class="neg86-accion" data-neg-accion="Procesos y control">'+(typeof sello==='function'?sello('empleo'):'')+'<div class="neg86-accion-info"><div class="nom">Procesos y control</div><div class="txt">Certificaciones, sistemas, auditoría, buen gobierno y mejora de procesos.</div></div></div></div></div>'; }
   function wrapPanel140(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v140) return;
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v140=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v140=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
 
   /* --- revisión: comprar una casa rival en crisis --- */
   function escenaFyA140(){
@@ -27345,11 +27345,11 @@ install();setTimeout(install,1200);
   }
   function instalar(){ const prev=window.dibujoPropiedad115; if(typeof prev!=='function'||prev.__v146) return;
     window.dibujoPropiedad115=function(b,w,h,mini){ const r=prev.apply(this,arguments); try{ return decorar(r,b,mini); }catch(e){ return r; } };
-    window.dibujoPropiedad115.__v146=true; }
+    window.dibujoPropiedad115.__v146=true; Object.keys(prev).forEach(k=>{ if(/^__v\d+$/.test(k)) window.dibujoPropiedad115[k]=true; }); }
   // al comprar: se guarda el tamaño elegido
   function wrapComprar(){ const old=window.comprarBien; if(typeof old!=='function'||old.__v146) return;
     window.comprarBien=function(o){ const b=old.apply(this,arguments); try{ if(b&&window.__tam146&&o&&(o.clase==='vivienda'||o.clase==='renta')&&esVivienda(Object.assign({},b,{exVivienda109:true}))) b.tam146=window.__tam146; }catch(e){} window.__tam146=null; return b; };
-    window.comprarBien.__v146=true; }
+    window.comprarBien.__v146=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.comprarBien[k]=true; }); }
   // el control de tamaño de las pantallas de compra deja dicho el tamaño
   document.addEventListener('input',e=>{ try{ const el=e.target; if(!el||el.type!=='range') return;
     if(el.id==='vHol'){ const v=+el.value; window.__tam146=v<95?'compacto':v>110?'amplio':'normal'; if(+el.max>130) window.__tam146=v<90?'compacto':v>130?'amplio':'normal'; }
@@ -27390,7 +27390,7 @@ install();setTimeout(install,1200);
       if(Math.abs(resto)>=.5) S.resumen.push(['Otros movimientos del año',resto,resto>=0?'pos':'neg']); }catch(e){}
   }
   function envolver(){ const old=window.pasarAnio; if(typeof old!=='function'||old.__v147) return;
-    window.pasarAnio=function(){ const r=old.apply(this,arguments); cuadrar(); return r; }; window.pasarAnio.__v147=true; }
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); cuadrar(); return r; }; window.pasarAnio.__v147=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.pasarAnio[k]=true; }); }
   window.anotar147=anotar;
   // va por fuera de todos los demás: se instala de último y se reinstala si alguien envuelve después
   setTimeout(envolver,1200); setTimeout(envolver,2500); setTimeout(envolver,5000);
@@ -27589,7 +27589,7 @@ install();setTimeout(install,1200);
     return '<div class="eq149-panel"><b>El equipo directivo</b><div class="apunte" style="margin:4px 0 8px">'+TAMN[tamano(e)]+' · '+(R.length-vac)+' de '+R.length+' cargos con alguien'+(vac?' · <span class="mal">'+vac+' vacante'+(vac>1?'s':'')+'</span>':'')+'</div>'
       +'<button type="button" class="btn" data-neg-accion="El equipo directivo">Ver el equipo directivo</button></div>'; }
   function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v149) return;
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v149=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v149=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA149_ACC) return; window.__SA149_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const R=rolesDe(e), vac=R.filter(r=>!EQ(e)[r]).length;
@@ -27707,9 +27707,9 @@ install();setTimeout(install,1200);
   // al fundar una compañía nueva, arranca sin licencias
   function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||old.__v150) return;
     window.fundarEn=function(){ const r=old.apply(this,arguments); try{ const g=companias(), e=g[g.length-1]; if(e&&!e.lic150){ e.lic150={}; if(requeridas(e).length) log('<b>'+esc(e.nombre)+'</b> necesita '+requeridas(e).map(id=>LIC[id].n.toLowerCase()).join(' y ')+' para operar del todo. Se tramitan en "Licencias y permisos".','mal'); } }catch(x){} return r; };
-    window.fundarEn.__v150=true; }
+    window.fundarEn.__v150=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.fundarEn[k]=true; }); }
   function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v150) return;
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&(negCat==='expansion'||negCat==='resumen')) h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v150=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&(negCat==='expansion'||negCat==='resumen')) h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v150=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA150_ACC) return; window.__SA150_ACC=true;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)&&requeridas(e).length){ const f=faltan(e).length;
@@ -28246,16 +28246,16 @@ install();setTimeout(install,1200);
           const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)+8,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)+8,0,100); return 'La junta aprobó el préstamo. '+esc(q.nombre)+' no lo va a olvidar.'; }},
          {t:'Votar en contra',f:()=>{ const q=S._pide153; if(!q) return ''; const B=beneficiarios().find(z=>z.key===q.key); if(B&&B.h) B.h.vinculo=clamp((B.h.vinculo||60)-10,0,100); if(B&&B.p) B.p.afecto=clamp((B.p.afecto||55)-10,0,100); return 'Votaste en contra y la junta lo negó. En el próximo almuerzo familiar hubo un silencio largo.'; }}]}; }
   /* --- enganches --- */
-  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v153) return; window.miPct=function(e){ const v=old.apply(this,arguments); try{ const f=foPct(e); if(f>0) S._venta153={e,efectivo:S.efectivo}; return v+f; }catch(x){ return v; } }; window.miPct.__v153=true; }
+  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v153) return; window.miPct=function(e){ const v=old.apply(this,arguments); try{ const f=foPct(e); if(f>0) S._venta153={e,efectivo:S.efectivo}; return v+f; }catch(x){ return v; } }; window.miPct.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.miPct[k]=true; }); }
   /* si la compañía se vende o se liquida, la parte de la plata que corresponde a las acciones del family office es del family office */
   function wrapSalida(){ const old=window.sacarDelGrupo; if(typeof old!=='function'||old.__v153) return;
-    window.sacarDelGrupo=function(e){ try{ const fo=FO(), s=S._venta153, f=foPct(e); if(fo&&f>0&&s&&s.e===e){ const tot=miPct(e), d=S.efectivo-s.efectivo; if(d>0&&tot>0){ const x=d*f/tot; S.efectivo-=x; meter(fo,x); log('De lo que dejó '+esc(e.nombre)+', '+fmt(x)+' fueron para el family office, dueño de '+pct(f)+' de la compañía.'); } } S._venta153=null; }catch(x){} return old.apply(this,arguments); }; window.sacarDelGrupo.__v153=true; }
+    window.sacarDelGrupo=function(e){ try{ const fo=FO(), s=S._venta153, f=foPct(e); if(fo&&f>0&&s&&s.e===e){ const tot=miPct(e), d=S.efectivo-s.efectivo; if(d>0&&tot>0){ const x=d*f/tot; S.efectivo-=x; meter(fo,x); log('De lo que dejó '+esc(e.nombre)+', '+fmt(x)+' fueron para el family office, dueño de '+pct(f)+' de la compañía.'); } } S._venta153=null; }catch(x){} return old.apply(this,arguments); }; window.sacarDelGrupo.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.sacarDelGrupo[k]=true; }); }
   function wrapValor(){ const old=window.valorFamilyOffice; if(typeof old!=='function'||old.__v153) return;
-    window.valorFamilyOffice=function(){ let v=old.apply(this,arguments); try{ const fo=FO(); if(fo&&Array.isArray(fo.prest153)) v+=fo.prest153.filter(p=>p.tipo!=='tu').reduce((s,p)=>s+p.saldo,0); }catch(x){} return v; }; window.valorFamilyOffice.__v153=true; }
+    window.valorFamilyOffice=function(){ let v=old.apply(this,arguments); try{ const fo=FO(); if(fo&&Array.isArray(fo.prest153)) v+=fo.prest153.filter(p=>p.tipo!=='tu').reduce((s,p)=>s+p.saldo,0); }catch(x){} return v; }; window.valorFamilyOffice.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.valorFamilyOffice[k]=true; }); }
   function wrapDividendos(){ const old=window.repartirDividendos; if(typeof old!=='function'||old.__v153) return;
-    window.repartirDividendos=function(v){ const e=S.emp, f=foPct(e), fo=FO(); const r=old.apply(this,arguments); try{ if(f>0&&fo){ const x=v*f; S.efectivo-=x; meter(fo,x); log('De ese dividendo, '+fmt(x)+' fueron para el family office.'); } }catch(x){} return r; }; window.repartirDividendos.__v153=true; }
+    window.repartirDividendos=function(v){ const e=S.emp, f=foPct(e), fo=FO(); const r=old.apply(this,arguments); try{ if(f>0&&fo){ const x=v*f; S.efectivo-=x; meter(fo,x); log('De ese dividendo, '+fmt(x)+' fueron para el family office.'); } }catch(x){} return r; }; window.repartirDividendos.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.repartirDividendos[k]=true; }); }
   function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||old.__v153) return;
-    window.escena=function(o){ try{ if(window.__fo153sub&&o&&Array.isArray(o.opciones)) o.opciones=o.opciones.filter(x=>x.t!=='Retirar parte del mandato'); }catch(x){} return old.apply(this,arguments); }; window.escena.__v153=true; }
+    window.escena=function(o){ try{ if(window.__fo153sub&&o&&Array.isArray(o.opciones)) o.opciones=o.opciones.filter(x=>x.t!=='Retirar parte del mandato'); }catch(x){} return old.apply(this,arguments); }; window.escena.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escena[k]=true; }); }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA153_PASO) return; window.__SA153_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA153_ACC) return; window.__SA153_ACC=true;
@@ -28270,7 +28270,7 @@ install();setTimeout(install,1200);
   function panelHTML(e){ const L=otros(e); if(!L.length&&!foHolder(e)) return ''; const tot=totalAcciones(e);
     return '<div class="socios153"><b>Los accionistas</b><table class="libro">'+e.holders.slice(0,6).map(h=>'<tr><td>'+esc(h.id==='tu'?'Tú':h.nombre)+' <small>'+(h.id==='fo153'?'family office':h.id==='tu'?'':(TIPO_N[h.tipo]||''))+'</small></td><td>'+pct(h.n/tot)+'</td></tr>').join('')+'</table>'+(L.length?'<button type="button" class="btn" data-neg-accion="Comprarles acciones a los socios">Ofrecer por sus acciones</button>':'')+'</div>'; }
   function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v153) return;
-    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='finanzas') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v153=true; }
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='finanzas') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v153=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function init153(){ wrapMiPct(); wrapSalida(); wrapValor(); wrapDividendos(); wrapEscena(); wrapPaso(); wrapAcciones(); wrapCat(); wrapPanel();
     try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Comprarles acciones a los socios')) D.push('Comprarles acciones a los socios'); }catch(x){}
     Object.assign(window,{escenaFO153,escenaSocios153,beneficiariosFO153:beneficiarios,juntaFO153:junta,votarFO153:votar,aportarAccionesFO153:aportarAcciones,anualFO153:anual,unirBancaFO153:unir,aceptacion153:aceptacion}); }
@@ -28418,7 +28418,7 @@ install();setTimeout(install,1200);
   /* --- enganches --- */
   let OLD_PRES=null;
   function wrapPres(){ const old=window.escenaPresidente; if(typeof old!=='function'||old.__v154) return; OLD_PRES=old;
-    window.escenaPresidente=function(e,gratis){ if(window.__pres154dedo) return old.apply(this,arguments); try{ return escenaBuscar(e,gratis); }catch(x){ console.error(x); return old.apply(this,arguments); } }; window.escenaPresidente.__v154=true; }
+    window.escenaPresidente=function(e,gratis){ if(window.__pres154dedo) return old.apply(this,arguments); try{ return escenaBuscar(e,gratis); }catch(x){ console.error(x); return old.apply(this,arguments); } }; window.escenaPresidente.__v154=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaPresidente[k]=true; }); }
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA154_EMP) return; window.__SA154_EMP=true;
     window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA154_ACC) return; window.__SA154_ACC=true;
