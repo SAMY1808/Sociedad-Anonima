@@ -1122,10 +1122,48 @@ svg.foto116{display:block;background:#1d2a23}
 .tam146 i{display:inline-block;width:5px;height:11px;border-radius:2px;background:rgba(255,255,255,.18)}
 .tam146 i.on{background:var(--oro,#D6A648)}
 </style>
+<style id="estilos-v149">
+.eq149 .tam{display:inline-block;padding:2px 10px;border-radius:9px;background:rgba(214,166,72,.18);color:#F0CF86;font-size:12.5px;margin-bottom:8px}
+.eq149 .rol{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.eq149 .rol b{display:block;font-size:14.5px}
+.eq149 .rol span{font-size:12.5px;color:var(--humo2)}
+.eq149 .rol .vac{color:#E8A08F}
+.eq149 .rol .c{font-family:var(--display);font-size:16px;color:#E8D2A4;white-space:nowrap}
+.eq149-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
+<style id="estilos-v150">
+.lic150 .lic{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.lic150 .lic b{display:block;font-size:14.5px}
+.lic150 .lic span{font-size:12.5px;color:var(--humo2)}
+.lic150 .est{font-size:12.5px;padding:2px 9px;border-radius:9px;white-space:nowrap}
+.lic150 .est.ok{background:rgba(127,163,107,.22);color:#B9D3A5}
+.lic150 .est.tr{background:rgba(214,166,72,.22);color:#F0CF86}
+.lic150 .est.no{background:rgba(181,85,60,.28);color:#F0A48E}
+.lic150-panel{margin-top:14px;padding:12px;border-radius:10px;background:rgba(214,166,72,.06);border:1px solid rgba(214,166,72,.22)}
+</style>
+<style id="estilos-v151">
+.banco151 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.banco151 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.banco151 .k b{display:block;font-size:16px;font-family:var(--display)}
+.banco151 .k span{font-size:12px;color:var(--humo2)}
+.banco151 .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.banco151 h4{margin:10px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.banco151 table.libro td{padding:5px 4px}
+</style>
+<style id="estilos-v152">
+.bolsa152 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.bolsa152 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.bolsa152 .k b{display:block;font-size:16px;font-family:var(--display)}
+.bolsa152 .k span{font-size:12px;color:var(--humo2)}
+.bolsa152 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.bolsa152 table.libro td{padding:5px 4px}
+.bolsa152 table.libro td small{color:var(--humo2)}
+.bolsa152 .vacio{color:var(--humo2);font-size:13px;padding:4px 0}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v148</div>
+<div class="version-badge" id="versionBadge">v152</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6842,7 +6880,7 @@ function pasarAnio(){
   S.sillas.forEach(s=>{ const h=s.honorarios*(1+m.inflacion*.5); ingreso+=h; res.push(['Honorarios junta de '+s.nombre,h,'pos']); });
 
   /* portafolio */
-  S.portafolio.forEach(pf=>{
+  S.portafolio.forEach(pf=>{ if(pf.bolsa152) return;
     const r=m.ciclo*1.3+rnd(-.16,.22);
     const antes=pf.valor; pf.valor=Math.max(0,pf.valor*(1+r));
     res.push(['Portafolio: '+pf.nombre,pf.valor-antes,pf.valor>=antes?'pos':'neg']);
@@ -23679,7 +23717,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function correrBancos112(){
     const m=S.macro||{ciclo:0,tasa:.1}; const ciclo=m.ciclo||0;
-    bancos().forEach(e=>{ const b=e.banco112, pol=POL[b.pol]||POL.normal;
+    bancos().forEach(e=>{ if(e.banco151) return; const b=e.banco112, pol=POL[b.pol]||POL.normal;
       const crisis=ciclo<-.05?1+(-ciclo)*14:1;
       b.dep=Math.max(0,b.dep*(1+pol.crece+(e.marca-50)/500+ciclo*.6));
       const cartera=b.dep*(1-b.reserva);
@@ -27406,6 +27444,622 @@ install();setTimeout(install,1200);
   function init148(){ wrapEmpresa(); wrapPaso(); wrapEscena(); Object.assign(window,{empresaCafe148:empresa,migrarEmpresasCafe148:migrar,crearEmpresaCafe148:crear}); }
   setTimeout(init148,40); setTimeout(init148,220); setTimeout(init148,650);
   window.__SA148={version:V148};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v149 · QUIÉN MANDA EN CADA COMPAÑÍA
+   Cada compañía necesita gente según su tamaño:
+   - Pequeña (menos de 80 empleados): un administrador de fábrica (o del
+     negocio) que esté encima de todo.
+   - Mediana (hasta 500): gerente de planta, director financiero y
+     director comercial.
+   - Grande: directores de área (financiero, comercial, de operaciones, de
+     gestión humana y jurídico) y un director por cada filial en el
+     exterior.
+   Cada directivo tiene nombre, competencia, honradez, lealtad y sueldo. Se
+   contrata entre candidatos (cazatalentos, alguien de adentro o un
+   familiar), se despide o se le sube el sueldo. Cada cargo mueve algo de la
+   compañía (margen, crecimiento, eficiencia, moral, riesgos legales, las
+   filiales), y una vacante cuesta. Hay robos, cazatalentos de la
+   competencia que se los llevan y directivos que se jubilan.
+   ========================================================================== */
+(function(){
+  const V149='v149';
+  const ROLES={
+    admin:{n:'Administrador de fábrica',d:'Está encima de todo: producción, compras, nómina.'},
+    planta:{n:'Gerente de planta',d:'La operación del día a día.'},
+    financiero:{n:'Director financiero',d:'Caja, deuda, bancos y márgenes.'},
+    comercial:{n:'Director comercial',d:'Ventas, clientes, distribución.'},
+    operaciones:{n:'Director de operaciones',d:'Plantas, logística, eficiencia.'},
+    humana:{n:'Director de gestión humana',d:'Contratación, clima laboral, sindicato.'},
+    juridico:{n:'Director jurídico',d:'Contratos, demandas, cumplimiento.'}
+  };
+  const P1=n=>String(n||'').split(' ')[0];
+  const APE=['Gómez','Restrepo','Vélez','Ospina','Sarmiento','Pombo','Holguín','Lleras','Escobar','Botero','Cuéllar','Parra','Lozano','Santamaría','Herrera','Uribe','Cárdenas','Valencia'];
+  function tamano(e){ const em=e.empleados||0; return em<80&&e.ingresos<1500?'pequena':em<500&&e.ingresos<8000?'mediana':'grande'; }
+  const TAMN={pequena:'Compañía pequeña',mediana:'Compañía mediana',grande:'Compañía grande'};
+  function rolesDe(e){ const t=tamano(e); const base=t==='pequena'?['admin']:t==='mediana'?['planta','financiero','comercial']:['financiero','comercial','operaciones','humana','juridico'];
+    const fil=t==='grande'?((e.filiales||[]).map(f=>'filial:'+f.pais)):[]; return base.concat(fil); }
+  const nomRol=(r,e)=>{ if(/^filial:/.test(r)){ const f=(e.filiales||[]).find(x=>'filial:'+x.pais===r); return 'Director de la filial'+(f?' en '+(f.n||f.pais):''); } return ROLES[r].n; };
+  const EQ=e=>{ if(!e.eq149||typeof e.eq149!=='object'){ e.eq149={}; try{ rolesDe(e).forEach(r=>{ const c=candidato(e,r,'adentro'); c.comp=5; c.leal=65; c.sueldo=estandar(e,r,5); c.desde=e.fundada||S.anio; e.eq149[r]=c; }); }catch(x){} } return e.eq149; };   // el equipo que venía
+  const estandar=(e,r,comp)=>Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
+  const escala=e=>clamp(Math.sqrt(Math.max(50,e.ingresos||50)/1000),.4,6);
+  function candidato(e,r,origen){
+    const sx=pick(['h','m']); let nombre; try{ nombre=nombreLocal(e.ciudad||S.hogar.ciudad,sx)+' '+pick(APE); }catch(x){ nombre=(sx==='h'?'Jorge':'Marta')+' '+pick(APE); }
+    let comp=ri(4,9), hon=ri(3,10), leal=ri(40,70), sueldo=Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
+    if(origen==='adentro'){ comp=ri(3,7); leal=ri(70,92); sueldo=Math.round(sueldo*.7); }
+    if(origen==='cazatalentos'){ comp=ri(7,10); sueldo=Math.round(sueldo*1.35); }
+    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=22&&!h.cargo149); const h=H.length?pick(H):null; if(!h) return null;
+      nombre=h.nombre+' '+(h.apellido||S.p.apellido); comp=clamp(Math.round(((h.formacion||40)/12)+rnd(0,2)),2,9); hon=ri(6,10); leal=95; sueldo=Math.round(sueldo*.8); return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,hijo:h.nombre,edad:h.edad}; }
+    return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,edad:ri(32,58)};
+  }
+  /* --- el año: lo que hace cada cargo, y lo que cuesta no tenerlo --- */
+  function anual(e){
+    const eq=EQ(e), R=rolesDe(e); let g=0, dm=0, sueldos=0; const vac=[];
+    // quien ya no tiene cargo (la compañía cambió de tamaño) se queda como asesor un año y sale
+    Object.keys(eq).forEach(k=>{ if(!R.includes(k)&&eq[k]){ if(eq[k].sobra149&&eq[k].sobra149<S.anio){ delete eq[k]; } else eq[k].sobra149=eq[k].sobra149||S.anio; } });
+    R.forEach(r=>{ const x=eq[r];
+      if(!x){ vac.push(r); return; }
+      x.edad=(x.edad||45)+1; sueldos+=Math.max(0,x.sueldo-estandar(e,r,5)); const d=(x.comp-5);   // lo normal ya está en los costos; pesa lo que se paga de más
+      if(r==='admin'){ e.eficiencia=clamp(e.eficiencia+d*.4,0,100); e.moral=clamp(e.moral+d*.2,0,100); dm+=d*.002; }
+      if(r==='planta'||r==='operaciones'){ e.eficiencia=clamp(e.eficiencia+d*.35,0,100); if(e.prod137) e.prod137.calidad=clamp(e.prod137.calidad+d*.3,0,98); }
+      if(r==='financiero'){ dm+=d*.004; }
+      if(r==='comercial'){ g+=d*.005; e.marca=clamp(e.marca+d*.2,0,100); }
+      if(r==='humana'){ e.moral=clamp(e.moral+d*.5,0,100); try{ const s=sind(e); s.fuerza=clamp(s.fuerza-d*.4,0,100); }catch(z){} }
+      if(r==='juridico'){ if(e.proc140) e.proc140.control=clamp(e.proc140.control+d*.4,0,100); try{ if(S.penal) S.penal.riesgo=clamp((S.penal.riesgo||0)-d*.3,0,100); }catch(z){} }
+      if(/^filial:/.test(r)){ g+=d*.002; }
+      x.leal=clamp(x.leal+(x.sueldo>=Math.round(escala(e)*(6+x.comp*2.2))?1:-2),0,100);
+    });
+    // las vacantes cuestan: más en compañías grandes
+    vac.forEach(r=>{ if(r==='admin'){ e.eficiencia=clamp(e.eficiencia-1.2,0,100); dm-=.004; } else if(/^filial:/.test(r)){ g-=.006; } else { dm-=.004; g-=.003; } });
+    const ing0=e.ingresos, mg=ing0>0?e.utilidad/ing0:0; const ing=ing0*(1+clamp(g,-.05,.05)); const delta=(ing-ing0)*Math.max(0,mg)+ing*clamp(dm,-.04,.04)-sueldos;
+    e.ingresos=ing; e.utilidad+=delta; e.caja+=delta; e.eqUlt149={sueldos,vac:vac.length,anio:S.anio};
+    if(vac.length&&tamano(e)!=='pequena'&&S.anio-(e.avisoVac149||0)>=4){ e.avisoVac149=S.anio; log('<b>'+esc(e.nombre)+'</b> tiene '+vac.length+' cargo'+(vac.length>1?'s':'')+' directivo'+(vac.length>1?'s':'')+' sin nadie: '+vac.map(r=>nomRol(r,e).toLowerCase()).join(', ')+'.','mal'); }
+    // sucesos
+    if(S._ev149===S.anio) return;
+    const conN=R.filter(r=>eq[r]); if(!conN.length) return;
+    const ladron=conN.find(r=>eq[r].hon<=4&&chance((5-eq[r].hon)*.03));
+    if(ladron){ S._ev149=S.anio; cola.push(evRobo(e,ladron)); return; }
+    const estrella=conN.find(r=>eq[r].comp>=8&&chance(.06));
+    if(estrella){ S._ev149=S.anio; cola.push(evCazatalentos(e,estrella)); return; }
+    const viejo=conN.find(r=>eq[r].edad>=66&&chance(.35));
+    if(viejo){ const x=eq[viejo]; delete eq[viejo]; log(esc(x.nombre)+' se jubiló como '+nomRol(viejo,e).toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.',''); if(x.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===x.hijo); if(h) h.cargo149=null; } }
+  }
+  function evRobo(e,r){ const x=EQ(e)[r], monto=Math.max(5,Math.round(e.ingresos*rnd(.01,.04))); e.caja-=monto; e.utilidad-=monto;
+    return {p:9,c:()=>companias().includes(e),t:()=>'<b>'+esc(x.nombre)+', '+nomRol(r,e).toLowerCase()+' de '+esc(e.nombre)+', se robó '+fmt(monto)+'.</b> Facturas infladas con proveedores amigos durante años.',
+      o:[{t:'Despedirlo y denunciarlo',f:()=>{ delete EQ(e)[r]; if(chance(.4)){ e.caja+=monto*.5; return 'Lo condenaron y recuperaste la mitad.'; } return 'Lo echaste. La plata no apareció.'; }},
+         {t:'Despedirlo sin ruido',f:()=>{ delete EQ(e)[r]; return 'Se fue sin escándalo. En el gremio se supo igual.'; }}]}; }
+  function evCazatalentos(e,r){ const x=EQ(e)[r], rival=(()=>{ try{ const L=rivalesVivas(); return L.length?'los '+pick(L).apellido:'una multinacional'; }catch(z){ return 'una multinacional'; } })();
+    return {p:9,c:()=>companias().includes(e)&&!!EQ(e)[r],t:()=>'<b>'+esc(rival.charAt(0).toUpperCase()+rival.slice(1))+' le ofrecen el doble a '+esc(x.nombre)+'</b>, tu '+nomRol(r,e).toLowerCase()+' en '+esc(e.nombre)+'.',
+      o:[{t:()=>'Igualar la oferta (el sueldo pasa a '+fmt(x.sueldo*1.8)+')',f:()=>{ const y=EQ(e)[r]; if(!y) return ''; y.sueldo=Math.round(y.sueldo*1.8); y.leal=clamp(y.leal+15,0,100); return 'Se queda. Te sale caro, pero no se va con tus secretos.'; }},
+         {t:'Dejarlo ir',f:()=>{ delete EQ(e)[r]; return 'Se fue a la competencia, con tu lista de clientes en la cabeza.'; }}]}; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA149_EMP) return; window.__SA149_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+
+  /* --- la pantalla --- */
+  function escenaEquipo149(e){
+    e=e||S.emp; if(!e) return; const eq=EQ(e), R=rolesDe(e), t=tamano(e), reab=()=>{ cerrarModal(); render(); escenaEquipo149(e); };
+    const filas=R.map(r=>{ const x=eq[r]; return '<div class="rol"><div><b>'+esc(nomRol(r,e))+'</b>'+(x?'<span>'+esc(x.nombre)+' · competencia '+x.comp+'/10 · lealtad '+Math.round(x.leal)+' · desde '+x.desde+(x.origen==='familia'?' · de la familia':'')+'</span>':'<span class="vac">Vacante. '+(ROLES[r]?esc(ROLES[r].d):'La filial anda sola.')+'</span>')+'</div><div class="c">'+(x?fmt(x.sueldo)+'/año':'—')+'</div></div>'; }).join('');
+    const ops=[];
+    R.forEach(r=>{ const x=eq[r];
+      if(!x) ops.push({t:'Contratar: '+nomRol(r,e).toLowerCase(),cat:'empleo',d:'Ves tres candidatos: un cazatalentos, alguien de adentro o un familiar.',cerrar:false,run:()=>{ cerrarModal(); elegir(e,r); }});
+      else { ops.push({t:'Despedir a '+P1(x.nombre)+' ('+nomRol(r,e).toLowerCase()+')',cat:'empleo',d:'Indemnización de medio sueldo anual. El cargo queda vacante.',cerrar:false,run:()=>{ e.caja-=x.sueldo*.5; if(x.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===x.hijo); if(h){ h.cargo149=null; h.vinculo=clamp((h.vinculo||50)-15,0,100); } } delete eq[r]; log('Despediste a '+esc(x.nombre)+' de <b>'+esc(e.nombre)+'</b>.'); reab(); }});
+        if(x.leal<55) ops.push({t:'Subirle el sueldo a '+P1(x.nombre),cat:'empleo',d:'+25%. Su lealtad está en '+Math.round(x.leal)+': se lo pueden llevar.',cerrar:false,run:()=>{ x.sueldo=Math.round(x.sueldo*1.25); x.leal=clamp(x.leal+20,0,100); reab(); }}); }
+    });
+    const u=e.eqUlt149;
+    escena({rubro:esc(e.nombre)+' · Personal',titulo:'El equipo directivo',ancho:true,cerrable:true,clase:'eq149',
+      cuerpo:t==='pequena'?'Una compañía pequeña necesita a alguien de confianza encima de la fábrica.':t==='mediana'?'Ya no la manejas sola: necesita gerente de planta y directores financiero y comercial.':'Una compañía grande se maneja por áreas, y cada filial en el exterior necesita su director.',
+      html:'<span class="tam">'+TAMN[t]+' · '+(e.empleados||0).toLocaleString('es-CO')+' empleados</span>'+filas+(u?'<div class="apunte">El año pasado los sueldos por encima de lo normal costaron '+fmt(u.sueldos)+(u.vac?'; '+u.vac+' vacante'+(u.vac>1?'s':'')+' le restaron a la compañía':'')+'.</div>':''),
+      opciones:ops.length?ops:[{t:'Volver',cat:'empleo'}]});
+  }
+  function elegir(e,r){
+    const C=['cazatalentos','adentro','familia'].map(o=>candidato(e,r,o)).filter(Boolean);
+    escena({rubro:esc(e.nombre),titulo:nomRol(r,e),ancho:true,cerrable:true,cuerpo:'Tres opciones para el cargo. El cazatalentos trae a los mejores, a precio de mercado; alguien de adentro conoce la casa; un familiar es leal, pero no siempre el más capaz.',
+      opciones:C.map(c=>({t:c.nombre+' · '+({cazatalentos:'del cazatalentos',adentro:'de adentro de la compañía',familia:'de la familia'})[c.origen],cat:'empleo',d:'Competencia '+c.comp+'/10. '+(c.origen==='familia'?'Lealtad total. ':'')+'Pide '+fmt(c.sueldo)+' al año.'+(c.origen==='cazatalentos'?' El cazatalentos cobra '+fmt(c.sueldo*.3)+'.':''),
+        run:()=>{ if(c.origen==='cazatalentos') e.caja-=c.sueldo*.3; EQ(e)[r]=c; if(c.hijo){ const h=(S.familia.hijos||[]).find(y=>y.nombre===c.hijo); if(h){ h.cargo149=e.nombre; h.vinculo=clamp((h.vinculo||50)+8,0,100); } }
+          log('<b>'+esc(c.nombre)+'</b> es '+(c.origen==='familia'?'el nuevo ':'')+nomRol(r,e).toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.','bien'); render(); }}))});
+  }
+  function panelHTML(e){ const R=rolesDe(e), eq=EQ(e), vac=R.filter(r=>!eq[r]).length;
+    return '<div class="eq149-panel"><b>El equipo directivo</b><div class="apunte" style="margin:4px 0 8px">'+TAMN[tamano(e)]+' · '+(R.length-vac)+' de '+R.length+' cargos con alguien'+(vac?' · <span class="mal">'+vac+' vacante'+(vac>1?'s':'')+'</span>':'')+'</div>'
+      +'<button type="button" class="btn" data-neg-accion="El equipo directivo">Ver el equipo directivo</button></div>'; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v149) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&negCat==='personal') h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v149=true; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA149_ACC) return; window.__SA149_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)){ const R=rolesDe(e), vac=R.filter(r=>!EQ(e)[r]).length;
+        A.push({t:'El equipo directivo',d:TAMN[tamano(e)]+': '+(vac?vac+' cargo'+(vac>1?'s':'')+' sin nadie.':'todos los cargos cubiertos.'),mov:0,modal:true,run:()=>escenaEquipo149(e)}); } }catch(x){}
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA149_CAT) return; window.__SA149_CAT=true;
+    window.catDe=function(t){ if(t==='El equipo directivo') return 'empleo'; return old.apply(this,arguments); }; }
+  function init149(){ wrapEmpresa(); wrapPanel(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('El equipo directivo')) D.push('El equipo directivo'); }catch(x){}
+    Object.assign(window,{equipo149:EQ,rolesEquipo149:rolesDe,tamanoCompania149:tamano,escenaEquipo149,candidato149:candidato}); }
+  setTimeout(init149,40); setTimeout(init149,220); setTimeout(init149,650); setTimeout(init149,950);
+  window.__SA149={version:V149};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v150 · LAS LICENCIAS
+   Cada actividad necesita sus permisos, según el sector y la época:
+   licencia de funcionamiento de la Superintendencia (bancos, financieras,
+   aseguradoras), título minero, licencia ambiental (desde 1993), registro
+   sanitario del INVIMA (desde 1995; antes, del Ministerio de Salud),
+   habilitación de servicios de salud, licencias de construcción ante la
+   curaduría (desde 1997), concesión de frecuencias de radio y de
+   televisión, habilitación de transporte, registro de exportador de café,
+   registro nacional de turismo, permisos de energía ante la CREG.
+   Sin licencia la compañía opera a medias y se arriesga a multas y
+   cierres. El trámite tarda y cuesta: por la vía normal, con un gestor, o
+   "por debajo de la mesa" (rápido, y delito). Las licencias se renuevan;
+   un escándalo o un incumplimiento pueden suspenderlas.
+   Las compañías que ya existían conservan las licencias que tenían.
+   ========================================================================== */
+(function(){
+  const V150='v150';
+  const L=(id,n,ent,desde,anios,vig,c,d)=>({id,n,ent,desde,anios,vig,c,d});
+  const LIC={
+    superfin:L('superfin','Licencia de funcionamiento','la Superintendencia Financiera',1923,2,0,.03,'Sin ella no se puede captar ni prestar plata del público.'),
+    aseguradora:L('aseguradora','Licencia de aseguradora','la Superintendencia Financiera',1923,2,0,.03,'Para vender pólizas hay que demostrar reservas y capital.'),
+    titulo:L('titulo','Título minero','el Ministerio de Minas',1900,2,30,.02,'La concesión para explorar y explotar una zona.'),
+    ambiental:L('ambiental','Licencia ambiental','la ANLA y las corporaciones autónomas',1993,2,0,.015,'Estudio de impacto, consulta previa y plan de manejo.'),
+    invima:L('invima','Registro sanitario','el INVIMA',1995,1,10,.008,'Cada producto que se come o se toma necesita su registro.'),
+    minsalud:L('minsalud','Licencia sanitaria','el Ministerio de Salud',1950,1,10,.006,'El permiso para fabricar alimentos y medicamentos.'),
+    habilitacion:L('habilitacion','Habilitación de servicios de salud','la Secretaría de Salud',2002,1,4,.006,'Para atender pacientes hay que cumplir los estándares.'),
+    curaduria:L('curaduria','Licencias de urbanismo y construcción','las curadurías urbanas',1997,1,3,.01,'Cada proyecto necesita su licencia antes de poner un ladrillo.'),
+    planeacion:L('planeacion','Licencias de construcción','las oficinas de planeación municipal',1950,1,3,.008,'El permiso de la alcaldía para cada obra.'),
+    radio:L('radio','Concesión de frecuencias de radio','el Ministerio de Comunicaciones',1930,1,10,.01,'El espectro es del Estado: se concesiona.'),
+    tv:L('tv','Concesión de televisión','la Comisión Nacional de Televisión',1998,2,10,.05,'Los canales privados nacionales llegan en 1998.'),
+    transporte:L('transporte','Habilitación de transporte','el Ministerio de Transporte',1990,1,0,.006,'Rutas, vehículos y seguros en regla.'),
+    exportador:L('exportador','Registro de exportador de café','la Federación de Cafeteros',1927,1,0,.004,'Calidades, contratos y contribución cafetera.'),
+    turismo:L('turismo','Registro Nacional de Turismo','el Ministerio de Comercio',1996,1,1,.003,'Todo prestador de servicios turísticos se registra.'),
+    creg:L('creg','Registro ante la CREG','la Comisión de Regulación de Energía',1994,1,0,.006,'Para generar o vender energía en el mercado mayorista.')
+  };
+  function requeridas(e){ const A=S.anio, s=e.sector, r=[];
+    const add=id=>{ if(LIC[id]&&A>=LIC[id].desde) r.push(id); };
+    if(s==='financiero') add('superfin');
+    if(s==='seguros') add('aseguradora');
+    if(s==='mineria'){ add('titulo'); add('ambiental'); }
+    if(s==='energia'){ add('ambiental'); add('creg'); }
+    if(s==='construccion'){ if(A>=1997) add('curaduria'); else add('planeacion'); }
+    if(s==='alimentos'||s==='salud'){ if(A>=1995) add('invima'); else add('minsalud'); }
+    if(s==='salud') add('habilitacion');
+    if(s==='medios'){ add('radio'); if((e.ingresos||0)>3000) add('tv'); }
+    if(s==='logistica') add('transporte');
+    if(s==='turismo') add('turismo');
+    if(e.cafe148&&e.cafe148.k==='export') add('exportador');
+    return r; }
+  const R=e=>{ if(!e.lic150||typeof e.lic150!=='object'){ e.lic150={}; requeridas(e).forEach(id=>{ e.lic150[id]={estado:'vigente',desde:e.fundada||S.anio,hasta:LIC[id].vig?S.anio+LIC[id].vig:null}; }); e.lic150.__nueva=(e.fundada||0)>=S.anio; } return e.lic150; };
+  const costo=(e,id)=>Math.max(4,Math.round((e.ingresos||100)*LIC[id].c));
+  const vigente=(e,id)=>{ const x=R(e)[id]; return x&&x.estado==='vigente'; };
+  const faltan=e=>requeridas(e).filter(id=>!vigente(e,id));
+  /* --- el año --- */
+  function anual(e){
+    const lic=R(e); let pen=0;
+    if(e.banco112&&!e.banco112.intervenido&&!vigente(e,'superfin')&&requeridas(e).includes('superfin')) lic.superfin={estado:'vigente',desde:e.banco112.desde||S.anio,hasta:null};   // el banco de la v112 ya tiene su licencia
+    requeridas(e).forEach(id=>{ if(!lic[id]&&(e.fundada||S.anio)<LIC[id].desde&&!lic.__nueva){ lic[id]={estado:'vigente',desde:S.anio,hasta:Math.max(S.anio,LIC[id].desde)+3,transicion:true};
+      log('Nueva exigencia para <b>'+esc(e.nombre)+'</b>: '+LIC[id].n.toLowerCase()+' ante '+LIC[id].ent+'. Tiene tres años de transición.',''); } });
+    requeridas(e).forEach(id=>{ const x=lic[id];
+      if(x&&x.estado==='tramite'&&x.listo<=S.anio){ if(chance(x.p||.7)){ lic[id]={estado:'vigente',desde:S.anio,hasta:LIC[id].vig?S.anio+LIC[id].vig:null}; log('<b>'+esc(e.nombre)+'</b> obtuvo su '+LIC[id].n.toLowerCase()+' de '+LIC[id].ent+'.','bien'); hito(e.nombre+' obtuvo su '+LIC[id].n.toLowerCase()); }
+        else { lic[id]={estado:'negada',anio:S.anio}; log(LIC[id].ent.charAt(0).toUpperCase()+LIC[id].ent.slice(1)+' le negó a <b>'+esc(e.nombre)+'</b> la '+LIC[id].n.toLowerCase()+'. Toca volver a radicar.','mal'); } }
+      const y=lic[id];
+      if(y&&y.estado==='vigente'&&y.hasta&&y.hasta<=S.anio){ const c=costo(e,id); if(e.caja>=c){ e.caja-=c; y.hasta=S.anio+LIC[id].vig; } else { y.estado='vencida'; log('Se venció la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> y no había caja para renovarla.','mal'); } }
+      if(y&&y.estado==='suspendida'&&y.hasta<=S.anio){ y.estado='vigente'; y.hasta=LIC[id].vig?S.anio+LIC[id].vig:null; log('Levantaron la suspensión de la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b>.','bien'); }
+      if(!vigente(e,id)) pen+=.1;
+    });
+    if(pen>0){ const p=Math.min(.3,pen), perd=e.ingresos*p, mg=e.ingresos>0?e.utilidad/e.ingresos:0; e.ingresos-=perd; const d=-perd*Math.max(0,mg); e.utilidad+=d; e.caja+=d;
+      if(S._ev150!==S.anio&&chance(.25)){ S._ev150=S.anio; cola.push(evSancion(e,faltan(e)[0])); } }
+    // un escándalo abierto de la compañía puede traer una suspensión
+    try{ const esc_=(S.esc129||[]).filter(x=>x.estado==='abierto'&&x.tipo==='empresa'&&String(x.titulo||'').indexOf(e.nombre)>=0); const conLic=requeridas(e).filter(id=>vigente(e,id));
+      if(esc_.length&&conLic.length&&S._ev150!==S.anio&&chance(.2)){ S._ev150=S.anio; const id=pick(conLic); lic[id]={estado:'suspendida',desde:lic[id].desde,hasta:S.anio+1}; log('Por el escándalo, '+LIC[id].ent+' suspendió la '+LIC[id].n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> por un año.','mal'); } }catch(x){}
+  }
+  function evSancion(e,id){ const L_=LIC[id]; return {p:9,c:()=>companias().includes(e)&&!vigente(e,id),t:()=>'<b>'+esc(L_.ent.charAt(0).toUpperCase()+L_.ent.slice(1))+' llegó a '+esc(e.nombre)+'.</b> Está operando sin '+L_.n.toLowerCase()+'. Amenazan con multa y cierre.',
+    o:[{t:()=>'Pagar la multa y radicar ya ('+fmt(costo(e,id)*2)+')',f:()=>{ e.caja-=costo(e,id)*2; R(e)[id]={estado:'tramite',listo:S.anio+L_.anios,p:.75}; return 'Pagaste la multa y empezó el trámite.'; }},
+       {t:'Cerrar mientras se tramita',f:()=>{ e.ingresos*=.8; R(e)[id]={estado:'tramite',listo:S.anio+L_.anios,p:.8}; return 'Cerraste unos meses. Perdiste ventas, pero ya no hay riesgo de sanción.'; }},
+       {t:'Un sobre para que miren para otro lado',f:()=>{ const c=costo(e,id); e.caja-=c; registrarDelito('cohecho',3,'sobornar a un funcionario de '+L_.ent); if(chance(.7)) return 'El funcionario se fue contento. El problema no se fue: sigues sin licencia.'; try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','El soborno de '+e.nombre,2); }catch(x){} return 'Era una trampa de la Fiscalía. Salió en todos los noticieros.'; }}]}; }
+  /* --- la pantalla --- */
+  function escenaLicencias150(e){
+    e=e||S.emp; if(!e) return; const lic=R(e), req=requeridas(e), reab=()=>{ cerrarModal(); render(); escenaLicencias150(e); };
+    const est=id=>{ const x=lic[id]; if(!x) return ['no','Sin licencia']; if(x.estado==='vigente') return ['ok','Vigente'+(x.hasta?' hasta '+x.hasta:'')]; if(x.estado==='tramite') return ['tr','En trámite · respuesta en '+x.listo]; if(x.estado==='suspendida') return ['no','Suspendida hasta '+x.hasta]; if(x.estado==='negada') return ['no','Negada en '+x.anio]; return ['no','Vencida']; };
+    const filas=req.map(id=>{ const [c,t]=est(id); return '<div class="lic"><div><b>'+esc(LIC[id].n)+'</b><span>'+esc(LIC[id].ent.charAt(0).toUpperCase()+LIC[id].ent.slice(1))+'. '+esc(LIC[id].d)+'</span></div><span class="est '+c+'">'+esc(t)+'</span></div>'; }).join('');
+    const ops=[];
+    req.filter(id=>{ const x=lic[id]; return !x||!['vigente','tramite','suspendida'].includes(x.estado); }).forEach(id=>{ const L_=LIC[id], c=costo(e,id);
+      ops.push({t:'Radicar: '+L_.n.toLowerCase(),cat:'compania',d:'Por la vía normal: '+fmt(c)+' en estudios y trámites. Respuesta en '+L_.anios+' año'+(L_.anios>1?'s':'')+'.',dis:e.caja<c?'La compañía no tiene '+fmt(c):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c; S.mov--; lic[id]={estado:'tramite',listo:S.anio+L_.anios,p:clamp(.55+S.p.reputacion/300,.4,.9)}; log('<b>'+esc(e.nombre)+'</b> radicó la solicitud de '+L_.n.toLowerCase()+'.'); reab(); }});
+      ops.push({t:'Con un gestor: '+L_.n.toLowerCase(),cat:'compania',d:'Un tramitador que conoce a todo el mundo: '+fmt(c*2)+'. Más rápido y más probable.',dis:e.caja<c*2?'La compañía no tiene '+fmt(c*2):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c*2; S.mov--; lic[id]={estado:'tramite',listo:S.anio+Math.max(1,L_.anios-1),p:clamp(.7+S.p.redes/300,.5,.95)}; log('<b>'+esc(e.nombre)+'</b> le pasó el trámite de '+L_.n.toLowerCase()+' a un gestor.'); reab(); }});
+      ops.push({t:'Por debajo de la mesa: '+L_.n.toLowerCase(),cat:'riesgo',d:'Sale ya. Cuesta '+fmt(c*3)+', es un delito y puede salir mal.',dis:e.caja<c*3?'La compañía no tiene '+fmt(c*3):S.mov<1?'No te quedan movidas':null,cerrar:false,run:()=>{ e.caja-=c*3; S.mov--; registrarDelito('cohecho',3,'comprar la '+L_.n.toLowerCase()+' de '+e.nombre);
+        if(chance(.75)){ lic[id]={estado:'vigente',desde:S.anio,hasta:L_.vig?S.anio+L_.vig:null,irregular:true}; log('La '+L_.n.toLowerCase()+' de <b>'+esc(e.nombre)+'</b> salió en una semana. Nadie preguntó cómo.','mal'); }
+        else { try{ window.abrirEscandalo129&&window.abrirEscandalo129('empresa','La licencia comprada de '+e.nombre,2); }catch(x){} log('El funcionario fue capturado con tu sobre. La licencia no salió y el escándalo sí.','mal'); } reab(); }}); });
+    escena({rubro:esc(e.nombre)+' · Expansión',titulo:'Licencias y permisos',ancho:true,cerrable:true,clase:'lic150',
+      cuerpo:req.length?(faltan(e).length?'Sin todas sus licencias la compañía opera a medias: vende menos y se arriesga a multas y cierres.':'La compañía tiene todos sus permisos en regla.'):'En '+S.anio+' esta actividad no necesita licencias especiales: basta el registro mercantil.',
+      html:filas,opciones:ops.length?ops:[{t:'Volver',cat:'compania'}]});
+  }
+  function panelHTML(e){ const req=requeridas(e); if(!req.length) return ''; const f=faltan(e).length;
+    return '<div class="lic150-panel"><b>Licencias y permisos</b><div class="apunte" style="margin:4px 0 8px">'+(req.length-f)+' de '+req.length+' en regla'+(f?' · <span class="mal">'+f+' pendiente'+(f>1?'s':'')+': la compañía opera a medias</span>':'')+'</div><button type="button" class="btn" data-neg-accion="Licencias y permisos">Ver las licencias</button></div>'; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA150_EMP) return; window.__SA150_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  // al fundar una compañía nueva, arranca sin licencias
+  function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||old.__v150) return;
+    window.fundarEn=function(){ const r=old.apply(this,arguments); try{ const g=companias(), e=g[g.length-1]; if(e&&!e.lic150){ e.lic150={}; if(requeridas(e).length) log('<b>'+esc(e.nombre)+'</b> necesita '+requeridas(e).map(id=>LIC[id].n.toLowerCase()).join(' y ')+' para operar del todo. Se tramitan en "Licencias y permisos".','mal'); } }catch(x){} return r; };
+    window.fundarEn.__v150=true; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v150) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments); try{ if(e&&(negCat==='expansion'||negCat==='resumen')) h+=panelHTML(e); }catch(x){} return h; }; window.panelCompania86.__v150=true; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA150_ACC) return; window.__SA150_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(A)&&e&&companias().includes(e)&&requeridas(e).length){ const f=faltan(e).length;
+        A.push({t:'Licencias y permisos',d:f?f+' licencia'+(f>1?'s':'')+' pendiente'+(f>1?'s':'')+': la compañía opera a medias.':'Todo en regla.',mov:0,modal:true,run:()=>escenaLicencias150(e)}); } }catch(x){}
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA150_CAT) return; window.__SA150_CAT=true;
+    window.catDe=function(t){ if(t==='Licencias y permisos') return 'compania'; return old.apply(this,arguments); }; }
+  function init150(){ wrapEmpresa(); wrapFundar(); wrapPanel(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Licencias y permisos')) D.push('Licencias y permisos'); }catch(x){}
+    // las compañías que ya existían conservan lo que tenían
+    try{ if(S&&S.p) companias().forEach(e=>R(e)); }catch(x){}
+    Object.assign(window,{LICENCIAS_150:LIC,licenciasRequeridas150:requeridas,licencias150:R,escenaLicencias150,licenciasFaltantes150:faltan}); }
+  setTimeout(init150,40); setTimeout(init150,220); setTimeout(init150,650); setTimeout(init150,950);
+  window.__SA150={version:V150};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v151 · LA BANCA POR DENTRO
+   El banco propio deja de ser "depósitos y una política de crédito" y se
+   administra como un banco:
+   - Pasivos: cuentas de ahorro, cuentas corrientes y CDT, cada uno con su
+     costo. La tasa de captación decide cuánta plata llega.
+   - Activos: el encaje que exige el Banco de la República y la cartera,
+     repartida en comercial, consumo, hipotecaria, tarjetas de crédito
+     (desde 1970) y microcrédito (desde 2000), cada una con su tasa, su
+     mora y su peso en la solvencia.
+   - Tasas de colocación con tope de usura (el interés bancario corriente
+     por 1,5). El UPAC (1972-1999) para la vivienda, hasta la crisis.
+   - Provisiones, gastos de la red (oficinas, cajeros desde 1980, banca
+     digital desde 2010), comisiones, el 4 por mil (desde 1998).
+   - Solvencia mínima (9%), liquidez, corridas, Fogafín (desde 1985) y la
+     intervención de la Superfinanciera.
+   - Control de lavado de activos (SARLAFT) y la "lista Clinton" (desde
+     1995): sin control, la plata caliente llega sola.
+   - Emisión de bonos, compra de cartera, capitalizar y repartir.
+   ========================================================================== */
+(function(){
+  const V151='v151';
+  const SEG={comercial:{n:'Comercial',sp:.06,mora:.03,rw:1,desde:0},consumo:{n:'Consumo',sp:.12,mora:.05,rw:1,desde:0},hipotecaria:{n:'Hipotecaria',sp:.04,mora:.03,rw:.5,desde:0},
+    tarjetas:{n:'Tarjetas de crédito',sp:.17,mora:.07,rw:1,desde:1970},micro:{n:'Microcrédito',sp:.22,mora:.08,rw:1,desde:2000}};
+  const ESTR={equilibrada:{n:'Equilibrada',w:{comercial:.35,consumo:.25,hipotecaria:.2,tarjetas:.12,micro:.08}},corporativa:{n:'Corporativa',w:{comercial:.7,consumo:.1,hipotecaria:.1,tarjetas:.07,micro:.03}},
+    consumo:{n:'De consumo',w:{comercial:.15,consumo:.4,hipotecaria:.1,tarjetas:.3,micro:.05}},vivienda:{n:'De vivienda',w:{comercial:.2,consumo:.1,hipotecaria:.6,tarjetas:.07,micro:.03}},
+    popular:{n:'Popular y microcrédito',w:{comercial:.1,consumo:.25,hipotecaria:.1,tarjetas:.15,micro:.4}}};
+  const pct=x=>(Math.round(x*1000)/10)+'%';
+  const bancos=()=>{ try{ return companias().filter(e=>e.banco112&&!e.banco112.intervenido); }catch(e){ return []; } };
+  const tasaBR=()=>clamp((S.macro&&S.macro.tasa)||.08,.02,.4);
+  const usura=()=>(tasaBR()+.08)*1.5;
+  const encajeLegal=()=>S.anio<1990?.25:S.anio<2000?.15:.08;
+  const solvMin=()=>S.anio>=1990?.09:.08;
+  function B(e){
+    if(e.banco151) return e.banco151;
+    const b=e.banco112, dep=Math.max(50,b.dep||e.caja*2.5), car=dep*(1-(b.reserva||.15));
+    const w=ESTR[b.pol==='agresivo'?'consumo':b.pol==='conservador'?'corporativa':'equilibrada'].w;
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde), tw=disp.reduce((s,k)=>s+w[k],0);
+    e.banco151={dep:{ahorro:dep*.45,corriente:dep*.25,cdt:dep*.3},car:Object.fromEntries(Object.keys(SEG).map(k=>[k,disp.includes(k)?car*w[k]/tw:0])),
+      capt:'mercado',estr:b.pol==='agresivo'?'consumo':b.pol==='conservador'?'corporativa':'equilibrada',col:'prudente',prov:'prudentes',
+      oficinas:Math.max(3,Math.round(dep/250)),cajeros:S.anio>=1980?Math.round(dep/150):0,digital:false,sarlaft:S.anio>=1995,bonos:0,ult:null,hist:[]};
+    return e.banco151;
+  }
+  const totDep=b=>b.dep.ahorro+b.dep.corriente+b.dep.cdt;
+  const totCar=b=>Object.values(b.car).reduce((s,x)=>s+x,0);
+  const rwa=b=>Object.keys(SEG).reduce((s,k)=>s+b.car[k]*SEG[k].rw,0);
+  function anual(e){
+    const b=B(e), m=S.macro||{}, ciclo=m.ciclo||0, i=tasaBR(), U=usura();
+    const crisis=ciclo<-.05?1+(-ciclo)*12:1, upac=S.anio>=1998&&S.anio<=2000;
+    // 1. los depósitos
+    const D0=totDep(b), solv0=e.caja/Math.max(1,rwa(b));
+    let g=.05+ciclo*.5+({baja:-.04,mercado:0,alta:.07})[b.capt]+Math.log10(Math.max(1,b.oficinas))*.01+(b.digital?.03:0)+(b.cajeros>0?.01:0)-(solv0<solvMin()?.08:0)-(S.anio>=1998?.005:0);
+    try{ if((S.esc129||[]).some(x=>x.estado==='abierto'&&String(x.titulo||'').indexOf(e.nombre)>=0)) g-=.06; }catch(x){}
+    const mix=b.capt==='alta'?{ahorro:.35,corriente:.2,cdt:.45}:b.capt==='baja'?{ahorro:.5,corriente:.3,cdt:.2}:{ahorro:.45,corriente:.25,cdt:.3};
+    const D1=Math.max(10,D0*(1+clamp(g,-.3,.3))); Object.keys(mix).forEach(k=>{ b.dep[k]=b.dep[k]*.7+D1*mix[k]*.3; }); const f=D1/totDep(b); Object.keys(b.dep).forEach(k=>b.dep[k]*=f);
+    const costoDep=b.dep.ahorro*i*.35+b.dep.cdt*(i*.95+(b.capt==='alta'?.015:b.capt==='baja'?-.01:0));
+    // 2. la cartera: crece hasta lo que permiten los depósitos y el encaje, repartida según la estrategia
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde), W=ESTR[b.estr].w, tw=disp.reduce((s,k)=>s+W[k],0);
+    const tope=(totDep(b)+b.bonos)*(1-encajeLegal()-.05)+Math.max(0,e.caja)*.8, C0=totCar(b), C1=Math.max(0,Math.min(tope,C0*1.25+10));
+    disp.forEach(k=>{ b.car[k]=b.car[k]*.85+C1*W[k]/tw*.15; });
+    const fc=C1/Math.max(1,totCar(b)); disp.forEach(k=>b.car[k]*=fc);
+    // 3. lo que rinde y lo que se pierde
+    let ingInt=0, perdida=0; const moras={};
+    disp.forEach(k=>{ const s=SEG[k]; let tasa=i+s.sp*(b.col==='maxima'?1.25:1); const tope_=k==='micro'?U*1.4:U; if(tasa>tope_) tasa=tope_;
+      let mo=s.mora*crisis*(b.col==='maxima'?1.3:1)*(k==='hipotecaria'&&upac?5:1)*(e.gerente112==='amigos'?2:1); mo=clamp(mo,.005,.6); moras[k]=mo;
+      ingInt+=b.car[k]*tasa*(1-mo*.5); const prov=({minimas:.8,prudentes:1,contraciclicas:ciclo>0?1.15:.8})[b.prov]; perdida+=b.car[k]*mo*.55*prov; b.car[k]*=1-mo*.5; });
+    const comis=b.car.tarjetas*.04+totDep(b)*.004;
+    const opex=b.oficinas*1.5*(b.digital?.88:1)+b.cajeros*.08+(b.digital?6:0)+(totDep(b)+totCar(b))*.008+(b.sarlaft?Math.max(2,totDep(b)*.001):0);
+    const intBonos=b.bonos*(i+.02);
+    const antesImp=ingInt+comis-costoDep-perdida-opex-intBonos, util=antesImp>0?antesImp*.67:antesImp;
+    // 4. a las cuentas de la compañía (el capital del banco es su caja)
+    const delta=util-e.utilidad; e.ingresos=Math.max(1,ingInt+comis); e.utilidad=util; e.costos=e.ingresos-util; e.caja+=delta;
+    const h=e.historia&&e.historia[e.historia.length-1]; if(h&&h.anio===S.anio){ h.ing=e.ingresos; h.ut=e.utilidad; try{ h.val=valuar(e); }catch(x){} }
+    e.banco112.dep=totDep(b); e.banco112.util=util; e.banco112.mora=disp.reduce((s,k)=>s+b.car[k]*moras[k],0)/Math.max(1,totCar(b));
+    const solv=e.caja/Math.max(1,rwa(b)), liq=((totDep(b)+b.bonos+Math.max(0,e.caja))-totCar(b))/Math.max(1,totDep(b)); e.banco112.solv=solv;
+    b.ult={anio:S.anio,ingInt,comis,costoDep,perdida,opex,intBonos,util,moras,solv,liq,roe:util/Math.max(1,e.caja)}; b.hist.push([S.anio,Math.round(util)]); if(b.hist.length>40) b.hist.shift();
+    // 5. el regulador y la confianza
+    if(solv<solvMin()*.5){ intervenir(e,'la solvencia cayó a '+pct(solv)+', muy por debajo del mínimo'); return; }
+    if(solv<solvMin()&&S._ev151!==S.anio){ S._ev151=S.anio; cola.push(evCapitalizar(e)); return; }
+    const pCorr=(liq<.12?.12:0)+(crisis>1.5?.05:0)+(solv<solvMin()*1.2?.05:0); if(S._ev151!==S.anio&&chance(pCorr*(S.anio>=1985?.5:1))){ S._ev151=S.anio; cola.push(evCorrida(e)); return; }
+    if(!b.sarlaft&&S.anio>=1978&&S.anio-(b.calienteAviso||0)>=5&&chance(.12)&&S._ev151!==S.anio){ b.calienteAviso=S.anio; S._ev151=S.anio; cola.push(evCaliente(e)); return; }
+    if(upac&&b.car.hipotecaria>totCar(b)*.25&&!b.upacAviso&&S._ev151!==S.anio){ b.upacAviso=1; S._ev151=S.anio; cola.push(evUpac(e)); }
+  }
+  function intervenir(e,motivo){ const b=e.banco112; b.intervenido=S.anio; e.ceoExterno='la Superintendencia Financiera'; e.caja=Math.max(0,e.caja*.1); e.ingresos*=.35;
+    S.p.reputacion=clamp(S.p.reputacion-12,0,100); try{ moverPrestigio(-8,'la intervención de su banco'); }catch(x){}
+    log('<b>La Superintendencia Financiera intervino '+esc(e.nombre)+'</b>: '+esc(motivo)+'. Los ahorradores hacen fila'+(S.anio>=1985?'; Fogafín les responde hasta el tope del seguro de depósitos.':'.'),'mal'); hito('Intervinieron '+e.nombre); }
+  const BK=()=>bancos().find(x=>x.nombre===S._b151);
+  function evCapitalizar(e){ S._b151=e.nombre; const b=B(e), falta=Math.max(10,Math.round(rwa(b)*solvMin()-e.caja+rwa(b)*.01));
+    return {p:9,c:()=>!!BK(),t:()=>'<b>La Superintendencia Financiera le exige capital a '+esc(e.nombre)+'.</b> La solvencia está en '+pct(e.caja/Math.max(1,rwa(b)))+' y el mínimo es '+pct(solvMin())+'. Faltan unos '+fmt(falta)+'.',
+      o:[{t:()=>'Ponerlo de tu bolsillo ('+fmt(falta)+')',f:()=>{ const x=BK(); if(!x) return ''; const p=Math.min(S.efectivo,falta); S.efectivo-=p; x.caja+=p; return p>=falta?'Capitalizaste el banco. La Superintendencia queda tranquila.':'Pusiste lo que tenías: no alcanzó del todo.'; }},
+         {t:'Frenar el crédito y vender cartera',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x); Object.keys(bb.car).forEach(k=>bb.car[k]*=.8); x.caja+=totCar(bb)*.02; return 'Vendiste cartera con descuento y dejaste de prestar. El banco se encoge, pero sale del rojo.'; }}]}; }
+  function evCorrida(e){ S._b151=e.nombre; const b=B(e), ret=Math.round(totDep(b)*rnd(.2,.35));
+    return {p:9,c:()=>!!BK(),t:()=>'<b>Corrida en '+esc(e.nombre)+'.</b> Un rumor en la radio y las filas le dan la vuelta a la cuadra. Quieren sacar '+fmt(ret)+' en una semana.'+(S.anio>=1985?' Fogafín tranquiliza a algunos.':''),
+      o:[{t:'Pagarle a todo el mundo, ventanilla por ventanilla',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x), liq=(totDep(bb)+bb.bonos+Math.max(0,x.caja))-totCar(bb); const f=ret/totDep(bb); Object.keys(bb.dep).forEach(k=>bb.dep[k]*=1-f); if(liq<ret){ Object.keys(bb.car).forEach(k=>bb.car[k]*=1-(ret-liq)/Math.max(1,totCar(bb))); x.caja-=(ret-liq)*.15; } return 'Pagaste todo. La fila se acabó al tercer día: el que ve que le pagan, deja de pedir.'; }},
+         {t:'Pedir un apoyo de liquidez al Banco de la República',f:()=>{ const x=BK(); if(!x) return ''; x.deuda=(x.deuda||0)+ret*.6; const bb=B(x); Object.keys(bb.dep).forEach(k=>bb.dep[k]*=1-ret*.6/totDep(bb)); return 'El Emisor te prestó, caro. Sobreviviste, con la Superintendencia encima.'; }}]}; }
+  function evCaliente(e){ S._b151=e.nombre; return {p:9,c:()=>!!BK(),t:()=>'<b>Plata caliente.</b> Un cliente nuevo de '+esc(e.nombre)+' abre cuentas con maletas de efectivo y CDT a nombre de terceros. Tu oficina de '+esc(e.ciudad||'Medellín')+' está feliz con las metas.',
+    o:[{t:'Montar control de lavado de activos y cerrarle las cuentas',f:()=>{ const x=BK(); if(x){ B(x).sarlaft=true; x.caja-=Math.max(3,totDep(B(x))*.002); } return 'Montaste el control y le cerraste las cuentas. Perdiste depósitos y ganaste paz.'; }},
+       {t:'No preguntar: la plata es plata',f:()=>{ const x=BK(); if(!x) return ''; const bb=B(x); bb.dep.cdt+=totDep(bb)*.08; registrarDelito('lavado de activos',4,'recibir depósitos de origen ilícito en '+x.nombre);
+         if(S.anio>=1995&&chance(.3)){ x.ingresos*=.5; bb.dep.corriente*=.5; try{ window.abrirEscandalo129&&window.abrirEscandalo129('fiscal','La lista Clinton y '+x.nombre,3); }catch(z){} return 'Al año siguiente, '+x.nombre+' apareció en la lista Clinton. Los bancos corresponsales de Nueva York cortaron todo.'; }
+         return 'Los depósitos crecieron. Nadie preguntó. Todavía.'; }}]}; }
+  function evUpac(e){ S._b151=e.nombre; return {p:9,c:()=>!!BK(),t:()=>'<b>La crisis del UPAC.</b> Las tasas se dispararon y las cuotas de vivienda subieron más que lo que valen las casas. Miles de deudores de '+esc(e.nombre)+' devuelven las llaves. La Corte Constitucional declara inconstitucional el sistema.',
+    o:[{t:'Reestructurar los créditos y aliviar a los deudores',f:()=>{ const x=BK(); if(!x) return ''; x.caja-=B(x).car.hipotecaria*.06; S.p.reputacion=clamp(S.p.reputacion+5,0,100); return 'Reliquidaste los créditos al nuevo sistema (UVR). Perdiste plata y ganaste clientes.'; }},
+       {t:'Rematar las casas',f:()=>{ const x=BK(); if(!x) return ''; B(x).car.hipotecaria*=.85; S.p.reputacion=clamp(S.p.reputacion-8,0,100); try{ window.abrirEscandalo129&&window.abrirEscandalo129('sociedad','Los remates de '+x.nombre,1); }catch(z){} return 'Recuperaste algo con los remates. En los noticieros salen las familias en la calle.'; }}]}; }
+  /* --- la pantalla --- */
+  function escenaBanco151(e){
+    e=e||bancos()[0]; if(!e) return; const b=B(e), u=b.ult, sinMov=S.mov<1?'No te quedan movidas':null, reab=()=>{ cerrarModal(); render(); escenaBanco151(e); };
+    const f=(a,c,cl)=>'<tr><td>'+a+'</td><td class="'+(cl||'')+'">'+c+'</td></tr>';
+    const disp=Object.keys(SEG).filter(k=>S.anio>=SEG[k].desde);
+    const activos='<table class="libro">'+f('Encaje y disponible',fmt(Math.max(0,totDep(b)+b.bonos+Math.max(0,e.caja)-totCar(b))))+disp.map(k=>f('Cartera '+SEG[k].n.toLowerCase(),fmt(b.car[k])+(u&&u.moras[k]!==undefined?' · mora '+pct(u.moras[k]):''),u&&u.moras[k]>.08?'mal':'')).join('')+'</table>';
+    const pasivos='<table class="libro">'+f('Cuentas de ahorro',fmt(b.dep.ahorro))+f('Cuentas corrientes',fmt(b.dep.corriente))+f('CDT',fmt(b.dep.cdt))+(b.bonos?f('Bonos emitidos',fmt(b.bonos)):'')+f('Patrimonio',fmt(e.caja),'bien')+'</table>';
+    const pyg=u?'<table class="libro">'+f('Intereses de la cartera',fmt(u.ingInt))+f('Comisiones',fmt(u.comis))+f('Intereses de los depósitos',fmt(-u.costoDep),'mal')+f('Provisiones',fmt(-u.perdida),'mal')+f('Oficinas, cajeros y nómina',fmt(-u.opex),'mal')+(u.intBonos?f('Intereses de los bonos',fmt(-u.intBonos),'mal'):'')+f('Utilidad',fmt(u.util),u.util>=0?'bien':'mal')+'</table>':'<div class="apunte">El primer año completo con estos números se ve al cerrar el año.</div>';
+    const solv=e.caja/Math.max(1,rwa(b));
+    const html='<div class="k"><div><b class="'+(solv<solvMin()?'mal':'')+'">'+pct(solv)+'</b><span>solvencia (mínimo '+pct(solvMin())+')</span></div><div><b>'+pct(Math.max(0,(totDep(b)+b.bonos+Math.max(0,e.caja)-totCar(b))/Math.max(1,totDep(b))))+'</b><span>liquidez</span></div><div><b>'+pct(tasaBR())+'</b><span>tasa del Banco de la República</span></div><div><b>'+pct(usura())+'</b><span>tasa de usura</span></div><div><b>'+b.oficinas+(b.cajeros?' · '+b.cajeros:'')+'</b><span>oficinas'+(b.cajeros?' · cajeros':'')+(b.digital?' · digital':'')+'</span></div><div><b>'+(u?pct(u.roe):'—')+'</b><span>rentabilidad del patrimonio</span></div></div>'
+      +'<div class="dos"><div><h4>Activos</h4>'+activos+'</div><div><h4>Pasivos y patrimonio</h4>'+pasivos+'</div></div><h4>El año pasado</h4>'+pyg;
+    const ops=[];
+    const elegir=(tit,cuerpo,dic,key)=>({t:tit,cat:'capital',d:cuerpo+' Hoy: '+String((dic[b[key]]||{}).n||dic[b[key]]).toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:esc(e.nombre),titulo:tit,cerrable:true,opciones:Object.keys(dic).filter(k=>k!==b[key]).map(k=>({t:dic[k].n||dic[k],cat:'capital',d:dic[k].d||'',cerrar:false,run:()=>{ b[key]=k; reab(); }}))}); }});
+    ops.push(elegir('Tasa de captación','Pagar más por los CDT trae depósitos, y cuesta.',{baja:{n:'Por debajo del mercado',d:'Depósitos baratos, que crecen poco.'},mercado:{n:'De mercado'},alta:{n:'Por encima del mercado',d:'Los ahorradores llegan, y salen caros.'}},'capt'));
+    ops.push(elegir('Estrategia de cartera','A quién le prestas.',ESTR,'estr'));
+    ops.push(elegir('Tasas de colocación','Cobrar hasta la usura deja más margen y trae peores clientes.',{prudente:{n:'Prudentes',d:'Clientes buenos y mora baja.'},maxima:{n:'Hasta el tope de la usura',d:'Más margen, más mora.'}},'col'));
+    ops.push(elegir('Provisiones','Cuánto se reserva para lo que no van a pagar.',{minimas:{n:'Mínimas',d:'Más utilidad hoy; más golpe en la crisis.'},prudentes:{n:'Prudentes'},contraciclicas:{n:'Contracíclicas',d:'Guardar en los años buenos para los malos.'}},'prov'));
+    const cO=Math.round(Math.max(20,b.oficinas*2)); ops.push({t:'Abrir 10 oficinas',cat:'casa',d:'Más depósitos y más clientes. '+fmt(cO)+' de inversión y más gastos cada año.',dis:e.caja<cO?'El banco no tiene '+fmt(cO):sinMov,cerrar:false,run:()=>{ e.caja-=cO; S.mov--; b.oficinas+=10; log('<b>'+esc(e.nombre)+'</b> abrió diez oficinas nuevas.','bien'); reab(); }});
+    if(b.oficinas>10) ops.push({t:'Cerrar 10 oficinas',cat:'casa',d:'Menos gasto; algunos clientes se van.',cerrar:false,run:()=>{ b.oficinas-=10; Object.keys(b.dep).forEach(k=>b.dep[k]*=.97); reab(); }});
+    if(S.anio>=1980){ const cC=Math.round(Math.max(10,b.oficinas*.8)); ops.push({t:'Instalar 50 cajeros automáticos',cat:'casa',d:'Plata a cualquier hora. '+fmt(cC)+'.',dis:e.caja<cC?'El banco no tiene '+fmt(cC):null,cerrar:false,run:()=>{ e.caja-=cC; b.cajeros+=50; reab(); }}); }
+    if(S.anio>=2010&&!b.digital){ const cD=Math.round(Math.max(30,totDep(b)*.01)); ops.push({t:'Banca digital y app',cat:'casa',d:'Abrir cuentas desde el celular. Baja el costo de las oficinas y atrae a los jóvenes. '+fmt(cD)+'.',dis:e.caja<cD?'El banco no tiene '+fmt(cD):sinMov,cerrar:false,run:()=>{ e.caja-=cD; S.mov--; b.digital=true; log('<b>'+esc(e.nombre)+'</b> lanzó su banca digital.','bien'); reab(); }}); }
+    if(S.anio>=1990) ops.push({t:b.sarlaft?'Control de lavado de activos: activo':'Montar control de lavado de activos',cat:'riesgo',d:b.sarlaft?'Oficial de cumplimiento y revisión de clientes. Cuesta cada año.':'Sin él, la plata caliente llega sola, y con ella la Fiscalía.',dis:b.sarlaft?'Ya está montado':null,cerrar:false,run:()=>{ b.sarlaft=true; reab(); }});
+    if(S.anio>=1995){ const m=Math.round(totDep(b)*.1); ops.push({t:'Emitir bonos por '+fmt(m),cat:'capital',d:'Plata a cinco años para prestar más, a la tasa del mercado más 2%.',dis:sinMov,cerrar:false,run:()=>{ S.mov--; b.bonos+=m; log('<b>'+esc(e.nombre)+'</b> emitió bonos por '+fmt(m)+'.'); reab(); }}); }
+    const cap=Math.round(Math.max(10,rwa(b)*.02)); ops.push({t:'Capitalizar el banco ('+fmt(cap)+')',cat:'capital',d:'De tu bolsillo al patrimonio del banco. Sube la solvencia.',dis:S.efectivo<cap?'No tienes '+fmt(cap):null,cerrar:false,run:()=>{ S.efectivo-=cap; e.caja+=cap; reab(); }});
+    if(u&&u.util>0&&solv>solvMin()+.03){ const div=Math.round(u.util*.5*Math.max(0,Math.min(1,(solv-solvMin())/.05))); if(div>0) ops.push({t:'Repartir dividendos ('+fmt(div*miPct(e))+' para ti)',cat:'capital',d:'La mitad de la utilidad, si la solvencia lo permite.',cerrar:false,run:()=>{ e.caja-=div; S.efectivo+=div*miPct(e); log('<b>'+esc(e.nombre)+'</b> repartió '+fmt(div)+' en dividendos.','bien'); reab(); }}); }
+    escena({rubro:'Tu banco',titulo:esc(e.nombre),ancho:true,cerrable:true,clase:'banco151',cuerpo:'Captas plata del público, la prestas y respondes por ella. El negocio es el margen; el riesgo es la mora, la liquidez y la confianza.',html,opciones:ops});
+  }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA151_EMP) return; window.__SA151_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e.banco112&&!e.banco112.intervenido&&companias().includes(e)) anual(e); }catch(x){ console.error(x); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA151_ACC) return; window.__SA151_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const a=Array.isArray(A)&&A.find(x=>x.t==='Tu banco'); if(a){ const e=bancos()[0]; if(e){ const b=B(e); a.d=esc(e.nombre)+': '+fmt(totDep(b))+' en depósitos, solvencia '+pct(e.caja/Math.max(1,rwa(b)))+'. Captación, cartera, tasas, provisiones, red y cumplimiento.'; a.run=()=>escenaBanco151(e); } } }catch(x){}
+      return A; }; }
+  function init151(){ wrapEmpresa(); wrapAcciones(); Object.assign(window,{banco151:B,escenaBanco151,anualBanco151:anual,SEGMENTOS_151:SEG,usura151:usura}); }
+  setTimeout(init151,40); setTimeout(init151,220); setTimeout(init151,650);
+  window.__SA151={version:V151};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v152 · LA BOLSA A FONDO
+   Una cuenta con una comisionista de bolsa:
+   - Acciones con nombre, según la época: las que ya cotizaban en la Bolsa de
+     Bogotá (Bavaria, Coltejer, Fabricato, Argos, Suramericana, Chocolates,
+     el Industrial Colombiano, el Banco de Bogotá, Avianca) y las que llegan
+     después (Éxito, ISA, Ecopetrol, Grupo Aval). Cada una con su riesgo,
+     sus dividendos y su historia (la apertura y los textiles, la OPA de
+     Bavaria, el petróleo de 2015, la quiebra de Avianca).
+   - El índice: el de la Bolsa de Bogotá, el IGBC desde 2001 (cuando nace la
+     Bolsa de Valores de Colombia) y el COLCAP desde 2008.
+   - Órdenes de compra a precio límite y órdenes de pérdida máxima (stop).
+   - Crédito de margen (desde 1995), con llamada al margen.
+   - Venta en corto (desde 2008).
+   - Bonos del Estado (TES desde 1991): cupón, plazo y precio que se mueve
+     con las tasas.
+   - Bolsas del exterior (desde 1991, cuando se abre el control de cambios),
+     que ganan o pierden también con el dólar.
+   - La comisionista importa: Interbolsa, la más barata, hasta 2012.
+   - Información privilegiada: tentadora y delito.
+   La cuenta vive dentro del portafolio (una sola línea, "Cuenta en la bolsa"),
+   así cuenta en el patrimonio, se hereda y se puede liquidar para cubrir un
+   año malo.
+   ========================================================================== */
+(function(){
+  const V152='v152';
+  const EMI=[
+    {id:'bavaria',n:'Bavaria',s:'Cerveza',desde:1930,hasta:2005,fin:'opa',beta:.8,div:.05,vol:.15,p0:900},
+    {id:'coltejer',n:'Coltejer',s:'Textiles',desde:1930,beta:1.2,div:.03,vol:.22,p0:400},
+    {id:'fabricato',n:'Fabricato',s:'Textiles',desde:1930,beta:1.15,div:.03,vol:.22,p0:350},
+    {id:'argos',n:'Cementos Argos',s:'Cemento',desde:1944,beta:1.05,div:.035,vol:.18,p0:600},
+    {id:'sura',n:a=>a>=2011?'Grupo Sura':'Suramericana de Inversiones',s:'Seguros e inversiones',desde:1945,beta:1,div:.025,vol:.17,p0:700},
+    {id:'nutresa',n:a=>a>=2011?'Grupo Nutresa':'Compañía Nacional de Chocolates',s:'Alimentos',desde:1930,beta:.7,div:.035,vol:.13,p0:800},
+    {id:'bic',n:a=>a>=1998?'Bancolombia':'Banco Industrial Colombiano',s:'Banca',desde:1945,beta:1.1,div:.04,vol:.18,p0:500},
+    {id:'bogota',n:'Banco de Bogotá',s:'Banca',desde:1930,beta:.9,div:.05,vol:.14,p0:1200},
+    {id:'avianca',n:'Avianca',s:'Aviación',desde:1950,hasta:2020,fin:'quiebra',beta:1.5,div:.01,vol:.3,p0:300},
+    {id:'exito',n:'Almacenes Éxito',s:'Comercio',desde:1994,beta:.9,div:.025,vol:.17,p0:8000},
+    {id:'isa',n:'ISA',s:'Energía',desde:2000,beta:.8,div:.04,vol:.15,p0:2000},
+    {id:'ecopetrol',n:'Ecopetrol',s:'Petróleo',desde:2007,beta:1.2,div:.06,vol:.25,p0:1400},
+    {id:'aval',n:'Grupo Aval',s:'Banca',desde:2011,beta:.95,div:.045,vol:.15,p0:1000}];
+  const CHOQUES={coltejer:{1991:-.3,1992:-.25,1993:-.2,1998:-.3,1999:-.3},fabricato:{1991:-.25,1992:-.2,1998:-.3,1999:-.25},ecopetrol:{2008:.35,2014:-.35,2015:-.45,2022:.3},
+    avianca:{1983:-.3,2001:-.35,2002:-.4,2020:-.9},bic:{1982:-.3,1999:-.35},bogota:{1982:-.2,1999:-.2},exito:{2007:.2},bavaria:{1967:.1}};
+  const pct=x=>(x>=0?'+':'')+(Math.round(x*1000)/10)+'%';
+  const nom=x=>typeof x.n==='function'?x.n(S.anio):x.n;
+  const bolsaN=()=>S.anio>=2001?'Bolsa de Valores de Colombia':'Bolsa de Bogotá';
+  const indiceN=()=>S.anio>=2008?'COLCAP':S.anio>=2001?'IGBC':'Índice de la Bolsa de Bogotá';
+  const margenOK=()=>S.anio>=1995, cortoOK=()=>S.anio>=2008, exteriorOK=()=>S.anio>=1991;
+  const tesN=()=>S.anio>=1991?'TES':'Bonos de deuda pública';
+  const EXT=[{id:'sp',n:'Bolsa de Nueva York (S&P 500)',mu:.075,vol:.16},{id:'eu',n:'Bolsas de Europa',mu:.06,vol:.18},{id:'em',n:'Mercados emergentes',mu:.08,vol:.25}];
+  const COMIS=[{id:'tradicional',n:'Una comisionista tradicional',c:.012},{id:'banco',n:'La comisionista de un banco',c:.009,desde:1993},{id:'interbolsa',n:'Interbolsa',c:.005,desde:1990,hasta:2012,d:'La más barata y la más agresiva del mercado.'}];
+  /* --- el mercado: precios de las emisoras --- */
+  function mercado(){
+    if(!S.emis152) S.emis152={};
+    EMI.forEach(x=>{ if(S.anio>=x.desde&&!(x.hasta&&S.anio>x.hasta)&&!S.emis152[x.id]) S.emis152[x.id]={p:Math.round(x.p0*rnd(.8,1.25)),ant:null,div:x.div}; });
+    return S.emis152;
+  }
+  const vivas=()=>{ const M=mercado(); return EMI.filter(x=>M[x.id]&&!M[x.id].fin); };
+  const precio=id=>{ const M=mercado(); return M[id]?M[id].p:0; };
+  /* --- la cuenta: vive dentro de una línea del portafolio --- */
+  function cuentaPF(crear){
+    if(!Array.isArray(S.portafolio)) S.portafolio=[];
+    let pf=S.portafolio.find(p=>p&&p.bolsa152);
+    if(!pf&&crear){ pf={nombre:'Cuenta en la bolsa',ticker:'BVC',valor:0,tipo:'bolsa',bolsa152:{pos:{},cortos:{},tes:[],ext:{},margen:0,garantia:0,ordenes:[],comis:'tradicional',ult:0,hist:[]}}; S.portafolio.push(pf); return pf; }
+    if(pf) sincronizar(pf);
+    return pf;
+  }
+  const C=()=>{ const pf=cuentaPF(false); return pf?pf.bolsa152:null; };
+  function valorTes(t){ const resta=Math.max(0,t.venc-S.anio), tasa=(S.macro&&S.macro.tasa)||.08; return Math.max(t.monto*.3,t.monto*(1-resta*.8*(tasa-t.cupon))); }
+  function neto(c){ let v=c.garantia-c.margen; Object.keys(c.pos).forEach(id=>v+=c.pos[id].acc*precio(id)/1e6); Object.keys(c.cortos).forEach(id=>v-=c.cortos[id].acc*precio(id)/1e6);
+    c.tes.forEach(t=>v+=valorTes(t)); Object.keys(c.ext).forEach(id=>v+=c.ext[id].valor); return v; }
+  const largos=c=>Object.keys(c.pos).reduce((s,id)=>s+c.pos[id].acc*precio(id)/1e6,0);
+  function escalar(c,f){ Object.values(c.pos).forEach(p=>{ p.acc*=f; p.costo*=f; }); Object.values(c.cortos).forEach(p=>{ p.acc*=f; }); c.tes.forEach(t=>t.monto*=f); Object.values(c.ext).forEach(x=>x.valor*=f); c.margen*=f; c.garantia*=f; }
+  function sincronizar(pf){ const c=pf.bolsa152; if(!c) return;
+    // si alguien tocó el valor (una herencia que se reparte, un año malo que obliga a vender), la cuenta se ajusta en proporción
+    if(c.ult>0&&Math.abs(pf.valor-c.ult)>.01){ escalar(c,clamp(pf.valor/c.ult,0,10)); }
+    fijar(pf); }
+  function fijar(pf){ const c=pf.bolsa152, v=neto(c);
+    if(v<.5&&!Object.keys(c.pos).length&&!Object.keys(c.cortos).length&&!c.tes.length&&!Object.keys(c.ext).length&&!c.ordenes.length){ if(v>0) S.efectivo+=v; c.margen=0; c.garantia=0; pf.valor=0; c.ult=0; const i=S.portafolio.indexOf(pf); if(i>=0) S.portafolio.splice(i,1); return; }
+    if(v<0){ S.deuda=(S.deuda||0)-v; escalar(c,0); c.pos={}; c.cortos={}; c.tes=[]; c.ext={}; pf.valor=0; c.ult=0; log('Tu cuenta en la bolsa quedó en rojo: la comisionista te cobra '+fmt(-v)+'.','mal'); return; } pf.valor=v; c.ult=v; }
+  const comision=()=>{ const pf=(S.portafolio||[]).find(p=>p&&p.bolsa152), c=pf&&pf.bolsa152, k=COMIS.find(x=>x.id===(c&&c.comis))||COMIS[0]; return k.c; };
+  function movida(){ if(S._mov152===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov152=S.anio; return true; }
+  /* --- operaciones --- */
+  function comprar(id,monto,conMargen){ const pf=cuentaPF(true), c=pf.bolsa152, p=precio(id); if(!p||monto<=0) return false;
+    const propio=conMargen?monto/2:monto; if(S.efectivo<propio) return false; S.efectivo-=propio; if(conMargen) c.margen+=monto/2;
+    const acc=monto*(1-comision())*1e6/p, q=c.pos[id]||(c.pos[id]={acc:0,costo:0}); q.acc+=acc; q.costo+=monto; fijar(pf); return true; }
+  function vender(id,frac){ const pf=cuentaPF(true), c=pf.bolsa152, q=c.pos[id]; if(!q) return 0; const acc=q.acc*frac, bruto=acc*precio(id)/1e6*(1-comision());
+    q.acc-=acc; q.costo*=1-frac; if(q.acc<1e-6) delete c.pos[id];
+    let neto_=bruto; const L=largos(c)+bruto; if(c.margen>0){ const paga=Math.min(c.margen,c.margen*bruto/Math.max(1e-9,L)+(Object.keys(c.pos).length?0:c.margen)); c.margen-=paga; neto_-=paga; }
+    S.efectivo+=neto_; fijar(pf); return neto_; }
+  function cortar(id,monto){ const pf=cuentaPF(true), c=pf.bolsa152, p=precio(id); const acc=monto*1e6/p, q=c.cortos[id]||(c.cortos[id]={acc:0,pv:p}); q.pv=(q.pv*q.acc+p*acc)/(q.acc+acc); q.acc+=acc;
+    c.garantia+=monto*(1-comision()); const req=monto*.5; S.efectivo-=req; c.garantia+=req; fijar(pf); }
+  function cubrir(id){ const pf=cuentaPF(true), c=pf.bolsa152, q=c.cortos[id]; if(!q) return 0; const costo=q.acc*precio(id)/1e6*(1+comision()); c.garantia-=costo; delete c.cortos[id];
+    if(!Object.keys(c.cortos).length&&c.garantia>0){ S.efectivo+=c.garantia; c.garantia=0; } else if(c.garantia<0){ S.efectivo+=c.garantia; c.garantia=0; } fijar(pf); return costo; }
+  function comprarTes(monto,plazo){ const pf=cuentaPF(true), c=pf.bolsa152, i=(S.macro&&S.macro.tasa)||.08; S.efectivo-=monto; c.tes.push({monto,cupon:i+(plazo>=10?.015:plazo>=5?.008:.002),venc:S.anio+plazo,plazo}); fijar(pf); }
+  function venderTes(k){ const pf=cuentaPF(true), c=pf.bolsa152, t=c.tes[k]; if(!t) return 0; const v=valorTes(t)*(1-comision()/2); c.tes.splice(k,1); S.efectivo+=v; fijar(pf); return v; }
+  function comprarExt(id,monto){ const pf=cuentaPF(true), c=pf.bolsa152; S.efectivo-=monto; const q=c.ext[id]||(c.ext[id]={valor:0,costo:0}); q.valor+=monto*(1-comision()-.01); q.costo+=monto; fijar(pf); }
+  function venderExt(id){ const pf=cuentaPF(true), c=pf.bolsa152, q=c.ext[id]; if(!q) return 0; const v=q.valor*(1-.01); delete c.ext[id]; S.efectivo+=v; fijar(pf); return v; }
+  /* --- el año en la bolsa --- */
+  function anual(){
+    const M=mercado(), m=S.macro||{}, cc=m.colcap||100, cc0=S._cc152||cc, mkt=clamp(cc/cc0-1,-.6,1.2), usd=m.usd||1, usd0=S._usd152||usd;
+    let divs=0, cupones=0, intM=0; const pf=cuentaPF(false), c=pf&&pf.bolsa152;
+    EMI.forEach(x=>{ const q=M[x.id]; if(!q||q.fin) return;
+      const ch=(CHOQUES[x.id]||{})[S.anio]||0; let r=x.beta*mkt+rnd(-x.vol,x.vol)+ch; r=clamp(r,-.95,2.5); q.ant=q.p; q.p=Math.max(1,q.p*(1+r)); q.r=r;
+      const dy=x.div*(mkt>-.1?1:.6)*(r<-.3?.5:1); q.dy=dy;
+      if(c&&c.pos[x.id]) divs+=c.pos[x.id].acc*q.ant*dy/1e6;
+      if(c&&c.cortos[x.id]) divs-=c.cortos[x.id].acc*q.ant*dy/1e6;
+      if(x.hasta&&S.anio>=x.hasta){ q.fin=x.fin; if(c&&c.pos[x.id]){ if(x.fin==='opa'){ q.p*=1.2; const v=vender(x.id,1); log('<b>La OPA por '+nom(x)+'</b>: el comprador extranjero pagó 20% sobre el precio de bolsa. Te entraron '+fmt(v)+'.','bien'); window.anotar147&&window.anotar147('OPA por tus acciones de '+nom(x),0); }
+          else { q.p*=.03; vender(x.id,1); log('<b>'+nom(x)+' se acogió a la ley de quiebras en Nueva York.</b> Las acciones quedaron valiendo casi nada.','mal'); } }
+        if(c&&c.cortos[x.id]) cubrir(x.id); } });
+    S._cc152=cc; S._usd152=usd;
+    if(!c){ return; }
+    const e0=S.efectivo;
+    // dividendos y cupones a tu bolsillo
+    S.efectivo+=divs;
+    c.tes.slice().forEach((t,k)=>{ cupones+=t.monto*t.cupon; });
+    S.efectivo+=cupones;
+    const vencen=c.tes.filter(t=>t.venc<=S.anio); if(vencen.length){ const v=vencen.reduce((s,t)=>s+t.monto,0); c.tes=c.tes.filter(t=>t.venc>S.anio); S.efectivo+=v; log('Te pagaron '+fmt(v)+' de '+tesN()+' que se vencieron.'); }
+    // el exterior: el mercado de allá y el dólar
+    const mundo=((m.ciclo||0)*.4)+rnd(-.05,.05);
+    Object.keys(c.ext).forEach(id=>{ const x=EXT.find(z=>z.id===id)||EXT[0]; const r=x.mu+mundo+rnd(-x.vol,x.vol); c.ext[id].valor*=Math.max(.2,(1+r)*(usd/usd0)); });
+    // el margen cuesta
+    if(c.margen>0){ intM=c.margen*(((m.tasa)||.08)+.04); S.efectivo-=intM; }
+    // las órdenes
+    const ejecutadas=[]; c.ordenes=c.ordenes.filter(o=>{ const q=M[o.id]; if(!q||q.fin) return false; const x=EMI.find(z=>z.id===o.id);
+      if(o.tipo==='compra'&&q.p<=o.precio&&S.efectivo>=o.monto){ comprar(o.id,o.monto,false); ejecutadas.push('compraste '+nom(x)+' a '+Math.round(q.p).toLocaleString('es-CO')); return false; }
+      if(o.tipo==='stop'&&c.pos[o.id]&&q.p<=o.precio){ vender(o.id,1); ejecutadas.push('se vendió '+nom(x)+' al tocar tu pérdida máxima'); return false; }
+      if(o.tipo==='venta'&&c.pos[o.id]&&q.p>=o.precio){ vender(o.id,1); ejecutadas.push('vendiste '+nom(x)+' en tu precio objetivo'); return false; }
+      return S.anio-o.anio<2; });
+    if(ejecutadas.length) log('Órdenes de bolsa: '+ejecutadas.join('; ')+'.');
+    // llamada al margen
+    const L=largos(c); if(c.margen>0&&c.margen>L*.7){ const f=clamp(1-(L*.5)/c.margen,0,1); const ids=Object.keys(c.pos); const antes=S.efectivo; ids.forEach(id=>vender(id,clamp(f*1.2,0,1)));
+      log('<b>Llamada al margen.</b> Tus acciones cayeron y la comisionista vendió parte de tu posición para cubrir el crédito.','mal'); window.anotar147&&window.anotar147('Llamada al margen: venta forzada de acciones',S.efectivo-antes); }
+    // garantía de los cortos
+    const liab=Object.keys(c.cortos).reduce((s,id)=>s+c.cortos[id].acc*precio(id)/1e6,0); if(liab>0&&c.garantia<liab*1.1){ const antes=S.efectivo; Object.keys(c.cortos).forEach(id=>cubrir(id)); log('<b>Te cerraron los cortos.</b> Las acciones subieron y la garantía no alcanzaba.','mal'); window.anotar147&&window.anotar147('Cierre forzado de ventas en corto',S.efectivo-antes); }
+    const v0=c.ult; fijar(pf); c.hist.push([S.anio,Math.round(pf.valor)]); if(c.hist.length>40) c.hist.shift();
+    try{ if(S._cierre147&&S._cierre147.anio===S.anio&&Array.isArray(S.resumen)&&Math.abs(pf.valor-v0)>=.5) S.resumen.push(['Cuenta en la bolsa: valorización',pf.valor-v0,pf.valor>=v0?'pos':'neg']); }catch(x){}
+    if(window.anotar147){ if(divs) window.anotar147('Dividendos de tus acciones'+(Object.keys(c.cortos).length?' (neto de los que pagas por los cortos)':''),divs); if(cupones) window.anotar147('Cupones de '+tesN(),cupones); if(intM) window.anotar147('Intereses del crédito de margen',-intM); }
+    // la comisionista que se cae
+    if(c.comis==='interbolsa'&&S.anio>=2012&&!c.caida){ c.caida=1; const perd=pf.valor*.15; escalar(c,clamp(1-perd/Math.max(1,pf.valor),0,1)); c.comis='banco'; fijar(pf);
+      log('<b>La Superintendencia Financiera ordenó liquidar Interbolsa.</b> Tus acciones aparecieron, pero las operaciones a plazo se perdieron: '+fmt(perd)+' menos en tu cuenta. Te pasaron a otra comisionista.','mal'); }
+    // información privilegiada
+    if(S._ev152!==S.anio&&chance(.07)&&vivas().length){ S._ev152=S.anio; cola.push(evDato()); }
+  }
+  function evDato(){ const x=pick(vivas()), n_=nom(x); S._dato152=x.id;
+    return {p:6,id152:'dato',c:()=>!!mercado()[S._dato152],t:()=>'En un almuerzo, un miembro de la junta de <b>'+esc(n_)+'</b> te cuenta, bajito, que la semana entrante anuncian una oferta por la compañía. "Yo no te dije nada."',
+      o:[{t:()=>'Comprar antes del anuncio ('+fmt(Math.max(20,S.efectivo*.2))+')',f:()=>{ const id=S._dato152, monto=Math.max(20,S.efectivo*.2); if(S.efectivo<monto) return 'No tenías la plata a mano.'; comprar(id,monto,false); const q=mercado()[id]; q.p*=1.25; fijar(cuentaPF(true));
+          registrarDelito('uso de información privilegiada',3,'comprar acciones de '+n_+' con información de su junta'); return 'Compraste. A la semana salió la oferta y la acción subió 25%. La Superintendencia revisa siempre quién compró antes de un anuncio.'; }},
+         {t:'Agradecer el almuerzo y no hacer nada',f:()=>'No compraste. Al otro lunes salió la noticia, y te quedó el dato y la conciencia tranquila.'}]}; }
+  /* --- la pantalla --- */
+  function escenaBolsa152(){
+    const M=mercado(), pf=cuentaPF(false), c=pf&&pf.bolsa152, m=S.macro||{};
+    const reab=()=>{ cerrarModal(); render(); escenaBolsa152(); };
+    const f=(a,b,cl)=>'<tr><td>'+a+'</td><td class="'+(cl||'')+'">'+b+'</td></tr>';
+    let html='<div class="k"><div><b>'+Math.round(m.colcap||0).toLocaleString('es-CO')+'</b><span>'+indiceN()+(S._cc152&&S._cc152!==m.colcap?'':'')+'</span></div><div><b>'+(pf?fmt(pf.valor):'—')+'</b><span>tu cuenta, neto</span></div><div><b>'+(((m.tasa)||0)*100).toFixed(1)+'%</b><span>tasa de interés</span></div><div><b>$'+Math.round(m.usd||0).toLocaleString('es-CO')+'</b><span>el dólar</span></div></div>';
+    html+='<h4>La rueda</h4><table class="libro">'+vivas().map(x=>{ const q=M[x.id]; return f(esc(nom(x))+' <small>'+x.s+'</small>','$'+Math.round(q.p).toLocaleString('es-CO')+(q.r!==undefined?' <small class="'+(q.r>=0?'bien':'mal')+'">'+pct(q.r)+'</small>':'')+' <small>· div. '+(Math.round((q.dy||x.div)*1000)/10)+'%</small>'); }).join('')+'</table>';
+    if(c){ const filas=[];
+      Object.keys(c.pos).forEach(id=>{ const x=EMI.find(z=>z.id===id), v=c.pos[id].acc*precio(id)/1e6; filas.push(f(esc(nom(x))+' <small>'+Math.round(c.pos[id].acc).toLocaleString('es-CO')+' acciones</small>',fmt(v)+' <small class="'+(v>=c.pos[id].costo?'bien':'mal')+'">'+pct(v/Math.max(1e-9,c.pos[id].costo)-1)+'</small>')); });
+      Object.keys(c.cortos).forEach(id=>{ const x=EMI.find(z=>z.id===id), q=c.cortos[id]; filas.push(f('En corto: '+esc(nom(x)),'−'+fmt(q.acc*precio(id)/1e6)+' <small class="'+(precio(id)<=q.pv?'bien':'mal')+'">vendidas a $'+Math.round(q.pv).toLocaleString('es-CO')+'</small>','mal')); });
+      c.tes.forEach(t=>filas.push(f(tesN()+' '+t.venc+' <small>cupón '+(Math.round(t.cupon*1000)/10)+'%</small>',fmt(valorTes(t)))));
+      Object.keys(c.ext).forEach(id=>{ const x=EXT.find(z=>z.id===id); filas.push(f(esc(x.n),fmt(c.ext[id].valor)+' <small class="'+(c.ext[id].valor>=c.ext[id].costo?'bien':'mal')+'">'+pct(c.ext[id].valor/Math.max(1e-9,c.ext[id].costo)-1)+'</small>')); });
+      if(c.garantia) filas.push(f('Garantía de los cortos',fmt(c.garantia)));
+      if(c.margen) filas.push(f('Crédito de margen','−'+fmt(c.margen),'mal'));
+      c.ordenes.forEach(o=>{ const x=EMI.find(z=>z.id===o.id); filas.push(f('Orden: '+(o.tipo==='compra'?'comprar ':o.tipo==='stop'?'pérdida máxima ':'vender ')+esc(nom(x)),'a $'+Math.round(o.precio).toLocaleString('es-CO'))); });
+      const k=COMIS.find(x=>x.id===c.comis)||COMIS[0];
+      html+='<h4>Tu cuenta · '+esc(k.n)+'</h4>'+(filas.length?'<table class="libro">'+filas.join('')+'</table>':'<div class="vacio">La cuenta está abierta y vacía.</div>'); }
+    else html+='<h4>Tu cuenta</h4><div class="vacio">No tienes cuenta con una comisionista. La primera compra la abre.</div>';
+    const sinMov=(S._mov152!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+    const ops=[];
+    ops.push({t:'Comprar acciones',cat:'mercado',d:'Escoges la acción y cuánto. Comisión '+(Math.round(comision()*1000)/10)+'%.'+(margenOK()?' Se puede con crédito de margen.':''),dis:sinMov||(S.efectivo<5?'No tienes efectivo':null),cerrar:false,run:()=>{ cerrarModal(); escena({rubro:bolsaN(),titulo:'¿Qué compras?',ancho:true,cerrable:true,
+      opciones:vivas().map(x=>{ const q=M[x.id]; return {t:nom(x),cat:'mercado',d:x.s+'. $'+Math.round(q.p).toLocaleString('es-CO')+' por acción'+(q.r!==undefined?', '+pct(q.r)+' el último año':'')+'. Dividendo cerca de '+(Math.round((q.dy||x.div)*1000)/10)+'%.',cerrar:false,run:()=>{ cerrarModal(); montos(x); }}; })}); }});
+    if(c&&Object.keys(c.pos).length) ops.push({t:'Vender acciones',cat:'mercado',d:'Toda la posición o la mitad.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); escena({rubro:bolsaN(),titulo:'¿Qué vendes?',cerrable:true,
+      opciones:Object.keys(c.pos).flatMap(id=>{ const x=EMI.find(z=>z.id===id); return [1,.5].map(fr=>({t:(fr===1?'Todo ':'La mitad de ')+nom(x),cat:'mercado',d:fmt(c.pos[id].acc*fr*precio(id)/1e6)+' antes de comisión.',cerrar:false,run:()=>{ if(!movida()) return; const v=vender(id,fr); log('Vendiste '+nom(x)+': te entraron '+fmt(v)+'.'); reab(); }})); })}); }});
+    ops.push({t:'Poner una orden',cat:'mercado',d:'Comprar si baja a un precio, o vender si sube o si cae hasta tu pérdida máxima. Se ejecuta al cierre del año si el precio llega.',cerrar:false,run:()=>{ cerrarModal(); escenaOrdenes(); }});
+    ops.push({t:'Comprar '+tesN(),cat:'mercado',d:'Deuda del Estado. Cupón cercano a la tasa de hoy; si las tasas bajan, el bono vale más, y si suben, menos.',dis:sinMov||(S.efectivo<10?'No tienes efectivo':null),cerrar:false,run:()=>{ cerrarModal(); const mt=Math.round(S.efectivo*.25); escena({rubro:'Deuda pública',titulo:'¿A qué plazo?',cerrable:true,
+      opciones:[2,5,10].map(pl=>({t:pl+' años · '+fmt(mt),cat:'mercado',d:'Cupón de '+(Math.round((((m.tasa)||.08)+(pl>=10?.015:pl>=5?.008:.002))*1000)/10)+'% al año.',cerrar:false,run:()=>{ if(!movida()) return; comprarTes(mt,pl); log('Compraste '+fmt(mt)+' en '+tesN()+' a '+pl+' años.'); reab(); }}))}); }});
+    if(c&&c.tes.length) ops.push({t:'Vender '+tesN()+' antes del vencimiento',cat:'mercado',d:'Al precio de hoy.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:'Deuda pública',titulo:'¿Cuál vendes?',cerrable:true,opciones:c.tes.map((t,k)=>({t:tesN()+' '+t.venc+' · '+fmt(valorTes(t)),cat:'mercado',cerrar:false,run:()=>{ if(!movida()) return; venderTes(k); reab(); }}))}); }});
+    if(exteriorOK()) ops.push({t:'Bolsas del exterior',cat:'mercado',d:'Nueva York, Europa o los emergentes. Ganas lo del mercado de allá más lo que suba el dólar.',dis:sinMov,cerrar:false,run:()=>{ cerrarModal(); const mt=Math.round(S.efectivo*.2); escena({rubro:'Inversión en el exterior',titulo:'¿Dónde?',cerrable:true,
+      opciones:EXT.map(x=>c&&c.ext[x.id]?{t:'Vender '+x.n,cat:'mercado',d:fmt(c.ext[x.id].valor)+'.',cerrar:false,run:()=>{ if(!movida()) return; venderExt(x.id); reab(); }}:{t:x.n+' · '+fmt(mt),cat:'mercado',d:'Más o menos '+Math.round(x.mu*100)+'% al año en dólares, con altibajos.',dis:S.efectivo<mt||mt<5?'No tienes efectivo':null,cerrar:false,run:()=>{ if(!movida()) return; comprarExt(x.id,mt); reab(); }})}); }});
+    if(cortoOK()) ops.push({t:'Venta en corto',cat:'riesgo',d:'Vender acciones prestadas para recomprarlas más baratas. Si suben, pierdes sin techo.',dis:sinMov||(!pf||pf.valor<20?'Necesitas una cuenta con al menos '+fmt(20):null),cerrar:false,run:()=>{ cerrarModal(); const mt=Math.round(Math.max(10,(pf?pf.valor:0)*.3));
+      escena({rubro:bolsaN(),titulo:'¿Contra cuál apuestas?',cerrable:true,opciones:vivas().map(x=>c&&c.cortos[x.id]?{t:'Recomprar '+nom(x),cat:'riesgo',d:'Cerrar el corto.',cerrar:false,run:()=>{ if(!movida()) return; cubrir(x.id); reab(); }}:{t:nom(x)+' · '+fmt(mt),cat:'riesgo',d:'Dejas '+fmt(mt*.5)+' de garantía.',dis:S.efectivo<mt*.5?'No tienes la garantía':null,cerrar:false,run:()=>{ if(!movida()) return; cortar(x.id,mt); log('Vendiste en corto '+fmt(mt)+' de '+nom(x)+'.'); reab(); }})}); }});
+    if(c&&c.margen>0) ops.push({t:'Pagar el crédito de margen ('+fmt(c.margen)+')',cat:'capital',dis:S.efectivo<c.margen?'No te alcanza':null,cerrar:false,run:()=>{ S.efectivo-=c.margen; c.margen=0; fijar(pf); reab(); }});
+    ops.push({t:'Cambiar de comisionista',cat:'mercado',d:'Cobran distinto y no todas son igual de sólidas.',cerrar:false,run:()=>{ cerrarModal(); escena({rubro:bolsaN(),titulo:'¿Con quién operas?',cerrable:true,
+      opciones:COMIS.filter(k=>S.anio>=(k.desde||0)&&!(k.hasta&&S.anio>k.hasta)).map(k=>({t:k.n,cat:'mercado',d:'Comisión '+(Math.round(k.c*1000)/10)+'%. '+(k.d||''),cerrar:false,run:()=>{ const x=cuentaPF(true); x.bolsa152.comis=k.id; reab(); }}))}); }});
+    if(typeof escenaPlaza==='function') ops.push({t:'Las casas de la plaza',cat:'mercado',d:'Las compañías de las otras familias que cotizan: comprar, sentarse en su junta, ofertas.',cerrar:false,run:()=>{ cerrarModal(); escenaPlaza(); }});
+    escena({rubro:bolsaN(),titulo:'La bolsa',ancho:true,cerrable:true,clase:'bolsa152',cuerpo:'Las acciones que se transan, tu cuenta y lo que puedes hacer con ella. La primera operación del año te cuesta una movida; las demás de ese año, no.',html,opciones:ops});
+  }
+  function montos(x){ const q=mercado()[x.id], base=S.efectivo; const op=[.1,.25,.5].map(fr=>({t:fmt(base*fr),cat:'mercado',d:Math.round(base*fr*1e6/q.p).toLocaleString('es-CO')+' acciones.',cerrar:false,run:()=>{ if(!movida()) return; comprar(x.id,base*fr,false); log('Compraste '+fmt(base*fr)+' de '+nom(x)+'.'); cerrarModal(); render(); escenaBolsa152(); }}));
+    if(margenOK()) op.push({t:fmt(base*.5)+' con margen: '+fmt(base)+' en acciones',cat:'riesgo',d:'La comisionista te presta la otra mitad, a la tasa más 4%. Si caen 30%, te llaman al margen.',cerrar:false,run:()=>{ if(!movida()) return; comprar(x.id,base,true); log('Compraste '+fmt(base)+' de '+nom(x)+', la mitad con crédito de margen.'); cerrarModal(); render(); escenaBolsa152(); }});
+    escena({rubro:bolsaN(),titulo:esc(nom(x)),cerrable:true,cuerpo:'A $'+Math.round(q.p).toLocaleString('es-CO')+' por acción. ¿Cuánto?',opciones:op}); }
+  function escenaOrdenes(){ const pf=cuentaPF(false), c=pf&&pf.bolsa152, M=mercado(), ops=[];
+    vivas().forEach(x=>{ const p=M[x.id].p, mt=Math.round(S.efectivo*.15);
+      if(mt>=5) ops.push({t:'Comprar '+nom(x)+' si baja 15%',cat:'mercado',d:'Orden límite a $'+Math.round(p*.85).toLocaleString('es-CO')+' por '+fmt(mt)+'. Vale dos años.',cerrar:false,run:()=>{ const x2=cuentaPF(true); x2.bolsa152.ordenes.push({tipo:'compra',id:x.id,precio:p*.85,monto:mt,anio:S.anio}); cerrarModal(); render(); escenaBolsa152(); }});
+      if(c&&c.pos[x.id]){ ops.push({t:'Pérdida máxima en '+nom(x)+' (−20%)',cat:'riesgo',d:'Si cae a $'+Math.round(p*.8).toLocaleString('es-CO')+', se vende.',cerrar:false,run:()=>{ c.ordenes.push({tipo:'stop',id:x.id,precio:p*.8,anio:S.anio}); cerrarModal(); render(); escenaBolsa152(); }});
+        ops.push({t:'Vender '+nom(x)+' si sube 30%',cat:'mercado',d:'Precio objetivo $'+Math.round(p*1.3).toLocaleString('es-CO')+'.',cerrar:false,run:()=>{ c.ordenes.push({tipo:'venta',id:x.id,precio:p*1.3,anio:S.anio}); cerrarModal(); render(); escenaBolsa152(); }}); } });
+    if(c&&c.ordenes.length) ops.unshift({t:'Cancelar todas las órdenes',cat:'mercado',cerrar:false,run:()=>{ c.ordenes=[]; cerrarModal(); render(); escenaBolsa152(); }});
+    escena({rubro:bolsaN(),titulo:'Órdenes',cerrable:true,cuerpo:'Las órdenes se revisan al cierre del año con el precio de ese momento.',opciones:ops}); }
+  /* --- enganches --- */
+  function parchePortafolio(){ /* el núcleo valoriza cada línea del portafolio al azar: la cuenta se valoriza sola, por sus acciones */ }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA152_PASO) return; window.__SA152_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA152_ACC) return; window.__SA152_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ const enGrupo=!window.__crudo91&&A.some(a=>a&&a.t==='Invertir tu plata'&&a.modal);
+        if(Array.isArray(A)&&S.anio>=1929&&!enGrupo&&!A.some(a=>a.t==='La bolsa')){ const pf=cuentaPF(false);
+        A.push({t:'La bolsa',cat:'mercado',d:indiceN()+' en '+Math.round((S.macro&&S.macro.colcap)||0).toLocaleString('es-CO')+'. '+(pf?'Tu cuenta: '+fmt(pf.valor)+'. ':'')+'Acciones con nombre, órdenes, '+tesN()+(exteriorOK()?', bolsas del exterior':'')+(margenOK()?', margen':'')+(cortoOK()?' y cortos':'')+'.',mov:0,modal:true,run:()=>escenaBolsa152()}); } }catch(x){}
+      return A; }; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA152_CAT) return; window.__SA152_CAT=true;
+    window.catDe=function(t){ if(t==='La bolsa') return 'Inversión y mercado'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='invertir'); if(!g||!Array.isArray(g.miembros)) return;
+    if(!g.miembros.some(m=>m[1]==='La bolsa')){ g.miembros.unshift(['Bolsa','La bolsa']); g.d='Portafolio, la bolsa con sus acciones y bonos, fondos, tesorería y divisas, en un solo lugar.'; } }
+  function init152(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo(); Object.assign(window,{escenaBolsa152,cuentaBolsa152:cuentaPF,mercadoBolsa152:mercado,comprarAccion152:comprar,venderAccion152:vender,anualBolsa152:anual,EMISORAS_152:EMI,cortar152:cortar,comprarTes152:comprarTes,comprarExt152:comprarExt}); }
+  setTimeout(init152,40); setTimeout(init152,220); setTimeout(init152,650);
+  window.__SA152={version:V152};
 })();
 </script>
 
