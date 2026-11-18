@@ -1229,10 +1229,36 @@ svg.foto116{display:block;background:#1d2a23}
 .lid159 .esc159 span.si{background:rgba(214,166,72,.25);color:#F0CF86}
 .lid159 .alto{color:#e79a8a}.lid159 .bajo{color:#8fe0b0}
 </style>
+<style id="estilos-v160">
+.ins160 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.ins160 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.ins160 .k b{display:block;font-size:15px;font-family:var(--display)}
+.ins160 .k span{font-size:12px;color:var(--humo2)}
+.ins160 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.ins160 small{color:var(--humo2)}
+.ins160 .pasos160{display:flex;flex-direction:column;gap:0;margin:6px 0 4px}
+.ins160 .pasos160 .p160{position:relative;padding:2px 0 14px 30px;border-left:2px solid rgba(255,255,255,.12);margin-left:9px}
+.ins160 .pasos160 .p160:last-child{border-left-color:transparent;padding-bottom:2px}
+.ins160 .pasos160 .p160 i{position:absolute;left:-10px;top:2px;width:18px;height:18px;border-radius:50%;background:#1b2a24;border:2px solid rgba(255,255,255,.25)}
+.ins160 .pasos160 .p160.hecho i{background:var(--laton);border-color:var(--laton)}
+.ins160 .pasos160 .p160.hecho{border-left-color:var(--laton)}
+.ins160 .pasos160 .p160.en160 i{border-color:var(--laton);box-shadow:0 0 0 4px rgba(214,166,72,.22)}
+.ins160 .pasos160 .p160.mal i{background:#c9604f;border-color:#c9604f}
+.ins160 .pasos160 .p160 b{display:block;font-size:14px}
+.ins160 .pasos160 .p160 small{display:block;margin-top:1px}
+.ins160 .et160{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ins160 .et160 span{font-size:11.5px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--humo2)}
+.ins160 .et160 span.on{background:rgba(214,166,72,.26);color:#F0CF86}
+.ins160 .et160 span.ya{background:rgba(214,166,72,.12);color:#c9b17a}
+.ins160 .b160{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:6px;max-width:320px}
+.ins160 .b160 i{display:block;height:100%;background:var(--laton)}
+.ins160 .bit160{margin-top:4px;font-size:13px;color:var(--humo)}
+.ins160 .bit160 div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v159</div>
+<div class="version-badge" id="versionBadge">v163</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3235,8 +3261,8 @@ function escenaCarreraEstudio(obj){
     return;
   }
   escena({rubro:'Formación',titulo:'Elegir carrera universitaria',ancho:true,
-    cuerpo:esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Ya tienes pregrado. Elige el campo que quieres convertir en tu profesión. La carrera abrirá trabajos y negocios especializados.',
-    opciones:CARRERAS_PROFESIONALES.map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
+    cuerpo:(window.carrerasEra161&&!window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo).length?'En esta época ninguna universidad recibe a una mujer: lo que se aprende, se aprende en casa, con institutriz y libros. ':'')+(esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Ya tienes pregrado. Elige el campo que quieres convertir en tu profesión. La carrera abrirá trabajos y negocios especializados.'),
+    opciones:(window.carrerasEra161?window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo):CARRERAS_PROFESIONALES).map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
       if(esHijo){ elegido.carreraEstudio=cr.id; elegido.formacion=clamp((elegido.formacion||0)+8+cr.grado,0,100); elegido.atr.intelecto=clamp((elegido.atr.intelecto||5)+1,1,10); elegido.rumbo='estudia '+cr.n.toLowerCase(); elegido.independiente=true; log(esc(elegido.nombre)+' eligió estudiar <b>'+esc(cr.n)+'</b>.','hito'); }
       else { S.carrera.estudio=cr.id; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0; S.carrera.ruta=S.carrera.ruta==='fundador'?'fundador':'desempleado'; log('Elegiste estudiar <b>'+esc(cr.n)+'</b>. Ya puedes construir una carrera profesional en '+cr.n+'.','hito'); }
       S.mov--; cerrarModal(); render();
@@ -4318,7 +4344,7 @@ function nuevoAmante(){
   const sx=S.p.sexo==='h'?'m':'h';
   const edad=clamp(S.p.edad+ri(-7,7),21,Math.max(22,S.p.edad+12));
   return {id:'a'+Date.now().toString(36)+ri(100,999),nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),sexo:sx,edad,
-    rol:pick(['empresaria','abogado','médica','consultor','profesora','directivo','arquitecta','empresario','periodista']),
+    rol:(window.rolEra161?window.rolEra161(sx):pick(['empresaria','abogado','médica','consultor','profesora','directivo','arquitecta','empresario','periodista'])),
     fertilidad:fertilidadActual({sexo:sx,edad,salud:ri(65,95),felicidad:ri(55,90)}),afecto:ri(35,72),desde:S.anio,
     discrecion:ri(35,78),activo:true};
 }
@@ -5034,7 +5060,7 @@ function nuevoPariente(rel,sexo,edad,rama){
   const ap=(rama==='materna')?apellidoMaterno():S.dinastia;
   return { pid:'p'+(UIDP++), rel, sexo:s, edad, apellido:ap,
     nombre:nombreLibre(s,ap),
-    oficio:pick(OFICIOS_FAM), afecto:ri(45,80), capaz:ri(2,9), honrado:ri(2,9),
+    oficio:(window.oficioEra161?window.oficioEra161(s,edad):pick(OFICIOS_FAM)), afecto:ri(45,80), capaz:ri(2,9), honrado:ri(2,9),
     rama:rama||'paterna', vivo:true, cultura:culturaCiudad(S.p.ciudad).id };
 }
 function parientesVivos(rel){ return (S.parientes||[]).filter(p=>p.vivo&&(!rel||p.rel===rel)); }
@@ -5071,7 +5097,7 @@ function sucesoresColaterales(){
 }
 function sucesorDeEmergencia(){
   const sexo=chance(.5)?'h':'m';
-  return prepararSucesorColateral({pid:'lej'+ri(100000,999999),rel:sexo==='h'?'primo segundo':'prima segunda',sexo,edad:ri(22,38),nombre:nombreLocal(S.p.ciudad,sexo),oficio:pick(OFICIOS_FAM),afecto:ri(55,78),capaz:ri(4,9)});
+  return prepararSucesorColateral({pid:'lej'+ri(100000,999999),rel:sexo==='h'?'primo segundo':'prima segunda',sexo,edad:ri(22,38),nombre:nombreLocal(S.p.ciudad,sexo),oficio:(window.oficioEra161?window.oficioEra161(sexo,30):pick(OFICIOS_FAM)),afecto:ri(55,78),capaz:ri(4,9)});
 }
 function normalizarFamiliaGeneros(){
   (S.parientes||[]).forEach(p=>{
@@ -5149,7 +5175,7 @@ function reacomodarParentela(heredero){
   S.familia.hijos.filter(h=>h!==heredero).forEach(h=>{
     const esSuPadre=esNieto&&heredero._padre108===h.nombre;
     nuevos.push({ pid:'p'+(UIDP++), rel:esSuPadre?(h.sexo==='m'?'madre':'padre'):relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
-      nombre:h.nombre, oficio:h.rumbo||pick(OFICIOS_FAM), afecto:clamp(h.vinculo||55,0,100),
+      nombre:h.nombre, oficio:h.rumbo||(window.oficioEra161?window.oficioEra161(h.sexo,h.edad):pick(OFICIOS_FAM)), afecto:clamp(h.vinculo||55,0,100),
       capaz:clamp(Math.round(((h.atr&&h.atr.intelecto)||5+(h.atr&&h.atr.disciplina)||5)/2),1,10),
       honrado:ri(3,9), rama:'paterna', vivo:true, deLaCasa:true });
   });
@@ -5181,7 +5207,7 @@ function generarPretendiente(sexoBuscado,edadRef){
   const apellidoPret=S.p && esCiudadGlobal(S.p.ciudad)?apellidoCiudad(S.p.ciudad):c.a;
   return {
     nombre:nombreLocal(S.p.ciudad,s)+' '+apellidoPret,
-    sexo:s, edad:clamp(edadRef+ri(-6,5),19,64), rol:pick(PAREJAS_ROL),
+    sexo:s, edad:clamp(edadRef+ri(-6,5),19,64), rol:(window.rolEra161?window.rolEra161(s):pick(PAREJAS_ROL)),
     casa:{apellido:apellidoPret,prestigio:c.p},
     cultura:culturaCiudad(S.p.ciudad).id,
     dote, afecto:ri(10,95),
@@ -6772,7 +6798,7 @@ function listaAcciones(){
   if(!S.familia.pareja) A.push({t:'Salir a conocer gente', d:'Sin cálculo ni alianzas: a ver qué pasa.', mov:1,
     run:()=>{ if(chance(clamp(.35+S.p.atr.carisma/22+S.p.felicidad/300,.2,.9))){
         const sx = S.p.sexo==='h'?'m':'h';
-        S.familia.pareja={nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),rol:pick(PAREJAS_ROL),sexo:sx,edad:S.p.edad+ri(-5,4),casados:false,paciencia:70,exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4)};
+        S.familia.pareja={nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),rol:(window.rolEra161?window.rolEra161(sx):pick(PAREJAS_ROL)),sexo:sx,edad:S.p.edad+ri(-5,4),casados:false,paciencia:70,exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4)};
         S.p.felicidad+=12; log('Conociste a <b>'+esc(S.familia.pareja.nombre)+'</b>, '+S.familia.pareja.rol+'.','bien');
       } else { S.p.felicidad-=2; log('Año de citas malas y agendas imposibles.'); }}});
   if(S.familia.pareja&&!S.familia.pareja.casados) A.push({t:'Casarte', d:'Sube felicidad y estabilidad. Ojo con el régimen de bienes.', mov:1, modal:true,
@@ -10210,7 +10236,7 @@ function correrFundacion(res,m){
       {t:'Decir que cada quien haga su camino',f:()=>{const a=S.familia.hijos.find(x=>x.nombre===S._dxA),b=S.familia.hijos.find(x=>x.nombre===S._dxB);if(a)a.vinculo=clamp((a.vinculo||60)-4,0,100);if(b)b.vinculo=clamp((b.vinculo||60)-4,0,100);return 'La frase fue sincera y bastante fría. Cada uno tendrá que abrirse paso solo.';}}
     ]},
     {p:.9,c:()=>!!S.familyOffice&&S.familia.hijos.some(h=>h.edad>=17&&h.edad<=25),t:()=>{const h=pick(S.familia.hijos.filter(x=>x.edad>=17&&x.edad<=25));S._dxEdu=h?.nombre;return h?'<b>'+esc(h.nombre)+'</b> quiere estudiar fuera y necesita decidir si acepta una universidad internacional.':'null';},o:[
-      {t:'Apoyar el salto',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h){h.formacion=clamp((h.formacion||0)+14,0,100);h.carreraEstudio=h.carreraEstudio||pick(CARRERAS_PROFESIONALES).id;h.ciudad=pick(CIUDADES_GLOBALES).n;h.vinculo=clamp((h.vinculo||60)+7,0,100);h.independiente=true;}return 'La familia financió el salto. El mundo se acaba de hacer más grande para esa rama.';}},
+      {t:'Apoyar el salto',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h){h.formacion=clamp((h.formacion||0)+14,0,100);h.carreraEstudio=h.carreraEstudio||pick((window.carrerasEra161&&window.carrerasEra161(h.sexo).length)?window.carrerasEra161(h.sexo):CARRERAS_PROFESIONALES).id;h.ciudad=pick(CIUDADES_GLOBALES).n;h.vinculo=clamp((h.vinculo||60)+7,0,100);h.independiente=true;}return 'La familia financió el salto. El mundo se acaba de hacer más grande para esa rama.';}},
       {t:'Pedirle que estudie en casa',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h)h.vinculo=clamp((h.vinculo||60)-6,0,100);return 'Decidiste priorizar quedarse cerca. No parece que le haya encantado.';}}
     ]},
     {p:.85,c:()=>S.emp&&S.emp.productos&&S.emp.productos.length>0,t:()=>{const pr=pick(S.emp.productos);S._dxProd=pr?.nombre;return pr?'<b>'+esc(pr.nombre)+'</b> está teniendo un crecimiento inesperado. La pregunta es si metes más dinero o dejas que se pague solo.':'null';},o:[
@@ -15394,8 +15420,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return;
     }
     escena({rubro:'Formación',titulo:'Elegir carrera universitaria',ancho:true,
-      cuerpo:esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Elige el campo que quieres convertir en tu profesión. El pregrado, la especialización, la maestría y el doctorado que curses de ahora en adelante quedarán todos dentro de esta misma carrera.',
-      opciones:CARRERAS_PROFESIONALES.map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
+      cuerpo:(window.carrerasEra161&&!window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo).length?'En esta época ninguna universidad recibe a una mujer: lo que se aprende, se aprende en casa, con institutriz y libros. ':'')+(esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Elige el campo que quieres convertir en tu profesión. El pregrado, la especialización, la maestría y el doctorado que curses de ahora en adelante quedarán todos dentro de esta misma carrera.'),
+      opciones:(window.carrerasEra161?window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo):CARRERAS_PROFESIONALES).map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
         if(esHijo){ elegido.carreraEstudio=cr.id; elegido.formacion=clamp((elegido.formacion||0)+8+cr.grado,0,100); elegido.atr.intelecto=clamp((elegido.atr.intelecto||5)+1,1,10); elegido.rumbo='estudia '+cr.n.toLowerCase(); elegido.independiente=true; log(esc(elegido.nombre)+' eligió estudiar <b>'+esc(cr.n)+'</b>.','hito'); }
         else { S.carrera.estudio=cr.id; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0; S.carrera.ruta=S.carrera.ruta==='fundador'?'fundador':'desempleado'; log('Elegiste estudiar <b>'+esc(cr.n)+'</b>. Ya puedes construir una carrera profesional en '+cr.n+'.','hito'); }
         S.mov--; cerrarModal(); render();
@@ -18506,20 +18532,21 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return {absuelto:true,prob:p};
     }
     if(j.penaCapital&&g>=8&&chance(clamp(.34+g*.018-q*.06,.05,.9))){
-      const mot=fijarMotivoCondena(); S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia';
+      const mot=fijarMotivoCondena(); S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia'; S.penal.evid160=c.evidencia; S.penal.abog160=c.abogado; S.penal.firme160=false; S.penal.ins160=null;
       log('El tribunal impuso pena capital por <b>'+esc(mot)+'</b>.','mal');
       return {capital:true,prob:p,motivo:mot};
     }
     const [lo,hi]=penaRango89();
     const anios=Math.max(1,Math.round(ri(lo,hi)*(1-q*.15)));
     const mot=fijarMotivoCondena();
-    S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios;
+    S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios; S.penal.evid160=c.evidencia; S.penal.abog160=c.abogado; S.penal.firme160=false; S.penal.ins160=null;
     moverPrestigio(-3,'fue condenado');
     log('<b>Culpable</b> de '+esc(mot)+'. El tribunal impuso una condena de '+anios+' año'+(anios===1?'':'s')+' de prisión.','mal');
     return {anios,prob:p,motivo:mot};
   }
   function costoApelacion89(){ return Math.max(15,Math.round(pat()*.02)); }
   function apelarPenal89(){
+    if(typeof window.iniciarApelacion160==='function') return window.iniciarApelacion160();
     const anios=S.penal.apelable89; if(!anios||S.penal.prisionRestante<=0) return 'Ya no había nada que apelar.';
     const costo=costoApelacion89(); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
     S.efectivo-=costo; S.penal.apelable89=0;
@@ -18549,7 +18576,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     escena({rubro:'Tribunal',titulo:'Culpable',ancho:true,clase:'veredicto89 mal',
       cuerpo:relato+'<b>Culpable</b> de '+esc(res.motivo||S.penal.motivoCondena||'')+'. '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión. Tu abogado te dice al oído que se puede apelar.',
       opciones:[
-        {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Si prospera, el tribunal superior rebaja la condena a la mitad.',
+        {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Sube al tribunal superior: tarda uno o dos años y, si hace falta, puede llegar a casación ante la Corte Suprema.',
          dis:S.efectivo<costo?'No te alcanza':null,cerrar:false,run:()=>{ const m=apelarPenal89(); log(m,/prosperó/.test(m)?'bien':'mal'); cerrarModal(); render(); }},
         {t:'Aceptar la condena',cat:'riesgo',run:()=>{ S.penal.apelable89=0; }}
       ]});
@@ -22912,7 +22939,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const casa=l.casa&&typeof casaParaPretendiente==='function'?casaParaPretendiente():null;
     const ap=casa?casa.a:apellidoCiudad(S.p.ciudad);
     const w=r=>String(r).split(' ')[0]; const roles=PAREJAS_ROL.filter(r=>/ista$/.test(w(r))||(sx==='h'?!/a$/.test(w(r)):!/(o|or)$/.test(w(r))));
-    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:pick(roles.length?roles:PAREJAS_ROL),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
+    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:(window.rolEra161?window.rolEra161(sx):pick(roles.length?roles:PAREJAS_ROL)),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
       compat:clamp(ri(30,85)+l.bono+Math.round((S.p.atr.carisma-5)*2),10,98),quiereHijos:chance(.7),casa:casa?{apellido:casa.a,prestigio:casa.p}:null};
   }
   const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
@@ -24180,7 +24207,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     s.fam.forEach(x=>ops.push({t:esc(x.n),cat:'legado',d:'Un nombre de la casa: '+esc(x.por)+'.',run:()=>{ ponerNombre(h,x.n,x.por); sigue(); }}));
     s.reg.forEach(n=>ops.push({t:esc(n),cat:'familia',d:'Un nombre común en '+esc(S.p.ciudad)+'.',run:()=>{ ponerNombre(h,n); sigue(); }}));
     const html='<div class="nombre118"><input id="nombre118" maxlength="28" autocomplete="off" placeholder="O escribe el nombre que quieras"><button class="btn" id="nombre118ok" type="button">Ponerle este nombre</button><div class="error" id="nombre118err"></div></div>';
-    const caja=escena({rubro:'Registro civil',titulo:'¿Cómo se va a llamar?',cuerpo:'Nació '+art+(otro&&otro.nombre?' de '+esc(primer(S.p.nombre))+' y '+esc(primer(otro.nombre)):'')+'. Antes del apellido, el nombre de '+quien+'.',html,opciones:ops});
+    const caja=escena({rubro:'Registro civil',titulo:'¿Cómo se va a llamar?',cuerpo:'Nació '+art+(otro&&otro.nombre?' de '+esc(primer(S.p.nombre))+' y '+esc(primer(otro.nombre)):'')+'. Antes del apellido, el nombre '+(h.sexo==='m'?'de la niña':'del niño')+'.',html,opciones:ops});
     const inp=caja&&caja.querySelector('#nombre118'), ok=caja&&caja.querySelector('#nombre118ok'), err=caja&&caja.querySelector('#nombre118err');
     if(!inp||!ok) return;
     const enviar=()=>{ const n=cap(inp.value.trim().replace(/\s+/g,' '));
@@ -24647,7 +24674,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const V120='v120';
   const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion',
     /* v122 */ 'mayoria_edad','graduacion','luna_miel','divorcio','viudez','duelo_hijo','hospital','mudanza','infidelidad','fundacion_empresa','bolsa','quiebra','crisis','banco_apertura','corrida','intervencion','piramide','eleccion','carcel','libertad','escandalo','portada',
-    /* v158 */ 'embajada_ofrecida','ministerio_ofrecido','licitacion_ganada','licitacion_perdida','desfalco_empresa_publica','extradicion','exilio','captura','prision_domiciliaria','carcel_maxima_seguridad','prision_ordinaria','pabellon_especial'];
+    /* v158 */ 'embajada_ofrecida','ministerio_ofrecido','licitacion_ganada','licitacion_perdida','desfalco_empresa_publica','extradicion','exilio','captura','prision_domiciliaria','carcel_maxima_seguridad','prision_ordinaria','pabellon_especial',
+    /* v163 */ 'bautizo'];
   const ok={};
   function precargar(){ if(window.__SA120_PRE) return; window.__SA120_PRE=true;
     IMGS.forEach(n=>{ const im=new Image(); im.onload=()=>{ ok[n]=true; }; im.onerror=()=>{ ok[n]=false; }; im.src='img/eventos/'+n+'.jpg'; }); }
@@ -24655,7 +24683,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión',
     mayoria_edad:'La mayoría de edad',graduacion:'El grado',luna_miel:'La luna de miel',divorcio:'El divorcio',viudez:'El luto',duelo_hijo:'Un hijo que se va antes',hospital:'En la clínica',mudanza:'La mudanza',infidelidad:'La infidelidad',
     fundacion_empresa:'La fundación de la compañía',bolsa:'La Bolsa de Bogotá',quiebra:'La quiebra',crisis:'La crisis',banco_apertura:'Un banco con el apellido',corrida:'La corrida bancaria',intervencion:'La intervención',piramide:'La pirámide',
-    eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada',
+    bautizo:'El bautizo',eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada',
     embajada_ofrecida:'Te ofrecieron una embajada',ministerio_ofrecido:'Te ofrecieron un ministerio',licitacion_ganada:'Ganaste una licitación',licitacion_perdida:'Perdiste una licitación',desfalco_empresa_publica:'Escándalo por desfalco de empresa pública',extradicion:'Extradición',exilio:'Exilio',captura:'La captura',prision_domiciliaria:'Prisión domiciliaria',carcel_maxima_seguridad:'Cárcel de máxima seguridad',prision_ordinaria:'Prisión ordinaria',pabellon_especial:'Pabellón especial de pago'};
   const figura=(k,pie)=>'<figure class="momento120" data-momento="'+k+'"><img src="img/eventos/'+k+'.jpg" alt="'+esc(PIE[k]||'')+'"><figcaption>'+esc(pie||PIE[k]||'')+'</figcaption></figure>';
   const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
@@ -24666,7 +24694,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function detectar(o){
     const ti=plano(o.titulo), cu=plano(o.cuerpo), ru=plano(o.rubro);
     if(o.momento120) return o.momento120;   /* v158: las pantallas de poder y justicia dicen cuál lámina llevan */
-    if(ti==='¿Cómo se va a llamar?') return 'nacimiento_hijo';
+    if(ti==='¿Cómo se va a llamar?') return ok.bautizo?'bautizo':'nacimiento_hijo';   /* v163: ponerle el nombre es el bautizo */
     /* v122 */
     const raw=String(o.cuerpo||'');
     if(ti==='Cumpliste 18') return 'mayoria_edad';
@@ -29657,6 +29685,506 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaLiderazgo159,escenaGremio159,escenaSalario159,escenaRama159,escenaLineaRama159,escenaPresion159,escenaSector159,escenaForma159,escenaAranceles159,faltasGremio159:faltas,lider159:L,gremio159:G,CARGOS_GREMIO_159:CARGOS,MEDIDAS_159:MEDIDAS,nivelArancel159:niv,desvioArancel159:dev,efectoArancel159:efArancel,anualGremios159:anual,evMedida159:evMedida,costoSmlv159:costoSmlv,candidaturaGremio159:candidatura,probEleccionGremio159:probEleccion,efectoMods159:efMods}); }
   setTimeout(init159,40); setTimeout(init159,220); setTimeout(init159,650); setTimeout(init159,950);
   window.__SA159={version:V159};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v160 · APELACIÓN Y CASACIÓN
+   Una condena ya no se discute en un solo golpe. Si pierdes el juicio:
+   - Apelación: el expediente sube al tribunal superior. Tarda uno o dos años,
+     cuesta (radicación y honorarios cada año) y se ve avanzar por etapas:
+     recurso radicado, reparto al magistrado ponente, audiencia de
+     sustentación y proyecto de fallo.
+   - El tribunal puede absolverte, anular el juicio, rebajar la pena o
+     confirmarla.
+   - Casación: si confirma o reduce y la pena es de cinco años o más, puedes
+     demandar en casación ante la Corte Suprema. Primero decide si admite la
+     demanda (la mayoría no pasa); si la admite, el fallo tarda más años.
+   - Mientras corren los recursos sigues cumpliendo la condena, y lo
+     cumplido cuenta si te la rebajan. Una pena capital pasa por revisión
+     automática, y al final queda la clemencia.
+   - Puedes impulsar el proceso, reforzar la defensa, cambiar de abogado o
+     desistir.
+   ========================================================================== */
+(function(){
+  const V160='v160';
+  const ES=x=>String(x==null?'':x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(S&&S.p&&S.penal&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const movida=()=>{ if(S._mov160===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov160=S.anio; return true; };
+  const sinMov=()=>(S._mov160!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const ABOG={
+    oficio:{q:0,n:'Defensor de oficio',d:'No cuesta nada. Tiene doscientos expedientes y el tuyo es uno más.',fee:()=>0},
+    reconocido:{q:1,n:'Un penalista reconocido',d:'Conoce a los magistrados y sabe cómo se arma una sustentación.',fee:()=>Math.max(8,Math.round(pat()*.008))},
+    estrella:{q:2,n:'El bufete más caro del país',d:'Gana recursos que nadie más gana, y cobra como si lo supiera.',fee:()=>Math.max(25,Math.round(pat()*.025))}};
+  const qFO=()=>{ try{ const a=S.familyOffice&&S.familyOffice.staff&&S.familyOffice.staff.abogado; if(!a) return 0; return (a.capaz||5)>=8?2:1; }catch(e){ return 0; } };
+  const qDe=i=>Math.max((ABOG[i&&i.abogado]||ABOG.oficio).q,qFO());
+  const feeDe=i=>{ const a=ABOG[i&&i.abogado]||ABOG.oficio; return a.q>qFO()?a.fee():0; };
+  const bonoJ=()=>{ try{ const j=S.carrera&&S.carrera.judicatura; return (j&&j.activo)?((j.nivel||0)>=2?.06:.04):0; }catch(e){ return 0; } };
+  const ETAPAS={apelacion:['Recurso radicado','Reparto al magistrado','Audiencia de sustentación','Proyecto de fallo'],
+                casacion:['Demanda presentada','Admisión de la demanda','Audiencia de sustentación','Proyecto de fallo']};
+  /* los tribunales cambian con la época y con el país */
+  function cortes(){ let j; try{ j=jurisdiccionActual(); }catch(e){ j={pais:'Colombia',jurisdiccion:'Colombia'}; }
+    const a=S.anio, col=!j.pais||j.pais==='Colombia';
+    if(col) return {apel:a<1810?'la Real Audiencia de Santa Fe':a<1886?'el Tribunal Superior del Distrito':'el Tribunal Superior del Distrito Judicial',
+      apelCorto:a<1810?'la Real Audiencia':'el Tribunal Superior',
+      cas:a>=1905?'la Sala de Casación Penal de la Corte Suprema de Justicia':'la Corte Suprema de Justicia',casCorto:'la Corte Suprema',puedeCas:a>=1905};
+    return {apel:'la corte de apelaciones de '+j.jurisdiccion,apelCorto:'la corte de apelaciones',cas:'la Corte Suprema de '+j.jurisdiccion,casCorto:'la Corte Suprema',puedeCas:true}; }
+  const costoRecurso=f=>f==='casacion'?Math.max(25,Math.round(pat()*.035)):Math.max(15,Math.round(pat()*.02));
+  const costoImpulso=()=>Math.max(6,Math.round(pat()*.008));
+  const costoRefuerzo=()=>Math.max(10,Math.round(pat()*.012));
+  /* --- estado --- */
+  function P(){ try{ asegurarPenal(); }catch(e){} return S.penal; }
+  const INS=()=>{ const p=P(); return p&&p.ins160&&p.ins160.gen===S.gen?p.ins160:null; };
+  const hist=(i,t)=>{ i.hist=(i.hist||[]).concat([{anio:S.anio,txt:t}]).slice(-8); };
+  const etapa=i=>Math.min(3,Math.floor((i.elapsed||0)/Math.max(1,i.dur||1)*4));
+  const peso=i=>clamp(qDe(i)*.05+(i.refuerzos||0)*.04+(60-(isFinite(i.evid)?i.evid:55))/400+bonoJ()+(yo('astuto')?.02:0),-.1,.4);
+  const evento=(texto,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.penal&&!S.muerto),t:()=>texto,o:o||[{t:'Entendido',f:()=>''}]}); }catch(e){} };
+  const rango=a=>a===1?'un año':a+' años';
+  /* --- abrir la apelación --- */
+  function abrir(auto){ const p=P(), cap=!!p.penaMuerte, c=cortes(), pena=cap?0:(p.apelable89||0);
+    const dur=cap?ri(2,3):(chance(.5)?2:1);
+    const i=p.ins160={gen:S.gen,fase:'apelacion',estado:'curso',rad:S.anio,dur,elapsed:0,pena:cap?0:pena,capital:cap,auto:!!auto,
+      abogado:ABOG[p.abog160]?p.abog160:'oficio',evid:isFinite(p.evid160)?p.evid160:55,gastado:0,refuerzos:0,hist:[],motivo:p.motivoCondena||''};
+    p.apelable89=0;
+    hist(i,(auto?'Revisión automática de la pena capital ante ':'Radicaste el recurso de apelación ante ')+c.apel+'.');
+    return i; }
+  function iniciarApelacion160(){ const p=P(); if(p.ins160&&INS()) return 'Ya tienes un recurso en curso.';
+    const cap=!!p.penaMuerte;
+    if(!cap&&(!p.apelable89||!(p.prisionRestante>0))) return 'Ya no había nada que apelar.';
+    const costo=costoRecurso('apelacion'); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
+    S.efectivo-=costo; const i=abrir(false); i.gastado=costo; const c=cortes();
+    log('Presentaste el recurso de apelación ante <b>'+esc(c.apel)+'</b>. Costó '+fmt(costo)+'.','hito');
+    return 'La apelación quedó radicada y se resuelve en '+(i.dur===1?'un año':i.dur+' años')+'. Entre tanto, '+(cap?'la ejecución queda suspendida.':'sigues cumpliendo la condena, y lo cumplido cuenta si te la rebajan.'); }
+  /* --- los desenlaces --- */
+  function cerrarFirme(msg){ const p=P(), i=p.ins160; p.ins160=null; p.firme160=true; p.apelable89=0; if(msg) log(msg,'mal'); if(p.penaMuerte) ejecutar(); }
+  function ejecutar(){ const p=P(); log('<b>Se cumplió la sentencia.</b> Ya no quedaban recursos.','mal'); p.penaMuerte=false; p.condena=null; p.ins160=null; setTimeout(()=>{ try{ if(!S.muerto) morir(); }catch(e){ console.error(e); } },60); }
+  function absolver(i){ const p=P(), f=i.fase==='casacion'?'casación':'apelación'; p.prisionRestante=0; p.condena=null; p.motivoCondena=null; p.penaMuerte=false; p.caso=null; p.ins160=null; p.firme160=false; p.apelable89=0;
+    p.riesgo=clamp((p.riesgo||0)-25,0,100); S.p.escandalos=Math.max(0,(S.p.escandalos||0)-1); try{ moverPrestigio(6,'fue absuelto en '+f); }catch(e){}
+    log('<b>Absuelto en '+f+'.</b> La condena quedó sin efecto y sales libre. Gastaste '+fmt(i.gastado||0)+' en los recursos.','bien'); try{ hito('Lo absolvieron en '+f); }catch(e){} }
+  function anular(i){ const p=P(), tr=cortes(); p.prisionRestante=0; p.condena=null; p.penaMuerte=false; p.ins160=null; p.firme160=false; p.apelable89=0;
+    p.caso={estado:'juicio',motivo:i.motivo||p.motivoCondena||'investigación penal',inicio:S.anio,jurisdiccion:(function(){ try{ return jurisdiccionActual().jurisdiccion; }catch(e){ return 'Colombia'; } })(),
+      evidencia:clamp((isFinite(i.evid)?i.evid:55)-10,15,92),abogado:i.abogado,plazo:S.anio+2,gastado:0,bitacora:[{anio:S.anio,txt:'El juicio se anuló y se repite.'}]};
+    log('<b>Se anuló el juicio.</b> Hay que repetirlo desde el principio; mientras tanto, quedas en libertad.','hito'); }
+  function reducir(i,frac){ const p=P(), nueva=Math.max(1,Math.round(i.pena*frac)), cumplido=Math.max(0,i.pena-Math.max(0,p.prisionRestante)), rest=Math.max(0,nueva-cumplido);
+    const antes=i.pena; i.pena=nueva; i.mod=true; p.prisionRestante=rest; if(rest<=0){ p.condena=null; p.motivoCondena=null; }
+    return {nueva,antes,rest,cumplido}; }
+  function conmutar(i,anios){ const p=P(), n=anios||ri(18,35); p.penaMuerte=false; p.condena='prisión'; p.prisionRestante=n; p.caso=null; i.capital=false; i.pena=n; i.mod=true; return n; }
+  /* --- qué sigue después de un fallo --- */
+  function despues(i,titulo){ const p=P(), c=cortes();
+    if(i.fase==='apelacion'&&c.puedeCas&&(i.capital||i.pena>=5)&&(p.prisionRestante>0||i.capital)){
+      i.estado='decidido'; i.puedeCasar=true; i.decidido=S.anio;
+      evento(titulo+'<br><br>Tu abogado ve base para una demanda de casación ante <b>'+esc(c.cas)+'</b>. Cuesta '+fmt(costoRecurso('casacion'))+' y primero hay que lograr que la admitan. Si este año no la presentas, la sentencia queda en firme.',
+        [{t:'Presentar la casación ('+fmt(costoRecurso('casacion'))+')',f:()=>presentarCasacion160()},{t:i.capital?'Aceptar la sentencia: se ejecutará':'Aceptar la sentencia',f:()=>{ cerrarFirme(); return 'La sentencia quedó en firme.'; }}]);
+      return; }
+    if(i.capital){ i.estado='decidido'; i.puedeCasar=false; i.clemencia=true; i.decidido=S.anio;
+      evento(titulo+'<br><br>No quedan recursos. Solo falta la clemencia: una carta al ejecutivo, con influencias. Si este año no la pides, la sentencia se cumple.',
+        [{t:'Pedir clemencia ('+fmt(costoClemencia())+')',f:()=>pedirClemencia160()},{t:'Aceptar lo que viene',f:()=>{ ejecutar(); return ''; }}]);
+      return; }
+    cerrarFirme(); evento(titulo+' La sentencia quedó en firme.'); }
+  const costoClemencia=()=>Math.max(40,Math.round(pat()*.03));
+  function pedirClemencia160(){ const i=INS(); if(!i||!i.clemencia) return 'Ya no había nada que pedir.'; const costo=costoClemencia(); if(S.efectivo<costo) { ejecutar(); return 'No tenías con qué pagar la gestión de la clemencia.'; }
+    S.efectivo-=costo; i.gastado=(i.gastado||0)+costo; let infl=0; try{ const po=typeof window.politica155==='function'?window.politica155():null; infl=po&&po.influ||0; }catch(e){}
+    const p=clamp(.08+infl/500+(typeof prestigio==='function'?prestigio():0)/700+qFO()*.04,.05,.4);
+    if(chance(p)){ const n=conmutar(i,ri(20,40)); P().ins160=null; P().firme160=true; log('<b>Te concedieron la clemencia.</b> La pena capital se conmutó por '+n+' años de prisión.','hito'); return 'La pena capital quedó conmutada por '+n+' años de prisión.'; }
+    ejecutar(); return 'La clemencia fue negada.'; }
+  /* --- los fallos --- */
+  function fallaApelacion(i){ const p=P(), W=peso(i), c=cortes(), r=Math.random(); const mag='del magistrado '+pick(APELLIDOS);
+    const pAbs=clamp(.04+W*(i.capital?.4:.6),.02,.3), pNul=.05, pRed=clamp(.2+W*1.2,.08,.5);
+    hist(i,'El tribunal falló el recurso.');
+    if(r<pAbs){ absolver(i); evento('<b>'+ES(cap(c.apelCorto))+' revocó tu condena.</b> Con ponencia '+esc(mag)+', la sala encontró que las pruebas no alcanzaban y te absolvió. Sales libre.'); return; }
+    if(r<pAbs+pNul){ anular(i); evento('<b>'+ES(cap(c.apelCorto))+' anuló el juicio.</b> Hubo un error de fondo en el proceso: hay que repetirlo desde el principio, y mientras tanto quedas en libertad.'); return; }
+    if(i.capital){ if(r<pAbs+pNul+clamp(.3+W*1.1,.12,.6)){ const n=conmutar(i); log('El tribunal conmutó la pena capital por '+n+' años de prisión.','bien'); despues(i,'<b>'+ES(cap(c.apelCorto))+' conmutó tu pena capital</b> por '+n+' años de prisión.'); return; } log('El tribunal confirmó la pena capital.','mal'); despues(i,'<b>'+ES(cap(c.apelCorto))+' confirmó la pena capital.</b>'); return; }
+    if(r<pAbs+pNul+pRed){ const x=reducir(i,rand(.45,.75)); log('El tribunal rebajó la condena de '+x.antes+' a '+x.nueva+' años.','bien');
+      if(x.rest<=0){ i.estado='decidido'; P().ins160=null; P().firme160=true; evento('<b>'+ES(cap(c.apelCorto))+' rebajó tu condena a '+rango(x.nueva)+'.</b> Como ya llevabas '+rango(x.cumplido)+' cumplidos, quedas libre.'); return; }
+      despues(i,'<b>'+ES(cap(c.apelCorto))+' rebajó tu condena de '+rango(x.antes)+' a '+rango(x.nueva)+'.</b> Te faltan '+rango(x.rest)+'.'); return; }
+    log('El tribunal confirmó la condena.','mal'); despues(i,'<b>'+ES(cap(c.apelCorto))+' confirmó la condena</b> de '+rango(i.pena)+'. La ponencia '+esc(mag)+' no encontró errores.'); }
+  function fallaCasacion(i){ const W=peso(i), c=cortes(), r=Math.random(), mag='del magistrado '+pick(APELLIDOS); hist(i,'La Corte falló la demanda.');
+    const pCasa=clamp(.3+W*1.0,.12,.6);
+    if(r<pCasa){ if(i.capital){ const n=conmutar(i); P().ins160=null; P().firme160=true; log('La Corte casó la sentencia y conmutó la pena capital por '+n+' años.','bien'); evento('<b>La Corte Suprema casó la sentencia.</b> La pena capital quedó conmutada por '+n+' años de prisión.'); return; }
+      const s=Math.random();
+      if(s<.6){ const x=reducir(i,rand(.4,.7)); P().ins160=null; P().firme160=true; log('La Corte casó la sentencia y rebajó la condena de '+x.antes+' a '+x.nueva+' años.','bien');
+        evento('<b>La Corte Suprema casó la sentencia.</b> La pena baja de '+rango(x.antes)+' a '+rango(x.nueva)+'.'+(x.rest<=0?' Como ya la cumpliste, quedas libre.':' Te faltan '+rango(x.rest)+'.')); return; }
+      if(s<.85){ absolver(i); evento('<b>La Corte Suprema casó la sentencia y te absolvió.</b> Sale con ponencia '+esc(mag)+': la condena se fundó en pruebas ilegales.'); return; }
+      anular(i); evento('<b>La Corte Suprema anuló el juicio.</b> Hay que repetirlo; mientras tanto quedas en libertad.'); return; }
+    log('La Corte no casó la sentencia.','mal'); despues(i,'<b>La Corte Suprema no casó la sentencia.</b> Con ponencia '+esc(mag)+', la Sala de Casación la dejó en firme.'); }
+  function admision(i){ const c=cortes(), pA=clamp(.32+qDe(i)*.08+(i.refuerzos||0)*.05+(i.mod?.04:0),.12,.65);
+    if(chance(pA)){ i.admitida=true; i.dur=1+ri(1,3); hist(i,'La Corte admitió la demanda de casación.'); log('<b>La Corte admitió la demanda de casación.</b> El fallo tarda unos años.','hito'); return; }
+    i.admitida=false; hist(i,'La Corte no admitió la demanda.'); log('La Corte no admitió la demanda de casación.','mal'); despues(i,'<b>La Corte Suprema no admitió la demanda de casación.</b> La mayoría no pasa ese filtro.'); }
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  function presentarCasacion160(){ const i=INS(); if(!i||i.estado!=='decidido'||!i.puedeCasar) return 'Ya no había nada que presentar.';
+    const costo=costoRecurso('casacion'); if(S.efectivo<costo) return 'No tenías con qué pagar la casación.';
+    S.efectivo-=costo; i.gastado=(i.gastado||0)+costo; const c=cortes();
+    Object.assign(i,{fase:'casacion',estado:'curso',puedeCasar:false,dur:1,elapsed:0,admitida:null,refuerzos:0,rad:S.anio}); hist(i,'Presentaste la demanda de casación ante '+c.cas+'.');
+    log('Presentaste la demanda de <b>casación</b> ante '+esc(c.cas)+'. Costó '+fmt(costo)+'.','hito'); return 'La demanda de casación quedó presentada: primero hay que lograr que la admitan.'; }
+  /* --- el paso de un año --- */
+  const TXT={0:['El recurso quedó radicado ante ','Tu demanda llegó a '],1:['El expediente fue repartido al despacho del magistrado ','Se fijó fecha para sustentar'],2:['Se realizó la audiencia de sustentación.','Los magistrados oyeron a las partes.'],3:['El proyecto de fallo ya circula entre los magistrados.']};
+  function anual(){ if(!ACTIVO()||nino()) return; const p=P(); let i=p.ins160;
+    if(i&&i.gen!==S.gen){ p.ins160=null; i=null; }
+    if(!i){ if(p.penaMuerte&&!p.firme160){ abrir(true); log('La pena capital pasó a <b>revisión automática</b> ante '+esc(cortes().apel)+'.','hito'); } return; }
+    let fuga=false; try{ fuga=!!(p.fugado||(S.ext157&&['exilio','proceso','solicitud','negada','asilo'].includes(S.ext157.estado))); }catch(e){}
+    if(fuga){ p.ins160=null; log('Tu recurso se archivó: no se atiende a quien huyó de la justicia.','mal'); return; }
+    if(i.estado==='decidido'){ if(i.clemencia){ ejecutar(); return; } cerrarFirme('Venció el plazo para la casación: la sentencia quedó en firme.'); return; }
+    if(!i.capital&&!(p.prisionRestante>0)){ p.ins160=null; p.firme160=true; log('El recurso perdió sentido: ya cumpliste la condena.'); return; }
+    const antes=etapa(i); i.elapsed=(i.elapsed||0)+1;
+    const fee=feeDe(i); if(fee){ if(S.efectivo>=fee){ S.efectivo-=fee; i.gastado=(i.gastado||0)+fee; } else { i.abogado='oficio'; hist(i,'Sin plata para los honorarios, te quedó el defensor de oficio.'); log('No pudiste seguir pagando los honorarios: te quedó un defensor de oficio.','mal'); } }
+    if(i.fase==='casacion'&&i.admitida==null&&i.elapsed>=1){ admision(i); return; }
+    if(i.elapsed>=i.dur){ if(i.fase==='casacion') fallaCasacion(i); else fallaApelacion(i); return; }
+    const e=etapa(i); if(e>antes||e>0){ const x=pick(TXT[e]||TXT[3]); const t=e===1?x+'el magistrado '+pick(APELLIDOS)+'.':x; hist(i,t); log('<b>Tu '+(i.fase==='casacion'?'casación':'apelación')+' avanzó:</b> '+esc(t),'hito'); } }
+  /* --- pantallas --- */
+  function tracker(i){ const c=cortes(), tiene=!!i, fase=i&&i.fase;
+    const sentencia=i?(i.capital?'Pena capital':rango(i.pena)+' de prisión'):'';
+    let h='<div class="pasos160"><div class="p160 hecho"><i></i><b>Primera instancia</b><small>'+(i?esc(sentencia):'Condena')+(i&&i.motivo?' · '+esc(i.motivo):'')+'</small></div>';
+    const etp=(clave,n,corte)=>{ const E=ETAPAS[clave], act=fase===clave&&i.estado==='curso', ya=(clave==='apelacion'&&fase==='casacion')||(fase===clave&&i.estado==='decidido'), pos=act?etapa(i):-1;
+      let d='<div class="p160 '+(act?'en160':(ya?'hecho':''))+'"><i></i><b>'+n+'</b><small>'+esc(cap(corte))+(act?' · '+(i.elapsed||0)+' de '+(i.dur||1)+' año'+((i.dur||1)===1?'':'s'):(ya?' · resuelto':''))+'</small>';
+      if(act){ d+='<div class="et160">'+E.map((x,k)=>'<span class="'+(k===pos?'on':(k<pos?'ya':''))+'">'+esc(x)+'</span>').join('')+'</div><div class="b160"><i style="width:'+Math.round(clamp(((i.elapsed||0)/Math.max(1,i.dur||1))*100,6,100))+'%"></i></div>'; }
+      return d+'</div>'; };
+    h+=etp('apelacion','Apelación',c.apelCorto);
+    if(c.puedeCas) h+=etp('casacion','Casación',c.cas);
+    h+='<div class="p160"><i></i><b>Sentencia en firme</b><small>'+(i&&i.capital?'Ejecución o clemencia':'Se cumple lo que quede de la pena')+'</small></div></div>';
+    return h; }
+  function escenaInstancias160(){ const p=P(), i=INS(); if(!i){ return viejo(); } const c=cortes(), j=(function(){ try{ return jurisdiccionActual(); }catch(e){ return {jurisdiccion:'Colombia'}; } })();
+    const hist_=(i.hist||[]).slice(-5).reverse(), q=qDe(i), W=peso(i);
+    const abre=i.fase==='casacion'?'casación':'apelación', ops=[], reab=()=>{ cerrarModal(); render(); escenaInstancias160(); };
+    const cuerpo=(i.capital?'Te condenaron a <b>pena capital</b>'+(i.motivo?' por <b>'+esc(i.motivo)+'</b>':'')+'. La ejecución queda suspendida mientras corran los recursos.'
+      :'Te condenaron a <b>'+rango(i.pena)+'</b> de prisión'+(i.motivo?' por <b>'+esc(i.motivo)+'</b>':'')+'. La condena no queda en firme mientras corran los recursos: entre tanto la cumples, y lo cumplido cuenta si te la rebajan.');
+    if(i.estado==='curso'){
+      const restan=Math.max(0,(i.dur||1)-(i.elapsed||0));
+      ops.push({t:'Impulsar el proceso · '+fmt(costoImpulso()),cat:'riesgo',d:'Presionar al despacho para que no se duerma el expediente. Puede ahorrar un año.',dis:restan<=1?'Ya se resuelve el año que viene':(i.impulsado===S.anio?'Ya lo intentaste este año':(S.efectivo<costoImpulso()?'No te alcanza':sinMov())),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=costoImpulso(); i.gastado=(i.gastado||0)+costoImpulso(); i.impulsado=S.anio;
+        if(chance(.55+q*.08)){ i.elapsed=Math.min((i.dur||1)-1,(i.elapsed||0)+1); hist(i,'Tu abogado movió el expediente: se adelantó un año.'); log('Tu abogado movió el expediente: el fallo se adelantó un año.','bien'); } else { hist(i,'El despacho no se movió.'); log('Tu abogado insistió, pero el despacho no se movió.','mal'); } reab(); }});
+      ops.push({t:'Reforzar la defensa · '+fmt(costoRefuerzo()),cat:'riesgo',d:'Un peritaje y un memorial nuevo. Sube las posibilidades del fallo ('+(i.refuerzos||0)+' de 2).',dis:(i.refuerzos||0)>=2?'Ya reforzaste dos veces':(S.efectivo<costoRefuerzo()?'No te alcanza':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=costoRefuerzo(); i.gastado=(i.gastado||0)+costoRefuerzo(); i.refuerzos=(i.refuerzos||0)+1; hist(i,'Se presentó un peritaje y un memorial nuevo.'); log('Tu defensa presentó un peritaje y un memorial nuevo.','bien'); reab(); }});
+      ops.push({t:'Cambiar de abogado',cat:'riesgo',d:'Tu abogado actual: '+(ABOG[i.abogado]||ABOG.oficio).n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escenaAbogado160(); }});
+      ops.push({t:'Desistir del recurso',cat:'riesgo',d:i.capital?'Aceptas la sentencia: se ejecutará.':'Aceptas la sentencia y se pierde lo gastado.',cerrar:false,run:()=>{ cerrarFirme('Desististe del recurso: la sentencia quedó en firme.'); cerrarModal(); render(); }});
+    } else if(i.puedeCasar){
+      ops.push({t:'Presentar la casación · '+fmt(costoRecurso('casacion')),cat:'riesgo',d:'Demanda ante '+c.cas+'. Primero hay que lograr que la admitan.',dis:S.efectivo<costoRecurso('casacion')?'No te alcanza':null,cerrar:false,run:()=>{ const m=presentarCasacion160(); log(m); cerrarModal(); render(); escenaInstancias160(); }});
+      ops.push({t:i.capital?'Aceptar la sentencia: se ejecutará':'Aceptar la sentencia',cat:'riesgo',cerrar:false,run:()=>{ cerrarFirme('Aceptaste la sentencia.'); cerrarModal(); render(); }});
+    } else if(i.clemencia){
+      ops.push({t:'Pedir clemencia · '+fmt(costoClemencia()),cat:'riesgo',d:'Una carta al ejecutivo, con influencias. Si falla, la sentencia se cumple.',cerrar:false,run:()=>{ const m=pedirClemencia160(); log(m); cerrarModal(); render(); }});
+      ops.push({t:'Aceptar lo que viene',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); ejecutar(); }});
+    }
+    if(!i.capital) ops.push({t:'Ver tu condena',cat:'riesgo',d:'La cárcel y lo que puedes hacer adentro.',cerrar:false,run:()=>{ cerrarModal(); viejo(); }});
+    ops.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Tribunal',titulo:'Tus recursos',ancho:true,cerrable:true,clase:'ins160',cuerpo,
+      html:'<div class="k"><div><b>'+esc(cap(abre))+'</b><span>instancia actual</span></div><div><b>'+fmt(i.gastado||0)+'</b><span>gastado en recursos</span></div><div><b>'+((ABOG[i.abogado]||ABOG.oficio).n.length>26?(ABOG[i.abogado]||ABOG.oficio).n.slice(0,24)+'…':(ABOG[i.abogado]||ABOG.oficio).n)+'</b><span>tu abogado'+(feeDe(i)?' · '+fmt(feeDe(i))+' al año':'')+'</span></div></div>'
+        +'<h4>El camino de tu proceso</h4>'+tracker(i)+(hist_.length?'<h4>El expediente</h4><div class="bit160">'+hist_.map(e=>'<div><b>'+e.anio+'</b> '+esc(e.txt)+'</div>').join('')+'</div>':''),
+      opciones:ops}); }
+  function escenaAbogado160(){ const i=INS(); if(!i){ return; } const fo=qFO();
+    const ops=['oficio','reconocido','estrella'].map(id=>{ const a=ABOG[id], fee=a.q>fo?a.fee():0, actual=i.abogado===id;
+      return {t:a.n+(actual?' (el actual)':''),cat:'riesgo',d:a.d+' '+(fee?'Honorarios: '+fmt(fee)+' al año, el primero por adelantado.':(a.q&&fo>=a.q?'Lo cubre el abogado de tu family office.':'Sin costo.')),
+        dis:actual?'Ya es tu abogado':(fee&&S.efectivo<fee?'No te alcanza para el primer año':null),cerrar:false,run:()=>{ if(fee){ S.efectivo-=fee; i.gastado=(i.gastado||0)+fee; } i.abogado=id; hist(i,'Cambiaste de abogado: '+a.n.toLowerCase()+'.'); log('Ahora te defiende '+a.n.toLowerCase()+'.'); cerrarModal(); render(); escenaInstancias160(); }}; });
+    ops.push({t:'Volver',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); escenaInstancias160(); }});
+    escena({rubro:'Tu defensa',titulo:'Elegir abogado',ancho:true,cuerpo:'En los recursos pesa más la técnica que el relato: un abogado de alto nivel sube bastante las posibilidades de que el tribunal te dé la razón.'+(fo?' <b>Tu family office tiene abogado propio</b>.':''),opciones:ops,cerrable:true}); }
+  let VIEJO=null; const viejo=()=>{ if(typeof VIEJO==='function'){ const f=VIEJO; return f.apply(window,[]); } };
+  /* --- enganches --- */
+  function wrapProceso(){ const old=window.escenaProcesoPenal; if(typeof old!=='function'||old.__v160) return; VIEJO=old;
+    window.escenaProcesoPenal=function(){ try{ if(ACTIVO()&&!nino()){ const p=P(); const i0=INS(); if(i0&&!i0.capital&&p.caso&&!(p.prisionRestante>0)) p.ins160=null; if(INS()) return escenaInstancias160(); if(p.penaMuerte&&!p.firme160){ abrir(true); return escenaInstancias160(); } } }catch(e){ console.error(e); } return old.apply(this,arguments); };
+    window.escenaProcesoPenal.__v160=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaProcesoPenal[k]=true; }); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA160_PASO) return; window.__SA160_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapResumen(){ const old=window.resumenLegalActual; if(typeof old!=='function'||window.__SA160_RES) return; window.__SA160_RES=true;
+    window.resumenLegalActual=function(){ let t=old.apply(this,arguments); try{ const i=ACTIVO()&&INS(); if(i){ t+=(t?' · ':'')+(i.estado==='curso'?(i.fase==='casacion'?'casación':'apelación')+' en curso (etapa '+(etapa(i)+1)+' de 4)':(i.puedeCasar?'puedes pedir la casación':'clemencia pendiente')); } }catch(e){} return t; }; }
+  function init160(){ wrapProceso(); wrapPaso(); wrapResumen(); Object.assign(window,{iniciarApelacion160,presentarCasacion160,pedirClemencia160,escenaInstancias160,escenaAbogado160,anualInstancias160:anual,cortes160:cortes,insPenal160:INS,costoRecurso160:costoRecurso,pesoRecurso160:peso,etapaRecurso160:etapa}); }
+  setTimeout(init160,40); setTimeout(init160,220); setTimeout(init160,650); setTimeout(init160,950);
+  window.__SA160={version:V160};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v161 · LIMPIEZA GENERAL: EL BAUTIZO, LOS OFICIOS Y LAS CARRERAS DE CADA ÉPOCA
+   1. El bautizo de los hijos. La pantalla del nombre se perdía cuando otra
+      pantalla (un evento, una elección) se abría justo después y la tapaba.
+      Ahora el nombre queda pendiente hasta que lo pongas: si algo la tapa,
+      vuelve a aparecer en cuanto el camino se despeja.
+   2. Los oficios y las profesiones. La familia, las parejas y los amantes
+      ya no sacan su oficio de una bolsa revuelta:
+      - cada oficio tiene forma de hombre y de mujer. Un sacerdote es un
+        hombre; ellas, en un país católico, son religiosas.
+      - cada oficio existe desde una fecha. En 1800 no hay arquitectas, ni
+        odontólogos, ni profesoras universitarias; hay hacendados,
+        comerciantes, médicos, abogados, notarios y señoras de su casa.
+      - las mujeres entran a la universidad y a las profesiones en la fecha
+        en que realmente pudieron (la universidad, desde 1936).
+   3. Las carreras universitarias también tienen fecha: Medicina y Derecho
+      siempre; Ingeniería desde 1880; Economía desde 1945; Sistemas desde
+      1970; Finanzas desde 1975.
+   4. Lo que ya estaba guardado se corrige solo: los oficios de la partida
+      que no cuadraban con el sexo o la época se reemplazan por uno válido.
+   ========================================================================== */
+(function(){
+  const V161='v161';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ANIO=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+
+  /* ---------- 1. el bautizo que no se pierde ---------- */
+  const PEND=[]; let OLD_BAUT=null, PREV_AP=null, INT=null;
+  const libre=()=>!document.querySelector('#escenaHost .lienzo');
+  function tick(){
+    try{
+      if(window.__noNombrar161||typeof S==='undefined'||!S||!S.p||S.muerto||!PEND.length) return;
+      for(let k=PEND.length-1;k>=0;k--){ const p=PEND[k]; if(!(S.familia&&(S.familia.hijos||[]).includes(p.h))||p.h.nombre118) PEND.splice(k,1); }
+      if(!PEND.length||!libre()||nino()) return;
+      const p=PEND[0];
+      if(p.tipo==='bautizo'){
+        if(typeof OLD_BAUT!=='function'){ PEND.shift(); return; }
+        OLD_BAUT(p.h,p.motivo,()=>{ p.h.nombre118=true; if(typeof p.luego==='function') p.luego(); else render(); });
+      } else if(typeof window.escenaNombre118==='function'){
+        window.escenaNombre118(p.h,p.otro,()=>{ setTimeout(()=>{ try{ if(typeof PREV_AP==='function') PREV_AP(p.h,p.otro); }catch(e){ console.error(e); } },0); });
+      } else { p.h.nombre118=true; PEND.shift(); }
+    }catch(e){ console.error(e); }
+  }
+  function wrapApellido(){
+    const old=window.escenaApellidoHijo; if(typeof old!=='function'||window.__SA161_AP) return;
+    if(!window.__SA118_AP) return;                       // espera a que v118 ponga su capa
+    window.__SA161_AP=true; PREV_AP=old;
+    window.escenaApellidoHijo=function(h,otro){
+      if(!h||h.nombre118||nino()) return old.apply(this,arguments);
+      if(!PEND.some(p=>p.h===h)) PEND.push({h,otro,tipo:'nacimiento'});
+    };
+    Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaApellidoHijo[k]=true; });
+  }
+  function wrapBautizo(){
+    const old=window.escenaBautizo; if(typeof old!=='function'||window.__SA161_BAU) return;
+    window.__SA161_BAU=true; OLD_BAUT=old;
+    window.escenaBautizo=function(h,motivo,luego){
+      if(!h||nino()) return old.apply(this,arguments);
+      if(!PEND.some(p=>p.h===h)) PEND.push({h,motivo,tipo:'bautizo',luego});
+    };
+  }
+
+  /* ---------- 2. oficios por sexo y por época ---------- */
+  const F=2100;
+  /* [masculino, femenino, desde (h), desde (m), hasta (h), hasta (m), peso] */
+  const TABLA=[
+    ['hacendado','hacendada',1800,1800,1959,1959,2],
+    ['comerciante','comerciante',1800,1800,F,F,3],
+    ['ganadero','ganadera',1800,1900,F,F,1],
+    ['finquero','finquera',1900,1950,F,F,1],
+    ['sacerdote','religiosa',1800,1800,F,F,1],
+    ['militar','militar',1800,1980,F,F,1],
+    ['abogado','abogada',1800,1945,F,F,2],
+    ['notario','notaria',1800,1950,F,F,1],
+    ['médico','médica',1800,1936,F,F,2],
+    ['boticario','boticaria',1800,F,1959,1959,1],
+    ['farmacéutico','farmacéutica',1930,1950,F,F,1],
+    ['ingeniero','ingeniera',1880,1950,F,F,2],
+    ['periodista','periodista',1850,1935,F,F,1],
+    ['político','política',1830,1958,F,F,1],
+    ['banquero','banquera',1870,1980,F,F,1],
+    ['contador','contadora',1920,1950,F,F,1],
+    ['arquitecto','arquitecta',1930,1950,F,F,1],
+    ['odontólogo','odontóloga',1900,1940,F,F,1],
+    ['veterinario','veterinaria',1930,1965,F,F,1],
+    ['maestro','maestra',1800,1870,1929,1929,2],
+    ['profesor','profesora',1930,1935,F,F,2],
+    ['agrónomo','agrónoma',1915,1950,F,F,1],
+    ['economista','economista',1945,1950,F,F,1],
+    ['empresario','empresaria',1880,1940,F,F,2],
+    ['piloto','piloto',1930,1975,F,F,1],
+    ['ingeniero de sistemas','ingeniera de sistemas',1975,1980,F,F,1],
+    ['publicista','publicista',1950,1955,F,F,1],
+    [null,'dedicada al hogar',F,1800,F,1999,4],
+    [null,'modista',F,1850,F,1979,1],
+    [null,'enfermera',F,1905,F,F,1],
+    [null,'secretaria',F,1920,F,1999,1],
+    [null,'telefonista',F,1915,F,1984,1]];
+  /* en el país de hoy los oficios traen apellido de especialidad */
+  const MODERNO_H=['abogado de familia','médico internista','arquitecto','profesor universitario','comerciante','funcionario público','periodista','contador público','odontólogo','ingeniero de procesos','empresario','consultor','directivo'];
+  const MODERNO_M=['abogada de familia','médica internista','arquitecta','profesora universitaria','comerciante','funcionaria pública','periodista','contadora pública','odontóloga','ingeniera de procesos','empresaria','consultora','directiva'];
+  const peso=(r,sx,a)=>{ const w=r[6]; if(sx==='m'&&r[1]==='dedicada al hogar') return a<1960?4:a<1990?2:.6; return w; };
+  function pool(sexo){ const a=ANIO(), m=sexo==='m'; const out=[];
+    TABLA.forEach(r=>{ const nom=m?r[1]:r[0], d=m?r[3]:r[2], h=m?r[5]:r[4]; if(!nom||a<d||a>h) return; out.push({n:nom,w:peso(r,sexo,a)}); });
+    return out; }
+  function pesca(L){ const tot=L.reduce((s,x)=>s+x.w,0); let k=Math.random()*tot; for(const x of L){ k-=x.w; if(k<=0) return x.n; } return L[L.length-1].n; }
+  function rolEra161(sexo){ const sx=sexo==='m'?'m':'h'; const a=ANIO();
+    if(a>=1975&&Math.random()<.55) return (sx==='m'?MODERNO_M:MODERNO_H)[Math.floor(Math.random()*(sx==='m'?MODERNO_M:MODERNO_H).length)];
+    const L=pool(sx); return L.length?pesca(L):(sx==='m'?'dedicada al hogar':'comerciante'); }
+  function oficioEra161(sexo,edad){ if(isFinite(edad)&&edad<16) return 'estudiante'; return rolEra161(sexo); }
+  function valido(rol,sexo){ if(!rol) return false; const sx=sexo==='m'?'m':'h'; const a=ANIO(); const t=String(rol).toLowerCase();
+    if(t==='estudiante') return true;
+    if(pool(sx).some(x=>x.n===t)) return true;
+    if(a>=1960&&(sx==='m'?MODERNO_M:MODERNO_H).some(x=>x===t)) return true;
+    return false; }
+  /* ---------- sanear lo guardado ---------- */
+  function arreglar(x,campo){ if(!x||!x.sexo) return false; if(valido(x[campo],x.sexo)) return false; x[campo]=(campo==='oficio'&&isFinite(x.edad)&&x.edad<16)?'estudiante':rolEra161(x.sexo); return true; }
+  function sanear(){ try{
+      if(typeof S==='undefined'||!S||!S.p) return 0; let n=0; const f=S.familia||{};
+      if(f.pareja) n+=arreglar(f.pareja,'rol')?1:0;
+      (f.amantes||[]).forEach(a=>{ n+=arreglar(a,'rol')?1:0; });
+      (f.candidatos||f.candidatas||[]).forEach(c=>{ n+=arreglar(c,'rol')?1:0; });
+      (S.parientes||[]).forEach(p=>{ n+=arreglar(p,'oficio')?1:0; });
+      (f.hijos||[]).forEach(h=>{ if(h.pareja&&h.pareja.sexo) n+=arreglar(h.pareja,'rol')?1:0; if(h.oficio) n+=arreglar(h,'oficio')?1:0; });
+      return n; }catch(e){ console.error(e); return 0; } }
+  /* ---------- 3. carreras con fecha ---------- */
+  const CAR={medicina:[1800,1936],derecho:[1800,1945],ingenieria:[1880,1945],geologia:[1890,1950],economia:[1945,1950],relaciones_internacionales:[1970,1970],
+    finanzas:[1975,1975],administracion:[1955,1955],arquitectura:[1930,1950],sistemas:[1970,1975],contaduria:[1920,1950],agronomia:[1915,1950],
+    comunicacion:[1960,1960],psicologia:[1950,1950],ciencia_politica:[1965,1965],pedagogia:[1870,1870]};
+  function carreraEra161(cr,sexo){ const d=cr&&CAR[cr.id]; if(!d) return true; return ANIO()>=(sexo==='m'?d[1]:d[0]); }
+  function carrerasEra161(sexo){ return (typeof CARRERAS_PROFESIONALES!=='undefined'?CARRERAS_PROFESIONALES:[]).filter(cr=>carreraEra161(cr,sexo)); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA161_PASO) return; window.__SA161_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ sanear(); }catch(e){} return r; }; }
+  function init161(){ wrapApellido(); wrapBautizo(); wrapPaso(); sanear();
+    if(!INT&&!window.__SA161_INT){ window.__SA161_INT=true; INT=setInterval(tick,350); }
+    Object.assign(window,{rolEra161,oficioEra161,carreraEra161,carrerasEra161,sanearOficios161:sanear,oficioValido161:valido,pendientesNombre161:()=>PEND.filter(p=>!p.h.nombre118),tickBautizo161:tick}); }
+  setTimeout(init161,40); setTimeout(init161,220); setTimeout(init161,650); setTimeout(init161,950); setTimeout(init161,1600);
+  window.__SA161={version:V161};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v162 · CADA ÉPOCA CON SU VOCABULARIO Y SUS DECISIONES
+   El juego arrancaba en 1800 y hablaba como en 2026: "se dañó el carro", "la
+   bolsa de Bogotá", "una tobillera", "un infarto", "un centro comercial".
+   1. Una tabla de fechas decide qué decisiones existen en cada época: no hay
+      fideicomisos offshore ni family offices en 1800, ni equipo de fútbol
+      antes de 1948, ni la rueda de la bolsa antes de 1928.
+   2. Un léxico por época reescribe lo que se lee (el diario, las pantallas,
+      los eventos, las descripciones de las acciones): coche en vez de carro
+      antes de 1905, instrucción criminal en vez de fiscalía antes de 1991,
+      "ataque al corazón" en vez de infarto antes de 1930, galería comercial
+      en vez de centro comercial antes de 1960, y así.
+   Solo cambia lo que se ve; la mecánica es la misma.
+   ========================================================================== */
+(function(){
+  const V162='v162';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  /* respeta la mayúscula inicial de lo que reemplaza */
+  const mant=(to)=>(m)=>{ const r=typeof to==='function'?to(m):to; return /^[A-ZÁÉÍÓÚÑ]/.test(m)?cap(r):r; };
+  /* [vale hasta (sin incluir), expresión, reemplazo]. Las frases largas van antes que las palabras sueltas. */
+  const R=[
+    /* el hogar y los gastos */
+    [1905,/Matrícula y seguro del carro/g,'Herraje y forraje de las bestias del coche'],
+    [1905,/Se dañó el carro/g,'Se quebró el eje del coche'],
+    [1905,/El carro los dejó tirados en la vía un domingo/g,'El coche se quedó atascado en el barro del camino un domingo'],
+    [1905,/Saliste con carro nuevo por/g,'Estrenaste un coche por'],
+    [1905,/accidentes? de tránsito/gi,m=>/s$/.test(m)?'accidentes de camino':'accidente de camino'],
+    [1905,/\bcarros\b/gi,mant('coches')],[1905,/\bcarro\b/gi,mant('coche')],
+    [1905,/\bautomóviles\b/gi,mant('coches')],[1905,/\bautomóvil\b/gi,mant('coche')],
+    [1900,/Se fue el electrodoméstico grande/g,'Se rompió un mueble de los grandes'],
+    [1930,/electrodomésticos?/gi,m=>/s$/.test(m)?'enseres':'enser'],
+    [1900,/Urgencia odontológica de la familia/g,'Un dolor de muela que no esperó'],
+    [1900,/Se reventó una tubería en la casa/g,'Se reventó la cañería del patio'],
+    [1900,/Grado, matrimonio o cumpleaños de a de veras/g,'Bautizo, matrimonio o fiesta de santo de a de veras'],
+    /* impuestos */
+    [1935,/Impuesto al patrimonio/g,'Contribuciones de la casa'],
+    [1935,/impuesto al patrimonio/g,'contribuciones'],
+    [1935,/, sucesiones al ([\d.,]+%) y patrimonio al [\d.,]+%/g,(m,a)=>' y sucesiones al '+a],
+    [1935,/suben renta, sucesiones y patrimonio/g,'suben las contribuciones y las sucesiones'],
+    [1918,/renta al ([\d.,]+%)/g,'contribución directa al $1'],
+    [1918,/impuesto (?:a la|de) renta/gi,mant('contribución directa')],
+    /* el mercado y la finca raíz */
+    [1928,/sacaron su compañía a la bolsa de Bogotá/g,'abrieron su compañía a nuevos accionistas'],
+    [1920,/Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial…/g,'Posada, hotel, botica, almacén de telas, mesón…'],
+    [1960,/Nuevo centro comercial/g,'Nueva galería comercial'],
+    [1960,/\bun centro comercial\b/gi,m=>'una galería comercial'],
+    [1960,/\bel centro comercial\b/gi,m=>'la galería comercial'],
+    [1960,/centros comerciales/gi,mant('galerías comerciales')],
+    [1960,/centro comercial/gi,mant('galería comercial')],
+    [1930,/\bun apartamento\b/gi,m=>'una casa'],
+    [1930,/\bel apartamento\b/gi,m=>'la casa'],
+    [1930,/\bapartamentos\b/gi,mant('casas')],[1930,/\bapartamento\b/gi,mant('casa')],
+    [2001,/\bBVC\b/g,'la bolsa'],
+    [1960,/parqueadero, gasolinera, clínica, galería comercial/g,'hospedaje, gasolinera, clínica, galería comercial'],
+    [1900,/Dólares, euros o yuanes: proteger del peso y pagar lo importado\./g,'Libras esterlinas o francos: proteger la plata del peso y pagar lo que llega del exterior.'],
+    [1999,/Dólares, euros o yuanes/g,'Dólares, libras o marcos'],
+    [1999,/\beuros?\b/gi,m=>/s$/i.test(m)?'libras':'libra'],
+    [1960,/ con MBA/g,' con estudios en el exterior'],
+    /* la justicia */
+    [1991,/\bla fiscalía\b/gi,m=>/^L/.test(m)?'La instrucción':'la instrucción'],
+    [1991,/\bFiscalía\b/g,'Instrucción criminal'],
+    [1991,/\bel fiscal\b/gi,m=>/^E/.test(m)?'El juez instructor':'el juez instructor'],
+    [1991,/\bun fiscal\b/gi,m=>'un juez instructor'],
+    [1991,/\bfiscales\b/gi,mant('jueces instructores')],
+    [1991,/\bfiscal\b/gi,mant('juez instructor')],
+    [1995,/con una tobillera/g,'bajo la vigilancia de un guardia'],
+    [1995,/tobillera/g,'vigilancia'],
+    /* la salud y la muerte */
+    [1930,/un infarto/g,'un ataque al corazón'],
+    [1930,/infartos?\b/gi,mant('ataque al corazón')],
+    [1950,/un derrame cerebral/g,'una apoplejía'],
+    [1950,/derrame cerebral/gi,mant('apoplejía')],
+    [1950,/hipertensión/gi,mant('mal del corazón')],
+    [1940,/complicaciones de la diabetes/g,'fiebres y un mal de azúcar'],
+    [1940,/la diabetes/gi,mant('el mal de azúcar')],
+    [1940,/diabetes/gi,mant('mal de azúcar')],
+    [1970,/\bEPOC\b/g,'mal de pecho'],
+    [1980,/\balzhéimer\b/gi,mant('demencia senil')],
+    [1950,/\bpárkinson\b|\bparkinson\b/gi,mant('temblor de la vejez')],
+    [1960,/medicina prepagada/gi,mant('un médico de cabecera')],
+    /* los gremios */
+    [1927,/La Federación, la ANDI, Fedegán, Analdex, Colfecar y demás: cada uno pide lo suyo y da lo suyo\./g,'La Sociedad de Agricultores y las cámaras de comercio: cada una pide lo suyo y da lo suyo.'],
+    [1944,/La Federación, la ANDI, Fedegán, Analdex, Colfecar y demás: cada uno pide lo suyo y da lo suyo\./g,'La Federación de Cafeteros, la Sociedad de Agricultores y las cámaras de comercio: cada una pide lo suyo y da lo suyo.'],
+    [1900,/Arancel, beneficio tributario, contratación o reforma laboral\./g,'Arancel, contribuciones, contratos con el Estado o reglas del trabajo.']];
+  function epoca162(t){ if(typeof t!=='string'||!t) return t; const a=A(); if(a>=2005) return t; let x=t;
+    for(let i=0;i<R.length;i++){ const r=R[i]; if(a<r[0]) x=x.replace(r[1],r[2]); }
+    return x; }
+  /* ---------- las decisiones que todavía no existen ---------- */
+  /* [título o prefijo del título, año desde el cual existe] */
+  const DESDE=[
+    ['Emplearte: Carrera corporativa',1880],['Emplearte: Trabajo de planta',1880],['Emplearte: Consultoría',1960],
+    ['Emplearte: Carrera en la Federación de Cafeteros',1927],['Emplearte: Legaciones cafeteras ',1927],['Emplearte: Cooperativa de caficultores',1927],
+    ['Constituir un fideicomiso afuera',1950],['Crear banca privada de la familia',1870],['Crear un family office',1970],
+    ['Revisar los seguros',1900],['Gestionar tesorería financiera',1985],['Reserva en moneda extranjera',1920],
+    ['Ir a la rueda de la bolsa',1928],['Toma hostil sobre ',1970],['Invertir en el mercado',1928],['Aceptar una silla en junta ajena',1870],
+    ['Gremios y agremiaciones',1871],['Fondos de inversión',1960],['Marcas',1920],['Comprar un viñedo',1960],['Fusiones y adquisiciones',1900],
+    ['Integración vertical',1900],['Comprar un equipo de fútbol',1948],['Bancos y crédito',1870],['Caficultura',1860],['Pasaporte de la familia',1880]];
+  const existe=(t)=>{ if(typeof t!=='string') return true; const a=A(); for(const [k,d] of DESDE){ if((k.slice(-1)===' '?t.indexOf(k)===0:t===k)&&a<d) return false; } return true; };
+  function marcar(f,old,mark){ f[mark]=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); return f; }
+  /* cada vez que otro módulo envuelva estas funciones por encima, vuelvo a quedar de último */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top162) return;
+    window.listaAcciones=marcar(function(){ const L=old.apply(this,arguments);
+      try{ if(!Array.isArray(L)||A()>=2005) return L;
+        for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(!existe(x.t)){ L.splice(i,1); continue; } if(typeof x.d==='string'){ const d=epoca162(x.d); if(d!==x.d) x.d=d; } }
+      }catch(e){ console.error(e); }
+      return L; },old,'__top162'); }
+  /* ---------- lo que se lee ---------- */
+  function wrapLog(){ const old=window.log; if(typeof old!=='function'||old.__top162) return;
+    window.log=marcar(function(txt,clase){ const a=Array.from(arguments); try{ if(typeof a[0]==='string') a[0]=epoca162(a[0]); }catch(e){} return old.apply(this,a); },old,'__top162'); }
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||old.__top162) return;
+    window.escena=marcar(function(o){ const a=Array.from(arguments);
+      try{ if(o&&typeof o==='object'&&A()<2005){ const n=Object.assign({},o);
+          ['rubro','titulo','cuerpo','html','kicker'].forEach(k=>{ if(typeof n[k]==='string') n[k]=epoca162(n[k]); });
+          if(Array.isArray(o.opciones)) n.opciones=o.opciones.map(x=>{ if(!x||typeof x!=='object') return x; const t=typeof x.t==='string'?epoca162(x.t):x.t, d=typeof x.d==='string'?epoca162(x.d):x.d; return (t===x.t&&d===x.d)?x:Object.assign({},x,{t,d}); });
+          a[0]=n; } }catch(e){ console.error(e); }
+      return old.apply(this,a); },old,'__top162'); }
+  /* ---------- los eventos que no caben en la época ---------- */
+  /* [año desde el cual puede existir, expresión sobre el texto del evento] */
+  const MODERNO=[[1930,/aeropuerto/i],[1920,/\bavión\b|\baviones\b|aerolínea/i],[1960,/Sobre planos|lanza un edificio/i],[1995,/\bcelular(es)?\b/i],[1995,/\binternet\b/i],
+    [1985,/computador/i],[2006,/redes sociales/i],[1970,/tarjeta de crédito/i],[1985,/cajero automático/i],[1954,/televisi[oó]n|televisor/i],[1910,/gasolinera/i]];
+  function bloquea(ev){ try{ if(!ev||A()>=2006) return false; const a=A();
+      const src=typeof ev.t==='function'?Function.prototype.toString.call(ev.t):String(ev.t||'');
+      for(const [d,re] of MODERNO){ if(a<d&&re.test(src)) return true; }
+      /* si el texto se arma en otra parte, se mira lo que de verdad va a decir */
+      let txt=''; try{ if(typeof ev.t==='function'&&(typeof ev.c!=='function'||ev.c())) txt=String(ev.t()||''); else if(typeof ev.t==='string') txt=ev.t; }catch(e){ txt=''; }
+      if(txt) for(const [d,re] of MODERNO){ if(a<d&&re.test(txt)) return true; }
+      return false; }catch(e){ return false; } }
+  /* los eventos se sortean entre todos los que cumplen su condición: se descartan los que no caben en la época */
+  function wrapSortear(){ const old=window.sortearEvento; if(typeof old!=='function'||old.__top162) return;
+    window.sortearEvento=marcar(function(){ let ev=old.apply(this,arguments); for(let k=0;k<16&&ev&&bloquea(ev);k++) ev=old.apply(this,arguments); return (ev&&bloquea(ev))?null:ev; },old,'__top162'); }
+  /* y los que otros módulos meten directo a la cola se quitan justo antes de mostrarlos */
+  function wrapProcesar(){ const old=window.procesarCola; if(typeof old!=='function'||old.__top162) return;
+    window.procesarCola=marcar(function(fin){ try{ if(typeof cola!=='undefined'&&Array.isArray(cola)) for(let i=cola.length-1;i>=0;i--){ if(bloquea(cola[i])) cola.splice(i,1); } }catch(e){} return old.apply(this,arguments); },old,'__top162'); }
+  function init162(){ wrapAcciones(); wrapLog(); wrapEscena(); wrapSortear(); wrapProcesar(); Object.assign(window,{bloqueaEvento162:bloquea,MODERNO_162:MODERNO,epoca162,decisionExiste162:existe,DESDE_162:DESDE,LEXICO_162:R}); }
+  setTimeout(init162,40); setTimeout(init162,220); setTimeout(init162,650); setTimeout(init162,950); setTimeout(init162,1700);
+  window.__SA162={version:V162};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v163 · EL BAUTIZO TIENE SU LÁMINA
+   La pantalla "¿Cómo se va a llamar?" —al nacer un hijo, al adoptarlo o al
+   recibirlo en la casa— lleva la ilustración de un bautizo católico.
+   Si la imagen (img/eventos/bautizo.jpg) no está, se usa la del nacimiento.
+   ========================================================================== */
+(function(){
+  window.__SA163={version:'v163'};
 })();
 </script>
 
