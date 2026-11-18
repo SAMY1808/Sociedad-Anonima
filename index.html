@@ -1271,10 +1271,23 @@ svg.foto116{display:block;background:#1d2a23}
 .his164 .ef164 span{display:inline-block;font-size:12.5px;padding:3px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:var(--humo2);margin:0 6px 6px 0}
 .his164 .ef164 span.mal{color:#e79a8a}.his164 .ef164 span.bien{color:#8fe0b0}
 </style>
+<style id="estilos-v166">
+.reg166 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.reg166 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.reg166 .k b{display:block;font-size:15px;font-family:var(--display)}
+.reg166 .k span{font-size:12px;color:var(--humo2)}
+.reg166 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.reg166 small{color:var(--humo2)}
+.reg166 table.libro td{padding:5px 4px;vertical-align:top}
+.reg166 .riesgo166{display:inline-block;font-size:12px;padding:2px 9px;border-radius:9px;background:rgba(255,255,255,.07)}
+.reg166 .riesgo166.alto{background:rgba(201,96,79,.28);color:#f0a99b}
+.reg166 .riesgo166.medio{background:rgba(214,166,72,.25);color:#F0CF86}
+.reg166 .riesgo166.bajo{background:rgba(111,192,143,.22);color:#8fe0b0}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v165</div>
+<div class="version-badge" id="versionBadge">v166</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5865,6 +5878,7 @@ function iniciar(cfg,legado){
     pub156:legadoValido&&legado.pub156?legado.pub156:null,
     lid159:legadoValido&&legado.lid159?legado.lid159:null,
     hist164:legadoValido&&legado.hist164?legado.hist164:null,
+    reg166:legadoValido&&legado.reg166?legado.reg166:null,
     residenciaInternacional:legadoValido&&legado.residenciaInternacional?legado.residenciaInternacional:null,
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
@@ -7939,6 +7953,7 @@ function heredar(h,frac,vivo,pleito){
     pub156:S.pub156?JSON.parse(JSON.stringify(S.pub156)):null,
     lid159:S.lid159?JSON.parse(JSON.stringify(S.lid159)):null,
     hist164:S.hist164?JSON.parse(JSON.stringify(S.hist164)):null,
+    reg166:S.reg166?JSON.parse(JSON.stringify(S.reg166)):null,
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
@@ -30510,6 +30525,168 @@ install();setTimeout(install,1200);
     try{ construir().forEach(h=>{ if(!window.HITOS_164.some(x=>x.id===h.id)) window.HITOS_164.push(h); }); window.HITOS_164.sort((a,b)=>a.anio-b.anio); if(typeof window.registrarPortadas164==='function') window.registrarPortadas164(); }catch(e){ console.error(e); } }
   setTimeout(init165,60); setTimeout(init165,240); setTimeout(init165,700); setTimeout(init165,1000);
   window.__SA165={version:V165};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v166 · EL ESTADO VIGILA: SUPERINTENDENCIAS Y REGULACIÓN
+   Cada época tiene sus reguladores y cada sector el suyo:
+   - el Ministerio de Hacienda, la Dirección de Impuestos y desde 1993 la DIAN;
+   - la Superintendencia Bancaria (1923), hoy Financiera, para bancos y
+     aseguradoras;
+   - la Superintendencia de Sociedades (1931), que mira a toda compañía
+     grande;
+   - la Superintendencia de Industria y Comercio (1968): carteles,
+     posición dominante y concentración;
+   - Supersalud, Superservicios y Supertransporte, cada una con su sector.
+   Antes de 1923 casi nadie vigila a nadie; después de 1991 todo el mundo
+   vigila a todo el mundo.
+   - Visitas: cada año el regulador puede visitar una compañía. Lo que
+     encuentra depende del control interno de v140 (y de si tienes oficial
+     de cumplimiento): sin hallazgos, observaciones, sanción o intervención.
+   - Cartelización: si te pusiste de acuerdo en precios, la SIC puede tocar
+     la puerta; desde 2009 hay programa de colaboración.
+   - Concentración: si tu cuota de mercado salta o pasa de 30% y 45%, la SIC
+     revisa la integración.
+   - Fiscalización tributaria: evadir, tener un fideicomiso afuera o pagar
+     sobornos sube la probabilidad de una auditoría.
+   - Cada compañía tiene su pantalla de "Regulación y cumplimiento".
+   ========================================================================== */
+(function(){
+  const V166='v166';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const secN=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return x?x.n:s; }catch(e){ return s; } };
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const proc=e=>{ try{ return typeof window.procesos140==='function'?window.procesos140(e):{control:30,aud:'ninguna',cert:{}}; }catch(x){ return {control:30,aud:'ninguna',cert:{}}; } };
+  const qFO=()=>{ try{ const a=S.familyOffice&&S.familyOffice.staff&&S.familyOffice.staff.abogado; if(!a) return 0; return (a.capaz||5)>=8?2:1; }catch(e){ return 0; } };
+  const movida=()=>{ if(S._mov166===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov166=S.anio; return true; };
+  const sinMov=()=>(S._mov166!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  /* --- el estado --- */
+  function R(){ if(!S) return null; let r=S.reg166; if(!r||typeof r!=='object') r=S.reg166={}; if(!Array.isArray(r.visitas)) r.visitas=[]; if(!r.cuota||typeof r.cuota!=='object') r.cuota={}; if(!r.ult||typeof r.ult!=='object') r.ult={}; return r; }
+  function RE(e){ if(!e.reg166||typeof e.reg166!=='object') e.reg166={visitas:0,sanc:0,ult:0,cumpl:0,oficial:false,aviso:0}; return e.reg166; }
+  /* --- los reguladores de cada época --- */
+  const REGS=[
+    {id:'hacienda',desde:1900,sect:'*',n:a=>a>=1993?'la DIAN':a>=1960?'la Dirección de Impuestos Nacionales':'el Ministerio de Hacienda',ambito:'impuestos'},
+    {id:'bancaria',desde:1923,sect:['financiero','seguros'],n:a=>a>=2005?'la Superintendencia Financiera':'la Superintendencia Bancaria',ambito:'solvencia, reservas y trato a los ahorradores'},
+    {id:'sociedades',desde:1931,sect:'*',min:1500,n:a=>'la Superintendencia de Sociedades',ambito:'libros, revisoría fiscal y gobierno de la compañía'},
+    {id:'sic',desde:1968,sect:'*',n:a=>'la Superintendencia de Industria y Comercio',ambito:'competencia, precios y consumidores'},
+    {id:'supersalud',desde:1977,sect:['salud'],n:a=>'la Superintendencia de Salud',ambito:'atención, cartera y habilitación'},
+    {id:'superservicios',desde:1994,sect:['energia'],n:a=>'la Superintendencia de Servicios Públicos',ambito:'tarifas, calidad y continuidad del servicio'},
+    {id:'supertransporte',desde:1992,sect:['logistica'],n:a=>'la Superintendencia de Transporte',ambito:'seguridad, tarifas y habilitación'}];
+  function intensidad(a){ a=a||A(); return a<1900?0:a<1923?.12:a<1960?.4:a<1991?.65:a<2005?1:1.25; }
+  const regsDe=e=>REGS.filter(g=>A()>=g.desde&&(g.sect==='*'||g.sect.includes(e.sector))&&(!g.min||e.ingresos>=g.min));
+  const SENS={financiero:1.5,seguros:1.3,salud:1.4,energia:1.2,logistica:1.1,mineria:1.15,alimentos:1.1};
+  const tam=e=>clamp(Math.log10(Math.max(50,e.ingresos)/150)*.8+.5,.4,1.7);
+  const cumpl=e=>clamp(proc(e).control+(RE(e).cumpl||0)+(RE(e).oficial?8:0),0,100);
+  /* probabilidad de visita por año y nivel de riesgo para mostrar */
+  function pVisita(e){ if(!regsDe(e).length) return 0; return clamp(.09*intensidad()*tam(e)*(SENS[e.sector]||1)*(1.5-cumpl(e)/100)+(((S.p&&S.p.escandalos)||0)*.01),0,.5); }
+  const nivelRiesgo=e=>{ const p=pVisita(e); return p<.05?'bajo':p<.12?'medio':'alto'; };
+  /* ==================== LAS VISITAS ==================== */
+  const evento=(texto,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.p&&!S.muerto),t:()=>texto,o}); }catch(e){} };
+  function registrarVisita(e,g,res,monto){ const r=R(); r.visitas.push({anio:S.anio,emp:e.nombre,reg:g.n(S.anio),res,monto:Math.round(monto||0)}); r.visitas=r.visitas.slice(-30); const x=RE(e); x.visitas++; x.ult=S.anio; x.sanc+=monto||0; }
+  const multa=(e,monto)=>{ e.caja-=monto; e.utilidad-=monto; };
+  function abogadoOK(){ return clamp(.42+qFO()*.07+(S.p.atr&&S.p.atr.intelecto?(S.p.atr.intelecto-5)/60:0),.2,.8); }
+  function mordida(e,monto,ok){ S.sobornos=(S.sobornos||0)+1; if(chance(.5)){ return ok(); } try{ registrarDelito('soborno a funcionario',3,'intentó sobornar a un inspector'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; return null; }
+  function visitar(e){ const regs=regsDe(e); if(!regs.length) return; const g=regs[Math.floor(Math.random()*regs.length)];
+    const c=cumpl(e), ent=g.n(S.anio), pGrave=clamp(.05*(1.3-c/100)*intensidad(),.01,.12), pSan=clamp(.22*(1.2-c/100),.05,.4), pObs=.26, r=Math.random();
+    if(r<pGrave) return gravedad(e,g,ent);
+    if(r<pGrave+pSan) return sancion(e,g,ent);
+    if(r<pGrave+pSan+pObs) return observaciones(e,g,ent);
+    registrarVisita(e,g,'sin hallazgos',0); RE(e).cumpl=Math.min(30,(RE(e).cumpl||0)+3); e.marca=clamp((e.marca||50)+.5,0,100);
+    log('<b>'+esc(cap(ent))+' visitó a '+esc(e.nombre)+' y no encontró nada.</b> La compañía sale con certificado limpio.','bien'); }
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  function observaciones(e,g,ent){ const costo=Math.round(e.ingresos*.004); S._ev166=S.anio;
+    evento('<b>'+esc(cap(ent))+' visitó a '+esc(e.nombre)+'.</b> Revisó '+esc(g.ambito)+' y dejó una lista de observaciones: nada grave, pero hay que corregir.',
+      [{t:'Hacer el plan de mejoramiento ('+fmt(costo)+')',f:()=>{ multa(e,costo); proc(e).control=clamp(proc(e).control+6,0,100); registrarVisita(e,g,'observaciones corregidas',costo); return 'Cumpliste el plan de mejoramiento por '+fm(costo)+': el control interno de '+esc(e.nombre)+' subió.'; }},
+       {t:'Responder con un memorial y dejarlo así',f:()=>{ registrarVisita(e,g,'observaciones sin corregir',0); RE(e).aviso=S.anio; return 'Contestaste con un memorial largo. Las observaciones quedaron abiertas, y se acordarán en la próxima visita.'; }}]); }
+  function sancion(e,g,ent){ const F=Math.round(e.ingresos*rnd(.01,.03)*(g.id==='hacienda'?1.2:1)); S._ev166=S.anio;
+    const grave=F>e.ingresos*.02;
+    evento('<b>'+esc(cap(ent))+' sancionó a '+esc(e.nombre)+'.</b> Encontró fallas en '+esc(g.ambito)+' y propone una multa de '+fmt(F)+'.',
+      [{t:'Pagar y corregir ('+fmt(F)+')',f:()=>{ multa(e,F); proc(e).control=clamp(proc(e).control+5,0,100); registrarVisita(e,g,'sanción pagada',F); return 'Pagaste '+fm(F)+' y corregiste lo que pedían.'; }},
+       {t:'Impugnar con tus abogados ('+fmt(Math.round(F*.2))+')',f:()=>{ const c=Math.round(F*.2); multa(e,c); if(chance(abogadoOK())){ const rebaja=Math.round(F*.3); multa(e,rebaja); registrarVisita(e,g,'sanción rebajada',c+rebaja); return 'Tus abogados le ganaron un pulso al regulador: la multa quedó en '+fm(rebaja)+' (más '+fm(c)+' de honorarios).'; } multa(e,F); registrarVisita(e,g,'sanción confirmada',c+F); prestSafe(-1,'perdió un pleito con el regulador'); return 'Impugnaste y perdiste: pagaste los '+fm(F)+' de la multa y '+fm(c)+' de honorarios.'; }},
+       {t:'Arreglarlo por debajo de la mesa',f:()=>{ const x=Math.round(F*.35); S.efectivo-=Math.min(S.efectivo,x); const ok=mordida(e,x,()=>{ registrarVisita(e,g,'sanción archivada',x); return 'El expediente se perdió entre dos escritorios. Te costó '+fm(x)+', sin recibo.'; }); if(ok) return ok; multa(e,F); registrarVisita(e,g,'sobornó y lo descubrieron',F+x); prestSafe(-5,'intentó sobornar a un inspector'); return 'El inspector grabó la conversación. Pagaste la multa de '+fm(F)+' y sumaste un escándalo.'; }}]); }
+  function gravedad(e,g,ent){ const F=Math.round(e.ingresos*rnd(.04,.08)); S._ev166=S.anio;
+    evento('<b>'+esc(cap(ent))+' abrió una investigación grave contra '+esc(e.nombre)+'.</b> '+(['financiero','seguros'].includes(e.sector)?'Habla de una posible toma de posesión.':'Habla de suspender parte de la operación.')+' La sanción puede llegar a '+fmt(F)+'.',
+      [{t:'Presentar un plan de choque ('+fmt(Math.round(F*.5))+')',f:()=>{ const c=Math.round(F*.5); multa(e,c); proc(e).control=clamp(proc(e).control+12,0,100); registrarVisita(e,g,'plan de choque',c); return 'Presentaste un plan de choque que costó '+fm(c)+'. El regulador lo aceptó con vigilancia.'; }},
+       {t:'Pelear en los tribunales',f:()=>{ const c=Math.round(F*.15); multa(e,c); if(chance(abogadoOK()*.8)){ registrarVisita(e,g,'investigación archivada',c); return 'El tribunal tumbó la investigación. Gastaste '+fm(c)+' en abogados.'; } multa(e,F); mod166(e,-.04,2); registrarVisita(e,g,'sanción grave',c+F); prestSafe(-6,'sanción grave de '+ent); return 'Perdiste: multa de '+fm(F)+', más '+fm(c)+' de abogados, y la operación quedó recortada dos años.'; }},
+       {t:'Aceptar la sanción y dejar que corten parte de la operación',f:()=>{ multa(e,F); mod166(e,-.05,2); registrarVisita(e,g,'sanción grave aceptada',F); return 'Pagaste '+fm(F)+' y aceptaste que el regulador cerrara una línea de negocio por un par de años.'; }}]); }
+  /* un golpe de ritmo para la compañía durante unos años */
+  function mod166(e,delta,anios){ const r=R(); r.mods=r.mods||[]; r.mods.push({emp:e.nombre,delta,hasta:S.anio+anios-1}); }
+  function efMods(e){ const r=R(); let b=0; (r.mods||[]).forEach(m=>{ if(m.emp===e.nombre&&m.hasta>=S.anio) b+=m.delta; }); return clamp(b,-.1,.05); }
+  const prestSafe=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  /* ==================== LA SIC: CARTELES Y CONCENTRACIÓN ==================== */
+  function evCartel(){ const e=comps().sort((a,b)=>b.ingresos-a.ingresos)[0]; if(!e) return null; const F=Math.round(e.ingresos*rnd(.03,.06)), col=A()>=2009;
+    return {p:9,c:()=>true,t:()=>'<b>La Superintendencia de Industria y Comercio abrió una investigación por cartelización.</b> Tiene grabaciones de los almuerzos en que '+esc(e.nombre)+' y sus competidores se pusieron de acuerdo en precios. La multa puede llegar a '+fmt(F)+'.',
+      o:(col?[{t:'Colaborar con la SIC y delatar a los demás',f:()=>{ const c=Math.round(F*.15); multa(e,c); prestSafe(-2,'delató a un cartel'); registrarCartel(false); return 'Entregaste los nombres y las grabaciones. La multa quedó en '+fm(c)+' y los demás competidores te cobran el favor con silencio.'; }}]:[]).concat([
+        {t:'Negar todo y litigar ('+fmt(Math.round(F*.2))+')',f:()=>{ const c=Math.round(F*.2); multa(e,c); if(chance(abogadoOK()*.7)){ registrarCartel(false); return 'No pudieron probar el acuerdo. Pagaste '+fm(c)+' de abogados y el caso se archivó.'; } multa(e,F); prestSafe(-5,'condenado por cartelización'); registrarCartel(true); try{ registrarDelito('cartelización',3,'sanción de la SIC'); }catch(x){} return 'Las grabaciones bastaron: multa de '+fm(F)+' más '+fm(c)+' de abogados.'; }},
+        {t:'Pagar y cerrar el asunto ('+fmt(Math.round(F*.6))+')',f:()=>{ const c=Math.round(F*.6); multa(e,c); prestSafe(-3,'multa por cartelización'); registrarCartel(true); return 'Aceptaste una multa de '+fm(c)+' sin reconocer culpa. El apellido salió en los periódicos.'; }}])}; }
+  function registrarCartel(){ const r=R(); r.cartel=r.cartel||[]; r.cartel.push(S.anio); }
+  const hayCartel=()=>{ try{ const c=(S.penal&&S.penal.crimes)||[]; return c.some(x=>x.tipo==='cartelización'&&S.anio-x.anio<=6&&S.anio-x.anio>=0); }catch(e){ return false; } };
+  function cuotaSec(s){ try{ if(typeof window.cuotasSector138==='function'){ const c=window.cuotasSector138(s); if(c&&isFinite(c.yo)) return c.yo; } }catch(e){} return null; }
+  function evConcentracion(s,antes,ahora){ const e=comps().filter(x=>x.sector===s).sort((a,b)=>b.ingresos-a.ingresos)[0]; if(!e) return null; const col=A()>=2009;
+    return {p:9,c:()=>true,t:()=>'<b>La Superintendencia de Industria y Comercio revisa la concentración en '+esc(secN(s).toLowerCase())+'.</b> Tu cuota pasó de '+Math.round(antes*100)+'% a '+Math.round(ahora*100)+'%'+(col?' y la integración debió notificarse antes.':'.')+' Hay que decidir qué ofrecer.',
+      o:[{t:'Ofrecer condiciones: precios topados y abrir el mercado',f:()=>{ e.ingresos*=.95; e.marca=clamp((e.marca||50)+2,0,100); return 'Aceptaste condiciones por tres años: precios topados y acceso para los pequeños. '+esc(e.nombre)+' vendió 5% menos, pero la integración se aprobó.'; }},
+         {t:'Vender activos para bajar la concentración',f:()=>{ const x=Math.round(e.ingresos*.35); e.ingresos*=.88; S.efectivo+=x; return 'Vendiste una unidad por '+fm(x)+'. La cuota bajó y la SIC archivó el caso.'; }},
+         {t:'Pelear la revisión ('+fmt(Math.round(e.ingresos*.015))+')',f:()=>{ const c=Math.round(e.ingresos*.015); multa(e,c); if(chance(abogadoOK()*.6)){ return 'Tus abogados defendieron la integración: aprobada sin condiciones. Costó '+fm(c)+'.'; } const F=Math.round(e.ingresos*.03); multa(e,F); e.ingresos*=.92; prestSafe(-3,'la SIC frenó su integración'); return 'La SIC negó la integración: multa de '+fm(F)+' y orden de deshacer parte.'; }}]}; }
+  /* ==================== LA DIAN ==================== */
+  function evasor(){ const c=(S.penal&&S.penal.crimes)||[]; let x=0; if(c.some(k=>k.tipo==='evasión fiscal'&&S.anio-k.anio<=6)) x+=.09; if(S.fideicomiso) x+=.05; x+=Math.min(.05,(S.sobornos||0)*.01); return x; }
+  function evFiscal(e){ const evade=evasor(), base=Math.round(e.ingresos*(.01+evade)), F=Math.round(base*(1.4+evade*4)), ent=regsDe(e).find(g=>g.id==='hacienda');
+    const nom=ent?ent.n(S.anio):'el fisco'; S._ev166=S.anio;
+    return {p:9,c:()=>true,t:()=>'<b>'+esc(cap(nom))+' abrió una auditoría a '+esc(e.nombre)+'.</b> Revisa varios años de declaraciones y dice que hay '+fmt(base)+' sin declarar. Con sanciones e intereses, la liquidación sube a '+fmt(F)+'.',
+      o:[{t:'Aceptar la liquidación y pagar ('+fmt(F)+')',f:()=>{ multa(e,F); proc(e).control=clamp(proc(e).control+4,0,100); registrarVisita(e,{n:()=>nom,ambito:'impuestos'},'liquidación pagada',F); return 'Pagaste '+fm(F)+' al fisco. Quedó en los libros como una corrección.'; }},
+         ...(A()>=1999?[{t:'Conciliar y pagar el 70% ('+fmt(Math.round(F*.7))+')',f:()=>{ const c=Math.round(F*.7); multa(e,c); registrarVisita(e,{n:()=>nom,ambito:'impuestos'},'conciliación',c); return 'Conciliaste con el fisco y pagaste '+fm(c)+'. Quedó cerrado sin proceso.'; }}]:[]),
+         {t:'Demandar la liquidación ('+fmt(Math.round(F*.15))+')',f:()=>{ const c=Math.round(F*.15); multa(e,c); if(chance(abogadoOK()*.7)){ registrarVisita(e,{n:()=>nom,ambito:'impuestos'},'liquidación anulada',c); return 'El Consejo de Estado anuló la liquidación. Gastaste '+fm(c)+' en abogados.'; } multa(e,F); registrarVisita(e,{n:()=>nom,ambito:'impuestos'},'liquidación confirmada',c+F); if(evade>.08&&chance(.3)){ try{ abrirCasoPenal('evasión fiscal'); }catch(x){} return 'Perdiste el pleito: pagaste '+fm(F)+' y el fisco pasó el expediente a la fiscalía.'; } return 'Perdiste el pleito: pagaste '+fm(F)+' más '+fm(c)+' de abogados.'; }}]}; }
+  /* ==================== EL AÑO ==================== */
+  function anualCompania(e){ if(!ACTIVO()||nino()||!comps().includes(e)) return; const x=RE(e);
+    // el cumplimiento sube con el oficial de cumplimiento y se enfría sin él
+    if(x.oficial){ const c=Math.round(e.ingresos*.004); e.caja-=c; e.utilidad-=c; x.cumpl=Math.min(30,(x.cumpl||0)+1); } else x.cumpl=Math.max(0,(x.cumpl||0)-2);
+    const b=efMods(e); if(Math.abs(b)>.0005){ const y=e.ingresos*b; e.ingresos=Math.max(1,e.ingresos+y); e.utilidad+=y*.15; }
+    if(S._ev166===S.anio) return;
+    if(chance(pVisita(e))) return visitar(e);
+    // la DIAN mira a los que evaden
+    if(A()>=1900&&chance(intensidad()*(.03+evasor())*tam(e)*.7)){ cola.push(evFiscal(e)); } }
+  function anual(){ if(!ACTIVO()||nino()) return; const r=R(), a=A();
+    r.mods=(r.mods||[]).filter(m=>m.hasta>=a);
+    if(a>=1959&&S._ev166!==a){ if(hayCartel()&&chance(.14)){ const ev=evCartel(); if(ev){ S._ev166=a; cola.push(ev); return; } } }
+    if(a>=1959){ const secs=Array.from(new Set(comps().map(e=>e.sector)));
+      for(const s of secs){ const q=cuotaSec(s); if(q==null) continue; const ant=r.cuota[s]; r.cuota[s]=q;
+        if(S._ev166===a) continue; if(ant!=null&&((q-ant>=.06)||(ant<.30&&q>=.30)||(ant<.45&&q>=.45))&&(!r.ult[s]||a-r.ult[s]>=4)){ const ev=evConcentracion(s,ant,q); if(ev){ r.ult[s]=a; S._ev166=a; cola.push(ev); } } } } }
+  /* --- la pantalla de cada compañía --- */
+  function escenaRegulacion166(e){ e=e||S.emp; if(!e||!ACTIVO()) return; const x=RE(e), regs=regsDe(e), p=pVisita(e), riesgo=nivelRiesgo(e), r=R(), reab=()=>{ cerrarModal(); render(); escenaRegulacion166(e); };
+    const hist=r.visitas.filter(v=>v.emp===e.nombre).slice(-6).reverse();
+    const ops=[];
+    ops.push({t:'Preparar la próxima visita · '+fmt(Math.round(e.ingresos*.015)),cat:'compania',d:'Ordenar libros y papeles antes de que lleguen. Sube el control interno 8 puntos.',dis:S._prep166===S.anio+'|'+e.nombre?'Ya lo hiciste este año':(e.caja<e.ingresos*.015?'La compañía no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; const c=Math.round(e.ingresos*.015); e.caja-=c; proc(e).control=clamp(proc(e).control+8,0,100); S._prep166=S.anio+'|'+e.nombre; log('Ordenaste los libros de '+esc(e.nombre)+' por '+fmt(c)+'.','bien'); reab(); }});
+    if(A()>=1998) ops.push({t:x.oficial?'Despedir al oficial de cumplimiento':'Contratar un oficial de cumplimiento · '+fmt(Math.round(e.ingresos*.004))+' al año',cat:'compania',d:x.oficial?'Dejas de pagar el cargo.':'Una persona que vigila lavado de activos, conflictos de interés y reportes. Baja el riesgo de sanciones.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; x.oficial=!x.oficial; log(x.oficial?'Contrataste un oficial de cumplimiento en '+esc(e.nombre)+'.':'Despediste al oficial de cumplimiento de '+esc(e.nombre)+'.'); reab(); }});
+    ops.push({t:'Auditoría regulatoria externa · '+fmt(Math.round(e.ingresos*.01)),cat:'compania',d:'Una firma revisa tus riesgos como lo haría el regulador. Sube el cumplimiento 5 puntos por un tiempo.',dis:e.caja<e.ingresos*.01?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const c=Math.round(e.ingresos*.01); e.caja-=c; x.cumpl=Math.min(30,(x.cumpl||0)+5); log('Una firma auditó el cumplimiento de '+esc(e.nombre)+' por '+fmt(c)+'.','bien'); reab(); }});
+    if(typeof window.escenaProcesos140==='function') ops.push({t:'Ir a Procesos y control',cat:'compania',d:'Auditoría, sistemas, certificaciones y buen gobierno.',cerrar:false,run:()=>{ cerrarModal(); window.escenaProcesos140(e); }});
+    escena({rubro:'Regulación',titulo:'Regulación y cumplimiento de '+esc(e.nombre),ancho:true,cerrable:true,clase:'reg166',
+      cuerpo:regs.length?'Quien te vigila hoy: '+regs.map(g=>esc(g.n(S.anio))+' ('+esc(g.ambito)+')').join('; ')+'.':'Todavía no hay quién vigile a una compañía como la tuya: en esta época el Estado casi no mira lo que pasa adentro.',
+      html:'<div class="k"><div><b>'+Math.round(cumpl(e))+'/100</b><span>cumplimiento (control interno'+(x.oficial?' + oficial':'')+')</span></div><div><b><span class="riesgo166 '+riesgo+'">'+riesgo+'</span></b><span>riesgo de visita (≈'+Math.round(p*100)+'% al año)</span></div><div><b>'+fmt(x.sanc||0)+'</b><span>pagado en sanciones</span></div></div>'
+        +(hist.length?'<h4>Visitas y sanciones</h4><table class="libro">'+hist.map(v=>'<tr><td><b>'+v.anio+'</b> '+esc(cap(v.reg))+'<br><small>'+esc(v.res)+'</small></td><td style="text-align:right">'+(v.monto?fmt(v.monto):'—')+'</td></tr>').join('')+'</table>':'<div class="apunte">Todavía no ha pasado ninguna visita por '+esc(e.nombre)+'.</div>'),
+      opciones:ops}); }
+  /* --- los enganches --- */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top166) return;
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    f.__top166=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA166_PASO) return; window.__SA166_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top166) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(L)&&e&&ACTIVO()&&!nino()&&comps().includes(e)&&A()>=1900&&!L.some(x=>x.t==='Regulación y cumplimiento')){ const x=RE(e), reg=regsDe(e); L.push({t:'Regulación y cumplimiento',d:(reg.length?'Te vigilan '+reg.map(g=>g.n(S.anio)).slice(0,2).join(' y ')+(reg.length>2?' y más':'')+'. ':'Todavía no hay quién te vigile. ')+'Riesgo '+nivelRiesgo(e)+', cumplimiento '+Math.round(cumpl(e))+'/100.',mov:0,modal:true,run:()=>escenaRegulacion166(e)}); } }catch(x){ console.error(x); }
+      return L; };
+    f.__top166=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA166_CAT) return; window.__SA166_CAT=true;
+    window.catDe=function(t){ if(t==='Regulación y cumplimiento') return 'compania'; return old.apply(this,arguments); }; }
+  function init166(){ wrapEmpresa(); wrapPaso(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Regulación y cumplimiento')) D.push('Regulación y cumplimiento'); }catch(x){}
+    Object.assign(window,{REGULADORES_166:REGS,reguladoresDe166:regsDe,intensidadRegulacion166:intensidad,cumplimiento166:cumpl,probVisita166:pVisita,riesgoRegulatorio166:nivelRiesgo,estado166:R,compania166:RE,escenaRegulacion166,visitarCompania166:visitar,anualRegulacion166:anual,anualCompania166:anualCompania,eventoCartel166:evCartel,eventoConcentracion166:evConcentracion,eventoFiscal166:evFiscal,efectoRegulacion166:efMods,sancion166:sancion,observaciones166:observaciones,gravedad166:gravedad}); }
+  setTimeout(init166,40); setTimeout(init166,220); setTimeout(init166,650); setTimeout(init166,950);
+  window.__SA166={version:V166};
 })();
 </script>
 
