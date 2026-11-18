@@ -1258,7 +1258,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v160</div>
+<div class="version-badge" id="versionBadge">v161</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3261,8 +3261,8 @@ function escenaCarreraEstudio(obj){
     return;
   }
   escena({rubro:'Formación',titulo:'Elegir carrera universitaria',ancho:true,
-    cuerpo:esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Ya tienes pregrado. Elige el campo que quieres convertir en tu profesión. La carrera abrirá trabajos y negocios especializados.',
-    opciones:CARRERAS_PROFESIONALES.map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
+    cuerpo:(window.carrerasEra161&&!window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo).length?'En esta época ninguna universidad recibe a una mujer: lo que se aprende, se aprende en casa, con institutriz y libros. ':'')+(esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Ya tienes pregrado. Elige el campo que quieres convertir en tu profesión. La carrera abrirá trabajos y negocios especializados.'),
+    opciones:(window.carrerasEra161?window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo):CARRERAS_PROFESIONALES).map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
       if(esHijo){ elegido.carreraEstudio=cr.id; elegido.formacion=clamp((elegido.formacion||0)+8+cr.grado,0,100); elegido.atr.intelecto=clamp((elegido.atr.intelecto||5)+1,1,10); elegido.rumbo='estudia '+cr.n.toLowerCase(); elegido.independiente=true; log(esc(elegido.nombre)+' eligió estudiar <b>'+esc(cr.n)+'</b>.','hito'); }
       else { S.carrera.estudio=cr.id; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0; S.carrera.ruta=S.carrera.ruta==='fundador'?'fundador':'desempleado'; log('Elegiste estudiar <b>'+esc(cr.n)+'</b>. Ya puedes construir una carrera profesional en '+cr.n+'.','hito'); }
       S.mov--; cerrarModal(); render();
@@ -4344,7 +4344,7 @@ function nuevoAmante(){
   const sx=S.p.sexo==='h'?'m':'h';
   const edad=clamp(S.p.edad+ri(-7,7),21,Math.max(22,S.p.edad+12));
   return {id:'a'+Date.now().toString(36)+ri(100,999),nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),sexo:sx,edad,
-    rol:pick(['empresaria','abogado','médica','consultor','profesora','directivo','arquitecta','empresario','periodista']),
+    rol:(window.rolEra161?window.rolEra161(sx):pick(['empresaria','abogado','médica','consultor','profesora','directivo','arquitecta','empresario','periodista'])),
     fertilidad:fertilidadActual({sexo:sx,edad,salud:ri(65,95),felicidad:ri(55,90)}),afecto:ri(35,72),desde:S.anio,
     discrecion:ri(35,78),activo:true};
 }
@@ -5060,7 +5060,7 @@ function nuevoPariente(rel,sexo,edad,rama){
   const ap=(rama==='materna')?apellidoMaterno():S.dinastia;
   return { pid:'p'+(UIDP++), rel, sexo:s, edad, apellido:ap,
     nombre:nombreLibre(s,ap),
-    oficio:pick(OFICIOS_FAM), afecto:ri(45,80), capaz:ri(2,9), honrado:ri(2,9),
+    oficio:(window.oficioEra161?window.oficioEra161(s,edad):pick(OFICIOS_FAM)), afecto:ri(45,80), capaz:ri(2,9), honrado:ri(2,9),
     rama:rama||'paterna', vivo:true, cultura:culturaCiudad(S.p.ciudad).id };
 }
 function parientesVivos(rel){ return (S.parientes||[]).filter(p=>p.vivo&&(!rel||p.rel===rel)); }
@@ -5097,7 +5097,7 @@ function sucesoresColaterales(){
 }
 function sucesorDeEmergencia(){
   const sexo=chance(.5)?'h':'m';
-  return prepararSucesorColateral({pid:'lej'+ri(100000,999999),rel:sexo==='h'?'primo segundo':'prima segunda',sexo,edad:ri(22,38),nombre:nombreLocal(S.p.ciudad,sexo),oficio:pick(OFICIOS_FAM),afecto:ri(55,78),capaz:ri(4,9)});
+  return prepararSucesorColateral({pid:'lej'+ri(100000,999999),rel:sexo==='h'?'primo segundo':'prima segunda',sexo,edad:ri(22,38),nombre:nombreLocal(S.p.ciudad,sexo),oficio:(window.oficioEra161?window.oficioEra161(sexo,30):pick(OFICIOS_FAM)),afecto:ri(55,78),capaz:ri(4,9)});
 }
 function normalizarFamiliaGeneros(){
   (S.parientes||[]).forEach(p=>{
@@ -5175,7 +5175,7 @@ function reacomodarParentela(heredero){
   S.familia.hijos.filter(h=>h!==heredero).forEach(h=>{
     const esSuPadre=esNieto&&heredero._padre108===h.nombre;
     nuevos.push({ pid:'p'+(UIDP++), rel:esSuPadre?(h.sexo==='m'?'madre':'padre'):relacionPorSexo(relHijo,h.sexo), sexo:h.sexo, edad:h.edad,
-      nombre:h.nombre, oficio:h.rumbo||pick(OFICIOS_FAM), afecto:clamp(h.vinculo||55,0,100),
+      nombre:h.nombre, oficio:h.rumbo||(window.oficioEra161?window.oficioEra161(h.sexo,h.edad):pick(OFICIOS_FAM)), afecto:clamp(h.vinculo||55,0,100),
       capaz:clamp(Math.round(((h.atr&&h.atr.intelecto)||5+(h.atr&&h.atr.disciplina)||5)/2),1,10),
       honrado:ri(3,9), rama:'paterna', vivo:true, deLaCasa:true });
   });
@@ -5207,7 +5207,7 @@ function generarPretendiente(sexoBuscado,edadRef){
   const apellidoPret=S.p && esCiudadGlobal(S.p.ciudad)?apellidoCiudad(S.p.ciudad):c.a;
   return {
     nombre:nombreLocal(S.p.ciudad,s)+' '+apellidoPret,
-    sexo:s, edad:clamp(edadRef+ri(-6,5),19,64), rol:pick(PAREJAS_ROL),
+    sexo:s, edad:clamp(edadRef+ri(-6,5),19,64), rol:(window.rolEra161?window.rolEra161(s):pick(PAREJAS_ROL)),
     casa:{apellido:apellidoPret,prestigio:c.p},
     cultura:culturaCiudad(S.p.ciudad).id,
     dote, afecto:ri(10,95),
@@ -6798,7 +6798,7 @@ function listaAcciones(){
   if(!S.familia.pareja) A.push({t:'Salir a conocer gente', d:'Sin cálculo ni alianzas: a ver qué pasa.', mov:1,
     run:()=>{ if(chance(clamp(.35+S.p.atr.carisma/22+S.p.felicidad/300,.2,.9))){
         const sx = S.p.sexo==='h'?'m':'h';
-        S.familia.pareja={nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),rol:pick(PAREJAS_ROL),sexo:sx,edad:S.p.edad+ri(-5,4),casados:false,paciencia:70,exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4)};
+        S.familia.pareja={nombre:(sx==='m'?pick(NOM_M):pick(NOM_H))+' '+pick(APELLIDOS),rol:(window.rolEra161?window.rolEra161(sx):pick(PAREJAS_ROL)),sexo:sx,edad:S.p.edad+ri(-5,4),casados:false,paciencia:70,exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4)};
         S.p.felicidad+=12; log('Conociste a <b>'+esc(S.familia.pareja.nombre)+'</b>, '+S.familia.pareja.rol+'.','bien');
       } else { S.p.felicidad-=2; log('Año de citas malas y agendas imposibles.'); }}});
   if(S.familia.pareja&&!S.familia.pareja.casados) A.push({t:'Casarte', d:'Sube felicidad y estabilidad. Ojo con el régimen de bienes.', mov:1, modal:true,
@@ -10236,7 +10236,7 @@ function correrFundacion(res,m){
       {t:'Decir que cada quien haga su camino',f:()=>{const a=S.familia.hijos.find(x=>x.nombre===S._dxA),b=S.familia.hijos.find(x=>x.nombre===S._dxB);if(a)a.vinculo=clamp((a.vinculo||60)-4,0,100);if(b)b.vinculo=clamp((b.vinculo||60)-4,0,100);return 'La frase fue sincera y bastante fría. Cada uno tendrá que abrirse paso solo.';}}
     ]},
     {p:.9,c:()=>!!S.familyOffice&&S.familia.hijos.some(h=>h.edad>=17&&h.edad<=25),t:()=>{const h=pick(S.familia.hijos.filter(x=>x.edad>=17&&x.edad<=25));S._dxEdu=h?.nombre;return h?'<b>'+esc(h.nombre)+'</b> quiere estudiar fuera y necesita decidir si acepta una universidad internacional.':'null';},o:[
-      {t:'Apoyar el salto',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h){h.formacion=clamp((h.formacion||0)+14,0,100);h.carreraEstudio=h.carreraEstudio||pick(CARRERAS_PROFESIONALES).id;h.ciudad=pick(CIUDADES_GLOBALES).n;h.vinculo=clamp((h.vinculo||60)+7,0,100);h.independiente=true;}return 'La familia financió el salto. El mundo se acaba de hacer más grande para esa rama.';}},
+      {t:'Apoyar el salto',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h){h.formacion=clamp((h.formacion||0)+14,0,100);h.carreraEstudio=h.carreraEstudio||pick((window.carrerasEra161&&window.carrerasEra161(h.sexo).length)?window.carrerasEra161(h.sexo):CARRERAS_PROFESIONALES).id;h.ciudad=pick(CIUDADES_GLOBALES).n;h.vinculo=clamp((h.vinculo||60)+7,0,100);h.independiente=true;}return 'La familia financió el salto. El mundo se acaba de hacer más grande para esa rama.';}},
       {t:'Pedirle que estudie en casa',f:()=>{const h=S.familia.hijos.find(x=>x.nombre===S._dxEdu);if(h)h.vinculo=clamp((h.vinculo||60)-6,0,100);return 'Decidiste priorizar quedarse cerca. No parece que le haya encantado.';}}
     ]},
     {p:.85,c:()=>S.emp&&S.emp.productos&&S.emp.productos.length>0,t:()=>{const pr=pick(S.emp.productos);S._dxProd=pr?.nombre;return pr?'<b>'+esc(pr.nombre)+'</b> está teniendo un crecimiento inesperado. La pregunta es si metes más dinero o dejas que se pague solo.':'null';},o:[
@@ -15420,8 +15420,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return;
     }
     escena({rubro:'Formación',titulo:'Elegir carrera universitaria',ancho:true,
-      cuerpo:esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Elige el campo que quieres convertir en tu profesión. El pregrado, la especialización, la maestría y el doctorado que curses de ahora en adelante quedarán todos dentro de esta misma carrera.',
-      opciones:CARRERAS_PROFESIONALES.map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
+      cuerpo:(window.carrerasEra161&&!window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo).length?'En esta época ninguna universidad recibe a una mujer: lo que se aprende, se aprende en casa, con institutriz y libros. ':'')+(esHijo?esc(elegido.nombre)+' ya terminó el colegio. Ahora puede escoger una profesión propia.':'Elige el campo que quieres convertir en tu profesión. El pregrado, la especialización, la maestría y el doctorado que curses de ahora en adelante quedarán todos dentro de esta misma carrera.'),
+      opciones:(window.carrerasEra161?window.carrerasEra161(esHijo?elegido.sexo:S.p.sexo):CARRERAS_PROFESIONALES).map(cr=>({t:cr.n,cat:'formacion',d:'Bono técnico '+cr.grado+'/10. Puede trabajar como '+cr.tit+' y posteriormente fundar: '+cr.negocios.map(b=>b.n).join(', ')+'.',run:()=>{
         if(esHijo){ elegido.carreraEstudio=cr.id; elegido.formacion=clamp((elegido.formacion||0)+8+cr.grado,0,100); elegido.atr.intelecto=clamp((elegido.atr.intelecto||5)+1,1,10); elegido.rumbo='estudia '+cr.n.toLowerCase(); elegido.independiente=true; log(esc(elegido.nombre)+' eligió estudiar <b>'+esc(cr.n)+'</b>.','hito'); }
         else { S.carrera.estudio=cr.id; S.carrera.profesion=null; S.carrera.nivelProf=0; S.carrera.experienciaProf=0; S.carrera.ruta=S.carrera.ruta==='fundador'?'fundador':'desempleado'; log('Elegiste estudiar <b>'+esc(cr.n)+'</b>. Ya puedes construir una carrera profesional en '+cr.n+'.','hito'); }
         S.mov--; cerrarModal(); render();
@@ -22939,7 +22939,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const casa=l.casa&&typeof casaParaPretendiente==='function'?casaParaPretendiente():null;
     const ap=casa?casa.a:apellidoCiudad(S.p.ciudad);
     const w=r=>String(r).split(' ')[0]; const roles=PAREJAS_ROL.filter(r=>/ista$/.test(w(r))||(sx==='h'?!/a$/.test(w(r)):!/(o|or)$/.test(w(r))));
-    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:pick(roles.length?roles:PAREJAS_ROL),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
+    return {nombre:nom+' '+ap,sexo:sx,edad:clamp(S.p.edad+ri(-6,5),19,70),rol:(window.rolEra161?window.rolEra161(sx):pick(roles.length?roles:PAREJAS_ROL)),rasgo:l.rasgo&&chance(.6)?l.rasgo:pick(Object.keys(RASGOS_108)),
       compat:clamp(ri(30,85)+l.bono+Math.round((S.p.atr.carisma-5)*2),10,98),quiereHijos:chance(.7),casa:casa?{apellido:casa.a,prestigio:casa.p}:null};
   }
   const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
@@ -29889,6 +29889,148 @@ install();setTimeout(install,1200);
   function init160(){ wrapProceso(); wrapPaso(); wrapResumen(); Object.assign(window,{iniciarApelacion160,presentarCasacion160,pedirClemencia160,escenaInstancias160,escenaAbogado160,anualInstancias160:anual,cortes160:cortes,insPenal160:INS,costoRecurso160:costoRecurso,pesoRecurso160:peso,etapaRecurso160:etapa}); }
   setTimeout(init160,40); setTimeout(init160,220); setTimeout(init160,650); setTimeout(init160,950);
   window.__SA160={version:V160};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v161 · LIMPIEZA GENERAL: EL BAUTIZO, LOS OFICIOS Y LAS CARRERAS DE CADA ÉPOCA
+   1. El bautizo de los hijos. La pantalla del nombre se perdía cuando otra
+      pantalla (un evento, una elección) se abría justo después y la tapaba.
+      Ahora el nombre queda pendiente hasta que lo pongas: si algo la tapa,
+      vuelve a aparecer en cuanto el camino se despeja.
+   2. Los oficios y las profesiones. La familia, las parejas y los amantes
+      ya no sacan su oficio de una bolsa revuelta:
+      - cada oficio tiene forma de hombre y de mujer. Un sacerdote es un
+        hombre; ellas, en un país católico, son religiosas.
+      - cada oficio existe desde una fecha. En 1800 no hay arquitectas, ni
+        odontólogos, ni profesoras universitarias; hay hacendados,
+        comerciantes, médicos, abogados, notarios y señoras de su casa.
+      - las mujeres entran a la universidad y a las profesiones en la fecha
+        en que realmente pudieron (la universidad, desde 1936).
+   3. Las carreras universitarias también tienen fecha: Medicina y Derecho
+      siempre; Ingeniería desde 1880; Economía desde 1945; Sistemas desde
+      1970; Finanzas desde 1975.
+   4. Lo que ya estaba guardado se corrige solo: los oficios de la partida
+      que no cuadraban con el sexo o la época se reemplazan por uno válido.
+   ========================================================================== */
+(function(){
+  const V161='v161';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ANIO=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+
+  /* ---------- 1. el bautizo que no se pierde ---------- */
+  const PEND=[]; let OLD_BAUT=null, PREV_AP=null, INT=null;
+  const libre=()=>!document.querySelector('#escenaHost .lienzo');
+  function tick(){
+    try{
+      if(typeof S==='undefined'||!S||!S.p||S.muerto||!PEND.length) return;
+      for(let k=PEND.length-1;k>=0;k--){ const p=PEND[k]; if(!(S.familia&&(S.familia.hijos||[]).includes(p.h))||p.h.nombre118) PEND.splice(k,1); }
+      if(!PEND.length||!libre()||nino()) return;
+      const p=PEND[0];
+      if(p.tipo==='bautizo'){
+        if(typeof OLD_BAUT!=='function'){ PEND.shift(); return; }
+        OLD_BAUT(p.h,p.motivo,()=>{ p.h.nombre118=true; if(typeof p.luego==='function') p.luego(); else render(); });
+      } else if(typeof window.escenaNombre118==='function'){
+        window.escenaNombre118(p.h,p.otro,()=>{ setTimeout(()=>{ try{ if(typeof PREV_AP==='function') PREV_AP(p.h,p.otro); }catch(e){ console.error(e); } },0); });
+      } else { p.h.nombre118=true; PEND.shift(); }
+    }catch(e){ console.error(e); }
+  }
+  function wrapApellido(){
+    const old=window.escenaApellidoHijo; if(typeof old!=='function'||window.__SA161_AP) return;
+    if(!window.__SA118_AP) return;                       // espera a que v118 ponga su capa
+    window.__SA161_AP=true; PREV_AP=old;
+    window.escenaApellidoHijo=function(h,otro){
+      if(!h||h.nombre118||nino()) return old.apply(this,arguments);
+      if(!PEND.some(p=>p.h===h)) PEND.push({h,otro,tipo:'nacimiento'});
+    };
+    Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaApellidoHijo[k]=true; });
+  }
+  function wrapBautizo(){
+    const old=window.escenaBautizo; if(typeof old!=='function'||window.__SA161_BAU) return;
+    window.__SA161_BAU=true; OLD_BAUT=old;
+    window.escenaBautizo=function(h,motivo,luego){
+      if(!h||nino()) return old.apply(this,arguments);
+      if(!PEND.some(p=>p.h===h)) PEND.push({h,motivo,tipo:'bautizo',luego});
+    };
+  }
+
+  /* ---------- 2. oficios por sexo y por época ---------- */
+  const F=2100;
+  /* [masculino, femenino, desde (h), desde (m), hasta (h), hasta (m), peso] */
+  const TABLA=[
+    ['hacendado','hacendada',1800,1800,1959,1959,2],
+    ['comerciante','comerciante',1800,1800,F,F,3],
+    ['ganadero','ganadera',1800,1900,F,F,1],
+    ['finquero','finquera',1900,1950,F,F,1],
+    ['sacerdote','religiosa',1800,1800,F,F,1],
+    ['militar','militar',1800,1980,F,F,1],
+    ['abogado','abogada',1800,1945,F,F,2],
+    ['notario','notaria',1800,1950,F,F,1],
+    ['médico','médica',1800,1936,F,F,2],
+    ['boticario','boticaria',1800,F,1959,1959,1],
+    ['farmacéutico','farmacéutica',1930,1950,F,F,1],
+    ['ingeniero','ingeniera',1880,1950,F,F,2],
+    ['periodista','periodista',1850,1935,F,F,1],
+    ['político','política',1830,1958,F,F,1],
+    ['banquero','banquera',1870,1980,F,F,1],
+    ['contador','contadora',1920,1950,F,F,1],
+    ['arquitecto','arquitecta',1930,1950,F,F,1],
+    ['odontólogo','odontóloga',1900,1940,F,F,1],
+    ['veterinario','veterinaria',1930,1965,F,F,1],
+    ['maestro','maestra',1800,1870,1929,1929,2],
+    ['profesor','profesora',1930,1935,F,F,2],
+    ['agrónomo','agrónoma',1915,1950,F,F,1],
+    ['economista','economista',1945,1950,F,F,1],
+    ['empresario','empresaria',1880,1940,F,F,2],
+    ['piloto','piloto',1930,1975,F,F,1],
+    ['ingeniero de sistemas','ingeniera de sistemas',1975,1980,F,F,1],
+    ['publicista','publicista',1950,1955,F,F,1],
+    [null,'dedicada al hogar',F,1800,F,1999,4],
+    [null,'modista',F,1850,F,1979,1],
+    [null,'enfermera',F,1905,F,F,1],
+    [null,'secretaria',F,1920,F,1999,1],
+    [null,'telefonista',F,1915,F,1984,1]];
+  /* en el país de hoy los oficios traen apellido de especialidad */
+  const MODERNO_H=['abogado de familia','médico internista','arquitecto','profesor universitario','comerciante','funcionario público','periodista','contador público','odontólogo','ingeniero de procesos','empresario','consultor','directivo'];
+  const MODERNO_M=['abogada de familia','médica internista','arquitecta','profesora universitaria','comerciante','funcionaria pública','periodista','contadora pública','odontóloga','ingeniera de procesos','empresaria','consultora','directiva'];
+  const peso=(r,sx,a)=>{ const w=r[6]; if(sx==='m'&&r[1]==='dedicada al hogar') return a<1960?4:a<1990?2:.6; return w; };
+  function pool(sexo){ const a=ANIO(), m=sexo==='m'; const out=[];
+    TABLA.forEach(r=>{ const nom=m?r[1]:r[0], d=m?r[3]:r[2], h=m?r[5]:r[4]; if(!nom||a<d||a>h) return; out.push({n:nom,w:peso(r,sexo,a)}); });
+    return out; }
+  function pesca(L){ const tot=L.reduce((s,x)=>s+x.w,0); let k=Math.random()*tot; for(const x of L){ k-=x.w; if(k<=0) return x.n; } return L[L.length-1].n; }
+  function rolEra161(sexo){ const sx=sexo==='m'?'m':'h'; const a=ANIO();
+    if(a>=1975&&Math.random()<.55) return (sx==='m'?MODERNO_M:MODERNO_H)[Math.floor(Math.random()*(sx==='m'?MODERNO_M:MODERNO_H).length)];
+    const L=pool(sx); return L.length?pesca(L):(sx==='m'?'dedicada al hogar':'comerciante'); }
+  function oficioEra161(sexo,edad){ if(isFinite(edad)&&edad<16) return 'estudiante'; return rolEra161(sexo); }
+  function valido(rol,sexo){ if(!rol) return false; const sx=sexo==='m'?'m':'h'; const a=ANIO(); const t=String(rol).toLowerCase();
+    if(t==='estudiante') return true;
+    if(pool(sx).some(x=>x.n===t)) return true;
+    if(a>=1960&&(sx==='m'?MODERNO_M:MODERNO_H).some(x=>x===t)) return true;
+    return false; }
+  /* ---------- sanear lo guardado ---------- */
+  function arreglar(x,campo){ if(!x||!x.sexo) return false; if(valido(x[campo],x.sexo)) return false; x[campo]=(campo==='oficio'&&isFinite(x.edad)&&x.edad<16)?'estudiante':rolEra161(x.sexo); return true; }
+  function sanear(){ try{
+      if(typeof S==='undefined'||!S||!S.p) return 0; let n=0; const f=S.familia||{};
+      if(f.pareja) n+=arreglar(f.pareja,'rol')?1:0;
+      (f.amantes||[]).forEach(a=>{ n+=arreglar(a,'rol')?1:0; });
+      (f.candidatos||f.candidatas||[]).forEach(c=>{ n+=arreglar(c,'rol')?1:0; });
+      (S.parientes||[]).forEach(p=>{ n+=arreglar(p,'oficio')?1:0; });
+      (f.hijos||[]).forEach(h=>{ if(h.pareja&&h.pareja.sexo) n+=arreglar(h.pareja,'rol')?1:0; if(h.oficio) n+=arreglar(h,'oficio')?1:0; });
+      return n; }catch(e){ console.error(e); return 0; } }
+  /* ---------- 3. carreras con fecha ---------- */
+  const CAR={medicina:[1800,1936],derecho:[1800,1945],ingenieria:[1880,1945],geologia:[1890,1950],economia:[1945,1950],relaciones_internacionales:[1970,1970],
+    finanzas:[1975,1975],administracion:[1955,1955],arquitectura:[1930,1950],sistemas:[1970,1975],contaduria:[1920,1950],agronomia:[1915,1950],
+    comunicacion:[1960,1960],psicologia:[1950,1950],ciencia_politica:[1965,1965],pedagogia:[1870,1870]};
+  function carreraEra161(cr,sexo){ const d=cr&&CAR[cr.id]; if(!d) return true; return ANIO()>=(sexo==='m'?d[1]:d[0]); }
+  function carrerasEra161(sexo){ return (typeof CARRERAS_PROFESIONALES!=='undefined'?CARRERAS_PROFESIONALES:[]).filter(cr=>carreraEra161(cr,sexo)); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA161_PASO) return; window.__SA161_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ sanear(); }catch(e){} return r; }; }
+  function init161(){ wrapApellido(); wrapBautizo(); wrapPaso(); sanear();
+    if(!INT&&!window.__SA161_INT){ window.__SA161_INT=true; INT=setInterval(tick,350); }
+    Object.assign(window,{rolEra161,oficioEra161,carreraEra161,carrerasEra161,sanearOficios161:sanear,oficioValido161:valido,pendientesNombre161:()=>PEND.filter(p=>!p.h.nombre118),tickBautizo161:tick}); }
+  setTimeout(init161,40); setTimeout(init161,220); setTimeout(init161,650); setTimeout(init161,950); setTimeout(init161,1600);
+  window.__SA161={version:V161};
 })();
 </script>
 
