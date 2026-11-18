@@ -1216,10 +1216,23 @@ svg.foto116{display:block;background:#1d2a23}
 .car157 table.libro td{padding:5px 4px;vertical-align:top}
 .car157 small{color:var(--humo2)}
 </style>
+<style id="estilos-v159">
+.lid159 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.lid159 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.lid159 .k b{display:block;font-size:15px;font-family:var(--display)}
+.lid159 .k span{font-size:12px;color:var(--humo2)}
+.lid159 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.lid159 table.libro td{padding:5px 4px;vertical-align:top}
+.lid159 small{color:var(--humo2)}
+.lid159 .esc159{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.lid159 .esc159 span{font-size:12.5px;padding:3px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:var(--humo2)}
+.lid159 .esc159 span.si{background:rgba(214,166,72,.25);color:#F0CF86}
+.lid159 .alto{color:#e79a8a}.lid159 .bajo{color:#8fe0b0}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v158</div>
+<div class="version-badge" id="versionBadge">v159</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5808,6 +5821,7 @@ function iniciar(cfg,legado){
     familyOffice:legadoValido&&legado.familyOffice?legado.familyOffice:null,
     pol155:legadoValido&&legado.pol155?legado.pol155:null,
     pub156:legadoValido&&legado.pub156?legado.pub156:null,
+    lid159:legadoValido&&legado.lid159?legado.lid159:null,
     residenciaInternacional:legadoValido&&legado.residenciaInternacional?legado.residenciaInternacional:null,
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
@@ -7880,6 +7894,7 @@ function heredar(h,frac,vivo,pleito){
     familyOffice:S.familyOffice?JSON.parse(JSON.stringify(S.familyOffice)):null,
     pol155:S.pol155?JSON.parse(JSON.stringify(S.pol155)):null,
     pub156:S.pub156?JSON.parse(JSON.stringify(S.pub156)):null,
+    lid159:S.lid159?JSON.parse(JSON.stringify(S.lid159)):null,
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
@@ -29393,6 +29408,255 @@ install();setTimeout(install,1200);
   function init158(){ wrapLog(); wrapPaso(); Object.assign(window,{ofertaGobierno158:oferta}); }
   setTimeout(init158,40); setTimeout(init158,220); setTimeout(init158,650); setTimeout(init158,950);
   window.__SA158={version:V158};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v159 · EL LIDERAZGO GREMIAL Y LA POLÍTICA ECONÓMICA
+   Afiliarte a un gremio ya daba bonos y cuotas. Ahora puedes subir adentro:
+   comité regional, junta directiva, vicepresidencia y presidencia, con
+   asamblea cada tres años, apoyo de los afiliados e influencia.
+   Desde esos cargos:
+   - El salario mínimo: cada año se negocia con el Gobierno y las centrales.
+     Tu línea (dura, concertada o de pacto social) mueve el aumento real, que
+     le cuesta más a las pymes y a los sectores de mucha nómina.
+   - La negociación colectiva por rama: una convención para todas tus
+     compañías de un sector, con riesgo de paro.
+   - La presión al Gobierno: cabildeo, prensa, paro sectorial o marcha con las
+     centrales, para pedir aranceles, alivios tributarios o subsidios.
+   - Los aranceles por sector, con la norma de cada época (sustitución de
+     importaciones, la apertura del 91, los TLC) y lo que el Gobierno y tu
+     presión le suman o le restan: protegen a unos, encarecen los insumos de
+     otros y complican a los exportadores.
+   - Las medidas del Gobierno (reformas tributaria, laboral, pensional, de
+     salud, agraria, TLC, vivienda, infraestructura...): apoyarlas, oponerte
+     o negociar cambios, con crédito o rencor con el Gobierno y el apoyo de
+     los afiliados en juego.
+   ========================================================================== */
+(function(){
+  const V159='v159';
+  const CARGOS=[
+    {id:'comite',art:'el',n:'Comité regional',inf:10,min:{anios:1,prest:15,ing:0}},
+    {id:'junta',n:'Junta directiva',inf:28,min:{anios:3,prest:30,ing:150}},
+    {id:'vice',n:'Vicepresidencia',inf:48,min:{anios:5,prest:45,ing:600}},
+    {id:'presidente',n:'Presidencia del gremio',inf:75,min:{anios:7,prest:60,ing:1200}}];
+  const PESO=[.4,.6,.8,1];
+  const cIx=id=>CARGOS.findIndex(c=>c.id===id);
+  const nc=c=>(c.art||'la')+' '+c.n.toLowerCase();
+  const ac=c=>c.art==='el'?'al '+c.n.toLowerCase():'a la '+c.n.toLowerCase();
+  const del=c=>c.art==='el'?'del '+c.n.toLowerCase():'de la '+c.n.toLowerCase();
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  const SEC=['moda','alimentos','agro','construccion','tech','energia','salud','mineria','financiero','logistica','retail','medios','juridico','seguros','turismo','juegos'];
+  /* prod: cuánto le sirve que el arancel protega su producto; ins: cuánto depende de insumos importados; trade: cuánto vive del comercio;
+     exp: cuánto exporta; lab: peso de la nómina; mult: arancel normal del sector frente al promedio */
+  const PERFIL={moda:{prod:1,ins:.4,exp:.2,trade:0,lab:.30,mult:1.5},alimentos:{prod:1,ins:.3,exp:.2,trade:0,lab:.18,mult:1.3},agro:{prod:1,ins:.5,exp:.6,trade:0,lab:.35,mult:1.7},
+    construccion:{prod:.8,ins:.3,exp:0,trade:0,lab:.30,mult:.9},tech:{prod:.3,ins:.9,exp:.1,trade:.2,lab:.45,mult:.5},energia:{prod:.2,ins:.8,exp:.3,trade:0,lab:.12,mult:.4},
+    salud:{prod:.4,ins:.6,exp:0,trade:0,lab:.40,mult:.6},mineria:{prod:.1,ins:.6,exp:.8,trade:0,lab:.20,mult:.3},financiero:{prod:0,ins:0,exp:0,trade:0,lab:.35,mult:0},
+    logistica:{prod:0,ins:.5,exp:0,trade:.8,lab:.30,mult:0},retail:{prod:.4,ins:.7,exp:0,trade:.5,lab:.22,mult:1.2},medios:{prod:0,ins:.3,exp:0,trade:0,lab:.35,mult:.5},juridico:{prod:0,ins:0,exp:0,trade:0,lab:.50,mult:0},
+    seguros:{prod:0,ins:0,exp:0,trade:0,lab:.30,mult:0},turismo:{prod:0,ins:.4,exp:.3,trade:.2,lab:.40,mult:.2},juegos:{prod:0,ins:.8,exp:.2,trade:0,lab:.45,mult:.2}};
+  /* qué puede hacer cada gremio cuando lo diriges */
+  const AG={andi:{smlv:1,rama:1},fenalco:{smlv:1,rama:1,paro:1},acopi:{smlv:1},camacol:{smlv:1,rama:1},colfecar:{smlv:1,rama:1,paro:1},augura:{smlv:1,rama:1},sac:{rama:1,paro:1},fedegan:{rama:1,paro:1},fedecafe:{rama:1,paro:1},asobancaria:{rama:1},analdex:{},camaramed:{},fedelonjas:{}};
+  const MEDIDAS=[
+    {id:'tributaria',n:'una reforma tributaria',d:'Sube la renta y amplía la base. El Gobierno dice que es para cerrar el hueco fiscal.',desde:1930,gan:[],pier:SEC,mag:.008,p0:.55,esp:()=>{ try{ const f=fisco(); f.renta=clamp(f.renta+.02,.15,.5); }catch(e){} }},
+    {id:'flex',n:'una flexibilización laboral',d:'Abarata contratar y despedir, con menos recargos. Los sindicatos la llaman precarización.',desde:1990,gan:['moda','alimentos','retail','logistica','agro'],pier:[],mag:.012,p0:.5,esp:()=>{ S.tension=clamp((S.tension||35)+3,0,100); }},
+    {id:'trabajador',n:'una reforma laboral a favor de los trabajadores',d:'Recargos, contratos a término indefinido y más garantías sindicales.',desde:1990,gan:[],pier:['moda','alimentos','retail','logistica','agro','construccion'],mag:.012,p0:.45,esp:()=>{ S.tension=clamp((S.tension||35)-3,0,100); companias().forEach(e=>{ e.moral=clamp((e.moral||50)+6,0,100); }); }},
+    {id:'apertura',n:'una apertura comercial',d:'Baja los aranceles y firma tratados de libre comercio. Entran importados baratos y se abren mercados para exportar.',desde:1991,gan:['tech','mineria','logistica','retail','energia'],pier:['moda','alimentos','construccion','agro'],mag:.012,p0:.55,esp:()=>{ const l=L(); SEC.forEach(s=>{ l.aj[s]=(l.aj[s]||0)-8; }); }},
+    {id:'proteccion',n:'salvaguardias y arancel de protección',d:'Sube los aranceles a la industria nacional "para defender el empleo".',desde:1930,gan:['moda','alimentos','construccion','agro'],pier:['tech','logistica','retail','energia'],mag:.012,p0:.5,esp:()=>{ const l=L(); ['moda','alimentos','construccion','agro'].forEach(s=>{ l.aj[s]=(l.aj[s]||0)+8; }); }},
+    {id:'pension',n:'una reforma pensional',d:'Cambia quién ahorra y quién paga. Los fondos de pensiones ganan o pierden según cómo salga.',desde:1993,gan:['financiero'],pier:['moda','alimentos','construccion','retail'],mag:.006,p0:.5},
+    {id:'salud',n:'una reforma a la salud',d:'Redefine el papel de las EPS, el giro directo y las tarifas de las clínicas.',desde:1993,gan:[],pier:['salud','financiero'],mag:.012,p0:.5},
+    {id:'tierras',n:'una reforma agraria',d:'Redistribuye tierra y cambia las reglas de propiedad y de uso del campo.',desde:1936,gan:[],pier:['agro','alimentos'],mag:.014,p0:.45,esp:()=>{ S.tension=clamp((S.tension||35)-2,0,100); }},
+    {id:'vivienda',n:'un subsidio de vivienda',d:'Plata del Estado para que las familias compren casa.',desde:1972,gan:['construccion','financiero'],pier:[],mag:.014,p0:.6},
+    {id:'combustibles',n:'un impuesto a los combustibles',d:'Sube la gasolina y el ACPM para financiar el presupuesto.',desde:1960,gan:[],pier:['logistica','energia','agro'],mag:.010,p0:.55},
+    {id:'francas',n:'nuevas zonas francas y exenciones',d:'Incentivos para producir y exportar desde zonas con menos impuestos.',desde:1990,gan:['moda','tech','agro','mineria','alimentos'],pier:[],mag:.010,p0:.6},
+    {id:'infra',n:'un plan de infraestructura',d:'Vías, puertos y concesiones con plata pública y privada.',desde:1990,gan:['construccion','logistica','mineria','energia'],pier:[],mag:.012,p0:.6}];
+  const OBJ=[
+    {id:'arancel_sube',n:'Subir el arancel de un sector',d:'Más protección para quien produce aquí.',tipo:'arancel',dir:1},
+    {id:'arancel_baja',n:'Bajar el arancel de un sector',d:'Insumos y bienes de capital más baratos.',tipo:'arancel',dir:-1},
+    {id:'renta',n:'Un alivio tributario para el sector',d:'Cuatro años de menos impuestos para tu industria.',tipo:'alivio'},
+    {id:'subsidio',n:'Un subsidio o crédito de fomento',d:'Plata del Estado para las compañías del sector.',tipo:'subsidio'}];
+  const FORMAS=[
+    {id:'cabildeo',n:'Cabildeo y un comunicado',d:'Reuniones con ministros y congresistas.',costo:.1,p:.30,tension:0,prest:0},
+    {id:'prensa',n:'Campaña en la prensa',d:'Avisos, columnas y declaraciones del gremio.',costo:.25,p:.42,tension:1,prest:1},
+    {id:'marcha',n:'Marcha con las centrales obreras',d:'Cuando empresarios y trabajadores piden lo mismo, el Gobierno oye.',costo:.15,p:.50,tension:3,prest:0},
+    {id:'paro',n:'Paro sectorial',d:'El sector se para unos días. Cuesta ventas y deja un enemigo en el Gobierno.',costo:.4,p:.62,tension:5,prest:-2,solo:'paro'}];
+  const ES=x=>String(x||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const R1=x=>Math.round(x*10)/10;
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(S&&S.p&&S.anio>=1871);
+  const escala=()=>{ try{ if(typeof window.escalaPol155==='function') return window.escalaPol155(); }catch(e){} return clamp((typeof patrimonio==='function'?patrimonio():500)*.06,100,6000); };
+  const pol=()=>{ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } };
+  const secN=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return x?x.n:s; }catch(e){ return s; } };
+  const movida=()=>{ if(S._mov159===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov159=S.anio; return true; };
+  const sinMov=()=>(S._mov159!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  /* --- estado --- */
+  function L(){ if(!S) return null; let l=S.lid159; if(!l||typeof l!=='object') l=S.lid159={};
+    ['mods'].forEach(k=>{ if(!Array.isArray(l[k])) l[k]=[]; }); ['gr','aj','smlv','rama','alivio'].forEach(k=>{ if(!l[k]||typeof l[k]!=='object') l[k]={}; }); if(!isFinite(l.idx)) l.idx=0;
+    if(l.gen!==S.gen){ l.gen=S.gen; Object.keys(l.gr).forEach(id=>{ const x=l.gr[id]; x.cargo=null; x.hasta=null; x.anios=0; x.ap=55; x.influ*=.3; x.eleccion=null; }); }
+    return l; }
+  function G(gid){ const l=L(); let g=l.gr[gid]; if(!g) g=l.gr[gid]={cargo:null,anios:0,influ:0,ap:55,desde:S.anio,hasta:null,eleccion:null}; return g; }
+  const afil=()=>{ try{ return gremios().filter(id=>gremioDe(id)); }catch(e){ return []; } };
+  const peso=gid=>{ const g=G(gid); return g.cargo?PESO[cIx(g.cargo)]:afil().includes(gid)?.12:0; };
+  const mejorCargo=()=>{ let m=-1; afil().forEach(id=>{ const c=G(id).cargo; if(c) m=Math.max(m,cIx(c)); }); return m; };
+  const hash=gid=>gid.split('').reduce((s,c)=>s+c.charCodeAt(0),0)%3;
+  const AGRARIOS=['fedecafe','fedegan','augura'];
+  const sectoresDe=gid=>{ const g=gremioDe(gid), mios=Array.from(new Set(companias().map(e=>e.sector))); const base=AGRARIOS.includes(gid)?['agro']:(g&&g.sectores?g.sectores:null); return (base?mios.filter(s=>base.includes(s)):mios).filter(s=>PERFIL[s]); };
+  /* --- aranceles --- */
+  const baseArancel=a=>a<1900?25:a<1930?28:a<1950?38:a<1968?62:a<1991?45:a<1995?45-(a-1990)*8:a<2012?12:9;
+  const ref=s=>baseArancel(S.anio)*((PERFIL[s]||{mult:1}).mult);
+  function niv(s){ const g=gob(), gv=1+(-(g.apertura||0))*3; return clamp(ref(s)*gv+(L().aj[s]||0),0,120); }
+  const dev=s=>niv(s)-ref(s);
+  const devProm=()=>SEC.reduce((q,s)=>q+dev(s),0)/SEC.length;
+  function efArancel(e){ const p=PERFIL[e.sector]; if(!p) return 0; const d=dev(e.sector)/20, dp=devProm()/20; return clamp(.03*p.prod*d-(.02*p.ins+.015*p.trade+.012*p.exp)*dp,-.05,.05); }
+  /* --- salario mínimo --- */
+  const infl=()=>((S.macro&&S.macro.inflacion)||.05);
+  const baseReal=()=>.012+(gob().laboral||0)*.3;
+  function smlvDefecto(a){ const m=infl(), b=baseReal(); return {anio:a,infl:m,base:b,raise:clamp(m+b+rnd(-.004,.004),0,.2),via:'decreto',stance:null,aplicado:false}; }
+  function aplicarSmlv(r){ if(r.aplicado) return; r.aplicado=true; const l=L(); l.idx=clamp(l.idx*.6+(r.raise-r.infl-r.base),-.05,.06); }
+  function costoSmlv(e){ const p=PERFIL[e.sector], l=L(); if(!p||Math.abs(l.idx)<.0005) return 0; const pyme=e.ingresos<1500?1.4:e.ingresos>8000?.8:1; return e.ingresos*p.lab*l.idx*.5*pyme; }
+  /* --- lo que le pasa a cada compañía --- */
+  function efMods(e){ const l=L(); let b=0; l.mods.forEach(m=>{ if(m.hasta>=S.anio&&m.sector===e.sector) b+=m.delta; }); const al=l.alivio[e.sector]; if(al&&al.hasta>=S.anio) b+=al.bonus; return b; }
+  /* --- el liderazgo --- */
+  const proximo=gid=>{ const g=G(gid), ix=g.cargo?cIx(g.cargo)+1:0; return CARGOS[ix]||null; };
+  function faltas(gid,c){ const g=G(gid), f=[]; if(g.anios<c.min.anios) f.push('llevar '+c.min.anios+' años afiliado'); if((typeof prestigio==='function'?prestigio():0)<c.min.prest) f.push('prestigio '+c.min.prest); if((typeof ingresosAgremiables==='function'?ingresosAgremiables():0)<c.min.ing) f.push('mover '+fmt(c.min.ing)+' en ventas'); return f; }
+  function probEleccion(gid,c){ const g=G(gid), ix=cIx(c.id); return clamp(.32+(typeof prestigio==='function'?prestigio():0)/260+g.ap/400+g.influ/300-ix*.06+((S.p.redes||0)/500)+(g.cargo&&g.hasta<=S.anio?.1:0),.08,.88); }
+  function candidatura(gid,c){ const g=G(gid), gr=gremioDe(gid), costo=Math.round(escala()*.06*(cIx(c.id)+1)); if(S.efectivo<costo){ log('No tenías '+fmt(costo)+' para la campaña dentro de '+esc(gr.corto)+'.','mal'); return; } S.efectivo-=costo; const p=probEleccion(gid,c);
+    if(chance(p)){ g.cargo=c.id; g.hasta=S.anio+3; g.influ=Math.max(g.influ,c.inf*.5); g.ap=clamp(g.ap+8,0,100); moverPrestigio(Math.max(1,c.inf/12),'llegó a '+nc(c)+' de '+gr.corto); log('<b>Ganaste la elección para '+esc(nc(c))+' de '+esc(gr.n)+'.</b>','hito'); hito('Llegó a '+nc(c)+' de '+gr.corto); }
+    else{ g.ap=clamp(g.ap-3,0,100); if(g.cargo===c.id){ g.cargo=null; g.influ*=.5; } moverPrestigio(-1,'perdió la elección en '+gr.corto); log('Perdiste la elección para '+esc(nc(c))+' de <b>'+esc(gr.corto)+'</b>.','mal'); } }
+  /* --- pantallas --- */
+  function escenaLiderazgo159(){ if(!ACTIVO()) return; const l=L(), A=afil(), reab=()=>{ cerrarModal(); render(); escenaLiderazgo159(); };
+    const filas=A.map(id=>{ const g=gremioDe(id), s=G(id), ix=s.cargo?cIx(s.cargo):-1; return '<tr><td><b>'+esc(g.corto)+'</b><br><small>'+(s.cargo?esc(CARGOS[ix].n)+' hasta '+s.hasta:'afiliado')+' · apoyo '+Math.round(s.ap)+'/100 · influencia '+Math.round(s.influ)+'</small></td><td style="text-align:right"><small>'+s.anios+' año'+(s.anios===1?'':'s')+'</small></td></tr>'; }).join('');
+    const ops=A.map(id=>{ const g=gremioDe(id), s=G(id); return {t:g.corto+(s.cargo?' · '+CARGOS[cIx(s.cargo)].n:''),cat:'empleo',d:s.cargo?'Tu agenda: salario mínimo, negociación colectiva, presión al Gobierno.':'Sube por la escalera: comité, junta, vicepresidencia, presidencia.',cerrar:false,run:()=>{ cerrarModal(); escenaGremio159(id); }}; });
+    ops.push({t:'Los aranceles',cat:'riesgo',d:'Qué protege el Estado, qué encarece y cómo le toca a tus compañías.',cerrar:false,run:()=>{ cerrarModal(); escenaAranceles159(); }});
+    ops.push({t:'El salario mínimo',cat:'empleo',d:S.anio>=1950?'Se negocia cada año: '+(l.smlv[S.anio]?'ya cerró en '+R1(l.smlv[S.anio].raise*100)+'%.':'todavía está abierto.'):'Todavía no hay salario mínimo.',dis:S.anio<1950?'Se crea hacia 1950':null,cerrar:false,run:()=>{ cerrarModal(); escenaSalario159(null); }});
+    if(!A.length) ops.unshift({t:'Afiliarte a un gremio',cat:'empleo',d:'Para dirigir un gremio, primero hay que entrar a uno.',cerrar:false,run:()=>{ cerrarModal(); if(typeof escenaGremios==='function') escenaGremios(); }});
+    escena({rubro:'Gremios',titulo:'El liderazgo gremial',ancho:true,cerrable:true,clase:'lid159',cuerpo:'Un gremio negocia con el Gobierno lo que ningún empresario logra solo: el salario mínimo, los aranceles, los alivios. Dentro, quien sube de cargo manda más. Tu mejor cargo hoy: '+(mejorCargo()>=0?esc(CARGOS[mejorCargo()].n.toLowerCase()):'ninguno')+'.'+(mejorCargo()>=2?' Dirigir un gremio a ese nivel te quita una movida al año.':''),
+      html:'<div class="k"><div><b>'+A.length+'</b><span>gremios</span></div><div><b>'+(mejorCargo()>=0?CARGOS[mejorCargo()].n:'—')+'</b><span>tu mejor cargo</span></div><div><b>'+R1(l.idx*100)+'%</b><span>aumento real del salario mínimo frente a lo normal</span></div></div>'+(filas?'<table class="libro">'+filas+'</table>':'<div class="apunte">No estás afiliado a ningún gremio.</div>'),opciones:ops}); }
+  function escenaGremio159(gid){ const gr=gremioDe(gid), g=G(gid), ag=AG[gid]||{}, reab=()=>{ cerrarModal(); render(); escenaGremio159(gid); }, ix=g.cargo?cIx(g.cargo):-1, prox=proximo(gid), fl=prox?faltas(gid,prox):[];
+    const esc_=CARGOS.map((c,i)=>'<span class="'+(i<=ix?'si':'')+'">'+c.n+'</span>').join('');
+    const elec=g.eleccion===S.anio||((S.anio+hash(gid))%3===0), ops=[];
+    if(prox) ops.push({t:'Lanzarte '+ac(prox)+' · '+fmt(escala()*.06*(cIx(prox.id)+1)),cat:'empleo',d:'Asamblea cada tres años. Probabilidad '+Math.round(probEleccion(gid,prox)*100)+'%.'+(fl.length?' Te falta: '+fl.join(', ')+'.':''),dis:!elec?'La asamblea es otro año':fl.length?'Te falta: '+fl.join(', '):S.efectivo<escala()*.06*(cIx(prox.id)+1)?'No tienes la plata de la campaña':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; g.eleccion=S.anio; candidatura(gid,prox); reab(); }});
+    if(g.cargo&&g.hasta<=S.anio) ops.push({t:'Reelegirte como '+CARGOS[ix].n.toLowerCase()+' · '+fmt(escala()*.06*(ix+1)),cat:'empleo',d:'Se vence tu período. Probabilidad '+Math.round(probEleccion(gid,CARGOS[ix])*100)+'%.',dis:S.efectivo<escala()*.06*(ix+1)?'No tienes la plata de la campaña':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; g.eleccion=S.anio; candidatura(gid,CARGOS[ix]); reab(); }});
+    if(ix>=1&&ag.smlv) ops.push({t:'La concertación del salario mínimo',cat:'empleo',d:'Tu gremio se sienta con el Gobierno y las centrales.',dis:S.anio<1950?'Todavía no hay salario mínimo':null,cerrar:false,run:()=>{ cerrarModal(); escenaSalario159(gid); }});
+    if(ix>=0&&ag.rama&&sectoresDe(gid).length) ops.push({t:'La negociación colectiva de rama',cat:'empleo',d:'Una convención para todas tus compañías del sector.',cerrar:false,run:()=>{ cerrarModal(); escenaRama159(gid); }});
+    if(ix>=0) ops.push({t:'Presionar al Gobierno',cat:'riesgo',d:'Aranceles, alivios tributarios o subsidios para el sector.',cerrar:false,run:()=>{ cerrarModal(); escenaPresion159(gid); }});
+    ops.push({t:'Los aranceles',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); escenaAranceles159(); }});
+    escena({rubro:esc(gr.n),titulo:ix>=0?CARGOS[ix].n+' de '+gr.corto:'Afiliado a '+gr.corto,ancho:true,cerrable:true,clase:'lid159',cuerpo:esc(gr.d)+' '+(ix<0?'Sin cargo, tu voz en el gremio pesa poco.':'Tu cargo vence en '+g.hasta+'.'),
+      html:'<div class="k"><div><b>'+Math.round(g.ap)+'/100</b><span>apoyo de los afiliados</span></div><div><b>'+Math.round(g.influ)+'/100</b><span>influencia</span></div><div><b>'+g.anios+'</b><span>años afiliado</span></div></div><h4>La escalera</h4><div class="esc159">'+esc_+'</div>',opciones:ops}); }
+  /* --- el salario mínimo --- */
+  function silla159(){ let best=null; afil().forEach(id=>{ const ix=G(id).cargo?cIx(G(id).cargo):-1; if(ix>=1&&(AG[id]||{}).smlv&&(!best||ix>cIx(G(best).cargo))) best=id; }); return best; }
+  function escenaSalario159(gid){ if(S.anio<1950) return; gid=gid||silla159(); const l=L(), m=infl(), b=baseReal(), done=l.smlv[S.anio], ix=gid&&G(gid).cargo?cIx(G(gid).cargo):-1, mesa=ix>=1&&!!(AG[gid]||{}).smlv;
+    const ops=[], reab=()=>{ cerrarModal(); render(); escenaSalario159(gid); };
+    const linea=(id,n,d,pull)=>ops.push({t:n,cat:'empleo',d,dis:done?'Ya se cerró este año':!mesa?'Necesitas la junta directiva o más en un gremio que se sienta en la mesa':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const w=PESO[ix], g=G(gid);
+      let raise=clamp(m+b+.0138+pull*w+rnd(-.006,.006),0,.2), via='concertado';
+      if(id==='dura'&&chance(.35)){ raise=clamp(m+b+rnd(-.003,.003),0,.2); via='decreto'; S.tension=clamp((S.tension||35)+2,0,100); }
+      const r=l.smlv[S.anio]={anio:S.anio,infl:m,base:b,raise,via,stance:id,aplicado:false}; aplicarSmlv(r); companies_(raise-m-b); g.ap=clamp(g.ap+(id==='dura'?4:id==='social'?-5:1),0,100); g.influ=clamp(g.influ+2,0,100);
+      log('<b>Salario mínimo '+(via==='decreto'?'por decreto':'concertado')+': '+R1(raise*100)+'%</b> con inflación de '+R1(m*100)+'%. '+(id==='dura'?(via==='decreto'?'No hubo acuerdo y decretó el Gobierno.':'Tu línea dura se sintió en la mesa.'):id==='social'?'Cediste: las centrales y el Gobierno lo agradecen.':'Un acuerdo a medio camino.'),'hito'); reab(); }});
+    linea('dura','Línea dura: inflación y poco más','Menos aumento real para todos. Hay una probabilidad de que no haya acuerdo y decrete el Gobierno.',-.02);
+    linea('concertar','Concertar: inflación más productividad','Un aumento real moderado y sin ruido.',0);
+    linea('social','Pacto social: ceder a las centrales','Aumento real más generoso: la paz laboral cuesta caja.',.012);
+    escena({rubro:'Concertación',titulo:'El salario mínimo de '+S.anio,ancho:true,cerrable:true,clase:'lid159',cuerpo:(S.anio>=1996?'Se sientan el Gobierno, los gremios y las centrales (CUT, CGT, CTC). ':'El Gobierno lo fija por decreto, oyendo a gremios y centrales. ')+'Inflación '+R1(m*100)+'%. '+(done?'Este año cerró en <b>'+R1(done.raise*100)+'%</b> ('+done.via+').':'Sin acuerdo antes de fin de año, decreta el Gobierno cerca del '+R1((m+b)*100)+'%.')+' El aumento real le cuesta más a las pymes y a los sectores de mucha nómina.',
+      html:'<div class="k"><div><b>'+R1(l.idx*100)+'%</b><span>aumento real acumulado frente a lo normal</span></div></div>',opciones:ops}); }
+  const companies_=dev=>{ companias().forEach(e=>{ e.moral=clamp((e.moral||50)+dev*100*.6,0,100); }); S.tension=clamp((S.tension||35)-dev*100*.4,0,100); };
+  /* --- la negociación colectiva de rama --- */
+  function escenaRama159(gid){ const gr=gremioDe(gid), g=G(gid), l=L(), ix=cIx(g.cargo), secs=sectoresDe(gid), reab=()=>{ cerrarModal(); render(); escenaRama159(gid); };
+    const ops=secs.map(s=>{ const E=companias().filter(e=>e.sector===s), fz=E.reduce((q,e)=>q+sind(e).fuerza,0)/Math.max(1,E.length), ult=(l.rama[s]||{}).ult; return {t:secN(s)+' · '+E.length+' compañía'+(E.length>1?'s':''),cat:'empleo',d:'Sindicatos con fuerza media '+Math.round(fz)+'/100. '+(ult?'Última rama cerrada en '+ult+'.':''),dis:ult&&S.anio-ult<2?'Cerrada hace menos de dos años':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaLineaRama159(gid,s,E,fz); }}; });
+    escena({rubro:esc(gr.n),titulo:'La negociación de rama',ancho:true,cerrable:true,clase:'lid159',cuerpo:'Desde tu cargo lideras la mesa del sector: lo que cierres vale para todas tus compañías de la rama, y lo que se rompa también.',opciones:ops}); }
+  function escenaLineaRama159(gid,s,E,fz){ const g=G(gid), ix=cIx(g.cargo), l=L(), w=PESO[ix], resp=(typeof bonoGremio==='function'?bonoGremio('laboral'):0)+.2*w, reab=()=>{ cerrarModal(); render(); escenaRama159(gid); };
+    const cerrar=(costo,anios,fzDelta,moral)=>{ E.forEach(e=>{ const sd=sind(e); sd.convencion={costo,vence:S.anio+anios}; sd.fuerza=clamp(sd.fuerza+fzDelta,0,100); e.moral=clamp((e.moral||50)+moral,0,100); }); };
+    const paro=(a)=>{ E.forEach(e=>{ const sd=sind(e); sd.huelga=a+(centralDe&&centralDe(e)?1:0); sd.fuerza=clamp(sd.fuerza+14,0,100); e.moral=clamp((e.moral||50)-12,0,100); }); S.tension=clamp((S.tension||35)+4,0,100); moverPrestigio(-3,'el paro en '+secN(s)); };
+    const fin=()=>{ l.rama[s]={ult:S.anio}; g.influ=clamp(g.influ+2,0,100); reab(); };
+    escena({rubro:esc(secN(s)),titulo:'¿Qué línea llevas a la mesa?',ancho:true,cerrable:true,clase:'lid159',cuerpo:'Fuerza sindical media: '+Math.round(fz)+'/100. '+(resp>.2?'Tu gremio manda asesores a la mesa. ':'')+'Una convención firmada evita los pliegos individuales mientras dure.',
+      opciones:[{t:'Convención de rama generosa',cat:'empleo',d:'Seis años y cerca del '+pc(.045)+' de los ingresos. Paz laboral y la moral arriba.',cerrar:false,run:()=>{ if(!movida()) return; cerrar(.045,6,-26,20); moverPrestigio(2,'la convención de rama'); log('Cerraste una <b>convención de rama</b> en '+esc(secN(s))+': seis años de paz.','bien'); fin(); }},
+        {t:'Línea moderada',cat:'empleo',d:'La mitad de lo que piden. Puede cerrar o terminar en paro.',cerrar:false,run:()=>{ if(!movida()) return; const p=clamp(.72-fz/140+resp,.2,.95); if(chance(p)){ cerrar(.022,4,-12,8); log('La rama de '+esc(secN(s))+' cerró en la mitad: cuatro años y '+pc(.022)+' de costo.','bien'); } else { paro(ri(1,2)); log('<b>Paro en la rama de '+esc(secN(s))+'.</b> Tus compañías paran '+E[0].sind.huelga+' año(s).','mal'); } fin(); }},
+        {t:'Línea dura: resistir',cat:'riesgo',d:'Casi nada de aumento. Si los quiebras, ganas años de calma barata; si no, paro largo.',cerrar:false,run:()=>{ if(!movida()) return; const p=clamp(.45-fz/160+resp*.7,.12,.8); if(chance(p)){ cerrar(.012,3,-20,-4); log('Aguantaste la línea dura en '+esc(secN(s))+': convención barata por tres años.','bien'); g.ap=clamp(g.ap+4,0,100); } else { paro(ri(2,3)); log('<b>Paro largo en la rama de '+esc(secN(s))+'.</b>','mal'); g.ap=clamp(g.ap-6,0,100); } fin(); }}]}); }
+  /* --- presión al gobierno --- */
+  function escenaPresion159(gid){ const gr=gremioDe(gid), g=G(gid), ag=AG[gid]||{}, secs=sectoresDe(gid), reab=()=>{ cerrarModal(); render(); }, ops=[];
+    if(!secs.length){ escena({rubro:esc(gr.n),titulo:'Presionar al Gobierno',cuerpo:'Necesitas una compañía del sector que representa el gremio para tener qué pedir.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    OBJ.forEach(o=>ops.push({t:o.n,cat:'riesgo',d:o.d,cerrar:false,run:()=>{ cerrarModal(); escenaSector159(gid,o,secs); }}));
+    escena({rubro:esc(gr.n),titulo:'Presionar al Gobierno',ancho:true,cerrable:true,clase:'lid159',cuerpo:'Desde tu cargo ('+esc(CARGOS[cIx(g.cargo)].n.toLowerCase())+') tienes derecho a pedir y a hacerte oír. Qué tan bien salga depende de tu influencia, de cuánto te escuche este Gobierno y de qué tan bravo te pongas.',opciones:ops}); }
+  function escenaSector159(gid,o,secs){ const ops=secs.map(s=>({t:secN(s),cat:'riesgo',d:o.tipo==='arancel'?'Hoy el arancel está en '+Math.round(niv(s))+'% ('+(dev(s)>=0?'+':'')+Math.round(dev(s))+' frente a lo normal).':'',cerrar:false,run:()=>{ cerrarModal(); escenaForma159(gid,o,s); }}));
+    escena({rubro:'Presión',titulo:o.n,cerrable:true,clase:'lid159',cuerpo:'¿Para cuál sector?',opciones:ops}); }
+  function escenaForma159(gid,o,s){ const gr=gremioDe(gid), g=G(gid), ag=AG[gid]||{}, ix=cIx(g.cargo), po=pol(), pres=po&&po.pres, e=escala(), g0=gob();
+    const base=(f)=>clamp(f.p+g.influ/300+(ix+1)*.04+((g0.publico||1)-1)*.2+((pres&&pres.credito)||0)/600-((pres&&pres.rencor)||0)/200+(o.tipo==='arancel'&&o.dir<0&&(g0.apertura||0)>0?.08:0)+(o.tipo==='arancel'&&o.dir>0&&(g0.apertura||0)<0?.08:0),.08,.92);
+    const ops=FORMAS.filter(f=>!f.solo||ag[f.solo]).map(f=>{ const p=base(f), c=Math.round(e*f.costo); return {t:f.n+' · '+fmt(c),cat:'riesgo',d:f.d+' Probabilidad '+Math.round(p*100)+'%.',dis:S.efectivo<c?'No tienes '+fmt(c):sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=c; const exito=chance(p), l=L();
+      if(f.id==='paro'){ companias().filter(x=>x.sector===s).forEach(x=>{ x.ingresos=Math.max(1,x.ingresos*.93); }); }
+      S.tension=clamp((S.tension||35)+f.tension,0,100); if(f.prest) moverPrestigio(f.prest,'');
+      if(f.id==='paro'&&pres) pres.rencor=Math.min(80,(pres.rencor||0)+6);
+      if(exito){ if(o.tipo==='arancel'){ l.aj[s]=(l.aj[s]||0)+o.dir*8; log('<b>El Gobierno cedió:</b> el arancel de '+esc(secN(s))+' '+(o.dir>0?'sube':'baja')+' ocho puntos.','bien'); }
+        else if(o.tipo==='alivio'){ l.alivio[s]={hasta:S.anio+4,bonus:.012}; log('<b>Alivio tributario</b> para '+esc(secN(s))+': cuatro años de menos impuestos.','bien'); }
+        else { companias().filter(x=>x.sector===s).forEach(x=>{ const y=x.ingresos*.03; x.caja+=y; }); log('<b>Subsidio concedido</b> para las compañías de '+esc(secN(s))+'.','bien'); }
+        g.ap=clamp(g.ap+6,0,100); g.influ=clamp(g.influ+3,0,100); }
+      else { log('El Gobierno <b>no cedió</b> a la presión de '+esc(gr.corto)+' por '+esc(secN(s))+'.','mal'); g.ap=clamp(g.ap-4,0,100); }
+      cerrarModal(); render(); }}; });
+    escena({rubro:esc(secN(s)),titulo:o.n,cerrable:true,clase:'lid159',cuerpo:'¿Cómo presionas?',opciones:ops}); }
+  /* --- los aranceles --- */
+  function escenaAranceles159(){ const l=L(), g=gob(), mios=Array.from(new Set(companias().map(e=>e.sector)));
+    const filas=SEC.filter(s=>PERFIL[s].mult>0||mios.includes(s)).map(s=>{ const d=dev(s), p=PERFIL[s], mio=mios.includes(s); return '<tr><td><b>'+esc(secN(s))+'</b>'+(mio?' <small>(tuyo)</small>':'')+'<br><small>'+(p.prod>=.8?'protege al productor':p.ins>=.7?'depende de insumos importados':p.trade>=.5?'vive del comercio':p.exp>=.6?'exporta':'efecto moderado')+'</small></td><td style="text-align:right">'+Math.round(niv(s))+'%<br><small class="'+(d>3?'alto':d<-3?'bajo':'')+'">'+(d>=0?'+':'')+Math.round(d)+' vs. lo normal</small></td></tr>'; }).join('');
+    const efs=companias().map(e=>({e,v:efArancel(e)}));
+    const net=efs.length?efs.map(x=>'<tr><td>'+esc(x.e.nombre)+'</td><td style="text-align:right" class="'+(x.v>.004?'bajo':x.v<-.004?'alto':'')+'">'+(x.v>=0?'+':'')+R1(x.v*100)+'% al año</td></tr>').join(''):'';
+    escena({rubro:'Política comercial',titulo:'Los aranceles',ancho:true,cerrable:true,clase:'lid159',cuerpo:'La norma de '+S.anio+' pone el arancel promedio en '+Math.round(baseArancel(S.anio))+'%'+(S.anio<1991&&S.anio>=1950?' (sustitución de importaciones)':S.anio>=1991&&S.anio<2000?' (la apertura económica)':S.anio>=2012?' (con tratados de libre comercio)':'')+'. Un '+esc(g.n)+' lo mueve '+((g.apertura||0)>0?'a la baja':(g.apertura||0)<0?'al alza':'poco')+', y tu presión también. Lo que se aparta de lo normal protege a unos, encarece los insumos de otros y complica a los exportadores.',
+      html:'<table class="libro">'+filas+'</table>'+(net?'<h4>Cómo le toca a tus compañías</h4><table class="libro">'+net+'</table>':''),opciones:[]}); }
+  /* --- el año --- */
+  function evMedida(m){ const l=L(), A=afil(), rel=A.filter(id=>sectoresDe(id).some(s=>m.gan.includes(s)||m.pier.includes(s))), w=rel.reduce((q,id)=>Math.max(q,peso(id)),0)*3+(A.length?1:0), best=rel.sort((a,b)=>peso(b)-peso(a))[0], mios=Array.from(new Set(companias().map(e=>e.sector)));
+    const ganas=mios.some(s=>m.gan.includes(s)), pierdes=mios.some(s=>m.pier.includes(s)), po=pol();
+    const resolver=(stance)=>{ const pres=po&&po.pres; let p=m.p0+(po&&po.congreso?(po.congreso.mayoria-.5)*.4:0)+((pres&&pres.credito)||0)/500-(S.tension||35)/500+(stance*w+rnd(-1.5,1.5))*.035; p=clamp(p,.08,.92); return chance(p); };
+    const aplicar=(pasa,stance,suave)=>{ if(pasa){ m.gan.forEach(s=>l.mods.push({sector:s,delta:m.mag,hasta:S.anio+3})); m.pier.forEach(s=>l.mods.push({sector:s,delta:-m.mag*(suave?.5:1),hasta:S.anio+3})); if(m.esp) try{ m.esp(); }catch(e){} }
+      const pres=po&&po.pres; if(pres){ if(stance>0&&pasa) pres.credito=Math.min(150,(pres.credito||0)+8); if(stance<0&&pasa) pres.rencor=Math.min(80,(pres.rencor||0)+8); if(stance>0&&!pasa) pres.credito=Math.min(150,(pres.credito||0)+3); }
+      afil().forEach(id=>{ const g=G(id), ov=sectoresDe(id); if(!ov.length) return; const dano=ov.some(s=>m.pier.includes(s)), bien=ov.some(s=>m.gan.includes(s)); if(stance>0&&dano) g.ap=clamp(g.ap-10,0,100); if(stance<0&&dano) g.ap=clamp(g.ap+8,0,100); if(stance>0&&bien) g.ap=clamp(g.ap+6,0,100); if(stance<0&&bien) g.ap=clamp(g.ap-6,0,100); if(stance!==0) g.influ=clamp(g.influ+1,0,100); });
+      return pasa?'<b>Pasó '+m.n+'.</b>'+(suave?' Con tus cambios, el golpe quedó a la mitad.':''):'<b>Se hundió '+m.n+'.</b>'; };
+    return {p:7,c:()=>true,t:()=>'<b>El Gobierno presenta '+m.n+'.</b> '+m.d+(ganas?' Le conviene a tus compañías de '+mios.filter(s=>m.gan.includes(s)).map(secN).join(', ')+'.':'')+(pierdes?' Le pega a tus compañías de '+mios.filter(s=>m.pier.includes(s)).map(secN).join(', ')+'.':'')+(best?' '+esc(cap(gremioDe(best).corto))+' espera tu posición.':''),
+      o:[{t:'Respaldarla públicamente',f:()=>aplicar(resolver(1),1,false)},
+         {t:'Oponerte con tu gremio ('+fmt(escala()*.08)+')',f:()=>{ S.efectivo-=Math.min(Math.max(0,S.efectivo),escala()*.08); return aplicar(resolver(-1),-1,false); }},
+         {t:'Negociar cambios'+(best&&cIx(G(best).cargo)>=1?'':' (necesitas la junta directiva de un gremio afectado)'),f:()=>{ if(!(best&&cIx(G(best).cargo)>=1)) return 'No tenías silla en la mesa: quedaste por fuera.'; const ok=chance(clamp(.45+peso(best)*.3,.2,.85)); const pasa=resolver(0); return aplicar(pasa,0,pasa&&ok); }},
+         {t:'Quedarte callado',f:()=>aplicar(resolver(0),0,false)}]}; }
+  function evAsamblea(gid){ const gr=gremioDe(gid), g=G(gid), ix=g.cargo?cIx(g.cargo):-1, prox=proximo(gid), vence=g.cargo&&g.hasta<=S.anio;
+    const sube=prox&&!faltas(gid,prox).length?prox:null, igual=vence?CARGOS[ix]:null; if(!sube&&!igual) return null;
+    const costo=c=>Math.round(escala()*.06*(cIx(c.id)+1)), o=[];
+    const correr=c=>()=>{ const x=G(gid); x.eleccion=S.anio; if(S.efectivo<costo(c)) return 'No tenías '+fmt(costo(c))+' para la campaña.'; candidatura(gid,c); return x.cargo===c.id?'Ganaste la elección en '+gr.corto+'.':'No alcanzó.'; };
+    if(sube) o.push({t:'Lanzarte '+ac(sube)+' ('+fmt(costo(sube))+') · '+Math.round(probEleccion(gid,sube)*100)+'%',f:correr(sube)});
+    if(igual) o.push({t:'Reelegirte como '+igual.n.toLowerCase()+' ('+fmt(costo(igual))+') · '+Math.round(probEleccion(gid,igual)*100)+'%',f:correr(igual)});
+    o.push({t:'Dejarlo para otra asamblea',f:()=>{ G(gid).eleccion=S.anio; return 'No te postulaste esta vez.'; }});
+    return {p:6,c:()=>afil().includes(gid),t:()=>'<b>Asamblea de '+esc(gr.corto)+'.</b> '+(igual?'Se vence tu período como '+esc(igual.n.toLowerCase())+'. ':'')+(sube?'Se elige '+esc(nc(sube))+' y tus años y tu nombre te dan opción.':''),o}; }
+  function anual(){ if(!ACTIVO()||nino()) return; const l=L(), prev=S.anio-1;
+    // los afiliados y los cargos
+    afil().forEach(id=>{ const g=G(id); g.anios++; g.ap=clamp(g.ap+(55-g.ap)*.12,0,100);
+      if(g.cargo){ const c=CARGOS[cIx(g.cargo)], gr=gremioDe(id);
+        if(g.ap<30){ log('Te sacaron '+esc(del(c))+' de <b>'+esc(gr.corto)+'</b>: los afiliados perdieron la confianza.','mal'); g.cargo=null; g.influ*=.4; }
+        else if(g.hasta<S.anio){ g.cargo=null; g.influ*=.5; log('Terminó tu período en '+esc(nc(c))+' de <b>'+esc(gr.corto)+'</b>.'); }
+        else g.influ=clamp(g.influ*.9+c.inf*.12,0,100); }
+      else g.influ=clamp(g.influ*.85,0,100); });
+    // los aranceles se acomodan
+    Object.keys(l.aj).forEach(s=>{ l.aj[s]*=.75; if(Math.abs(l.aj[s])<.5) delete l.aj[s]; });
+    // el salario mínimo que nadie negoció lo decreta el Gobierno
+    if(S.anio>=1951){ if(!l.smlv[prev]) l.smlv[prev]=smlvDefecto(prev); aplicarSmlv(l.smlv[prev]); }
+    Object.keys(l.alivio).forEach(s=>{ if(l.alivio[s].hasta<S.anio) delete l.alivio[s]; }); l.mods=l.mods.filter(m=>m.hasta>=S.anio);
+    // los eventos
+    if(S._ev159===S.anio) return;
+    const elec=afil().find(id=>(S.anio+hash(id))%3===0&&G(id).eleccion!==S.anio);
+    if(elec&&chance(.7)){ const ev=evAsamblea(elec); if(ev){ S._ev159=S.anio; cola.push(ev); return; } }
+    const disp=MEDIDAS.filter(m=>S.anio>=m.desde&&!(l.ult&&l.ult[m.id]&&S.anio-l.ult[m.id]<6)); if(disp.length&&chance(.28)){ const m=pick(disp); (l.ult=l.ult||{})[m.id]=S.anio; S._ev159=S.anio; cola.push(evMedida(m)); } }
+  /* --- enganches --- */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA159_EMP) return; window.__SA159_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&companias().includes(e)&&PERFIL[e.sector]){ const b=clamp(efArancel(e)+efMods(e),-.06,.06); if(Math.abs(b)>.0005){ const x=e.ingresos*b, sm=(typeof SECTORES!=='undefined'&&SECTORES.find(z=>z.id===e.sector))||{m:.1}, du=x*clamp((sm.m||.1)*1.3,.1,.3); e.ingresos=Math.max(1,e.ingresos+x); e.utilidad+=du; e.caja+=du; }
+        if(S.anio>=1951){ const c=costoSmlv(e); if(Math.abs(c)>.01){ e.utilidad-=c; e.caja-=c; } } } }catch(x){ console.error(x); } return r; }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA159_PASO) return; window.__SA159_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapMov(){ const old=window.movidasBase; if(typeof old!=='function'||window.__SA159_MOV) return; window.__SA159_MOV=true;
+    window.movidasBase=function(){ let n=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()&&mejorCargo()>=2) n=Math.max(1,n-1); }catch(e){} return n; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA159_ACC) return; window.__SA159_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!ACTIVO()||nino()) return A; const enGrupo=!window.__crudo91&&A.some(x=>x.t==='Influencia y palancas'&&x.modal);
+        if(!enGrupo&&!A.some(x=>x.t==='El liderazgo gremial')){ const m=mejorCargo(); A.push({t:'El liderazgo gremial',cat:'empleo',d:(m>=0?'Tu cargo: '+CARGOS[m].n.toLowerCase()+'. ':'')+'Sube de cargo en tu gremio, negocia el salario mínimo y las convenciones, presiona al Gobierno y mira los aranceles.',mov:0,modal:true,run:()=>escenaLiderazgo159()}); } }catch(x){ console.error(x); }
+      return A; }; window.listaAcciones.__v159=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA159_CAT) return; window.__SA159_CAT=true;
+    window.catDe=function(t){ if(t==='El liderazgo gremial') return 'empleo'; return old.apply(this,arguments); }; }
+  function grupo(){ const G_=window.GRUPOS_91; if(!Array.isArray(G_)) return; const g=G_.find(x=>x.id==='palancas'); if(!g||!Array.isArray(g.miembros)) return; if(!g.miembros.some(m=>m[1]==='El liderazgo gremial')) g.miembros.push(['Influencia','El liderazgo gremial']); }
+  function init159(){ wrapEmpresa(); wrapPaso(); wrapMov(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{escenaLiderazgo159,escenaGremio159,escenaSalario159,escenaRama159,escenaLineaRama159,escenaPresion159,escenaSector159,escenaForma159,escenaAranceles159,faltasGremio159:faltas,lider159:L,gremio159:G,CARGOS_GREMIO_159:CARGOS,MEDIDAS_159:MEDIDAS,nivelArancel159:niv,desvioArancel159:dev,efectoArancel159:efArancel,anualGremios159:anual,evMedida159:evMedida,costoSmlv159:costoSmlv,candidaturaGremio159:candidatura,probEleccionGremio159:probEleccion,efectoMods159:efMods}); }
+  setTimeout(init159,40); setTimeout(init159,220); setTimeout(init159,650); setTimeout(init159,950);
+  window.__SA159={version:V159};
 })();
 </script>
 
