@@ -1296,10 +1296,26 @@ svg.foto116{display:block;background:#1d2a23}
 .com167 .b167 i{display:block;height:100%;background:var(--laton)}
 .com167 .tlc167{font-size:11.5px;padding:1px 7px;border-radius:7px;background:rgba(111,192,143,.22);color:#8fe0b0;margin-left:4px}
 </style>
+<style id="estilos-v168">
+.ir168{margin-left:8px;padding:2px 11px;border-radius:12px;border:1px solid rgba(214,166,72,.55);background:rgba(214,166,72,.12);color:#F0CF86;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;line-height:1.5}
+.ir168:hover{background:rgba(214,166,72,.26)}
+.ir168.suave{background:transparent;border-color:rgba(255,255,255,.18);color:var(--humo2,#b9ae98);margin-left:0}
+.pie168{margin:6px 0 0;text-align:right}
+.con168 .cab168{display:flex;gap:12px;align-items:center;margin:2px 0 10px}
+.con168 .ava168{width:46px;height:46px;border-radius:50%;background:rgba(214,166,72,.18);display:grid;place-items:center;font-family:var(--display);font-size:19px;color:#F0CF86;border:1px solid rgba(214,166,72,.5);flex:none}
+.con168 .cab168 small{color:var(--humo2,#b9ae98)}
+.con168 .tar168{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-left:3px solid #C25B4E;margin:8px 0}
+.con168 .tar168.oro{border-left-color:#D6A648}
+.con168 .tar168.bien{border-left-color:#6FC08F}
+.con168 .tar168 .p168{font-size:12.5px;color:var(--humo2,#b9ae98);margin-top:5px}
+.con168 .tar168 .bt168{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.con168 .nada168{padding:14px;border-radius:10px;background:rgba(111,192,143,.08);border:1px solid rgba(111,192,143,.25);margin:8px 0}
+.con168 .pie168b{margin-top:10px;font-size:12px;color:var(--humo2,#b9ae98)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v167</div>
+<div class="version-badge" id="versionBadge">v168</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3754,7 +3770,7 @@ function consejoDelAnio(){
     if(compromisos().length) return [{txt:'Año tranquilo. Lo que tienes en curso avanza solo.',tono:'bien'}];
     return [{txt:'No hay nada urgente. Es el año para construir algo que tome tiempo.',tono:'bien'}];
   }
-  return av.sort((a,b)=>b.peso-a.peso).slice(0,3);
+  return av.sort((a,b)=>b.peso-a.peso).slice(0,window.__todosConsejos168?99:3);
 }
 
 /* ---------------- las puertas ---------------- */
@@ -8427,7 +8443,7 @@ function renderLienzo(){
   if(tab==='mesa'){
     h+=dashboardPersona();
     const consejos=consejoDelAnio();
-    if(consejos.length) h+='<div class="wrap dash-after-note"><div class="dash-notices">'+consejos.map(c=>'<p class="'+(c.tono||'mal')+'">'+c.txt+'</p>').join('')+'</div>'+(compromisos().length?'<div class="dash-running">En curso: '+compromisos().map(c=>esc(c.titulo)+' · '+c.restan+' año'+(c.restan>1?'s':'')).join(' · ')+'</div>':'')+'</div>';
+    if(consejos.length) h+='<div class="wrap dash-after-note"><div class="dash-notices">'+consejos.map(c=>'<p class="'+(c.tono||'mal')+'">'+c.txt+(window.botonConsejo168?window.botonConsejo168(c):'')+'</p>').join('')+(window.pieConsejero168?window.pieConsejero168():'')+'</div>'+(compromisos().length?'<div class="dash-running">En curso: '+compromisos().map(c=>esc(c.titulo)+' · '+c.restan+' año'+(c.restan>1?'s':'')).join(' · ')+'</div>':'')+'</div>';
     if(S.destitucionAviso) h+='<div class="wrap dash-after-note"><div class="aviso"><b>La junta te tiene en evaluación.</b> Si el año cierra otra vez en pérdidas, convocan la votación de salida. Sube la confianza, recupera utilidad, o compra acciones hasta pasar del 50%.</div></div>';
   }
 
@@ -30874,6 +30890,179 @@ install();setTimeout(install,1200);
     Object.assign(window,{MERCADOS_167:MERC,INCENTIVOS_167:INC,mercadosDe167:mercDisp,arancelDestino167:arancelDe,comercio167:EX,cuotaExport167:share,cuotaMaxima167:cuotaMax,costoEntrada167:costoEntrada,exportable167:exportable,cicloMundo167:mundo,anualComercio167:anualCompania,escenaComercio167,eventoAntidumping167:evAntidumping,eventoPuerto167:evPuerto,eventoMoroso167:evMoroso,eventoAduana167:evAduana}); }
   setTimeout(init167,40); setTimeout(init167,220); setTimeout(init167,650); setTimeout(init167,950);
   window.__SA167={version:V167};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v168 · EL CONSEJERO DE LA CASA
+   La mesa ya avisaba "qué aprieta este año", pero solo con texto, solo con
+   lo básico y sin decirte por dónde empezar. Ahora la casa tiene un
+   consejero de su época (el mayordomo, el apoderado, el contador, el
+   administrador, el asesor financiero, el gerente de la oficina familiar):
+   - Revisa tu situación entera: juicios y recursos, riesgo penal, salud,
+     testamento, caja de cada compañía, pérdidas, visitas de reguladores,
+     comercio exterior, dólar sin cubrir, plata quieta, seguros, o que ni
+     siquiera tengas un negocio.
+   - Las tres cosas más urgentes salen en la mesa, cada una con un botón
+     que te lleva directo a la decisión que la resuelve.
+   - Tiene su pantalla: seis avisos con el porqué y qué pasa si no haces
+     nada. Puedes decirle "ya lo sé" y calla ese tema tres años.
+   - Cada año deja constancia del más urgente en la crónica.
+   - Otros módulos le pueden sumar avisos con consejeroRegistrar168(fn).
+   ========================================================================== */
+(function(){
+  const V168='v168';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>fmt(Math.round(x));
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const hash=s=>{ let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); };
+  const sentar=e=>()=>{ try{ const i=comps().indexOf(e); if(i>=0){ sentarseEn(i); try{ negSel=i; }catch(x){} } }catch(x){} };
+  /* ---- el estado del consejero ---- */
+  function ST(){ if(!S.con168||typeof S.con168!=='object') S.con168={asesor:null,mudo:{},seguidos:0}; const c=S.con168; c.mudo=c.mudo&&typeof c.mudo==='object'?c.mudo:{}; c.seguidos=c.seguidos||0; return c; }
+  /* ---- quién aconseja, según la época ---- */
+  const APELL=['Cuéllar','Mejía','Santamaría','Posada','Cárdenas','Samper','Ospina','Zuluaga','Valencia','Londoño','Pombo','Caicedo','Rojas','Duque','Vélez','Montoya','Lozano','Barrera'];
+  const ERAS=[
+    {hasta:1859,tit:'el mayordomo de la casa',pre:'Don',m:['Anselmo','Próspero','Eustaquio','Nepomuceno','Casimiro','Hilario','Telésforo']},
+    {hasta:1919,tit:'el apoderado de la casa',pre:'Don',m:['Aurelio','Rafael','Clímaco','Bonifacio','Eladio','Heliodoro','Ezequiel']},
+    {hasta:1959,tit:'el contador de la casa',pre:'Don',m:['Gonzalo','Alfonso','Ernesto','Gustavo','Aníbal','Evaristo','Ignacio']},
+    {hasta:1989,tit:'el administrador de la familia',pre:'Doctor',m:['Hernán','Jaime','Álvaro','Fernando','Germán','Darío'],preF:'Doctora',f:['Lucía','Cecilia','Marta','Stella']},
+    {hasta:2009,tit:'el asesor financiero de la familia',pre:'Doctor',m:['Mauricio','Rodrigo','Felipe','Esteban','Camilo'],preF:'Doctora',f:['Marcela','Patricia','Claudia','Adriana','Liliana']},
+    {hasta:9999,tit:'el gerente de la oficina familiar',pre:'',m:['Santiago','Julián','Sebastián','Andrés','Nicolás'],preF:'',f:['Valentina','Carolina','Juliana','Natalia','Daniela']}];
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  function nuevoAsesor(){ const era=ERAS.find(x=>A()<=x.hasta)||ERAS[ERAS.length-1];
+    const fem=!!(era.f&&Math.random()<.5); const nom=pick(fem?era.f:era.m);
+    const dueno=[S.p&&S.p.apellido,S.dinastia].filter(Boolean); let ap=pick(APELL); for(let i=0;i<6&&dueno.includes(ap);i++) ap=pick(APELL);
+    return {nom:((fem?era.preF:era.pre)||'')+' '+nom+' '+ap, corto:nom, tit:era.tit, era:era.tit, desde:S.anio, fem}; }
+  function asesor(){ const c=ST(); if(!c.asesor) c.asesor=nuevoAsesor(); return c.asesor; }
+  function rotar(){ const c=ST(); const era=ERAS.find(x=>A()<=x.hasta)||ERAS[ERAS.length-1]; const as=c.asesor;
+    if(!as){ c.asesor=nuevoAsesor(); return; }
+    if(as.era!==era.tit||A()-as.desde>=28){ const nuevo=nuevoAsesor(); c.asesor=nuevo; log('<b>'+E(as.nom.trim())+'</b> se retiró de '+E(as.tit)+'. Ahora te aconseja <b>'+E(nuevo.nom.trim())+'</b>, '+E(nuevo.tit)+'.'); } }
+  const trato=()=>{ const f=!(S.p&&S.p.sexo==='h'), a=A(); if(a<1960) return f?'Señora':'Señor'; if(a<2000) return f?'Doctora':'Doctor'; return (S.p&&S.p.nombre)||'oye'; };
+  /* ==================== LOS AVISOS PROPIOS ==================== */
+  const EXTRA=[];
+  const silenciado=id=>{ const m=ST().mudo[id]; return isFinite(m)&&m>A(); };
+  function gJusticia(){ const out=[], p=S.penal; if(!p) return out;
+    const c=p.caso; const ir='Revisar tu situación penal';
+    if(c&&c.estado==='juicio') out.push({id:'juicio',peso:93,tono:'mal',txt:'Tienes un <b>juicio abierto</b> por '+E(c.motivo||'una investigación penal')+'. El abogado se contrata antes del fallo, no después.',por:'Un buen penalista y un apellido limpio pesan más que cualquier excusa el día de la audiencia.',si:'Llegas al fallo con lo que tengas: la condena puede ser de varios años.',ir,irT:'Ver el caso'});
+    else if(c&&c.estado==='investigacion') out.push({id:'investigacion',peso:72,tono:'mal',txt:'Hay una <b>investigación penal</b> en marcha por '+E(c.motivo||'tus negocios')+'.',por:'Si pasa a juicio ya es tarde para negociar; ahora todavía se puede colaborar o preparar la defensa.',si:'La investigación puede convertirse en proceso formal cualquier año.',ir,irT:'Ver el caso'});
+    const i=p.ins160;
+    if(i&&i.estado==='curso'&&i.abogado==='oficio'&&!p.penaMuerte) out.push({id:'recurso-oficio',peso:52,tono:'mal',txt:'Tu <b>recurso</b> lo lleva un defensor de oficio, con doscientos expedientes más.',por:'Un penalista reconocido mueve el expediente y gana más recursos.',si:'El recurso avanza lento y se pierde con más frecuencia.',ir,irT:'Ver el recurso'});
+    if(!c&&!(p.prisionRestante>0)&&(p.riesgo||0)>=55) out.push({id:'riesgo-penal',peso:58,tono:'mal',txt:'Tu <b>riesgo penal</b> está en '+Math.round(p.riesgo)+': tus negocios grises dejaron rastro.',por:'Pasada cierta cifra, una investigación llega sola, sin que hagas nada más.',si:'Tarde o temprano toca la puerta alguien con una orden.',ir,irT:'Ver la situación'});
+    return out; }
+  function gPersona(){ const out=[], p=S.p;
+    if(p.salud>=38&&p.salud<55) out.push({id:'salud',peso:Math.round(40+(55-p.salud)*.7),tono:'mal',txt:'Tu salud anda en '+Math.round(p.salud)+': todavía se arregla.',por:'Con un médico y descanso ahora se recupera; dentro de unos años cuesta mucho más.',si:'Cada año a este ritmo baja la salud y sube el riesgo de morir antes de dejar la casa en orden.',ir:'Cuidarte: médico y ejercicio',irT:'Ir al médico'});
+    if(p.felicidad<30) out.push({id:'animo',peso:44,tono:'mal',txt:'Andas <b>agotado</b> (ánimo en '+Math.round(p.felicidad)+').',por:'Un ánimo bajo se paga en decisiones, en salud y en la casa.',si:'La tristeza se te nota y no rinde ninguna jugada.',ir:['Tomarte un respiro','Vacaciones de verdad'],irT:'Descansar'});
+    if(p.edad>=55&&!S.testamento) out.push({id:'testamento',peso:Math.round(48+Math.min(30,(p.edad-55)*2)),tono:'mal',dup:/testamento/,txt:'Vas en '+p.edad+' años y <b>no has dictado testamento</b>.',por:'Con testamento decides quién queda con qué, y con cuánto control.',si:'La ley reparte por partes iguales y los pleitos entre herederos se comen una tajada.',ir:'Dictar testamento',irT:'Dictarlo'});
+    const f=S.familia||{};
+    if(p.edad>=27&&p.edad<=42&&!f.pareja&&!(f.hijos||[]).length) out.push({id:'heredero',peso:30,tono:'oro',dup:/descendencia/,txt:'Todavía <b>no hay con quién dejar la casa</b>.',por:'Una casa sin descendencia se apaga con quien la funda; un buen matrimonio también trae contactos y prestigio.',si:'Cada año que pasa es uno menos para criar a un heredero.',ir:['Buscar un buen matrimonio','Salir a conocer gente'],irT:'Buscar pareja'});
+    return out; }
+  function gNegocios(){ const out=[], g=comps();
+    if(!g.length&&p_edad()>=21){ const emp=S.carrera&&S.carrera.ruta; out.push({id:'sin-negocio',peso:emp?28:50,tono:'oro',txt:'Todavía <b>no tienes ninguna compañía</b>.',por:'El efectivo quieto pierde valor con la inflación; una compañía lo pone a trabajar y hace crecer el apellido.',si:'La fortuna depende solo de tu sueldo y de lo que hereden.',ir:'Fundar una compañía',irT:'Fundar una'}); }
+    g.forEach(e=>{ if(!e||!(e.ingresos>0)) return;
+      const nom=E(e.nombre);
+      if((e.aniosAhogo||0)<1&&e.caja<e.ingresos*.05&&S.efectivo>=Math.max(e.ingresos*.1,120)) out.push({id:'caja:'+e.nombre,peso:64,tono:'mal',txt:'<b>'+nom+'</b> tiene la caja casi vacía ('+fm(e.caja)+').',por:'Sin colchón, cualquier mal trimestre la obliga a endeudarse con quien cobre más caro.',si:'Se ahoga: deuda alta, caja en el piso y pérdidas.',ir:'Aportar capital personal a la compañía',irT:'Aportar capital',pre:sentar(e)});
+      if(e.utilidad<0) out.push({id:'perdida:'+e.nombre,peso:61,tono:'mal',txt:'<b>'+nom+'</b> está dando pérdidas ('+fm(e.utilidad)+').',por:'Una compañía que pierde se come la caja y el valor de lo que tienes en ella.',si:'La junta se impacienta y el mercado la castiga.',ir:'Recortar costos',irT:'Recortar costos',pre:sentar(e)});
+      else if((e.innovacion||50)<30&&(e.marca||50)<38) out.push({id:'rezago:'+e.nombre,peso:38,tono:'oro',txt:'<b>'+nom+'</b> se está quedando atrás en producto y marca.',por:'Sin innovación ni marca, el negocio vive de que nadie más lo haga mejor.',si:'Los competidores se llevan a tus clientes poco a poco.',ir:'Invertir en producto y tecnología',irT:'Invertir',pre:sentar(e)}); });
+    return out; }
+  function p_edad(){ return (S.p&&S.p.edad)||0; }
+  function gRegulacion(){ const out=[]; if(typeof window.riesgoRegulatorio166!=='function') return out;
+    comps().forEach(e=>{ try{ if(window.riesgoRegulatorio166(e)!=='alto') return; const regs=window.reguladoresDe166(e); const r=regs[0]; const cum=window.cumplimiento166(e);
+      out.push({id:'regula:'+e.nombre,peso:71,tono:'mal',txt:'Es probable que '+(r?E(typeof r.n==='function'?r.n(A()):r.n):'un regulador')+' visite a <b>'+E(e.nombre)+'</b>: su cumplimiento está en '+Math.round(cum)+'/100.',por:'Con el control interno flojo, cada visita termina en observaciones, multas y mala prensa.',si:'La visita llega sin preparación y la sanción sale más cara.',ir:'Regulación y cumplimiento',irT:'Prepararte',pre:sentar(e)}); }catch(x){} });
+    return out.slice(0,1); }
+  function gComercio(){ const out=[]; if(typeof window.exportable167!=='function'||A()<1700) return out;
+    for(const e of comps()){ try{
+      const x=e.ext167||{merc:{},imp:0,cob:0};
+      if(window.exportable167(e)&&!Object.keys(x.merc||{}).length){ const ms=window.mercadosDe167(e).filter(m=>window.arancelDestino167(m)===0||m.desde>=A()-3); const m=ms[0];
+        if(m&&e.ingresos>400){ out.push({id:'export:'+e.nombre,peso:42,tono:'oro',txt:(window.arancelDestino167(m)===0?'Con '+E(m.n)+' sin aranceles, ':'Con '+E(m.n)+' recién abierto, ')+'<b>'+E(e.nombre)+'</b> podría empezar a exportar.',por:'Un mercado nuevo tarda en madurar, pero el que llega primero se queda con los mejores distribuidores.',si:'Otro de tu sector se lleva ese cliente.',ir:'Comercio exterior',irT:'Ver mercados',pre:sentar(e)}); break; } }
+      const w=S.mundo167, usd=S.macro&&S.macro.usd;
+      if(A()>=1991&&(x.imp||0)>=.3&&!(x.cob>0)&&w&&isFinite(w.usdPrev)&&isFinite(usd)&&w.usdPrev>0&&Math.abs(usd/w.usdPrev-1)>=.1){ out.push({id:'dolar:'+e.nombre,peso:57,tono:'mal',txt:'El dólar se movió y <b>'+E(e.nombre)+'</b> importa el '+Math.round(x.imp*100)+'% de sus insumos sin cobertura.',por:'La cobertura cambiaria cuesta poco y quita el golpe de una devaluación.',si:'Cada salto del dólar se lo come en utilidad.',ir:'Comercio exterior',irT:'Cubrirte',pre:sentar(e)}); break; }
+    }catch(y){} }
+    return out; }
+  function gDinero(){ const out=[]; let fijos=0; try{ fijos=compromisosAnuales()||0; }catch(e){}
+    if(S.efectivo>2000&&S.efectivo>Math.max(fijos*4,pat()*.4)&&(S.penal==null||!(S.penal.prisionRestante>0))){ const inf=S.macro&&isFinite(S.macro.inflacion)?S.macro.inflacion:0;
+      out.push({id:'quieto',peso:34,tono:'oro',txt:'Tienes <b>'+fm(S.efectivo)+'</b> en efectivo, sin trabajar.',por:inf>=.04?'Con una inflación de '+(Math.round(inf*1000)/10)+'% anual, la plata quieta pierde valor todos los años.':'El efectivo quieto no rinde; la tierra, un negocio o la bolsa sí.',si:'El dinero se queda donde está mientras todo lo demás sube.',ir:['Invertir en el mercado','Fondos de inversión','Comprar finca','Comprar vivienda'],irT:'Ponerlo a trabajar'}); }
+    const hay=(S.bienes||[]).length||comps().length;
+    if(A()>=1900&&hay&&!Object.keys(S.seguros||{}).length) out.push({id:'seguros',peso:36,tono:'oro',txt:'Nada de lo que tienes está <b>asegurado</b>.',por:'Un incendio, una enfermedad o un robo se pagan con el patrimonio si no hay póliza.',si:'Un solo siniestro puede borrar años de trabajo.',ir:'Revisar los seguros',irT:'Revisar'});
+    return out; }
+  /* ==================== EL CONJUNTO ==================== */
+  const IR_ORIG=[
+    [/tu salud está/i,'Cuidarte: médico y ejercicio','Ir al médico'],
+    [/testamento/i,'Dictar testamento','Dictarlo'],
+    [/descendencia/i,['Buscar un buen matrimonio','Salir a conocer gente'],'Buscar pareja'],
+    [/escándalo/i,'Prensa e imagen','Ver la prensa'],
+    [/quién la dirija/i,'El equipo directivo','Poner director'],
+    [/ahogada/i,'Aportar capital personal a la compañía','Aportar capital'],
+    [/peleando tu mercado/i,'Cuota de mercado de tu sector','Ver el mercado'],
+    [/a punto de irse/i,'Atender a la familia','Atender']];
+  function aviso168(x){ const t=plano(x.txt); const o=Object.assign({},x,{id:'o'+hash(t.replace(/\d+/g,'#'))}); const m=IR_ORIG.find(r=>r[0].test(t)); if(m){ o.ir=m[1]; o.irT=m[2]; const c=comps().find(e=>t.indexOf(plano(e.nombre))>=0); if(c) o.pre=sentar(c); } return o; }
+  let VIEJA=null;
+  function todos(oculto){ if(!ACTIVO()) return [];
+    let base=[]; try{ window.__todosConsejos168=true; base=(VIEJA?VIEJA.call(window):[])||[]; }catch(e){ base=[]; } finally{ window.__todosConsejos168=false; }
+    const orig=base.filter(x=>x&&x.peso!==undefined).map(aviso168);
+    let extra=[]; [gJusticia,gPersona,gNegocios,gRegulacion,gComercio,gDinero].concat(EXTRA).forEach(fn=>{ try{ const r=fn(); if(Array.isArray(r)) extra=extra.concat(r); }catch(e){ console.error(e); } });
+    const textos=orig.map(x=>plano(x.txt));
+    extra=extra.filter(a=>a&&a.txt&&!(a.dup&&textos.some(t=>a.dup.test(t))));
+    let L=orig.concat(extra); const vistos={}; L=L.filter(a=>{ if(vistos[a.id]) return false; vistos[a.id]=1; return true; });
+    const mudos=L.filter(a=>silenciado(a.id));
+    L=L.filter(a=>!silenciado(a.id)).sort((a,b)=>b.peso-a.peso);
+    if(oculto) return {lista:L,mudos:mudos.length};
+    return L; }
+  /* ==================== IR A LA DECISIÓN ==================== */
+  function crudas(){ const prev=window.__crudo91; window.__crudo91=true; try{ return listaAcciones()||[]; }catch(e){ return []; } finally{ window.__crudo91=prev; } }
+  function buscar(ir){ const L=crudas(); const lista=Array.isArray(ir)?ir:[ir];
+    for(const t of lista){ const a=L.find(z=>z&&z.t===t)||L.find(z=>z&&typeof z.t==='string'&&z.t.indexOf(t)===0); if(a&&!a.dis) return a; }
+    for(const t of lista){ const a=L.find(z=>z&&z.t===t); if(a) return a; }
+    return null; }
+  function irA(id){ const a=todos().find(x=>x.id===id); try{ cerrarModal(); }catch(e){}
+    if(!a||!a.ir){ render(); return; }
+    try{ if(a.pre) a.pre(); }catch(e){}
+    const acc=buscar(a.ir);
+    if(!acc){ aviso('Ahora mismo no se puede hacer eso.'); render(); return; }
+    const dis=acc.dis||((acc.mov||0)>S.mov?'Te quedan '+S.mov+' movidas y esto cuesta '+(acc.mov||1)+'.':null);
+    if(dis){ aviso(plano(dis)); render(); return; }
+    try{ const cat=catDe(acc.t); if(window.bloqueaPreso157?window.bloqueaPreso157(cat):(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat))){ aviso('Esta decisión queda suspendida por tu situación judicial.'); render(); return; } }catch(e){}
+    ST().seguidos++;
+    acc.run(); if(!acc.modal) S.mov=Math.max(0,S.mov-(acc.mov===0?0:(acc.mov||1)));
+    render(); }
+  function callar(id){ if(id==='todos'){ ST().mudo={}; } else ST().mudo[id]=A()+3; try{ cerrarModal(); }catch(e){} render(); escenaConsejero168(); }
+  /* ==================== LA PANTALLA ==================== */
+  function escenaConsejero168(){ if(!ACTIVO()||nino()) return; const as=asesor(), c=ST(), R=todos(true), L=R.lista.slice(0,6);
+    const ini=(as.corto||as.nom||'?').trim().charAt(0).toUpperCase();
+    const cab='<div class="cab168"><div class="ava168">'+E(ini)+'</div><div><b>'+E(as.nom.trim())+'</b><br><small>'+E(as.tit)+' · desde '+as.desde+'</small></div></div>';
+    const tr=trato(); const intro=!L.length?E(tr)+', hoy no veo nada que apremie.':E(tr)+', '+(L.length===1?'hay una cosa que no puede esperar.':'esto es lo que no puede esperar, por orden de urgencia.');
+    const tarjetas=L.map(a=>'<div class="tar168 '+E(a.tono||'mal')+'"><div>'+a.txt+'</div>'+(a.por?'<div class="p168"><b>Por qué importa:</b> '+a.por+'</div>':'')+(a.si?'<div class="p168"><b>Si no se hace:</b> '+a.si+'</div>':'')
+      +'<div class="bt168">'+(a.ir?'<button type="button" class="ir168" style="margin-left:0" data-c168="'+E(a.id)+'">'+E(a.irT||'Ir')+'</button>':'')+'<button type="button" class="ir168 suave" data-m168="'+E(a.id)+'">Ya lo sé, calla tres años</button></div></div>').join('');
+    const vacio=L.length?'':'<div class="nada168">Es un buen año para construir algo que tome tiempo: una compañía nueva, un mercado, una alianza o la educación de un hijo.</div>';
+    const pie='<div class="pie168b">'+(c.seguidos?'Has seguido '+c.seguidos+' consejo'+(c.seguidos===1?'':'s')+' de '+E(as.corto||'tu consejero')+'. ':'')+(R.mudos?'Silenciaste '+R.mudos+' tema'+(R.mudos===1?'':'s')+'. <button type="button" class="ir168 suave" data-m168="todos">Volver a escucharlos</button>':'')+'</div>';
+    escena({rubro:'La casa',titulo:'El consejero de la casa',ancho:true,cerrable:true,clase:'con168',cuerpo:intro+' Te quedan '+S.mov+' movida'+(S.mov===1?'':'s')+' este año.',html:cab+tarjetas+vacio+pie,opciones:[]}); }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapConsejo(){ const old=window.consejoDelAnio; if(typeof old!=='function'||old.__top168) return; VIEJA=old;
+    const f=function(){ if(window.__todosConsejos168) return old.apply(this,arguments);
+      try{ if(ACTIVO()&&!nino()){ const L=todos(); if(L.length) return L.slice(0,3); } }catch(e){ console.error(e); }
+      return old.apply(this,arguments); };
+    f.__top168=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.consejoDelAnio=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA168_PASO) return; window.__SA168_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments);
+      try{ if(ACTIVO()&&!nino()){ rotar(); const L=todos(); if(L.length&&L[0].peso>=50){ const as=asesor(); log('<b>'+E(as.nom.trim())+'</b>, '+E(as.tit)+': «'+E(plano(L[0].txt))+'»'); } } }catch(e){ console.error(e); }
+      return r; }; }
+  function clic(ev){ const t=ev.target; if(!t||!t.closest) return;
+    const b=t.closest('[data-c168]'); if(b){ ev.preventDefault(); ev.stopPropagation(); const v=b.getAttribute('data-c168'); if(v==='abrir') escenaConsejero168(); else irA(v); return; }
+    const m=t.closest('[data-m168]'); if(m){ ev.preventDefault(); ev.stopPropagation(); callar(m.getAttribute('data-m168')); } }
+  function init168(){ wrapConsejo(); wrapPaso(); if(!window.__SA168_CLIC){ window.__SA168_CLIC=true; document.addEventListener('click',clic,true); }
+    Object.assign(window,{
+      consejosCasa168:()=>todos(), consejeroRegistrar168:fn=>{ if(typeof fn==='function'&&!EXTRA.includes(fn)) EXTRA.push(fn); },
+      escenaConsejero168, irAConsejo168:irA, callarConsejo168:callar, asesor168:asesor, rotarAsesor168:rotar, tratoConsejero168:trato,
+      botonConsejo168:c=>(c&&c.ir&&c.id)?' <button type="button" class="ir168" data-c168="'+E(c.id)+'">'+E(c.irT||'Ir')+'</button>':'',
+      pieConsejero168:()=>{ try{ if(!ACTIVO()||nino()||!todos().length) return ''; const as=asesor(); return '<div class="pie168"><button type="button" class="ir168 suave" data-c168="abrir">Hablar con '+E((as.corto||'el consejero'))+'</button></div>'; }catch(e){ return ''; } },
+      ERAS_CONSEJERO_168:ERAS }); }
+  setTimeout(init168,40); setTimeout(init168,220); setTimeout(init168,650); setTimeout(init168,950);
+  window.__SA168={version:V168};
 })();
 </script>
 
