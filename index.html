@@ -1284,10 +1284,22 @@ svg.foto116{display:block;background:#1d2a23}
 .reg166 .riesgo166.medio{background:rgba(214,166,72,.25);color:#F0CF86}
 .reg166 .riesgo166.bajo{background:rgba(111,192,143,.22);color:#8fe0b0}
 </style>
+<style id="estilos-v167">
+.com167 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.com167 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.com167 .k b{display:block;font-size:15px;font-family:var(--display)}
+.com167 .k span{font-size:12px;color:var(--humo2)}
+.com167 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.com167 small{color:var(--humo2)}
+.com167 table.libro td{padding:5px 4px;vertical-align:top}
+.com167 .b167{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px;min-width:90px}
+.com167 .b167 i{display:block;height:100%;background:var(--laton)}
+.com167 .tlc167{font-size:11.5px;padding:1px 7px;border-radius:7px;background:rgba(111,192,143,.22);color:#8fe0b0;margin-left:4px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v166</div>
+<div class="version-badge" id="versionBadge">v167</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -30687,6 +30699,181 @@ install();setTimeout(install,1200);
     Object.assign(window,{REGULADORES_166:REGS,reguladoresDe166:regsDe,intensidadRegulacion166:intensidad,cumplimiento166:cumpl,probVisita166:pVisita,riesgoRegulatorio166:nivelRiesgo,estado166:R,compania166:RE,escenaRegulacion166,visitarCompania166:visitar,anualRegulacion166:anual,anualCompania166:anualCompania,eventoCartel166:evCartel,eventoConcentracion166:evConcentracion,eventoFiscal166:evFiscal,efectoRegulacion166:efMods,sancion166:sancion,observaciones166:observaciones,gravedad166:gravedad}); }
   setTimeout(init166,40); setTimeout(init166,220); setTimeout(init166,650); setTimeout(init166,950);
   window.__SA166={version:V166};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v167 · EL COMERCIO EXTERIOR DE CADA COMPAÑÍA
+   Antes, exportar era un contrato suelto que sumaba ingresos una vez. Ahora
+   cada compañía tiene su propio comercio exterior, año tras año:
+   - Mercados según la época: la Corona y Cádiz, Inglaterra desde 1820,
+     Estados Unidos desde 1850, Europa desde 1870, el Pacto Andino desde
+     1969, Asia desde 1960, China desde 1995, la Alianza del Pacífico desde
+     2012. Cada uno con su tamaño, su distancia, su arancel (que cae con los
+     tratados) y su riesgo.
+   - Las exportaciones maduran: abrir un mercado cuesta, y la cuota crece
+     con tu marca, tu eficiencia y lo que inviertas, hasta un tope que
+     depende de qué tan exportable es tu sector.
+   - El mundo tiene sus ciclos (1914, 1929, 1974, 2008, 2020...), y el dólar
+     se mueve: una devaluación premia al exportador y castiga al que importa
+     insumos; la cobertura cambiaria (desde 1991) amortigua el golpe.
+   - Importar insumos abarata, pero te amarra al dólar.
+   - Incentivos de cada época: el Plan Vallejo (1959), el certificado de
+     reembolso (1967 a 1991), Proexport/ProColombia (1992), las zonas
+     francas (1991).
+   - Sucesos: antidumping, puertos bloqueados, clientes que no pagan, la
+     Aduana si metes mercancía de contrabando.
+   ========================================================================== */
+(function(){
+  const V167='v167';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const proc=e=>{ try{ return typeof window.procesos140==='function'?window.procesos140(e):{control:30,cert:{}}; }catch(x){ return {control:30,cert:{}}; } };
+  const movida=()=>{ if(S._mov167===S.anio) return true; if(S.mov<1) return false; S._mov167=S.anio; S.mov--; return true; };
+  const sinMov=()=>(S._mov167!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  /* ---- qué tan exportable es cada sector y qué margen deja ---- */
+  const T={agro:.9,mineria:.95,alimentos:.6,moda:.55,tech:.45,energia:.15,construccion:.08,financiero:.1,logistica:.25,retail:.08,salud:.3,medios:.3,turismo:.7,juegos:.6,seguros:.05,juridico:.1};
+  const margenSec=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return (x&&x.m)||.1; }catch(e){ return .1; } };
+  const exportable=e=>(T[e.sector]||0)>=.2&&(e.sector!=='tech'||A()>=1995)&&(e.sector!=='juegos'||A()>=2005);
+  /* ---- los mercados de cada época ---- */
+  const arancel=(pts,a)=>{ let v=pts[0][1]; pts.forEach(([d,x])=>{ if(a>=d) v=x; }); return v; };
+  const MERC=[
+    {id:'corona',n:'Cádiz y la Corona',desde:1700,hasta:1819,tam:.9,dist:.14,riesgo:.10,ar:[[1700,12]],d:'El comercio de siempre con la metrópoli: lento, vigilado y con monopolio.'},
+    {id:'caribe',n:'El Caribe y Curazao',desde:1750,hasta:1860,tam:.6,dist:.07,riesgo:.14,ar:[[1750,10]],d:'Contrabando elegante y comercio libre por el mar; lo que la Corona no deja, Curazao lo vende.'},
+    {id:'gb',n:'Inglaterra',desde:1820,tam:1.0,dist:.09,riesgo:.05,ar:[[1820,18],[1860,3],[1914,6]],d:'El gran comprador de materias primas y el gran vendedor de géneros del siglo.'},
+    {id:'vecinos',n:'Venezuela y Ecuador',desde:1830,tam:.6,dist:.03,riesgo:.12,ar:[[1830,20],[1969,8],[1993,0],[2008,8]],d:'Los vecinos: cerca, baratos de alcanzar y con crisis propias.'},
+    {id:'eeuu',n:'Estados Unidos',desde:1850,tam:1.6,dist:.06,riesgo:.06,ar:[[1850,30],[1934,18],[1962,10],[1991,5],[2012,0]],d:'El mercado más grande del hemisferio. Exigente, pero paga.'},
+    {id:'europa',n:'Alemania y Europa continental',desde:1870,tam:1.2,dist:.10,riesgo:.06,ar:[[1870,10],[1960,8],[2013,0]],d:'Café, banano y flores; normas finas y buenos precios.'},
+    {id:'asia',n:'Japón y Asia',desde:1960,tam:1.2,dist:.12,riesgo:.08,ar:[[1960,14],[1995,8]],d:'Un mercado que crece más rápido que ningún otro.'},
+    {id:'andes',n:'Pacto Andino y Mercosur',desde:1969,tam:.8,dist:.04,riesgo:.09,ar:[[1969,15],[1993,2]],d:'La integración regional: aranceles que se caen y reglas que cambian.'},
+    {id:'china',n:'China',desde:1995,tam:2.0,dist:.13,riesgo:.10,ar:[[1995,12],[2010,8]],d:'El mercado de las materias primas del nuevo siglo.'},
+    {id:'ap',n:'Alianza del Pacífico',desde:2012,tam:1.0,dist:.05,riesgo:.07,ar:[[2012,0]],d:'México, Chile y Perú sin aranceles.'}];
+  const mercDisp=e=>MERC.filter(m=>A()>=m.desde&&(!m.hasta||A()<=m.hasta));
+  const arancelDe=m=>arancel(m.ar,A());
+  const tlcDe=m=>arancelDe(m)===0;
+  /* ---- los ciclos del mundo ---- */
+  const MUNDO={1914:-.06,1915:-.04,1918:-.02,1929:-.12,1930:-.15,1931:-.12,1932:-.08,1933:-.04,1974:-.04,1975:-.02,1982:-.05,1983:-.02,2001:-.03,2008:-.08,2009:-.10,2010:-.02,2015:-.03,2016:-.02,2020:-.09,2021:.03,1950:.03,1951:.03,1968:.02,1972:.03,1997:.02,2004:.03,2005:.03,2006:.03,2007:.02};
+  function mundo(){ S.mundo167=S.mundo167||{ruido:0}; const w=S.mundo167; if(w.anio!==S.anio){ w.anio=S.anio; w.ruido=clamp((w.ruido||0)*.5+rnd(-.025,.025),-.06,.06); w.ciclo=(MUNDO[S.anio]||0)+w.ruido; } return w.ciclo||0; }
+  /* ---- los incentivos ---- */
+  const INC={
+    vallejo:{n:'Plan Vallejo',desde:1959,c:.005,d:'Importas insumos sin aranceles si los usas para exportar.'},
+    cert:{n:'Certificado de reembolso tributario',desde:1967,hasta:1991,c:0,d:'El Estado te devuelve 6% de lo que exportas, en papeles que se venden con descuento.',auto:true},
+    proexport:{n:'Proexport / ProColombia',desde:1992,c:.003,d:'Oficinas en el exterior, ferias y contactos: abrir un mercado cuesta 35% menos.'},
+    zf:{n:'Zona franca',desde:1991,c:.04,d:'Producir y exportar desde una zona con menos impuestos: suma 2.5% de lo exportado como utilidad.'}};
+  const incDisp=k=>A()>=INC[k].desde&&(!INC[k].hasta||A()<=INC[k].hasta);
+  /* ---- el estado de cada compañía ---- */
+  function EX(e){ if(!e.ext167||typeof e.ext167!=='object') e.ext167={merc:{},imp:0,cob:0,inc:{},last:0,hist:[],legacy:null}; const x=e.ext167; x.merc=x.merc||{}; x.inc=x.inc||{}; x.hist=x.hist||[]; return x; }
+  const share=e=>{ const x=EX(e); return clamp(Object.keys(x.merc).reduce((s,k)=>s+(x.merc[k].cuota||0),0),0,.7); };
+  const cuotaMax=(e,m)=>clamp((T[e.sector]||.1)*m.tam*.11*(1-arancelDe(m)/150)*(.7+(e.marca||50)/160),.02,.3);
+  const costoEntrada=(e,m)=>Math.max(10,Math.round(e.ingresos*(.025+m.dist*.6)*(incDisp('proexport')&&EX(e).inc.proexport ? .65 : 1)));
+  const costoInversion=e=>Math.max(8,Math.round(e.ingresos*.015));
+  function anotarHist(e,t){ const x=EX(e); x.hist.push({anio:S.anio,t}); x.hist=x.hist.slice(-8); }
+  /* ==================== EL AÑO ==================== */
+  function anualCompania(e){ if(!ACTIVO()||nino()||!comps().includes(e)) return; const x=EX(e);
+    if(x.legacy===null) x.legacy=e.exportaciones||0;
+    const mk=Object.keys(x.merc);
+    if(!mk.length&&!x.imp){ x.last=0; return; }
+    const m0=margenSec(e.sector), ciclo=mundo();
+    // el dólar de este año frente al del año pasado
+    const w=S.mundo167; const usd=S.macro&&S.macro.usd, prev=w.usdPrev; const shock=(isFinite(usd)&&isFinite(prev)&&prev>0)?clamp(usd/prev-1,-.5,.5):0;
+    // los mercados maduran y tienen su riesgo
+    let extNow=0, utilEx=0;
+    const dom=Math.max(e.ingresos*.35,e.ingresos-(x.last||0));
+    mk.forEach(id=>{ const m=MERC.find(z=>z.id===id), q=x.merc[id]; if(!m){ delete x.merc[id]; return; }
+      if(m.hasta&&A()>m.hasta){ delete x.merc[id]; return; }
+      q.anios=(q.anios||0)+1; const tope=cuotaMax(e,m), crece=.01+(e.marca||50)/6000+(e.eficiencia||50)/8000+(proc(e).cert&&proc(e).cert.iso9001 ? .005 : 0)+(q.inv&&S.anio-q.inv<=3 ? .01 : 0);
+      q.cuota=clamp(q.cuota+(tope>q.cuota?Math.min(crece,tope-q.cuota):-(q.cuota-tope)*.3),.005,.45);
+      const dem=1+ciclo*1.6+(q.dem||0); q.dem=clamp((q.dem||0)*.5+rnd(-.03,.03),-.1,.1);
+      const rev=dom*q.cuota*clamp(dem,.4,1.5); q.rev=rev; extNow+=rev;
+      const mm=clamp(m0*1.15-m.dist*.5-arancelDe(m)*.002+(e.marca||50)/1500,.02,.3); utilEx+=rev*mm; });
+    // lo que entra por exportar, con la cobertura y los incentivos
+    const cob=x.cob||0; let flujo=0;
+    if(x.imp>0||extNow>0){ const impBase=e.ingresos*(1-m0)*(x.imp||0)*.55; const ahorro=impBase*(.05+(incDisp('vallejo')&&x.inc.vallejo&&extNow>0 ? .03 : 0)); const expo=extNow-impBase; flujo+=ahorro+expo*shock*(1-cob*.9)*.85; flujo-=(extNow+impBase)*cob*.008*(A()>=1991 ? 1 : 2); x.ultFx=Math.round(expo*shock*(1-cob*.9)*.85); x.ultAhorro=Math.round(ahorro); }
+    if(incDisp('cert')&&extNow>0) flujo+=extNow*.06;
+    if(incDisp('zf')&&x.inc.zf&&extNow>0) flujo+=extNow*.025;
+    const dIng=extNow-(x.last||0); e.ingresos=Math.max(1,e.ingresos+dIng); const du=(extNow>0?utilEx/extNow:0)*dIng+flujo; e.utilidad+=du; e.caja+=du;
+    x.last=extNow; x.neto=Math.round(utilEx+flujo); x.share=extNow/Math.max(1,e.ingresos);
+    e.exportaciones=Math.max(x.legacy||0,extNow);
+    try{ if(typeof window.anotar147==='function'&&(extNow>0||x.imp>0)) window.anotar147('Comercio exterior de '+e.nombre,Math.round(utilEx+flujo)); }catch(y){}
+    sucesos(e,x,shock); }
+  /* ==================== LOS SUCESOS ==================== */
+  const evento=(t,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.p&&!S.muerto),t:()=>t,o}); }catch(e){} };
+  function sucesos(e,x,shock){ if(S._ev167===S.anio) return; const mk=Object.keys(x.merc), sh=share(e);
+    if(Math.abs(shock)>=.18&&(sh>.04||x.imp>=.15)){ S._ev167=S.anio; log('<b>El dólar '+(shock>0?'se disparó':'se hundió')+' '+Math.round(Math.abs(shock)*100)+'%.</b> '+(shock>0?'Los exportadores celebran y los que importan insumos pagan caro':'Los exportadores sufren y los que importan insumos respiran')+'. '+(x.cob?'Tu cobertura amortiguó el golpe.':'Sin cobertura, '+esc(e.nombre)+' quedó expuesta.'),shock>0===(sh>x.imp*.5)?'bien':'mal'); }
+    if(S._ev167===S.anio) return;
+    if(sh>.06&&A()>=1960&&chance(.05*(1+sh*2))){ const id=mk[Math.floor(Math.random()*mk.length)], m=MERC.find(z=>z.id===id); if(m) return evAntidumping(e,m); }
+    if(sh>.03&&A()>=1900&&chance(.05)) return evPuerto(e);
+    if(mk.length&&chance(.04)){ const id=mk[Math.floor(Math.random()*mk.length)], m=MERC.find(z=>z.id===id); if(m&&chance(m.riesgo*1.6)) return evMoroso(e,m); }
+    try{ const crimes=(S.penal&&S.penal.crimes)||[]; if((x.imp>0||sh>0)&&A()>=1900&&crimes.some(c=>c.tipo==='contrabando'&&S.anio-c.anio<=5)&&chance(.14)) return evAduana(e); }catch(y){} }
+  function evAntidumping(e,m){ S._ev167=S.anio; const q=EX(e).merc[m.id]; const c=Math.round(e.ingresos*.015);
+    evento('<b>'+esc(m.n)+' abrió una investigación antidumping contra '+esc(e.nombre)+'.</b> Los productores de allá dicen que vendes por debajo de tu precio. Si prospera, te cobrarán un arancel adicional.',
+      [{t:'Defenderte con abogados de comercio ('+fmt(c)+')',f:()=>{ e.caja-=c; e.utilidad-=c; if(chance(.55)){ return 'Demostraste que tus precios eran justos. La investigación se archivó y te costó '+fm(c)+'.'; } q.cuota*=.65; prest(-1,'sanción antidumping'); return 'Perdiste el caso: pagas un arancel extra y tu cuota en '+esc(m.n)+' se achicó un tercio.'; }},
+       {t:'Subir tus precios en ese mercado',f:()=>{ q.cuota*=.8; e.utilidad+=e.ingresos*.004; return 'Subiste los precios para evitar la investigación. Vendes menos, pero con mejor margen.'; }},
+       {t:'Retirarte de ese mercado',f:()=>{ delete EX(e).merc[m.id]; return 'Te retiraste de '+esc(m.n)+'. Abrir de nuevo costará lo mismo.'; }}]); }
+  function evPuerto(e){ S._ev167=S.anio; const c=Math.round(e.ingresos*.012);
+    evento('<b>Un paro bloquea el puerto por donde sale la mercancía de '+esc(e.nombre)+'.</b> Los contenedores se acumulan y los clientes de afuera empiezan a llamar.',
+      [{t:'Pagar fletes aéreos y bodegaje ('+fmt(c)+')',f:()=>{ e.caja-=c; e.utilidad-=c; return 'Despachaste lo urgente por avión y pagaste bodegas. Costó '+fm(c)+' pero los clientes no se fueron.'; }},
+       {t:'Esperar a que se despeje',f:()=>{ const x=EX(e); Object.keys(x.merc).forEach(k=>{ x.merc[k].cuota*=.92; }); e.utilidad-=e.ingresos*.004; return 'Esperaste. Se perdieron envíos y los clientes se pasaron a otros proveedores.'; }}]); }
+  function evMoroso(e,m){ S._ev167=S.anio; const q=EX(e).merc[m.id], perd=Math.round((q.rev||e.ingresos*.05)*.3);
+    evento('<b>Un cliente de '+esc(m.n)+' no paga.</b> Debe cerca de '+fmt(Math.round((q.rev||0)*.3))+' y dejó de contestar.',
+      [{t:'Cobrar por vía jurídica en el exterior ('+fmt(Math.round(perd*.25))+')',f:()=>{ const c=Math.round(perd*.25); e.caja-=c; if(chance(.5)){ e.caja+=perd; return 'Cobraste: recuperaste '+fm(perd)+' y gastaste '+fm(c)+' en abogados.'; } e.utilidad-=perd+c; return 'No pudiste cobrar: se perdieron '+fm(perd)+' más '+fm(c)+' de abogados.'; }},
+       {t:'Darlo por perdido y cambiar de cliente',f:()=>{ e.utilidad-=perd; q.cuota*=.9; return 'Diste la deuda por perdida ('+fm(perd)+') y buscaste otro distribuidor.'; }}]); }
+  function evAduana(e){ S._ev167=S.anio; const F=Math.round(e.ingresos*.02);
+    evento('<b>La Aduana retuvo un contenedor de '+esc(e.nombre)+'.</b> Dicen que la factura no coincide con la mercancía. Es lo que pasa cuando una parte entra sin papeles.',
+      [{t:'Pagar la multa y legalizar ('+fmt(F)+')',f:()=>{ e.caja-=F; e.utilidad-=F; return 'Pagaste '+fm(F)+' y legalizaste lo que se pudo.'; }},
+       {t:'Arreglarlo con el funcionario ('+fmt(Math.round(F*.4))+')',f:()=>{ const c=Math.round(F*.4); S.efectivo-=Math.min(S.efectivo,c); S.sobornos=(S.sobornos||0)+1; if(chance(.5)) return 'El contenedor salió esa misma noche. Te costó '+fm(c)+', sin recibo.'; try{ registrarDelito('soborno a funcionario',3,'sobornó a la Aduana'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; e.caja-=F; return 'El funcionario te grabó: pagaste '+fm(F)+' y sumaste un escándalo.'; }}]); }
+  /* ==================== LA PANTALLA ==================== */
+  function escenaComercio167(e){ e=e||S.emp; if(!e||!ACTIVO()) return; const x=EX(e), reab=()=>{ cerrarModal(); render(); escenaComercio167(e); };
+    const disp=mercDisp(e), abiertos=Object.keys(x.merc).map(k=>MERC.find(m=>m.id===k)).filter(Boolean), cerrados=disp.filter(m=>!x.merc[m.id]);
+    const sh=share(e), ops=[];
+    if(!exportable(e)) ops.push({t:'Tu sector casi no exporta',cat:'compania',d:'Una compañía de '+esc((SECTORES.find(s=>s.id===e.sector)||{}).n||e.sector)+' vive del mercado interno. Puedes importar insumos, pero casi no hay a quién venderle afuera.',dis:'No disponible',run:()=>{}});
+    else cerrados.forEach(m=>{ const c=costoEntrada(e,m), tope=cuotaMax(e,m); ops.push({t:'Abrir '+m.n+' · '+fmt(c),cat:'mercado',d:m.d+' Arancel de entrada '+arancelDe(m)+'%'+(tlcDe(m)?' (sin aranceles)':'')+'. Puede llegar a '+Math.round(tope*100)+'% de tus ventas.',dis:e.caja<c?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=c; x.merc[m.id]={cuota:.02,anios:0,inv:S.anio}; anotarHist(e,'Abriste '+m.n); log('<b>'+esc(e.nombre)+'</b> abrió <b>'+esc(m.n)+'</b> por '+fmt(c)+'.','hito'); reab(); }}); });
+    abiertos.forEach(m=>{ const q=x.merc[m.id], c=costoInversion(e), tope=cuotaMax(e,m); ops.push({t:'Invertir en '+m.n+' · '+fmt(c),cat:'mercado',d:'Distribuidores, ferias y calidad. La cuota crece más rápido los próximos tres años. Hoy '+Math.round(q.cuota*100)+'% (tope '+Math.round(tope*100)+'%).',dis:S._inv167===S.anio+'|'+e.nombre+m.id?'Ya invertiste este año':(e.caja<c?'La compañía no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=c; q.inv=S.anio; S._inv167=S.anio+'|'+e.nombre+m.id; anotarHist(e,'Invertiste en '+m.n); log('Invertiste '+fmt(c)+' en '+esc(m.n)+'.','bien'); reab(); }});
+      ops.push({t:'Retirarte de '+m.n,cat:'mercado',d:'Cierras la operación en ese mercado.',cerrar:false,run:()=>{ delete x.merc[m.id]; anotarHist(e,'Te retiraste de '+m.n); log('Te retiraste de '+esc(m.n)+'.'); reab(); }}); });
+    const pasos=[0,.15,.3,.45,.6];
+    if(true){ const sig=pasos.find(p=>p>x.imp+.001), ant=[...pasos].reverse().find(p=>p<x.imp-.001);
+      if(sig!==undefined) ops.push({t:'Importar más insumos: hasta '+Math.round(sig*100)+'%',cat:'compania',d:'Más barato, pero atado al dólar: cada devaluación te sube los costos.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; x.imp=sig; log('Pasaste a importar el '+Math.round(sig*100)+'% de los insumos de '+esc(e.nombre)+'.'); reab(); }});
+      if(ant!==undefined) ops.push({t:'Importar menos insumos: bajar a '+Math.round(ant*100)+'%',cat:'compania',d:'Menos riesgo de dólar, algo más de costo.',cerrar:false,run:()=>{ x.imp=ant; reab(); }}); }
+    if(A()>=1991){ const cs=[0,.25,.5,.75,1], sig=cs.find(p=>p>x.cob+.001), ant=[...cs].reverse().find(p=>p<x.cob-.001);
+      if(sig!==undefined) ops.push({t:'Cobertura cambiaria: subir a '+Math.round(sig*100)+'%',cat:'mercado',d:'Fijas el dólar con el banco. Cuesta cerca de 0.8% de lo cubierto cada año y te quita el golpe (y el premio) de las devaluaciones.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; x.cob=sig; reab(); }});
+      if(ant!==undefined) ops.push({t:'Cobertura cambiaria: bajar a '+Math.round(ant*100)+'%',cat:'mercado',cerrar:false,run:()=>{ x.cob=ant; reab(); }}); }
+    ['vallejo','proexport','zf'].forEach(k=>{ if(!incDisp(k)||x.inc[k]) return; const c=Math.round(e.ingresos*INC[k].c); ops.push({t:INC[k].n+' · '+fmt(c),cat:'compania',d:INC[k].d,dis:e.caja<c?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=c; x.inc[k]=S.anio; anotarHist(e,'Entraste al '+INC[k].n); log('<b>'+esc(e.nombre)+'</b> entró a '+esc(INC[k].n)+'.','bien'); reab(); }}); });
+    ops.push({t:'Un contrato único de exportación (el de siempre)',cat:'mercado',d:'Una venta suelta a un distribuidor, cobrada en divisas.',cerrar:false,run:()=>{ cerrarModal(); if(typeof escenaExportacion==='function') escenaExportacion(); }});
+    const tabla=abiertos.map(m=>{ const q=x.merc[m.id]; return '<tr><td><b>'+esc(m.n)+'</b>'+(tlcDe(m)?'<span class="tlc167">sin aranceles</span>':'')+'<br><small>Arancel '+arancelDe(m)+'% · riesgo '+Math.round(m.riesgo*100)+'% · '+q.anios+' año'+(q.anios===1?'':'s')+'</small><div class="b167"><i style="width:'+Math.round(clamp(q.cuota/Math.max(.02,cuotaMax(e,m))*100,4,100))+'%"></i></div></td><td style="text-align:right">'+Math.round(q.cuota*100)+'%<br><small>'+fmt(Math.round(q.rev||0))+'</small></td></tr>'; }).join('');
+    escena({rubro:'Comercio exterior',titulo:'El comercio exterior de '+esc(e.nombre),ancho:true,cerrable:true,clase:'com167',
+      cuerpo:abiertos.length||x.imp?'Vendes y compras afuera: cada año el mundo, el dólar y tus clientes mueven el resultado.':'Todavía '+esc(e.nombre)+' vive del mercado interno. Abrir un mercado cuesta, tarda en madurar y te expone al dólar y a los ciclos del mundo.',
+      html:'<div class="k"><div><b>'+Math.round(sh*100)+'%</b><span>de tus ventas son exportaciones</span></div><div><b>'+Math.round((x.imp||0)*100)+'%</b><span>de los insumos son importados</span></div><div><b>'+Math.round((x.cob||0)*100)+'%</b><span>cubierto del dólar</span></div><div><b>'+(x.neto!==undefined?(x.neto>=0?'+':'')+fmt(x.neto):'—')+'</b><span>resultado del último año</span></div></div>'
+        +(tabla?'<h4>Tus mercados</h4><table class="libro">'+tabla+'</table>':'')
+        +(Object.keys(x.inc).length?'<h4>Tus incentivos</h4><div>'+Object.keys(x.inc).map(k=>'<small>'+esc(INC[k].n)+' · desde '+x.inc[k]+'</small>').join('<br>')+'</div>':'')
+        +(incDisp('cert')&&sh>0?'<div class="apunte">El Estado te reembolsa 6% de lo que exportas (certificado de reembolso tributario).</div>':''),
+      opciones:ops}); }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top167) return;
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    f.__top167=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA167_PASO) return; window.__SA167_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto&&S.macro){ S.mundo167=S.mundo167||{ruido:0}; S.mundo167.usdPrev=S.macro.usd; } }catch(e){} return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top167) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ const e=S&&S.emp; if(Array.isArray(L)&&e&&ACTIVO()&&!nino()&&comps().includes(e)){ const x=EX(e), sh=share(e), a=L.find(z=>z.t==='Firmar un contrato de exportación');
+          const d='Mercados por época, aranceles, dólar y cobertura. Hoy exportas el '+Math.round(sh*100)+'% de tus ventas'+(x.imp?' e importas el '+Math.round(x.imp*100)+'% de tus insumos':'')+'.';
+          if(a){ a.t='Comercio exterior'; a.d=d; a.mov=0; a.run=()=>escenaComercio167(e); }
+          else if(!L.some(z=>z.t==='Comercio exterior')) L.push({t:'Comercio exterior',d,mov:0,modal:true,run:()=>escenaComercio167(e)}); } }catch(x){ console.error(x); }
+      return L; };
+    f.__top167=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA167_CAT) return; window.__SA167_CAT=true;
+    window.catDe=function(t){ if(t==='Comercio exterior') return 'mercado'; return old.apply(this,arguments); }; }
+  function init167(){ wrapEmpresa(); wrapPaso(); wrapAcciones(); wrapCat();
+    try{ const D=window.DECISIONES_COMPANIA_83; if(Array.isArray(D)&&!D.includes('Comercio exterior')) D.push('Comercio exterior'); }catch(x){}
+    Object.assign(window,{MERCADOS_167:MERC,INCENTIVOS_167:INC,mercadosDe167:mercDisp,arancelDestino167:arancelDe,comercio167:EX,cuotaExport167:share,cuotaMaxima167:cuotaMax,costoEntrada167:costoEntrada,exportable167:exportable,cicloMundo167:mundo,anualComercio167:anualCompania,escenaComercio167,eventoAntidumping167:evAntidumping,eventoPuerto167:evPuerto,eventoMoroso167:evMoroso,eventoAduana167:evAduana}); }
+  setTimeout(init167,40); setTimeout(init167,220); setTimeout(init167,650); setTimeout(init167,950);
+  window.__SA167={version:V167};
 })();
 </script>
 
