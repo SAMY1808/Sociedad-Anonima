@@ -1258,7 +1258,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v161</div>
+<div class="version-badge" id="versionBadge">v162</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -30031,6 +30031,147 @@ install();setTimeout(install,1200);
     Object.assign(window,{rolEra161,oficioEra161,carreraEra161,carrerasEra161,sanearOficios161:sanear,oficioValido161:valido,pendientesNombre161:()=>PEND.filter(p=>!p.h.nombre118),tickBautizo161:tick}); }
   setTimeout(init161,40); setTimeout(init161,220); setTimeout(init161,650); setTimeout(init161,950); setTimeout(init161,1600);
   window.__SA161={version:V161};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v162 · CADA ÉPOCA CON SU VOCABULARIO Y SUS DECISIONES
+   El juego arrancaba en 1800 y hablaba como en 2026: "se dañó el carro", "la
+   bolsa de Bogotá", "una tobillera", "un infarto", "un centro comercial".
+   1. Una tabla de fechas decide qué decisiones existen en cada época: no hay
+      fideicomisos offshore ni family offices en 1800, ni equipo de fútbol
+      antes de 1948, ni la rueda de la bolsa antes de 1928.
+   2. Un léxico por época reescribe lo que se lee (el diario, las pantallas,
+      los eventos, las descripciones de las acciones): coche en vez de carro
+      antes de 1905, instrucción criminal en vez de fiscalía antes de 1991,
+      "ataque al corazón" en vez de infarto antes de 1930, galería comercial
+      en vez de centro comercial antes de 1960, y así.
+   Solo cambia lo que se ve; la mecánica es la misma.
+   ========================================================================== */
+(function(){
+  const V162='v162';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  /* respeta la mayúscula inicial de lo que reemplaza */
+  const mant=(to)=>(m)=>{ const r=typeof to==='function'?to(m):to; return /^[A-ZÁÉÍÓÚÑ]/.test(m)?cap(r):r; };
+  /* [vale hasta (sin incluir), expresión, reemplazo]. Las frases largas van antes que las palabras sueltas. */
+  const R=[
+    /* el hogar y los gastos */
+    [1905,/Matrícula y seguro del carro/g,'Herraje y forraje de las bestias del coche'],
+    [1905,/Se dañó el carro/g,'Se quebró el eje del coche'],
+    [1905,/El carro los dejó tirados en la vía un domingo/g,'El coche se quedó atascado en el barro del camino un domingo'],
+    [1905,/Saliste con carro nuevo por/g,'Estrenaste un coche por'],
+    [1905,/accidentes? de tránsito/gi,m=>/s$/.test(m)?'accidentes de camino':'accidente de camino'],
+    [1905,/\bcarros\b/gi,mant('coches')],[1905,/\bcarro\b/gi,mant('coche')],
+    [1905,/\bautomóviles\b/gi,mant('coches')],[1905,/\bautomóvil\b/gi,mant('coche')],
+    [1900,/Se fue el electrodoméstico grande/g,'Se rompió un mueble de los grandes'],
+    [1930,/electrodomésticos?/gi,m=>/s$/.test(m)?'enseres':'enser'],
+    [1900,/Urgencia odontológica de la familia/g,'Un dolor de muela que no esperó'],
+    [1900,/Se reventó una tubería en la casa/g,'Se reventó la cañería del patio'],
+    [1900,/Grado, matrimonio o cumpleaños de a de veras/g,'Bautizo, matrimonio o fiesta de santo de a de veras'],
+    /* impuestos */
+    [1935,/Impuesto al patrimonio/g,'Contribuciones de la casa'],
+    [1935,/impuesto al patrimonio/g,'contribuciones'],
+    [1935,/, sucesiones al ([\d.,]+%) y patrimonio al [\d.,]+%/g,(m,a)=>' y sucesiones al '+a],
+    [1935,/suben renta, sucesiones y patrimonio/g,'suben las contribuciones y las sucesiones'],
+    [1918,/renta al ([\d.,]+%)/g,'contribución directa al $1'],
+    [1918,/impuesto (?:a la|de) renta/gi,mant('contribución directa')],
+    /* el mercado y la finca raíz */
+    [1928,/sacaron su compañía a la bolsa de Bogotá/g,'abrieron su compañía a nuevos accionistas'],
+    [1920,/Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial…/g,'Posada, hotel, botica, almacén de telas, mesón…'],
+    [1960,/Nuevo centro comercial/g,'Nueva galería comercial'],
+    [1960,/\bun centro comercial\b/gi,m=>'una galería comercial'],
+    [1960,/\bel centro comercial\b/gi,m=>'la galería comercial'],
+    [1960,/centros comerciales/gi,mant('galerías comerciales')],
+    [1960,/centro comercial/gi,mant('galería comercial')],
+    [1930,/\bun apartamento\b/gi,m=>'una casa'],
+    [1930,/\bel apartamento\b/gi,m=>'la casa'],
+    [1930,/\bapartamentos\b/gi,mant('casas')],[1930,/\bapartamento\b/gi,mant('casa')],
+    [2001,/\bBVC\b/g,'la bolsa'],
+    [1960,/parqueadero, gasolinera, clínica, galería comercial/g,'hospedaje, gasolinera, clínica, galería comercial'],
+    [1900,/Dólares, euros o yuanes: proteger del peso y pagar lo importado\./g,'Libras esterlinas o francos: proteger la plata del peso y pagar lo que llega del exterior.'],
+    [1999,/Dólares, euros o yuanes/g,'Dólares, libras o marcos'],
+    [1999,/\beuros?\b/gi,m=>/s$/i.test(m)?'libras':'libra'],
+    [1960,/ con MBA/g,' con estudios en el exterior'],
+    /* la justicia */
+    [1991,/\bla fiscalía\b/gi,m=>/^L/.test(m)?'La instrucción':'la instrucción'],
+    [1991,/\bFiscalía\b/g,'Instrucción criminal'],
+    [1991,/\bel fiscal\b/gi,m=>/^E/.test(m)?'El juez instructor':'el juez instructor'],
+    [1991,/\bun fiscal\b/gi,m=>'un juez instructor'],
+    [1991,/\bfiscales\b/gi,mant('jueces instructores')],
+    [1991,/\bfiscal\b/gi,mant('juez instructor')],
+    [1995,/con una tobillera/g,'bajo la vigilancia de un guardia'],
+    [1995,/tobillera/g,'vigilancia'],
+    /* la salud y la muerte */
+    [1930,/un infarto/g,'un ataque al corazón'],
+    [1930,/infartos?\b/gi,mant('ataque al corazón')],
+    [1950,/un derrame cerebral/g,'una apoplejía'],
+    [1950,/derrame cerebral/gi,mant('apoplejía')],
+    [1950,/hipertensión/gi,mant('mal del corazón')],
+    [1940,/complicaciones de la diabetes/g,'fiebres y un mal de azúcar'],
+    [1940,/la diabetes/gi,mant('el mal de azúcar')],
+    [1940,/diabetes/gi,mant('mal de azúcar')],
+    [1970,/\bEPOC\b/g,'mal de pecho'],
+    [1980,/\balzhéimer\b/gi,mant('demencia senil')],
+    [1950,/\bpárkinson\b|\bparkinson\b/gi,mant('temblor de la vejez')],
+    [1960,/medicina prepagada/gi,mant('un médico de cabecera')],
+    /* los gremios */
+    [1927,/La Federación, la ANDI, Fedegán, Analdex, Colfecar y demás: cada uno pide lo suyo y da lo suyo\./g,'La Sociedad de Agricultores y las cámaras de comercio: cada una pide lo suyo y da lo suyo.'],
+    [1944,/La Federación, la ANDI, Fedegán, Analdex, Colfecar y demás: cada uno pide lo suyo y da lo suyo\./g,'La Federación de Cafeteros, la Sociedad de Agricultores y las cámaras de comercio: cada una pide lo suyo y da lo suyo.'],
+    [1900,/Arancel, beneficio tributario, contratación o reforma laboral\./g,'Arancel, contribuciones, contratos con el Estado o reglas del trabajo.']];
+  function epoca162(t){ if(typeof t!=='string'||!t) return t; const a=A(); if(a>=2005) return t; let x=t;
+    for(let i=0;i<R.length;i++){ const r=R[i]; if(a<r[0]) x=x.replace(r[1],r[2]); }
+    return x; }
+  /* ---------- las decisiones que todavía no existen ---------- */
+  /* [título o prefijo del título, año desde el cual existe] */
+  const DESDE=[
+    ['Emplearte: Carrera corporativa',1880],['Emplearte: Trabajo de planta',1880],['Emplearte: Consultoría',1960],
+    ['Emplearte: Carrera en la Federación de Cafeteros',1927],['Emplearte: Legaciones cafeteras',1950],['Emplearte: Cooperativa de caficultores',1960],
+    ['Constituir un fideicomiso afuera',1950],['Crear banca privada de la familia',1870],['Crear un family office',1970],
+    ['Revisar los seguros',1900],['Gestionar tesorería financiera',1985],['Reserva en moneda extranjera',1920],
+    ['Ir a la rueda de la bolsa',1928],['Toma hostil sobre ',1970],['Invertir en el mercado',1928],['Aceptar una silla en junta ajena',1870],
+    ['Gremios y agremiaciones',1871],['Fondos de inversión',1960],['Marcas',1920],['Comprar un viñedo',1960],['Fusiones y adquisiciones',1900],
+    ['Integración vertical',1900],['Comprar un equipo de fútbol',1948],['Bancos y crédito',1870],['Caficultura',1860],['Pasaporte de la familia',1880]];
+  const existe=(t)=>{ if(typeof t!=='string') return true; const a=A(); for(const [k,d] of DESDE){ if((k.slice(-1)===' '?t.indexOf(k)===0:t===k)&&a<d) return false; } return true; };
+  function marcar(f,old,mark){ f[mark]=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); return f; }
+  /* cada vez que otro módulo envuelva estas funciones por encima, vuelvo a quedar de último */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top162) return;
+    window.listaAcciones=marcar(function(){ const L=old.apply(this,arguments);
+      try{ if(!Array.isArray(L)||A()>=2005) return L;
+        for(let i=L.length-1;i>=0;i--){ const x=L[i]; if(!existe(x.t)){ L.splice(i,1); continue; } if(typeof x.d==='string'){ const d=epoca162(x.d); if(d!==x.d) x.d=d; } }
+      }catch(e){ console.error(e); }
+      return L; },old,'__top162'); }
+  /* ---------- lo que se lee ---------- */
+  function wrapLog(){ const old=window.log; if(typeof old!=='function'||old.__top162) return;
+    window.log=marcar(function(txt,clase){ const a=Array.from(arguments); try{ if(typeof a[0]==='string') a[0]=epoca162(a[0]); }catch(e){} return old.apply(this,a); },old,'__top162'); }
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||old.__top162) return;
+    window.escena=marcar(function(o){ const a=Array.from(arguments);
+      try{ if(o&&typeof o==='object'&&A()<2005){ const n=Object.assign({},o);
+          ['rubro','titulo','cuerpo','html','kicker'].forEach(k=>{ if(typeof n[k]==='string') n[k]=epoca162(n[k]); });
+          if(Array.isArray(o.opciones)) n.opciones=o.opciones.map(x=>{ if(!x||typeof x!=='object') return x; const t=typeof x.t==='string'?epoca162(x.t):x.t, d=typeof x.d==='string'?epoca162(x.d):x.d; return (t===x.t&&d===x.d)?x:Object.assign({},x,{t,d}); });
+          a[0]=n; } }catch(e){ console.error(e); }
+      return old.apply(this,a); },old,'__top162'); }
+  /* ---------- los eventos que no caben en la época ---------- */
+  /* [año desde el cual puede existir, expresión sobre el texto del evento] */
+  const MODERNO=[[1930,/aeropuerto/i],[1920,/\bavión\b|\baviones\b|aerolínea/i],[1960,/Sobre planos|lanza un edificio/i],[1995,/\bcelular(es)?\b/i],[1995,/\binternet\b/i],
+    [1985,/computador/i],[2006,/redes sociales/i],[1970,/tarjeta de crédito/i],[1985,/cajero automático/i],[1954,/televisi[oó]n|televisor/i],[1910,/gasolinera/i]];
+  function bloquea(ev){ try{ if(!ev||A()>=2006) return false; const a=A();
+      const src=typeof ev.t==='function'?Function.prototype.toString.call(ev.t):String(ev.t||'');
+      for(const [d,re] of MODERNO){ if(a<d&&re.test(src)) return true; }
+      /* si el texto se arma en otra parte, se mira lo que de verdad va a decir */
+      let txt=''; try{ if(typeof ev.t==='function'&&(typeof ev.c!=='function'||ev.c())) txt=String(ev.t()||''); else if(typeof ev.t==='string') txt=ev.t; }catch(e){ txt=''; }
+      if(txt) for(const [d,re] of MODERNO){ if(a<d&&re.test(txt)) return true; }
+      return false; }catch(e){ return false; } }
+  /* los eventos se sortean entre todos los que cumplen su condición: se descartan los que no caben en la época */
+  function wrapSortear(){ const old=window.sortearEvento; if(typeof old!=='function'||old.__top162) return;
+    window.sortearEvento=marcar(function(){ let ev=old.apply(this,arguments); for(let k=0;k<16&&ev&&bloquea(ev);k++) ev=old.apply(this,arguments); return (ev&&bloquea(ev))?null:ev; },old,'__top162'); }
+  /* y los que otros módulos meten directo a la cola se quitan justo antes de mostrarlos */
+  function wrapProcesar(){ const old=window.procesarCola; if(typeof old!=='function'||old.__top162) return;
+    window.procesarCola=marcar(function(fin){ try{ if(typeof cola!=='undefined'&&Array.isArray(cola)) for(let i=cola.length-1;i>=0;i--){ if(bloquea(cola[i])) cola.splice(i,1); } }catch(e){} return old.apply(this,arguments); },old,'__top162'); }
+  function init162(){ wrapAcciones(); wrapLog(); wrapEscena(); wrapSortear(); wrapProcesar(); Object.assign(window,{bloqueaEvento162:bloquea,MODERNO_162:MODERNO,epoca162,decisionExiste162:existe,DESDE_162:DESDE,LEXICO_162:R}); }
+  setTimeout(init162,40); setTimeout(init162,220); setTimeout(init162,650); setTimeout(init162,950); setTimeout(init162,1700);
+  window.__SA162={version:V162};
 })();
 </script>
 
