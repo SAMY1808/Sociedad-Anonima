@@ -29924,7 +29924,7 @@ install();setTimeout(install,1200);
   const libre=()=>!document.querySelector('#escenaHost .lienzo');
   function tick(){
     try{
-      if(typeof S==='undefined'||!S||!S.p||S.muerto||!PEND.length) return;
+      if(window.__noNombrar161||typeof S==='undefined'||!S||!S.p||S.muerto||!PEND.length) return;
       for(let k=PEND.length-1;k>=0;k--){ const p=PEND[k]; if(!(S.familia&&(S.familia.hijos||[]).includes(p.h))||p.h.nombre118) PEND.splice(k,1); }
       if(!PEND.length||!libre()||nino()) return;
       const p=PEND[0];
@@ -30127,7 +30127,7 @@ install();setTimeout(install,1200);
   /* [título o prefijo del título, año desde el cual existe] */
   const DESDE=[
     ['Emplearte: Carrera corporativa',1880],['Emplearte: Trabajo de planta',1880],['Emplearte: Consultoría',1960],
-    ['Emplearte: Carrera en la Federación de Cafeteros',1927],['Emplearte: Legaciones cafeteras',1950],['Emplearte: Cooperativa de caficultores',1960],
+    ['Emplearte: Carrera en la Federación de Cafeteros',1927],['Emplearte: Legaciones cafeteras ',1927],['Emplearte: Cooperativa de caficultores',1927],
     ['Constituir un fideicomiso afuera',1950],['Crear banca privada de la familia',1870],['Crear un family office',1970],
     ['Revisar los seguros',1900],['Gestionar tesorería financiera',1985],['Reserva en moneda extranjera',1920],
     ['Ir a la rueda de la bolsa',1928],['Toma hostil sobre ',1970],['Invertir en el mercado',1928],['Aceptar una silla en junta ajena',1870],
