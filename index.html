@@ -1219,7 +1219,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v157</div>
+<div class="version-badge" id="versionBadge">v158</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24631,7 +24631,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 (function(){
   const V120='v120';
   const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion',
-    /* v122 */ 'mayoria_edad','graduacion','luna_miel','divorcio','viudez','duelo_hijo','hospital','mudanza','infidelidad','fundacion_empresa','bolsa','quiebra','crisis','banco_apertura','corrida','intervencion','piramide','eleccion','carcel','libertad','escandalo','portada'];
+    /* v122 */ 'mayoria_edad','graduacion','luna_miel','divorcio','viudez','duelo_hijo','hospital','mudanza','infidelidad','fundacion_empresa','bolsa','quiebra','crisis','banco_apertura','corrida','intervencion','piramide','eleccion','carcel','libertad','escandalo','portada',
+    /* v158 */ 'embajada_ofrecida','ministerio_ofrecido','licitacion_ganada','licitacion_perdida','desfalco_empresa_publica','extradicion','exilio','captura','prision_domiciliaria','carcel_maxima_seguridad','prision_ordinaria','pabellon_especial'];
   const ok={};
   function precargar(){ if(window.__SA120_PRE) return; window.__SA120_PRE=true;
     IMGS.forEach(n=>{ const im=new Image(); im.onload=()=>{ ok[n]=true; }; im.onerror=()=>{ ok[n]=false; }; im.src='img/eventos/'+n+'.jpg'; }); }
@@ -24639,7 +24640,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión',
     mayoria_edad:'La mayoría de edad',graduacion:'El grado',luna_miel:'La luna de miel',divorcio:'El divorcio',viudez:'El luto',duelo_hijo:'Un hijo que se va antes',hospital:'En la clínica',mudanza:'La mudanza',infidelidad:'La infidelidad',
     fundacion_empresa:'La fundación de la compañía',bolsa:'La Bolsa de Bogotá',quiebra:'La quiebra',crisis:'La crisis',banco_apertura:'Un banco con el apellido',corrida:'La corrida bancaria',intervencion:'La intervención',piramide:'La pirámide',
-    eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada'};
+    eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada',
+    embajada_ofrecida:'Te ofrecieron una embajada',ministerio_ofrecido:'Te ofrecieron un ministerio',licitacion_ganada:'Ganaste una licitación',licitacion_perdida:'Perdiste una licitación',desfalco_empresa_publica:'Escándalo por desfalco de empresa pública',extradicion:'Extradición',exilio:'Exilio',captura:'La captura',prision_domiciliaria:'Prisión domiciliaria',carcel_maxima_seguridad:'Cárcel de máxima seguridad',prision_ordinaria:'Prisión ordinaria',pabellon_especial:'Pabellón especial de pago'};
   const figura=(k,pie)=>'<figure class="momento120" data-momento="'+k+'"><img src="img/eventos/'+k+'.jpg" alt="'+esc(PIE[k]||'')+'"><figcaption>'+esc(pie||PIE[k]||'')+'</figcaption></figure>';
   const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
 
@@ -24648,6 +24650,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     return pt<=0?'funeral_beneficencia':pr>=70?'funeral_pompa':pr>=40?'funeral_normal':'funeral_sencillo'; }
   function detectar(o){
     const ti=plano(o.titulo), cu=plano(o.cuerpo), ru=plano(o.rubro);
+    if(o.momento120) return o.momento120;   /* v158: las pantallas de poder y justicia dicen cuál lámina llevan */
     if(ti==='¿Cómo se va a llamar?') return 'nacimiento_hijo';
     /* v122 */
     const raw=String(o.cuerpo||'');
@@ -24662,6 +24665,12 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(ti==='Así queda la herencia'||ti==='¿Notaría o juzgado?'||/^La sucesión de /.test(ti)||/está lista para la partición/.test(cu)) return 'sucesion';
     if((ti==='¿Con quién sigue la casa?'||ti==='La casa necesita un sucesor')&&!/Retiro|en vida/.test(ru)) return funeralPropio();
     if(/embargados por una deuda|Se viene el remate/.test(cu)) return 'embargo';
+    /* v158 */
+    if(/abrieron una investigación en/.test(cu)) return 'desfalco_empresa_publica';
+    if(/pidió tu extradición|Concedieron la extradición/.test(cu)) return 'extradicion';
+    if(/Te localizaron en|medida de aseguramiento contra ti/.test(cu)) return 'captura';
+    if(/te ofrece una embajada/.test(cu)) return 'embajada_ofrecida';
+    if(/te ofrece un ministerio/.test(cu)) return 'ministerio_ofrecido';
     return null;
   }
   const FUNERAL_OPC=[[/^Algo sencillo/,'funeral_sencillo'],[/^Como debe ser/,'funeral_normal'],[/^Honras completas/,'funeral_pompa'],[/beneficencia/,'funeral_beneficencia']];
@@ -24782,7 +24791,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const ahora=estado();
     const antes=S._m122; S._m122=ahora;
     if(!antes) return;   // primera vez en esta generación: solo se toma la foto
-    if(ahora.pres&&!antes.pres) M('carcel','A la cárcel',(S.penal&&S.penal.motivoCondena?'Culpable de '+S.penal.motivoCondena+'. ':'')+'Te quedan '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de condena.');
+    if(ahora.pres&&!antes.pres) M((typeof window.imagenRegimen158==='function'&&window.imagenRegimen158())||'carcel','A la cárcel',(S.penal&&S.penal.motivoCondena?'Culpable de '+S.penal.motivoCondena+'. ':'')+'Te quedan '+S.penal.prisionRestante+' año'+(S.penal.prisionRestante===1?'':'s')+' de condena.');
     if(!ahora.pres&&antes.pres&&!S.muerto&&!(S.penal&&S.penal.penaMuerte)) M('libertad','Libre otra vez','Cumpliste la condena. Afuera, el apellido te espera.');
     if(ahora.muertos>antes.muertos){ try{ const f=window.fallecidos108(); const u=f[f.length-1]; if(u) M('duelo_hijo','Murió '+u.nombre,'Tenía '+(u.edad||0)+' año'+(u.edad===1?'':'s')+'. '+(u.causa?String(u.causa).charAt(0).toUpperCase()+String(u.causa).slice(1)+'.':'')); }catch(e){} }
     if(ahora.esc>antes.esc&&cada('escandalo',3)){ const t=typeof window.ultimoEscandalo129==='function'&&window.ultimoEscandalo129(); M('escandalo',t||'El escándalo','Tu nombre está en todos los periódicos, y no por buenas razones.'); }
@@ -29215,7 +29224,7 @@ install();setTimeout(install,1200);
     if(elegible){ const p2=clamp_(.4+c.conducta/200-g*.02,.15,.85); ops.push({t:'Pedir la libertad condicional',cat:'legado',d:'Llevas más del 60% y tu conducta lo permite. Probabilidad '+Math.round(p2*100)+'%.',cerrar:false,run:()=>{ c.condPedida=true; if(chance(p2)){ const r=S.penal.prisionRestante; S.penal.prisionRestante=0; S.penal.condena=null; S.penal.motivoCondena=null; c.cond={hasta:S.anio+Math.max(1,Math.ceil(r)),r}; log('<b>Te dieron la libertad condicional.</b> Sales con control hasta '+c.cond.hasta+'.','bien'); } else log('Negaron la libertad condicional: "el delito fue grave".','mal'); cerrarModal(); render(); }}); }
     if(S.ext157) ops.push({t:'La extradición',cat:'riesgo',d:'Tienes un proceso de extradición o de exilio abierto.',cerrar:false,run:()=>{ cerrarModal(); escenaExtradicion157(); }});
     ops.push({t:'El proceso penal y los recursos',cat:'riesgo',d:'Apelar, pagar por mejores condiciones, intentar fugarte.',cerrar:false,run:()=>{ cerrarModal(); if(OLD_PENAL) OLD_PENAL(); }});
-    escena({rubro:'Justicia',titulo:pre?'Detención preventiva':'Cumpliendo condena',ancho:true,cerrable:true,clase:'car157',cuerpo:(pre?'Estás detenido mientras se define tu juicio en '+esc(j.jurisdiccion)+'. Si te condenan, te descuentan este tiempo.':'Te quedan <b>'+rest+'</b> año'+(rest===1?'':'s')+' de prisión en '+esc(j.jurisdiccion)+(S.penal.motivoCondena?', condenad'+(S.p.sexo==='m'?'a':'o')+' por <b>'+esc(S.penal.motivoCondena)+'</b>':'')+'.')+' '+R.d+' La partida sigue: familia, patrimonio y compañías, según tu régimen.',html,opciones:ops}); }
+    escena({rubro:'Justicia',titulo:pre?'Detención preventiva':'Cumpliendo condena',ancho:true,cerrable:true,clase:'car157',momento120:(window.IMG_REGIMEN_158||{})[c.reg||'ordinaria'],cuerpo:(pre?'Estás detenido mientras se define tu juicio en '+esc(j.jurisdiccion)+'. Si te condenan, te descuentan este tiempo.':'Te quedan <b>'+rest+'</b> año'+(rest===1?'':'s')+' de prisión en '+esc(j.jurisdiccion)+(S.penal.motivoCondena?', condenad'+(S.p.sexo==='m'?'a':'o')+' por <b>'+esc(S.penal.motivoCondena)+'</b>':'')+'.')+' '+R.d+' La partida sigue: familia, patrimonio y compañías, según tu régimen.',html,opciones:ops}); }
   /* --- el año adentro --- */
   function anualPrision(){ const c=C(), R=REG[c.reg], P=PROG[c.programa||'conducta']; if(!c.reg) return;
     S.p.salud=clamp(S.p.salud+R.salud*((S.p.edad||40)>60?1.3:1),0,100); S.p.felicidad=clamp((S.p.felicidad||60)+R.felic,0,100);
@@ -29270,7 +29279,7 @@ install();setTimeout(install,1200);
     if(chance(p)){ return {p:9,c:()=>!!S.ext157,t:()=>'<b>Concedieron la extradición.</b> El tribunal de '+esc(x.pais==='Colombia'?x.origen:x.pais)+' firmó la orden: te entregan en pocos días.',o:[{t:'Presentarte con tus abogados',f:()=>{ extraditar(); return 'Fuiste entregado a '+esc(S.p.ciudad)+'.'; }},{t:'Intentar huir antes de que te lleven',f:()=>{ const L=refugios(); if(!L.length||!chance(.35)) { extraditar(); return 'La fuga falló: te detuvieron en el aeropuerto.'; } return irExilio(L[0],x.motivo); }}]}; }
     x.estado='negada'; x.seguro=true; return {p:9,c:()=>!!S.ext157,t:()=>'<b>Negaron la extradición.</b> El tribunal de '+esc(x.pais)+' consideró que no se cumplían los requisitos del tratado. Eres libre mientras sigas en este país.',o:[{t:'Quedarte',f:()=>'Seguirás aquí, con la circular roja viva: si sales a otro país, te pueden detener.'}]}; }
   function escenaExilio157(){ const L=refugios(), reab=()=>{ cerrarModal(); render(); };
-    escena({rubro:'Exilio',titulo:'¿A dónde te vas?',ancho:true,cerrable:true,clase:'car157',cuerpo:'Un país sin tratado que lo obligue a entregarte, y con un banco que no pregunte. Allá no puedes dirigir tus compañías de Colombia en persona y te pueden encontrar.',
+    escena({rubro:'Exilio',titulo:'¿A dónde te vas?',ancho:true,cerrable:true,clase:'car157',momento120:'exilio',cuerpo:'Un país sin tratado que lo obligue a entregarte, y con un banco que no pregunte. Allá no puedes dirigir tus compañías de Colombia en persona y te pueden encontrar.',
       opciones:L.map(r=>({t:r.g.n+' · '+r.g.pais+' · '+fmt(r.costo),cat:'riesgo',d:'Riesgo de que te entreguen: '+lbl(r.p)+'. '+(r.g.d||''),dis:S.efectivo<r.costo?'No tienes '+fmt(r.costo):null,cerrar:false,run:()=>{ cerrarModal(); const m=irExilio(r,(S.ext157&&S.ext157.motivo)||''); log(m); render(); }}))}); }
   function escenaExtradicion157(){ const x=S.ext157; if(!x){ if(OLD_PENAL) OLD_PENAL(); return; } const hostCol=x.pais==='Colombia'||x.host==='Colombia', p=probExt(x), po=pol(), reab=()=>{ cerrarModal(); render(); escenaExtradicion157(); };
     const ops=[];
@@ -29280,7 +29289,7 @@ install();setTimeout(install,1200);
       const cr=po&&po.pres?po.pres.credito:0; if(cr>=50) ops.push({t:'Pedir un indulto o una amnistía',cat:'riesgo',d:'Tu influencia en el Gobierno lo permite: gasta 50 de crédito. Probabilidad 35%.',cerrar:false,run:()=>{ po.pres.credito=Math.max(0,po.pres.credito-50); if(chance(.35)){ S.ext157=null; if(casoMia()) S.penal.caso=null; S.penal.fugado=false; log('<b>El Gobierno firmó un indulto.</b> Puedes volver y el proceso se cerró.','bien'); } else log('El indulto no salió: "políticamente inviable".','mal'); cerrarModal(); render(); }}); }
     if(x.estado!=='asilo'&&(((po&&po.pres&&po.pres.rencor>=20))||(S.anio>=1948&&S.anio<=1957))) ops.push({t:'Pedir asilo político',cat:'riesgo',d:'Alegas persecución política'+(po&&po.pres&&po.pres.rencor>=20?': el Gobierno sabe que financiaste a otro.':'.')+' Si lo conceden, no te extraditan por delitos políticos. Probabilidad 40%.',cerrar:false,run:()=>{ if(chance(.4)){ x.asilo=true; x.estado='asilo'; log('Te concedieron asilo político en '+esc(x.pais)+'.','bien'); } else log('Negaron el asilo: "no se acreditó persecución política".','mal'); reab(); }});
     ops.push({t:'El proceso penal y los recursos',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); if(OLD_PENAL) OLD_PENAL(); }});
-    escena({rubro:'Justicia',titulo:x.estado==='exilio'?'En el exilio':x.estado==='asilo'?'Con asilo':x.estado==='negada'?'Extradición negada':x.estado==='proceso'?'La extradición en tribunales':'Piden tu extradición',ancho:true,cerrable:true,clase:'car157',
+    escena({rubro:'Justicia',titulo:x.estado==='exilio'?'En el exilio':x.estado==='asilo'?'Con asilo':x.estado==='negada'?'Extradición negada':x.estado==='proceso'?'La extradición en tribunales':'Piden tu extradición',ancho:true,cerrable:true,clase:'car157',momento120:(x.estado==='exilio'||x.estado==='asilo')?'exilio':'extradicion',
       cuerpo:(hostCol?esc(x.origen)+' reclama a un colombiano que vive en Colombia. '+(S.anio<1979?'Aún no hay tratado.':S.anio<1991?'Hay tratado con Estados Unidos; decide el Gobierno.':S.anio<1998?'La Constitución de 1991 prohíbe extraditar colombianos.':'Solo por delitos cometidos después de 1997.'):'Colombia reclama a un colombiano que vive en '+esc(x.pais)+'. El tratado de ese país con Colombia '+(S.anio>=1980?'vigente':'de la época')+' deja un riesgo de entrega '+lbl(p)+'.')+(x.estado==='proceso'?' El tribunal resolverá hacia '+x.resuelve+'.':'')+(x.estado==='exilio'?' Llevas '+(S.anio-x.desde)+' año'+(S.anio-x.desde===1?'':'s')+' fuera; el delito prescribe a los '+(gr()>=8?25:15)+'.':''),
       html:'<div class="k"><div><b>'+Math.round(p*100)+'%</b><span>de que te entreguen</span></div><div><b>'+esc(x.pais||'')+'</b><span>donde estás</span></div><div><b>'+(x.abog?x.abog:0)+'/3</b><span>nivel de tu defensa</span></div></div>',opciones:ops}); }
   /* --- el exilio año a año --- */
@@ -29327,6 +29336,63 @@ install();setTimeout(install,1200);
   function init157(){ wrapProceso(); wrapPaso(); wrapMov(); wrapAcc(); Object.assign(window,{escenaCarcel157,escenaExtradicion157,escenaExilio157,sync157:sync,anual157:anual,fugarse157:fugarse,REGIMENES_157:REG,PROGRAMAS_157:PROG,carcel157:C,sugeridoCarcel157:sugerido,probExt157:probExt,extraditar157:extraditar,abrirExtradicion157:abrirExtradicion,refugios157:refugios,evMedida157:evMedida,resolverExt157:resolverExt}); }
   setTimeout(init157,40); setTimeout(init157,220); setTimeout(init157,650); setTimeout(init157,950);
   window.__SA157={version:V157};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v158 · LAS ILUSTRACIONES DEL PODER Y LA JUSTICIA
+   Doce láminas nuevas: te ofrecieron una embajada o un ministerio, ganaste o
+   perdiste una licitación, el desfalco de una empresa pública, la captura, la
+   extradición, el exilio, y los cuatro lugares donde se cumple una condena
+   (cárcel ordinaria, casa por cárcel, pabellón especial de pago y alta
+   seguridad).
+   - Dentro de las pantallas: la extradición, el exilio, la investigación por
+     un desfalco, la captura y la prisión llevan su lámina arriba.
+   - Como lámina aparte, cuando el juego lo anota: un nombramiento, una
+     licitación, una detención, una extradición, un exilio.
+   - La oferta del presidente: si lo apoyaste, un día te ofrece una embajada o
+     un ministerio para alguien de la casa.
+   ========================================================================== */
+(function(){
+  const V158='v158';
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const M=(k,t,x)=>{ try{ if(window.__noLam158) return; if(typeof window.momento120==='function') window.momento120(k,t,x); }catch(e){} };
+  const IMG_REG={ordinaria:'prision_ordinaria',domiciliaria:'prision_domiciliaria',especial:'pabellon_especial',alta:'carcel_maxima_seguridad'};
+  window.IMG_REGIMEN_158=IMG_REG;
+  window.imagenRegimen158=()=>{ try{ const c=S&&S.car157; return c&&c.reg?IMG_REG[c.reg]:null; }catch(e){ return null; } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  /* lo que el diario anota y merece lámina: [patrón, (m,texto)=>[lámina,título,texto]] */
+  const REGLAS=[
+    [/^(.+?) fue nombrad[oa] en ((?:Embajada|Representación).+?)\.?$/,(m,t)=>['embajada_ofrecida','Una embajada para la casa',t]],
+    [/^(.+?) fue nombrad[oa] en (Ministerio.+?)\.?$/,(m,t)=>['ministerio_ofrecido','Un ministerio para la casa',t]],
+    [/firmó un contrato de tres años con (.+?): unos/,(m,t)=>['licitacion_ganada','Contrato con '+m[1],t]],
+    [/perdió la licitación de (.+?)\./,(m,t)=>['licitacion_perdida','Perdiste una licitación',t]],
+    [/(^|\. )Te detuvieron|te detuvieron en el aeropuerto/,(m,t)=>['captura','Te detuvieron',t]],
+    [/^Te extraditaron a (.+?)\./,(m,t)=>['extradicion','Te extraditaron a '+m[1],t]],
+    [/^Te fuiste a (.+?)\./,(m,t)=>['exilio','Te exiliaste en '+m[1],t]],
+    [/detención domiciliaria/,(m,t)=>/^(Un|El) juez concedió/.test(t)?['prision_domiciliaria','La casa por cárcel',t]:null],
+    [/^Te trasladaron al pabellón especial/,(m,t)=>['pabellon_especial','El pabellón especial',t]]];
+  function wrapLog(){ const old=window.log; if(typeof old!=='function'||old.__v158) return;
+    window.log=function(txt,clase){ const r=old.apply(this,arguments);
+      try{ const t=plano(txt); for(const [re,f] of REGLAS){ const m=t.match(re); if(m){ const x=f(m,t); if(x){ M(x[0],x[1],x[2]); break; } } } }catch(e){}
+      return r; };
+    window.log.__v158=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.log[k]=true; }); }
+  /* --- la oferta del presidente --- */
+  function oferta(){ if(!S||!S.p||!S.gobierno||nino()||typeof window.politica155!=='function') return;
+    const po=window.politica155(), pr=po&&po.pres; if(!pr||po.ofertaGob158===pr.desde) return;
+    if(!S.gobierno.apoyado&&(pr.credito||0)<40) return; if(S._ev155===S.anio||S._ev156===S.anio||S._ev157===S.anio||S._ev158===S.anio) return; if(!chance(.2)) return;
+    const per=(window.personasPol155?window.personasPol155():[]).filter(x=>x.edad>=26).sort((a,b)=>b.capaz-a.capaz)[0]; if(!per) return;
+    const tipo=chance(.5)?'min':'emb', L=(window.PUESTOS_155||[]).filter(x=>x.tipo===tipo&&S.anio>=x.d&&!(x.h&&S.anio>x.h)&&!po.cargos.some(c=>c.puesto===x.id)&&x.poder<=4); if(!L.length) return;
+    const pu=pick(L), nom=typeof pu.n==='function'?pu.n(S.anio):pu.n; po.ofertaGob158=pr.desde; S._ev158=S.anio;
+    cola.push({p:8,c:()=>!!(window.politica155&&window.politica155().pres),t:()=>'<b>'+esc(pr.nombre)+'</b> quiere agradecerte lo que hiciste por su gobierno: te ofrece '+(tipo==='min'?'un ministerio':'una embajada')+' para alguien de la casa, <b>'+esc(nom)+'</b>. Propones a '+esc(per.nombre)+' ('+esc(per.rel)+'), la más preparada de la familia.',
+      o:[{t:'Aceptar para '+per.nombre.split(' ')[0],f:()=>{ window.__noLam158=true; try{ const c=window.ponerCargo155(per,pu); po.influ=Math.min(100,(po.influ||0)+pu.poder*2); if(chance(.14)){ try{ abrirEscandalo129('politico','El nombramiento de '+per.nombre+' en '+c.pn,2); }catch(x){} moverPrestigio(-3,'el nepotismo en '+c.pn); return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. La prensa se enteró: "los de siempre se reparten el Estado".'; } return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. Es de la casa y el Gobierno te lo agradece.'; }catch(x){ return 'El nombramiento no pudo hacerse.'; } finally{ window.__noLam158=false; } }},
+         {t:'Agradecer y declinar',f:()=>{ pr.rencor=Math.min(80,(pr.rencor||0)+4); S.p.redes=clamp((S.p.redes||0)+1,0,100); moverPrestigio(1,'no se dejó comprar'); return 'Agradeciste con elegancia y no aceptaste. Quedó claro que no te compran con un puesto.'; }}]}); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA158_PASO) return; window.__SA158_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) oferta(); }catch(e){ console.error(e); } return r; }; }
+  function init158(){ wrapLog(); wrapPaso(); Object.assign(window,{ofertaGobierno158:oferta}); }
+  setTimeout(init158,40); setTimeout(init158,220); setTimeout(init158,650); setTimeout(init158,950);
+  window.__SA158={version:V158};
 })();
 </script>
 
