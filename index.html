@@ -1312,10 +1312,32 @@ svg.foto116{display:block;background:#1d2a23}
 .con168 .nada168{padding:14px;border-radius:10px;background:rgba(111,192,143,.08);border:1px solid rgba(111,192,143,.25);margin:8px 0}
 .con168 .pie168b{margin-top:10px;font-size:12px;color:var(--humo2,#b9ae98)}
 </style>
+<style id="estilos-v169">
+.tec169 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.tec169 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.tec169 .k b{display:block;font-size:15px;font-family:var(--display)}
+.tec169 .k span{font-size:12px;color:var(--humo2)}
+.tec169 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.tec169 small{color:var(--humo2)}
+.tec169 .tira169{width:100%;height:auto;display:block;margin:4px 0 6px}
+.tec169 .ley169{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--humo2);margin-bottom:8px}
+.tec169 .ley169 i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.tec169 .rail169{position:relative;margin:8px 0 0 8px;border-left:2px solid rgba(214,166,72,.35);padding-left:16px}
+.tec169 .nodo169{position:relative;padding:2px 0 14px}
+.tec169 .nodo169::before{content:"";position:absolute;left:-23px;top:6px;width:10px;height:10px;border-radius:50%;background:#8a8272;border:2px solid #1b2a22}
+.tec169 .nodo169.ok::before{background:#6FC08F}.tec169 .nodo169.atr::before{background:#C25B4E}.tec169 .nodo169.lle::before{background:#D6A648}.tec169 .nodo169.mun::before{background:#6C9BD2}
+.tec169 .an169{font-family:var(--display);font-size:12px;color:#D6A648;letter-spacing:.05em}
+.tec169 .d169{font-size:13px;color:var(--humo);margin-top:2px}
+.tec169 .chip169{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:9px;background:rgba(255,255,255,.08);margin-left:4px;white-space:nowrap}
+.tec169 .chip169.ok{background:rgba(111,192,143,.22);color:#8fe0b0}.tec169 .chip169.atr{background:rgba(194,91,78,.25);color:#f0a79d}.tec169 .chip169.lle{background:rgba(214,166,72,.22);color:#F0CF86}.tec169 .chip169.mun{background:rgba(108,155,210,.22);color:#a9c8ec}
+.tec169 .hor169{margin-top:10px;font-size:13px;color:var(--humo2);font-style:italic}
+.panel169{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.panel169 .apunte{margin:4px 0 8px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v168</div>
+<div class="version-badge" id="versionBadge">v169</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5907,6 +5929,7 @@ function iniciar(cfg,legado){
     lid159:legadoValido&&legado.lid159?legado.lid159:null,
     hist164:legadoValido&&legado.hist164?legado.hist164:null,
     reg166:legadoValido&&legado.reg166?legado.reg166:null,
+    tec169:legadoValido&&legado.tec169?legado.tec169:null,
     residenciaInternacional:legadoValido&&legado.residenciaInternacional?legado.residenciaInternacional:null,
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
@@ -7982,6 +8005,7 @@ function heredar(h,frac,vivo,pleito){
     lid159:S.lid159?JSON.parse(JSON.stringify(S.lid159)):null,
     hist164:S.hist164?JSON.parse(JSON.stringify(S.hist164)):null,
     reg166:S.reg166?JSON.parse(JSON.stringify(S.reg166)):null,
+    tec169:S.tec169?JSON.parse(JSON.stringify(S.tec169)):null,
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
@@ -31063,6 +31087,245 @@ install();setTimeout(install,1200);
       ERAS_CONSEJERO_168:ERAS }); }
   setTimeout(init168,40); setTimeout(init168,220); setTimeout(init168,650); setTimeout(init168,950);
   window.__SA168={version:V168};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v169 · LA LÍNEA DE TIEMPO DE LA TECNOLOGÍA
+   La tecnología llega por olas, y llega distinto a Colombia que al mundo:
+   el vapor, el telégrafo, el ferrocarril, la electricidad, el teléfono, el
+   automóvil, la aviación, la radio, la televisión, el computador, el
+   celular, internet, el smartphone, la nube, la inteligencia artificial.
+   Cada una tiene cuatro momentos: no existe, existe afuera, llega al país
+   y se vuelve lo normal.
+   - Cada compañía la adopta o no. Adoptarla cuesta según su sector, y su
+     peso es distinto para cada uno (el ferrocarril lo es todo para la
+     logística y casi nada para un bufete).
+   - Si la traes antes de que llegue al país, eres pionera: sale más cara,
+     puede fallar, y si funciona te da marca, prestigio y ventas extra.
+   - Si la adoptas cuando llega, sube eficiencia, ventas y margen durante
+     unos años. Si no, cuando se vuelve lo normal tu competencia te pasa por
+     encima y pierdes ventas durante cinco años.
+   - Una compañía que nace cuando ya es lo normal, nace con ella.
+   - Llegan noticias en la crónica, un aviso si tienes una compañía a la que
+     le cambia el negocio, y fallas técnicas para las que la usan.
+   - La casa también se equipa: luz, teléfono, radio, televisión, carro,
+     nevera, computador, internet...
+   - Una pantalla con la línea de tiempo completa del país y la del mundo.
+   ========================================================================== */
+(function(){
+  const V169='v169';
+  const TIT='La tecnología de la época';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>fmt(Math.round(x));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const secN=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return x?x.n:s; }catch(e){ return s; } };
+  const margenSec=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return (x&&x.m)||.1; }catch(e){ return .1; } };
+  const movida=()=>{ if(S._mov169===S.anio) return true; if(S.mov<1) return false; S._mov169=S.anio; S.mov--; return true; };
+  const sinMov=()=>(S._mov169!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  /* ---- el catálogo: mu = existe en el mundo · co = llega a Colombia · ma = se vuelve lo normal
+         w = cuánto le importa a cada sector · c = costo (parte de las ventas) · al = alza de ventas
+         mg = mejora de margen · ob = sectores a los que les cambia el negocio de raíz ---- */
+  const TEC=[
+    {id:'vapor',n:'La navegación a vapor',mu:1807,co:1824,ma:1870,w:{logistica:1,agro:.6,mineria:.4,retail:.4,alimentos:.3},c:.08,al:.08,mg:.004,cat:'transporte',d:'Vapores por el río Magdalena: lo que tardaba un mes en champán sube en días.',fa:'encalló un vapor en el Magdalena',ob:{logistica:1.6}},
+    {id:'telegrafo',n:'El telégrafo',mu:1844,co:1865,ma:1895,w:{financiero:1,medios:.8,retail:.6,logistica:.6,seguros:.6,agro:.4,juridico:.4,mineria:.3},c:.02,al:.05,mg:.005,cat:'comunicacion',d:'Precios, órdenes y noticias en minutos, no en semanas.',fa:'se cortaron los hilos del telégrafo'},
+    {id:'ferrocarril',n:'El ferrocarril',mu:1825,co:1871,ma:1925,w:{logistica:1,agro:.8,mineria:.7,construccion:.6,retail:.5,alimentos:.5,moda:.3},c:.12,al:.10,mg:.006,cat:'transporte',d:'Rieles al puerto y al interior: el café y los géneros ya no dependen de la mula.',fa:'descarriló un tren',ob:{logistica:1.7}},
+    {id:'telar',n:'El telar mecánico',mu:1785,co:1907,ma:1935,w:{moda:1,alimentos:.2},c:.06,al:.08,mg:.008,cat:'industria',d:'Fábricas de textiles con telares movidos por máquina, como las de Medellín.',fa:'se rompió el telar principal'},
+    {id:'dinamita',n:'La dinamita y la maquinaria minera',mu:1867,co:1885,ma:1925,w:{mineria:1,construccion:.5,energia:.3},c:.07,al:.08,mg:.008,cat:'industria',d:'Minas más hondas y túneles que antes eran imposibles.',fa:'hubo un derrumbe en la mina'},
+    {id:'beneficio',n:'El beneficio mecánico del café',mu:1860,co:1885,ma:1930,w:{agro:.9,alimentos:.4},c:.05,al:.07,mg:.010,cat:'industria',d:'Despulpadoras y secadoras: café más parejo y mejor pagado.',fa:'se dañó la secadora en plena cosecha'},
+    {id:'electricidad',n:'La electricidad',mu:1882,co:1889,ma:1935,w:{energia:1,moda:.7,alimentos:.7,retail:.5,mineria:.5,medios:.5,turismo:.5,construccion:.4,logistica:.4,salud:.4,financiero:.3,agro:.2},c:.07,al:.09,mg:.008,cat:'energia',d:'Luz, fuerza motriz y fábricas que ya no dependen del agua ni del carbón.',fa:'hubo un apagón',casa:true},
+    {id:'telefono',n:'El teléfono',mu:1876,co:1884,ma:1940,w:{financiero:.9,juridico:.8,retail:.7,seguros:.7,medios:.5,turismo:.5,logistica:.5,salud:.4},c:.02,al:.05,mg:.006,cat:'comunicacion',d:'Hablar con el cliente, el banco y el abogado sin salir de la oficina.',fa:'se cayó la central telefónica',casa:true},
+    {id:'concreto',n:'El concreto armado y el cemento',mu:1900,co:1909,ma:1945,w:{construccion:1,energia:.3,mineria:.3},c:.06,al:.07,mg:.007,cat:'industria',d:'Edificios altos, puentes y acueductos más baratos y más duraderos.',fa:'una obra salió con el concreto defectuoso'},
+    {id:'petroleo',n:'El petróleo y la refinación',mu:1859,co:1905,ma:1940,w:{energia:1,mineria:.7,logistica:.5,construccion:.3},c:.10,al:.09,mg:.012,cat:'energia',d:'Concesiones, oleoductos y refinerías: un país que empieza a vivir del crudo.',fa:'se rompió un oleoducto'},
+    {id:'automovil',n:'El automóvil y el camión',mu:1886,co:1908,ma:1950,w:{logistica:.9,retail:.5,agro:.5,turismo:.5,construccion:.4,alimentos:.4},c:.06,al:.07,mg:.005,cat:'transporte',d:'Carreteras donde antes había trochas y mercancía que llega en días.',fa:'se varó la flota',casa:true,ob:{logistica:1.3}},
+    {id:'aviacion',n:'La aviación comercial',mu:1903,co:1920,ma:1955,w:{turismo:.9,logistica:.8,agro:.4,retail:.3,mineria:.2,financiero:.2},c:.09,al:.07,mg:.006,cat:'transporte',d:'SCADTA y sus sucesoras: valles andinos a horas de distancia, no a semanas.',fa:'un accidente aéreo cerró una ruta'},
+    {id:'radio',n:'La radio',mu:1920,co:1929,ma:1950,w:{medios:1,retail:.6,moda:.3,alimentos:.3,turismo:.3,salud:.2},c:.03,al:.07,mg:.008,cat:'comunicacion',d:'Noticias, novelas y publicidad que entran a cada casa a la misma hora.',fa:'se dañó el transmisor',casa:true,ob:{medios:1.4}},
+    {id:'cenicafe',n:'La investigación cafetera (Cenicafé)',mu:1938,co:1938,ma:1975,w:{agro:1,alimentos:.3},c:.03,al:.07,mg:.012,cat:'industria',d:'Variedades más resistentes y técnicas de cultivo probadas por la Federación.',fa:'la roya golpeó los cafetales'},
+    {id:'refrigeracion',n:'La refrigeración industrial',mu:1913,co:1935,ma:1965,w:{alimentos:1,agro:.6,salud:.5,retail:.5,turismo:.4},c:.05,al:.07,mg:.007,cat:'industria',d:'Carne, leche y flores que viajan frías y duran semanas, no días.',fa:'falló la cadena de frío',casa:true},
+    {id:'antibioticos',n:'Los antibióticos y la farmacia moderna',mu:1943,co:1947,ma:1965,w:{salud:1,alimentos:.2},c:.06,al:.10,mg:.010,cat:'salud',d:'Infecciones que mataban ahora se curan; la medicina se vuelve industria.',fa:'se contaminó un lote'},
+    {id:'plasticos',n:'Los plásticos y la petroquímica',mu:1950,co:1956,ma:1975,w:{moda:.7,alimentos:.6,retail:.5,construccion:.4,salud:.4},c:.05,al:.06,mg:.007,cat:'industria',d:'Envases, tuberías y telas sintéticas: costos más bajos para casi todo.',fa:'se dañó la extrusora'},
+    {id:'television',n:'La televisión',mu:1939,co:1954,ma:1975,w:{medios:1,retail:.7,moda:.4,alimentos:.4,turismo:.3},c:.08,al:.09,mg:.009,cat:'comunicacion',d:'Imagen en la sala de cada casa: la publicidad ya no es la misma.',fa:'se cayó la transmisión en horario triple A',casa:true,ob:{medios:1.5}},
+    {id:'computador',n:'El computador central',mu:1951,co:1961,ma:1990,w:{financiero:1,seguros:.9,retail:.5,energia:.4,juridico:.3,mineria:.3,salud:.3},c:.06,al:.08,mg:.012,cat:'digital',d:'Planillas, cuentas y facturas procesadas por una máquina del tamaño de un cuarto.',fa:'se perdió una cinta con la contabilidad'},
+    {id:'tarjetas',n:'Las tarjetas y los cajeros automáticos',mu:1967,co:1977,ma:1998,w:{financiero:1,retail:.7,turismo:.5,seguros:.3},c:.04,al:.06,mg:.008,cat:'digital',d:'Pagar y retirar sin ir a la ventanilla: la banca llega a la calle.',fa:'se cayó la red de cajeros'},
+    {id:'tvcolor',n:'La televisión a color',mu:1953,co:1979,ma:1987,w:{medios:.9,retail:.5,moda:.3},c:.04,al:.04,mg:.005,cat:'comunicacion',d:'El Mundial del 78 y la telenovela en color: la pantalla cambia el negocio.',fa:'falló el estudio principal',casa:true},
+    {id:'automatizacion',n:'La automatización y la robótica',mu:1980,co:1995,ma:2015,w:{moda:.8,alimentos:.8,mineria:.6,logistica:.6,agro:.5,construccion:.4,energia:.4,salud:.4},c:.09,al:.08,mg:.014,cat:'industria',d:'Robots y control digital en la línea: menos mano de obra por unidad.',fa:'se detuvo la línea automatizada'},
+    {id:'pc',n:'El computador personal',mu:1981,co:1984,ma:1997,w:{tech:1,juridico:.8,financiero:.7,seguros:.6,retail:.5,medios:.5,logistica:.4,salud:.4,turismo:.4,moda:.3,alimentos:.3,construccion:.3,energia:.3},c:.04,al:.07,mg:.010,cat:'digital',d:'Hojas de cálculo y procesadores en cada escritorio.',fa:'se perdió una base de datos sin copia',casa:true},
+    {id:'celular',n:'La telefonía celular',mu:1983,co:1994,ma:2004,w:{logistica:.7,tech:.6,retail:.6,financiero:.5,turismo:.5,salud:.4,construccion:.4,seguros:.4,agro:.3,medios:.3},c:.03,al:.05,mg:.005,cat:'comunicacion',d:'El vendedor, el conductor y el gerente ya no están "incomunicados".',fa:'se saturó la red celular',casa:true},
+    {id:'internet',n:'Internet',mu:1991,co:1995,ma:2005,w:{tech:1,medios:.9,financiero:.8,juegos:.8,turismo:.8,retail:.7,seguros:.6,juridico:.5,moda:.5,logistica:.5,salud:.4},c:.04,al:.09,mg:.012,cat:'digital',d:'Correo, páginas y la primera tienda en línea: el mundo a un clic.',fa:'se cayó el servidor',casa:true,ob:{medios:1.5}},
+    {id:'ecommerce',n:'El comercio electrónico',mu:1995,co:1999,ma:2013,w:{retail:1,moda:.8,turismo:.8,logistica:.6,financiero:.5,alimentos:.4,juegos:.4,medios:.4},c:.04,al:.08,mg:.009,cat:'digital',d:'Vender y cobrar por la red, con despachos a domicilio.',fa:'una falla de pagos frenó las ventas',ob:{retail:1.4}},
+    {id:'redes',n:'Las redes sociales',mu:2004,co:2008,ma:2014,w:{medios:1,moda:.8,retail:.7,turismo:.7,juegos:.7,tech:.6,alimentos:.4},c:.02,al:.06,mg:.006,cat:'digital',d:'La marca habla directo con el cliente, y el cliente le contesta.',fa:'se viralizó una queja',casa:true},
+    {id:'smartphone',n:'El teléfono inteligente',mu:2007,co:2009,ma:2016,w:{tech:1,juegos:1,medios:.8,financiero:.7,retail:.7,turismo:.7,logistica:.5,salud:.4},c:.03,al:.07,mg:.008,cat:'digital',d:'Un computador en el bolsillo de cada cliente.',fa:'falló la aplicación en plena campaña',casa:true},
+    {id:'streaming',n:'El streaming',mu:2007,co:2011,ma:2018,w:{medios:1,juegos:.9,tech:.5},c:.05,al:.08,mg:.010,cat:'digital',d:'Series, música y juegos a demanda, sin horario ni antena.',fa:'se saturaron los servidores',ob:{medios:1.7}},
+    {id:'nube',n:'La computación en la nube',mu:2006,co:2012,ma:2019,w:{tech:1,financiero:.8,juegos:.6,seguros:.6,retail:.5,medios:.5,salud:.5,juridico:.4},c:.04,al:.06,mg:.012,cat:'digital',d:'Servidores que se alquilan por uso: se acabó comprar la sala de máquinas.',fa:'se cayó un centro de datos'},
+    {id:'pagos',n:'Los pagos digitales y las fintech',mu:2010,co:2016,ma:2022,w:{financiero:1,retail:.7,tech:.6,turismo:.5,seguros:.4},c:.04,al:.07,mg:.010,cat:'digital',d:'Billeteras, transferencias al instante y crédito sin sucursal.',fa:'se cayó el sistema de pagos',ob:{financiero:1.3}},
+    {id:'solar',n:'La energía solar y eólica',mu:2010,co:2018,ma:2027,w:{energia:1,agro:.4,construccion:.4,mineria:.3,alimentos:.2},c:.08,al:.07,mg:.012,cat:'energia',d:'Paneles y parques eólicos: energía más barata y sin humo.',fa:'una tormenta dañó el parque',casa:true},
+    {id:'ev',n:'Los vehículos eléctricos',mu:2012,co:2018,ma:2032,w:{logistica:.8,energia:.6,retail:.3,turismo:.3},c:.08,al:.06,mg:.008,cat:'transporte',d:'Flotas eléctricas: menos combustible y más cargadores.',fa:'faltaron cargadores',casa:true},
+    {id:'ia',n:'La inteligencia artificial',mu:2022,co:2023,ma:2030,w:{tech:1,juridico:.9,financiero:.8,medios:.8,seguros:.7,juegos:.7,retail:.6,salud:.6,logistica:.5,turismo:.5,moda:.4},c:.05,al:.10,mg:.015,cat:'digital',d:'Asistentes que redactan, analizan y programan: lo que tardaba días toma minutos.',fa:'el modelo se equivocó con un cliente importante',ob:{juridico:1.4,medios:1.3}}];
+  const TBY={}; TEC.forEach(t=>{ TBY[t.id]=t; });
+  const HORIZ={transporte:'nuevas formas de moverse',comunicacion:'nuevas formas de comunicarse',energia:'nuevas fuentes de energía',industria:'máquinas que hacen el trabajo de muchas manos',digital:'máquinas que calculan y conectan',salud:'avances en la medicina'};
+  /* ---- los cuatro momentos ---- */
+  const fase=(t,a)=>{ a=a==null?A():a; return a<t.mu?'futuro':a<t.co?'mundo':a<t.ma?'llegada':'madura'; };
+  const dif=(t,a)=>{ a=a==null?A():a; return a<t.co?0:Math.max(0,Math.min(1,(a-t.co)/Math.max(1,t.ma-t.co))); };
+  const W=(e,t)=>(e&&t.w[e.sector])||0;
+  const relevante=(e,t)=>W(e,t)>=.3;
+  const nacioCon=(e,t)=>(e.fundada||0)>=t.ma-2&&(e.fundada||0)>0;
+  const PIONERA=12;
+  /* ---- el estado ---- */
+  function ST(){ if(!S.tec169||typeof S.tec169!=='object') S.tec169={vistos:{},casa:{},primeros:{}}; const s=S.tec169; s.vistos=s.vistos||{}; s.casa=s.casa||{}; s.primeros=s.primeros||{};
+    if(!s.init){ s.init=true; s.desde=A(); TEC.forEach(t=>{ if(A()>t.co) s.vistos[t.id]=A(); }); } return s; }
+  function EX(e){ if(!e.tec169||typeof e.tec169!=='object') e.tec169={adop:{},vio:{},fallo:{},hist:[]}; const x=e.tec169; x.adop=x.adop||{}; x.vio=x.vio||{}; x.fallo=x.fallo||{}; x.hist=x.hist||[]; return x; }
+  /* lo que ya era lo normal cuando empezó la partida, o hace más de quince años, nadie lo discute: ya lo tienen todos */
+  const adoptada=(e,t)=>!!EX(e).adop[t.id]||nacioCon(e,t)||t.ma<=(ST().desde||0)||A()-t.ma>15;
+  const pionera=(t)=>fase(t)==='mundo'&&A()>=t.co-PIONERA;
+  function puede(e,t){ if(!relevante(e,t)||adoptada(e,t)) return false; const f=fase(t); if(f==='futuro') return false; if(f==='mundo'){ if(!pionera(t)) return false; const fa=EX(e).fallo[t.id]; if(fa&&A()<fa+3) return false; } return true; }
+  /* ---- costo y riesgo ---- */
+  function costo(e,t){ const f=fase(t), base=e.ingresos*t.c*(.6+.4*W(e,t)); const k=f==='mundo'?1.7:f==='llegada'?1.15-.3*dif(t):.7; return Math.max(10,Math.round(base*k*(EX(e).vio[t.id]?.85:1))); }
+  function pExito(e,t){ const f=fase(t); if(f==='madura') return 1; if(f==='llegada') return .94; return Math.max(.4,Math.min(.88,.5+(e.innovacion||50)/250+(e.eficiencia||50)/400+(EX(e).vio[t.id]?.15:0))); }
+  /* ---- lo que pasa cada año ---- */
+  function efectos(e){ const x=EX(e), m0=margenSec(e.sector); let gan=0, rez=0, mg=0; const atr=[];
+    TEC.forEach(t=>{ const w=W(e,t); if(w<.3) return; const r=x.adop[t.id];
+      if(r){ const an=A()-r.anio; if(an>=1&&an<=4) gan+=t.al*w*(r.pion?1.3:1)/4; mg+=t.mg*w*(.5+.5*dif(t)); }
+      else if(fase(t)==='madura'&&!adoptada(e,t)){ atr.push(t); const an=A()-t.ma; if(an>=0&&an<5) rez+=t.al*w*.6/5*((t.ob&&t.ob[e.sector])||1); } });
+    mg=Math.min(mg,.03);
+    return {gan,rez,mg,atr,du:(gan-rez)*m0*1.1+mg*.5}; }
+  function anualCompania(e){ if(!ACTIVO()||nino()||!comps().includes(e)||!(e.ingresos>0)) return; const x=EX(e), f=efectos(e);
+    const dI=e.ingresos*(f.gan-f.rez), du=dI*margenSec(e.sector)*1.1+e.ingresos*f.mg*.5;
+    if(dI||du){ e.ingresos=Math.max(1,e.ingresos+dI); e.utilidad+=du; e.caja+=du; x.ult={dI:Math.round(dI),du:Math.round(du)};
+      try{ if(typeof window.anotar147==='function'&&Math.abs(du)>=1) window.anotar147('Tecnología en '+e.nombre,Math.round(du)); }catch(y){} }
+    sucesos(e,x); }
+  /* ---- sucesos ---- */
+  const evento=(t,o)=>{ try{ cola.push({p:8,c:()=>!!(S&&S.p&&!S.muerto),t:()=>t,o}); }catch(e){} };
+  function sucesos(e,x){ if(S._fa169===S.anio) return;
+    const ads=Object.keys(x.adop).map(k=>TBY[k]).filter(t=>t&&A()-x.adop[t.id].anio>=1);
+    if(!ads.length||!chance(.022*(1.15-(e.eficiencia||50)/100))) return;
+    const t=ads[Math.floor(Math.random()*ads.length)]; S._fa169=S.anio; const c=Math.round(e.ingresos*.012);
+    evento('<b>En '+E(e.nombre)+' '+E(t.fa)+'.</b> Lo que depende de '+E(t.n.toLowerCase())+' está parado.',
+      [{t:'Repararlo de inmediato ('+fmt(c)+')',f:()=>{ e.caja-=c; return 'Lo arreglaste a tiempo y costó '+fm(c)+'.'; }},
+       {t:'Aguantar con lo que hay',f:()=>{ e.utilidad-=c*1.5; e.caja-=c*1.5; return 'Se perdieron días de producción y de ventas: '+fm(c*1.5)+'.'; }}]); }
+  function mejorCompania(t){ let m=null, v=-1; comps().forEach(e=>{ if(W(e,t)<.5||adoptada(e,t)||!(e.ingresos>0)) return; const s=W(e,t)*e.ingresos; if(s>v){ v=s; m=e; } }); return m; }
+  function adoptar(e,t){ const x=EX(e), f=fase(t), c=costo(e,t);
+    if(x.adop[t.id]) return 'Ya la tenía.'; if(e.caja<c) return 'La compañía no tiene esa caja.';
+    e.caja-=c; const w=W(e,t), p=pExito(e,t);
+    if(!chance(p)){ x.fallo[t.id]=A(); e.innovacion=Math.max(0,Math.min(100,(e.innovacion||50)+3)); x.hist.push({anio:A(),t:'Falló el intento con '+t.n.toLowerCase()});
+      log('<b>'+E(e.nombre)+'</b> intentó adoptar '+E(t.n.toLowerCase())+' antes de tiempo y <b>falló</b>: se perdieron '+fm(c)+'. Algo aprendió.','mal'); return 'El intento falló: se perdieron '+fm(c)+'. Algo aprendió y podrá intentarlo de nuevo en unos años.'; }
+    x.adop[t.id]={anio:A(),f,pion:f==='mundo'};
+    e.eficiencia=Math.max(0,Math.min(100,(e.eficiencia||50)+Math.round(8*w)));
+    if(['digital','comunicacion'].includes(t.cat)) e.innovacion=Math.max(0,Math.min(100,(e.innovacion||50)+Math.round(5*w)));
+    x.hist.push({anio:A(),t:'Adoptó '+t.n.toLowerCase()});
+    let extra='';
+    if(f==='mundo'){ e.marca=Math.max(0,Math.min(100,(e.marca||50)+4)); const s=ST();
+      if(!s.primeros[t.id]){ s.primeros[t.id]={quien:e.nombre,anio:A()}; prest(2,'primera del país en '+t.n.toLowerCase()); try{ if(typeof hito==='function') hito(e.nombre+' fue la primera del país en adoptar '+t.n.toLowerCase()); }catch(y){} extra=' Fue la <b>primera del país</b>: sube la marca y el apellido.'; }
+      else { prest(1,'pionera en '+t.n.toLowerCase()); extra=' Llegó entre las primeras.'; } }
+    log('<b>'+E(e.nombre)+'</b> adoptó <b>'+E(t.n.toLowerCase())+'</b> por '+fm(c)+'.'+extra,'bien');
+    return 'Hecho: '+E(e.nombre)+' ya cuenta con '+E(t.n.toLowerCase())+'.'+extra; }
+  function llegada(t){ log('<b>'+E(t.n)+' llega a Colombia.</b> '+E(t.d),'hito');
+    if(S._ev169===S.anio) return; const e=mejorCompania(t); if(!e) return; S._ev169=S.anio;
+    const c=costo(e,t), ing=Math.round(e.ingresos*.012);
+    evento('<b>'+E(t.n)+' llega a Colombia.</b> '+E(t.d)+' Para <b>'+E(e.nombre)+'</b>, de '+E(secN(e.sector).toLowerCase())+', va a importar.',
+      [{t:'Adoptarla ya ('+fmt(c)+')',f:()=>adoptar(e,t)},
+       {t:'Mandar a un ingeniero a verla primero ('+fmt(ing)+')',f:()=>{ EX(e).vio[t.id]=A(); e.caja-=ing; return 'Volvió con planos y cotizaciones. Adoptarla saldrá 15% más barata y con menos riesgo.'; }},
+       {t:'Esperar a ver qué hacen los demás',f:()=>'Decidiste esperar. Cuando se vuelva lo normal, la que no la tenga se queda atrás.'}]); }
+  function pasoAnio(){ const s=ST();
+    TEC.forEach(t=>{ if(A()===t.mu&&t.mu>=1810) log('<b>En el mundo:</b> aparece '+E(t.n.toLowerCase())+'. Todavía no llega al país.');
+      if(A()>=t.co&&!s.vistos[t.id]){ s.vistos[t.id]=A(); llegada(t); }
+      if(A()===t.ma){ const at=comps().filter(e=>relevante(e,t)&&W(e,t)>=.5&&!adoptada(e,t)); if(at.length) log('<b>'+E(t.n)+'</b> ya es lo normal. '+at.map(e=>'<b>'+E(e.nombre)+'</b>').join(', ')+' '+(at.length>1?'se quedan atrás':'se queda atrás')+' y los clientes lo van a notar.','mal'); } }); }
+  /* ---- la casa ---- */
+  const casaT=()=>TEC.filter(t=>t.casa&&A()>=t.co);
+  function costoCasa(t){ return Math.max(2,Math.round(pat()*.0018*(fase(t)==='llegada'?1.1-.4*dif(t):.6))); }
+  function equipar(t){ const c=costoCasa(t); if(S.efectivo<c) return 'No te alcanza el efectivo.'; const s=ST(); if(s.casa[t.id]) return 'La casa ya lo tiene.';
+    S.efectivo-=c; s.casa[t.id]=A(); S.p.felicidad=Math.max(0,Math.min(100,S.p.felicidad+3)); if(fase(t)==='llegada') prest(1,'la primera casa con '+t.n.toLowerCase());
+    log('La casa ya cuenta con <b>'+E(t.n.toLowerCase())+'</b> ('+fm(c)+').','bien'); return 'La casa ya cuenta con '+E(t.n.toLowerCase())+'.'; }
+  /* ==================== LA PANTALLA ==================== */
+  const COL={ok:'#6FC08F',atr:'#C25B4E',lle:'#D6A648',mun:'#6C9BD2',nd:'#8a8272'};
+  function estado(e,t){ const f=fase(t);
+    if(!e) return {k:'nd',t:f==='mundo'?'Solo existe afuera':f==='llegada'?'Ya está en el país':'Es lo normal'};
+    if(!relevante(e,t)) return {k:'nd',t:'No es de tu sector'};
+    if(adoptada(e,t)){ const r=EX(e).adop[t.id]; return {k:'ok',t:r?'Adoptada en '+r.anio+(r.pion?' (pionera)':''):'Nació con ella'}; }
+    if(f==='madura') return {k:'atr',t:'Atrasada: es lo normal desde '+t.ma};
+    if(f==='llegada') return {k:'lle',t:'Llegó en '+t.co+' · '+Math.round(dif(t)*100)+'% del país la usa'};
+    return {k:'mun',t:'Existe afuera desde '+t.mu+(pionera(t)?' · se puede traer':'')}; }
+  function tira(e){ const a0=1800, a1=Math.max(2032,A()+8), Wd=560, X=y=>Math.round((y-a0)/(a1-a0)*(Wd-24)+12);
+    let s='<svg viewBox="0 0 '+Wd+' 64" class="tira169" role="img" aria-label="Línea de tiempo de las tecnologías"><line x1="12" y1="42" x2="'+(Wd-12)+'" y2="42" stroke="rgba(255,255,255,.25)" stroke-width="2"/>';
+    for(let y=1800;y<=a1;y+=50) s+='<line x1="'+X(y)+'" y1="38" x2="'+X(y)+'" y2="48" stroke="rgba(255,255,255,.35)"/><text x="'+X(y)+'" y="62" font-size="13" fill="#9c8f7c" text-anchor="middle">'+y+'</text>';
+    s+='<line x1="'+X(A())+'" y1="4" x2="'+X(A())+'" y2="48" stroke="#D6A648" stroke-width="2"/>';
+    const lane={};
+    TEC.filter(t=>fase(t)!=='futuro').sort((a,b)=>a.co-b.co).forEach(t=>{ const k=Math.floor(t.co/7); lane[k]=(lane[k]||0)+1; const y=34-((lane[k]-1)%4)*9, st=estado(e,t);
+      s+='<circle cx="'+X(t.co)+'" cy="'+y+'" r="4.5" fill="'+COL[st.k]+'" opacity="'+(t.co>A()?.4:1)+'"><title>'+E(t.n)+' · llega a Colombia en '+t.co+'</title></circle>'; });
+    return s+'</svg><div class="ley169"><span><i style="background:'+COL.ok+'"></i>Adoptada</span><span><i style="background:'+COL.atr+'"></i>Atrasada</span><span><i style="background:'+COL.lle+'"></i>En el país</span><span><i style="background:'+COL.mun+'"></i>Solo afuera</span><span><i style="background:'+COL.nd+'"></i>No te afecta</span></div>'; }
+  const prio=(e,t)=>{ const f=fase(t), w=W(e,t); return (f==='madura'?3:f==='llegada'?2:1)*10+w*t.al*100; };
+  function horizonte(){ const c={}; TEC.filter(t=>fase(t)==='futuro'&&t.mu-A()<=10).forEach(t=>{ c[t.cat]=1; }); const k=Object.keys(c).slice(0,2); if(!k.length) return ''; return '<div class="hor169">En el horizonte: en talleres y laboratorios del extranjero se habla de '+k.map(x=>HORIZ[x]).join(' y de ')+'.</div>'; }
+  function rail(e){ const L=TEC.filter(t=>fase(t)!=='futuro').sort((a,b)=>b.co-a.co);
+    return '<div class="rail169">'+L.map(t=>{ const st=estado(e,t), sec=Object.keys(t.w).sort((a,b)=>t.w[b]-t.w[a]).slice(0,3).map(secN).join(', ');
+      return '<div class="nodo169 '+st.k+'"><div class="an169">'+(t.co>A()?'llega hacia '+t.co:'Colombia '+t.co)+' · mundo '+t.mu+'</div><b>'+E(t.n)+'</b><span class="chip169 '+st.k+'">'+E(st.t)+'</span><div class="d169">'+E(t.d)+'</div><small>Les cambia sobre todo a: '+E(sec)+'.</small></div>'; }).join('')+'</div>'+horizonte(); }
+  function escenaTecnologia169(e,vista){ if(!ACTIVO()||nino()) return; const g=comps(); e=e||S.emp||g[0]||null; if(e&&!g.includes(e)) e=g[0]||null;
+    const s=ST(); vista=vista||s.vista||'decidir'; s.vista=vista;
+    const reab=(v,x)=>{ cerrarModal(); render(); escenaTecnologia169(x||e,v||vista); };
+    const ops=[]; let kpis='', cuerpo='';
+    if(e){ const f=efectos(e), rel=TEC.filter(t=>fase(t)!=='futuro'&&relevante(e,t)&&A()>=t.co), ad=rel.filter(t=>adoptada(e,t)).length;
+      kpis='<div class="k"><div><b>'+ad+' de '+rel.length+'</b><span>tecnologías al día</span></div><div><b>'+(f.gan>0?'+':'')+(Math.round(f.gan*1000)/10)+'%</b><span>ventas extra este año</span></div><div><b>'+(f.rez>0?'−':'')+(Math.round(f.rez*1000)/10)+'%</b><span>ventas que se pierden por rezago</span></div><div><b>'+f.atr.length+'</b><span>atrasada'+(f.atr.length===1?'':'s')+'</span></div></div>';
+      cuerpo=f.atr.length?'<b>'+E(e.nombre)+'</b> se está quedando atrás: '+f.atr.slice(0,3).map(t=>E(t.n.toLowerCase())).join(', ')+' ya es lo normal en el país.':'Esto es lo que ha traído cada ola de tecnología, y qué tanto la ha adoptado <b>'+E(e.nombre)+'</b>.'; }
+    else cuerpo='Todavía no tienes una compañía. Mientras tanto, mira cómo llegó cada tecnología al país: cuando fundes una, podrás decidir cuáles adoptar y cuándo.';
+    if(e&&vista==='decidir'){ TEC.filter(t=>puede(e,t)).sort((a,b)=>prio(e,b)-prio(e,a)).slice(0,6).forEach(t=>{ const f=fase(t), c=costo(e,t), p=pExito(e,t), r=EX(e).vio[t.id];
+        const d=(f==='madura'?'Ya es lo normal desde '+t.ma+': tus competidores la tienen y las ventas se resienten.':f==='llegada'?'Llegó a Colombia en '+t.co+' y hoy la usa el '+Math.round(dif(t)*100)+'% del mercado.':'Existe en el mundo desde '+t.mu+' y llegará al país hacia '+t.co+'. Serías pionera: marca, prestigio y más ventas, pero con riesgo ('+Math.round((1-p)*100)+'% de que falle).')
+          +' Subes eficiencia'+(['digital','comunicacion'].includes(t.cat)?' e innovación':'')+', hasta +'+(Math.round(t.al*W(e,t)*1000)/10)+'% de ventas en cuatro años y mejor margen.'+(r?' Mandaste un ingeniero a verla: sale 15% más barata.':'');
+        ops.push({t:'Adoptar '+t.n.toLowerCase()+' · '+fmt(c),cat:'compania',d,dis:e.caja<c?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const m=adoptar(e,t); aviso(String(m).replace(/<[^>]+>/g,'')); reab(); }}); });
+      TEC.filter(t=>relevante(e,t)&&!adoptada(e,t)&&fase(t)==='mundo'&&pionera(t)&&!EX(e).vio[t.id]&&!EX(e).fallo[t.id]).slice(0,1).forEach(t=>{ const c=Math.round(e.ingresos*.012);
+        ops.push({t:'Mandar un ingeniero a ver '+t.n.toLowerCase()+' · '+fmt(c),cat:'compania',d:'Ve cómo funciona afuera. Adoptarla después saldrá 15% más barata y con 15 puntos menos de riesgo de falla.',dis:e.caja<c?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=c; EX(e).vio[t.id]=A(); log('Mandaste un ingeniero de '+E(e.nombre)+' a ver '+E(t.n.toLowerCase())+'.'); reab(); }}); }); }
+    const nCasa=casaT().filter(t=>!s.casa[t.id]).length;
+    if(vista==='decidir') ops.push({t:'Ver la línea de tiempo completa',cat:'legado',d:'Todas las tecnologías que han llegado, con sus fechas en el mundo y en Colombia.',cerrar:false,run:()=>reab('linea')});
+    else ops.push({t:'Volver a las decisiones',cat:'legado',d:'Lo que puedes adoptar hoy en esta compañía.',cerrar:false,run:()=>reab('decidir')});
+    if(nCasa) ops.push({t:'Equipar la casa ('+nCasa+')',cat:'casa',d:'Luz, teléfono, radio, televisión, nevera, carro, computador, internet: cada cosa nueva que entra a tu casa.',cerrar:false,run:()=>{ cerrarModal(); escenaCasa169(e); }});
+    if(g.length>1){ const sig=g[(g.indexOf(e)+1)%g.length]; ops.push({t:'Ver otra compañía: '+sig.nombre,cat:'compania',d:'Cada compañía tiene su propia historia con la tecnología.',cerrar:false,run:()=>reab(vista,sig)}); }
+    escena({rubro:'Tecnología',titulo:e?'La tecnología de '+E(e.nombre):'La línea de tiempo de la tecnología',ancho:true,cerrable:true,clase:'tec169',cuerpo,
+      html:kpis+tira(e)+(vista==='linea'?'<h4>Línea de tiempo</h4>'+rail(e):horizonte()),opciones:ops}); }
+  function escenaCasa169(e){ const s=ST(); const ops=casaT().filter(t=>!s.casa[t.id]).map(t=>{ const c=costoCasa(t);
+      return {t:'Instalar '+t.n.toLowerCase()+' en la casa · '+fmt(c),cat:'casa',d:(fase(t)==='llegada'?'Está llegando: serás de las primeras casas con ella. ':'')+'Más comodidad y ánimo.',dis:S.efectivo<c?'No te alcanza el efectivo':null,cerrar:false,run:()=>{ const m=equipar(t); aviso(String(m).replace(/<[^>]+>/g,'')); cerrarModal(); render(); escenaCasa169(e); }}; });
+    ops.push({t:'Volver a la línea de tiempo',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); render(); escenaTecnologia169(e); }});
+    const ya=Object.keys(s.casa).map(k=>TBY[k]).filter(Boolean);
+    escena({rubro:'Tecnología',titulo:'Equipar la casa',ancho:true,cerrable:true,clase:'tec169',cuerpo:ya.length?'Ya tiene: '+ya.map(t=>E(t.n.toLowerCase())).join(', ')+'.':'Todavía la casa no tiene nada de esto.',opciones:ops}); }
+  /* ==================== EL CONSEJERO ==================== */
+  function gTec(){ if(!ACTIVO()||nino()) return []; let mejor=null;
+    comps().forEach(e=>{ TEC.forEach(t=>{ const w=W(e,t); if(w<.5||!puede(e,t)) return; const f=fase(t), an=A()-t.ma, c=costo(e,t); if(e.caja<c*1.1) return;
+      const peso=(f==='madura'?(an<5?56:33):f==='llegada'?46:35)+w*6; if(!mejor||peso>mejor.peso) mejor={peso,e,t,f}; }); });
+    if(!mejor) return []; const {e,t,f,peso}=mejor, n=E(t.n.toLowerCase()), nom=E(e.nombre);
+    const txt=f==='madura'?'Ya todos usan '+n+' y <b>'+nom+'</b> se está quedando atrás.':f==='llegada'?'Llegó '+n+' al país y <b>'+nom+'</b> todavía no la usa.':'Afuera ya existe '+n+': la que la traiga primero a <b>'+nom+'</b> toma ventaja.';
+    return [{id:'tec:'+t.id+':'+e.nombre,peso:Math.round(peso),tono:f==='madura'?'mal':'oro',txt,por:f==='madura'?'Cada año que pasa pierdes clientes frente a quienes ya la tienen.':'Adoptarla a tiempo sube la eficiencia, las ventas y el margen durante años.',si:f==='madura'?'Pierdes hasta '+Math.round(t.al*W(e,t)*60)/10+'% de las ventas en cinco años.':'Cuando se vuelva lo normal, adoptarla ya no te dará ventaja y no hacerlo te costará.',ir:TIT,irT:'Ver tecnologías',pre:()=>{ try{ const i=comps().indexOf(e); if(i>=0) sentarseEn(i); }catch(x){} }}]; }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top169) return;
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    f.__top169=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA169_PASO) return; window.__SA169_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()) pasoAnio(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top169) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()){ const enGrupo=!window.__crudo91&&L.some(x=>x.t==='Influencia y palancas'&&x.modal);
+          if(!enGrupo&&!L.some(z=>z.t===TIT)){ const e=S.emp, n=e?efectos(e).atr.length:0;
+            L.push({t:TIT,cat:'legado',d:'La línea de tiempo del vapor al internet y la inteligencia artificial: qué llegó, cuándo, y qué ha adoptado tu compañía'+(n?' ('+n+' atrasada'+(n===1?'':'s')+')':'')+'.',mov:0,modal:true,run:()=>escenaTecnologia169()}); } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top169=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA169_CAT) return; window.__SA169_CAT=true;
+    window.catDe=function(t){ if(t===TIT) return 'legado'; return old.apply(this,arguments); }; }
+  function grupo(){ const G_=window.GRUPOS_91; if(!Array.isArray(G_)) return; const g=G_.find(x=>x.id==='palancas'); if(!g||!Array.isArray(g.miembros)) return; if(!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Influencia',TIT]); }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v169) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&typeof negCat!=='undefined'&&negCat==='resumen'){ const f=efectos(e), i=comps().indexOf(e), rel=TEC.filter(t=>fase(t)!=='futuro'&&relevante(e,t)&&A()>=t.co), ad=rel.filter(t=>adoptada(e,t)).length;
+          h+='<div class="panel169"><b>Tecnología</b><div class="apunte">'+ad+' de '+rel.length+' tecnologías al día'+(f.atr.length?' · <b>'+f.atr.length+' atrasada'+(f.atr.length===1?'':'s')+'</b>':'')+'.</div><button type="button" class="btn" data-c169="abrir:'+i+'">Ver la tecnología de la compañía</button></div>'; } }catch(x){}
+      return h; }; window.panelCompania86.__v169=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
+  function clic(ev){ const t=ev.target; if(!t||!t.closest) return; const b=t.closest('[data-c169]'); if(!b) return;
+    ev.preventDefault(); ev.stopPropagation(); const v=String(b.getAttribute('data-c169')||''); if(v.indexOf('abrir:')===0){ const e=comps()[+v.slice(6)]; escenaTecnologia169(e); } }
+  function init169(){ wrapEmpresa(); wrapPaso(); wrapAcciones(); wrapCat(); grupo(); wrapPanel();
+    if(!window.__SA169_CLIC){ window.__SA169_CLIC=true; document.addEventListener('click',clic,true); }
+    try{ if(typeof window.consejeroRegistrar168==='function') window.consejeroRegistrar168(gTec); }catch(x){}
+    Object.assign(window,{TECNOLOGIAS_169:TEC,faseTec169:fase,difusionTec169:dif,pesoTec169:W,relevanteTec169:relevante,costoTec169:costo,exitoTec169:pExito,estadoTec169:EX,mundoTec169:ST,efectosTec169:efectos,adoptarTec169:adoptar,adoptadaTec169:adoptada,
+      puedeTec169:puede,equiparCasa169:equipar,costoCasa169:costoCasa,anualTec169:anualCompania,pasoAnioTec169:pasoAnio,escenaTecnologia169,escenaCasa169,eventoFalla169:sucesos,llegadaTec169:llegada}); }
+  setTimeout(init169,40); setTimeout(init169,220); setTimeout(init169,650); setTimeout(init169,950);
+  window.__SA169={version:V169};
 })();
 </script>
 
