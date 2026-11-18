@@ -1255,10 +1255,26 @@ svg.foto116{display:block;background:#1d2a23}
 .ins160 .bit160{margin-top:4px;font-size:13px;color:var(--humo)}
 .ins160 .bit160 div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)}
 </style>
+<style id="estilos-v164">
+.his164 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.his164 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.his164 .k b{display:block;font-size:15px;font-family:var(--display)}
+.his164 .k span{font-size:12px;color:var(--humo2)}
+.his164 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.his164 small{color:var(--humo2)}
+.his164 .lin164{position:relative;margin:6px 0 4px 8px;padding-left:22px;border-left:2px solid rgba(214,166,72,.35)}
+.his164 .lin164 .h164{position:relative;padding:0 0 13px 0}
+.his164 .lin164 .h164 i{position:absolute;left:-31px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--laton);border:2px solid #1b2a24}
+.his164 .lin164 .h164 b{display:block;font-size:14px}
+.his164 .lin164 .h164 .a164{font-size:12px;color:var(--laton);letter-spacing:.05em}
+.his164 .lin164 .h164 em{display:block;font-style:normal;font-size:13px;color:var(--humo);margin-top:2px}
+.his164 .ef164 span{display:inline-block;font-size:12.5px;padding:3px 10px;border-radius:9px;background:rgba(255,255,255,.06);color:var(--humo2);margin:0 6px 6px 0}
+.his164 .ef164 span.mal{color:#e79a8a}.his164 .ef164 span.bien{color:#8fe0b0}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v163</div>
+<div class="version-badge" id="versionBadge">v165</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5848,6 +5864,7 @@ function iniciar(cfg,legado){
     pol155:legadoValido&&legado.pol155?legado.pol155:null,
     pub156:legadoValido&&legado.pub156?legado.pub156:null,
     lid159:legadoValido&&legado.lid159?legado.lid159:null,
+    hist164:legadoValido&&legado.hist164?legado.hist164:null,
     residenciaInternacional:legadoValido&&legado.residenciaInternacional?legado.residenciaInternacional:null,
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
@@ -7921,6 +7938,7 @@ function heredar(h,frac,vivo,pleito){
     pol155:S.pol155?JSON.parse(JSON.stringify(S.pol155)):null,
     pub156:S.pub156?JSON.parse(JSON.stringify(S.pub156)):null,
     lid159:S.lid159?JSON.parse(JSON.stringify(S.lid159)):null,
+    hist164:S.hist164?JSON.parse(JSON.stringify(S.hist164)):null,
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
@@ -19096,7 +19114,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         html:'<div class="p90-cab"><div class="p90-medio">'+esc(medio)+'</div>'
           +'<div class="p90-linea"><span>'+esc((S&&S.p&&S.p.ciudad)||'Bogotá')+', '+anio+'</span><span>Edición extraordinaria</span></div></div>'
           +'<h2 class="p90-titular">'+esc(hito.t)+'</h2>'
-          +'<div class="p90-bajada">Es lo único de lo que se habla en el país. La pregunta en tu casa es qué hacer.</div>'};
+          +'<div class="p90-bajada">'+esc(hito.bajada||'Es lo único de lo que se habla en el país. La pregunta en tu casa es qué hacer.')+'</div>'};
     }
     const k=categoriaEvento90(o.cuerpo), c=CATS_90[k];
     return {rubro:'Año '+anio+' · '+c.n,titulo:c.t,cuerpo:o.cuerpo,clase:'evento90 ev90-'+k,
@@ -30185,6 +30203,313 @@ install();setTimeout(install,1200);
    ========================================================================== */
 (function(){
   window.__SA163={version:'v163'};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v164 · LA HISTORIA DE COLOMBIA, JUGABLE (1810–1948)
+   El juego arrancaba en 1800 y no pasaba nada del país hasta 1957. Ahora cada
+   hito de la historia nacional llega a la casa como una decisión:
+   la Independencia y la Reconquista, la abolición de la esclavitud, la
+   desamortización de los bienes de la Iglesia, la Regeneración y el papel
+   moneda, el café y el ferrocarril, la Guerra de los Mil Días, la gripa
+   española, la aviación, la danza de los millones y el Banco de la República,
+   las bananeras, la crisis de 1929, la guerra con el Perú, la Ley de Tierras
+   de 1936 y el Bogotazo.
+   - Lo que decides se recuerda: las posturas en la Independencia pesan en la
+     Reconquista y en Boyacá; la plata que guardaste en oro te salva del papel
+     moneda.
+   - Los efectos son de verdad: dinero, fincas, inflación, tensión del país,
+     el ritmo de cada sector durante varios años, inversiones que pagan renta.
+   - La pantalla "La historia del país" cuenta lo que ha vivido tu casa y lo
+     que sigue activo, y la crónica de la casa la incluye.
+   ========================================================================== */
+(function(){
+  const V164='v164';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const P=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  /* --- el estado: lo que la casa ha vivido y lo que sigue activo --- */
+  function HS(){ if(!S) return null; let h=S.hist164; if(!h||typeof h!=='object') h=S.hist164={};
+    if(!Array.isArray(h.vistos)) h.vistos=[]; if(!h.postura||typeof h.postura!=='object') h.postura={};
+    if(!Array.isArray(h.mods)) h.mods=[]; if(!Array.isArray(h.flujos)) h.flujos=[]; if(!Array.isArray(h.reg)) h.reg=[];
+    return h; }
+  const postura=(k,v)=>{ const h=HS(); if(v!==undefined) h.postura[k]=v; return h.postura[k]; };
+  /* --- lo que se puede hacer a la casa --- */
+  const sectoresMios=()=>Array.from(new Set((typeof companias==='function'?companias():[]).map(e=>e.sector)));
+  const tiene=(...s)=>sectoresMios().some(x=>s.includes(x));
+  const fincas=()=>(S.bienes||[]).filter(b=>b&&b.clase==='finca');
+  function pagar(frac,min){ const m=Math.max(min||0,Math.round(P()*frac)), p=Math.max(0,Math.min(S.efectivo,m)); S.efectivo-=p; return p; }
+  function valorFincas(mult){ let n=0; fincas().forEach(b=>{ b.valor=Math.max(1,b.valor*mult); n++; }); return n; }
+  /* vende una finca: sale del patrimonio y entra lo que queda después de la hipoteca */
+  function venderFinca(b,desc){ const neto=Math.max(0,b.valor*desc-(b.hipoteca||0)); S.efectivo+=neto; S.bienes=(S.bienes||[]).filter(x=>x!==b); return neto; }
+  function valorBienes(mult,solo){ (S.bienes||[]).forEach(b=>{ if(!solo||solo(b)) b.valor=Math.max(1,b.valor*mult); }); }
+  function macro(o){ const m=S.macro; if(!m) return; if(isFinite(o.inflacion)) m.inflacion=clamp(m.inflacion+o.inflacion,0,.6); if(isFinite(o.tasa)) m.tasa=clamp(m.tasa+o.tasa,0,.6); if(isFinite(o.ciclo)) m.ciclo=o.ciclo; }
+  const tension=d=>{ S.tension=clamp((S.tension||35)+d,0,100); };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const redes=d=>{ S.p.redes=clamp((S.p.redes||0)+d,0,100); };
+  function partido(id,d){ try{ const po=typeof window.politica155==='function'?window.politica155():null; if(!po) return; po.part=po.part||{}; const q=po.part[id]||(po.part[id]={afin:0,credito:0}); q.afin=clamp((q.afin||0)+d,0,100); q.credito=(q.credito||0)+d*.5; }catch(e){} }
+  /* el ritmo de un sector durante unos años (fracción de ingresos por año) */
+  function mod(sectores,delta,anios,id,txt){ const h=HS(); (Array.isArray(sectores)?sectores:[sectores]).forEach(s=>h.mods.push({sector:s,delta,hasta:S.anio+anios-1,id:id||'',txt:txt||''})); }
+  const TODOS=['moda','alimentos','agro','construccion','tech','energia','salud','mineria','financiero','logistica','retail','medios','juridico','seguros','turismo','juegos'];
+  /* una inversión que paga cada año (o una carga que cuesta cada año) */
+  function flujo(monto,anios,txt){ const h=HS(); h.flujos.push({monto:Math.round(monto*10)/10,hasta:S.anio+anios-1,txt:txt||'Historia del país'}); }
+  const fm=x=>fmt(Math.round(x));
+  const lbl=(t,fr)=>()=>t+' ('+fm(Math.min(S.efectivo,P()*fr))+')';
+  function parientesMuertos(n,causa){ const L=(S.parientes||[]).filter(p=>p.vivo&&p.edad>=45).sort(()=>Math.random()-.5).slice(0,n); L.forEach(p=>{ p.vivo=false; p.muerte=S.anio; log('Murió de '+causa+' tu '+esc(p.rel||'pariente')+' <b>'+esc(p.nombre+(p.apellido?' '+p.apellido:''))+'</b>.','mal'); }); return L.length; }
+
+  /* ==================== LOS HITOS ==================== */
+  /* cada hito: id, anio, mk() → {cuerpo, ahora?(), o:[{id, t, f, def?}]} */
+  const HITOS=[
+  {id:'grito',anio:1810,t:'El Grito de Independencia',mk:()=>({
+    cuerpo:'El 20 de julio, en Santa Fe, un florero prestado es el pretexto: el cabildo desconoce al virrey y las provincias se parten entre patriotas y realistas. Las casas con plata tienen que escoger, y escoger mal sale caro.',
+    o:[{id:'patriota',t:lbl('Poner plata y bestias a favor de la causa patriota',.06),f:()=>{ const p=pagar(.06); postura('indep','patriota'); prest(2,'apoyó la Independencia'); redes(6); return 'Entregaste '+fm(p)+' en plata, mulas y granos a la causa patriota. Si vuelve el Rey, serás de los primeros en la lista.'; }},
+       {id:'realista',t:'Declararte fiel al Rey y al virrey',f:()=>{ postura('indep','realista'); prest(1,'fue fiel a la Corona'); return 'Firmaste tu fidelidad a la Corona. Por ahora tu casa está tranquila; la historia dirá hasta cuándo.'; }},
+       {id:'neutral',def:1,t:lbl('Callar y comerciar con los dos bandos',.02),f:()=>{ const p=pagar(.02); postura('indep','neutral'); return 'Pagaste '+fm(p)+' en "contribuciones voluntarias" a cada lado para que te dejaran en paz. Nadie confía del todo en ti.'; }}]})},
+  {id:'reconquista',anio:1816,t:'La Reconquista',mk:()=>{ const po=postura('indep')||'neutral';
+    const base='El general Pablo Morillo entra a Cartagena después de un sitio de meses y marcha sobre Santa Fe. Vienen los consejos de guerra, los fusilamientos y el secuestro de los bienes de los patriotas. ';
+    if(po==='patriota') return {cuerpo:base+'Tu nombre figura entre los que ayudaron a los insurgentes.',
+      o:[{id:'huir',t:lbl('Huir a los Llanos con lo que se pueda cargar',.08),f:()=>{ const p=pagar(.08); valorFincas(.9); return 'Saliste de noche con lo que cabía en las mulas ('+fm(p)+' entre fletes y sobornos). Las fincas quedaron en manos de los administradores.'; }},
+         {id:'testaferro',t:'Poner tus bienes a nombre de un pariente realista',f:()=>{ if(chance(.55)){ prest(-1,'puso sus bienes a nombre de un realista'); return 'Tu primo, fiel al Rey, firmó como dueño de todo. Pasó la tormenta y pagaste el favor con algo de prestigio.'; } valorFincas(.78); const p=pagar(.12); return 'Alguien delató el arreglo: te secuestraron buena parte de los bienes y te sacaron '+fm(p)+' en multas.'; }},
+         {id:'cara',def:1,t:'Dar la cara y aceptar lo que venga',f:()=>{ const p=pagar(.2); valorFincas(.82); prest(3,'dio la cara ante la Reconquista'); return 'Te secuestraron '+fm(p)+' y buena parte de las fincas. En Santa Fe se comenta que no huiste.'; }}]};
+    if(po==='realista') return {cuerpo:base+'La Corona premia a los que no dudaron, y los bienes de los insurgentes salen a remate.',
+      o:[{id:'comprar',t:lbl('Comprar a precio de remate los bienes secuestrados a los patriotas',.05),f:()=>{ const p=pagar(.05); valorFincas(1.08); prest(-2,'se enriqueció con los secuestros'); return 'Pagaste '+fm(p)+' por haciendas que valen mucho más. En la ciudad nadie te saluda de buena gana.'; }},
+         {id:'cuota',def:1,t:lbl('Ayudar solo con la cuota de guerra',.02),f:()=>{ const p=pagar(.02); prest(1,'sirvió a la Corona'); return 'Pagaste '+fm(p)+' para el ejército del Rey y te dejaste ver en la misa. Nada más.'; }}]};
+    return {cuerpo:base+'Nadie sabe de qué lado estás, y los dos bandos te miran.',
+      o:[{id:'contribucion',def:1,t:lbl('Pagar la contribución de guerra',.04),f:()=>{ const p=pagar(.04); return 'Pagaste '+fm(p)+' de contribución y presentaste buenos papeles. Salió barato frente a lo que pagaron otros.'; }},
+         {id:'esconder',t:'Esconder el grueso de la plata y las bestias',f:()=>{ if(chance(.5)){ return 'Tus mulas amanecieron en una finca de la sabana y nadie preguntó. Te ahorraste la contribución.'; } const p=pagar(.09); return 'Un vecino cobró la denuncia: te tocó pagar '+fm(p)+' con recargo.'; }}]}; }},
+  {id:'boyaca',anio:1819,t:'Boyacá y la República',mk:()=>{ const po=postura('indep')||'neutral';
+    const base='El 7 de agosto, Bolívar y Santander derrotan a los realistas en el Puente de Boyacá y el virrey huye de Santa Fe. Nace la República de Colombia, y con ella los puertos abiertos al comercio inglés. ';
+    mod(['retail','logistica'],.02,6,'boyaca','Puertos abiertos al comercio');
+    if(po==='patriota') return {cuerpo:base+'Los vencedores hacen cuentas: quién ayudó y quién se escondió.',
+      o:[{id:'tierras',def:1,t:'Cobrar tu ayuda en vales de tierras y haciendas confiscadas',f:()=>{ valorFincas(1.12); prest(3,'la República le pagó con tierras'); return 'Cambiaste tus recibos de la guerra por haciendas de los realistas. La República te debía y pagó con lo que tenía.'; }},
+         {id:'dinero',t:'Cobrar en dinero del nuevo Tesoro',f:()=>{ const x=P()*.045; S.efectivo+=x; macro({inflacion:.01}); return 'El Tesoro te devolvió '+fm(x)+' en billetes y vales descontados. Tardó, pero llegó.'; }},
+         {id:'orgullo',t:'No cobrar: lo que diste, lo diste por la patria',f:()=>{ prest(5,'no cobró lo que dio a la Independencia'); redes(5); return 'Rompiste los recibos delante de Santander. En todo el virreinato se supo.'; }}]};
+    if(po==='realista') return {cuerpo:base+'Los que sirvieron al Rey quedan señalados.',
+      o:[{id:'jurar',def:1,t:lbl('Jurar la República y pagar el indulto',.07),f:()=>{ const p=pagar(.07); prest(-1,'sirvió al Rey'); return 'Juraste la República y pagaste '+fm(p)+' de indulto. Conservaste lo que tenías, pero te quedó el apodo de "godo".'; }},
+         {id:'salir',t:'Vender con descuento y salir hacia La Habana',f:()=>{ valorFincas(.8); const p=P()*.06; S.efectivo+=p; prest(-3,'huyó con el virrey'); return 'Remataste las fincas a mitad de precio para irte con lo que se pudiera. Quedaste a medias entre dos países.'; }}]};
+    return {cuerpo:base+'El nuevo gobierno necesita crédito y los comerciantes tienen plata.',
+      o:[{id:'prestar',t:lbl('Prestarle al gobierno de la República',.03),f:()=>{ const p=pagar(.03); flujo(p*.14,6,'Intereses del préstamo a la República'); return 'Prestaste '+fm(p)+' a la República. Los intereses llegan, con atraso, durante seis años.'; }},
+         {id:'margen',def:1,t:'Mantenerte al margen y abrir tu tienda al comercio inglés',f:()=>{ mod(['retail','logistica'],.01,4,'boyaca2','Géneros ingleses'); return 'Abriste los estantes a los géneros ingleses. Los precios bajaron y la clientela subió.'; }}]}; }},
+  {id:'granColombia',anio:1830,t:'Se disuelve la Gran Colombia',mk:()=>({
+    cuerpo:'Venezuela y Quito se separan, Sucre cae asesinado en Berruecos y Bolívar muere desterrado en Santa Marta. Las aduanas cambian de dueño, el comercio de frontera se enreda y el país que queda se llama Nueva Granada.',
+    o:[{id:'interno',def:1,t:'Volcarte al comercio interior: Antioquia, Cundinamarca y el Cauca',f:()=>{ mod(['retail','logistica'],.015,5,'interno','Comercio interior'); return 'Reorganizaste tus rutas hacia adentro. Cuesta más moverse, pero hay menos aduanas que pagar.'; }},
+       {id:'frontera',t:lbl('Seguir con el comercio de frontera y pagar los nuevos derechos',.02),f:()=>{ const p=pagar(.02); mod(['retail','logistica'],-.01,3,'frontera','Aduanas nuevas'); return 'Pagaste '+fm(p)+' en derechos y gabelas de las nuevas fronteras. El negocio sigue, más caro.'; }}]})},
+  {id:'esclavitud',anio:1851,t:'Se abole la esclavitud',mk:()=>({
+    cuerpo:'El 21 de mayo de 1851 el Congreso declara libres a los esclavos que aún quedan en Colombia. Las haciendas y las minas de Antioquia, el Cauca y el Chocó pierden la mano de obra que las sostenía, y el Estado promete indemnizar a los dueños con bonos.'+(tiene('agro','mineria')||fincas().length?' Tu casa está de lleno en el asunto.':' A tu casa le toca de lado.'),
+    o:[{id:'bonos',t:'Aceptar la indemnización en bonos del Estado',f:()=>{ const x=P()*(tiene('agro','mineria')||fincas().length?.05:.01); S.efectivo+=x; mod(['agro','mineria'],-.02,4,'esclavitud','Falta de brazos'); return 'Cobraste '+fm(x)+' en bonos que se descuentan a la mitad. El campo quedó sin brazos y los jornales se encarecieron.'; }},
+       {id:'jornaleros',def:1,t:lbl('Contratar a los libertos como jornaleros y aparceros',.03),f:()=>{ const p=pagar(.03); mod(['agro','mineria'],-.01,3,'esclavitud','Ajuste de la mano de obra'); mod(['agro','mineria'],.01,4,'esclavitud2','Aparcería'); prest(2,'contrató a los libertos'); return 'Pagaste '+fm(p)+' en casas, herramientas y los primeros jornales. Al cabo de unos años el campo volvió a producir.'; }},
+       {id:'litigar',t:'Pleitear por la propiedad y resistir',f:()=>{ const p=pagar(.02); tension(4); if(chance(.35)){ prest(-3,'pleiteó contra la libertad de sus esclavos'); return 'Gastaste '+fm(p)+' en abogados y en la prensa te dibujaron como un negrero. Perdiste el pleito.'; } mod(['agro','mineria'],-.015,3,'esclavitud3','Pleitos'); return 'Gastaste '+fm(p)+' en abogados. Ganaste tiempo, pero la ley ya estaba firmada.'; }}]})},
+  {id:'desamortizacion',anio:1861,t:'La desamortización de los bienes de la Iglesia',mk:()=>({
+    cuerpo:'En septiembre de 1861 el general Tomás Cipriano de Mosquera decreta la desamortización de los bienes de manos muertas: las haciendas y casas de la Iglesia y las comunidades religiosas salen a remate. Hay gangas enormes, y en un país católico, enemigos para el que las compre.',
+    o:[{id:'comprar',t:lbl('Comprar haciendas rematadas de la Iglesia',.07),f:()=>{ const p=pagar(.07); valorFincas(1.06); S.efectivo+=p*.04; partido('liberal',5); partido('conservador',-6); prest(-2,'compró bienes de la Iglesia'); return 'Compraste por '+fm(p)+' haciendas que valen el doble. El arzobispo no te perdona y la misa de los domingos se te hizo incómoda.'; }},
+       {id:'testaferro',t:lbl('Comprar a través de un testaferro',.05),f:()=>{ const p=pagar(.05); valorFincas(1.03); partido('liberal',2); return 'Compraste por '+fm(p)+' con un nombre prestado. Ganaste menos, pero nadie te señaló.'; }},
+       {id:'iglesia',def:1,t:lbl('No comprar y ayudar a la Iglesia',.01),f:()=>{ const p=pagar(.01); partido('conservador',6); partido('liberal',-3); prest(2,'defendió a la Iglesia'); return 'Donaste '+fm(p)+' a la curia y te quedaste con la conciencia limpia. Las gangas se las llevaron otros.'; }}]})},
+  {id:'cafe',anio:1880,t:'El café desplaza al tabaco, y llega el ferrocarril',mk:()=>({
+    cuerpo:'El tabaco y la quina se desploman en los mercados de Europa y el café, sembrado en las laderas de Santander, Cundinamarca y Antioquia, empieza a ocupar su lugar. Los rieles del Ferrocarril de Antioquia y del Magdalena prometen sacar la cosecha de las montañas.',
+    o:[{id:'ferrocarril',t:lbl('Meter plata como accionista del ferrocarril',.05),f:()=>{ const p=pagar(.05); flujo(p*.08,10,'Dividendos del ferrocarril'); mod(['logistica'],.02,8,'ferro','Llegó el ferrocarril'); return 'Compraste acciones por '+fm(p)+'. Los dividendos llegan cada año, mientras los rieles sigan abiertos.'; }},
+       {id:'cafe',def:1,t:'Entrar al negocio del café: siembra y exportación',f:()=>{ mod(['agro','logistica'],.025,8,'cafe','Auge del café'); if(!fincas().length) return 'Todavía no tienes tierra, pero las casas exportadoras buscan socios: la acción "Caficultura" te deja comprar finca cafetera.'; valorFincas(1.06); return 'Tus fincas se valorizaron y el café se vende cada vez mejor.'; }},
+       {id:'tabaco',t:'Seguir con el tabaco y la quina',f:()=>{ mod(['agro'],-.02,5,'tabaco','Cae el tabaco'); return 'Te quedaste con el tabaco y la quina. Los precios siguieron cayendo y el campo se quedó mirando los cafetales de los demás.'; }}]})},
+  {id:'regeneracion',anio:1886,t:'La Regeneración y el papel moneda',mk:()=>({
+    cuerpo:'La nueva Constitución centraliza el país y le da al Estado el Banco Nacional. Para pagar sus guerras y sus obras, el Gobierno empieza a emitir billetes de curso forzoso. El que tiene plata en papel va a ver cómo se derrite.',
+    o:[{id:'oro',def:1,t:lbl('Cambiar pesos por oro y tierra antes de que llegue la inflación',.03),f:()=>{ const p=pagar(.03); postura('papel','oro'); macro({inflacion:.02}); return 'Pagaste '+fm(p)+' de comisiones por pasar tu plata a oro y escrituras. Cuando el papel se devalúe, tú ya estarás en otra parte.'; }},
+       {id:'banco',t:lbl('Prestarle al Banco Nacional y apoyar al Gobierno',.04),f:()=>{ const p=pagar(.04); postura('papel','banco'); partido('nacional',8); partido('conservador',4); flujo(p*.12,5,'Intereses del Banco Nacional'); macro({inflacion:.02}); return 'Prestaste '+fm(p)+' al Banco Nacional. El Gobierno te lo agradece y el papel moneda te lo cobra.'; }},
+       {id:'quieto',t:'Seguir como estás',f:()=>{ postura('papel','quieto'); macro({inflacion:.02}); return 'No moviste nada. Tu plata está en pesos de papel, y el papel está empezando a pesar menos.'; }}]})},
+  {id:'milDias',anio:1899,t:'La Guerra de los Mil Días',mk:()=>({
+    ahora:()=>{ const prot=postura('papel')==='oro'; const perdida=prot?.08:.22; const x=S.efectivo*perdida; S.efectivo-=x; macro({inflacion:.12}); tension(20); valorFincas(.92); mod(['agro'],-.05,3,'mildias','La guerra en el campo'); mod(TODOS.filter(s=>s!=='agro'),-.03,3,'mildias2','La guerra'); return 'La guerra y el papel moneda se llevaron '+fm(x)+' de la plata que tenías en pesos'+(prot?' (la parte en oro la salvó)':'')+'.'; },
+    cuerpo:'En octubre los liberales se alzan en armas contra el Gobierno conservador y la guerra se riega por todo el país. Para pagarla, el Gobierno imprime billetes sin freno y los precios se disparan. Hay reclutamiento, empréstitos forzosos y fincas saqueadas. Dos años después, cerca de cien mil muertos.',
+    o:[{id:'neutral',def:1,t:lbl('Pagar el empréstito forzoso y mantener la neutralidad',.07),f:()=>{ const p=pagar(.07); postura('mildias','neutral'); prest(1,'pagó el empréstito sin tomar partido'); return 'Pagaste '+fm(p)+' de empréstito forzoso a un bando y al otro. Nadie te quiere, pero nadie te fusila.'; }},
+       {id:'gobierno',t:lbl('Financiar al Gobierno conservador',.1),f:()=>{ const p=pagar(.1); postura('mildias','gobierno'); partido('conservador',10); partido('nacional',6); partido('liberal',-8); return 'Pusiste '+fm(p)+' en las armas del Gobierno. Si gana, será un gran favor cobrado.'; }},
+       {id:'liberal',t:lbl('Financiar a los liberales alzados',.1),f:()=>{ const p=pagar(.1); postura('mildias','liberal'); partido('liberal',10); partido('conservador',-8); return 'Pusiste '+fm(p)+' en la guerrilla liberal. Si pierde, te lo van a cobrar caro.'; }},
+       {id:'huir',t:lbl('Sacar a los hijos varones del reclutamiento y esconder el ganado',.04),f:()=>{ const p=pagar(.04); postura('mildias','neutral'); valorFincas(1.04); prest(-1,'sacó a sus hijos del reclutamiento'); return 'Pagaste '+fm(p)+' en exoneraciones y en peones que escondieron el ganado en el monte. Tus hijos no fueron a la guerra, y en el pueblo se enteró todo el mundo.'; }}]})},
+  {id:'neerlandia',anio:1902,t:'El fin de la guerra y la pérdida de Panamá',mk:()=>{ const pos=postura('mildias')||'neutral';
+    return {ahora:()=>{ let t=''; if(pos==='liberal'){ const p=pagar(.12); prest(-3,'financió a los liberales derrotados'); t='Como financiaste a los liberales derrotados, el Gobierno te cobró '+fm(p)+' de multas. '; } else if(pos==='gobierno'){ prest(3,'financió al bando vencedor'); redes(6); t='El Gobierno vencedor te reconoce lo que pusiste. '; } macro({inflacion:-.08}); tension(-10); return t+'Con la paz del Wisconsin el país queda arruinado, y un año después Panamá se separa con ayuda de los Estados Unidos.'; },
+      cuerpo:'Se firman los tratados de Neerlandia y del Wisconsin: la guerra termina con el país en ruinas, los campos arrasados y la moneda hecha trizas. En noviembre del año siguiente, Panamá se declara independiente.',
+      o:[{id:'reconstruir',t:lbl('Reconstruir tus fincas y tus negocios',.05),f:()=>{ const p=pagar(.05); valorFincas(1.08); mod(['agro','construccion','retail'],.03,5,'reconstruir','Reconstrucción'); return 'Gastaste '+fm(p)+' en cercas, cosechas y techos. En cinco años el campo volvió a dar.'; }},
+         {id:'tierras',t:lbl('Comprar tierras baratas a los arruinados',.08),f:()=>{ const p=pagar(.08); valorFincas(1.14); prest(-1,'se aprovechó de los arruinados'); return 'Compraste por '+fm(p)+' fincas que valen mucho más. Hay quien lo llama avaricia, y hay quien lo llama olfato.'; }},
+         {id:'comercio',def:1,t:'Pasarte al comercio y a las ciudades',f:()=>{ mod(['retail','logistica','financiero'],.02,6,'ciudades','El auge de las ciudades'); return 'Dejaste la tierra a un administrador y apostaste al comercio de las ciudades, donde el dinero se movía más rápido.'; }}]}; }},
+  {id:'canal',anio:1914,t:'El Canal de Panamá y la guerra en Europa',mk:()=>({
+    ahora:()=>{ mod(['agro'],-.015,2,'guerra1','Cierre de mercados europeos'); return 'Estalla la guerra en Europa y los barcos dejan de llevar café y de traer mercancías: los precios caen y los fletes se disparan.'; },
+    cuerpo:'Se abre el Canal de Panamá: los barcos cruzan de un océano al otro sin pasar por el Cabo de Hornos. Al mismo tiempo estalla la guerra en Europa. Colombia es neutral, pero el café pierde mercados y las importaciones se encarecen.',
+    o:[{id:'exportar',t:lbl('Buscar compradores en los Estados Unidos y salir por el Pacífico',.03),f:()=>{ const p=pagar(.03); mod(['agro','logistica'],.02,6,'canal','Nuevos mercados'); return 'Gastaste '+fm(p)+' en contactos y fletes hacia Nueva York. A la vuelta de dos años el café ya se vendía allá.'; }},
+       {id:'esperar',def:1,t:'Guardar la cosecha y esperar a que acabe la guerra',f:()=>{ mod(['agro'],-.01,3,'esperar','Cosecha guardada'); return 'Guardaste el grano en bodegas. Perdiste ventas este año, pero el precio se recuperó cuando la guerra terminó.'; }},
+       {id:'interno',t:'Producir para el mercado interno ya que no llegan importaciones',f:()=>{ mod(['moda','alimentos'],.03,6,'sustitucion','Se encarece lo importado'); return 'Sin mercancía importada, lo hecho en casa se vendió solo. Apareció una industria pequeña que no existía.'; }}]})},
+  {id:'gripa',anio:1918,t:'La gripa española',mk:()=>({
+    ahora:()=>{ const n=parientesMuertos(ri(1,2),'la gripa española'); return n?'':'La gripa llegó a las casas del barrio y pasó por la tuya sin llevarse a nadie.'; },
+    cuerpo:'Una gripa que dicen que vino de España en los barcos del Magdalena se riega por Barranquilla, Bogotá y Medellín. Cierran las iglesias, los entierros no dan abasto y los boticarios agotan la quinina.',
+    o:[{id:'cerrar',t:lbl('Cerrar el negocio unas semanas y pagar a la gente',.02),f:()=>{ const p=pagar(.02); S.p.salud=clamp(S.p.salud+3,0,100); prest(1,'cuidó a su gente en la gripa'); (typeof companias==='function'?companias():[]).forEach(e=>{ e.moral=clamp((e.moral||50)+6,0,100); }); return 'Pagaste '+fm(p)+' en jornales sin trabajar. Los tuyos lo recordaron mucho tiempo.'; }},
+       {id:'seguir',def:1,t:'Seguir trabajando con cuidado',f:()=>{ S.p.salud=clamp(S.p.salud-3,0,100); mod(TODOS,-.015,1,'gripa','La gripa'); return 'Seguiste, pero con medio personal en cama. Las ventas bajaron y tú también estuviste enfermo.'; }},
+       {id:'caridad',t:lbl('Montar un hospital de campaña en tu casa',.03),f:()=>{ const p=pagar(.03); prest(4,'montó un hospital de campaña en la gripa'); redes(5); return 'Convertiste el patio en hospital de campaña. Costó '+fm(p)+' y salvó a más de uno.'; }}]})},
+  {id:'scadta',anio:1919,t:'Nace la aviación comercial',mk:()=>({
+    cuerpo:'En Barranquilla un grupo de colombianos y alemanes funda la Sociedad Colombo-Alemana de Transportes Aéreos, SCADTA: la primera aerolínea de América. Un viaje que toma quince días en champán por el Magdalena se vuelve cuestión de horas.',
+    o:[{id:'acciones',t:lbl('Comprar acciones de la aerolínea',.04),f:()=>{ const p=pagar(.04); flujo(p*.1,12,'Dividendos de la aerolínea'); mod(['logistica'],.015,8,'avion','El avión'); return 'Compraste acciones por '+fm(p)+'. Los hidroaviones empezaron a recorrer el río.'; }},
+       {id:'rio',def:1,t:'Seguir con las mulas y el río',f:()=>{ mod(['logistica'],-.01,6,'rio','Se pierde el río'); return 'Te quedaste con los champanes y las recuas. En pocos años cada pueblo con pista dejó de necesitarte.'; }}]})},
+  {id:'danza',anio:1923,t:'La danza de los millones y el Banco de la República',mk:()=>({
+    cuerpo:'Los Estados Unidos pagan 25 millones de dólares por la separación de Panamá y los bancos de Nueva York prestan sin medida. La Misión Kemmerer reorganiza las finanzas y crea el Banco de la República. El Estado construye carreteras y ferrocarriles; los precios y las deudas suben a la par.',
+    o:[{id:'obras',t:lbl('Meter plata en bonos y obras públicas',.06),f:()=>{ const p=pagar(.06); flujo(p*.09,10,'Intereses de bonos de obras públicas'); return 'Compraste bonos de carreteras y ferrocarriles por '+fm(p)+'. Pagan buen interés mientras el Estado tenga crédito.'; }},
+       {id:'banco',t:lbl('Entrar como accionista de un banco',.05),f:()=>{ const p=pagar(.05); flujo(p*.11,12,'Dividendos bancarios'); mod(['financiero'],.02,6,'bancos','Auge bancario'); partido('republicano',4); return 'Compraste acciones bancarias por '+fm(p)+'. Con el nuevo Banco de la República los bancos privados se multiplican.'; }},
+       {id:'oro',def:1,t:'Guardar en oro y esperar',f:()=>{ postura('crash','oro'); return 'No te dejaste llevar por la fiesta: guardaste tu plata en oro. Era lo prudente.'; }}]})},
+  {id:'bananeras',anio:1928,t:'La huelga bananera',mk:()=>({
+    cuerpo:'En diciembre, en Ciénaga, el Ejército dispara contra los trabajadores de la United Fruit que llevan semanas en huelga. Nunca se sabe cuántos murieron. En todo el país se habla de patronos, salarios y Estado.',
+    o:[{id:'salarios',t:lbl('Subir los salarios de tus propios trabajadores antes de que se contagie la huelga',.02),f:()=>{ const p=pagar(.02); (typeof companias==='function'?companias():[]).forEach(e=>{ e.moral=clamp((e.moral||50)+8,0,100); }); tension(-3); prest(2,'subió salarios tras las bananeras'); return 'Subiste los jornales y gastaste '+fm(p)+'. Tus peones dejaron de hablar de huelga.'; }},
+       {id:'firme',def:1,t:'Mantener los salarios y apoyar al Gobierno',f:()=>{ tension(5); partido('conservador',4); (typeof companias==='function'?companias():[]).forEach(e=>{ e.moral=clamp((e.moral||50)-4,0,100); }); return 'Apoyaste el orden. Tus trabajadores se quedaron callados, y con rencor.'; }},
+       {id:'callar',t:'No tomar posición',f:()=>{ tension(2); return 'Callaste. En una casa como la tuya, el silencio también es una respuesta.'; }}]})},
+  {id:'crash',anio:1929,t:'La crisis de 1929',mk:()=>({
+    ahora:()=>{ const oro=postura('crash')==='oro'; macro({ciclo:-.15,inflacion:-.05}); const f=oro?.88:.8; valorFincas(f); mod(['agro','financiero','construccion'],-.04,3,'crash','La gran crisis'); tension(10); return 'El precio del café se desploma con la bolsa de Nueva York y el crédito de afuera se corta. Las fincas valen '+(oro?'un poco menos':'mucho menos')+'.'; },
+    cuerpo:'El jueves negro de Wall Street arrastra al café y con él a toda la economía colombiana. Los bancos cierran créditos, las fincas no se venden y el Gobierno sube los aranceles para proteger la industria nacional.',
+    o:[{id:'industria',t:lbl('Dar el salto a la industria: montar o ampliar una fábrica',.06),f:()=>{ const p=pagar(.06); try{ const l=typeof window.lider159==='function'?window.lider159():null; if(l&&l.aj){ ['moda','alimentos','construccion'].forEach(s=>{ l.aj[s]=(l.aj[s]||0)+8; }); } }catch(e){} if(tiene('moda','alimentos','construccion')){ mod(['moda','alimentos','construccion'],.03,8,'industria','Sustitución de importaciones'); return 'Pusiste '+fm(p)+' en maquinaria. Con los aranceles altos, tu producto nacional se vende solo.'; } flujo(p*.1,8,'Utilidades de una fábrica'); return 'Entraste como socio de una fábrica por '+fm(p)+'. Con los aranceles altos, rinde bien.'; }},
+       {id:'aguantar',def:1,t:'Aguantar con deuda y esperar a que pase',f:()=>{ macro({tasa:.03}); mod(['agro'],-.02,2,'aguantar','Deuda de la crisis'); return 'Aguantaste con deuda cara. Pasaron dos años malos y quedaste vivo.'; }},
+       {id:'vender',t:'Vender fincas y ponerte en efectivo',f:()=>{ let n=0, x=0; fincas().forEach(b=>{ if(chance(.5)){ x+=venderFinca(b,.7); n++; } }); if(!n) return 'No tenías fincas para vender a ese precio.'; return 'Vendiste '+n+' finca'+(n>1?'s':'')+' a precio de afán y quedaste con '+fm(x)+' en efectivo. Cuando pase la crisis valdrán mucho más.'; }}]})},
+  {id:'leticia',anio:1932,t:'La guerra con el Perú',mk:()=>({
+    cuerpo:'Un grupo de peruanos toma Leticia, en el Amazonas, y el país se levanta: las mujeres donan sus argollas de matrimonio, los colegios hacen colectas y el Gobierno abre una suscripción nacional para armar al ejército.',
+    o:[{id:'donar',t:lbl('Donar con generosidad a la suscripción nacional',.02),f:()=>{ const p=pagar(.02); prest(4,'donó a la patria en la guerra con el Perú'); redes(4); return 'Donaste '+fm(p)+' y tu nombre salió publicado en la lista de honor.'; }},
+       {id:'minimo',def:1,t:lbl('Dar lo mínimo y quedar bien',.004),f:()=>{ const p=pagar(.004); prest(1,'dio a la suscripción nacional'); return 'Diste '+fm(p)+', lo justo para que nadie dijera nada.'; }},
+       {id:'eludir',t:'No dar nada',f:()=>{ prest(-2,'no dio nada a la patria'); return 'No diste ni un peso. En el club alguien lo notó.'; }}]})},
+  {id:'ley200',anio:1936,t:'La Ley de Tierras y la República Liberal',mk:()=>({
+    cuerpo:'El presidente López Pumarejo saca adelante la Ley 200: la propiedad tiene una función social y las tierras que no se trabajan pueden perderse. Los colonos que llevan años cultivando baldíos y haciendas ociosas empiezan a reclamar. En la universidad, por primera vez, aceptan mujeres.'+(fincas().length?' Tus fincas están en la mira.':''),
+    o:[{id:'titular',t:'Cumplir: titular a los colonos y trabajar la tierra',f:()=>{ valorFincas(.94); tension(-3); prest(2,'cumplió la Ley de Tierras'); mod(['agro'],.01,4,'titular','Tierra trabajada'); return 'Titulaste las parcelas de los colonos y pusiste a producir lo demás. Las fincas valen menos, pero la paz en el campo vale más.'; }},
+       {id:'resistir',def:1,t:lbl('Resistir: abogados, administradores y desalojos',.02),f:()=>{ const p=pagar(.02); tension(4); if(typeof afiliado==='function'&&afiliado('sac')){ return 'Gastaste '+fm(p)+', pero la SAC peleó la ley a tu lado y te ahorraste lo peor.'; } if(chance(.3)){ prest(-3,'desalojó a colonos'); return 'Gastaste '+fm(p)+' y un desalojo salió en los periódicos con fotos. Perdiste prestigio.'; } valorFincas(.97); return 'Gastaste '+fm(p)+' en abogados y desalojos. Ganaste tiempo, no la discusión.'; }},
+       {id:'vender',t:'Vender las fincas ociosas antes de que las reclamen',f:()=>{ let x=0; fincas().forEach(b=>{ if(chance(.5)){ x+=venderFinca(b,.85); } }); return x>0?'Vendiste fincas que no producían por '+fm(x)+'. Algo menos de lo que valían, pero sin pleitos.':'No tenías fincas ociosas que vender.'; }}]})},
+  {id:'bogotazo',anio:1948,t:'El Bogotazo y la Violencia',mk:()=>({
+    ahora:()=>{ tension(25); valorFincas(.9); mod(['retail','logistica'],-.03,3,'bogotazo','La Violencia'); return 'Asesinan a Jorge Eliécer Gaitán el 9 de abril: Bogotá arde, el centro se destruye y la violencia entre liberales y conservadores se riega por los campos. Las fincas pierden valor y el comercio se frena.'; },
+    cuerpo:'El caudillo liberal Jorge Eliécer Gaitán cae a tiros en la carrera Séptima. La multitud incendia tranvías, iglesias y almacenes, y los pueblos se arman. Empieza una violencia que durará décadas.',
+    o:[{id:'sacar',t:lbl('Sacar la plata y la familia de Bogotá',.03),f:()=>{ const p=pagar(.03); S.p.salud=clamp(S.p.salud+2,0,100); return 'Pagaste '+fm(p)+' por pasajes, fletes y hospedaje en otra ciudad. La familia quedó a salvo.'; }},
+       {id:'blindar',def:1,t:lbl('Blindar tus bienes y contratar vigilancia',.02),f:()=>{ const p=pagar(.02); valorFincas(1.05); return 'Contrataste vigilantes y reforzaste las cercas por '+fm(p)+'. Tus fincas aguantaron mejor que las vecinas.'; }},
+       {id:'orden',t:'Apostar al orden y alinearte con el Gobierno',f:()=>{ partido('conservador',8); partido('liberal',-5); tension(3); prest(1,'se alineó con el orden'); return 'Te alineaste con el Gobierno conservador. En la política te abrieron puertas; en el barrio liberal, algunas se cerraron.'; }}]})}
+  ];
+  /* ==================== EL MOTOR ==================== */
+  function registrar(x,op,txt){ const h=HS(); h.reg.push({anio:S.anio,id:x.id,t:x.t,e:plano(typeof op.t==='function'?op.t():op.t).replace(/\s*\([^)]*\)\s*$/,''),r:plano(txt).slice(0,280)}); h.reg=h.reg.slice(-80); }
+  function disparar(x){ const c=x.mk();
+    let aviso=''; try{ if(typeof c.ahora==='function') aviso=c.ahora()||''; }catch(e){ console.error(e); }
+    if(aviso) log('<b>'+x.anio+' · '+esc(x.t)+'.</b> '+aviso,'hito');
+    if(nino()){ const d=c.o.find(o=>o.def)||c.o[0]; let r=''; try{ r=d.f()||''; }catch(e){ console.error(e); } registrar(x,d,r); log('<b>'+x.anio+' · '+esc(x.t)+'.</b> Tu tutor decidió por la casa: '+esc(plano(typeof d.t==='function'?d.t():d.t).replace(/\s*\([^)]*\)\s*$/,''))+'. '+r,'hito'); return; }
+    try{ hito(x.t); }catch(e){}
+    try{ const en=HISTORIA.find(z=>z&&z.v164&&z.id164===x.id); if(en) en.bajada=(aviso?aviso+' ':'')+c.cuerpo; }catch(e){}
+    cola.push({p:9,c:()=>true,t:()=>'<b>'+x.anio+' · '+esc(x.t)+'.</b><br>'+(aviso?esc(aviso)+'<br><br>':'')+esc(c.cuerpo),
+      o:c.o.map(op=>({t:op.t,f:()=>{ let r=''; try{ r=op.f()||''; }catch(e){ console.error(e); r='El país siguió su curso.'; } registrar(x,op,r); return r; }}))}); }
+  function anual(){ if(!ACTIVO()) return; const h=HS();
+    h.flujos=h.flujos.filter(f=>{ if(S.anio>f.hasta) return false; S.efectivo+=f.monto; try{ window.anotar147&&window.anotar147(f.txt,f.monto); }catch(e){} return true; });
+    h.mods=h.mods.filter(m=>m.hasta>=S.anio);
+    HITOS.forEach(x=>{ if(x.anio!==S.anio||h.vistos.includes(x.id)) return; h.vistos.push(x.id); try{ disparar(x); }catch(e){ console.error(e); } }); }
+  function efMods(e){ const h=HS(); let b=0; if(!h||!e) return 0; h.mods.forEach(m=>{ if(m.hasta>=S.anio&&m.sector===e.sector) b+=m.delta; }); return clamp(b,-.09,.09); }
+  /* --- v106 ya traía siete de estos años con decisiones sencillas: aquí quedan reemplazados por los de v164 --- */
+  const SUPERADOS=[1819,1851,1899,1902,1928,1929,1948];
+  function wrapHistoria(){ const old=window.correrHistoria; if(typeof old!=='function'||old.__top164) return;
+    const f=function(){ const ocultos=[];
+      try{ if(typeof HISTORIA!=='undefined') HISTORIA.forEach(e=>{ if(e&&!e.v164&&Array.isArray(e.o)&&SUPERADOS.includes(e.anio)&&e.anio===S.anio){ ocultos.push([e,e.anio]); e.anio=-1; } }); }catch(x){}
+      try{ return old.apply(this,arguments); } finally{ ocultos.forEach(([e,a])=>{ e.anio=a; }); } };
+    f.__top164=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrHistoria=f; }
+  /* cada hito se anota en HISTORIA (sin año, para que no se dispare dos veces) y así sale como primera página de periódico (v90) */
+  function registrarPortadas(){ try{ if(typeof HISTORIA==='undefined'||!Array.isArray(HISTORIA)) return; HITOS.forEach(x=>{ if(!HISTORIA.some(z=>z&&z.v164&&z.id164===x.id)) HISTORIA.push({anio:-1,t:x.t,v164:true,id164:x.id,bajada:'',f:()=>''}); }); }catch(e){ console.error(e); } }
+  /* --- los enganches --- */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA164_EMP) return; window.__SA164_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&typeof companias==='function'&&companias().includes(e)){ const b=efMods(e); if(Math.abs(b)>.0005){ const x=e.ingresos*b, sm=(typeof SECTORES!=='undefined'&&SECTORES.find(z=>z.id===e.sector))||{m:.1}, du=x*clamp((sm.m||.1)*1.3,.1,.3); e.ingresos=Math.max(1,e.ingresos+x); e.utilidad+=du; e.caja+=du; } } }catch(x){ console.error(x); } return r; }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA164_PASO) return; window.__SA164_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapCronica(){ const old=window.cronicaTexto; if(typeof old!=='function'||window.__SA164_CRON) return; window.__SA164_CRON=true;
+    window.cronicaTexto=function(){ let t=old.apply(this,arguments); try{ const h=HS(); if(h&&h.reg.length){ t+='\n\n## La casa y la historia del país\n\n'+h.reg.map(e=>'- **'+e.anio+' · '+e.t+'.** '+e.e+'. '+e.r).join('\n')+'\n'; } }catch(e){} return t; }; }
+  /* --- la pantalla --- */
+  function escenaHistoria164(){ if(!ACTIVO()) return; const h=HS(), reg=h.reg.slice().reverse();
+    const mods=h.mods.filter(m=>m.hasta>=S.anio), fl=h.flujos.filter(f=>S.anio<=f.hasta);
+    const agr={}; mods.forEach(m=>{ const k=m.sector; agr[k]=(agr[k]||0)+m.delta; });
+    const efs=Object.keys(agr).map(s=>{ const n=(typeof SECTORES!=='undefined'&&(SECTORES.find(x=>x.id===s)||{}).n)||s; const v=agr[s]; return '<span class="'+(v>=0?'bien':'mal')+'">'+esc(n)+' '+(v>=0?'+':'')+(Math.round(v*1000)/10)+'% al año</span>'; }).concat(fl.map(f=>'<span class="'+(f.monto>=0?'bien':'mal')+'">'+esc(f.txt)+': '+(f.monto>=0?'+':'')+fm(f.monto)+' al año hasta '+f.hasta+'</span>'));
+    escena({rubro:'Historia',titulo:'La historia del país',ancho:true,cerrable:true,clase:'his164',
+      cuerpo:'Cada hito que vive el país llega a tu casa como una decisión, y lo que decidas se queda: en el dinero, en la tierra, en el ritmo de tus negocios y en lo que la gente recuerda de ti.',
+      html:'<div class="k"><div><b>'+reg.length+'</b><span>hitos vividos</span></div><div><b>'+mods.length+'</b><span>efectos sobre tus sectores</span></div><div><b>'+fl.length+'</b><span>inversiones y cargas</span></div></div>'
+        +(efs.length?'<h4>Lo que sigue activo</h4><div class="ef164">'+efs.join('')+'</div>':'')
+        +(reg.length?'<h4>Lo que ha vivido tu casa</h4><div class="lin164">'+reg.slice(0,14).map(e=>'<div class="h164"><i></i><div class="a164">'+e.anio+'</div><b>'+esc(e.t)+'</b><em>'+esc(e.e)+'. '+esc(e.r)+'</em></div>').join('')+'</div>':'<div class="apunte">Todavía no ha pasado nada que le toque a tu casa.</div>'),
+      opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}]}); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top164) return;
+    const f=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!ACTIVO()||nino()) return A; const h=HS(); if(!h||!h.reg.length) return A; const enGrupo=!window.__crudo91&&A.some(x=>x.t==='Influencia y palancas'&&x.modal);
+        if(!enGrupo&&!A.some(x=>x.t==='La historia del país')) A.push({t:'La historia del país',cat:'legado',d:'Lo que ha vivido tu casa en los hitos del país ('+h.reg.length+') y los efectos que siguen activos.',mov:0,modal:true,run:()=>escenaHistoria164()}); }catch(x){ console.error(x); }
+      return A; };
+    f.__top164=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA164_CAT) return; window.__SA164_CAT=true;
+    window.catDe=function(t){ if(t==='La historia del país') return 'legado'; return old.apply(this,arguments); }; }
+  function grupo(){ const G_=window.GRUPOS_91; if(!Array.isArray(G_)) return; const g=G_.find(x=>x.id==='palancas'); if(!g||!Array.isArray(g.miembros)) return; if(!g.miembros.some(m=>m[1]==='La historia del país')) g.miembros.push(['Influencia','La historia del país']); }
+  function init164(){ wrapEmpresa(); wrapPaso(); wrapCronica(); wrapAcciones(); wrapCat(); grupo(); wrapHistoria(); registrarPortadas();
+    Object.assign(window,{API164:{P,pagar,valorFincas,venderFinca,valorBienes,macro,tension,prest,redes,partido,mod,flujo,lbl,fm,postura,tiene,fincas,sectoresMios,TODOS,HS,nino},registrarPortadas164:registrarPortadas,HITOS_164:HITOS,hist164:HS,escenaHistoria164,anualHistoria164:anual,efectoHistoria164:efMods,posturaHist164:postura,dispararHito164:disparar}); }
+  setTimeout(init164,40); setTimeout(init164,220); setTimeout(init164,650); setTimeout(init164,950);
+  window.__SA164={version:V164};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v165 · LA HISTORIA DE COLOMBIA, JUGABLE (1954–2021)
+   Nueve hitos que no tenían decisión propia y completan la línea de tiempo
+   de v164: la televisión y el voto de las mujeres, la reforma agraria del
+   Incora, el control de cambios de 1967, la bonanza marimbera, el apagón del
+   92, la Ley 100, el TLC con Estados Unidos, la migración venezolana y el
+   paro nacional de 2021. Usan el mismo motor: lo que decides se recuerda,
+   toca el dinero, las fincas y el ritmo de cada sector, y sale como primera
+   página de periódico.
+   ========================================================================== */
+(function(){
+  const V165='v165';
+  let X=null;
+  function api(){ if(!X&&window.API164) X=window.API164; return X; }
+  const afil=id=>{ try{ return typeof afiliado==='function'&&afiliado(id); }catch(e){ return false; } };
+  const compas=()=>{ try{ return typeof companias==='function'?companias():[]; }catch(e){ return []; } };
+  function construir(){ const {P,pagar,valorFincas,venderFinca,macro,tension,prest,redes,partido,mod,flujo,lbl,fm,tiene,fincas,TODOS}=api();
+    return [
+  {id:'tele',anio:1954,t:'La televisión llega a Colombia',mk:()=>({
+    cuerpo:'En junio, el general Rojas Pinilla inaugura la televisión: un solo canal del Estado, con programas en vivo desde Bogotá y apenas unos pocos aparatos en las casas. Ese mismo año se aprueba el voto de las mujeres, que votarán por primera vez en el plebiscito de 1957.',
+    o:[{id:'tv',t:lbl('Entrar como socio de una programadora de televisión',.04),f:()=>{ const p=pagar(.04); flujo(p*.1,10,'Utilidades de la programadora'); mod(['medios'],.03,8,'tv','La televisión'); prest(1,'entró al negocio de la televisión'); return 'Pusiste '+fm(p)+' en una programadora. La gente empieza a reunirse en la casa del vecino que tiene aparato.'; }},
+       {id:'radio',def:1,t:'Seguir con la radio y la prensa',f:()=>{ mod(['medios'],-.015,6,'tv2','Compite la televisión'); return 'Te quedaste con la radio y la prensa. En unos años la televisión les quitó la publicidad.'; }},
+       {id:'voto',t:lbl('Abrir tu casa a la campaña del voto femenino',.01),f:()=>{ const p=pagar(.01); prest(2,'apoyó el voto de las mujeres'); redes(4); partido('liberal',3); return 'Gastaste '+fm(p)+' en reuniones y volantes. Las mujeres de tu familia estarán entre las primeras en votar.'; }}]})},
+  {id:'incora',anio:1961,t:'La reforma agraria y el Incora',mk:()=>({
+    cuerpo:'La Ley 135 crea el Incora para repartir tierras y titular a los campesinos, con el impulso de la Alianza para el Progreso. Los dueños de grandes haciendas ven venir las expropiaciones y los gremios del campo se arman para defenderse.'+(fincas().length?' Tus fincas están en la mira.':''),
+    o:[{id:'vender',t:'Ofrecerle al Incora las tierras que no trabajas',f:()=>{ let x=0, n=0; fincas().forEach(b=>{ if(chance(.5)){ x+=venderFinca(b,.85); n++; } }); prest(1,'vendió tierras al Incora'); return n?'Le vendiste '+n+' finca'+(n>1?'s':'')+' al Incora por '+fm(x)+'. Menos de lo que valían, pero sin pleitos.':'No tenías fincas ociosas que ofrecerle.'; }},
+       {id:'resistir',t:lbl('Resistir con tus gremios: abogados y cabildeo',.02),f:()=>{ const p=pagar(.02); tension(3); const g=afil('sac')||afil('fedegan'); if(g||chance(.4)){ return 'Gastaste '+fm(p)+(g?' y tu gremio peleó la reforma a tu lado: la ley se aplicó a medias.':', y los expedientes se quedaron en un cajón.'); } valorFincas(.96); prest(-1,'se opuso a la reforma agraria'); return 'Gastaste '+fm(p)+' y el Incora igual avanzó sobre parte de tus tierras.'; }},
+       {id:'tecnificar',def:1,t:lbl('Tecnificar y mecanizar para que nadie diga que no trabajas la tierra',.04),f:()=>{ const p=pagar(.04); valorFincas(1.04); mod(['agro'],.02,6,'tecnificar','Tierra tecnificada'); return 'Pusiste '+fm(p)+' en tractores, riego y administradores. Nadie pudo decir que tu tierra estaba ociosa.'; }}]})},
+  {id:'cambios',anio:1967,t:'El control de cambios de 1967',mk:()=>({
+    cuerpo:'El Estatuto Cambiario crea el control de cambios: el Banco de la República fija el dólar y reparte los giros. Importar exige licencia previa y exportar se premia con certificados de reembolso. Cada dólar tiene dueño, y el mercado negro empieza a respirar.',
+    o:[{id:'licencias',def:1,t:'Tramitar licencias de importación y aguantar la fila',f:()=>{ mod(['retail','logistica','tech'],-.02,5,'cambios','Licencias de importación'); return 'Aprendiste a vivir con licencias, cupos y favores en el Banco de la República. Importar se volvió lento y caro.'; }},
+       {id:'exportar',t:lbl('Reorientar el negocio a exportar y cobrar certificados',.03),f:()=>{ const p=pagar(.03); mod(['agro','moda','alimentos','mineria'],.025,6,'cert','Certificados de reembolso'); return 'Pusiste '+fm(p)+' en empaques, contactos y papeles de exportación. Los certificados de reembolso empezaron a llegar.'; }},
+       {id:'negro',t:'Conseguir los dólares por la puerta de atrás',f:()=>{ if(chance(.6)){ mod(['retail','logistica'],.012,4,'negro','Dólares del mercado negro'); try{ registrarDelito('contrabando',1,'dólares y mercancía fuera del cupo'); }catch(e){} return 'Tu corredor te consiguió los dólares y la mercancía entró sin papeles. Hay que esperar que nadie pregunte.'; } const p=pagar(.03); return 'Te pillaron con dólares sin giro autorizado: multa de '+fm(p)+' y dos meses de dolores de cabeza con la Aduana.'; }}]})},
+  {id:'marimba',anio:1978,t:'La bonanza marimbera y los dólares calientes',mk:()=>({
+    cuerpo:'La marimba de la Guajira y los primeros cargamentos de cocaína dejan dólares en las costas y en las notarías. Aparecen casas de cambio, haciendas compradas de contado y vecinos con plata de la que nadie pregunta.',
+    o:[{id:'rechazar',def:1,t:'Rechazar la plata y mantener las distancias',f:()=>{ prest(2,'se mantuvo lejos de la plata caliente'); return 'No quisiste saber de dónde venía la plata. Algunos amigos dejaron de buscarte.'; }},
+       {id:'socio',t:'Recibir un "socio capitalista" sin hacer preguntas',f:()=>{ const x=P()*.08; S.efectivo+=x; valorFincas(1.05); try{ registrarDelito('lavado de activos',3,'capital de origen ilícito'); }catch(e){} tension(2); return 'Entraron '+fm(x)+' de un socio que nunca firma. Todo se ve legal, y por eso mismo da miedo.'; }},
+       {id:'denunciar',t:'Denunciar a los vecinos que reciben la plata',f:()=>{ prest(3,'denunció a los traficantes'); tension(3); if(chance(.3)){ S.p.estres=clamp((isFinite(S.p.estres)?S.p.estres:30)+8,0,100); return 'Denunciaste, y a los pocos días empezaron las llamadas sin nombre. Tu familia vive con miedo.'; } return 'Denunciaste y nadie volvió a saludarte en el club. En la fiscalía te dieron las gracias.'; }}]})},
+  {id:'apagon',anio:1992,t:'El apagón y el racionamiento de energía',mk:()=>({
+    ahora:()=>{ mod(TODOS.filter(s=>s!=='energia'),-.025,1,'apagon','Racionamiento de energía'); mod(['energia'],.03,2,'apagon2','Escasez de energía'); tension(4); return 'Un Niño muy seco vació los embalses y el Gobierno decretó apagones programados de hasta nueve horas.'; },
+    cuerpo:'Las fábricas paran, los almacenes compran plantas eléctricas y en las noches la gente cena a la luz de velas. La energía, que se creía eterna, tiene dueño y precio.',
+    o:[{id:'planta',t:lbl('Comprar una planta eléctrica propia',.02),f:()=>{ const p=pagar(.02); mod(TODOS,.02,1,'planta','Planta propia'); return 'Compraste una planta por '+fm(p)+'. En los apagones tu negocio siguió, con ruido, pero siguió.'; }},
+       {id:'turnos',def:1,t:'Reorganizar turnos y trabajar de noche',f:()=>{ return 'Pasaste los turnos a las madrugadas. Costó, pero se aguantó el año.'; }},
+       {id:'generar',t:lbl('Invertir en una generadora privada',.05),f:()=>{ const p=pagar(.05); flujo(p*.09,12,'Utilidades de la generadora'); mod(['energia'],.02,6,'gen','Nueva generación'); return 'Compraste una parte de una generadora por '+fm(p)+'. Cuando vuelva la sequía, será un gran negocio.'; }}]})},
+  {id:'ley100',anio:1993,t:'La Ley 100 y los servicios públicos privados',mk:()=>({
+    cuerpo:'La Ley 100 crea el sistema de seguridad social: las EPS y las IPS manejan la salud con recursos de los afiliados y del Estado, y las pensiones se abren a los fondos privados. La Ley 142 deja entrar la inversión privada a los servicios públicos.',
+    o:[{id:'eps',t:lbl('Montar o comprar una EPS o una clínica',.07),f:()=>{ const p=pagar(.07); if(tiene('salud')) mod(['salud'],.04,8,'eps','Auge de las EPS'); else flujo(p*.1,10,'Utilidades de la EPS'); partido('liberal',2); return 'Pusiste '+fm(p)+' en el nuevo sistema de salud. El Estado paga por cada afiliado, pero tarda en pagar.'; }},
+       {id:'prepagada',def:1,t:'Seguir con tu medicina prepagada y mirar de lejos',f:()=>{ return 'Te quedaste con tu prepagada. La reforma no cambió tu vida, pero sí la de millones.'; }},
+       {id:'servicios',t:lbl('Comprar acciones de empresas de servicios públicos',.04),f:()=>{ const p=pagar(.04); flujo(p*.08,10,'Dividendos de servicios públicos'); return 'Compraste acciones por '+fm(p)+'. Las tarifas suben y el dividendo también.'; }}]})},
+  {id:'tlc',anio:2012,t:'El TLC con Estados Unidos',mk:()=>({
+    ahora:()=>{ try{ const l=typeof window.lider159==='function'?window.lider159():null; if(l&&l.aj){ ['agro','moda','alimentos'].forEach(s=>{ l.aj[s]=(l.aj[s]||0)-6; }); } }catch(e){} return 'Bajaron los aranceles para lo que viene de Estados Unidos.'; },
+    cuerpo:'Entra en vigor el Tratado de Libre Comercio con los Estados Unidos. Se abren mercados para el café, las flores y el banano; se abren también las puertas al maíz, la carne y los lácteos subsidiados de afuera y a los textiles asiáticos que pasan por Panamá.',
+    o:[{id:'exportar',t:lbl('Prepararte para exportar: certificaciones, logística y contactos',.03),f:()=>{ const p=pagar(.03); mod(['agro','alimentos','moda','mineria'],.025,6,'tlc','Nuevos mercados'); return 'Pusiste '+fm(p)+' en certificaciones y logística. Los primeros contenedores salieron al año siguiente.'; }},
+       {id:'salvaguardias',t:'Pedirle a tu gremio salvaguardias y plazos largos',f:()=>{ let infl=0; try{ const l=typeof window.lider159==='function'?window.lider159():null; if(l&&l.gr) Object.keys(l.gr).forEach(id=>{ if(l.gr[id].cargo) infl=Math.max(infl,l.gr[id].influ||0); }); }catch(e){} if(chance(.3+infl/200)){ mod(['agro','alimentos','moda'],.012,6,'salv','Salvaguardias'); return 'Tu gremio logró plazos largos y salvaguardias para los productos más sensibles.'; } return 'Tu gremio fue a la mesa, pero el Gobierno ya había firmado.'; }},
+       {id:'competir',def:1,t:lbl('Competir: bajar costos e importar insumos más baratos',.025),f:()=>{ const p=pagar(.025); mod(['moda','alimentos','construccion','tech'],.015,4,'insumos','Insumos importados más baratos'); return 'Gastaste '+fm(p)+' en eficiencia y cambiaste de proveedores. Los insumos importados te abarataron la producción.'; }}]})},
+  {id:'migrantes',anio:2018,t:'La migración venezolana',mk:()=>({
+    cuerpo:'Más de un millón de venezolanos cruzan la frontera huyendo de la crisis. Llegan a las calles, a los semáforos y a las filas de empleo, y Colombia les abre la puerta con un permiso especial de permanencia.',
+    o:[{id:'contratar',def:1,t:'Contratar venezolanos con permisos y salarios justos',f:()=>{ mod(['retail','logistica','alimentos','construccion'],.012,4,'migra','Mano de obra nueva'); prest(2,'contrató venezolanos con papeles'); return 'Contrataste con papeles y salarios dignos. Tu gente nueva respondió con lealtad.'; }},
+       {id:'informal',t:'Aprovechar la mano de obra barata sin contrato',f:()=>{ mod(['retail','logistica','alimentos','construccion'],.02,3,'migra2','Mano de obra barata'); if(chance(.3)){ S.p.escandalos=(S.p.escandalos||0)+1; prest(-3,'contrató sin papeles a migrantes'); return 'Te ahorraste costos, pero una denuncia llegó al Ministerio del Trabajo y a la prensa.'; } return 'Te ahorraste costos. Por ahora nadie preguntó.'; }},
+       {id:'ayudar',t:lbl('Financiar un albergue y comedores para los recién llegados',.01),f:()=>{ const p=pagar(.01); prest(3,'financió un albergue para migrantes'); redes(4); return 'Pusiste '+fm(p)+' en un albergue y un comedor. En el barrio te lo agradecieron.'; }}]})},
+  {id:'paro21',anio:2021,t:'El paro nacional',mk:()=>({
+    ahora:()=>{ mod(['logistica','retail','alimentos','turismo'],-.04,1,'paro21','Bloqueos y paros'); tension(12); return 'En abril, un paro contra una reforma tributaria se volvió semanas de marchas, bloqueos y disturbios.'; },
+    cuerpo:'Se agotan los alimentos, las ciudades se quedan sin gasolina y el comercio cierra a las tres de la tarde. El Gobierno retira la reforma, pero las calles siguen llenas.',
+    o:[{id:'cerrar',def:1,t:'Cerrar y esperar a que pasen las semanas',f:()=>{ return 'Cerraste y esperaste. Se perdieron ventas y se aprendió que el país tiene rabia.'; }},
+       {id:'negociar',t:'Recibir a los líderes de tus trabajadores y escuchar sus pedidos',f:()=>{ compas().forEach(e=>{ e.moral=clamp((e.moral||50)+6,0,100); }); prest(2,'escuchó a sus trabajadores en el paro'); tension(-3); return 'Escuchaste los pedidos de tus trabajadores y subiste algunos salarios. La moral se levantó mientras afuera seguía el paro.'; }},
+       {id:'seguridad',t:lbl('Contratar seguridad y escoltas para tus bodegas',.015),f:()=>{ const p=pagar(.015); mod(['logistica','retail'],.015,1,'seg21','Bodegas protegidas'); return 'Pagaste '+fm(p)+' en vigilancia. Tus bodegas no se saquearon, pero en las fotos salió tu guardia armado.'; }}]})}
+  ]; }
+  function init165(){ if(window.__SA165_OK) return; const A=api(); if(!A||!Array.isArray(window.HITOS_164)) return; window.__SA165_OK=true;
+    try{ construir().forEach(h=>{ if(!window.HITOS_164.some(x=>x.id===h.id)) window.HITOS_164.push(h); }); window.HITOS_164.sort((a,b)=>a.anio-b.anio); if(typeof window.registrarPortadas164==='function') window.registrarPortadas164(); }catch(e){ console.error(e); } }
+  setTimeout(init165,60); setTimeout(init165,240); setTimeout(init165,700); setTimeout(init165,1000);
+  window.__SA165={version:V165};
 })();
 </script>
 
