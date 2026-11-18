@@ -1229,10 +1229,36 @@ svg.foto116{display:block;background:#1d2a23}
 .lid159 .esc159 span.si{background:rgba(214,166,72,.25);color:#F0CF86}
 .lid159 .alto{color:#e79a8a}.lid159 .bajo{color:#8fe0b0}
 </style>
+<style id="estilos-v160">
+.ins160 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.ins160 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.ins160 .k b{display:block;font-size:15px;font-family:var(--display)}
+.ins160 .k span{font-size:12px;color:var(--humo2)}
+.ins160 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.ins160 small{color:var(--humo2)}
+.ins160 .pasos160{display:flex;flex-direction:column;gap:0;margin:6px 0 4px}
+.ins160 .pasos160 .p160{position:relative;padding:2px 0 14px 30px;border-left:2px solid rgba(255,255,255,.12);margin-left:9px}
+.ins160 .pasos160 .p160:last-child{border-left-color:transparent;padding-bottom:2px}
+.ins160 .pasos160 .p160 i{position:absolute;left:-10px;top:2px;width:18px;height:18px;border-radius:50%;background:#1b2a24;border:2px solid rgba(255,255,255,.25)}
+.ins160 .pasos160 .p160.hecho i{background:var(--laton);border-color:var(--laton)}
+.ins160 .pasos160 .p160.hecho{border-left-color:var(--laton)}
+.ins160 .pasos160 .p160.en160 i{border-color:var(--laton);box-shadow:0 0 0 4px rgba(214,166,72,.22)}
+.ins160 .pasos160 .p160.mal i{background:#c9604f;border-color:#c9604f}
+.ins160 .pasos160 .p160 b{display:block;font-size:14px}
+.ins160 .pasos160 .p160 small{display:block;margin-top:1px}
+.ins160 .et160{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ins160 .et160 span{font-size:11.5px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--humo2)}
+.ins160 .et160 span.on{background:rgba(214,166,72,.26);color:#F0CF86}
+.ins160 .et160 span.ya{background:rgba(214,166,72,.12);color:#c9b17a}
+.ins160 .b160{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:6px;max-width:320px}
+.ins160 .b160 i{display:block;height:100%;background:var(--laton)}
+.ins160 .bit160{margin-top:4px;font-size:13px;color:var(--humo)}
+.ins160 .bit160 div{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v159</div>
+<div class="version-badge" id="versionBadge">v160</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -18506,20 +18532,21 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       return {absuelto:true,prob:p};
     }
     if(j.penaCapital&&g>=8&&chance(clamp(.34+g*.018-q*.06,.05,.9))){
-      const mot=fijarMotivoCondena(); S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia';
+      const mot=fijarMotivoCondena(); S.penal.penaMuerte=true; S.penal.condena='pena capital'; c.estado='sentencia'; S.penal.evid160=c.evidencia; S.penal.abog160=c.abogado; S.penal.firme160=false; S.penal.ins160=null;
       log('El tribunal impuso pena capital por <b>'+esc(mot)+'</b>.','mal');
       return {capital:true,prob:p,motivo:mot};
     }
     const [lo,hi]=penaRango89();
     const anios=Math.max(1,Math.round(ri(lo,hi)*(1-q*.15)));
     const mot=fijarMotivoCondena();
-    S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios;
+    S.penal.prisionRestante=anios; S.penal.condena='prisión'; S.penal.caso=null; S.penal.apelable89=anios; S.penal.evid160=c.evidencia; S.penal.abog160=c.abogado; S.penal.firme160=false; S.penal.ins160=null;
     moverPrestigio(-3,'fue condenado');
     log('<b>Culpable</b> de '+esc(mot)+'. El tribunal impuso una condena de '+anios+' año'+(anios===1?'':'s')+' de prisión.','mal');
     return {anios,prob:p,motivo:mot};
   }
   function costoApelacion89(){ return Math.max(15,Math.round(pat()*.02)); }
   function apelarPenal89(){
+    if(typeof window.iniciarApelacion160==='function') return window.iniciarApelacion160();
     const anios=S.penal.apelable89; if(!anios||S.penal.prisionRestante<=0) return 'Ya no había nada que apelar.';
     const costo=costoApelacion89(); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
     S.efectivo-=costo; S.penal.apelable89=0;
@@ -18549,7 +18576,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     escena({rubro:'Tribunal',titulo:'Culpable',ancho:true,clase:'veredicto89 mal',
       cuerpo:relato+'<b>Culpable</b> de '+esc(res.motivo||S.penal.motivoCondena||'')+'. '+res.anios+' año'+(res.anios===1?'':'s')+' de prisión. Tu abogado te dice al oído que se puede apelar.',
       opciones:[
-        {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Si prospera, el tribunal superior rebaja la condena a la mitad.',
+        {t:'Apelar la condena',cat:'riesgo',d:'Cuesta '+fmt(costo)+'. Sube al tribunal superior: tarda uno o dos años y, si hace falta, puede llegar a casación ante la Corte Suprema.',
          dis:S.efectivo<costo?'No te alcanza':null,cerrar:false,run:()=>{ const m=apelarPenal89(); log(m,/prosperó/.test(m)?'bien':'mal'); cerrarModal(); render(); }},
         {t:'Aceptar la condena',cat:'riesgo',run:()=>{ S.penal.apelable89=0; }}
       ]});
@@ -29657,6 +29684,211 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaLiderazgo159,escenaGremio159,escenaSalario159,escenaRama159,escenaLineaRama159,escenaPresion159,escenaSector159,escenaForma159,escenaAranceles159,faltasGremio159:faltas,lider159:L,gremio159:G,CARGOS_GREMIO_159:CARGOS,MEDIDAS_159:MEDIDAS,nivelArancel159:niv,desvioArancel159:dev,efectoArancel159:efArancel,anualGremios159:anual,evMedida159:evMedida,costoSmlv159:costoSmlv,candidaturaGremio159:candidatura,probEleccionGremio159:probEleccion,efectoMods159:efMods}); }
   setTimeout(init159,40); setTimeout(init159,220); setTimeout(init159,650); setTimeout(init159,950);
   window.__SA159={version:V159};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v160 · APELACIÓN Y CASACIÓN
+   Una condena ya no se discute en un solo golpe. Si pierdes el juicio:
+   - Apelación: el expediente sube al tribunal superior. Tarda uno o dos años,
+     cuesta (radicación y honorarios cada año) y se ve avanzar por etapas:
+     recurso radicado, reparto al magistrado ponente, audiencia de
+     sustentación y proyecto de fallo.
+   - El tribunal puede absolverte, anular el juicio, rebajar la pena o
+     confirmarla.
+   - Casación: si confirma o reduce y la pena es de cinco años o más, puedes
+     demandar en casación ante la Corte Suprema. Primero decide si admite la
+     demanda (la mayoría no pasa); si la admite, el fallo tarda más años.
+   - Mientras corren los recursos sigues cumpliendo la condena, y lo
+     cumplido cuenta si te la rebajan. Una pena capital pasa por revisión
+     automática, y al final queda la clemencia.
+   - Puedes impulsar el proceso, reforzar la defensa, cambiar de abogado o
+     desistir.
+   ========================================================================== */
+(function(){
+  const V160='v160';
+  const ES=x=>String(x==null?'':x).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(S&&S.p&&S.penal&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const yo=id=>{ try{ return typeof window.rasgosDe88==='function'&&window.rasgosDe88(S.p).includes(id); }catch(e){ return false; } };
+  const movida=()=>{ if(S._mov160===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov160=S.anio; return true; };
+  const sinMov=()=>(S._mov160!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const ABOG={
+    oficio:{q:0,n:'Defensor de oficio',d:'No cuesta nada. Tiene doscientos expedientes y el tuyo es uno más.',fee:()=>0},
+    reconocido:{q:1,n:'Un penalista reconocido',d:'Conoce a los magistrados y sabe cómo se arma una sustentación.',fee:()=>Math.max(8,Math.round(pat()*.008))},
+    estrella:{q:2,n:'El bufete más caro del país',d:'Gana recursos que nadie más gana, y cobra como si lo supiera.',fee:()=>Math.max(25,Math.round(pat()*.025))}};
+  const qFO=()=>{ try{ const a=S.familyOffice&&S.familyOffice.staff&&S.familyOffice.staff.abogado; if(!a) return 0; return (a.capaz||5)>=8?2:1; }catch(e){ return 0; } };
+  const qDe=i=>Math.max((ABOG[i&&i.abogado]||ABOG.oficio).q,qFO());
+  const feeDe=i=>{ const a=ABOG[i&&i.abogado]||ABOG.oficio; return a.q>qFO()?a.fee():0; };
+  const bonoJ=()=>{ try{ const j=S.carrera&&S.carrera.judicatura; return (j&&j.activo)?((j.nivel||0)>=2?.06:.04):0; }catch(e){ return 0; } };
+  const ETAPAS={apelacion:['Recurso radicado','Reparto al magistrado','Audiencia de sustentación','Proyecto de fallo'],
+                casacion:['Demanda presentada','Admisión de la demanda','Audiencia de sustentación','Proyecto de fallo']};
+  /* los tribunales cambian con la época y con el país */
+  function cortes(){ let j; try{ j=jurisdiccionActual(); }catch(e){ j={pais:'Colombia',jurisdiccion:'Colombia'}; }
+    const a=S.anio, col=!j.pais||j.pais==='Colombia';
+    if(col) return {apel:a<1810?'la Real Audiencia de Santa Fe':a<1886?'el Tribunal Superior del Distrito':'el Tribunal Superior del Distrito Judicial',
+      apelCorto:a<1810?'la Real Audiencia':'el Tribunal Superior',
+      cas:a>=1905?'la Sala de Casación Penal de la Corte Suprema de Justicia':'la Corte Suprema de Justicia',casCorto:'la Corte Suprema',puedeCas:a>=1905};
+    return {apel:'la corte de apelaciones de '+j.jurisdiccion,apelCorto:'la corte de apelaciones',cas:'la Corte Suprema de '+j.jurisdiccion,casCorto:'la Corte Suprema',puedeCas:true}; }
+  const costoRecurso=f=>f==='casacion'?Math.max(25,Math.round(pat()*.035)):Math.max(15,Math.round(pat()*.02));
+  const costoImpulso=()=>Math.max(6,Math.round(pat()*.008));
+  const costoRefuerzo=()=>Math.max(10,Math.round(pat()*.012));
+  /* --- estado --- */
+  function P(){ try{ asegurarPenal(); }catch(e){} return S.penal; }
+  const INS=()=>{ const p=P(); return p&&p.ins160&&p.ins160.gen===S.gen?p.ins160:null; };
+  const hist=(i,t)=>{ i.hist=(i.hist||[]).concat([{anio:S.anio,txt:t}]).slice(-8); };
+  const etapa=i=>Math.min(3,Math.floor((i.elapsed||0)/Math.max(1,i.dur||1)*4));
+  const peso=i=>clamp(qDe(i)*.05+(i.refuerzos||0)*.04+(60-(isFinite(i.evid)?i.evid:55))/400+bonoJ()+(yo('astuto')?.02:0),-.1,.4);
+  const evento=(texto,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.penal&&!S.muerto),t:()=>texto,o:o||[{t:'Entendido',f:()=>''}]}); }catch(e){} };
+  const rango=a=>a===1?'un año':a+' años';
+  /* --- abrir la apelación --- */
+  function abrir(auto){ const p=P(), cap=!!p.penaMuerte, c=cortes(), pena=cap?0:(p.apelable89||0);
+    const dur=cap?ri(2,3):(chance(.5)?2:1);
+    const i=p.ins160={gen:S.gen,fase:'apelacion',estado:'curso',rad:S.anio,dur,elapsed:0,pena:cap?0:pena,capital:cap,auto:!!auto,
+      abogado:ABOG[p.abog160]?p.abog160:'oficio',evid:isFinite(p.evid160)?p.evid160:55,gastado:0,refuerzos:0,hist:[],motivo:p.motivoCondena||''};
+    p.apelable89=0;
+    hist(i,(auto?'Revisión automática de la pena capital ante ':'Radicaste el recurso de apelación ante ')+c.apel+'.');
+    return i; }
+  function iniciarApelacion160(){ const p=P(); if(p.ins160&&INS()) return 'Ya tienes un recurso en curso.';
+    const cap=!!p.penaMuerte;
+    if(!cap&&(!p.apelable89||!(p.prisionRestante>0))) return 'Ya no había nada que apelar.';
+    const costo=costoRecurso('apelacion'); if(S.efectivo<costo) return 'No tenías con qué pagar la apelación.';
+    S.efectivo-=costo; const i=abrir(false); i.gastado=costo; const c=cortes();
+    log('Presentaste el recurso de apelación ante <b>'+esc(c.apel)+'</b>. Costó '+fmt(costo)+'.','hito');
+    return 'La apelación quedó radicada y se resuelve en '+(i.dur===1?'un año':i.dur+' años')+'. Entre tanto, '+(cap?'la ejecución queda suspendida.':'sigues cumpliendo la condena, y lo cumplido cuenta si te la rebajan.'); }
+  /* --- los desenlaces --- */
+  function cerrarFirme(msg){ const p=P(), i=p.ins160; p.ins160=null; p.firme160=true; p.apelable89=0; if(msg) log(msg,'mal'); if(p.penaMuerte) ejecutar(); }
+  function ejecutar(){ const p=P(); log('<b>Se cumplió la sentencia.</b> Ya no quedaban recursos.','mal'); p.penaMuerte=false; p.condena=null; p.ins160=null; setTimeout(()=>{ try{ if(!S.muerto) morir(); }catch(e){ console.error(e); } },60); }
+  function absolver(i){ const p=P(), f=i.fase==='casacion'?'casación':'apelación'; p.prisionRestante=0; p.condena=null; p.motivoCondena=null; p.penaMuerte=false; p.caso=null; p.ins160=null; p.firme160=false; p.apelable89=0;
+    p.riesgo=clamp((p.riesgo||0)-25,0,100); S.p.escandalos=Math.max(0,(S.p.escandalos||0)-1); try{ moverPrestigio(6,'fue absuelto en '+f); }catch(e){}
+    log('<b>Absuelto en '+f+'.</b> La condena quedó sin efecto y sales libre. Gastaste '+fmt(i.gastado||0)+' en los recursos.','bien'); try{ hito('Lo absolvieron en '+f); }catch(e){} }
+  function anular(i){ const p=P(), tr=cortes(); p.prisionRestante=0; p.condena=null; p.penaMuerte=false; p.ins160=null; p.firme160=false; p.apelable89=0;
+    p.caso={estado:'juicio',motivo:i.motivo||p.motivoCondena||'investigación penal',inicio:S.anio,jurisdiccion:(function(){ try{ return jurisdiccionActual().jurisdiccion; }catch(e){ return 'Colombia'; } })(),
+      evidencia:clamp((isFinite(i.evid)?i.evid:55)-10,15,92),abogado:i.abogado,plazo:S.anio+2,gastado:0,bitacora:[{anio:S.anio,txt:'El juicio se anuló y se repite.'}]};
+    log('<b>Se anuló el juicio.</b> Hay que repetirlo desde el principio; mientras tanto, quedas en libertad.','hito'); }
+  function reducir(i,frac){ const p=P(), nueva=Math.max(1,Math.round(i.pena*frac)), cumplido=Math.max(0,i.pena-Math.max(0,p.prisionRestante)), rest=Math.max(0,nueva-cumplido);
+    const antes=i.pena; i.pena=nueva; i.mod=true; p.prisionRestante=rest; if(rest<=0){ p.condena=null; p.motivoCondena=null; }
+    return {nueva,antes,rest,cumplido}; }
+  function conmutar(i,anios){ const p=P(), n=anios||ri(18,35); p.penaMuerte=false; p.condena='prisión'; p.prisionRestante=n; p.caso=null; i.capital=false; i.pena=n; i.mod=true; return n; }
+  /* --- qué sigue después de un fallo --- */
+  function despues(i,titulo){ const p=P(), c=cortes();
+    if(i.fase==='apelacion'&&c.puedeCas&&(i.capital||i.pena>=5)&&(p.prisionRestante>0||i.capital)){
+      i.estado='decidido'; i.puedeCasar=true; i.decidido=S.anio;
+      evento(titulo+'<br><br>Tu abogado ve base para una demanda de casación ante <b>'+esc(c.cas)+'</b>. Cuesta '+fmt(costoRecurso('casacion'))+' y primero hay que lograr que la admitan. Si este año no la presentas, la sentencia queda en firme.',
+        [{t:'Presentar la casación ('+fmt(costoRecurso('casacion'))+')',f:()=>presentarCasacion160()},{t:i.capital?'Aceptar la sentencia: se ejecutará':'Aceptar la sentencia',f:()=>{ cerrarFirme(); return 'La sentencia quedó en firme.'; }}]);
+      return; }
+    if(i.capital){ i.estado='decidido'; i.puedeCasar=false; i.clemencia=true; i.decidido=S.anio;
+      evento(titulo+'<br><br>No quedan recursos. Solo falta la clemencia: una carta al ejecutivo, con influencias. Si este año no la pides, la sentencia se cumple.',
+        [{t:'Pedir clemencia ('+fmt(costoClemencia())+')',f:()=>pedirClemencia160()},{t:'Aceptar lo que viene',f:()=>{ ejecutar(); return ''; }}]);
+      return; }
+    cerrarFirme(); evento(titulo+' La sentencia quedó en firme.'); }
+  const costoClemencia=()=>Math.max(40,Math.round(pat()*.03));
+  function pedirClemencia160(){ const i=INS(); if(!i||!i.clemencia) return 'Ya no había nada que pedir.'; const costo=costoClemencia(); if(S.efectivo<costo) { ejecutar(); return 'No tenías con qué pagar la gestión de la clemencia.'; }
+    S.efectivo-=costo; i.gastado=(i.gastado||0)+costo; let infl=0; try{ const po=typeof window.politica155==='function'?window.politica155():null; infl=po&&po.influ||0; }catch(e){}
+    const p=clamp(.08+infl/500+(typeof prestigio==='function'?prestigio():0)/700+qFO()*.04,.05,.4);
+    if(chance(p)){ const n=conmutar(i,ri(20,40)); P().ins160=null; P().firme160=true; log('<b>Te concedieron la clemencia.</b> La pena capital se conmutó por '+n+' años de prisión.','hito'); return 'La pena capital quedó conmutada por '+n+' años de prisión.'; }
+    ejecutar(); return 'La clemencia fue negada.'; }
+  /* --- los fallos --- */
+  function fallaApelacion(i){ const p=P(), W=peso(i), c=cortes(), r=Math.random(); const mag='del magistrado '+pick(APELLIDOS);
+    const pAbs=clamp(.04+W*(i.capital?.4:.6),.02,.3), pNul=.05, pRed=clamp(.2+W*1.2,.08,.5);
+    hist(i,'El tribunal falló el recurso.');
+    if(r<pAbs){ absolver(i); evento('<b>'+ES(cap(c.apelCorto))+' revocó tu condena.</b> Con ponencia '+esc(mag)+', la sala encontró que las pruebas no alcanzaban y te absolvió. Sales libre.'); return; }
+    if(r<pAbs+pNul){ anular(i); evento('<b>'+ES(cap(c.apelCorto))+' anuló el juicio.</b> Hubo un error de fondo en el proceso: hay que repetirlo desde el principio, y mientras tanto quedas en libertad.'); return; }
+    if(i.capital){ if(r<pAbs+pNul+clamp(.3+W*1.1,.12,.6)){ const n=conmutar(i); log('El tribunal conmutó la pena capital por '+n+' años de prisión.','bien'); despues(i,'<b>'+ES(cap(c.apelCorto))+' conmutó tu pena capital</b> por '+n+' años de prisión.'); return; } log('El tribunal confirmó la pena capital.','mal'); despues(i,'<b>'+ES(cap(c.apelCorto))+' confirmó la pena capital.</b>'); return; }
+    if(r<pAbs+pNul+pRed){ const x=reducir(i,rand(.45,.75)); log('El tribunal rebajó la condena de '+x.antes+' a '+x.nueva+' años.','bien');
+      if(x.rest<=0){ i.estado='decidido'; P().ins160=null; P().firme160=true; evento('<b>'+ES(cap(c.apelCorto))+' rebajó tu condena a '+rango(x.nueva)+'.</b> Como ya llevabas '+rango(x.cumplido)+' cumplidos, quedas libre.'); return; }
+      despues(i,'<b>'+ES(cap(c.apelCorto))+' rebajó tu condena de '+rango(x.antes)+' a '+rango(x.nueva)+'.</b> Te faltan '+rango(x.rest)+'.'); return; }
+    log('El tribunal confirmó la condena.','mal'); despues(i,'<b>'+ES(cap(c.apelCorto))+' confirmó la condena</b> de '+rango(i.pena)+'. La ponencia '+esc(mag)+' no encontró errores.'); }
+  function fallaCasacion(i){ const W=peso(i), c=cortes(), r=Math.random(), mag='del magistrado '+pick(APELLIDOS); hist(i,'La Corte falló la demanda.');
+    const pCasa=clamp(.3+W*1.0,.12,.6);
+    if(r<pCasa){ if(i.capital){ const n=conmutar(i); P().ins160=null; P().firme160=true; log('La Corte casó la sentencia y conmutó la pena capital por '+n+' años.','bien'); evento('<b>La Corte Suprema casó la sentencia.</b> La pena capital quedó conmutada por '+n+' años de prisión.'); return; }
+      const s=Math.random();
+      if(s<.6){ const x=reducir(i,rand(.4,.7)); P().ins160=null; P().firme160=true; log('La Corte casó la sentencia y rebajó la condena de '+x.antes+' a '+x.nueva+' años.','bien');
+        evento('<b>La Corte Suprema casó la sentencia.</b> La pena baja de '+rango(x.antes)+' a '+rango(x.nueva)+'.'+(x.rest<=0?' Como ya la cumpliste, quedas libre.':' Te faltan '+rango(x.rest)+'.')); return; }
+      if(s<.85){ absolver(i); evento('<b>La Corte Suprema casó la sentencia y te absolvió.</b> Sale con ponencia '+esc(mag)+': la condena se fundó en pruebas ilegales.'); return; }
+      anular(i); evento('<b>La Corte Suprema anuló el juicio.</b> Hay que repetirlo; mientras tanto quedas en libertad.'); return; }
+    log('La Corte no casó la sentencia.','mal'); despues(i,'<b>La Corte Suprema no casó la sentencia.</b> Con ponencia '+esc(mag)+', la Sala de Casación la dejó en firme.'); }
+  function admision(i){ const c=cortes(), pA=clamp(.32+qDe(i)*.08+(i.refuerzos||0)*.05+(i.mod?.04:0),.12,.65);
+    if(chance(pA)){ i.admitida=true; i.dur=1+ri(1,3); hist(i,'La Corte admitió la demanda de casación.'); log('<b>La Corte admitió la demanda de casación.</b> El fallo tarda unos años.','hito'); return; }
+    i.admitida=false; hist(i,'La Corte no admitió la demanda.'); log('La Corte no admitió la demanda de casación.','mal'); despues(i,'<b>La Corte Suprema no admitió la demanda de casación.</b> La mayoría no pasa ese filtro.'); }
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const rand=(a,b)=>a+Math.random()*(b-a);
+  function presentarCasacion160(){ const i=INS(); if(!i||i.estado!=='decidido'||!i.puedeCasar) return 'Ya no había nada que presentar.';
+    const costo=costoRecurso('casacion'); if(S.efectivo<costo) return 'No tenías con qué pagar la casación.';
+    S.efectivo-=costo; i.gastado=(i.gastado||0)+costo; const c=cortes();
+    Object.assign(i,{fase:'casacion',estado:'curso',puedeCasar:false,dur:1,elapsed:0,admitida:null,refuerzos:0,rad:S.anio}); hist(i,'Presentaste la demanda de casación ante '+c.cas+'.');
+    log('Presentaste la demanda de <b>casación</b> ante '+esc(c.cas)+'. Costó '+fmt(costo)+'.','hito'); return 'La demanda de casación quedó presentada: primero hay que lograr que la admitan.'; }
+  /* --- el paso de un año --- */
+  const TXT={0:['El recurso quedó radicado ante ','Tu demanda llegó a '],1:['El expediente fue repartido al despacho del magistrado ','Se fijó fecha para sustentar'],2:['Se realizó la audiencia de sustentación.','Los magistrados oyeron a las partes.'],3:['El proyecto de fallo ya circula entre los magistrados.']};
+  function anual(){ if(!ACTIVO()||nino()) return; const p=P(); let i=p.ins160;
+    if(i&&i.gen!==S.gen){ p.ins160=null; i=null; }
+    if(!i){ if(p.penaMuerte&&!p.firme160){ abrir(true); log('La pena capital pasó a <b>revisión automática</b> ante '+esc(cortes().apel)+'.','hito'); } return; }
+    let fuga=false; try{ fuga=!!(p.fugado||(S.ext157&&['exilio','proceso','solicitud','negada','asilo'].includes(S.ext157.estado))); }catch(e){}
+    if(fuga){ p.ins160=null; log('Tu recurso se archivó: no se atiende a quien huyó de la justicia.','mal'); return; }
+    if(i.estado==='decidido'){ if(i.clemencia){ ejecutar(); return; } cerrarFirme('Venció el plazo para la casación: la sentencia quedó en firme.'); return; }
+    if(!i.capital&&!(p.prisionRestante>0)){ p.ins160=null; p.firme160=true; log('El recurso perdió sentido: ya cumpliste la condena.'); return; }
+    const antes=etapa(i); i.elapsed=(i.elapsed||0)+1;
+    const fee=feeDe(i); if(fee){ if(S.efectivo>=fee){ S.efectivo-=fee; i.gastado=(i.gastado||0)+fee; } else { i.abogado='oficio'; hist(i,'Sin plata para los honorarios, te quedó el defensor de oficio.'); log('No pudiste seguir pagando los honorarios: te quedó un defensor de oficio.','mal'); } }
+    if(i.fase==='casacion'&&i.admitida==null&&i.elapsed>=1){ admision(i); return; }
+    if(i.elapsed>=i.dur){ if(i.fase==='casacion') fallaCasacion(i); else fallaApelacion(i); return; }
+    const e=etapa(i); if(e>antes||e>0){ const x=pick(TXT[e]||TXT[3]); const t=e===1?x+'el magistrado '+pick(APELLIDOS)+'.':x; hist(i,t); log('<b>Tu '+(i.fase==='casacion'?'casación':'apelación')+' avanzó:</b> '+esc(t),'hito'); } }
+  /* --- pantallas --- */
+  function tracker(i){ const c=cortes(), tiene=!!i, fase=i&&i.fase;
+    const sentencia=i?(i.capital?'Pena capital':rango(i.pena)+' de prisión'):'';
+    let h='<div class="pasos160"><div class="p160 hecho"><i></i><b>Primera instancia</b><small>'+(i?esc(sentencia):'Condena')+(i&&i.motivo?' · '+esc(i.motivo):'')+'</small></div>';
+    const etp=(clave,n,corte)=>{ const E=ETAPAS[clave], act=fase===clave&&i.estado==='curso', ya=(clave==='apelacion'&&fase==='casacion')||(fase===clave&&i.estado==='decidido'), pos=act?etapa(i):-1;
+      let d='<div class="p160 '+(act?'en160':(ya?'hecho':''))+'"><i></i><b>'+n+'</b><small>'+esc(cap(corte))+(act?' · '+(i.elapsed||0)+' de '+(i.dur||1)+' año'+((i.dur||1)===1?'':'s'):(ya?' · resuelto':''))+'</small>';
+      if(act){ d+='<div class="et160">'+E.map((x,k)=>'<span class="'+(k===pos?'on':(k<pos?'ya':''))+'">'+esc(x)+'</span>').join('')+'</div><div class="b160"><i style="width:'+Math.round(clamp(((i.elapsed||0)/Math.max(1,i.dur||1))*100,6,100))+'%"></i></div>'; }
+      return d+'</div>'; };
+    h+=etp('apelacion','Apelación',c.apelCorto);
+    if(c.puedeCas) h+=etp('casacion','Casación',c.cas);
+    h+='<div class="p160"><i></i><b>Sentencia en firme</b><small>'+(i&&i.capital?'Ejecución o clemencia':'Se cumple lo que quede de la pena')+'</small></div></div>';
+    return h; }
+  function escenaInstancias160(){ const p=P(), i=INS(); if(!i){ return viejo(); } const c=cortes(), j=(function(){ try{ return jurisdiccionActual(); }catch(e){ return {jurisdiccion:'Colombia'}; } })();
+    const hist_=(i.hist||[]).slice(-5).reverse(), q=qDe(i), W=peso(i);
+    const abre=i.fase==='casacion'?'casación':'apelación', ops=[], reab=()=>{ cerrarModal(); render(); escenaInstancias160(); };
+    const cuerpo=(i.capital?'Te condenaron a <b>pena capital</b>'+(i.motivo?' por <b>'+esc(i.motivo)+'</b>':'')+'. La ejecución queda suspendida mientras corran los recursos.'
+      :'Te condenaron a <b>'+rango(i.pena)+'</b> de prisión'+(i.motivo?' por <b>'+esc(i.motivo)+'</b>':'')+'. La condena no queda en firme mientras corran los recursos: entre tanto la cumples, y lo cumplido cuenta si te la rebajan.');
+    if(i.estado==='curso'){
+      const restan=Math.max(0,(i.dur||1)-(i.elapsed||0));
+      ops.push({t:'Impulsar el proceso · '+fmt(costoImpulso()),cat:'riesgo',d:'Presionar al despacho para que no se duerma el expediente. Puede ahorrar un año.',dis:restan<=1?'Ya se resuelve el año que viene':(i.impulsado===S.anio?'Ya lo intentaste este año':(S.efectivo<costoImpulso()?'No te alcanza':sinMov())),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=costoImpulso(); i.gastado=(i.gastado||0)+costoImpulso(); i.impulsado=S.anio;
+        if(chance(.55+q*.08)){ i.elapsed=Math.min((i.dur||1)-1,(i.elapsed||0)+1); hist(i,'Tu abogado movió el expediente: se adelantó un año.'); log('Tu abogado movió el expediente: el fallo se adelantó un año.','bien'); } else { hist(i,'El despacho no se movió.'); log('Tu abogado insistió, pero el despacho no se movió.','mal'); } reab(); }});
+      ops.push({t:'Reforzar la defensa · '+fmt(costoRefuerzo()),cat:'riesgo',d:'Un peritaje y un memorial nuevo. Sube las posibilidades del fallo ('+(i.refuerzos||0)+' de 2).',dis:(i.refuerzos||0)>=2?'Ya reforzaste dos veces':(S.efectivo<costoRefuerzo()?'No te alcanza':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=costoRefuerzo(); i.gastado=(i.gastado||0)+costoRefuerzo(); i.refuerzos=(i.refuerzos||0)+1; hist(i,'Se presentó un peritaje y un memorial nuevo.'); log('Tu defensa presentó un peritaje y un memorial nuevo.','bien'); reab(); }});
+      ops.push({t:'Cambiar de abogado',cat:'riesgo',d:'Tu abogado actual: '+(ABOG[i.abogado]||ABOG.oficio).n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escenaAbogado160(); }});
+      ops.push({t:'Desistir del recurso',cat:'riesgo',d:i.capital?'Aceptas la sentencia: se ejecutará.':'Aceptas la sentencia y se pierde lo gastado.',cerrar:false,run:()=>{ cerrarFirme('Desististe del recurso: la sentencia quedó en firme.'); cerrarModal(); render(); }});
+    } else if(i.puedeCasar){
+      ops.push({t:'Presentar la casación · '+fmt(costoRecurso('casacion')),cat:'riesgo',d:'Demanda ante '+c.cas+'. Primero hay que lograr que la admitan.',dis:S.efectivo<costoRecurso('casacion')?'No te alcanza':null,cerrar:false,run:()=>{ const m=presentarCasacion160(); log(m); cerrarModal(); render(); escenaInstancias160(); }});
+      ops.push({t:i.capital?'Aceptar la sentencia: se ejecutará':'Aceptar la sentencia',cat:'riesgo',cerrar:false,run:()=>{ cerrarFirme('Aceptaste la sentencia.'); cerrarModal(); render(); }});
+    } else if(i.clemencia){
+      ops.push({t:'Pedir clemencia · '+fmt(costoClemencia()),cat:'riesgo',d:'Una carta al ejecutivo, con influencias. Si falla, la sentencia se cumple.',cerrar:false,run:()=>{ const m=pedirClemencia160(); log(m); cerrarModal(); render(); }});
+      ops.push({t:'Aceptar lo que viene',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); ejecutar(); }});
+    }
+    if(!i.capital) ops.push({t:'Ver tu condena',cat:'riesgo',d:'La cárcel y lo que puedes hacer adentro.',cerrar:false,run:()=>{ cerrarModal(); viejo(); }});
+    ops.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Tribunal',titulo:'Tus recursos',ancho:true,cerrable:true,clase:'ins160',cuerpo,
+      html:'<div class="k"><div><b>'+esc(cap(abre))+'</b><span>instancia actual</span></div><div><b>'+fmt(i.gastado||0)+'</b><span>gastado en recursos</span></div><div><b>'+((ABOG[i.abogado]||ABOG.oficio).n.length>26?(ABOG[i.abogado]||ABOG.oficio).n.slice(0,24)+'…':(ABOG[i.abogado]||ABOG.oficio).n)+'</b><span>tu abogado'+(feeDe(i)?' · '+fmt(feeDe(i))+' al año':'')+'</span></div></div>'
+        +'<h4>El camino de tu proceso</h4>'+tracker(i)+(hist_.length?'<h4>El expediente</h4><div class="bit160">'+hist_.map(e=>'<div><b>'+e.anio+'</b> '+esc(e.txt)+'</div>').join('')+'</div>':''),
+      opciones:ops}); }
+  function escenaAbogado160(){ const i=INS(); if(!i){ return; } const fo=qFO();
+    const ops=['oficio','reconocido','estrella'].map(id=>{ const a=ABOG[id], fee=a.q>fo?a.fee():0, actual=i.abogado===id;
+      return {t:a.n+(actual?' (el actual)':''),cat:'riesgo',d:a.d+' '+(fee?'Honorarios: '+fmt(fee)+' al año, el primero por adelantado.':(a.q&&fo>=a.q?'Lo cubre el abogado de tu family office.':'Sin costo.')),
+        dis:actual?'Ya es tu abogado':(fee&&S.efectivo<fee?'No te alcanza para el primer año':null),cerrar:false,run:()=>{ if(fee){ S.efectivo-=fee; i.gastado=(i.gastado||0)+fee; } i.abogado=id; hist(i,'Cambiaste de abogado: '+a.n.toLowerCase()+'.'); log('Ahora te defiende '+a.n.toLowerCase()+'.'); cerrarModal(); render(); escenaInstancias160(); }}; });
+    ops.push({t:'Volver',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); escenaInstancias160(); }});
+    escena({rubro:'Tu defensa',titulo:'Elegir abogado',ancho:true,cuerpo:'En los recursos pesa más la técnica que el relato: un abogado de alto nivel sube bastante las posibilidades de que el tribunal te dé la razón.'+(fo?' <b>Tu family office tiene abogado propio</b>.':''),opciones:ops,cerrable:true}); }
+  let VIEJO=null; const viejo=()=>{ if(typeof VIEJO==='function'){ const f=VIEJO; return f.apply(window,[]); } };
+  /* --- enganches --- */
+  function wrapProceso(){ const old=window.escenaProcesoPenal; if(typeof old!=='function'||old.__v160) return; VIEJO=old;
+    window.escenaProcesoPenal=function(){ try{ if(ACTIVO()&&!nino()){ const p=P(); const i0=INS(); if(i0&&!i0.capital&&p.caso&&!(p.prisionRestante>0)) p.ins160=null; if(INS()) return escenaInstancias160(); if(p.penaMuerte&&!p.firme160){ abrir(true); return escenaInstancias160(); } } }catch(e){ console.error(e); } return old.apply(this,arguments); };
+    window.escenaProcesoPenal.__v160=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaProcesoPenal[k]=true; }); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA160_PASO) return; window.__SA160_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapResumen(){ const old=window.resumenLegalActual; if(typeof old!=='function'||window.__SA160_RES) return; window.__SA160_RES=true;
+    window.resumenLegalActual=function(){ let t=old.apply(this,arguments); try{ const i=ACTIVO()&&INS(); if(i){ t+=(t?' · ':'')+(i.estado==='curso'?(i.fase==='casacion'?'casación':'apelación')+' en curso (etapa '+(etapa(i)+1)+' de 4)':(i.puedeCasar?'puedes pedir la casación':'clemencia pendiente')); } }catch(e){} return t; }; }
+  function init160(){ wrapProceso(); wrapPaso(); wrapResumen(); Object.assign(window,{iniciarApelacion160,presentarCasacion160,pedirClemencia160,escenaInstancias160,escenaAbogado160,anualInstancias160:anual,cortes160:cortes,insPenal160:INS,costoRecurso160:costoRecurso,pesoRecurso160:peso,etapaRecurso160:etapa}); }
+  setTimeout(init160,40); setTimeout(init160,220); setTimeout(init160,650); setTimeout(init160,950);
+  window.__SA160={version:V160};
 })();
 </script>
 
