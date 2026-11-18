@@ -1258,7 +1258,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v162</div>
+<div class="version-badge" id="versionBadge">v163</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24207,7 +24207,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     s.fam.forEach(x=>ops.push({t:esc(x.n),cat:'legado',d:'Un nombre de la casa: '+esc(x.por)+'.',run:()=>{ ponerNombre(h,x.n,x.por); sigue(); }}));
     s.reg.forEach(n=>ops.push({t:esc(n),cat:'familia',d:'Un nombre común en '+esc(S.p.ciudad)+'.',run:()=>{ ponerNombre(h,n); sigue(); }}));
     const html='<div class="nombre118"><input id="nombre118" maxlength="28" autocomplete="off" placeholder="O escribe el nombre que quieras"><button class="btn" id="nombre118ok" type="button">Ponerle este nombre</button><div class="error" id="nombre118err"></div></div>';
-    const caja=escena({rubro:'Registro civil',titulo:'¿Cómo se va a llamar?',cuerpo:'Nació '+art+(otro&&otro.nombre?' de '+esc(primer(S.p.nombre))+' y '+esc(primer(otro.nombre)):'')+'. Antes del apellido, el nombre de '+quien+'.',html,opciones:ops});
+    const caja=escena({rubro:'Registro civil',titulo:'¿Cómo se va a llamar?',cuerpo:'Nació '+art+(otro&&otro.nombre?' de '+esc(primer(S.p.nombre))+' y '+esc(primer(otro.nombre)):'')+'. Antes del apellido, el nombre '+(h.sexo==='m'?'de la niña':'del niño')+'.',html,opciones:ops});
     const inp=caja&&caja.querySelector('#nombre118'), ok=caja&&caja.querySelector('#nombre118ok'), err=caja&&caja.querySelector('#nombre118err');
     if(!inp||!ok) return;
     const enviar=()=>{ const n=cap(inp.value.trim().replace(/\s+/g,' '));
@@ -24674,7 +24674,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const V120='v120';
   const IMGS=['nacimiento_hijo','nacimiento_nieto','boda_intima','boda_normal','boda_elite','funeral_sencillo','funeral_normal','funeral_pompa','funeral_beneficencia','juicio','embargo','sucesion',
     /* v122 */ 'mayoria_edad','graduacion','luna_miel','divorcio','viudez','duelo_hijo','hospital','mudanza','infidelidad','fundacion_empresa','bolsa','quiebra','crisis','banco_apertura','corrida','intervencion','piramide','eleccion','carcel','libertad','escandalo','portada',
-    /* v158 */ 'embajada_ofrecida','ministerio_ofrecido','licitacion_ganada','licitacion_perdida','desfalco_empresa_publica','extradicion','exilio','captura','prision_domiciliaria','carcel_maxima_seguridad','prision_ordinaria','pabellon_especial'];
+    /* v158 */ 'embajada_ofrecida','ministerio_ofrecido','licitacion_ganada','licitacion_perdida','desfalco_empresa_publica','extradicion','exilio','captura','prision_domiciliaria','carcel_maxima_seguridad','prision_ordinaria','pabellon_especial',
+    /* v163 */ 'bautizo'];
   const ok={};
   function precargar(){ if(window.__SA120_PRE) return; window.__SA120_PRE=true;
     IMGS.forEach(n=>{ const im=new Image(); im.onload=()=>{ ok[n]=true; }; im.onerror=()=>{ ok[n]=false; }; im.src='img/eventos/'+n+'.jpg'; }); }
@@ -24682,7 +24683,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     funeral_sencillo:'Un entierro sencillo',funeral_normal:'Velación y misa',funeral_pompa:'Honras fúnebres',funeral_beneficencia:'Entierro de beneficencia',juicio:'El juzgado',embargo:'El embargo',sucesion:'La sucesión',
     mayoria_edad:'La mayoría de edad',graduacion:'El grado',luna_miel:'La luna de miel',divorcio:'El divorcio',viudez:'El luto',duelo_hijo:'Un hijo que se va antes',hospital:'En la clínica',mudanza:'La mudanza',infidelidad:'La infidelidad',
     fundacion_empresa:'La fundación de la compañía',bolsa:'La Bolsa de Bogotá',quiebra:'La quiebra',crisis:'La crisis',banco_apertura:'Un banco con el apellido',corrida:'La corrida bancaria',intervencion:'La intervención',piramide:'La pirámide',
-    eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada',
+    bautizo:'El bautizo',eleccion:'La elección',carcel:'La cárcel',libertad:'La libertad',escandalo:'El escándalo',portada:'La portada',
     embajada_ofrecida:'Te ofrecieron una embajada',ministerio_ofrecido:'Te ofrecieron un ministerio',licitacion_ganada:'Ganaste una licitación',licitacion_perdida:'Perdiste una licitación',desfalco_empresa_publica:'Escándalo por desfalco de empresa pública',extradicion:'Extradición',exilio:'Exilio',captura:'La captura',prision_domiciliaria:'Prisión domiciliaria',carcel_maxima_seguridad:'Cárcel de máxima seguridad',prision_ordinaria:'Prisión ordinaria',pabellon_especial:'Pabellón especial de pago'};
   const figura=(k,pie)=>'<figure class="momento120" data-momento="'+k+'"><img src="img/eventos/'+k+'.jpg" alt="'+esc(PIE[k]||'')+'"><figcaption>'+esc(pie||PIE[k]||'')+'</figcaption></figure>';
   const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
@@ -24693,7 +24694,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function detectar(o){
     const ti=plano(o.titulo), cu=plano(o.cuerpo), ru=plano(o.rubro);
     if(o.momento120) return o.momento120;   /* v158: las pantallas de poder y justicia dicen cuál lámina llevan */
-    if(ti==='¿Cómo se va a llamar?') return 'nacimiento_hijo';
+    if(ti==='¿Cómo se va a llamar?') return ok.bautizo?'bautizo':'nacimiento_hijo';   /* v163: ponerle el nombre es el bautizo */
     /* v122 */
     const raw=String(o.cuerpo||'');
     if(ti==='Cumpliste 18') return 'mayoria_edad';
@@ -30172,6 +30173,18 @@ install();setTimeout(install,1200);
   function init162(){ wrapAcciones(); wrapLog(); wrapEscena(); wrapSortear(); wrapProcesar(); Object.assign(window,{bloqueaEvento162:bloquea,MODERNO_162:MODERNO,epoca162,decisionExiste162:existe,DESDE_162:DESDE,LEXICO_162:R}); }
   setTimeout(init162,40); setTimeout(init162,220); setTimeout(init162,650); setTimeout(init162,950); setTimeout(init162,1700);
   window.__SA162={version:V162};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v163 · EL BAUTIZO TIENE SU LÁMINA
+   La pantalla "¿Cómo se va a llamar?" —al nacer un hijo, al adoptarlo o al
+   recibirlo en la casa— lleva la ilustración de un bautizo católico.
+   Si la imagen (img/eventos/bautizo.jpg) no está, se usa la del nacimiento.
+   ========================================================================== */
+(function(){
+  window.__SA163={version:'v163'};
 })();
 </script>
 
