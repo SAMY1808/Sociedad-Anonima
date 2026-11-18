@@ -1195,10 +1195,31 @@ svg.foto116{display:block;background:#1d2a23}
 .pol155 .b155{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px;min-width:90px}
 .pol155 .b155 i{display:block;height:100%;background:var(--laton)}
 </style>
+<style id="estilos-v156">
+.pub156 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.pub156 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.pub156 .k b{display:block;font-size:15px;font-family:var(--display)}
+.pub156 .k span{font-size:12px;color:var(--humo2)}
+.pub156 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.pub156 table.libro td{padding:5px 4px;vertical-align:top}
+.pub156 small{color:var(--humo2)}
+.pub156 .b156{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px;min-width:80px}
+.pub156 .b156 i{display:block;height:100%;background:var(--laton)}
+.pub156 .b156.mal i{background:#c9604f}
+</style>
+<style id="estilos-v157">
+.car157 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.car157 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.car157 .k b{display:block;font-size:15px;font-family:var(--display)}
+.car157 .k span{font-size:12px;color:var(--humo2)}
+.car157 h4{margin:12px 0 4px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.car157 table.libro td{padding:5px 4px;vertical-align:top}
+.car157 small{color:var(--humo2)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v155</div>
+<div class="version-badge" id="versionBadge">v157</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -5786,6 +5807,7 @@ function iniciar(cfg,legado){
     bancoFamilia:legadoValido&&legado.bancoFamilia?legado.bancoFamilia:null,
     familyOffice:legadoValido&&legado.familyOffice?legado.familyOffice:null,
     pol155:legadoValido&&legado.pol155?legado.pol155:null,
+    pub156:legadoValido&&legado.pub156?legado.pub156:null,
     residenciaInternacional:legadoValido&&legado.residenciaInternacional?legado.residenciaInternacional:null,
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
@@ -6879,7 +6901,7 @@ function pasarAnio(){
 
   /* ingresos personales: una condena suspende el trabajo activo */
   let ingreso=0;
-  const penalNoLaboral=!!(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte));
+  const penalNoLaboral=!!(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte))&&!(window.trabajaPreso157&&window.trabajaPreso157());
   if(!penalNoLaboral&&c.ruta==='profesional'&&c.profesion){
     const cr=carreraProfesionalDe(c.profesion);
     const nv=cr&&cr.niveles[clamp(c.nivelProf||0,0,cr.niveles.length-1)];
@@ -6916,7 +6938,7 @@ function pasarAnio(){
   S.sillas.forEach(s=>{ const h=s.honorarios*(1+m.inflacion*.5); ingreso+=h; res.push(['Honorarios junta de '+s.nombre,h,'pos']); });
 
   /* portafolio */
-  S.portafolio.forEach(pf=>{ if(pf.bolsa152) return;
+  S.portafolio.forEach(pf=>{ if(pf.bolsa152||pf.pub156) return;
     const r=m.ciclo*1.3+rnd(-.16,.22);
     const antes=pf.valor; pf.valor=Math.max(0,pf.valor*(1+r));
     res.push(['Portafolio: '+pf.nombre,pf.valor-antes,pf.valor>=antes?'pos':'neg']);
@@ -7857,6 +7879,7 @@ function heredar(h,frac,vivo,pleito){
     fisco:S.fisco, fideicomiso:S.fideicomiso,
     familyOffice:S.familyOffice?JSON.parse(JSON.stringify(S.familyOffice)):null,
     pol155:S.pol155?JSON.parse(JSON.stringify(S.pol155)):null,
+    pub156:S.pub156?JSON.parse(JSON.stringify(S.pub156)):null,
     fundacion:S.fundacion?JSON.parse(JSON.stringify(S.fundacion)):null,
     mausoleo:S.mausoleo, gobiernoFamilia:S.gobiernoFamilia, vientos:S.vientos, vientosHasta:S.vientosHasta, leyes:S.leyes,
     carreraPublica:{politica:S.carrera.politica,diplomacia:S.carrera.diplomacia,judicatura:S.carrera.judicatura},
@@ -8134,7 +8157,7 @@ function baraja(acciones,conGrupos){
     const sinMov=(a.mov||0)>S.mov;
     let dis=a.dis||(sinMov?'Te quedan '+S.mov+' movidas y esta cuesta '+(a.mov||1):null);
     const cat=a.puerta?'legado':catDe(a.t);
-    if(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat)) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
+    if(window.bloqueaPreso157?window.bloqueaPreso157(cat):(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat))) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
     const clave=/Fundar|a bolsa|Vender la compañía|Ronda|Retirarte|Asumir|Adquirir/.test(a.t);
     const riesgo=/palancas|Recortar/.test(a.t);
     let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov===0?0:(a.mov||1));k++) fichas+='<i></i>';
@@ -13409,7 +13432,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       const sinMov=(a.mov||0)>S.mov;
       let dis=a.dis||(sinMov?'Te quedan '+S.mov+' movidas y esta cuesta '+(a.mov||1):null);
       const cat=a.puerta?'legado':catDe(a.t);
-      if(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat)) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
+      if(window.bloqueaPreso157?window.bloqueaPreso157(cat):(S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte)&&!['familia','salud','legado','riesgo'].includes(cat))) dis=dis||'Esta decisión queda suspendida por tu situación judicial.';
       const clave=/Fundar|a bolsa|Vender la compañía|Ronda|Retirarte|Asumir|Adquirir/.test(a.t);
       const riesgo=/palancas|Recortar/.test(a.t);
       let fichas=''; if(!a.puerta) for(let k=0;k<(a.mov===0?0:(a.mov||1));k++) fichas+='<i></i>';
@@ -28860,9 +28883,450 @@ install();setTimeout(install,1200);
     if(!g.miembros.some(m=>m[1]==='La política')){ g.miembros.push(['Influencia','La política']); g.d='Aceitar a un funcionario, mover palancas, empujar una ley en el Congreso y la política: campañas, favores y cargos.'; } }
   function init155(){ wrapEmpresa(); wrapPaso(); wrapElecc(); wrapAcciones(); wrapCat(); grupo();
     Object.assign(window,{escenaPolitica155,escenaCampana155,escenaApoyo155,escenaCandidatura155,escenaListas155,escenaUrnas155,escenaFavores155,escenaEstado155,escenaCongreso155,escenaLey155,politica155:P,partidosVivos155:vivos,PARTIDOS_155:PARTIDOS,PUESTOS_155:PUESTOS,iniciarCampana155:iniciarCampana,votar155:votar,proclamar155:proclamar,
-      ponerCargo155:ponerCargo,personasPol155:personas,anualPol155:anual,pedirFavor155:pedir155,bonoSector155:bonoSector,aporte155:aporte,escalaPol155:escala,generarCampana155:generar}); }
+      ponerCargo155:ponerCargo,soltarCargo155:soltarCargo,personasPol155:personas,anualPol155:anual,pedirFavor155:pedir155,bonoSector155:bonoSector,aporte155:aporte,escalaPol155:escala,generarCampana155:generar}); }
   setTimeout(init155,40); setTimeout(init155,220); setTimeout(init155,650); setTimeout(init155,950);
   window.__SA155={version:V155};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v156 · LAS EMPRESAS PÚBLICAS
+   El Estado tiene empresas, y se puede tratar con ellas:
+   - Un catálogo de cada época: salinas y ferrocarriles, Ferrocarriles
+     Nacionales, la Caja Agraria, el Banco Central Hipotecario, Telecom,
+     Ecopetrol, Colpuertos, las Empresas Públicas de Medellín, ISA, el IDEMA,
+     Inravisión, el ISS, Carbocol, Isagen, el Banco Agrario... con su salud,
+     su eficiencia, su empleo, sus controles y cuánto se roba en ellas.
+   - Venderles: contratos de tres años por licitación, a dedo con un amigo
+     adentro o pagando comisión (delito).
+   - Ayudarlas a crecer: gestionarles presupuesto, prestarles plata,
+     mandarles un equipo gerencial, hacer una obra conjunta.
+   - Emplear: recomendar gente (la cuota burocrática), que paga en crédito
+     político y cuesta en eficiencia; o pedir la gerencia para la familia.
+   - Comprarles acciones cuando el Estado vende (privatizaciones y OPA).
+   - Desfalcarlas: sobrefacturar, nómina fantasma, comisiones, desvío de
+     caja o reclamaciones fraudulentas. Pagan cada año, y cuando las
+     descubren el costo es enorme: devolver varias veces lo robado, multas,
+     proceso penal, extinción de dominio e inhabilidad para contratar con el
+     Estado.
+   - Las empresas se enferman, hacen huelga, pasan a manos privadas o se
+     liquidan, y se llevan por delante lo que les prestaste.
+   ========================================================================== */
+(function(){
+  const V156='v156';
+  const E=(id,n,d,h,tipo,ciudad,compra,ing,empleo,extra)=>Object.assign({id,n,d,h,tipo,ciudad,compra,ing,empleo},extra||{});
+  const EMP=[
+    E('salinas','Salinas de Zipaquirá',1800,1990,'nac','Zipaquirá',['logistica','construccion'],140,1.2,{fin:'liquidada'}),
+    E('correos','Correos y telégrafos',1850,2005,'nac','Bogotá',['logistica','tech'],260,6,{fin:'liquidada'}),
+    E('etb','Empresa de Teléfonos de Bogotá',1884,null,'mun','Bogotá',['tech','construccion'],1500,6),
+    E('ferroant','Ferrocarril de Antioquia',1874,1961,'dep','Medellín',['construccion','logistica','mineria'],220,3,{fin:'liquidada'}),
+    E('ferro','Ferrocarriles Nacionales',1931,1991,'nac','Bogotá',['construccion','logistica'],1800,14,{fin:'liquidada'}),
+    E('caja','Caja de Crédito Agrario',1931,1998,'nac','Bogotá',['financiero','tech','agro'],2500,9,{fin:'liquidada'}),
+    E('bch','Banco Central Hipotecario',1932,1999,'nac','Bogotá',['construccion','financiero'],2000,5,{fin:'privatizada'}),
+    E('iss','Instituto de Seguros Sociales',1946,2012,'nac','Bogotá',['salud','tech','construccion'],5000,40,{fin:'liquidada'}),
+    E('telecom','Telecom',1947,2003,'nac','Bogotá',['tech','construccion'],4000,18,{fin:'liquidada'}),
+    E('ecopetrol','Ecopetrol',1951,null,'nac','Bogotá',['energia','mineria','construccion','logistica','tech'],20000,9,{priv:{anio:2007,pct:.1}}),
+    E('epm','Empresas Públicas de Medellín',1955,null,'mun','Medellín',['energia','construccion','tech'],8000,8),
+    E('acueducto','Acueducto de Bogotá',1955,null,'mun','Bogotá',['construccion','tech'],2500,4),
+    E('colpuertos','Puertos de Colombia (Colpuertos)',1959,1991,'nac','Buenaventura',['logistica','construccion'],1200,8,{fin:'liquidada'}),
+    E('satena','Satena',1962,null,'nac','Bogotá',['logistica','tech'],400,1),
+    E('inravision','Inravisión',1963,2004,'nac','Bogotá',['medios','tech'],600,2,{fin:'liquidada'}),
+    E('isa','Interconexión Eléctrica (ISA)',1967,null,'nac','Medellín',['energia','construccion','tech'],6000,3,{priv:{anio:1997,pct:.12}}),
+    E('idema','Instituto de Mercadeo Agropecuario',1968,1997,'nac','Bogotá',['agro','alimentos','logistica'],1500,6,{fin:'liquidada'}),
+    E('carbocol','Carbones de Colombia (Carbocol)',1976,2003,'nac','Bogotá',['mineria','logistica'],1200,3,{fin:'privatizada'}),
+    E('findeter','Findeter',1989,null,'nac','Bogotá',['construccion','financiero'],800,1),
+    E('isagen','Isagen',1995,null,'nac','Medellín',['energia','construccion'],2500,1,{priv:{anio:2016,pct:.57}}),
+    E('banagrario','Banco Agrario',1999,null,'nac','Bogotá',['financiero','tech','agro'],2500,6),
+    E('rtvc','RTVC',2004,null,'nac','Bogotá',['medios','tech'],500,1)];
+  const MODOS=[
+    {id:'sobrefactura',n:'Sobrefacturar un contrato tuyo',d:'Tu compañía le cobra de más. Hay contrato de por medio, así que cuesta menos esconderlo.',base:.2,det:.9,req:(p,s,x)=>p.contratos.some(c=>c.pub===x.id&&c.hasta>=S.anio),tipo:'peculado por sobrefacturación',sev:3},
+    {id:'nomina',n:'Nómina fantasma',d:'Sueldos de gente que nunca va, a nombre de tus recomendados. Hay que tener gente colocada.',base:.12,det:.8,req:(p,s)=>s.cuota>0,tipo:'peculado por nómina fantasma',sev:3},
+    {id:'comisiones',n:'Comisiones por contratos de otros',d:'Cada contrato grande trae un porcentaje para ti. Pide tener a alguien de la familia en la gerencia.',base:.3,det:1,req:(p,s,x,ins)=>!!ins,tipo:'concusión y cohecho',sev:4},
+    {id:'caja',n:'Desviar plata de la caja',d:'Cuentas puente, fiducias y empresas fachada. Lo más grande, y lo más fácil de rastrear. Requiere control de la gerencia.',base:.6,det:1.3,req:(p,s,x,ins)=>!!ins,tipo:'peculado por apropiación',sev:5},
+    {id:'reclamos',n:'Reclamaciones fraudulentas',d:'Pensiones y deudas que nunca existieron, pagadas con abogados amigos. Solo en las empresas que se están liquidando.',base:.5,det:1.1,req:(p,s,x)=>!!(x.h&&x.h-S.anio<=3),tipo:'fraude procesal y peculado',sev:4}];
+  const R1=x=>Math.round(x*10)/10;
+  /* --- utilidades --- */
+  const ACTIVO=()=>!!(S&&S.anio>=1800&&S.gobierno);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const escala=()=>{ try{ if(typeof window.escalaPol155==='function') return window.escalaPol155(); }catch(e){} return clamp((typeof patrimonio==='function'?patrimonio():500)*.06,100,6000); };
+  const eraF=a=>clamp(.12+(a-1880)/90,.1,3);
+  const eraGraft=()=>S.anio<1900?35:S.anio<1960?40:S.anio<2011?50:42;
+  const eraCtrl=()=>S.anio<1923?12:S.anio<1991?26:S.anio<2011?46:60;
+  const vivas=()=>EMP.filter(x=>S.anio>=x.d&&!(x.h&&S.anio>x.h));
+  function P(){ if(!S) return null; let p=S.pub156; if(!p||typeof p!=='object') p=S.pub156={};
+    if(!p.emp||typeof p.emp!=='object') p.emp={}; ['contratos','robos','bonos'].forEach(k=>{ if(!Array.isArray(p[k])) p[k]=[]; }); if(!isFinite(p.sucia)) p.sucia=0;
+    if(p.gen!==S.gen){ p.gen=S.gen; p.contratos=[]; p.robos=[]; p.bonos=[]; p.sucia=0; p.inhab=null; p.invest=null; }
+    return p; }
+  function est(x){ const p=P(); let s=p.emp[x.id];
+    if(!s) s=p.emp[x.id]={salud:ri(52,76),efic:ri(35,65),graft:clamp(eraGraft()+ri(-12,12),5,90),ctrl:clamp(eraCtrl()+ri(-8,8),5,95),ing:Math.round(x.ing*eraF(S.anio)*rnd(.85,1.15)),emp:Math.round(x.empleo*1000*rnd(.85,1.15)*Math.min(1,eraF(S.anio)+.2)),rel:0,cuota:0,priv:false,liq:false};
+    return s; }
+  const ins=x=>{ try{ return typeof window.politica155==='function'?window.politica155().cargos.find(c=>c.puesto===x.id):null; }catch(e){ return null; } };
+  const tam=s=>s.ing>20000?'gigante':s.ing>5000?'grande':s.ing>1500?'mediana':'pequeña';
+  const valorEmp=(x,s)=>s.ing*(.35+s.salud/100*.6);
+  const movida=()=>{ if(S._mov156===S.anio) return true; if(S.mov<1) return false; S.mov--; S._mov156=S.anio; return true; };
+  const sinMov=()=>(S._mov156!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const inhab=()=>{ const p=P(); return p.inhab&&p.inhab>=S.anio?p.inhab:0; };
+  const barra=(v,mal)=>'<div class="b156'+(mal?' mal':'')+'"><i style="width:'+clamp(v,0,100)+'%"></i></div>';
+  const pol=()=>{ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } };
+  /* --- el tablero --- */
+  function escenaPublicas156(){
+    if(!ACTIVO()) return; const p=P(), L=vivas(), reab=()=>{ cerrarModal(); render(); escenaPublicas156(); };
+    const fila=x=>{ const s=est(x); return '<tr><td><b>'+esc(x.n)+'</b> <small>'+(x.tipo==='mun'?'municipal':x.tipo==='dep'?'departamental':'nacional')+' · '+tam(s)+(x.h&&x.h-S.anio<=3?' · <span class="mal">se acaba en '+x.h+'</span>':'')+'</small>'+barra(s.salud,s.salud<35)+'</td><td style="text-align:right"><small>'+Math.round(s.emp/100)/10+' mil empleados<br>'+(s.rel>10?'te conocen':'')+(p.contratos.some(c=>c.pub===x.id)?' · proveedor':'')+'</small></td></tr>'; };
+    const ops=L.map(x=>({t:x.n,cat:'riesgo',d:'Salud '+Math.round(est(x).salud)+'/100, controles '+Math.round(est(x).ctrl)+'/100.',cerrar:false,run:()=>{ cerrarModal(); escenaPub156(x.id); }}));
+    escena({rubro:'El Estado empresario',titulo:'Las empresas públicas',ancho:true,cerrable:true,clase:'pub156',
+      cuerpo:'Lo que el Estado maneja con gerente, junta y sindicato. Se puede venderles, ayudarlas a crecer, colocarles gente, comprarles acciones cuando venden, y también sacarles plata, con un costo enorme si te descubren.'+(inhab()?' <b>Estás inhabilitado para contratar con el Estado hasta '+inhab()+'.</b>':''),
+      html:'<div class="k"><div><b>'+L.length+'</b><span>empresas del Estado</span></div><div><b>'+p.contratos.filter(c=>c.hasta>=S.anio).length+'</b><span>contratos tuyos</span></div><div><b>'+(p.robos.filter(r=>!r.fin).length?fmt(p.robos.filter(r=>!r.fin).reduce((s,r)=>s+r.anual,0)):'—')+'</b><span>entra al año por fuera</span></div></div><table class="libro">'+L.map(fila).join('')+'</table>',opciones:ops}); }
+  function escenaPub156(id){ const x=EMP.find(z=>z.id===id); if(!x) return; const s=est(x), p=P(), insider=ins(x);
+    const mios=p.contratos.filter(c=>c.pub===id&&c.hasta>=S.anio), mq=S.portafolio&&S.portafolio.find(q=>q&&q.pub156&&q.pub156.id===id);
+    const fx=(txt,v,mal)=>'<div><b>'+txt+'</b><span>'+v+'</span></div>';
+    const html='<div class="k">'+fx(Math.round(s.salud)+'/100','salud financiera')+fx(Math.round(s.efic)+'/100','eficiencia')+fx(Math.round(s.emp/100)/10+' mil','empleados')+fx(Math.round(s.ctrl)+'/100','controles y auditoría')+fx(Math.round(s.rel)+'/100','qué tan bien te conocen')+'</div>'
+      +'<div class="apunte">'+(insider?'<b>'+esc(insider.nombre)+'</b>, de tu familia, es '+esc(insider.pn.toLowerCase())+'. ':'')+(mios.length?'Le vendes con '+mios.length+' contrato'+(mios.length>1?'s':'')+'. ':'')+(mq?'Tienes '+R1(mq.pub156.pct*100)+'% de las acciones. ':'')+(s.cuota?'Tienes '+s.cuota.toLocaleString('es-CO')+' recomendados adentro. ':'')+'</div>';
+    const ops=[];
+    const prov=companias().filter(e=>x.compra.includes(e.sector));
+    ops.push({t:'Venderle',cat:'compania',d:prov.length?'Contratos de tres años para '+prov.map(e=>e.nombre).slice(0,2).join(' y ')+(prov.length>2?'…':'')+'.':'Compra a '+x.compra.slice(0,3).join(', ')+'. No tienes compañías de esos sectores.',dis:inhab()?'Inhabilitado hasta '+inhab():!prov.length?'No tienes una compañía que le sirva':null,cerrar:false,run:()=>{ cerrarModal(); escenaVender156(x); }});
+    ops.push({t:'Ayudarla a crecer',cat:'capital',d:'Presupuesto, plata prestada, un equipo gerencial o una obra conjunta.',cerrar:false,run:()=>{ cerrarModal(); escenaCrecer156(x); }});
+    ops.push({t:'Colocar gente',cat:'familia',d:'Recomendados (la cuota política) o pedir la gerencia para la familia.',cerrar:false,run:()=>{ cerrarModal(); escenaEmplear156(x); }});
+    if((x.priv&&S.anio>=x.priv.anio)||mq) ops.push({t:mq?'Tus acciones':'Comprarle acciones al Estado',cat:'mercado',d:mq?'Valen '+fmt(mq.valor)+'.':'El Estado vendió parte de la empresa.',cerrar:false,run:()=>{ cerrarModal(); escenaAcciones156(x); }});
+    ops.push({t:'Sacarle plata',cat:'riesgo',d:'Peculado, comisiones, nómina fantasma. Paga cada año; si te descubren, cuesta muchas veces lo robado.',cerrar:false,run:()=>{ cerrarModal(); escenaDesfalco156(x); }});
+    escena({rubro:x.tipo==='mun'?'Empresa municipal':x.tipo==='dep'?'Empresa departamental':'Empresa del Estado',titulo:x.n,ancho:true,cerrable:true,clase:'pub156',cuerpo:esc(x.ciudad)+'. '+(x.h?'Funciona hasta '+x.h+'. ':'')+(s.salud<30?'<b>Está quebrada en la práctica.</b> ':s.salud<50?'Anda mal de caja. ':'')+(s.graft>65?'Todo el mundo sabe que se pierde plata adentro. ':'')+'El gerente cambia con cada gobierno.',html,opciones:ops}); }
+  /* --- venderle --- */
+  function escenaVender156(x){ const s=est(x), p=P(), g=S.leyes&&S.leyes.contratacion>=S.anio?.12:0, prov=companias().filter(e=>x.compra.includes(e.sector));
+    const reab=()=>{ cerrarModal(); render(); escenaPub156(x.id); }, ops=[];
+    prov.forEach(e=>{ const monto=Math.round(e.ingresos*rnd(.07,.14)), c1=Math.round(monto*.02), c2=Math.round(monto*.04), c3=Math.round(monto*.08), tiene=p.contratos.some(c=>c.pub===x.id&&c.emp===e.nombre&&c.hasta>=S.anio);
+      const pr=clamp(.3+s.rel/220+s.efic/450+g-(S.gobierno.apoyado?0:.04),.1,.8);
+      const firmar=(irregular,costo,delito,sev)=>()=>{ if(!movida()) return; if(e.caja<costo&&S.efectivo<costo){ log('No alcanzó para los costos de la licitación.','mal'); return; } if(e.caja>=costo) e.caja-=costo; else S.efectivo-=costo;
+        if(!irregular&&!chance(pr)){ log('<b>'+esc(e.nombre)+'</b> perdió la licitación de '+esc(x.n)+'. Ganó otro con mejor palanca.','mal'); s.rel=clamp(s.rel+2,0,100); return; }
+        p.contratos.push({pub:x.id,emp:e.nombre,desde:S.anio,hasta:S.anio+3,monto,irregular:!!irregular}); s.rel=clamp(s.rel+(irregular?3:6),0,100);
+        if(irregular){ registrarDelito(delito,sev,'contrato con '+x.n+' adjudicado sin licitación'); s.graft=clamp(s.graft+3,0,100); if(chance(.18)){ try{ abrirEscandalo129('politico','El contrato de '+e.nombre+' con '+x.n,2); }catch(z){} } }
+        log('<b>'+esc(e.nombre)+'</b> firmó un contrato de tres años con '+esc(x.n)+': unos '+fmt(monto)+' al año.','bien'); };
+      const t=tiene?'Ya le vendes con un contrato vigente':null;
+      ops.push({t:e.nombre+' · por licitación · '+fmt(c1),cat:'compania',d:'Pliegos, garantías y paciencia. Probabilidad de ganar: '+Math.round(pr*100)+'%. Contrato cercano a '+fmt(monto)+' al año.',dis:t||sinMov(),cerrar:false,run:()=>{ firmar(false,c1)(); reab(); }});
+      ops.push({t:e.nombre+' · a dedo, con un amigo adentro · '+fmt(c2),cat:'riesgo',d:'Casi seguro. Es contratación indebida y alguien puede acordarse.',dis:t||sinMov(),cerrar:false,run:()=>{ firmar(true,c2,'celebración indebida de contratos',2)(); reab(); }});
+      ops.push({t:e.nombre+' · pagando comisión · '+fmt(c3),cat:'riesgo',d:'Un porcentaje para quien firma. Es cohecho y deja huella.',dis:t||sinMov(),cerrar:false,run:()=>{ firmar(true,c3,'cohecho por dar u ofrecer',3)(); reab(); }}); });
+    escena({rubro:esc(x.n),titulo:'Venderle al Estado',ancho:true,cerrable:true,clase:'pub156',cuerpo:'Un contrato de tres años suma ventas a tu compañía mientras dure. '+(g?'La norma de contratación a tu medida ayuda. ':'')+'Si la empresa quiebra o se liquida, parte de lo que te deben se pierde.',opciones:ops}); }
+  /* --- ayudarla a crecer --- */
+  function escenaCrecer156(x){ const s=est(x), p=P(), e=escala(), reab=()=>{ cerrarModal(); render(); escenaPub156(x.id); }, po=pol();
+    const cred=po&&po.pres?po.pres.credito:0, infl=po?po.influ:0, prP=clamp(.4+cred/300+infl/300,.15,.9);
+    const ops=[
+      {t:'Gestionarle presupuesto · '+fmt(e*.12),cat:'riesgo',d:'Ir a hablar con quien reparte: el ministerio y las comisiones del Congreso. Probabilidad '+Math.round(prP*100)+'%.',dis:S.efectivo<e*.12?'No tienes '+fmt(e*.12):sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=e*.12; if(chance(prP)){ s.salud=clamp(s.salud+8,0,100); s.ing*=1.06; s.rel=clamp(s.rel+8,0,100); if(po&&po.pres) po.pres.credito=Math.max(0,po.pres.credito-10); log('Le consiguieron presupuesto a <b>'+esc(x.n)+'</b>: respira y contrata.','bien'); } else { s.rel=clamp(s.rel+2,0,100); log('El presupuesto de '+esc(x.n)+' no salió: "no hay caja este año".','mal'); } reab(); }},
+      {t:'Prestarle plata (bonos) · '+fmt(e*.5),cat:'capital',d:'Compras sus bonos a la tasa del mercado más 2%. Si se liquida, pierdes parte.',dis:S.efectivo<e*.5?'No tienes '+fmt(e*.5):null,cerrar:false,run:()=>{ S.efectivo-=e*.5; p.bonos.push({pub:x.id,monto:e*.5,tasa:((S.macro&&S.macro.tasa)||.08)+.02,desde:S.anio}); s.salud=clamp(s.salud+6,0,100); s.rel=clamp(s.rel+5,0,100); log('Le compraste bonos por '+fmt(e*.5)+' a <b>'+esc(x.n)+'</b>.','bien'); reab(); }},
+      {t:'Mandarle un equipo gerencial · '+fmt(e*.08),cat:'empleo',d:'Gente tuya de confianza, por un año: la ordenan y le bajan la corrupción.',dis:S.efectivo<e*.08?'No tienes '+fmt(e*.08):sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=e*.08; s.efic=clamp(s.efic+9,0,100); s.graft=clamp(s.graft-6,0,100); s.rel=clamp(s.rel+10,0,100); log('Un equipo de tu confianza ordenó <b>'+esc(x.n)+'</b>: más eficiente y menos filtraciones.','bien'); reab(); }}];
+    const eo=companias().find(c=>['construccion','energia','logistica','tech'].includes(c.sector)&&x.compra.includes(c.sector));
+    if(eo) ops.push({t:'Una obra conjunta con '+eo.nombre,cat:'compania',d:'Una obra grande entre las dos: ventas para tu compañía y empleo para la empresa. Aporta el 4% de tus ingresos.',dis:eo.caja<eo.ingresos*.04?'Tu compañía no tiene la caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const a=eo.ingresos*.04; eo.caja-=a; const y=eo.ingresos*.1; eo.ingresos+=y; eo.utilidad+=y*.2; eo.caja+=y*.2; s.ing*=1.04; s.salud=clamp(s.salud+3,0,100); s.rel=clamp(s.rel+8,0,100); S.tension=clamp((S.tension||35)-1,0,100); log('<b>'+esc(eo.nombre)+'</b> y <b>'+esc(x.n)+'</b> arrancaron una obra conjunta.','bien'); reab(); }});
+    escena({rubro:esc(x.n),titulo:'Ayudarla a crecer',ancho:true,cerrable:true,clase:'pub156',cuerpo:'Una empresa del Estado sana da empleo, paga contratos y distensiona al país. Una enferma te lleva por delante lo que le prestes.',opciones:ops}); }
+  /* --- emplear --- */
+  function escenaEmplear156(x){ const s=est(x), p=P(), reab=()=>{ cerrarModal(); render(); escenaPub156(x.id); }, po=pol(), ops=[];
+    [[.01,'Unos pocos recomendados'],[.03,'Una cuota seria'],[.07,'Media nómina de la región']].forEach(([f,tx])=>{ const n=Math.round(s.emp*f);
+      ops.push({t:tx+' · '+n.toLocaleString('es-CO')+' puestos',cat:'familia',d:'Suben la eficiencia de la empresa hacia abajo y la cuota hacia arriba: ganas lealtad, crédito político y un país menos tensionado.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; s.emp+=n; s.cuota+=n; s.efic=clamp(s.efic-n/Math.max(1000,s.emp)*60,0,100); s.salud=clamp(s.salud-n/Math.max(1000,s.emp)*35,0,100); s.rel=clamp(s.rel+n/Math.max(1000,s.emp)*150,0,100);
+        S.tension=clamp((S.tension||35)-Math.min(3,n/2500),0,100); S.p.redes=clamp(S.p.redes+Math.min(6,n/600),0,100); if(po&&po.pres&&S.gobierno.apoyado) po.pres.credito=Math.min(150,po.pres.credito+Math.min(12,n/400)); log('Colocaste '+n.toLocaleString('es-CO')+' recomendados en <b>'+esc(x.n)+'</b>.','bien'); reab(); }}); });
+    ops.push({t:'Pedirle al presidente la gerencia para la familia',cat:'riesgo',d:'Se pide como favor: se paga con crédito político y deja a alguien tuyo adentro.',cerrar:false,run:()=>{ cerrarModal(); if(typeof window.escenaFavores155==='function') window.escenaFavores155(); }});
+    if(s.cuota>0) ops.push({t:'Retirar tus recomendados',cat:'legado',d:'Sube la eficiencia, pero la gente colocada lo recuerda.',cerrar:false,run:()=>{ s.emp=Math.max(100,s.emp-s.cuota); s.efic=clamp(s.efic+8,0,100); s.rel=Math.max(0,s.rel-12); S.p.redes=clamp(S.p.redes-4,0,100); s.cuota=0; p.robos.filter(r=>r.pub===x.id&&r.modo==='nomina').forEach(r=>{ r.fin=S.anio; }); reab(); }});
+    escena({rubro:esc(x.n),titulo:'Emplear gente',ancho:true,cerrable:true,clase:'pub156',cuerpo:'Hoy emplea a '+Math.round(s.emp/100)/10+' mil personas y '+(s.cuota?'tiene '+s.cuota.toLocaleString('es-CO')+' puestos tuyos.':'no tiene puestos tuyos.'),opciones:ops}); }
+  /* --- acciones --- */
+  function pfDe(id){ return (S.portafolio||[]).find(q=>q&&q.pub156&&q.pub156.id===id); }
+  function escenaAcciones156(x){ const s=est(x), e=escala(), reab=()=>{ cerrarModal(); render(); escenaAcciones156(x); }, v=valorEmp(x,s), pf=pfDe(x.id);
+    const ops=[.1,.25].map(f=>{ const m=Math.round(e*f*2); return {t:'Comprar '+fmt(m)+' ('+R1(m/v*100)+'% de la empresa)',cat:'mercado',d:'Dividendos cada año si le va bien; si se liquida, se pierde.',dis:S.efectivo<m?'No tienes '+fmt(m):sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=m; let q=pfDe(x.id); if(!q){ q={nombre:'Acciones de '+x.n,ticker:'EST',valor:0,tipo:'participación',pub156:{id:x.id,pct:0,ult:0}}; S.portafolio.push(q); } q.pub156.pct+=m/v; q.valor=q.pub156.pct*v; q.pub156.ult=q.valor; log('Compraste '+R1(m/v*100)+'% de <b>'+esc(x.n)+'</b> por '+fmt(m)+'.','bien'); reab(); }}; });
+    if(pf) ops.push({t:'Vender todo ('+fmt(pf.valor*.97)+')',cat:'mercado',cerrar:false,run:()=>{ S.efectivo+=pf.valor*.97; S.portafolio=S.portafolio.filter(q=>q!==pf); log('Vendiste tus acciones de '+esc(x.n)+'.'); reab(); }});
+    escena({rubro:esc(x.n),titulo:'Acciones de la empresa',ancho:true,cerrable:true,clase:'pub156',cuerpo:'La empresa vale unos '+fmt(v)+'. '+(pf?'Tienes '+R1(pf.pub156.pct*100)+'%.':'Aún no tienes acciones.'),opciones:ops}); }
+  /* --- desfalcar --- */
+  function pdet(x,s,r){ const a=S.anio; return clamp(.025+(s.ctrl/100)*.12+(a>=1991?.03:0)+(a>=2011?.03:0)+((S.tension||35)/100)*.03+(s.graft>70?.02:0)+(r.mult-1)*.035+(x.h&&x.h-a<=1?.18:0)+(p155rencor()>20?.04:0),.02,.7); }
+  const p155rencor=()=>{ const po=pol(); return po&&po.pres?po.pres.rencor||0:0; };
+  function escenaDesfalco156(x){ const s=est(x), p=P(), e=escala(), reab=()=>{ cerrarModal(); render(); escenaDesfalco156(x); }, insd=ins(x);
+    const activos=p.robos.filter(r=>r.pub===x.id&&!r.fin);
+    const ops=[];
+    MODOS.forEach(m=>{ const ok=m.req(p,s,x,insd)&&!(inhab()&&m.id==='sobrefactura'); const mm=m.id==='sobrefactura'?p.contratos.filter(c=>c.pub===x.id&&c.hasta>=S.anio):[];
+      (ok&&!activos.some(r=>r.modo===m.id)?[[1,'pequeño'],[2.5,'mediano'],[6,'grande']]:[[1,'']]).forEach(([mult,tx])=>{ let anual=Math.round(Math.min(e*m.base*mult,s.ing*.03)); if(m.id==='sobrefactura'&&mm.length) anual=Math.round(Math.min(anual,mm.reduce((q,c)=>q+c.monto,0)*.3*mult));
+        const pr=pdet(x,s,{mult:m.det*mult});
+        ops.push({t:m.n+(tx?' · '+tx+' · '+fmt(anual)+' al año':''),cat:'riesgo',d:m.d+' Probabilidad de que lo descubran cada año: '+Math.round(pr*100)+'%.',dis:!ok?(m.id==='sobrefactura'?'Necesitas un contrato vigente con ella':m.id==='nomina'?'Necesitas gente colocada en la empresa':m.id==='reclamos'?'Solo cuando se está liquidando':'Necesitas a alguien de la familia en la gerencia'):anual<5?'Muy poca plata para el riesgo':activos.some(r=>r.modo===m.id)?'Ya tienes uno de este tipo':sinMov(),cerrar:false,run:()=>{ if(!movida()) return;
+          p.robos.push({id:'r'+Math.floor(Math.random()*1e6),pub:x.id,modo:m.id,anual,desde:S.anio,total:0,mult:m.det*mult,sev:m.sev,tipo:m.tipo,fin:null}); s.graft=clamp(s.graft+4,0,100); log('Empezaste a sacarle plata a <b>'+esc(x.n)+'</b>: '+m.n.toLowerCase()+' ('+tx+').','mal'); reab(); }}); }); });
+    activos.forEach(r=>{ ops.push({t:'Cerrar el grifo: '+MODOS.find(m=>m.id===r.modo).n.toLowerCase(),cat:'legado',d:'Dejas de sacar. Lo que ya salió queda en los papeles.',cerrar:false,run:()=>{ r.fin=S.anio; log('Cerraste uno de los grifos de <b>'+esc(x.n)+'</b>.'); reab(); }}); });
+    const tot=activos.reduce((q,r)=>q+r.anual,0);
+    escena({rubro:esc(x.n),titulo:'Sacarle plata a una empresa pública',ancho:true,cerrable:true,clase:'pub156',cuerpo:'Es peculado. '+(S.anio<1991?'Todavía no hay Fiscalía ni un Contralor fuerte, pero ':'Hay Contraloría, Fiscalía y una prensa atenta: ')+'cuando descubren un desfalco el costo para ti no es lo robado, es devolverlo varias veces, la multa, el proceso penal, la extinción de dominio de lo que compraste y la inhabilidad para contratar con el Estado. Los controles de esta empresa están en '+Math.round(s.ctrl)+'/100'+(insd?' y tienes a alguien tuyo en la gerencia.':'.')+(tot?' Hoy te entran '+fmt(tot)+' al año de esta empresa.':''),
+      opciones:ops}); }
+  /* --- el año --- */
+  const MOTIVO=r=>r.tipo;
+  function evInvest(x,rs){ const p=P(), s=est(x), total=Math.round(rs.reduce((q,r)=>q+Math.max(r.total,r.anual),0)); p.invest={pub:x.id,total,rs:rs.map(r=>r.id),anio:S.anio}; const e=escala();
+    const devol=Math.round(total*1.3), peor=Math.round(total*(2+rnd(0,1)));
+    return {p:9,c:()=>!!P().invest,t:()=>'<b>La Contraloría y la Fiscalía abrieron una investigación en '+esc(x.n)+'.</b> Aparecen '+fmt(total)+' que salieron de la caja y terminaron en cuentas de empresas de papel. Una de ellas lleva tu nombre en la cadena.',
+      o:[{t:'Colaborar y devolver ('+fmt(devol)+')',f:()=>{ const q=P(); S.efectivo-=devol; q.sucia=0; rs.forEach(r=>{ r.fin=S.anio; }); registrarDelito('peculado',3,'desvío de plata de '+x.n); q.inhab=S.anio+5; q.invest=null; moverPrestigio(-8,'el desfalco a '+x.n); try{ abrirEscandalo129('fiscal','El desfalco a '+x.n,2); }catch(z){} return 'Devolviste '+fmt(devol)+' y aceptaste un acuerdo: cinco años sin poder contratar con el Estado, y un expediente que no se cierra del todo.'; }},
+         {t:'Pelear con los mejores abogados ('+fmt(total*.25)+')',f:()=>{ const q=P(); S.efectivo-=total*.25; const gana=chance(clamp(.22+(S.p.redes||0)/250+(S.p.reputacion||0)/400-(s.ctrl/300),.08,.55));
+          if(gana){ S.efectivo-=total*.5; rs.forEach(r=>{ r.fin=S.anio; }); q.invest=null; q.sucia=Math.round(q.sucia*.3); registrarDelito('peculado',3,'desvío de plata de '+x.n); q.inhab=S.anio+3; return 'Los abogados lograron una responsabilidad fiscal parcial: pagaste la mitad de lo desviado y el proceso penal prescribió por defectos. Tres años sin contratar con el Estado.'; }
+          return castigo(x,total,peor,rs); }},
+         {t:'Mover a tus contactos para frenarlo',f:()=>{ const q=P(), po=pol(), cred=po&&po.pres?po.pres.credito:0, pr=clamp(.1+cred/250+(po?po.influ:0)/400,.05,.6);
+          if(chance(pr)){ q.invest=null; rs.forEach(r=>{ r.fin=S.anio; }); if(po&&po.pres) po.pres.credito=Math.max(0,po.pres.credito-50); registrarDelito('tráfico de influencias',2,'frenar la investigación de '+x.n); return 'Alguien en la Fiscalía "perdió" el expediente. Te costó un favor muy grande, y quedó anotado.'; }
+          registrarDelito('cohecho',3,'intentar frenar la investigación de '+x.n); return castigo(x,total,Math.round(peor*1.15),rs); }},
+         {t:()=>'Salir del país antes de que te citen',f:()=>{ const q=P(); if(typeof window.fugarse157==='function'){ q.invest=null; rs.forEach(r=>{ r.fin=S.anio; }); return window.fugarse157('el desfalco a '+x.n,total); } return 'No tenías a dónde ir. Te citaron.'+castigo(x,total,peor,rs); }}]}; }
+  function castigo(x,total,devol,rs){ const p=P(), po=pol(); S.efectivo-=devol; const ed=Math.round(Math.max(0,(S.efectivo+(S.portafolio||[]).reduce((q,y)=>q+(y.valor||0),0))*rnd(.12,.28)+p.sucia*.5)); S.efectivo-=Math.min(Math.max(0,S.efectivo),ed);
+    registrarDelito('peculado por apropiación',5,'desvío de plata de '+x.n); registrarDelito('enriquecimiento ilícito',4,'bienes sin origen explicable'); p.inhab=S.anio+15; p.sucia=0; p.invest=null; rs.forEach(r=>{ r.fin=S.anio; });
+    moverPrestigio(-14,'el peculado en '+x.n); S.p.escandalos=(S.p.escandalos||0)+1; try{ abrirEscandalo129('fiscal','El peculado en '+x.n+': el caso',3); }catch(z){} try{ if(po&&typeof window.soltarCargo155==='function') po.cargos.slice().filter(c=>c.puesto===x.id).forEach(c=>window.soltarCargo155(c,esc(c.nombre)+' salió de '+esc(c.pn)+' salpicado por el desfalco.')); }catch(z){}
+    p.contratos=p.contratos.filter(c=>c.pub!==x.id); try{ abrirCasoPenal('peculado por apropiación en '+x.n); }catch(z){}
+    return 'Responsabilidad fiscal por '+fmt(devol)+', extinción de dominio por '+fmt(ed)+', proceso penal por peculado y enriquecimiento ilícito, y quince años sin poder contratar con el Estado. Tu apellido salió en primera página.'; }
+  function evPriv(x){ const s=est(x), e=escala(), v=valorEmp(x,s), pct=x.priv.pct, m=Math.round(Math.min(e*3,v*pct)); return {p:6,c:()=>true,t:()=>'<b>El Gobierno vende parte de '+esc(x.n)+'.</b> Ofrece '+Math.round(pct*100)+'% a inversionistas, con descuento para quien entre temprano. La parte para ti sería de unos '+fmt(m)+'.',
+    o:[{t:'Entrar con '+fmt(m),f:()=>{ if(S.efectivo<m) return 'No tenías la plata a mano.'; S.efectivo-=m; let q=pfDe(x.id); if(!q){ q={nombre:'Acciones de '+x.n,ticker:'EST',valor:0,tipo:'participación',pub156:{id:x.id,pct:0,ult:0}}; S.portafolio.push(q); } q.pub156.pct+=m/v*1.06; q.valor=q.pub156.pct*v; q.pub156.ult=q.valor; return 'Entraste con '+fmt(m)+' y quedaste con '+R1(q.pub156.pct*100)+'% de la empresa.'; }},
+       {t:'Dejarlo pasar',f:()=>'Otros se llevaron las acciones.'}]}; }
+  function evHuelga(x){ const s=est(x); return {p:5,c:()=>true,t:()=>'<b>El sindicato de '+esc(x.n)+' se declaró en huelga.</b> Piden nivelación salarial y estabilidad. Tus contratos con ella se frenan mientras dure.',
+    o:[{t:'Esperar a que el Gobierno resuelva',f:()=>{ s.salud=clamp(s.salud-5,0,100); P().contratos.filter(c=>c.pub===x.id).forEach(c=>{ c.paro=S.anio; }); return 'La huelga duró semanas. Tus contratos con la empresa rindieron menos este año.'; }},
+       {t:'Mediar y poner a tu gente a hablar',f:()=>{ s.rel=clamp(s.rel+7,0,100); s.salud=clamp(s.salud-2,0,100); S.p.redes=clamp(S.p.redes+2,0,100); return 'Mediaste entre el sindicato y la gerencia. Se arregló antes de lo esperado y te quedó el favor.'; }}]}; }
+  function evRescate(x){ const s=est(x), e=escala(), m=Math.round(e*.4); return {p:6,c:()=>true,t:()=>'<b>'+esc(x.n)+' no tiene cómo pagar la nómina.</b> El gerente pide ayuda a las empresas con las que trabaja. Te llama a ti: necesita '+fmt(m)+' prestados, "mientras sale el presupuesto".',
+    o:[{t:'Prestarle ('+fmt(m)+')',f:()=>{ if(S.efectivo<m) return 'No tenías la plata a mano.'; S.efectivo-=m; P().bonos.push({pub:x.id,monto:m,tasa:((S.macro&&S.macro.tasa)||.08)+.03,desde:S.anio}); s.salud=clamp(s.salud+9,0,100); s.rel=clamp(s.rel+10,0,100); return 'Le prestaste '+fmt(m)+'. La nómina salió y el gerente quedó a tus órdenes.'; }},
+       {t:'Dejarla caer',f:()=>{ s.rel=Math.max(0,s.rel-8); return 'No pusiste un peso. Se quebró otro mes más.'; }}]}; }
+  function evArrastre(x){ const p=P(); return {p:8,c:()=>true,t:()=>'<b>Un escándalo de corrupción revienta en '+esc(x.n)+'.</b> Un contratista pagaba comisiones y la prensa publica la lista de proveedores. En ella aparece tu compañía.',
+    o:[{t:'Salir a explicar que fue por licitación',f:()=>{ if(chance(.5)){ return 'Mostraste el pliego y los puntajes. La tormenta pasó de largo.'; } registrarDelito('celebración indebida de contratos',2,'contratos con '+x.n); moverPrestigio(-5,'el escándalo de '+x.n); p.contratos=p.contratos.filter(c=>c.pub!==x.id); return 'No convenció. Te cancelaron los contratos y tu apellido quedó en la lista.'; }},
+       {t:'Renunciar al contrato y cerrar el tema',f:()=>{ p.contratos=p.contratos.filter(c=>c.pub!==x.id); return 'Soltaste el contrato antes de que te lo quitaran. Perdiste las ventas, no el nombre.'; }}]}; }
+  function liquidar(x){ const p=P(), s=est(x); s.liq=true; const fin=x.fin==='privatizada'?'pasó a manos privadas':'se liquidó'; const perd=x.fin==='privatizada'?0:.6;
+    p.contratos.filter(c=>c.pub===x.id).forEach(c=>{ c.hasta=Math.min(c.hasta,S.anio-1); }); const q=pfDe(x.id);
+    if(q){ const back=q.valor*(x.fin==='privatizada'?1:.25); S.efectivo+=back; S.portafolio=S.portafolio.filter(y=>y!==q); log('Tus acciones de '+esc(x.n)+' se cerraron: recibiste '+fmt(back)+'.',back>0&&x.fin==='privatizada'?'bien':'mal'); }
+    p.bonos.filter(b=>b.pub===x.id).forEach(b=>{ const back=b.monto*(1-perd); S.efectivo+=back; b.fin=S.anio; log('Los bonos de '+esc(x.n)+' pagaron '+fmt(back)+' de los '+fmt(b.monto)+' que prestaste.',perd?'mal':'bien'); });
+    p.robos.filter(r=>r.pub===x.id&&!r.fin).forEach(r=>{ r.fin=S.anio; });
+    log('<b>'+esc(x.n)+' '+fin+'</b> este año.'+(x.fin==='privatizada'?'':' Los empleados quedaron en la calle y los contratistas, con las cuentas por cobrar.'),'hito'); S.tension=clamp((S.tension||35)+(x.fin==='privatizada'?1:3),0,100); }
+  function anual(){ if(!ACTIVO()||nino()) return; const p=P(), g=gob(), m=S.macro||{};
+    // la salud del Estado empresario
+    vivas().forEach(x=>{ const s=est(x); if(s.liq) return;
+      s.salud=clamp(s.salud+((g.publico||1)-1)*8+(m.ciclo||0)*30+(s.efic-50)*.06-(s.graft-40)*.06-(s.emp>x.empleo*1000*1.8?2:0)+rnd(-4,4),3,100);
+      s.efic=clamp(s.efic+rnd(-3,3)-(s.cuota>0?s.cuota/Math.max(1000,s.emp)*6:0),5,100);
+      s.graft=clamp(s.graft+rnd(-2,2.5)+(S.tension||35)/100-((s.ctrl-40)*.03),3,100);
+      s.ctrl=clamp(s.ctrl+(S.anio>=2011?1.2:S.anio>=1991?.8:.2)+rnd(-1,1),5,95); s.ing=Math.max(5,s.ing*(1+(s.salud-55)/700+(m.ciclo||0)*.6)); s.emp=Math.max(100,s.emp*(1+(s.salud-55)/1500)); s.rel*=.93;
+      if(x.h&&S.anio>=x.h){ liquidar(x); } });
+    // lo que entra por fuera, y lo que se arriesga
+    let entra=0, ev=null; p.robos.filter(r=>!r.fin).forEach(r=>{ const x=EMP.find(z=>z.id===r.pub); if(!x) return; const s=est(x); if(s.liq){ r.fin=S.anio; return; }
+      entra+=r.anual; r.total+=r.anual; p.sucia+=r.anual; s.salud=clamp(s.salud-r.anual/Math.max(1,s.ing)*60,0,100); s.graft=clamp(s.graft+1.2,0,100); });
+    if(entra>0){ S.efectivo+=entra; if(window.anotar147) window.anotar147('Plata de empresas públicas (por fuera)',entra); }
+    if(!p.invest&&S._ev156!==S.anio){ const porPub={}; p.robos.filter(r=>!r.fin).forEach(r=>{ (porPub[r.pub]=porPub[r.pub]||[]).push(r); });
+      Object.keys(porPub).forEach(id=>{ if(ev) return; const x=EMP.find(z=>z.id===id), s=est(x), rs=porPub[id]; const pr=1-rs.reduce((q,r)=>q*(1-pdet(x,s,r)),1); if(chance(pr)){ ev=evInvest(x,rs); } }); }
+    // los bonos pagan
+    let ints=0; p.bonos.filter(b=>!b.fin).forEach(b=>{ const x=EMP.find(z=>z.id===b.pub), s=x?est(x):null; if(!x||!s||s.liq) return; const i=b.monto*b.tasa*(s.salud<30?.4:1); ints+=i; S.efectivo+=i; if(S.anio-b.desde>=5){ S.efectivo+=b.monto; b.fin=S.anio; log('Te pagaron los bonos de '+esc(x.n)+': '+fmt(b.monto)+'.','bien'); } });
+    if(ints>0&&window.anotar147) window.anotar147('Intereses de bonos de empresas públicas',ints);
+    // dividendos y valor de las acciones
+    (S.portafolio||[]).filter(q=>q&&q.pub156).forEach(q=>{ const x=EMP.find(z=>z.id===q.pub156.id); if(!x) return; const s=est(x); if(q.pub156.ult>0&&Math.abs(q.valor-q.pub156.ult)>.01) q.pub156.pct*=clamp(q.valor/q.pub156.ult,0,10); const v=valorEmp(x,s), div=q.pub156.pct*v*.04*(s.salud/60); q.valor=q.pub156.pct*v; q.pub156.ult=q.valor; if(div>.5){ S.efectivo+=div; if(window.anotar147) window.anotar147('Dividendos de '+x.n,div); } });
+    // los contratos terminados se limpian
+    p.contratos=p.contratos.filter(c=>c.hasta>=S.anio-1);
+    if(ev){ S._ev156=S.anio; cola.push(ev); return; }
+    if(S._ev156===S.anio) return;
+    const L=vivas().filter(x=>!est(x).liq);
+    const pv=L.find(x=>x.priv&&x.priv.anio===S.anio); if(pv){ S._ev156=S.anio; cola.push(evPriv(pv)); return; }
+    const cn=L.filter(x=>p.contratos.some(c=>c.pub===x.id&&c.hasta>=S.anio));
+    const arr=cn.find(x=>est(x).graft>65&&chance(.1)&&p.contratos.some(c=>c.pub===x.id&&c.irregular)); if(arr){ S._ev156=S.anio; cola.push(evArrastre(arr)); return; }
+    const hu=cn.find(x=>chance(.06)); if(hu){ S._ev156=S.anio; cola.push(evHuelga(hu)); return; }
+    const rs=L.find(x=>est(x).salud<28&&est(x).rel>=8&&chance(.3)); if(rs){ S._ev156=S.anio; cola.push(evRescate(rs)); } }
+  /* --- enganches --- */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA156_EMP) return; window.__SA156_EMP=true;
+    window.correrEmpresa=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&companias().includes(e)){ const p=P(); let obj=0; p.contratos.forEach(c=>{ if(c.emp===e.nombre&&c.hasta>=S.anio&&c.desde<=S.anio){ const x=EMP.find(z=>z.id===c.pub), s=x?est(x):null; if(!s||s.liq) return; let v=c.monto*(s.salud<30?.7:1)*(c.paro===S.anio?.7:1); obj+=v; } });
+        const prev=e.pub156add||0; const d=obj-prev; if(Math.abs(d)>.01){ const sm=(typeof SECTORES!=='undefined'&&SECTORES.find(z=>z.id===e.sector))||{m:.1}; e.ingresos=Math.max(1,e.ingresos+d); const du=d*clamp((sm.m||.1)*1.3,.1,.3); e.utilidad+=du; e.caja+=du; } e.pub156add=obj; } }catch(x){ console.error(x); } return r; }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA156_PASO) return; window.__SA156_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA156_ACC) return; window.__SA156_ACC=true;
+    window.listaAcciones=function(){ const A=old.apply(this,arguments);
+      try{ if(!Array.isArray(A)||!ACTIVO()||nino()) return A; const enGrupo=!window.__crudo91&&A.some(x=>x.t==='Influencia y palancas'&&x.modal);
+        if(!enGrupo&&!A.some(x=>x.t==='Las empresas públicas')){ const p=P(), L=vivas();
+          A.push({t:'Las empresas públicas',cat:'riesgo',d:L.length+' empresas del Estado: venderles, ayudarlas a crecer, colocar gente, comprarles acciones o sacarles plata. '+(p.contratos.filter(c=>c.hasta>=S.anio).length?'Tienes '+p.contratos.filter(c=>c.hasta>=S.anio).length+' contrato(s). ':'')+(inhab()?'Inhabilitado hasta '+inhab()+'.':''),mov:0,modal:true,run:()=>escenaPublicas156()}); } }catch(x){ console.error(x); }
+      return A; }; window.listaAcciones.__v156=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA156_CAT) return; window.__SA156_CAT=true;
+    window.catDe=function(t){ if(t==='Las empresas públicas') return 'riesgo'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='palancas'); if(!g||!Array.isArray(g.miembros)) return;
+    if(!g.miembros.some(m=>m[1]==='Las empresas públicas')){ g.miembros.push(['Influencia','Las empresas públicas']); } }
+  function init156(){ wrapEmpresa(); wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{escenaPublicas156,escenaPub156,escenaDesfalco156,escenaVender156,escenaCrecer156,escenaEmplear156,escenaAcciones156,empresasPub156:P,EMPRESAS_PUB_156:EMP,publicasVivas156:vivas,estadoPub156:est,anualPub156:anual,pdetPub156:pdet,castigoPub156:castigo,inhabPub156:inhab}); }
+  setTimeout(init156,40); setTimeout(init156,220); setTimeout(init156,650); setTimeout(init156,950);
+  window.__SA156={version:V156};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v157 · TRAS LAS REJAS Y LA EXTRADICIÓN
+   Una condena ya no apaga la partida: sigues trabajando según dónde cumplas.
+   - Regímenes: cárcel ordinaria, detención domiciliaria, pabellón especial
+     (ex-funcionarios y alta dignidad) y alta seguridad. Cada uno trae sus
+     movidas, lo que puedes decidir, cuánto ganas, tu salud y tu ánimo.
+   - Programa del año: trabajar dentro, estudiar, seguir dirigiendo tus
+     negocios o esperar con buena conducta. Trabajar y estudiar redimen pena.
+   - Pedir la casa por cárcel, un pabellón especial, o la libertad condicional
+     cuando llevas el 60% y tu conducta lo permite.
+   - Detención preventiva: antes del juicio, en casos graves. Cuenta para la
+     condena si te condenan.
+   - Extradición: si tienes un caso y vives en otro país (o el caso es de otro
+     país y vives en Colombia), te lo reclaman. El tratado de cada país y de
+     cada época decide: hasta la prohibición de extraditar colombianos de
+     1991 y su regreso en 1997. Puedes resistir en tribunales, entregarte,
+     pedir asilo, mover tus contactos o irte al exilio.
+   - El exilio: tus compañías se resienten sin ti, te embargan, hay riesgo de
+     que te encuentren; con los años el delito prescribe, o te indultan.
+   ========================================================================== */
+(function(){
+  const V157='v157';
+  const REG={
+    ordinaria:{n:'Cárcel ordinaria',mov:2,trab:.25,salud:-3,felic:-4,fam:-1,d:'Patios, conteos y visitas de domingo. Trabajas por teléfono y por abogado.'},
+    domiciliaria:{n:'Detención domiciliaria',mov:1,trab:.7,salud:-.5,felic:-2,fam:0,d:'En tu casa, con una tobillera. Trabajas casi como siempre.'},
+    especial:{n:'Pabellón especial',mov:1,trab:.5,salud:-1,felic:-2.5,fam:-.5,d:'Un patio aparte para ex-funcionarios y gente de alta dignidad, con oficina propia.'},
+    alta:{n:'Cárcel de alta seguridad',mov:3,trab:0,salud:-5,felic:-7,fam:-3,d:'Celdas individuales y una hora de patio. Casi no trabajas.'}};
+  const PROG={
+    trabajar:{n:'Trabajar dentro',d:'Redime pena: dos años de trabajo valen uno menos de condena. Pagan poco.',red:.5},
+    estudiar:{n:'Estudiar',d:'Redime algo de pena y te deja un título o una destreza.',red:.4},
+    gestionar:{n:'Seguir dirigiendo tus negocios',d:'Por teléfono y con tu abogado: tus compañías no se resienten. No redime pena.',red:0},
+    conducta:{n:'Buena conducta y a esperar',d:'Sin hacer ruido: sube la conducta, nada más.',red:.2}};
+  /* probabilidad de que cada país extradite a Colombia a un colombiano: [antes de 1980, desde 1980] */
+  const TRAT={'Estados Unidos':[.45,.85],'Reino Unido':[.4,.7],'Francia':[.35,.65],'Alemania':[.35,.65],'España':[.5,.8],'Emiratos Árabes Unidos':[.1,.3],'Singapur':[.08,.25],'China':[.03,.1],'Japón':[.12,.3],'Brasil':[.3,.6],'Panamá':[.35,.6]};
+  const clamp_=(a,b,c)=>Math.max(b,Math.min(c,a));
+  const ACTIVO=()=>!!(S&&S.penal&&S.p);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const escala=()=>{ try{ if(typeof window.escalaPol155==='function') return window.escalaPol155(); }catch(e){} return clamp((typeof patrimonio==='function'?patrimonio():500)*.06,100,6000); };
+  const pol=()=>{ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } };
+  const sinMov=()=>S.mov<1?'No te quedan movidas':null;
+  function C(){ if(!S) return {}; let c=S.car157; if(!c||typeof c!=='object') c=S.car157={}; if(!isFinite(c.conducta)) c.conducta=50; if(!isFinite(c.red)) c.red=0; if(!isFinite(c.sent)) c.sent=0; return c; }
+  const casoMia=()=>S.penal&&S.penal.caso;
+  const gr=()=>{ try{ return gravedadPenal(); }catch(e){ return 3; } };
+  const jur=()=>{ try{ return jurisdiccionActual(); }catch(e){ return {pais:'Colombia',jurisdiccion:'Colombia',penaCapital:false}; } };
+  const preso=()=>{ if(!ACTIVO()) return false; const c=C(); return !!(c.reg&&!(S.penal.penaMuerte)); };
+  const nombreReg=()=>{ const c=C(); return c.reg?REG[c.reg].n:''; };
+  /* --- el régimen que te toca --- */
+  function sugerido(){ const g=gr(), p=pol(), edad=S.p.edad||40, funcionario=!!(p&&p.cargos&&p.cargos.length)||!!(S.carrera&&S.carrera.ruta==='publico')||!!(S.carrera&&['politica','diplomatica','judicial'].includes(S.carrera.ruta)), j=jur();
+    if(g>=9||(j.penaCapital&&g>=7)) return 'alta';
+    if((edad>=65||S.p.salud<40)&&g<9) return 'domiciliaria';
+    if(funcionario&&g<9) return 'especial';
+    if(g<=3&&(S.penal.prisionRestante||0)<=4) return 'domiciliaria';
+    return 'ordinaria'; }
+  /* --- sincroniza el estado con lo que decide el núcleo del juego --- */
+  function sync(){ if(!ACTIVO()||nino()) return; asegurarPenal(); const c=C();
+    if(S.penal.caso&&!c.ciudadCaso) c.ciudadCaso=S.p.ciudad;
+    if(S.penal.prisionRestante>0&&!S.penal.penaMuerte){
+      if(c.pre){ const a=Math.max(0,S.anio-c.pre.desde); if(a>0){ S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-a); log('Te descontaron '+a+' año'+(a>1?'s':'')+' de detención preventiva de la condena.','bien'); } c.pre=null; if(S.penal.prisionRestante<=0){ S.penal.condena=null; S.penal.motivoCondena=null; log('Con la preventiva ya habías cumplido la condena.','bien'); } }
+      if(S.penal.prisionRestante>0){ if(!c.reg){ c.reg=sugerido(); c.sent=S.penal.prisionRestante; c.desde=S.anio; c.programa=companias().length?'gestionar':'trabajar'; c.condPedida=false; log('Te asignaron a <b>'+REG[c.reg].n.toLowerCase()+'</b>: '+REG[c.reg].d,'mal'); }
+        c.sent=Math.max(c.sent,S.penal.prisionRestante); } }
+    if(c.reg&&!c.pre&&S.penal.prisionRestante<=0&&!S.penal.penaMuerte){ liberar(); }
+    if(c.pre){ if(!S.penal.caso&&S.penal.prisionRestante<=0&&!S.penal.penaMuerte){ const a=Math.max(1,S.anio-c.pre.desde); log('<b>Saliste libre.</b> El caso se cerró después de '+a+' año'+(a>1?'s':'')+' de detención preventiva.','bien'); c.pre=null; c.reg=null; c.programa=null; } else if(!c.reg){ c.reg=c.pre.reg||sugerido(); } } }
+  function liberar(){ const c=C(); const r=c.reg; c.reg=null; c.programa=null; c.red=0; c.condPedida=false; if(r){ S.penal.estuvoPreso=true; log('<b>Saliste de prisión.</b> Recuperas tus decisiones y la vida de afuera.','bien'); } }
+  /* --- lo que puedes hacer desde adentro --- */
+  function puede(cat){ const c=C(), R=c.reg; if(['familia','salud','legado','riesgo'].includes(cat)) return true; if(!R||R==='alta') return false; if(cat==='casa'||cat==='empleo') return R==='domiciliaria'||R==='especial'; return true; }
+  window.bloqueaPreso157=function(cat){ try{ if(!ACTIVO()||nino()) return null; const core=S.penal&&(S.penal.prisionRestante>0||S.penal.penaMuerte), c=C(); if(!core&&!c.reg) return false; if(S.penal.penaMuerte) return !['familia','salud','legado','riesgo'].includes(cat); if(!c.reg) return !['familia','salud','legado','riesgo'].includes(cat); return !puede(cat); }catch(e){ return null; } };
+  window.trabajaPreso157=function(){ try{ const c=C(); return !!(c.reg&&REG[c.reg].trab>0&&!S.penal.penaMuerte); }catch(e){ return false; } };
+  /* --- la pantalla de la prisión --- */
+  function escenaCarcel157(){ sync(); const c=C(), R=REG[c.reg||'ordinaria'], j=jur(), g=gr(), reab=()=>{ cerrarModal(); render(); escenaCarcel157(); }; const pre=!!c.pre;
+    const rest=pre?null:S.penal.prisionRestante, hechos=c.sent?c.sent-(rest||0):0, elegible=!pre&&c.sent&&hechos>=c.sent*.6&&c.conducta>=55&&!c.condPedida;
+    const html='<div class="k"><div><b>'+R.n+'</b><span>régimen</span></div><div><b>'+(pre?'preventiva':rest+' año'+(rest===1?'':'s'))+'</b><span>'+(pre?'desde '+c.pre.desde:'te quedan')+'</span></div><div><b>'+Math.round(c.conducta)+'/100</b><span>conducta</span></div><div><b>'+Math.round(c.red*100)/100+'</b><span>de redención este año</span></div><div><b>'+Math.round(R.trab*100)+'%</b><span>de tu ingreso laboral</span></div><div><b>'+(S.mov)+'</b><span>movidas</span></div></div>'
+      +'<h4>Lo que puedes hacer desde adentro</h4><div class="apunte">'+(c.reg==='alta'?'Solo familia, salud y asuntos legales.':c.reg==='ordinaria'?'Dirigir tus negocios, tus inversiones y tu capital por teléfono y por abogado. No puedes emplearte ni manejar la casa.':'Casi todo, con las movidas que te quedan: dirigir negocios, invertir, manejar la casa.')+'</div>';
+    const ops=[];
+    Object.keys(PROG).forEach(k=>{ ops.push({t:(c.programa===k?'✓ ':'')+PROG[k].n,cat:k==='gestionar'?'compania':'riesgo',d:PROG[k].d+(k==='gestionar'&&!companias().length?' No tienes compañías.':''),dis:c.programa===k?'Es tu programa de este año':k==='gestionar'&&c.reg==='alta'?'En alta seguridad no puedes':null,cerrar:false,run:()=>{ c.programa=k; log('Programa del año: '+PROG[k].n.toLowerCase()+'.'); reab(); }}); });
+    if(c.reg!=='domiciliaria'){ const costo=Math.round(Math.max(20,patrimonio()*.01)), edad=S.p.edad||40, p0=clamp_(.1+(edad>=65?.4:0)+(S.p.salud<40?.35:0)+(g<=4?.25:0)+(S.p.redes||0)/400,.05,.8);
+      ops.push({t:'Pedir la casa por cárcel · '+fmt(costo),cat:'riesgo',d:'Abogados y un dictamen. Probabilidad '+Math.round(p0*100)+'% (cuentan la edad, la salud, lo grave del delito y tus contactos).',dis:S.efectivo<costo?'No tienes '+fmt(costo):c.reg==='alta'?'En alta seguridad ni se considera':sinMov(),cerrar:false,run:()=>{ S.mov--; S.efectivo-=costo; if(chance(p0)){ c.reg='domiciliaria'; log('Un juez concedió la detención domiciliaria. Cumples en tu casa, con tobillera.','bien'); } else log('El juez negó la casa por cárcel: "no se cumplen los requisitos".','mal'); reab(); }}); }
+    if(c.reg==='ordinaria'){ const po=pol(), cr=po&&po.pres?po.pres.credito:0, p1=clamp_(.2+(S.p.redes||0)/250+cr/400,.1,.7);
+      ops.push({t:'Pedir traslado al pabellón especial',cat:'riesgo',d:'Un patio aparte y una oficina. Se pide con contactos. Probabilidad '+Math.round(p1*100)+'%.',dis:sinMov(),cerrar:false,run:()=>{ S.mov--; if(chance(p1)){ c.reg='especial'; if(po&&po.pres) po.pres.credito=Math.max(0,po.pres.credito-15); log('Te trasladaron al pabellón especial.','bien'); } else log('El traslado no salió: "no hay cupo".','mal'); reab(); }}); }
+    if(elegible){ const p2=clamp_(.4+c.conducta/200-g*.02,.15,.85); ops.push({t:'Pedir la libertad condicional',cat:'legado',d:'Llevas más del 60% y tu conducta lo permite. Probabilidad '+Math.round(p2*100)+'%.',cerrar:false,run:()=>{ c.condPedida=true; if(chance(p2)){ const r=S.penal.prisionRestante; S.penal.prisionRestante=0; S.penal.condena=null; S.penal.motivoCondena=null; c.cond={hasta:S.anio+Math.max(1,Math.ceil(r)),r}; log('<b>Te dieron la libertad condicional.</b> Sales con control hasta '+c.cond.hasta+'.','bien'); } else log('Negaron la libertad condicional: "el delito fue grave".','mal'); cerrarModal(); render(); }}); }
+    if(S.ext157) ops.push({t:'La extradición',cat:'riesgo',d:'Tienes un proceso de extradición o de exilio abierto.',cerrar:false,run:()=>{ cerrarModal(); escenaExtradicion157(); }});
+    ops.push({t:'El proceso penal y los recursos',cat:'riesgo',d:'Apelar, pagar por mejores condiciones, intentar fugarte.',cerrar:false,run:()=>{ cerrarModal(); if(OLD_PENAL) OLD_PENAL(); }});
+    escena({rubro:'Justicia',titulo:pre?'Detención preventiva':'Cumpliendo condena',ancho:true,cerrable:true,clase:'car157',cuerpo:(pre?'Estás detenido mientras se define tu juicio en '+esc(j.jurisdiccion)+'. Si te condenan, te descuentan este tiempo.':'Te quedan <b>'+rest+'</b> año'+(rest===1?'':'s')+' de prisión en '+esc(j.jurisdiccion)+(S.penal.motivoCondena?', condenad'+(S.p.sexo==='m'?'a':'o')+' por <b>'+esc(S.penal.motivoCondena)+'</b>':'')+'.')+' '+R.d+' La partida sigue: familia, patrimonio y compañías, según tu régimen.',html,opciones:ops}); }
+  /* --- el año adentro --- */
+  function anualPrision(){ const c=C(), R=REG[c.reg], P=PROG[c.programa||'conducta']; if(!c.reg) return;
+    S.p.salud=clamp(S.p.salud+R.salud*((S.p.edad||40)>60?1.3:1),0,100); S.p.felicidad=clamp((S.p.felicidad||60)+R.felic,0,100);
+    try{ (S.familia.hijos||[]).forEach(h=>{ if(h.vinculo!==undefined) h.vinculo=clamp(h.vinculo+R.fam,0,100); }); }catch(e){}
+    c.conducta=clamp(c.conducta+({trabajar:6,estudiar:6,gestionar:1,conducta:4}[c.programa||'conducta']||2)+rnd(-2,2),0,100);
+    if(S.penal.prisionRestante>0&&P.red>0){ c.red+=P.red; while(c.red>=1){ S.penal.prisionRestante=Math.max(0,S.penal.prisionRestante-1); c.red-=1; log('Redención de pena: trabajar y estudiar te descontó un año.','bien'); if(S.penal.prisionRestante===0){ S.penal.condena=null; S.penal.motivoCondena=null; log('Terminaste de cumplir la condena.','bien'); } } }
+    if(c.programa==='estudiar'&&chance(.25)){ S.p.atr.intelecto=clamp((S.p.atr.intelecto||5)+1,1,10); log('Estudiando adentro mejoraste tu preparación.','bien'); }
+    // el trabajo desde adentro: lo que ganas por tu carrera se reduce según el régimen
+    try{ if(Array.isArray(S.resumen)&&R.trab<1){ S.resumen.forEach(l=>{ if(l&&l[1]>0&&/^(Honorarios \/ salario|Salario \(|Carrera )/.test(l[0])){ const d=l[1]*(1-R.trab); S.efectivo-=d; l[1]-=d; l[0]=l[0]+' · desde la cárcel'; } }); } }catch(e){} }
+  const regMsg=r=>REG[r].n.toLowerCase();
+  function evPrision(){ const c=C(), R=c.reg; if(!R||R==='domiciliaria'||S._ev157===S.anio) return null; const g=gr();
+    const L=[
+      {p:7,id:'rina',c:()=>!!C().reg,t:()=>'<b>Una pelea en el patio.</b> Un preso de otro pabellón te mide: saben quién eres y cuánto tienes.',o:[{t:'Pagar protección',f:()=>{ const m=Math.round(Math.max(10,escala()*.08)); S.efectivo-=m; return 'Pagaste '+fmt(m)+' a quien manda en el patio. No te volvieron a tocar.'; }},{t:'Defenderte',f:()=>{ if(chance(.5)){ C().conducta=Math.max(0,C().conducta-12); return 'Ganaste la pelea y perdiste conducta: te metieron un mes de aislamiento.'; } S.p.salud=clamp(S.p.salud-12,0,100); return 'Saliste golpeado. La enfermería te dejó una semana en observación.'; }}]},
+      {p:5,id:'vacuna',c:()=>!!C().reg,t:()=>'<b>La vacuna.</b> Los que manejan el pabellón cobran una cuota semanal "para mantener la paz".',o:[{t:'Pagarla',f:()=>{ const m=Math.round(Math.max(8,escala()*.05)); S.efectivo-=m; return 'Pagaste '+fmt(m)+' y no hubo problemas.'; }},{t:'Negarte y denunciar',f:()=>{ S.p.salud=clamp(S.p.salud-6,0,100); C().conducta=clamp(C().conducta+6,0,100); return 'Denunciaste. Te cambiaron de pabellón y la dirección anotó tu buena conducta.'; }}]},
+      {p:5,id:'visita',c:()=>!!C().reg,t:()=>'<b>Un domingo de visitas.</b> Tu familia hizo fila desde las cuatro de la mañana para verte una hora.',o:[{t:'Contarles todo y escucharlos',f:()=>{ try{ (S.familia.hijos||[]).forEach(h=>{ h.vinculo=clamp((h.vinculo||60)+6,0,100); }); }catch(e){} S.p.felicidad=clamp((S.p.felicidad||60)+5,0,100); return 'Fue una hora corta y larga a la vez. Salieron más tranquilos, y tú también.'; }}]},
+      {p:4,id:'guardia',c:()=>!!C().reg,t:()=>'<b>Un guardia te ofrece comodidades:</b> un colchón, una línea de teléfono y comida de afuera. "Todo discreto."',o:[{t:'Aceptar ('+fmt(Math.max(8,escala()*.05))+')',f:()=>{ S.efectivo-=Math.max(8,escala()*.05); S.p.salud=clamp(S.p.salud+4,0,100); if(chance(.2)){ C().conducta=Math.max(0,C().conducta-15); registrarDelito('cohecho',1,'pagarle a un guardia'); return 'Te descubrieron. Perdiste conducta y quedó anotado.'; } return 'Dormiste mejor este año.'; }},{t:'Rechazarlo',f:()=>{ C().conducta=clamp(C().conducta+4,0,100); return 'Dijiste que no. El guardia no volvió a mirarte.'; }}]}];
+    if(g<3) return null; return pick(L); }
+  function evCondicional(){ return null; }
+  /* --- la medida de aseguramiento --- */
+  function evMedida(){ const c=C(), caso=S.penal.caso, g=gr(), edad=S.p.edad||40, e=escala(); c.medida=S.anio; const caucion=Math.round(Math.max(40,e*.2*(g/4)));
+    return {p:9,c:()=>!!S.penal.caso&&!C().pre,t:()=>'<b>El fiscal pidió medida de aseguramiento contra ti.</b> Dice que hay riesgo de fuga y que el delito '+esc(caso.motivo||'que se investiga')+' es grave. El juez decide esta semana.',
+      o:[{t:'Aceptar la detención preventiva',f:()=>{ const x=C(); x.pre={desde:S.anio,reg:sugerido()}; x.reg=x.pre.reg; x.programa=companias().length?'gestionar':'trabajar'; return 'Te detuvieron. Estarás en <b>'+regMsg(x.reg)+'</b> mientras se define el juicio.'; }},
+         {t:'Pagar la caución ('+fmt(caucion)+')',f:()=>{ const x=C(); const detener=()=>{ x.pre={desde:S.anio,reg:sugerido()}; x.reg=x.pre.reg; x.programa=companias().length?'gestionar':'trabajar'; };
+           if(S.efectivo<caucion){ detener(); return 'No tenías la plata de la caución. Te detuvieron.'; } S.efectivo-=caucion; if(chance(.7)){ x.caucion=true; return 'El juez aceptó la caución: enfrentas el juicio en libertad, sin pasaporte.'; } detener(); return 'El juez rechazó la caución y ordenó la detención. La plata no se devuelve.'; }},
+         {t:'Pedir la casa por cárcel',f:()=>{ const x=C(), p0=clamp_(.1+(edad>=65?.4:0)+(S.p.salud<40?.35:0)+(g<=5?.2:0)+(S.p.redes||0)/400,.05,.8); if(chance(p0)){ x.pre={desde:S.anio,reg:'domiciliaria'}; x.reg='domiciliaria'; x.programa=companias().length?'gestionar':'trabajar'; return 'El juez concedió la detención domiciliaria preventiva: en tu casa, con tobillera, hasta el juicio.'; } x.pre={desde:S.anio,reg:sugerido()}; x.reg=x.pre.reg; return 'Negaron la casa por cárcel. Te llevaron a <b>'+regMsg(x.reg)+'</b>.'; }},
+         {t:()=>'Salir del país antes de que decida',f:()=>fugarse('el proceso por '+(caso.motivo||'el caso abierto'),0)}]}; }
+  /* --- extradición --- */
+  function origen(){ const c=casoMia(); if(S.ext157&&S.ext157.origen) return S.ext157.origen; return c?c.jurisdiccion:null; }
+  function ciudadDe(j){ const g=(typeof CIUDADES_GLOBALES!=='undefined'?CIUDADES_GLOBALES:[]).find(x=>x.jurisdiccion===j||x.pais===j); if(g) return g.n; const c=C(); return c.ciudadCaso&&!/^(Miami|Nueva York|Londres|Dubái|Singapur|Hong Kong|Fráncfort|París|Tokio|Shanghái)$/.test(c.ciudadCaso)?c.ciudadCaso:'Bogotá'; }
+  function colExtradita(){ const a=S.anio; let cometido=S.anio; try{ (S.penal.crimes||[]).forEach(x=>{ if(x.anio<cometido) cometido=x.anio; }); }catch(e){} if(a<1979) return .15; if(a<1991) return .65; if(a<1998) return 0; return cometido<=1997?.1:.8; }
+  function probExt(x){ x=x||S.ext157; if(!x) return .5; const hostCol=x.pais==='Colombia'||x.host==='Colombia'; let p; if(!hostCol){ const t=TRAT[x.pais]||[.25,.45]; p=S.anio>=1980?t[1]:t[0]; } else p=colExtradita();
+    if(p===0) return 0; const d=(x.abog||0)*.1+(x.presion?.18:0)+(x.asilo?.3:0); return clamp_(p*(1-d),.02,.97); }
+  const lbl=p=>p>.7?'alto':p>.4?'medio':'bajo';
+  function refugios(){ const o=origen(), L=(typeof CIUDADES_GLOBALES!=='undefined'?CIUDADES_GLOBALES:[]).filter(g=>g.n!==S.p.ciudad&&g.jurisdiccion!==o);
+    return L.map(g=>{ const t=TRAT[g.pais]||[.25,.45], p=S.anio>=1980?t[1]:t[0], costo=Math.round(Math.max(120,(g.traslado||200)*1.8)+Math.max(0,S.efectivo)*.04); return {g,p,costo}; }).sort((a,b)=>a.p-b.p); }
+  function mudar(c){ const g=typeof esCiudadGlobal==='function'&&esCiudadGlobal(c); S.hogar.ciudad=c; S.hogar.zona=g?0:1; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=c; }
+  function irExilio(r,motivo){ const o=origen()||jur().jurisdiccion; if(!casoMia()){ try{ abrirCasoPenal(motivo||'el proceso en curso'); }catch(e){} }
+    const caso=casoMia(); if(caso){ caso.plazo=S.anio+60; } const o2=(caso&&caso.jurisdiccion)||o;
+    S.efectivo-=Math.min(Math.max(0,S.efectivo),r.costo); const antes=S.p.ciudad; S.ext157={estado:'exilio',origen:o2,host:r.g.jurisdiccion,pais:r.g.pais,ciudad:r.g.n,desde:S.anio,motivo:motivo||'',abog:0,presion:false,asilo:false,regreso:antes}; mudar(r.g.n); S.penal.fugado=true; const c=C(); c.pre=null; c.reg=null;
+    S.p.redes=clamp(S.p.redes*.6,0,100); moverPrestigio(-8,'se fue del país huyendo de la justicia'); log('<b>Te fuiste a '+esc(r.g.n)+'.</b> En '+esc(o2)+' hay una orden en tu contra y no puedes volver. Los extraditables de otras épocas conocían bien este camino.','mal'); hito('Se exilió en '+r.g.n); return 'Saliste del país con lo que pudiste. Ahora vives en '+r.g.n+', con una orden de captura a tus espaldas.'; }
+  function fugarse(motivo,monto){ const L=refugios(); if(!L.length) return 'No tenías a dónde ir.'; const b=L.find(r=>S.efectivo>=r.costo)||L[0]; if(S.efectivo<b.costo*.5) return 'No tenías con qué pagar la salida.'; return irExilio(b,motivo); }
+  function extraditar(){ const x=S.ext157; if(!x) return; const dest=ciudadDe(x.origen); const caso=casoMia(); if(caso){ caso.plazo=S.anio+1; caso.evidencia=isFinite(caso.evidencia)?Math.min(100,caso.evidencia+4):caso.evidencia; } const c=C(); c.pre={desde:S.anio,reg:S.penal&&jur().penaCapital?'alta':'ordinaria'}; S.ext157=null; S.penal.fugado=false; mudar(dest); c.reg=c.pre.reg; c.programa=companias().length?'gestionar':'trabajar'; S.p.redes=clamp(S.p.redes*.7,0,100); moverPrestigio(-6,'fue extraditado');
+    log('<b>Te extraditaron a '+esc(dest)+'.</b> Llegas esposado y el proceso sigue allá: detención preventiva en '+regMsg(c.reg)+'.','mal'); hito('Fue extraditado a '+dest); }
+  function abrirExtradicion(){ const o=origen(), h=jur(); const x={estado:'solicitud',origen:o,host:h.jurisdiccion,pais:h.pais,ciudad:S.p.ciudad,desde:S.anio,abog:0,presion:false,asilo:false}; S.ext157=x; return x; }
+  function evExtradicion(){ const x=S.ext157, hostCol=x.pais==='Colombia'||x.host==='Colombia';
+    return {p:9,c:()=>!!S.ext157,t:()=>'<b>'+(hostCol?esc(x.origen)+' pidió tu extradición a Colombia.':'Colombia pidió tu extradición a '+esc(x.pais)+'.')+'</b> '+(hostCol?(S.anio<1979?'Todavía no hay tratado que lo exija: sería una decisión del Gobierno.':S.anio<1991?'Hay tratado con Estados Unidos y la decisión la firma el Presidente.':S.anio<1998?'La Constitución de 1991 prohíbe extraditar colombianos: tu abogado dice que no puede pasar.':'La reforma de 1997 la permite, pero solo por delitos cometidos después.'):'Hay una circular roja de Interpol a tu nombre y la policía local ya sabe dónde vives. Probabilidad de que se concrete: '+lbl(probExt())+'.'),
+      o:[{t:'Resistir en los tribunales',f:()=>{ const q=S.ext157; if(!q) return ''; const m=Math.round(escala()*.4); S.efectivo-=Math.min(Math.max(0,S.efectivo),m); q.estado='proceso'; q.abog=1; q.resuelve=S.anio+ri(1,3); return 'Contrataste a los mejores abogados ('+fmt(m)+'). El proceso tomará entre uno y tres años; mientras tanto estás libre.'; }},
+         {t:'Entregarte voluntariamente',f:()=>{ const q=S.ext157; if(!q) return ''; q.entrega=true; const caso=casoMia(); if(caso&&isFinite(caso.evidencia)) caso.evidencia=Math.max(0,caso.evidencia-8); extraditar(); return 'Te presentaste. Colaborar te dejó mejor posicionado en el juicio.'; }},
+         {t:'Irte al exilio',f:()=>{ setTimeout(()=>escenaExilio157(),30); return ''; }},
+         {t:'Mover tus contactos y la diplomacia',f:()=>{ const q=S.ext157, po=pol(), cr=po&&po.pres?po.pres.credito:0; if(!q) return ''; if(hostCol&&cr>=30){ q.presion=true; if(po&&po.pres) po.pres.credito=Math.max(0,po.pres.credito-30); q.estado='proceso'; q.resuelve=S.anio+ri(1,3); return 'Tu influencia en el Gobierno pesa: la cancillería "estudia con cuidado" el pedido.'; } q.presion=chance(.3); q.estado='proceso'; q.resuelve=S.anio+ri(1,3); return q.presion?'Alguien con peso llamó a alguien. Quedó "en estudio".':'Nadie te contestó: el proceso sigue su curso.'; }}]}; }
+  function resolverExt(){ const x=S.ext157; if(!x||x.estado!=='proceso'||S.anio<x.resuelve) return null; const p=probExt(x);
+    if(chance(p)){ return {p:9,c:()=>!!S.ext157,t:()=>'<b>Concedieron la extradición.</b> El tribunal de '+esc(x.pais==='Colombia'?x.origen:x.pais)+' firmó la orden: te entregan en pocos días.',o:[{t:'Presentarte con tus abogados',f:()=>{ extraditar(); return 'Fuiste entregado a '+esc(S.p.ciudad)+'.'; }},{t:'Intentar huir antes de que te lleven',f:()=>{ const L=refugios(); if(!L.length||!chance(.35)) { extraditar(); return 'La fuga falló: te detuvieron en el aeropuerto.'; } return irExilio(L[0],x.motivo); }}]}; }
+    x.estado='negada'; x.seguro=true; return {p:9,c:()=>!!S.ext157,t:()=>'<b>Negaron la extradición.</b> El tribunal de '+esc(x.pais)+' consideró que no se cumplían los requisitos del tratado. Eres libre mientras sigas en este país.',o:[{t:'Quedarte',f:()=>'Seguirás aquí, con la circular roja viva: si sales a otro país, te pueden detener.'}]}; }
+  function escenaExilio157(){ const L=refugios(), reab=()=>{ cerrarModal(); render(); };
+    escena({rubro:'Exilio',titulo:'¿A dónde te vas?',ancho:true,cerrable:true,clase:'car157',cuerpo:'Un país sin tratado que lo obligue a entregarte, y con un banco que no pregunte. Allá no puedes dirigir tus compañías de Colombia en persona y te pueden encontrar.',
+      opciones:L.map(r=>({t:r.g.n+' · '+r.g.pais+' · '+fmt(r.costo),cat:'riesgo',d:'Riesgo de que te entreguen: '+lbl(r.p)+'. '+(r.g.d||''),dis:S.efectivo<r.costo?'No tienes '+fmt(r.costo):null,cerrar:false,run:()=>{ cerrarModal(); const m=irExilio(r,(S.ext157&&S.ext157.motivo)||''); log(m); render(); }}))}); }
+  function escenaExtradicion157(){ const x=S.ext157; if(!x){ if(OLD_PENAL) OLD_PENAL(); return; } const hostCol=x.pais==='Colombia'||x.host==='Colombia', p=probExt(x), po=pol(), reab=()=>{ cerrarModal(); render(); escenaExtradicion157(); };
+    const ops=[];
+    if(x.estado==='solicitud') { const ev=evExtradicion(); ev.o.forEach(o=>ops.push({t:typeof o.t==='function'?o.t():o.t,cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); const r=o.f(); if(r) log(r); render(); }})); }
+    if(x.estado==='proceso') { const m=Math.round(escala()*.3); ops.push({t:'Reforzar la defensa · '+fmt(m),cat:'riesgo',d:'Más abogados y peritos. Baja la probabilidad de que concedan la extradición.',dis:S.efectivo<m?'No tienes '+fmt(m):(x.abog>=3?'Ya tienes el mejor equipo':null),cerrar:false,run:()=>{ S.efectivo-=m; x.abog=(x.abog||0)+1; reab(); }}); ops.push({t:'Entregarte voluntariamente',cat:'riesgo',cerrar:false,run:()=>{ x.entrega=true; cerrarModal(); extraditar(); render(); }}); ops.push({t:'Irte al exilio',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); escenaExilio157(); }}); }
+    if(x.estado==='negada'||x.estado==='exilio'||x.estado==='asilo'){ ops.push({t:'Entregarte y volver al proceso',cat:'riesgo',d:'Entregarte antes de que te encuentren mejora tu posición.',cerrar:false,run:()=>{ x.entrega=true; cerrarModal(); extraditar(); render(); }}); ops.push({t:'Cambiar de refugio',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); escenaExilio157(); }});
+      const cr=po&&po.pres?po.pres.credito:0; if(cr>=50) ops.push({t:'Pedir un indulto o una amnistía',cat:'riesgo',d:'Tu influencia en el Gobierno lo permite: gasta 50 de crédito. Probabilidad 35%.',cerrar:false,run:()=>{ po.pres.credito=Math.max(0,po.pres.credito-50); if(chance(.35)){ S.ext157=null; if(casoMia()) S.penal.caso=null; S.penal.fugado=false; log('<b>El Gobierno firmó un indulto.</b> Puedes volver y el proceso se cerró.','bien'); } else log('El indulto no salió: "políticamente inviable".','mal'); cerrarModal(); render(); }}); }
+    if(x.estado!=='asilo'&&(((po&&po.pres&&po.pres.rencor>=20))||(S.anio>=1948&&S.anio<=1957))) ops.push({t:'Pedir asilo político',cat:'riesgo',d:'Alegas persecución política'+(po&&po.pres&&po.pres.rencor>=20?': el Gobierno sabe que financiaste a otro.':'.')+' Si lo conceden, no te extraditan por delitos políticos. Probabilidad 40%.',cerrar:false,run:()=>{ if(chance(.4)){ x.asilo=true; x.estado='asilo'; log('Te concedieron asilo político en '+esc(x.pais)+'.','bien'); } else log('Negaron el asilo: "no se acreditó persecución política".','mal'); reab(); }});
+    ops.push({t:'El proceso penal y los recursos',cat:'riesgo',cerrar:false,run:()=>{ cerrarModal(); if(OLD_PENAL) OLD_PENAL(); }});
+    escena({rubro:'Justicia',titulo:x.estado==='exilio'?'En el exilio':x.estado==='asilo'?'Con asilo':x.estado==='negada'?'Extradición negada':x.estado==='proceso'?'La extradición en tribunales':'Piden tu extradición',ancho:true,cerrable:true,clase:'car157',
+      cuerpo:(hostCol?esc(x.origen)+' reclama a un colombiano que vive en Colombia. '+(S.anio<1979?'Aún no hay tratado.':S.anio<1991?'Hay tratado con Estados Unidos; decide el Gobierno.':S.anio<1998?'La Constitución de 1991 prohíbe extraditar colombianos.':'Solo por delitos cometidos después de 1997.'):'Colombia reclama a un colombiano que vive en '+esc(x.pais)+'. El tratado de ese país con Colombia '+(S.anio>=1980?'vigente':'de la época')+' deja un riesgo de entrega '+lbl(p)+'.')+(x.estado==='proceso'?' El tribunal resolverá hacia '+x.resuelve+'.':'')+(x.estado==='exilio'?' Llevas '+(S.anio-x.desde)+' año'+(S.anio-x.desde===1?'':'s')+' fuera; el delito prescribe a los '+(gr()>=8?25:15)+'.':''),
+      html:'<div class="k"><div><b>'+Math.round(p*100)+'%</b><span>de que te entreguen</span></div><div><b>'+esc(x.pais||'')+'</b><span>donde estás</span></div><div><b>'+(x.abog?x.abog:0)+'/3</b><span>nivel de tu defensa</span></div></div>',opciones:ops}); }
+  /* --- el exilio año a año --- */
+  function anualExilio(){ const x=S.ext157; if(!x) return; const anios=S.anio-x.desde;
+    if(x.estado==='exilio'||x.estado==='asilo'||x.estado==='negada'){
+      const gasto=Math.round(escala()*.04); S.efectivo-=Math.min(Math.max(0,S.efectivo),gasto); if(window.anotar147) window.anotar147('Abogados y seguridad en el exilio',-gasto);
+      if(/Colombia/.test(x.origen||'')) companias().forEach(e=>{ try{ if(presides(e)&&!e.presidente){ e.ingresos=Math.max(1,e.ingresos*.975); e.moral=clamp((e.moral||50)-3,0,100); } }catch(z){} });
+      S.p.felicidad=clamp((S.p.felicidad||60)-2,0,100); }
+    const lim=gr()>=8?25:15; if(anios>=lim&&(x.estado==='exilio'||x.estado==='asilo')){ log('<b>El delito prescribió.</b> Pasaron '+anios+' años: ya puedes volver sin que te detengan.','bien'); if(casoMia()) S.penal.caso=null; S.penal.fugado=false; S.ext157=null; return; } }
+  function eventosExilio(){ const x=S.ext157; if(!x||S._ev157===S.anio||!(x.estado==='exilio'||x.estado==='negada')) return null; const anios=S.anio-x.desde, po=pol();
+    if(po&&po.pres&&po.pres.credito>=40&&chance(.08)) return {p:7,c:()=>!!S.ext157,t:()=>'<b>Se habla de una amnistía.</b> Un amigo en el Gobierno cree que se puede incluir tu caso si lo pides ahora.',o:[{t:'Pedirlo (50 de crédito)',f:()=>{ po.pres.credito=Math.max(0,po.pres.credito-50); if(chance(.5)){ S.ext157=null; if(casoMia()) S.penal.caso=null; S.penal.fugado=false; return 'Quedaste incluido en la amnistía. Puedes volver.'; } return 'No alcanzaron los votos. Sigues afuera.'; }},{t:'No arriesgarte',f:()=>'Dejaste pasar la oportunidad.'}]};
+    if(chance(.04+anios*.008)) return {p:9,c:()=>!!S.ext157,t:()=>'<b>Te localizaron en '+esc(x.ciudad)+'.</b> La policía local detuvo a un colombiano con tu nombre. La circular roja funcionó.',o:[{t:'Resistir la extradición con tus abogados',f:()=>{ x.estado='proceso'; x.abog=1; x.resuelve=S.anio+ri(1,2); return 'Empieza un nuevo proceso de extradición. Esta vez estás detenido mientras se define.'; }},{t:'Escapar a otro refugio',f:()=>{ const L=refugios(); if(!L.length||!chance(.5)) return 'Te encontraron en el aeropuerto. '+(function(){ x.estado='proceso'; x.abog=1; x.resuelve=S.anio+1; return 'Empieza el proceso de extradición.'; })(); return irExilio(L[0],x.motivo); }}]};
+    if(chance(.05)) return {p:6,c:()=>!!S.ext157,t:()=>'<b>Cambió el gobierno de '+esc(x.pais)+'.</b> El nuevo ministro del interior quiere congraciarse con Colombia y revisa los casos de extranjeros con circular roja.',o:[{t:'Mover tus contactos locales',f:()=>{ S.efectivo-=Math.round(escala()*.15); return 'Pagaste a los intermediarios correctos. Te dejaron quieto por ahora.'; }},{t:'Cambiar de refugio',f:()=>{ const L=refugios(); return L.length?irExilio(L[0],x.motivo):'No había a dónde ir.'; }}]};
+    return null; }
+  /* --- el año --- */
+  function anual(){ if(!ACTIVO()||nino()) return; sync(); const c=C(); let ev=null;
+    if(c.reg) anualPrision();
+    // el caso y el lugar donde vives: ¿te lo reclaman?
+    const caso=casoMia(), h=jur(), o=origen();
+    if(S.ext157&&S.ext157.ciudad!==S.p.ciudad&&['negada','exilio','asilo'].includes(S.ext157.estado)){ if(h.jurisdiccion===S.ext157.origen){ log('Volviste a '+esc(S.p.ciudad)+' y te detuvieron en el aeropuerto.','mal'); extraditar(); return; } S.ext157=null; }
+    if(caso&&!S.ext157&&o&&h.jurisdiccion!==o&&!(S.penal.prisionRestante>0)&&chance(clamp_(.3+gr()*.04,.1,.8))){ const x=abrirExtradicion(); ev=evExtradicion(); }
+    else if(S.ext157&&S.ext157.estado==='proceso'){ ev=resolverExt(); }
+    if(S.ext157) anualExilio();
+    if(!S.ext157&&caso&&!c.pre&&!c.medida&&gr()>=5&&!(S.penal.prisionRestante>0)&&o===h.jurisdiccion&&chance(.35)&&!ev) ev=evMedida();
+    if(!ev&&c.reg&&chance(.22)) ev=evPrision();
+    if(!ev) ev=eventosExilio();
+    if(c.cond&&S.anio>c.cond.hasta){ log('Terminó tu libertad condicional.','bien'); c.cond=null; } else if(c.cond&&(S.penal.riesgo||0)>60&&chance(.12)){ S.penal.prisionRestante=Math.max(1,Math.ceil(c.cond.r*.5)); c.cond=null; log('<b>Te revocaron la libertad condicional</b> por la sospecha de nuevos delitos.','mal'); sync(); }
+    if(ev&&S._ev157!==S.anio){ S._ev157=S.anio; cola.push(ev); } }
+  /* --- enganches --- */
+  let OLD_PENAL=null;
+  function wrapProceso(){ const old=window.escenaProcesoPenal; if(typeof old!=='function'||old.__v157) return; OLD_PENAL=old;
+    window.escenaProcesoPenal=function(){ try{ if(!ACTIVO()||nino()) return old.apply(this,arguments); sync(); const x=S.ext157, c=C();
+      if(x&&['exilio','negada','asilo','proceso','solicitud'].includes(x.estado)) return escenaExtradicion157();
+      if((S.penal.prisionRestante>0&&!S.penal.penaMuerte)||c.pre) return escenaCarcel157(); }catch(e){ console.error(e); }
+      return old.apply(this,arguments); }; window.escenaProcesoPenal.__v157=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.escenaProcesoPenal[k]=true; }); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA157_PASO) return; window.__SA157_PASO=true;
+    window.pasarAnio=function(){ try{ if(ACTIVO()&&!nino()){ sync(); const c=C(); if(c.reg&&S.penal){ const r=c.reg, p=c.programa; if(r==='domiciliaria'||r==='especial'||(p==='gestionar'&&r!=='alta')) S.penal.gestionRemota=true; } } }catch(e){}
+      const c0=ACTIVO()&&!nino()?C():null, pen=!!(c0&&c0.reg&&c0.pre&&!(S.penal.prisionRestante>0)&&!(c0.reg==='domiciliaria'||c0.reg==='especial'||(c0.programa==='gestionar'&&c0.reg!=='alta')));
+      const r=old.apply(this,arguments); try{ if(pen&&S.emp){ S.emp.ingresos=Math.max(1,S.emp.ingresos*rnd(.97,.995)); S.emp.eficiencia=clamp((S.emp.eficiencia||50)-ri(1,3),0,100); } if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapMov(){ const old=window.movidasBase; if(typeof old!=='function'||window.__SA157_MOV) return; window.__SA157_MOV=true;
+    window.movidasBase=function(){ let n=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()){ const c=C(); if(c.reg&&REG[c.reg]) n=Math.max(1,n-REG[c.reg].mov); } }catch(e){} return n; }; }
+  function wrapAcc(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA157_ACC) return; window.__SA157_ACC=true;
+    window.listaAcciones=function(){ try{ if(ACTIVO()&&!nino()) sync(); }catch(e){} return old.apply(this,arguments); }; }
+  function init157(){ wrapProceso(); wrapPaso(); wrapMov(); wrapAcc(); Object.assign(window,{escenaCarcel157,escenaExtradicion157,escenaExilio157,sync157:sync,anual157:anual,fugarse157:fugarse,REGIMENES_157:REG,PROGRAMAS_157:PROG,carcel157:C,sugeridoCarcel157:sugerido,probExt157:probExt,extraditar157:extraditar,abrirExtradicion157:abrirExtradicion,refugios157:refugios,evMedida157:evMedida,resolverExt157:resolverExt}); }
+  setTimeout(init157,40); setTimeout(init157,220); setTimeout(init157,650); setTimeout(init157,950);
+  window.__SA157={version:V157};
 })();
 </script>
 
