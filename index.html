@@ -1345,7 +1345,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v172</div>
+<div class="version-badge" id="versionBadge">v174</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4907,13 +4907,13 @@ function escenaMatrimonioEnCasa(){
       run:()=>{
         p.casadoConmigo=true;
         S.familia.pareja={nombre:nombrePariente(p), rol:p.oficio, sexo:p.sexo, edad:p.edad,
-          casados:true, paciencia:clamp(55+p.afecto*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
+          casados:true, paciencia:clamp(55+(p.afecto||50)*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
           casa:{apellido:S.dinastia,prestigio:prestigio()}, afecto:p.afecto, porInteres:true,
           separacionBienes:false, esPrima:true, pid:p.pid};
         // lo de la otra rama se queda del mismo lado
         const entra=(p.caudal||0)*.45;
         S.efectivo+=entra;
-        p.caudal-=entra;
+        p.caudal=(p.caudal||0)-entra;
         S.endogamia=(S.endogamia||0)+1;
         const lejano=['primo segundo','prima segunda'].includes(p.rel);
         parientesVivos().forEach(x=>x.afecto=clamp(x.afecto+10,0,100));
@@ -5231,6 +5231,16 @@ function generarParentela(){
   P.forEach(x=>{ x.caudal=caudalInicial(x.rel,origen,x.edad); asignarVia(x); });
   S.parientes=P; PARIENTES_EN_CURSO=null;
 }
+/* nadie en la familia se llama igual: si dos parientes coinciden en nombre y apellido, el segundo cambia de nombre */
+function nombresUnicosParientes(){
+  const vistos=new Set();
+  (S.parientes||[]).forEach(x=>{ let k; try{ k=nombrePariente(x); }catch(e){ return; } let n=0;
+    while(vistos.has(k)&&n++<25){ try{ x.nombre=nombreLocal(S.p.ciudad,x.sexo==='m'?'m':'h'); k=nombrePariente(x); }catch(e){ break; } }
+    /* una familia grande agota los nombres de la época: entonces el nombre se vuelve compuesto */
+    if(vistos.has(k)){ const med=x.sexo==='m'?['María','Isabel','Elena','Paula','Lucía','Inés','Teresa','Rosa']:['José','Antonio','Luis','Carlos','Felipe','David','Esteban','Camilo','Ignacio','Rafael']; const base=x.nombre; let j=0;
+      while(vistos.has(k)&&j<med.length){ x.nombre=base+' '+med[j++]; try{ k=nombrePariente(x); }catch(e){ break; } } }
+    vistos.add(k); });
+}
 
 /* Al pasar a la siguiente generación, la familia se reacomoda:
    tus hermanos son los tíos de tu heredero, tus sobrinos sus primos. */
@@ -5316,7 +5326,7 @@ function terminosPretendiente(pr){
 function desposar(pr,porInteres){
   S.familia.pareja={
     nombre:pr.nombre, rol:pr.rol, sexo:pr.sexo, edad:pr.edad, casados:true,
-    paciencia:clamp(45+pr.afecto*.4,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
+    paciencia:clamp(45+(pr.afecto||50)*.4,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
     casa:pr.casa, afecto:pr.afecto, porInteres:!!porInteres, separacionBienes:false
   };
   if(pr.dote>0){ S.efectivo+=pr.dote; }
@@ -5916,7 +5926,7 @@ function iniciar(cfg,legado){
     bienes:(legadoValido&&Array.isArray(legado.bienes))?legado.bienes:[],
     hogar:null,
     familia:{pareja:null,hijos:legado?[]:[],amantes:[]},
-    macro:{colcap:_ep.macro.colcap,usd:_ep.macro.usd,inflacion:_ep.macro.inflacion,tasa:_ep.macro.tasa,ciclo:_ep.macro.ciclo},
+    macro:(legadoValido&&legado.macro&&typeof legado.macro==='object'&&isFinite(legado.macro.usd)&&isFinite(legado.macro.colcap))?Object.assign({},legado.macro):{colcap:_ep.macro.colcap,usd:_ep.macro.usd,inflacion:_ep.macro.inflacion,tasa:_ep.macro.tasa,ciclo:_ep.macro.ciclo},
     legado:legadoValido&&legado.legado&&typeof legado.legado==='object'?legado.legado:{hitos:[],pico:0,ancestros:[]},
     casa:legadoValido&&legado.casa?legado.casa:{prestigio:({popular:4,media:12,comercio:24,elite:52})[cfg.origen]||10},
     parientes:legadoValido&&Array.isArray(legado.parientes)?legado.parientes:[],
@@ -5983,6 +5993,7 @@ function iniciar(cfg,legado){
     S.hogar.ciudad=casaHeredada.ciudad; S.hogar.zona=casaHeredada.zona!==undefined?casaHeredada.zona:S.hogar.zona; }
   else if(legado) S.hogar.conLosPadres=false;
   if(!S.parientes.length) generarParentela();
+  try{ nombresUnicosParientes(); }catch(e){}
   if(!S.rivales||!S.rivales.length) generarRivales();
   asegurarBolsa();
   asegurarGrupo();
@@ -7027,8 +7038,9 @@ function pasarAnio(){
   m.ciclo=clamp(m.ciclo*.55+rnd(-.09,.09),-.18,.18);
   m.inflacion=clamp(m.inflacion*.6+rnd(.02,.09)*.4+(m.ciclo>0?.004:-.002),.015,.22);
   m.tasa=clamp(m.inflacion+rnd(.015,.05),.03,.18);
-  m.usd=clamp(m.usd*(1+m.inflacion-.03-m.ciclo*.5+rnd(-.06,.07)),2600,9500);
-  m.colcap=Math.round(clamp(m.colcap*(1+m.ciclo*1.2+rnd(-.08,.1)),700,9000));
+  const bd173=(typeof window.bandaMacro173==='function')?window.bandaMacro173(S.anio):{usd:[2600,9500],col:[700,9000]};
+  m.usd=clamp(m.usd*(1+m.inflacion-.03-m.ciclo*.5+rnd(-.06,.07)),bd173.usd[0],bd173.usd[1]);
+  m.colcap=Math.round(clamp(m.colcap*(1+m.ciclo*1.2+rnd(-.08,.1)),bd173.col[0],bd173.col[1]));
 
   /* ingresos personales: una condena suspende el trabajo activo */
   let ingreso=0;
@@ -7142,7 +7154,7 @@ function pasarAnio(){
   /* familia */
   if(S.familia.pareja){
     const desatendida = (c.ruta==='fundador'? 8:4) + (S.p.felicidad<40?6:0);
-    S.familia.pareja.paciencia=clamp(S.familia.pareja.paciencia-desatendida+ri(0,6),0,100);
+    S.familia.pareja.paciencia=clamp((isFinite(S.familia.pareja.paciencia)?S.familia.pareja.paciencia:60)-desatendida+ri(0,6),0,100);
     if(S.familia.pareja.paciencia<12&&S.familia.pareja.casados&&!S.familia.pareja.divorcioEnCurso&&chance(.45)){
       const nom=S.familia.pareja.nombre;
       S.familia.pareja.divorcioEnCurso=true;
@@ -7217,7 +7229,7 @@ function correrEmpresa(res,cual){
   if(rb.marca) e.marca=clamp((e.marca||50)+rb.marca,0,100);
   // quien esté al frente decide cuánto crece
   if(presides(e)) { /* la diriges tú */ }
-  else if(e.presidente) g += (e.presidente.capaz-5)*.013;
+  else if(e.presidente) g += ((isFinite(e.presidente.capaz)?e.presidente.capaz:5)-5)*.013;
   else g -= .055;
   if(e.presidente&&e.presidente.sueldo){
     const sueldoPres=e.presidente.sueldo;
@@ -7306,6 +7318,7 @@ function juntaAnual(){
 }
 function destituir(){
   const e=S.emp;
+  if(!e){ S.destitucionAviso=0; return; }
   Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:50});
   const nuevo=nombreLocal(S.p.ciudad,'h')+' '+apellidoCiudad(S.p.ciudad);
   e.ceoExterno=nuevo;
@@ -8005,7 +8018,7 @@ function heredar(h,frac,vivo,pleito){
     epoca:S.epoca,
     parientes:reacomodarParentela(h),
     sociedades:(S.sociedades||[]).map(x=>({...x})),
-    rivales:S.rivales, tension:S.tension, gobierno:S.gobierno, pleito:S.pleito, gremios:S.gremios, divisas:S.divisas, embarazos:S.familia.embarazos||[],
+    rivales:S.rivales, tension:S.tension, macro:S.macro?JSON.parse(JSON.stringify(S.macro)):null, gobierno:S.gobierno, pleito:S.pleito, gremios:S.gremios, divisas:S.divisas, embarazos:S.familia.embarazos||[],
     tesoreria:S.tesoreria, coberturas:S.coberturas, endogamia:S.endogamia, bancoFamilia:S.bancoFamilia,
     fisco:S.fisco, fideicomiso:S.fideicomiso,
     familyOffice:S.familyOffice?JSON.parse(JSON.stringify(S.familyOffice)):null,
@@ -12089,7 +12102,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
             if(e.presidente&&e.presidente.tipo==='fundador') e.presidente=null;
             log('Dejaste de pagarte un salario en '+esc(e.nombre)+'.');
           } else {
-            e.presidente={nombre:S.p.nombre+' '+S.p.apellido,tipo:'fundador',sueldo:t.monto};
+            e.presidente={nombre:S.p.nombre+' '+S.p.apellido,tipo:'fundador',capaz:5,sueldo:t.monto};
             log('Te asignaste un salario de '+fmt(t.monto)+' al año como presidente de <b>'+esc(e.nombre)+'</b>.','hito');
           }
           S.mov--;
@@ -23698,8 +23711,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const old=window.listaAcciones; if(typeof old!=='function'||window.__SA110_ACC) return;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ if(window.__crudo91&&Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())&&!A.some(a=>a.t==='Comprar un negocio')){
-        const barato=Math.min(...disponibles().map(precio));
-        A.push({t:'Comprar un negocio',cat:'casa',d:'Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial… Desde '+fmt(barato)+'. Se opera, no se arrienda.',mov:1,modal:true,
+        const lista110=disponibles().map(precio).filter(x=>isFinite(x)&&x>0), barato=lista110.length?Math.min(...lista110):0;
+        if(lista110.length) A.push({t:'Comprar un negocio',cat:'casa',d:'Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial… Desde '+fmt(barato)+'. Se opera, no se arrienda.',mov:1,modal:true,
           dis:S.efectivo<barato*.35?'Necesitas al menos '+fmt(barato*.35):null,run:()=>escenaComprar110()}); } }catch(e){}
       return A; };
     window.__SA110_ACC=true;
@@ -28804,7 +28817,7 @@ install();setTimeout(install,1200);
   const bancadaTotal=()=>{ const p=P(); let b=Math.round(p.bancada); p.cargos.forEach(c=>{ if(c.nivel==='camara') b+=1; if(c.nivel==='senado') b+=3; }); return b; };
   /* --- el presidente --- */
   function asegurarPres(){ const p=P(); if(p.pres) return p.pres;
-    const g=S.gobierno, cand=vivos(S.anio).filter(x=>x.gob===g.id); const par=cand.length?pick(cand):pickW(vivos(S.anio),x=>x.peso+.1), c=nuevoCand(par,S.anio);
+    const g=S.gobierno, cand=vivos(S.anio).filter(x=>x.gob===g.id); const par=cand.length?pick(cand):(pickW(vivos(S.anio),x=>x.peso+.1)||{id:'sinpartido',n:'Sin partido',ideo:[0,0],gob:g.id,peso:.5}), c=nuevoCand(par,S.anio);
     p.pres={id:c.id,nombre:c.nombre,sexo:c.sexo,partido:par.id,gob:g.id,integ:c.integ,cumple:c.cumple,desde:g.desde,hasta:g.desde+4,credito:0,aporte:0,rencor:0,reelecto:false}; return p.pres; }
   function renovarCongreso(g){ const p=P(), a=S.anio, V=vivos(a), tot=a>=1991?268:a>=1958?200:120;
     const w=V.map(x=>(frente(a)&&x.id!=='liberal'&&x.id!=='conservador'?0:1)*x.peso*rnd(.7,1.3)*(x.id===g.partido?1.5:1)), sw=w.reduce((s,x)=>s+x,0)||1, esc_={};
@@ -31642,6 +31655,124 @@ install();setTimeout(install,1200);
   function init172(){ Object.assign(window,{anacronismos172:anacronismos,TERMINOS_ERA_172:TERMINOS}); }
   setTimeout(init172,40); setTimeout(init172,220); setTimeout(init172,650); setTimeout(init172,950);
   window.__SA172={version:V172};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v173 · AUDITORÍA DE BALANCE: LO QUE ENCONTRÓ UN BOT QUE JUEGA VIDAS ENTERAS
+   Un bot jugó 60 años en cada una de las 8 épocas, con los 4 orígenes, por
+   la interfaz real, y midió cifras año a año. Esto es lo que apareció y se
+   arregló:
+   - El tipo de cambio y el COLCAP saltaban en el primer año a rangos de hoy
+     (dólar de 1,0 a 2.600 en 1800; de 18 a 2.600 en 1970), y cualquier
+     divisa guardada se revaluaba miles de veces (en 1800, una exportación
+     de 20 millones valía 52.000 millones al cerrar el año). Ahora cada
+     época tiene su banda de cambio y de bolsa, que sigue la historia.
+   - Crecimiento NaN: una compañía en la que te asignaste un sueldo de
+     presidente, y que dejabas de presidir (otra compañía, otro trabajo),
+     calculaba la capacidad de un presidente sin capacidad y se reiniciaba
+     en 100 de ingresos con el historial dañado.
+   - La paciencia de la pareja podía quedar en NaN si se casaba alguien sin
+     "afecto" registrado.
+   - Al cerrarse una votación de destitución sin compañía, se rompía.
+   - En 1800 "Comprar un negocio" decía "desde $Infinity T": no había
+     negocios en esa época. Ahora no aparece.
+   - Una red de seguridad: si la paciencia, el ánimo o la salud se vuelven
+     no numéricos, se reparan al cerrar el año (y quedan avisados en consola).
+   ========================================================================== */
+(function(){
+  const V173='v173';
+  /* [año, valor] para el cambio (pesos por dólar) y el COLCAP; se interpola geométricamente */
+  const USD=[[1800,1],[1850,1.2],[1900,2],[1950,2.5],[1970,18],[1990,510],[1995,830],[2000,2088],[2005,2320],[2010,1900],[2015,2740]];
+  const COL=[[1800,40],[1850,60],[1900,80],[1950,100],[1970,180],[1990,420],[2000,1000],[2010,1500],[2015,1300]];
+  function interp(T,a){ if(!isFinite(a)||a<=T[0][0]) return T[0][1]; for(let i=1;i<T.length;i++){ if(a<=T[i][0]){ const p=T[i-1], q=T[i]; return p[1]*Math.pow(q[1]/p[1],(a-p[0])/(q[0]-p[0])); } } return T[T.length-1][1]; }
+  /* las bandas dentro de las que se mueven el cambio y la bolsa en cada año; desde 2015 las de siempre */
+  function banda(a){ if(isFinite(a)&&a>=2015) return {usd:[2600,9500],col:[700,9000]}; const u=interp(USD,a), c=interp(COL,a), w=(!isFinite(a)||a<1990)?[.75,1.7]:[.6,2.2]; return {usd:[u*w[0],u*w[1]],col:[c*.5,c*2.5]}; }
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  function sanear(){ if(!ACTIVO()) return 0; let n=0; const arr=(o,ks,v)=>{ if(!o) return; ks.forEach(k=>{ if(!isFinite(o[k])){ o[k]=v; n++; } }); };
+    arr(S.familia&&S.familia.pareja,['paciencia','exigencia'],60); arr(S.p,['felicidad','salud','reputacion','redes'],50);
+    if(n){ try{ console.warn('v173: se repararon '+n+' valores no numéricos del personaje o de la pareja'); }catch(e){} } return n; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA173_PASO) return; window.__SA173_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ sanear(); }catch(e){ console.error(e); } return r; }; }
+  function init173(){ wrapPaso(); Object.assign(window,{bandaMacro173:banda,interpMacro173:interp,saneaPersonaje173:sanear,ANCLAS_CAMBIO_173:USD,ANCLAS_COLCAP_173:COL}); }
+  /* la banda se necesita desde el primer cierre de año: se registra ya, sin esperar */
+  init173(); setTimeout(init173,40); setTimeout(init173,220); setTimeout(init173,650); setTimeout(init173,950);
+  window.__SA173={version:V173};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v174 · OFICIOS HUMILDES
+   Antes de las fábricas casi no había en qué emplearse sin estudios: en 1800
+   un personaje humilde solo veía "Sector público" y "Academia", cerrados
+   para un bachiller. Ahora hay trabajos que no piden estudio, con la época
+   que les toca:
+   - Aguatero, repartidor de leche, panadero, arriero, boga del Magdalena,
+     lavandera, costurera, criada de casa, peón de hacienda, vendedor de
+     plaza, zapatero, albañil, tendero y voceador de periódicos.
+   - Cada oficio existe solo mientras existió (el aguatero hasta que llega el
+     acueducto, el boga hasta el vapor, el arriero hasta el camión), y los
+     hay de hombre, de mujer y de cualquiera.
+   - Cada uno sube en cuatro peldaños con nombre propio (ayudante de aguatero,
+     aguatero, aguatero con burro y tinajas, dueño de una ruta de aguadores),
+     con el ascenso, el salario y el desempeño de siempre.
+   - Es la entrada de quien empieza sin nada: paga poco pero es un sueldo, y
+     desde 1900 convive con el trabajo de planta.
+   ========================================================================== */
+(function(){
+  const V174='v174';
+  const TIT='Emplearte: un oficio';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const SAL=[8,13,20,32];                     // al año, en millones: poco (un hogar humilde gasta 6,5), pero es un sueldo y alcanza para ahorrar
+  /* sx: 'h' hombre · 'm' mujer · null cualquiera. de/ha: años en que existió. */
+  const OFICIOS=[
+    {id:'aguatero',n:'aguatero',sx:'h',de:1800,ha:1925,emp:['una cuadrilla de aguateros del barrio','las pilas de agua de la plaza'],niv:['Ayudante de aguatero','Aguatero','Aguatero con burro y tinajas','Dueño de una ruta de aguadores'],d:'Cargar agua de la pila o del río hasta las casas. Pesado, pero todos los días hay quien la compre.'},
+    {id:'lechero',n:'repartidor de leche',sx:null,de:1800,ha:1972,emp:['una vaquería de las afueras','la lechería de un hacendado'],niv:['Ayudante de lechero','Repartidor de leche','Repartidor con ruta propia','Dueño de una vaquería'],d:'Salir de madrugada con las cantinas y dejarle la leche a cada puerta antes de que despierten.'},
+    {id:'panadero',n:'panadero',sx:null,de:1800,ha:1975,emp:['una panadería del barrio','el horno de la esquina'],niv:['Aprendiz de panadero','Panadero','Maestro panadero','Dueño de una panadería'],d:'Amasar de noche y hornear antes del amanecer. El pan siempre se vende.'},
+    {id:'arriero',n:'arriero',sx:'h',de:1800,ha:1955,emp:['una recua de mulas que sale hacia el Magdalena','un arriero de diez mulas'],niv:['Peón de arria','Arriero','Mayoral de recua','Dueño de una recua'],d:'Llevar carga a lomo de mula por caminos de herradura, semanas de ida y de vuelta.'},
+    {id:'boga',n:'boga del Magdalena',sx:'h',de:1800,ha:1915,emp:['los champanes del Magdalena','un patrón de champán en Honda'],niv:['Boga','Boga de proa','Patrón de champán','Dueño de un champán'],d:'Remar y palanquear río arriba, entre el calor y los mosquitos, hasta que lleguen los vapores.'},
+    {id:'lavandera',n:'lavandera',sx:'m',de:1800,ha:1965,emp:['las casas grandes de la calle real','el lavadero del río'],niv:['Ayudante de lavandera','Lavandera','Lavandera de casas grandes','Dueña de un lavadero'],d:'Lavar y planchar para las familias del pueblo, con las manos en el agua todo el día.'},
+    {id:'costurera',n:'costurera',sx:'m',de:1800,ha:1985,emp:['un taller de costura del centro','la modista de la plaza'],niv:['Aprendiz de costura','Costurera','Maestra costurera','Dueña de un taller de costura'],d:'Coser, remendar y bordar por encargo. La buena mano se hace una clientela.'},
+    {id:'criada',n:'criada de casa',sx:'m',de:1800,ha:1980,emp:['una casa de familia de bien','la casa de un comerciante'],niv:['Criada','Cocinera','Ama de llaves','Mayordoma de casa grande'],d:'Servir en una casa: cocina, patio y niños, con cuarto y comida, y poca paga.'},
+    {id:'peon',n:'peón de hacienda',sx:'h',de:1800,ha:1965,emp:['una hacienda de la región','las tierras de un terrateniente'],niv:['Peón','Jornalero','Capataz','Mayordomo de hacienda'],d:'Trabajar la tierra de otro por jornal, con la cosecha y los ciclos del patrón.'},
+    {id:'plaza',n:'vendedor de plaza',sx:null,de:1800,ha:1990,emp:['la plaza de mercado','un puesto de la plaza'],niv:['Ayudante de puesto','Vendedor de plaza','Vendedor con puesto fijo','Dueño de un puesto grande'],d:'Vender fruta, verdura o telas en la plaza los días de mercado.'},
+    {id:'zapatero',n:'zapatero',sx:'h',de:1800,ha:1970,emp:['un taller de zapatería','el maestro zapatero de la calle del comercio'],niv:['Aprendiz de zapatero','Oficial zapatero','Maestro zapatero','Dueño de una zapatería'],d:'Aprender el oficio de cortar y coser cuero en el taller de un maestro.'},
+    {id:'albanil',n:'albañil',sx:'h',de:1800,ha:1980,emp:['una obra del pueblo','una cuadrilla de albañiles'],niv:['Peón de obra','Albañil','Maestro de obra','Contratista de obras pequeñas'],d:'Pegar adobe y ladrillo, levantar tapias y techar casas.'},
+    {id:'tendero',n:'tendero',sx:null,de:1800,ha:1990,emp:['una tienda de barrio','la pulpería de la esquina'],niv:['Ayudante de tienda','Dependiente','Encargado de tienda','Dueño de una tienda de barrio'],d:'Atender el mostrador, fiar con cuidado y saber quién paga.'},
+    {id:'voceador',n:'voceador de periódicos',sx:null,de:1880,ha:1980,emp:['la imprenta de un diario','un puesto de prensa'],niv:['Voceador de periódicos','Repartidor de prensa','Jefe de voceadores','Dueño de un puesto de prensa'],d:'Salir a la calle a gritar los titulares y vender el diario antes del mediodía.'}];
+  const ofi=id=>OFICIOS.find(o=>o.id===id);
+  const actual=()=>{ try{ return ofi(S.carrera&&S.carrera.oficio174); }catch(e){ return null; } };
+  const GEN=['Aprendiz','Oficial','Maestro','Maestro con taller propio'];
+  /* la ruta: cuatro peldaños cuyos nombres cambian con el oficio elegido */
+  function instalarRuta(){ try{ if(typeof RUTAS==='undefined'||RUTAS.oficio) return;
+      RUTAS.oficio={n:'Oficio humilde',niveles:[0,1,2,3].map(i=>({get n(){ const o=actual(); return o?o.niv[i]:GEN[i]; },s:SAL[i],edu:0}))}; }catch(e){ console.error(e); } }
+  const sexoP=()=>(S&&S.p&&S.p.sexo==='m')?'m':'h';
+  function disponibles(){ const sx=sexoP(), a=A(); return OFICIOS.filter(o=>a>=o.de&&a<=o.ha&&(!o.sx||o.sx===sx)); }
+  function empezar(o){ const c=S.carrera, p=S.p;
+    if(c.ruta&&c.ruta!=='desempleado') return false;
+    if(S.mov<1){ try{ aviso('No te quedan movidas este año.'); }catch(e){} return false; }
+    S.mov--; const techo=Math.min(2,(p.educacion>=1?1:0)+Math.floor((p.reputacion||0)/40)); const idx=Math.max(0,techo);
+    c.ruta='oficio'; c.nivel=idx; c.anios=0; c.desempeno=50+((p.atr&&p.atr.disciplina)||5)*2; c.oficio174=o.id; c.salarioExtra=0;
+    c.empleador=o.emp[Math.floor(Math.random()*o.emp.length)];
+    log('Empezaste como <b>'+E(o.niv[idx].toLowerCase())+'</b> en '+E(c.empleador)+'. Sueldo de '+fmt(SAL[idx])+' al año.','bien'); return true; }
+  function escenaOficios174(){ if(!ACTIVO()||nino()) return; const L=disponibles(); const ops=L.map(o=>({t:cap(o.n)+' · '+fmt(SAL[0])+' al año',cat:'empleo',d:o.d+' Entras como '+o.niv[0].toLowerCase()+' y puedes llegar a '+o.niv[3].toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); const ok=empezar(o); render(); return ok; }}));
+    escena({rubro:'Trabajo',titulo:'Un oficio para empezar',ancho:true,cerrable:true,cuerpo:'No piden estudios, pero tampoco pagan mucho. Es lo que hay para quien empieza sin nada: un sueldo, un oficio y, con los años, un puesto propio.',opciones:ops}); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top174) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&typeof RUTAS!=='undefined'&&RUTAS.oficio){ const k='Emplearte: '+RUTAS.oficio.n, i=L.findIndex(z=>z&&z.t===k);
+          if(i>=0){ const n=disponibles().length; if(!n) L.splice(i,1); else { const a=L[i]; a.t=TIT; a.d=n+' oficios que no piden estudios: aguateros, panaderos, lecheros, costureras y más, según la época. Pagan poco pero es un sueldo.'; a.dis=null; a.mov=1; a.modal=true; a.run=()=>escenaOficios174(); } } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top174=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA174_CAT) return; window.__SA174_CAT=true; window.catDe=function(t){ if(t===TIT) return 'empleo'; return old.apply(this,arguments); }; }
+  function init174(){ instalarRuta(); wrapAcciones(); wrapCat(); Object.assign(window,{OFICIOS_174:OFICIOS,oficiosDisponibles174:disponibles,escenaOficios174,empezarOficio174:empezar,SALARIOS_OFICIO_174:SAL}); }
+  init174(); setTimeout(init174,40); setTimeout(init174,220); setTimeout(init174,650); setTimeout(init174,950);
+  window.__SA174={version:V174};
 })();
 </script>
 
