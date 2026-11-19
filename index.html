@@ -1334,10 +1334,18 @@ svg.foto116{display:block;background:#1d2a23}
 .panel169{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .panel169 .apunte{margin:4px 0 8px}
 </style>
+<style id="estilos-v170">
+.sic170 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0 12px}
+.sic170 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.sic170 .k b{display:block;font-size:15px;font-family:var(--display)}
+.sic170 .k span{font-size:12px;color:var(--humo2)}
+.reg166 .ext170{margin-top:6px}
+.reg166 .ext170 .apunte{margin:4px 0}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v169</div>
+<div class="version-badge" id="versionBadge">v170</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -27979,12 +27987,12 @@ install();setTimeout(install,1200);
     b.ult={anio:S.anio,ingInt,comis,costoDep,perdida,opex,intBonos,util,moras,solv,liq,roe:util/Math.max(1,e.caja)}; b.hist.push([S.anio,Math.round(util)]); if(b.hist.length>40) b.hist.shift();
     // 5. el regulador y la confianza
     if(solv<solvMin()*.5){ intervenir(e,'la solvencia cayó a '+pct(solv)+', muy por debajo del mínimo'); return; }
-    if(solv<solvMin()&&S._ev151!==S.anio){ S._ev151=S.anio; cola.push(evCapitalizar(e)); return; }
+    if(solv<solvMin()&&S._ev151!==S.anio){ S._ev151=S.anio; cola.push(evCapitalizar(e)); try{ if(typeof window.requerimiento170==='function') window.requerimiento170(e); }catch(x){} return; }
     const pCorr=(liq<.12?.12:0)+(crisis>1.5?.05:0)+(solv<solvMin()*1.2?.05:0); if(S._ev151!==S.anio&&chance(pCorr*(S.anio>=1985?.5:1))){ S._ev151=S.anio; cola.push(evCorrida(e)); return; }
     if(!b.sarlaft&&S.anio>=1978&&S.anio-(b.calienteAviso||0)>=5&&chance(.12)&&S._ev151!==S.anio){ b.calienteAviso=S.anio; S._ev151=S.anio; cola.push(evCaliente(e)); return; }
     if(upac&&b.car.hipotecaria>totCar(b)*.25&&!b.upacAviso&&S._ev151!==S.anio){ b.upacAviso=1; S._ev151=S.anio; cola.push(evUpac(e)); }
   }
-  function intervenir(e,motivo){ const b=e.banco112; b.intervenido=S.anio; e.ceoExterno='la Superintendencia Financiera'; e.caja=Math.max(0,e.caja*.1); e.ingresos*=.35;
+  function intervenir(e,motivo){ try{ if(typeof window.intervencion170==='function') window.intervencion170(e,motivo); }catch(x){} const b=e.banco112; b.intervenido=S.anio; e.ceoExterno='la Superintendencia Financiera'; e.caja=Math.max(0,e.caja*.1); e.ingresos*=.35;
     S.p.reputacion=clamp(S.p.reputacion-12,0,100); try{ moverPrestigio(-8,'la intervención de su banco'); }catch(x){}
     log('<b>La Superintendencia Financiera intervino '+esc(e.nombre)+'</b>: '+esc(motivo)+'. Los ahorradores hacen fila'+(S.anio>=1985?'; Fogafín les responde hasta el tope del seguro de depósitos.':'.'),'mal'); hito('Intervinieron '+e.nombre); }
   const BK=()=>bancos().find(x=>x.nombre===S._b151);
@@ -28028,7 +28036,7 @@ install();setTimeout(install,1200);
     if(S.anio>=1990) ops.push({t:b.sarlaft?'Control de lavado de activos: activo':'Montar control de lavado de activos',cat:'riesgo',d:b.sarlaft?'Oficial de cumplimiento y revisión de clientes. Cuesta cada año.':'Sin él, la plata caliente llega sola, y con ella la Fiscalía.',dis:b.sarlaft?'Ya está montado':null,cerrar:false,run:()=>{ b.sarlaft=true; reab(); }});
     if(S.anio>=1995){ const m=Math.round(totDep(b)*.1); ops.push({t:'Emitir bonos por '+fmt(m),cat:'capital',d:'Plata a cinco años para prestar más, a la tasa del mercado más 2%.',dis:sinMov,cerrar:false,run:()=>{ S.mov--; b.bonos+=m; log('<b>'+esc(e.nombre)+'</b> emitió bonos por '+fmt(m)+'.'); reab(); }}); }
     const cap=Math.round(Math.max(10,rwa(b)*.02)); ops.push({t:'Capitalizar el banco ('+fmt(cap)+')',cat:'capital',d:'De tu bolsillo al patrimonio del banco. Sube la solvencia.',dis:S.efectivo<cap?'No tienes '+fmt(cap):null,cerrar:false,run:()=>{ S.efectivo-=cap; e.caja+=cap; reab(); }});
-    if(u&&u.util>0&&solv>solvMin()+.03){ const div=Math.round(u.util*.5*Math.max(0,Math.min(1,(solv-solvMin())/.05))); if(div>0) ops.push({t:'Repartir dividendos ('+fmt(div*miPct(e))+' para ti)',cat:'capital',d:'La mitad de la utilidad, si la solvencia lo permite.',cerrar:false,run:()=>{ e.caja-=div; S.efectivo+=div*miPct(e); log('<b>'+esc(e.nombre)+'</b> repartió '+fmt(div)+' en dividendos.','bien'); reab(); }}); }
+    if(u&&u.util>0&&solv>solvMin()+.03&&!((b.vigilancia||0)>=S.anio)){ const div=Math.round(u.util*.5*Math.max(0,Math.min(1,(solv-solvMin())/.05))); if(div>0) ops.push({t:'Repartir dividendos ('+fmt(div*miPct(e))+' para ti)',cat:'capital',d:'La mitad de la utilidad, si la solvencia lo permite.',cerrar:false,run:()=>{ e.caja-=div; S.efectivo+=div*miPct(e); log('<b>'+esc(e.nombre)+'</b> repartió '+fmt(div)+' en dividendos.','bien'); reab(); }}); }
     escena({rubro:'Tu banco',titulo:esc(e.nombre),ancho:true,cerrable:true,clase:'banco151',cuerpo:'Captas plata del público, la prestas y respondes por ella. El negocio es el margen; el riesgo es la mora, la liquidez y la confianza.',html,opciones:ops});
   }
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||window.__SA151_EMP) return; window.__SA151_EMP=true;
@@ -28037,7 +28045,7 @@ install();setTimeout(install,1200);
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ const a=Array.isArray(A)&&A.find(x=>x.t==='Tu banco'); if(a){ const e=bancos()[0]; if(e){ const b=B(e); a.d=esc(e.nombre)+': '+fmt(totDep(b))+' en depósitos, solvencia '+pct(e.caja/Math.max(1,rwa(b)))+'. Captación, cartera, tasas, provisiones, red y cumplimiento.'; a.run=()=>escenaBanco151(e); } } }catch(x){}
       return A; }; }
-  function init151(){ wrapEmpresa(); wrapAcciones(); Object.assign(window,{banco151:B,escenaBanco151,anualBanco151:anual,SEGMENTOS_151:SEG,usura151:usura}); }
+  function init151(){ wrapEmpresa(); wrapAcciones(); Object.assign(window,{banco151:B,escenaBanco151,anualBanco151:anual,SEGMENTOS_151:SEG,usura151:usura,solvMin151:solvMin,rwa151:rwa,intervenir151:intervenir,evCapitalizar151:evCapitalizar}); }
   setTimeout(init151,40); setTimeout(init151,220); setTimeout(init151,650);
   window.__SA151={version:V151};
 })();
@@ -30634,13 +30642,14 @@ install();setTimeout(install,1200);
   const regsDe=e=>REGS.filter(g=>A()>=g.desde&&(g.sect==='*'||g.sect.includes(e.sector))&&(!g.min||e.ingresos>=g.min));
   const SENS={financiero:1.5,seguros:1.3,salud:1.4,energia:1.2,logistica:1.1,mineria:1.15,alimentos:1.1};
   const tam=e=>clamp(Math.log10(Math.max(50,e.ingresos)/150)*.8+.5,.4,1.7);
-  const cumpl=e=>clamp(proc(e).control+(RE(e).cumpl||0)+(RE(e).oficial?8:0),0,100);
+  const ajReg170=e=>{ try{ return typeof window.ajusteCumplimiento170==='function'?window.ajusteCumplimiento170(e):0; }catch(x){ return 0; } };
+  const cumpl=e=>clamp(proc(e).control+(RE(e).cumpl||0)+(RE(e).oficial?8:0)+ajReg170(e),0,100);
   /* probabilidad de visita por año y nivel de riesgo para mostrar */
   function pVisita(e){ if(!regsDe(e).length) return 0; return clamp(.09*intensidad()*tam(e)*(SENS[e.sector]||1)*(1.5-cumpl(e)/100)+(((S.p&&S.p.escandalos)||0)*.01),0,.5); }
   const nivelRiesgo=e=>{ const p=pVisita(e); return p<.05?'bajo':p<.12?'medio':'alto'; };
   /* ==================== LAS VISITAS ==================== */
   const evento=(texto,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.p&&!S.muerto),t:()=>texto,o}); }catch(e){} };
-  function registrarVisita(e,g,res,monto){ const r=R(); r.visitas.push({anio:S.anio,emp:e.nombre,reg:g.n(S.anio),res,monto:Math.round(monto||0)}); r.visitas=r.visitas.slice(-30); const x=RE(e); x.visitas++; x.ult=S.anio; x.sanc+=monto||0; }
+  function registrarVisita(e,g,res,monto){ const r=R(); r.visitas.push({anio:S.anio,emp:e.nombre,reg:g.n(S.anio),res,monto:Math.round(monto||0)}); r.visitas=r.visitas.slice(-30); const x=RE(e); x.visitas++; x.ult=S.anio; x.sanc+=monto||0; try{ if(typeof window.visitaRegistrada170==='function') window.visitaRegistrada170(e,g,res,monto); }catch(y){ console.error(y); } }
   const multa=(e,monto)=>{ e.caja-=monto; e.utilidad-=monto; };
   function abogadoOK(){ return clamp(.42+qFO()*.07+(S.p.atr&&S.p.atr.intelecto?(S.p.atr.intelecto-5)/60:0),.2,.8); }
   function mordida(e,monto,ok){ S.sobornos=(S.sobornos||0)+1; if(chance(.5)){ return ok(); } try{ registrarDelito('soborno a funcionario',3,'intentó sobornar a un inspector'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; return null; }
@@ -30719,7 +30728,8 @@ install();setTimeout(install,1200);
     escena({rubro:'Regulación',titulo:'Regulación y cumplimiento de '+esc(e.nombre),ancho:true,cerrable:true,clase:'reg166',
       cuerpo:regs.length?'Quien te vigila hoy: '+regs.map(g=>esc(g.n(S.anio))+' ('+esc(g.ambito)+')').join('; ')+'.':'Todavía no hay quién vigile a una compañía como la tuya: en esta época el Estado casi no mira lo que pasa adentro.',
       html:'<div class="k"><div><b>'+Math.round(cumpl(e))+'/100</b><span>cumplimiento (control interno'+(x.oficial?' + oficial':'')+')</span></div><div><b><span class="riesgo166 '+riesgo+'">'+riesgo+'</span></b><span>riesgo de visita (≈'+Math.round(p*100)+'% al año)</span></div><div><b>'+fmt(x.sanc||0)+'</b><span>pagado en sanciones</span></div></div>'
-        +(hist.length?'<h4>Visitas y sanciones</h4><table class="libro">'+hist.map(v=>'<tr><td><b>'+v.anio+'</b> '+esc(cap(v.reg))+'<br><small>'+esc(v.res)+'</small></td><td style="text-align:right">'+(v.monto?fmt(v.monto):'—')+'</td></tr>').join('')+'</table>':'<div class="apunte">Todavía no ha pasado ninguna visita por '+esc(e.nombre)+'.</div>'),
+        +(hist.length?'<h4>Visitas y sanciones</h4><table class="libro">'+hist.map(v=>'<tr><td><b>'+v.anio+'</b> '+esc(cap(v.reg))+'<br><small>'+esc(v.res)+'</small></td><td style="text-align:right">'+(v.monto?fmt(v.monto):'—')+'</td></tr>').join('')+'</table>':'<div class="apunte">Todavía no ha pasado ninguna visita por '+esc(e.nombre)+'.</div>')
+        +(typeof window.extraRegulacion170==='function'?window.extraRegulacion170(e):''),
       opciones:ops}); }
   /* --- los enganches --- */
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top166) return;
@@ -31326,6 +31336,152 @@ install();setTimeout(install,1200);
       puedeTec169:puede,equiparCasa169:equipar,costoCasa169:costoCasa,anualTec169:anualCompania,pasoAnioTec169:pasoAnio,escenaTecnologia169,escenaCasa169,eventoFalla169:sucesos,llegadaTec169:llegada}); }
   setTimeout(init169,40); setTimeout(init169,220); setTimeout(init169,650); setTimeout(init169,950);
   window.__SA169={version:V169};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v170 · LA REGULACIÓN, CONECTADA
+   La regulación de v166 vivía al lado de lo demás. Ahora está dentro:
+   - Los BANCOS (v151): el cumplimiento de un banco depende de su
+     solvencia frente al mínimo, de si tiene control de lavado de activos y
+     de su mora. Una sanción grave de la Superfinanciera lo deja en
+     vigilancia especial tres años (sin repartir utilidades); si la
+     solvencia es justa, además le exige capital; y dos sanciones graves
+     seguidas con la solvencia por debajo del mínimo terminan en
+     intervención. Lo que la Superfinanciera le hace a tu banco queda en su
+     historial de visitas.
+   - Los CONTRATOS CON EL ESTADO (v156): desde 1923 la Contraloría mira a
+     quien le vende a las empresas públicas. Más contratos, más plata sucia
+     y más sobrefacturación, más riesgo. Un hallazgo fiscal en firme te
+     inhabilita para venderle al Estado y frena los contratos vigentes.
+   - Las COMPRAS: cada vez que compras un competidor, la SIC mira cuánto
+     sube tu cuota. Desde 2009 la integración se notifica antes de cerrar:
+     puede aprobarla, aprobarla con condiciones o negarla. Antes de 2009 se
+     revisa después. Cerrar sin notificar cuando hay que hacerlo cuesta una
+     multa por cerrar antes de tiempo.
+   - El consejero (v168) avisa de la solvencia de un banco, de la vigilancia
+     especial y del riesgo con la Contraloría.
+   ========================================================================== */
+(function(){
+  const V170='v170';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>fmt(Math.round(x));
+  const pct=x=>(Math.round(x*1000)/10)+'%';
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const sentar=e=>()=>{ try{ const i=comps().indexOf(e); if(i>=0){ sentarseEn(i); try{ negSel=i; }catch(x){} } }catch(x){} };
+  const evento=(t,o)=>{ try{ cola.push({p:9,c:()=>!!(S&&S.p&&!S.muerto),t:()=>t,o}); }catch(e){} };
+  const multa=(e,m)=>{ e.caja-=m; e.utilidad-=m; };
+  const abogadoOK=()=>{ try{ const a=S.familyOffice&&S.familyOffice.staff&&S.familyOffice.staff.abogado; const q=a?((a.capaz||5)>=8?2:1):0; return Math.max(.2,Math.min(.8,.42+q*.07+(S.p.atr&&S.p.atr.intelecto?(S.p.atr.intelecto-5)/60:0))); }catch(e){ return .45; } };
+  /* ---- el historial de visitas de v166 ---- */
+  function anotar(e,reg,res,monto){ try{ const r=window.estado166(), x=window.compania166(e); r.visitas.push({anio:A(),emp:e.nombre,reg,res,monto:Math.round(monto||0)}); r.visitas=r.visitas.slice(-30); x.visitas++; x.ult=A(); x.sanc+=monto||0; }catch(y){} }
+  /* ==================== LOS BANCOS ==================== */
+  const esBanco=e=>!!(e&&e.banco112&&!e.banco112.intervenido&&typeof window.banco151==='function'&&typeof window.rwa151==='function');
+  function solv(e){ try{ const b=window.banco151(e); return e.caja/Math.max(1,window.rwa151(b)); }catch(x){ return null; } }
+  function ajusteCumplimiento(e){ let a=0; try{
+      if(esBanco(e)){ const b=window.banco151(e), s=solv(e), m=window.solvMin151(); if(A()>=1995) a+=b.sarlaft?8:-10; if(s!=null) a+=Math.max(-15,Math.min(8,(s-m)/m*10)); if((e.banco112.mora||0)>.08) a-=6; if((b.vigilancia||0)>=A()) a-=4; }
+      const cs=contratos(e); if(cs.length){ const p=publicas(); const robos=((p&&p.robos)||[]).filter(r=>!r.fin).length; a-=Math.min(12,robos*5+((p&&p.sucia)||0)/2000); }
+    }catch(x){} return a; }
+  const GRAVE=/sanción grave|sanción confirmada|sobornó/, PAGADA=/sanción pagada|plan de choque|sanción rebajada|sanción archivada/;
+  function visitaRegistrada(e,g,res,monto){
+    if(g&&g.id==='contraloria'){ contraloriaTras(e,res,monto); return; }
+    if(!esBanco(e)||!g||g.id!=='bancaria') return;
+    const grave=GRAVE.test(String(res||'')); if(!grave) return;
+    const b=window.banco151(e), s=solv(e), m=window.solvMin151();
+    b.graves=(b.graves||[]).filter(a=>A()-a<=5).concat(A());
+    if(!((b.vigilancia||0)>=A())) log('<b>La Superintendencia dejó a '+E(e.nombre)+' en vigilancia especial</b> hasta '+(A()+3)+': no puede repartir utilidades mientras tanto.','mal');
+    b.vigilancia=A()+3;
+    if(b.graves.length>=2&&s!=null&&s<m){ try{ window.intervenir151(e,'sanciones graves reiteradas y una solvencia por debajo del mínimo'); }catch(x){ console.error(x); } return; }
+    if(s!=null&&s<m*1.15&&S._ev151!==A()){ S._ev151=A(); try{ cola.push(window.evCapitalizar151(e)); }catch(x){ console.error(x); } } }
+  function intervencion(e,motivo){ anotar(e,'la Superintendencia Financiera','intervención',Math.round((e.caja||0)*.9)); }
+  function requerimiento(e){ anotar(e,'la Superintendencia Financiera','requerimiento de capital',0); }
+  /* ==================== LA CONTRALORÍA ==================== */
+  const CONTR={id:'contraloria',n:()=>'la Contraloría General',ambito:'los contratos con el Estado'};
+  const publicas=()=>{ try{ return typeof window.empresasPub156==='function'?window.empresasPub156():null; }catch(e){ return null; } };
+  function contratos(e){ const p=publicas(); return p&&Array.isArray(p.contratos)?p.contratos.filter(c=>c.emp===e.nombre&&c.hasta>=A()&&c.desde<=A()):[]; }
+  const cumpl=e=>{ try{ return window.cumplimiento166(e); }catch(x){ return 50; } };
+  function pContraloria(e){ if(A()<1923) return 0; const cs=contratos(e); if(!cs.length) return 0; const p=publicas(), robos=((p&&p.robos)||[]).filter(r=>!r.fin).length;
+    const int=A()<1960?.4:A()<1991?.65:1; return Math.max(0,Math.min(.4,int*(.03+cs.length*.025+((p&&p.sucia)||0)/4000+robos*.04+(S.sobornos||0)*.006)*(1.45-cumpl(e)/100))); }
+  function contraloriaTras(e,res,monto){ const p=publicas(); if(!p) return; res=String(res||'');
+    const firme=GRAVE.test(res)||/sanción pagada/.test(res); if(!firme) return;
+    const anios=GRAVE.test(res)?5:2; p.inhab=Math.max(p.inhab||0,A()+anios);
+    contratos(e).forEach(c=>{ c.paro=A(); });
+    log('<b>La Contraloría dejó un hallazgo fiscal en firme contra '+E(e.nombre)+'.</b> Queda inhabilitada para venderle al Estado hasta '+p.inhab+' y se frenan sus contratos vigentes.','mal'); }
+  function visitaContraloria(e){ const c=cumpl(e), ent=CONTR.n(A()); const pGrave=Math.max(.01,Math.min(.15,.06*(1.3-c/100))), pSan=Math.max(.05,Math.min(.4,.24*(1.2-c/100))), r=Math.random();
+    if(r<pGrave) return window.gravedad166(e,CONTR,ent);
+    if(r<pGrave+pSan) return window.sancion166(e,CONTR,ent);
+    if(r<pGrave+pSan+.24) return window.observaciones166(e,CONTR,ent);
+    anotar(e,ent,'sin hallazgos',0); log('<b>La Contraloría revisó los contratos de '+E(e.nombre)+' con el Estado y no encontró nada.</b>','bien'); }
+  function anualCompania(e){ if(!ACTIVO()||nino()||!comps().includes(e)) return; if(S._ev166===A()) return;
+    if(typeof window.gravedad166!=='function'||typeof window.estado166!=='function') return;
+    if(chance(pContraloria(e))) visitaContraloria(e); }
+  /* ==================== LA SIC EN CADA COMPRA ==================== */
+  const tamMercado=s=>{ try{ const m=window.mercadoSector138(s); return m&&isFinite(m.tam)&&m.tam>0?m.tam:null; }catch(x){ return null; } };
+  const cuotaYo=s=>{ try{ const c=window.cuotasSector138(s); return c&&isFinite(c.yo)?c.yo:null; }catch(x){ return null; } };
+  const secN=s=>{ try{ const x=SECTORES.find(z=>z.id===s); return x?x.n:s; }catch(e){ return s; } };
+  function proyeccion(e){ const tam=tamMercado(e.sector), yo=cuotaYo(e.sector); if(tam==null||yo==null) return null;
+    let esc_=1; try{ esc_=escalaTamano(e); }catch(x){} const delta=e.ingresos*.32*esc_, q1=Math.min(.95,(yo*tam+delta)/tam); return {yo,q1,delta}; }
+  const requiere=p=>!!p&&A()>=1959&&(p.q1>=.30||(p.q1-p.yo>=.06&&p.q1>=.15));
+  const aprobacion=p=>Math.max(.15,Math.min(.92,.9-(p.q1-.30)*1.6-(p.q1>=.45?.15:0)));
+  function escenaIntegracion(e,orig,a){ const p=proyeccion(e), obl=A()>=2009, tasa=Math.round(e.ingresos*.004), ap=aprobacion(p);
+    const seguir=()=>{ cerrarModal(); try{ orig(); }catch(x){ console.error(x); } S.mov=Math.max(0,S.mov-(a.mov||0)); render(); };
+    const aprobar=cond=>{ try{ const r=window.estado166(); r.ult=r.ult||{}; r.ult[e.sector]=A()+3; }catch(x){} if(cond){ e.ingresos*=.97; e.marca=Math.max(0,Math.min(100,(e.marca||50)+1)); } };
+    const ops=[];
+    ops.push({t:'Notificar a la SIC y esperar la autorización · '+fmt(tasa),cat:'riesgo',d:'La SIC estudia la integración antes de cerrar. Probabilidad de aprobarla: ≈'+Math.round(ap*100)+'%. '+(p.q1>=.45?'Con esta cuota casi seguro pide condiciones.':'Es lo que se espera de una compañía seria.'),dis:e.caja<tasa?'La compañía no tiene esa caja':null,cerrar:false,
+      run:()=>{ multa(e,tasa); if(chance(ap)){ const cond=p.q1>=.40; aprobar(cond); log('<b>La SIC autorizó la compra de '+E(e.nombre)+'</b>'+(cond?' con condiciones: precios topados por tres años y acceso para los pequeños.':'.'),'bien'); seguir(); return; }
+        cerrarModal(); try{ moverPrestigio(-1,'la SIC negó su compra'); }catch(x){} log('<b>La SIC negó la integración.</b> La compra no se hizo y perdiste '+fm(tasa)+' en trámites.','mal'); render(); }});
+    ops.push({t:obl?'Cerrar sin notificar (es obligatorio desde 2009)':'Cerrar la compra y ver qué pasa',cat:'riesgo',d:obl?'Es una infracción: si la SIC se entera te multa por cerrar antes de tiempo y puede ordenar deshacer la compra.':'Antes de 2009 la SIC revisa después. Si la cuota te deja con demasiado mercado, puedes terminar vendiendo parte.',cerrar:false,
+      run:()=>{ S.sic170=S.sic170||{pend:[]}; S.sic170.pend.push({emp:e.nombre,sector:e.sector,anio:A(),q1:p.q1,yo:p.yo,obl}); seguir(); }});
+    ops.push({t:'Mejor no comprar ahora',cat:'legado',d:'No pasa nada: no gastas movidas.',cerrar:false,run:()=>{ cerrarModal(); render(); }});
+    escena({rubro:'Competencia',titulo:'La SIC y la compra de un competidor',ancho:true,cerrable:false,clase:'sic170',
+      cuerpo:'Comprar un competidor lleva la cuota de <b>'+E(e.nombre)+'</b> en '+E(secN(e.sector).toLowerCase())+' de <b>'+Math.round(p.yo*100)+'%</b> a cerca de <b>'+Math.round(p.q1*100)+'%</b>. '+(obl?'Desde 2009 la integración se notifica antes de cerrar.':'La SIC puede revisarla después.'),
+      html:'<div class="k"><div><b>'+Math.round(p.yo*100)+'%</b><span>cuota hoy</span></div><div><b>'+Math.round(p.q1*100)+'%</b><span>cuota con la compra</span></div><div><b>'+Math.round(ap*100)+'%</b><span>probabilidad de aprobación</span></div></div>',opciones:ops}); }
+  function anualSic(){ const c=S.sic170; if(!c||!Array.isArray(c.pend)||!c.pend.length) return; const p=c.pend.shift(); const e=comps().find(x=>x.nombre===p.emp); if(!e||S._ev166===A()){ if(e) c.pend.unshift(p); return; }
+    const caza=p.obl?.7:Math.max(.15,Math.min(.8,(p.q1-.25)*1.2)); if(!chance(caza)) return; S._ev166=A();
+    const F=Math.round(e.ingresos*(p.obl?rnd(.01,.02):rnd(.008,.016)));
+    evento('<b>La Superintendencia de Industria y Comercio se enteró de la compra de '+E(e.nombre)+'.</b> '+(p.obl?'No la notificaron antes de cerrar y la sanciona con '+fmt(F)+'. ':'Revisa la concentración que resultó ('+Math.round(p.q1*100)+'% del mercado) y propone una multa de '+fmt(F)+'. ')+'También puede ordenar deshacer parte.',
+      [{t:'Pagar y ofrecer condiciones ('+fmt(F)+')',f:()=>{ multa(e,F); e.ingresos*=.96; anotar(e,'la Superintendencia de Industria y Comercio','compra sancionada',F); return 'Pagaste '+fm(F)+' y aceptaste condiciones por tres años. '+E(e.nombre)+' vendió 4% menos.'; }},
+       {t:'Litigar ('+fmt(Math.round(F*.25))+')',f:()=>{ const q=Math.round(F*.25); multa(e,q); if(chance(abogadoOK()*.6)){ anotar(e,'la Superintendencia de Industria y Comercio','sanción anulada',q); return 'Tus abogados tumbaron la sanción. Gastaste '+fm(q)+'.'; } multa(e,F); e.ingresos*=.9; prest(-2,'la SIC ordenó deshacer su compra'); anotar(e,'la Superintendencia de Industria y Comercio','compra deshecha',F+q); return 'Perdiste: multa de '+fm(F)+', '+fm(q)+' de abogados y orden de deshacer parte de la compra ('+E(e.nombre)+' vende 10% menos).'; }}]); }
+  /* ==================== LA PANTALLA ==================== */
+  function extra(e){ let h=''; try{
+      if(esBanco(e)){ const b=window.banco151(e), s=solv(e), m=window.solvMin151(), vig=(b.vigilancia||0)>=A();
+        h+='<h4>El banco ante la Superfinanciera</h4><div class="apunte">Solvencia <b>'+(s==null?'—':pct(s))+'</b> (mínimo '+pct(m)+')'+(A()>=1995?' · control de lavado: <b>'+(b.sarlaft?'activo':'sin montar')+'</b>':'')+(vig?' · <b>vigilancia especial hasta '+b.vigilancia+'</b> (no reparte utilidades)':'')+'.</div>'; }
+      const cs=contratos(e); if(cs.length){ const p=publicas(), inh=p&&p.inhab>=A()?p.inhab:0;
+        h+='<h4>Contratos con el Estado</h4><div class="apunte">'+cs.length+' contrato'+(cs.length===1?'':'s')+' activo'+(cs.length===1?'':'s')+'. Riesgo anual de revisión de la Contraloría: ≈<b>'+Math.round(pContraloria(e)*100)+'%</b>.'+(inh?' Inhabilitada para el Estado hasta '+inh+'.':'')+'</div>'; }
+    }catch(x){} return h?'<div class="ext170">'+h+'</div>':''; }
+  /* ==================== EL CONSEJERO ==================== */
+  function gRegulacion(){ if(!ACTIVO()||nino()) return []; const out=[];
+    comps().forEach(e=>{ try{
+      if(esBanco(e)){ const b=window.banco151(e), s=solv(e), m=window.solvMin151();
+        if(s!=null&&s<m*1.2) out.push({id:'banco-solv:'+e.nombre,peso:s<m?82:70,tono:'mal',txt:'La solvencia de <b>'+E(e.nombre)+'</b> está en '+pct(s)+' y el mínimo es '+pct(m)+'.',por:'Si cae del mínimo, la Superfinanciera le exige capital; si cae a la mitad, lo interviene.',si:'Pierdes el banco y el prestigio con él.',ir:'Tu banco',irT:'Ver el banco',pre:sentar(e)});
+        else if(A()>=1995&&!b.sarlaft) out.push({id:'banco-sarlaft:'+e.nombre,peso:50,tono:'mal',txt:'<b>'+E(e.nombre)+'</b> no tiene control de lavado de activos.',por:'Es lo primero que revisa la Superfinanciera, y lo que más pesa en una sanción.',si:'La plata caliente llega sola y una visita sale cara.',ir:'Tu banco',irT:'Montarlo',pre:sentar(e)});
+        if((b.vigilancia||0)>=A()) out.push({id:'banco-vig:'+e.nombre,peso:46,tono:'mal',txt:'<b>'+E(e.nombre)+'</b> está en vigilancia especial hasta '+b.vigilancia+'.',por:'No puede repartir utilidades, y otra sanción grave con la solvencia justa termina en intervención.',si:'',ir:'Tu banco',irT:'Ver el banco',pre:sentar(e)}); }
+      const p=pContraloria(e); if(p>=.12) out.push({id:'contraloria:'+e.nombre,peso:Math.round(52+p*40),tono:'mal',txt:'La Contraloría puede mirar los contratos de <b>'+E(e.nombre)+'</b> con el Estado (≈'+Math.round(p*100)+'% al año).',por:'Con más contratos y más sobrefacturación el riesgo sube; el cumplimiento lo baja.',si:'Un hallazgo fiscal en firme te inhabilita para venderle al Estado.',ir:'Regulación y cumplimiento',irT:'Prepararte',pre:sentar(e)});
+    }catch(x){} });
+    return out.slice(0,2); }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top170) return;
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    f.__top170=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA170_PASO) return; window.__SA170_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()) anualSic(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top170) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()){ const a=L.find(z=>z.t==='Adquirir un competidor'), e=S.emp;
+          if(a&&e&&comps().includes(e)&&!a.__sic170){ const orig=a.run; a.__sic170=true; a.modal=true;
+            a.run=function(){ const p=proyeccion(e); if(requiere(p)) return escenaIntegracion(e,orig,a); try{ orig.apply(this,arguments); }catch(x){ console.error(x); } S.mov=Math.max(0,S.mov-(a.mov||0)); }; } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top170=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function init170(){ wrapEmpresa(); wrapPaso(); wrapAcciones();
+    try{ if(typeof window.consejeroRegistrar168==='function') window.consejeroRegistrar168(gRegulacion); }catch(x){}
+    Object.assign(window,{ajusteCumplimiento170:ajusteCumplimiento,visitaRegistrada170:visitaRegistrada,intervencion170:intervencion,requerimiento170:requerimiento,extraRegulacion170:extra,
+      contratosEstado170:contratos,riesgoContraloria170:pContraloria,visitaContraloria170:visitaContraloria,proyeccionCompra170:proyeccion,requiereSIC170:requiere,aprobacionSIC170:aprobacion,escenaIntegracion170:escenaIntegracion,anualSic170:anualSic,solvenciaBanco170:solv,CONTRALORIA_170:CONTR}); }
+  setTimeout(init170,40); setTimeout(init170,220); setTimeout(init170,650); setTimeout(init170,950);
+  window.__SA170={version:V170};
 })();
 </script>
 
