@@ -1345,7 +1345,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v173</div>
+<div class="version-badge" id="versionBadge">v174</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -31699,6 +31699,80 @@ install();setTimeout(install,1200);
   /* la banda se necesita desde el primer cierre de año: se registra ya, sin esperar */
   init173(); setTimeout(init173,40); setTimeout(init173,220); setTimeout(init173,650); setTimeout(init173,950);
   window.__SA173={version:V173};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v174 · OFICIOS HUMILDES
+   Antes de las fábricas casi no había en qué emplearse sin estudios: en 1800
+   un personaje humilde solo veía "Sector público" y "Academia", cerrados
+   para un bachiller. Ahora hay trabajos que no piden estudio, con la época
+   que les toca:
+   - Aguatero, repartidor de leche, panadero, arriero, boga del Magdalena,
+     lavandera, costurera, criada de casa, peón de hacienda, vendedor de
+     plaza, zapatero, albañil, tendero y voceador de periódicos.
+   - Cada oficio existe solo mientras existió (el aguatero hasta que llega el
+     acueducto, el boga hasta el vapor, el arriero hasta el camión), y los
+     hay de hombre, de mujer y de cualquiera.
+   - Cada uno sube en cuatro peldaños con nombre propio (ayudante de aguatero,
+     aguatero, aguatero con burro y tinajas, dueño de una ruta de aguadores),
+     con el ascenso, el salario y el desempeño de siempre.
+   - Es la entrada de quien empieza sin nada: paga poco pero es un sueldo, y
+     desde 1900 convive con el trabajo de planta.
+   ========================================================================== */
+(function(){
+  const V174='v174';
+  const TIT='Emplearte: un oficio';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const SAL=[8,13,20,32];                     // al año, en millones: poco (un hogar humilde gasta 6,5), pero es un sueldo y alcanza para ahorrar
+  /* sx: 'h' hombre · 'm' mujer · null cualquiera. de/ha: años en que existió. */
+  const OFICIOS=[
+    {id:'aguatero',n:'aguatero',sx:'h',de:1800,ha:1925,emp:['una cuadrilla de aguateros del barrio','las pilas de agua de la plaza'],niv:['Ayudante de aguatero','Aguatero','Aguatero con burro y tinajas','Dueño de una ruta de aguadores'],d:'Cargar agua de la pila o del río hasta las casas. Pesado, pero todos los días hay quien la compre.'},
+    {id:'lechero',n:'repartidor de leche',sx:null,de:1800,ha:1972,emp:['una vaquería de las afueras','la lechería de un hacendado'],niv:['Ayudante de lechero','Repartidor de leche','Repartidor con ruta propia','Dueño de una vaquería'],d:'Salir de madrugada con las cantinas y dejarle la leche a cada puerta antes de que despierten.'},
+    {id:'panadero',n:'panadero',sx:null,de:1800,ha:1975,emp:['una panadería del barrio','el horno de la esquina'],niv:['Aprendiz de panadero','Panadero','Maestro panadero','Dueño de una panadería'],d:'Amasar de noche y hornear antes del amanecer. El pan siempre se vende.'},
+    {id:'arriero',n:'arriero',sx:'h',de:1800,ha:1955,emp:['una recua de mulas que sale hacia el Magdalena','un arriero de diez mulas'],niv:['Peón de arria','Arriero','Mayoral de recua','Dueño de una recua'],d:'Llevar carga a lomo de mula por caminos de herradura, semanas de ida y de vuelta.'},
+    {id:'boga',n:'boga del Magdalena',sx:'h',de:1800,ha:1915,emp:['los champanes del Magdalena','un patrón de champán en Honda'],niv:['Boga','Boga de proa','Patrón de champán','Dueño de un champán'],d:'Remar y palanquear río arriba, entre el calor y los mosquitos, hasta que lleguen los vapores.'},
+    {id:'lavandera',n:'lavandera',sx:'m',de:1800,ha:1965,emp:['las casas grandes de la calle real','el lavadero del río'],niv:['Ayudante de lavandera','Lavandera','Lavandera de casas grandes','Dueña de un lavadero'],d:'Lavar y planchar para las familias del pueblo, con las manos en el agua todo el día.'},
+    {id:'costurera',n:'costurera',sx:'m',de:1800,ha:1985,emp:['un taller de costura del centro','la modista de la plaza'],niv:['Aprendiz de costura','Costurera','Maestra costurera','Dueña de un taller de costura'],d:'Coser, remendar y bordar por encargo. La buena mano se hace una clientela.'},
+    {id:'criada',n:'criada de casa',sx:'m',de:1800,ha:1980,emp:['una casa de familia de bien','la casa de un comerciante'],niv:['Criada','Cocinera','Ama de llaves','Mayordoma de casa grande'],d:'Servir en una casa: cocina, patio y niños, con cuarto y comida, y poca paga.'},
+    {id:'peon',n:'peón de hacienda',sx:'h',de:1800,ha:1965,emp:['una hacienda de la región','las tierras de un terrateniente'],niv:['Peón','Jornalero','Capataz','Mayordomo de hacienda'],d:'Trabajar la tierra de otro por jornal, con la cosecha y los ciclos del patrón.'},
+    {id:'plaza',n:'vendedor de plaza',sx:null,de:1800,ha:1990,emp:['la plaza de mercado','un puesto de la plaza'],niv:['Ayudante de puesto','Vendedor de plaza','Vendedor con puesto fijo','Dueño de un puesto grande'],d:'Vender fruta, verdura o telas en la plaza los días de mercado.'},
+    {id:'zapatero',n:'zapatero',sx:'h',de:1800,ha:1970,emp:['un taller de zapatería','el maestro zapatero de la calle del comercio'],niv:['Aprendiz de zapatero','Oficial zapatero','Maestro zapatero','Dueño de una zapatería'],d:'Aprender el oficio de cortar y coser cuero en el taller de un maestro.'},
+    {id:'albanil',n:'albañil',sx:'h',de:1800,ha:1980,emp:['una obra del pueblo','una cuadrilla de albañiles'],niv:['Peón de obra','Albañil','Maestro de obra','Contratista de obras pequeñas'],d:'Pegar adobe y ladrillo, levantar tapias y techar casas.'},
+    {id:'tendero',n:'tendero',sx:null,de:1800,ha:1990,emp:['una tienda de barrio','la pulpería de la esquina'],niv:['Ayudante de tienda','Dependiente','Encargado de tienda','Dueño de una tienda de barrio'],d:'Atender el mostrador, fiar con cuidado y saber quién paga.'},
+    {id:'voceador',n:'voceador de periódicos',sx:null,de:1880,ha:1980,emp:['la imprenta de un diario','un puesto de prensa'],niv:['Voceador de periódicos','Repartidor de prensa','Jefe de voceadores','Dueño de un puesto de prensa'],d:'Salir a la calle a gritar los titulares y vender el diario antes del mediodía.'}];
+  const ofi=id=>OFICIOS.find(o=>o.id===id);
+  const actual=()=>{ try{ return ofi(S.carrera&&S.carrera.oficio174); }catch(e){ return null; } };
+  const GEN=['Aprendiz','Oficial','Maestro','Maestro con taller propio'];
+  /* la ruta: cuatro peldaños cuyos nombres cambian con el oficio elegido */
+  function instalarRuta(){ try{ if(typeof RUTAS==='undefined'||RUTAS.oficio) return;
+      RUTAS.oficio={n:'Oficio humilde',niveles:[0,1,2,3].map(i=>({get n(){ const o=actual(); return o?o.niv[i]:GEN[i]; },s:SAL[i],edu:0}))}; }catch(e){ console.error(e); } }
+  const sexoP=()=>(S&&S.p&&S.p.sexo==='m')?'m':'h';
+  function disponibles(){ const sx=sexoP(), a=A(); return OFICIOS.filter(o=>a>=o.de&&a<=o.ha&&(!o.sx||o.sx===sx)); }
+  function empezar(o){ const c=S.carrera, p=S.p;
+    if(c.ruta&&c.ruta!=='desempleado') return false;
+    if(S.mov<1){ try{ aviso('No te quedan movidas este año.'); }catch(e){} return false; }
+    S.mov--; const techo=Math.min(2,(p.educacion>=1?1:0)+Math.floor((p.reputacion||0)/40)); const idx=Math.max(0,techo);
+    c.ruta='oficio'; c.nivel=idx; c.anios=0; c.desempeno=50+((p.atr&&p.atr.disciplina)||5)*2; c.oficio174=o.id; c.salarioExtra=0;
+    c.empleador=o.emp[Math.floor(Math.random()*o.emp.length)];
+    log('Empezaste como <b>'+E(o.niv[idx].toLowerCase())+'</b> en '+E(c.empleador)+'. Sueldo de '+fmt(SAL[idx])+' al año.','bien'); return true; }
+  function escenaOficios174(){ if(!ACTIVO()||nino()) return; const L=disponibles(); const ops=L.map(o=>({t:cap(o.n)+' · '+fmt(SAL[0])+' al año',cat:'empleo',d:o.d+' Entras como '+o.niv[0].toLowerCase()+' y puedes llegar a '+o.niv[3].toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); const ok=empezar(o); render(); return ok; }}));
+    escena({rubro:'Trabajo',titulo:'Un oficio para empezar',ancho:true,cerrable:true,cuerpo:'No piden estudios, pero tampoco pagan mucho. Es lo que hay para quien empieza sin nada: un sueldo, un oficio y, con los años, un puesto propio.',opciones:ops}); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top174) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&typeof RUTAS!=='undefined'&&RUTAS.oficio){ const k='Emplearte: '+RUTAS.oficio.n, i=L.findIndex(z=>z&&z.t===k);
+          if(i>=0){ const n=disponibles().length; if(!n) L.splice(i,1); else { const a=L[i]; a.t=TIT; a.d=n+' oficios que no piden estudios: aguateros, panaderos, lecheros, costureras y más, según la época. Pagan poco pero es un sueldo.'; a.dis=null; a.mov=1; a.modal=true; a.run=()=>escenaOficios174(); } } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top174=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA174_CAT) return; window.__SA174_CAT=true; window.catDe=function(t){ if(t===TIT) return 'empleo'; return old.apply(this,arguments); }; }
+  function init174(){ instalarRuta(); wrapAcciones(); wrapCat(); Object.assign(window,{OFICIOS_174:OFICIOS,oficiosDisponibles174:disponibles,escenaOficios174,empezarOficio174:empezar,SALARIOS_OFICIO_174:SAL}); }
+  init174(); setTimeout(init174,40); setTimeout(init174,220); setTimeout(init174,650); setTimeout(init174,950);
+  window.__SA174={version:V174};
 })();
 </script>
 
