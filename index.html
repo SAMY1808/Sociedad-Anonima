@@ -4913,7 +4913,7 @@ function escenaMatrimonioEnCasa(){
         // lo de la otra rama se queda del mismo lado
         const entra=(p.caudal||0)*.45;
         S.efectivo+=entra;
-        p.caudal-=entra;
+        p.caudal=(p.caudal||0)-entra;
         S.endogamia=(S.endogamia||0)+1;
         const lejano=['primo segundo','prima segunda'].includes(p.rel);
         parientesVivos().forEach(x=>x.afecto=clamp(x.afecto+10,0,100));
@@ -5916,7 +5916,7 @@ function iniciar(cfg,legado){
     bienes:(legadoValido&&Array.isArray(legado.bienes))?legado.bienes:[],
     hogar:null,
     familia:{pareja:null,hijos:legado?[]:[],amantes:[]},
-    macro:{colcap:_ep.macro.colcap,usd:_ep.macro.usd,inflacion:_ep.macro.inflacion,tasa:_ep.macro.tasa,ciclo:_ep.macro.ciclo},
+    macro:(legadoValido&&legado.macro&&typeof legado.macro==='object'&&isFinite(legado.macro.usd)&&isFinite(legado.macro.colcap))?Object.assign({},legado.macro):{colcap:_ep.macro.colcap,usd:_ep.macro.usd,inflacion:_ep.macro.inflacion,tasa:_ep.macro.tasa,ciclo:_ep.macro.ciclo},
     legado:legadoValido&&legado.legado&&typeof legado.legado==='object'?legado.legado:{hitos:[],pico:0,ancestros:[]},
     casa:legadoValido&&legado.casa?legado.casa:{prestigio:({popular:4,media:12,comercio:24,elite:52})[cfg.origen]||10},
     parientes:legadoValido&&Array.isArray(legado.parientes)?legado.parientes:[],
@@ -8007,7 +8007,7 @@ function heredar(h,frac,vivo,pleito){
     epoca:S.epoca,
     parientes:reacomodarParentela(h),
     sociedades:(S.sociedades||[]).map(x=>({...x})),
-    rivales:S.rivales, tension:S.tension, gobierno:S.gobierno, pleito:S.pleito, gremios:S.gremios, divisas:S.divisas, embarazos:S.familia.embarazos||[],
+    rivales:S.rivales, tension:S.tension, macro:S.macro?JSON.parse(JSON.stringify(S.macro)):null, gobierno:S.gobierno, pleito:S.pleito, gremios:S.gremios, divisas:S.divisas, embarazos:S.familia.embarazos||[],
     tesoreria:S.tesoreria, coberturas:S.coberturas, endogamia:S.endogamia, bancoFamilia:S.bancoFamilia,
     fisco:S.fisco, fideicomiso:S.fideicomiso,
     familyOffice:S.familyOffice?JSON.parse(JSON.stringify(S.familyOffice)):null,
@@ -28806,7 +28806,7 @@ install();setTimeout(install,1200);
   const bancadaTotal=()=>{ const p=P(); let b=Math.round(p.bancada); p.cargos.forEach(c=>{ if(c.nivel==='camara') b+=1; if(c.nivel==='senado') b+=3; }); return b; };
   /* --- el presidente --- */
   function asegurarPres(){ const p=P(); if(p.pres) return p.pres;
-    const g=S.gobierno, cand=vivos(S.anio).filter(x=>x.gob===g.id); const par=cand.length?pick(cand):pickW(vivos(S.anio),x=>x.peso+.1), c=nuevoCand(par,S.anio);
+    const g=S.gobierno, cand=vivos(S.anio).filter(x=>x.gob===g.id); const par=cand.length?pick(cand):(pickW(vivos(S.anio),x=>x.peso+.1)||{id:'sinpartido',n:'Sin partido',ideo:[0,0],gob:g.id,peso:.5}), c=nuevoCand(par,S.anio);
     p.pres={id:c.id,nombre:c.nombre,sexo:c.sexo,partido:par.id,gob:g.id,integ:c.integ,cumple:c.cumple,desde:g.desde,hasta:g.desde+4,credito:0,aporte:0,rencor:0,reelecto:false}; return p.pres; }
   function renovarCongreso(g){ const p=P(), a=S.anio, V=vivos(a), tot=a>=1991?268:a>=1958?200:120;
     const w=V.map(x=>(frente(a)&&x.id!=='liberal'&&x.id!=='conservador'?0:1)*x.peso*rnd(.7,1.3)*(x.id===g.partido?1.5:1)), sw=w.reduce((s,x)=>s+x,0)||1, esc_={};
