@@ -5229,12 +5229,17 @@ function generarParentela(){
     }
   }
   P.forEach(x=>{ x.caudal=caudalInicial(x.rel,origen,x.edad); asignarVia(x); });
-  /* nadie en la familia se llama igual: si dos coinciden en nombre y apellido, el segundo cambia de nombre */
-  const nombresVistos=new Set();
-  P.forEach(x=>{ let k; try{ k=nombrePariente(x); }catch(e){ return; } let n=0;
-    while(nombresVistos.has(k)&&n++<20){ try{ x.nombre=nombreLocal(S.p.ciudad,x.sexo==='m'?'m':'h'); k=nombrePariente(x); }catch(e){ break; } }
-    nombresVistos.add(k); });
   S.parientes=P; PARIENTES_EN_CURSO=null;
+}
+/* nadie en la familia se llama igual: si dos parientes coinciden en nombre y apellido, el segundo cambia de nombre */
+function nombresUnicosParientes(){
+  const vistos=new Set();
+  (S.parientes||[]).forEach(x=>{ let k; try{ k=nombrePariente(x); }catch(e){ return; } let n=0;
+    while(vistos.has(k)&&n++<25){ try{ x.nombre=nombreLocal(S.p.ciudad,x.sexo==='m'?'m':'h'); k=nombrePariente(x); }catch(e){ break; } }
+    /* una familia grande agota los nombres de la época: entonces el nombre se vuelve compuesto */
+    if(vistos.has(k)){ const med=x.sexo==='m'?['María','Isabel','Elena','Paula','Lucía','Inés','Teresa','Rosa']:['José','Antonio','Luis','Carlos','Felipe','David','Esteban','Camilo','Ignacio','Rafael']; const base=x.nombre; let j=0;
+      while(vistos.has(k)&&j<med.length){ x.nombre=base+' '+med[j++]; try{ k=nombrePariente(x); }catch(e){ break; } } }
+    vistos.add(k); });
 }
 
 /* Al pasar a la siguiente generación, la familia se reacomoda:
@@ -5988,6 +5993,7 @@ function iniciar(cfg,legado){
     S.hogar.ciudad=casaHeredada.ciudad; S.hogar.zona=casaHeredada.zona!==undefined?casaHeredada.zona:S.hogar.zona; }
   else if(legado) S.hogar.conLosPadres=false;
   if(!S.parientes.length) generarParentela();
+  try{ nombresUnicosParientes(); }catch(e){}
   if(!S.rivales||!S.rivales.length) generarRivales();
   asegurarBolsa();
   asegurarGrupo();
