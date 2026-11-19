@@ -1345,7 +1345,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v172</div>
+<div class="version-badge" id="versionBadge">v173</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4907,7 +4907,7 @@ function escenaMatrimonioEnCasa(){
       run:()=>{
         p.casadoConmigo=true;
         S.familia.pareja={nombre:nombrePariente(p), rol:p.oficio, sexo:p.sexo, edad:p.edad,
-          casados:true, paciencia:clamp(55+p.afecto*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
+          casados:true, paciencia:clamp(55+(p.afecto||50)*.3,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
           casa:{apellido:S.dinastia,prestigio:prestigio()}, afecto:p.afecto, porInteres:true,
           separacionBienes:false, esPrima:true, pid:p.pid};
         // lo de la otra rama se queda del mismo lado
@@ -5316,7 +5316,7 @@ function terminosPretendiente(pr){
 function desposar(pr,porInteres){
   S.familia.pareja={
     nombre:pr.nombre, rol:pr.rol, sexo:pr.sexo, edad:pr.edad, casados:true,
-    paciencia:clamp(45+pr.afecto*.4,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
+    paciencia:clamp(45+(pr.afecto||50)*.4,0,100), exigencia:clamp(S.hogar?S.hogar.nivel:1,0,4),
     casa:pr.casa, afecto:pr.afecto, porInteres:!!porInteres, separacionBienes:false
   };
   if(pr.dote>0){ S.efectivo+=pr.dote; }
@@ -7027,8 +7027,9 @@ function pasarAnio(){
   m.ciclo=clamp(m.ciclo*.55+rnd(-.09,.09),-.18,.18);
   m.inflacion=clamp(m.inflacion*.6+rnd(.02,.09)*.4+(m.ciclo>0?.004:-.002),.015,.22);
   m.tasa=clamp(m.inflacion+rnd(.015,.05),.03,.18);
-  m.usd=clamp(m.usd*(1+m.inflacion-.03-m.ciclo*.5+rnd(-.06,.07)),2600,9500);
-  m.colcap=Math.round(clamp(m.colcap*(1+m.ciclo*1.2+rnd(-.08,.1)),700,9000));
+  const bd173=(typeof window.bandaMacro173==='function')?window.bandaMacro173(S.anio):{usd:[2600,9500],col:[700,9000]};
+  m.usd=clamp(m.usd*(1+m.inflacion-.03-m.ciclo*.5+rnd(-.06,.07)),bd173.usd[0],bd173.usd[1]);
+  m.colcap=Math.round(clamp(m.colcap*(1+m.ciclo*1.2+rnd(-.08,.1)),bd173.col[0],bd173.col[1]));
 
   /* ingresos personales: una condena suspende el trabajo activo */
   let ingreso=0;
@@ -7142,7 +7143,7 @@ function pasarAnio(){
   /* familia */
   if(S.familia.pareja){
     const desatendida = (c.ruta==='fundador'? 8:4) + (S.p.felicidad<40?6:0);
-    S.familia.pareja.paciencia=clamp(S.familia.pareja.paciencia-desatendida+ri(0,6),0,100);
+    S.familia.pareja.paciencia=clamp((isFinite(S.familia.pareja.paciencia)?S.familia.pareja.paciencia:60)-desatendida+ri(0,6),0,100);
     if(S.familia.pareja.paciencia<12&&S.familia.pareja.casados&&!S.familia.pareja.divorcioEnCurso&&chance(.45)){
       const nom=S.familia.pareja.nombre;
       S.familia.pareja.divorcioEnCurso=true;
@@ -7217,7 +7218,7 @@ function correrEmpresa(res,cual){
   if(rb.marca) e.marca=clamp((e.marca||50)+rb.marca,0,100);
   // quien esté al frente decide cuánto crece
   if(presides(e)) { /* la diriges tú */ }
-  else if(e.presidente) g += (e.presidente.capaz-5)*.013;
+  else if(e.presidente) g += ((isFinite(e.presidente.capaz)?e.presidente.capaz:5)-5)*.013;
   else g -= .055;
   if(e.presidente&&e.presidente.sueldo){
     const sueldoPres=e.presidente.sueldo;
@@ -7306,6 +7307,7 @@ function juntaAnual(){
 }
 function destituir(){
   const e=S.emp;
+  if(!e){ S.destitucionAviso=0; return; }
   Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:50});
   const nuevo=nombreLocal(S.p.ciudad,'h')+' '+apellidoCiudad(S.p.ciudad);
   e.ceoExterno=nuevo;
@@ -12089,7 +12091,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
             if(e.presidente&&e.presidente.tipo==='fundador') e.presidente=null;
             log('Dejaste de pagarte un salario en '+esc(e.nombre)+'.');
           } else {
-            e.presidente={nombre:S.p.nombre+' '+S.p.apellido,tipo:'fundador',sueldo:t.monto};
+            e.presidente={nombre:S.p.nombre+' '+S.p.apellido,tipo:'fundador',capaz:5,sueldo:t.monto};
             log('Te asignaste un salario de '+fmt(t.monto)+' al año como presidente de <b>'+esc(e.nombre)+'</b>.','hito');
           }
           S.mov--;
@@ -23698,8 +23700,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const old=window.listaAcciones; if(typeof old!=='function'||window.__SA110_ACC) return;
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ if(window.__crudo91&&Array.isArray(A)&&S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())&&!A.some(a=>a.t==='Comprar un negocio')){
-        const barato=Math.min(...disponibles().map(precio));
-        A.push({t:'Comprar un negocio',cat:'casa',d:'Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial… Desde '+fmt(barato)+'. Se opera, no se arrienda.',mov:1,modal:true,
+        const lista110=disponibles().map(precio).filter(x=>isFinite(x)&&x>0), barato=lista110.length?Math.min(...lista110):0;
+        if(lista110.length) A.push({t:'Comprar un negocio',cat:'casa',d:'Restaurante, hotel, parqueadero, gasolinera, clínica, centro comercial… Desde '+fmt(barato)+'. Se opera, no se arrienda.',mov:1,modal:true,
           dis:S.efectivo<barato*.35?'Necesitas al menos '+fmt(barato*.35):null,run:()=>escenaComprar110()}); } }catch(e){}
       return A; };
     window.__SA110_ACC=true;
@@ -31642,6 +31644,50 @@ install();setTimeout(install,1200);
   function init172(){ Object.assign(window,{anacronismos172:anacronismos,TERMINOS_ERA_172:TERMINOS}); }
   setTimeout(init172,40); setTimeout(init172,220); setTimeout(init172,650); setTimeout(init172,950);
   window.__SA172={version:V172};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v173 · AUDITORÍA DE BALANCE: LO QUE ENCONTRÓ UN BOT QUE JUEGA VIDAS ENTERAS
+   Un bot jugó 60 años en cada una de las 8 épocas, con los 4 orígenes, por
+   la interfaz real, y midió cifras año a año. Esto es lo que apareció y se
+   arregló:
+   - El tipo de cambio y el COLCAP saltaban en el primer año a rangos de hoy
+     (dólar de 1,0 a 2.600 en 1800; de 18 a 2.600 en 1970), y cualquier
+     divisa guardada se revaluaba miles de veces (en 1800, una exportación
+     de 20 millones valía 52.000 millones al cerrar el año). Ahora cada
+     época tiene su banda de cambio y de bolsa, que sigue la historia.
+   - Crecimiento NaN: una compañía en la que te asignaste un sueldo de
+     presidente, y que dejabas de presidir (otra compañía, otro trabajo),
+     calculaba la capacidad de un presidente sin capacidad y se reiniciaba
+     en 100 de ingresos con el historial dañado.
+   - La paciencia de la pareja podía quedar en NaN si se casaba alguien sin
+     "afecto" registrado.
+   - Al cerrarse una votación de destitución sin compañía, se rompía.
+   - En 1800 "Comprar un negocio" decía "desde $Infinity T": no había
+     negocios en esa época. Ahora no aparece.
+   - Una red de seguridad: si la paciencia, el ánimo o la salud se vuelven
+     no numéricos, se reparan al cerrar el año (y quedan avisados en consola).
+   ========================================================================== */
+(function(){
+  const V173='v173';
+  /* [año, valor] para el cambio (pesos por dólar) y el COLCAP; se interpola geométricamente */
+  const USD=[[1800,1],[1850,1.2],[1900,2],[1950,2.5],[1970,18],[1990,510],[1995,830],[2000,2088],[2005,2320],[2010,1900],[2015,2740]];
+  const COL=[[1800,40],[1850,60],[1900,80],[1950,100],[1970,180],[1990,420],[2000,1000],[2010,1500],[2015,1300]];
+  function interp(T,a){ if(!isFinite(a)||a<=T[0][0]) return T[0][1]; for(let i=1;i<T.length;i++){ if(a<=T[i][0]){ const p=T[i-1], q=T[i]; return p[1]*Math.pow(q[1]/p[1],(a-p[0])/(q[0]-p[0])); } } return T[T.length-1][1]; }
+  /* las bandas dentro de las que se mueven el cambio y la bolsa en cada año; desde 2015 las de siempre */
+  function banda(a){ if(isFinite(a)&&a>=2015) return {usd:[2600,9500],col:[700,9000]}; const u=interp(USD,a), c=interp(COL,a), w=(!isFinite(a)||a<1990)?[.75,1.7]:[.6,2.2]; return {usd:[u*w[0],u*w[1]],col:[c*.5,c*2.5]}; }
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  function sanear(){ if(!ACTIVO()) return 0; let n=0; const arr=(o,ks,v)=>{ if(!o) return; ks.forEach(k=>{ if(!isFinite(o[k])){ o[k]=v; n++; } }); };
+    arr(S.familia&&S.familia.pareja,['paciencia','exigencia'],60); arr(S.p,['felicidad','salud','reputacion','redes'],50);
+    if(n){ try{ console.warn('v173: se repararon '+n+' valores no numéricos del personaje o de la pareja'); }catch(e){} } return n; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA173_PASO) return; window.__SA173_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ sanear(); }catch(e){ console.error(e); } return r; }; }
+  function init173(){ wrapPaso(); Object.assign(window,{bandaMacro173:banda,interpMacro173:interp,saneaPersonaje173:sanear,ANCLAS_CAMBIO_173:USD,ANCLAS_COLCAP_173:COL}); }
+  /* la banda se necesita desde el primer cierre de año: se registra ya, sin esperar */
+  init173(); setTimeout(init173,40); setTimeout(init173,220); setTimeout(init173,650); setTimeout(init173,950);
+  window.__SA173={version:V173};
 })();
 </script>
 
