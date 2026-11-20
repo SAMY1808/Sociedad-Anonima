@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v178</div>
+<div class="version-badge" id="versionBadge">v179</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2782,7 +2782,7 @@ const GOBIERNOS=[
    d:'Gasto alegre, contratos a la mano de quien esté cerca y un país partido en dos.'}
 ];
 function gob(){ return GOBIERNOS.find(g=>g.id===(S.gobierno&&S.gobierno.id))||GOBIERNOS[1]; }
-function hayElecciones(){ return S.gobierno && (S.anio-S.gobierno.desde)>=4; }
+function hayElecciones(){ return S.gobierno && (S.anio-S.gobierno.desde)>=4 && !(typeof window.regimenActivo179==='function'&&window.regimenActivo179()); }   // v179: con una dictadura no hay elecciones
 function elegirGobierno(inicial,forzado){
   const g=forzado||pick(GOBIERNOS);
   S.gobierno={id:g.id,desde:S.anio,apoyado:false};
@@ -7323,6 +7323,7 @@ function correrEmpresa(res,cual){
   e.caja+=e.utilidad;
   if(e.hotel175&&typeof window.anualHoteles175==='function'){ try{ window.anualHoteles175(e,res); }catch(x){ console.error(x); } }   // v175: el resultado sale de los hoteles
   else if(e.red176&&typeof window.anualRed176==='function'){ try{ window.anualRed176(e,res); }catch(x){ console.error(x); } }   // v176: el resultado sale de las unidades de cada negocio
+  if(typeof window.efectoPoder179==='function'){ try{ window.efectoPoder179(e,res); }catch(x){ console.error(x); } }   // v179: clausuras y compromisos con el poder
   e.innovacion=clamp(e.innovacion-rnd(1.5,4),0,100);
   e.marca=clamp(e.marca-rnd(1,3),0,100);
   e.eficiencia=clamp(e.eficiencia-rnd(.5,2.5),0,100);
@@ -8640,7 +8641,7 @@ function renderLienzo(){
       +'Tasa de interés '+pc(S.macro.tasa)+' · inflación '+pc(S.macro.inflacion)+' · dólar $'+Math.round(S.macro.usd)+'.</div>'
       +'<div class="apunte">Con el país tensionado la bolsa paga menos por todo. '
       +'Renta '+pc(tarifaRenta())+' · sucesiones '+pc(fisco().sucesion)+' · patrimonio '+pc(fisco().patrimonio)+'. '
-      +(hayElecciones()?'<b>Hay elecciones este año.</b>':'Próximas elecciones en '+Math.max(0,4-(S.anio-S.gobierno.desde))+' años.')+'</div>';
+      +(hayElecciones()?'<b>Hay elecciones este año.</b>':(typeof window.regimenActivo179==='function'&&window.regimenActivo179())?'Manda una dictadura: no hay elecciones.':'Próximas elecciones en '+Math.max(0,4-(S.anio-S.gobierno.desde))+' años.')+'</div>';
     if(fisco().anuncio) h+='<div class="aviso"><b>Hay una reforma radicada</b> que empieza a regir en '+fisco().anuncio.anio+': '
       +(fisco().anuncio.renta>0?'suben renta, sucesiones y patrimonio.':'bajan las tarifas.')
       +(fisco().anuncio.renta>0?' Si vas a mover algo a una estructura, es este año.':'')+'</div>';
@@ -28899,6 +28900,7 @@ install();setTimeout(install,1200);
     p.cargos.filter(c=>c.pt==='ele'&&c.hasta<=S.anio).forEach(c=>{ soltarCargo(c); lineas.push(esc(c.nombre)+' terminó su período en '+esc(c.pn)+'.'); });
     renovarCongreso(g); resolverLocales(camp,g,lineas);
     if(g.fam){ const per=buscar(g.tipoFam,g.keyFam); if(per){ ponerCargo(per,{id:'presidencia',tipo:'pres',poder:5,sec:'*'},{pn:'Presidente de la República',pt:'pres',nombrado:false,hasta:S.anio+4}); p.pres.credito=150; p.influ=clamp(p.influ+30,0,100); moverPrestigio(15,'un presidente de la familia'); hito('Un miembro de la familia llegó a la presidencia: '+g.nombre); lineas.push('<b>'+esc(g.nombre)+' es el nuevo presidente de la República.</b> Es de tu casa.'); } }
+    try{ if(typeof window.eleccion179==='function') window.eleccion179(g,{aporte:aporte(g),apoyado,perd:perd.length,lineas}); }catch(x){}   // v179
     log('<b>Elecciones de '+S.anio+': ganó '+esc(g.nombre)+'</b> ('+esc(parDe(g.partido).n)+'), '+esc(G.n)+'.','hito');
     S._res155={g:g.nombre,lineas}; }
   function resolverLocales(camp,g,lineas){ const p=P(), ok=[]; const hechos=p.cand.filter(c=>c.anio===camp.anio); p.cand=p.cand.filter(c=>c.anio!==camp.anio);
@@ -28984,7 +28986,7 @@ install();setTimeout(install,1200);
   function escenaFavores155(){ const p=P(), pr=asegurarPres(), reab=()=>{ cerrarModal(); render(); escenaFavores155(); };
     const hon=pr.integ>=8?'Tiene fama de honrado: te recibe, pero casi nada de esto te lo concede.':pr.integ<=3?'Tiene fama de dar y recibir.':'Es del montón: da lo que le conviene.';
     escena({rubro:'Palacio',titulo:'Cobrar lo que te deben',ancho:true,cerrable:true,clase:'pol155',
-      cuerpo:esc(pr.nombre)+', '+esc(parDe(pr.partido).n)+', gobierna hasta '+pr.hasta+'. '+hon+' Cada favor gasta de lo que te debe; los favores se enfrían con los años.',
+      cuerpo:esc(pr.nombre)+', '+esc(parDe(pr.partido).n)+', gobierna hasta '+pr.hasta+'. '+hon+' Cada favor gasta de lo que te debe y además queda anotado: el poder te lo cobra con otros favores. Los favores se enfrían con los años.',
       html:'<div class="k"><div><b>'+Math.round(pr.credito)+'</b><span>crédito con el presidente</span></div><div><b>'+Math.round(p.influ)+'</b><span>influencia de la casa</span></div><div><b>'+Math.round(pr.cumple)+'/10</b><span>qué tan cumplidor es</span></div></div>',
       opciones:FAVORES.map(f=>({t:f.n+(f.costo?' · '+f.costo:''),cat:'riesgo',d:f.d,cerrar:false,dis:f.costo&&pr.credito<f.costo?'Te debe menos de '+f.costo:(f.id==='cargo'&&pr.credito<35?'Te debe muy poco':null),run:()=>{ cerrarModal(); pedir155(f); }})).concat([{t:'No pedir nada',cat:'legado',run:()=>{}}])}); }
   function exito(pr,costo,impropio){ return clamp(.55+(pr.cumple-5)*.04+(pr.credito-costo)/220+P().influ/400-(impropio?(pr.integ-5)*.035:0),.12,.95); }
@@ -29001,6 +29003,7 @@ install();setTimeout(install,1200);
       if(f.id==='decreto'){ const e=pick(companias()); const sec=e?e.sector:'*'; p.decretos.push({sector:sec,hasta:S.anio+4,bonus:.018}); log('Salió un decreto hecho a la medida del sector de '+esc(e?e.nombre:'tus negocios')+': cuatro años de reglas favorables.','bien'); hecho=true; }
       if(f.id==='frenar'){ asegurarPenal(); S.penal.riesgo=clamp(S.penal.riesgo-25,0,100); log('Alguien en la Fiscalía "perdió" un expediente. Tu riesgo legal bajó.','bien'); hecho=true; }
       p.influ=clamp(p.influ+4,0,100);
+      if(hecho&&typeof window.favor179==='function'){ try{ window.favor179(f.id,{txt:f.n}); }catch(x){} }   // v179: el favor se paga
       if(hecho&&f.impropio&&chance(riesgoEsc(pr,3))){ try{ abrirEscandalo129('politico','El favor de '+pr.nombre+' que salió en la prensa',2); }catch(x){} moverPrestigio(-3,'el favor del presidente'); log('Alguien filtró el favor: tu nombre sale junto al del presidente.','mal'); } };
     escena({rubro:'Palacio',titulo:f.n,cerrable:true,cuerpo:'Cuesta '+costo+' de lo que te debe. Probabilidad de que lo concedan: '+Math.round(prob*100)+'%.'+(f.impropio?' Si se sabe, deja rastro.':''),opciones:[{t:'Pedirlo',cat:'riesgo',cerrar:true,dis:sinMov(),run:()=>{ ir(); render(); }},{t:'Mejor no',cat:'legado',run:()=>{}}]}); }
   function escenaPuestos155(x){ const p=P(), pr=asegurarPres();
@@ -29009,6 +29012,7 @@ install();setTimeout(install,1200);
         escena({rubro:'Palacio',titulo:TIPON[t],ancho:true,cerrable:true,clase:'pol155',opciones:disponibles(t).map(pu=>{ const costo=costoPuesto(pu), prob=exito(pr,costo,true)-(x.capaz<reqCapaz(pu)?.1:0); return {t:nomP(pu)+' · '+costo,cat:'familia',d:'Poder '+pu.poder+'/5'+(pu.sec==='*'?'. Toca a todas tus compañías.':pu.sec.length?'. Toca: '+pu.sec.join(', ')+'.':'.')+' Probabilidad '+Math.round(prob*100)+'%'+(x.capaz<reqCapaz(pu)?'. Le queda grande.':'.'),cerrar:false,dis:pr.credito<costo?'Te debe menos de '+costo:sinMov(),run:()=>{ if(!movida()) return; cerrarModal();
           if(!chance(clamp(prob,.05,.95))){ pr.credito=Math.max(0,pr.credito-costo*.25); log('El presidente no pudo nombrar a <b>'+esc(x.nombre)+'</b> en '+nomP(pu)+': "el partido ya tenía su gente".','mal'); render(); return; }
           pr.credito=Math.max(0,pr.credito-costo); const c=ponerCargo(x,pu); p.influ=clamp(p.influ+pu.poder*2,0,100); log('<b>'+esc(x.nombre)+'</b> fue nombrado en <b>'+esc(c.pn)+'</b>.','hito');
+          if(typeof window.favor179==='function'){ try{ window.favor179('cargo',{poder:pu.poder,txt:x.nombre+' en '+c.pn}); }catch(z){} }   // v179: el cargo se paga
           if(chance(riesgoEsc(pr,pu.poder,x.capaz<reqCapaz(pu)?.12:0))){ try{ abrirEscandalo129('politico','El nombramiento de '+x.nombre+' en '+c.pn,2); }catch(z){} moverPrestigio(-3,'el nepotismo en '+c.pn); log('La prensa se enteró: "los de siempre se reparten el Estado".','mal'); }
           render(); }}; })}); }}))}); }
   /* --- la familia en el Estado, y el Congreso --- */
@@ -29062,6 +29066,7 @@ install();setTimeout(install,1200);
     p.decretos=p.decretos.filter(d=>d.hasta>=S.anio); p.contratos=p.contratos.filter(k=>k.hasta>=S.anio);
     // cargos: terminan, o se caen si la persona ya no está
     p.cargos.slice().forEach(c=>{ const per=buscar(c.tipo,c.key); if(!per){ p.cargos=p.cargos.filter(x=>x!==c); return; } per.ref.cargo155=c.pn; if(c.hasta<S.anio){ soltarCargo(c,esc(c.nombre)+' terminó su período en '+esc(c.pn)+'.'); } });
+    if(typeof window.regimenActivo179==='function'&&window.regimenActivo179()) return;   // v179: con una dictadura no hay campaña
     // la campaña arranca un año antes
     if(!campOk(p.camp)&&S.anio-S.gobierno.desde===3) iniciarCampana();
     const camp=campActual();
@@ -29086,7 +29091,7 @@ install();setTimeout(install,1200);
     window.listaAcciones=function(){ const A=old.apply(this,arguments);
       try{ if(!Array.isArray(A)||!ACTIVO()||nino()) return A; const a=A.find(x=>x.t==='Mover una ley en el Congreso'); if(a){ a.run=()=>escenaLey155(); a.d='Arancel, beneficio tributario, contratación o reforma laboral. Pesan la mayoría del gobierno y tu bancada.'; }
         const enGrupo=!window.__crudo91&&A.some(x=>x.t==='Influencia y palancas'&&x.modal);
-        if(!enGrupo&&!A.some(x=>x.t==='La política')){ const p=P(), pr=asegurarPres(), faltan=S.gobierno.desde+4-S.anio;
+        if(!enGrupo&&!A.some(x=>x.t==='La política')&&!(typeof window.regimenActivo179==='function'&&window.regimenActivo179())){ const p=P(), pr=asegurarPres(), faltan=S.gobierno.desde+4-S.anio;
           A.push({t:'La política',cat:'riesgo',d:(faltan<=1?(faltan<=0?'Hay elecciones este año. ':'Arranca la precampaña. '):'')+esc(pr.nombre)+' gobierna; te debe '+Math.round(pr.credito)+'. Campañas, favores, cargos para la familia y el Congreso.',mov:0,modal:true,run:()=>escenaPolitica155()}); } }catch(x){ console.error(x); }
       return A; }; window.listaAcciones.__v155=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA155_CAT) return; window.__SA155_CAT=true;
@@ -29095,7 +29100,7 @@ install();setTimeout(install,1200);
     if(!g.miembros.some(m=>m[1]==='La política')){ g.miembros.push(['Influencia','La política']); g.d='Aceitar a un funcionario, mover palancas, empujar una ley en el Congreso y la política: campañas, favores y cargos.'; } }
   function init155(){ wrapEmpresa(); wrapPaso(); wrapElecc(); wrapAcciones(); wrapCat(); grupo();
     Object.assign(window,{escenaPolitica155,escenaCampana155,escenaApoyo155,escenaCandidatura155,escenaListas155,escenaUrnas155,escenaFavores155,escenaEstado155,escenaCongreso155,escenaLey155,politica155:P,partidosVivos155:vivos,PARTIDOS_155:PARTIDOS,PUESTOS_155:PUESTOS,iniciarCampana155:iniciarCampana,votar155:votar,proclamar155:proclamar,
-      ponerCargo155:ponerCargo,soltarCargo155:soltarCargo,personasPol155:personas,anualPol155:anual,pedirFavor155:pedir155,bonoSector155:bonoSector,aporte155:aporte,escalaPol155:escala,generarCampana155:generar}); }
+      ponerCargo155:ponerCargo,soltarCargo155:soltarCargo,asegurarPres155:asegurarPres,personasPol155:personas,anualPol155:anual,pedirFavor155:pedir155,bonoSector155:bonoSector,aporte155:aporte,escalaPol155:escala,generarCampana155:generar}); }
   setTimeout(init155,40); setTimeout(init155,220); setTimeout(init155,650); setTimeout(init155,950);
   window.__SA155={version:V155};
 })();
@@ -29589,7 +29594,7 @@ install();setTimeout(install,1200);
     const tipo=chance(.5)?'min':'emb', L=(window.PUESTOS_155||[]).filter(x=>x.tipo===tipo&&S.anio>=x.d&&!(x.h&&S.anio>x.h)&&!po.cargos.some(c=>c.puesto===x.id)&&x.poder<=4); if(!L.length) return;
     const pu=pick(L), nom=typeof pu.n==='function'?pu.n(S.anio):pu.n; po.ofertaGob158=pr.desde; S._ev158=S.anio;
     cola.push({p:8,c:()=>!!(window.politica155&&window.politica155().pres),t:()=>'<b>'+esc(pr.nombre)+'</b> quiere agradecerte lo que hiciste por su gobierno: te ofrece '+(tipo==='min'?'un ministerio':'una embajada')+' para alguien de la casa, <b>'+esc(nom)+'</b>. Propones a '+esc(per.nombre)+' ('+esc(per.rel)+'), la más preparada de la familia.',
-      o:[{t:'Aceptar para '+per.nombre.split(' ')[0],f:()=>{ window.__noLam158=true; try{ const c=window.ponerCargo155(per,pu); po.influ=Math.min(100,(po.influ||0)+pu.poder*2); if(chance(.14)){ try{ abrirEscandalo129('politico','El nombramiento de '+per.nombre+' en '+c.pn,2); }catch(x){} moverPrestigio(-3,'el nepotismo en '+c.pn); return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. La prensa se enteró: "los de siempre se reparten el Estado".'; } return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. Es de la casa y el Gobierno te lo agradece.'; }catch(x){ return 'El nombramiento no pudo hacerse.'; } finally{ window.__noLam158=false; } }},
+      o:[{t:'Aceptar para '+per.nombre.split(' ')[0],f:()=>{ window.__noLam158=true; try{ const c=window.ponerCargo155(per,pu); try{ if(typeof window.favor179==='function') window.favor179('cargo',{poder:pu.poder,txt:per.nombre+' en '+c.pn}); }catch(z){} po.influ=Math.min(100,(po.influ||0)+pu.poder*2); if(chance(.14)){ try{ abrirEscandalo129('politico','El nombramiento de '+per.nombre+' en '+c.pn,2); }catch(x){} moverPrestigio(-3,'el nepotismo en '+c.pn); return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. La prensa se enteró: "los de siempre se reparten el Estado".'; } return 'Aceptaste: <b>'+esc(per.nombre)+'</b> quedó como '+esc(c.pn)+'. Es de la casa y el Gobierno te lo agradece.'; }catch(x){ return 'El nombramiento no pudo hacerse.'; } finally{ window.__noLam158=false; } }},
          {t:'Agradecer y declinar',f:()=>{ pr.rencor=Math.min(80,(pr.rencor||0)+4); S.p.redes=clamp((S.p.redes||0)+1,0,100); moverPrestigio(1,'no se dejó comprar'); return 'Agradeciste con elegancia y no aceptaste. Quedó claro que no te compran con un puesto.'; }}]}); }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA158_PASO) return; window.__SA158_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) oferta(); }catch(e){ console.error(e); } return r; }; }
@@ -33155,6 +33160,415 @@ install();setTimeout(install,1200);
     Object.assign(window,{EDUCACION_178:EDU,nivelesEducacion178:niveles,NIVELES_178:NIV}); }
   init178(); setTimeout(init178,40); setTimeout(init178,220); setTimeout(init178,650); setTimeout(init178,950);
   window.__SA178={version:V178};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v179 · EL PODER COBRA
+   Los eventos políticos dejan de ser un "apoyo y ya": atan.
+   - Quien manda (la dictadura del general Rojas Pinilla entre 1953 y 1957, o
+     el gobierno elegido en cualquier otra época) lleva la cuenta de lo que
+     le debes: cada favor que le pides (un contrato, las licencias, un
+     decreto, frenar una investigación, un cargo para la familia) es una
+     deuda. "No pidas, no debes."
+   - Esa deuda se cobra con otros favores: donaciones, bonos, la línea oficial
+     en tus medios, recomendados en tu nómina, suministros a precio de costo,
+     la firma de un manifiesto, la plata de una campaña. Se puede cumplir, dar
+     menos o negarse; lo que no se paga queda en mora.
+   - Oponerse tiene precio: la presión sube con la oposición abierta, el
+     dinero escondido para los rivales, la mora y los medios que no se
+     alinean. Primero te vigilan (visitas y revisiones), después te
+     hostigan (multas, licencias retenidas, gente detenida) y al final
+     pueden cerrarte compañías por un tiempo: sin ventas, pagando lo que
+     no se puede dejar de pagar, y con clientes que no vuelven todos.
+   - Para reabrir antes: hacer las paces (y quedar debiendo), recurrir a la
+     justicia o mover influencias.
+   - La dictadura de Rojas es un arco entero (la donación a la Secretaría de
+     Asistencia, la censura de la prensa, la reelección y el paro cívico) y al
+     caer se rinden cuentas: investigan a los beneficiados y premian a los
+     que se opusieron. Con las elecciones pasa lo mismo: el aliado del
+     ganador cobra y paga; el que financió a otro se vuelve sospechoso.
+   - Pantalla "El poder y tú", consejero de la casa y crónica.
+   ========================================================================== */
+(function(){
+  const V179='v179';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const R1=x=>Math.round(x*10)/10;
+  const patr=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const escalaP=()=>Math.max(30,patr()*.012);
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const redes=d=>{ try{ S.p.redes=cl((S.p.redes||0)+d,0,100); }catch(e){} };
+  const P155=()=>{ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } };
+  const adulto=()=>!!(ACTIVO()&&S.p.edad>=18&&!nino());
+
+  /* ==================== LOS REGÍMENES ==================== */
+  const REG={
+    rojas:{id:'rojas',desde:1953,hasta:1957,nombre:'la dictadura del general Rojas Pinilla',corto:'el régimen',jefe:'el general Rojas Pinilla',rig:1.15,gob:'populista'}
+  };
+  const regDe=a=>Object.keys(REG).map(k=>REG[k]).find(r=>a>=r.desde&&a<=r.hasta)||null;
+  const regActivo=()=>{ try{ return (typeof S!=='undefined'&&S&&isFinite(S.anio))?regDe(S.anio):null; }catch(e){ return null; } };
+
+  /* ==================== EL ESTADO ==================== */
+  function D(){ if(typeof S==='undefined'||!S) return null; let d=S.poder179; if(!d||typeof d!=='object') d=S.poder179={};
+    if(!d.reg||typeof d.reg!=='object') d.reg={}; if(!('gob' in d)) d.gob=null; if(!isFinite(d.premio)) d.premio=0;
+    ['hist','cargas','cierres'].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; }); return d; }
+  function nuevaRel(tipo,id,extra){ return Object.assign({id,tipo,postura:'neutral',manual:false,deuda:0,mora:0,presion:0,opoSecreta:0,opo:0,recibidos:0,hundido:0,pagos:0,negaciones:0,fav:[],desde:A(),cobroAnio:0,paro:false},extra||{}); }
+  const relReg=r=>{ const d=D(); return d.reg[r.id]||(d.reg[r.id]=nuevaRel('regimen',r.id,{nombre:r.nombre,quien:r.jefe,hasta:r.hasta,desde:r.desde})); };
+  const quien=rel=>rel.tipo==='regimen'?'el régimen':(rel.quien||'el gobierno');
+  function rigDe(rel){ if(rel.tipo==='regimen'){ const r=REG[rel.id]; return r?r.rig:1; }
+    const k=rel.gobId||(S.gobierno&&S.gobierno.id); const m={conservador:.7,liberal:.6,tecnocratico:.35,reformista:.65,populista:.9}[k]||.6;
+    return m*(A()<1991?1:.75)*(A()>=1958&&A()<=1974?.85:1); }
+  const vigDe=rel=>rel.presion>=75?3:rel.presion>=50?2:rel.presion>=25?1:0;
+  const VIGN=['Nadie te molesta','Te vigilan','Te hostigan','Te pueden cerrar'];
+  const POSN=r=>({aliado:r.tipo==='regimen'?'Con el régimen':'Con el gobierno',neutral:'A distancia',opositor:'En contra'});
+
+  function archivar(old,pr){ const d=D(); d.hist.push({id:old.id,nombre:old.nombre,desde:old.desde,hasta:A(),postura:old.postura,deuda:old.deuda,recibidos:old.recibidos,pagos:old.pagos}); if(d.hist.length>10) d.hist.shift();
+    if(old.postura==='opositor'&&pr&&pr.partido&&old.partido&&pr.partido!==old.partido) d.premio=Math.max(d.premio||0,10+5*(old.opo||0));
+    if(old.tipo==='gobierno'&&pr&&old.partido===pr.partido) return Math.round(old.deuda*.4*10)/10; return 0; }
+  function iniciarGob(rel,pr,heredada){
+    rel.postura=((S.gobierno&&S.gobierno.apoyado)||(pr.credito||0)>=25)?'aliado':(pr.rencor>10?'opositor':'neutral');
+    rel.presion=pr.rencor>10?Math.round(pr.rencor*.5):0; rel.deuda=heredada||0;
+    const d=D(); if(d.premio>0){ pr.credito=Math.min(150,(pr.credito||0)+d.premio); log('<b>El nuevo gobierno no olvida quién estuvo en contra del anterior</b>: te debe '+Math.round(d.premio)+' de crédito.','bien'); redes(5); d.premio=0; }
+  }
+  function relGob(){ const d=D(), p=P155(); if(!d||!p||regActivo()||A()<1830||!S.gobierno) return null; try{ if(!p.pres&&typeof window.asegurarPres155==='function') window.asegurarPres155(); }catch(x){} if(!p.pres) return null; const pr=p.pres;
+    const id='g'+pr.desde+':'+(pr.id||pr.nombre);
+    if(!d.gob||d.gob.id!==id){ let her=0; if(d.gob) her=archivar(d.gob,pr);
+      d.gob=nuevaRel('gobierno',id,{nombre:pr.nombre,quien:pr.nombre,partido:pr.partido,gobId:pr.gob,hasta:pr.hasta,desde:pr.desde}); iniciarGob(d.gob,pr,her); }
+    return d.gob; }
+  function relActiva(){ if(!ACTIVO()) return null; const rg=regActivo(); if(rg){ if(!S.gobierno||S.gobierno.regimen!==rg.id) iniciarRegimen(rg); return relReg(rg); } return relGob(); }
+
+  /* ==================== COMIENZA Y TERMINA UN RÉGIMEN ==================== */
+  function iniciarRegimen(rg){ try{ S.gobierno={id:rg.gob,desde:rg.desde,apoyado:false,regimen:rg.id}; S.tension=cl((S.tension||35)+6,0,100);
+    const p=P155(); if(p){ p.camp=null; p.pres={id:'regimen:'+rg.id,nombre:'el general Gustavo Rojas Pinilla',sexo:'h',partido:'regimen',gob:rg.gob,integ:4,cumple:8,desde:rg.desde,hasta:rg.hasta,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true}; }
+  }catch(e){ console.error(e); } }
+  function cerrarRegimen(rg){ try{ const d=D(), rel=relReg(rg), sig=A()+1;
+    rel.fin=true; const a={id:rg.id,postura:rel.postura,recibidos:rel.recibidos,hundido:rel.hundido,deuda:rel.deuda,opo:rel.opo,opoSecreta:rel.opoSecreta,paro:!!rel.paro,hecho:false};
+    S._ajuste179=a;
+    S.gobierno={id:'tecnocratico',desde:rg.hasta-3,apoyado:false}; S.tension=cl((S.tension||35)-6,0,100);   // una Junta Militar gobierna hasta que se vote
+    log('<b>Cayó '+rg.nombre+'.</b> Una Junta Militar gobierna hasta las elecciones del Frente Nacional.','hito');
+    const p=P155(); if(p){ p.camp=null; p.contratos=[]; p.decretos=[]; p.pres={id:'junta:'+rg.id,nombre:'la Junta Militar',sexo:'h',partido:'regimen',gob:'tecnocratico',integ:6,cumple:6,desde:rg.hasta,hasta:rg.hasta+1,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true};
+      (p.cargos||[]).filter(c=>c.nombrado&&c.pt!=='pres').forEach(c=>{ try{ if(typeof window.soltarCargo155==='function') window.soltarCargo155(c,'<b>'+E(c.nombre)+'</b> salió de '+E(c.pn)+' con la caída del régimen.'); }catch(x){} }); }
+    archivar(rel,null);
+  }catch(e){ console.error(e); } }
+  function ajuste179(){ const a=S&&S._ajuste179; if(!a||a.hecho) return ''; a.hecho=true; const t=[]; const dep=patr();
+    const amigo=a.postura==='aliado'||a.recibidos>0, opo=a.postura==='opositor'||a.opo>0||a.paro||a.opoSecreta>0;
+    if(amigo&&!(a.postura==='opositor')){ const exp=a.recibidos+a.hundido*1.5+(a.postura==='aliado'?1:0), prob=cl(.2+.1*exp,.2,.9);
+      if(chance(prob)){ const multa=Math.round(dep*cl(.012*exp+.01,.02,.12)); const pag=pagarMonto(multa); S.p.escandalos=(S.p.escandalos||0)+1; prest(-3,'los favores del régimen caído');
+        try{ if(typeof registrarDelito==='function') registrarDelito('enriquecimiento con favores del régimen',1,'los beneficiados del régimen caído'); }catch(x){}
+        t.push('Una comisión investigadora revisó a los beneficiados del régimen: tus contratos y favores salieron a la luz y te cobraron '+fm(pag)+'.'); }
+      else t.push('La comisión que revisó a los beneficiados del régimen no llegó hasta ti. Esta vez.'); }
+    if(opo){ const k=1+(a.opo||0)+(a.paro?1:0); redes(10+k*2); prest(2+k,'se opuso al régimen'); const d=D(); d.premio=Math.max(d.premio||0,12+4*k);
+      t.push('Los que se opusieron al régimen no pasan inadvertidos: las puertas se abren y el nuevo gobierno te va a deber.'); }
+    const cerradas=comps().filter(e=>e.cierre179);
+    if(cerradas.length){ cerradas.forEach(e=>reabrir(e,' con la caída del régimen')); t.push('Las compañías cerradas por orden del régimen reabrieron.'); }
+    return t.join(' '); }
+
+  /* ==================== PLATA Y COMPAÑÍAS ==================== */
+  function pagarMonto(m){ m=Math.max(0,Math.round(m)); let p=Math.min(Math.max(0,S.efectivo),m); S.efectivo-=p; const resto=m-p;
+    if(resto>0){ const e=comps().slice().sort((a,b)=>(b.caja||0)-(a.caja||0))[0]; if(e&&e.caja>0){ const q=Math.min(e.caja,resto); e.caja-=q; p+=q; } } return p; }
+  function gastoE(e,m){ e.caja-=m; if(e.caja<0){ e.deuda=(e.deuda||0)+(-e.caja)*1.1; e.caja=0; } }
+  const abiertas=()=>comps().filter(e=>e&&!(e.cierre179&&e.cierre179.hasta>=A()+1));
+  const mayor=incl=>abiertas().filter(e=>incl||!e.banco112).sort((a,b)=>(b.ingresos||0)-(a.ingresos||0))[0]||null;
+  const tieneMedios=()=>abiertas().some(e=>e.sector==='medios');
+  const medios=()=>abiertas().filter(e=>e.sector==='medios').sort((a,b)=>(b.ingresos||0)-(a.ingresos||0))[0]||null;
+  const fisco=()=>A()>=1993?'la DIAN':A()>=1960?'la Dirección de Impuestos Nacionales':'los inspectores de Hacienda';
+  function clausurar(e,dur,por){ if(!e||e.banco112) return false; const c=e.cierre179; if(c&&c.hasta>=A()+1) return false;
+    const hasta=A()+Math.max(1,dur||1);
+    e.cierre179={desde:A()+1,hasta,por:por||'',ing0:Math.max(10,e.ingresos||10),emp0:e.empleados||4,am0:e.aniosMalos||0,marca0:e.marca};
+    try{ if(e.red176&&Array.isArray(e.red176.unidades)) e.red176.unidades.forEach(u=>{ if(!u.enObra) u.cierre=Math.max(u.cierre||0,hasta); }); }catch(x){}
+    try{ if(e.hotel175&&Array.isArray(e.hotel175.hoteles)) e.hotel175.hoteles.forEach(h=>{ if(!h.enObra) h.cierre=Math.max(h.cierre||0,hasta); }); }catch(x){}
+    const d=D(); d.cierres.push({emp:e.nombre,desde:A()+1,hasta,por:por||''}); if(d.cierres.length>12) d.cierres.shift();
+    log('<b>Clausuraron '+E(e.nombre)+'</b> hasta '+hasta+(por?': '+E(por):'')+'.','mal'); hito('Clausuraron '+e.nombre+' por orden del poder'); return true; }
+  function reabrir(e,motivo){ const c=e&&e.cierre179; if(!c) return;
+    if(!(e.red176||e.hotel175)){ e.ingresos=Math.max(1,c.ing0*.8); e.empleados=Math.max(2,Math.round((c.emp0||e.empleados)*.8)); }
+    try{ if(e.red176&&Array.isArray(e.red176.unidades)) e.red176.unidades.forEach(u=>{ if((u.cierre||0)>=A()) u.cierre=A()-1; }); }catch(x){}
+    try{ if(e.hotel175&&Array.isArray(e.hotel175.hoteles)) e.hotel175.hoteles.forEach(h=>{ if((h.cierre||0)>=A()) h.cierre=A()-1; }); }catch(x){}
+    e.marca=cl(Math.min(e.marca||50,c.marca0||e.marca||50)-6,5,100); e.moral=cl((e.moral||50)-10,0,100); e.aniosMalos=c.am0||0;
+    e.cierre179=null; e.cierreUlt179=A(); log('<b>'+E(e.nombre)+'</b> reabrió sus puertas'+(motivo||'')+'. Volver a empezar cuesta: parte de la clientela se fue.','bien'); }
+  /* el efecto dentro del año de cada compañía (gancho en correrEmpresa) */
+  function efectoPoder179(e,res){ try{ if(!e||e._y179===A()) return; e._y179=A();
+    const tasa=((S.macro&&S.macro.tasa)||.08)+.03, c=e.cierre179;
+    if(c&&c.hasta>=A()){
+      const gen=!(e.hotel175||e.red176), ing0=c.ing0||Math.max(10,e.ingresos||10); let nueva;
+      if(gen){ const interes=Math.max(0,e.deuda||0)*tasa; nueva=-(ing0*.08+interes); e.ingresos=Math.max(1,ing0*.05); e.empleados=Math.max(2,Math.round((c.emp0||e.empleados||4)*.2)); e.costos=e.ingresos-nueva; }
+      else nueva=Math.min(0,e.utilidad||0)-ing0*.06;
+      e.caja+=nueva-(e.utilidad||0); e.utilidad=nueva; e.crecimiento=-.5; e.marca=cl((e.marca||50)-3,5,100); }
+    const d=D(); if(d&&d.cargas.length){ let x=0; d.cargas.forEach(k=>{ if(k.emp===e.nombre&&k.hasta>=A()) x+=k.monto; }); if(x>0){ e.caja-=x; e.utilidad=(e.utilidad||0)-x; } }
+  }catch(x){ console.error(x); } }
+
+  /* ==================== FAVORES = DEUDA ==================== */
+  const PESO={contrato:2,licencias:1,decreto:3,frenar:3};
+  function favor179(id,info){ try{ if(!adulto()) return; const rel=relActiva(); if(!rel) return; info=info||{};
+    const w=(id==='cargo'?cl(Math.round(1+(info.poder||3)*.6),2,4):(PESO[id]||1))*(rel.tipo==='gobierno'?.8:1);
+    rel.deuda=R1((rel.deuda||0)+w); rel.recibidos=(rel.recibidos||0)+1; rel.fav.push({id,anio:A(),w:R1(w),txt:info.txt||''}); if(rel.fav.length>14) rel.fav.shift();
+    if(rel.postura==='neutral') rel.postura='aliado';
+    log('<b>Los favores se pagan.</b> '+(rel.tipo==='regimen'?'El régimen':E(quien(rel)))+' anotó lo que hizo por ti: quedaste debiendo '+R1(w)+(w===1?' favor':' favores')+'.','mal');
+  }catch(e){ console.error(e); } }
+  /* los favores al régimen, sin presidente elegido: el menú propio */
+  const movida=()=>{ if(S._mov179===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov179=A(); return true; };
+  const sinMov=()=>(S._mov179!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  function pedirReg(id){ const rel=relActiva(); if(!rel||rel.tipo!=='regimen') return; const cs=comps(), p=P155()||{contratos:[],decretos:[]};
+    if(!movida()){ log('No te quedan movidas.'); return; }
+    const prob=rel.postura==='aliado'?.9:.6; let hecho=false, txt='';
+    if(!chance(prob)){ rel.presion=Math.min(100,rel.presion+4); log('Pediste un favor y te dieron largas: "el general está muy ocupado". Quedó anotado que lo pediste.','mal'); rel.deuda=R1(rel.deuda+.5); return; }
+    if(id==='contrato'){ const e=cs.slice().sort((a,b)=>b.ingresos-a.ingresos)[0]; if(!e){ log('No tienes una compañía a la cual darle el contrato.'); return; } const x=Math.round(e.ingresos*rnd(.06,.12)); e.ingresos+=x; e.caja+=x*.25; e.utilidad+=x*.25;
+      (p.contratos=p.contratos||[]).push({emp:e.nombre,desde:A(),hasta:A()+3,bonus:.012}); log('A <b>'+E(e.nombre)+'</b> le adjudicaron un contrato del Estado: '+fm(x)+' más en ventas este año.','bien'); hecho=true; txt='Un contrato para '+e.nombre; }
+    if(id==='licencias'){ const L=window.licencias150, Rq=window.licenciasRequeridas150; let n=0; if(typeof L==='function'&&typeof Rq==='function') cs.forEach(e=>{ const lic=L(e); Rq(e).forEach(k=>{ const x=lic[k]; if(!x||['tramite','negada','vencida','suspendida'].includes(x.estado)){ lic[k]={estado:'vigente',desde:A(),hasta:A()+8,influencia:true}; n++; } }); });
+      log(n?'Se movieron los trámites: salieron '+n+' licencia'+(n>1?'s':'')+'.':'Dijeron que sí, pero no tenías nada pendiente.',n?'bien':''); hecho=n>0; txt='Licencias agilizadas'; }
+    if(id==='decreto'){ const e=cs[0]; const sec=e?e.sector:'*'; (p.decretos=p.decretos||[]).push({sector:sec,hasta:A()+4,bonus:.018}); log('Salió un decreto hecho a la medida de tu sector: años de reglas favorables.','bien'); hecho=true; txt='Un decreto a tu medida'; }
+    if(id==='frenar'){ try{ if(typeof asegurarPenal==='function') asegurarPenal(); S.penal.riesgo=cl((S.penal.riesgo||0)-25,0,100); log('Alguien en la justicia militar "perdió" un expediente. Tu riesgo legal bajó.','bien'); hecho=true; txt='Un expediente que se perdió'; }catch(x){} }
+    if(hecho) favor179(id,{txt}); }
+  function pedirCargoReg(per){ const rel=relActiva(); if(!rel||rel.tipo!=='regimen'||!per) return; if(!movida()){ log('No te quedan movidas.'); return; }
+    const L=(window.PUESTOS_155||[]).filter(x=>A()>=x.d&&!(x.h&&A()>x.h)&&!((P155()||{}).cargos||[]).some(c=>c.puesto===x.id)&&x.poder>=2);
+    if(!L.length){ log('No hay cargos libres.'); return; } const pu=pick(L);
+    if(!chance(rel.postura==='aliado'?.88:.55)){ rel.deuda=R1(rel.deuda+.5); log('El régimen te dijo que lo estudiaba: "el cargo ya tiene dueño".','mal'); return; }
+    try{ const c=window.ponerCargo155(per,pu); log('<b>'+E(per.nombre)+'</b> fue nombrado en <b>'+E(c.pn)+'</b> por el régimen.','hito'); favor179('cargo',{poder:pu.poder,txt:per.nombre+' en '+c.pn}); }catch(x){ console.error(x); } }
+
+  /* ==================== LO QUE EL PODER COBRA ==================== */
+  const nomCarga=(e,monto,anios,txt)=>{ D().cargas.push({emp:e.nombre,monto:Math.round(monto),hasta:A()+anios,txt}); };
+  const POOL=[
+    {id:'sendas',tipo:'regimen',w:3,peso:1,ok:r=>r.id==='rojas'&&A()>=1954,m:()=>escalaP()*1.1,
+     txt:(r,m)=>'<b>La Secretaría Nacional de Asistencia Social, que maneja la familia del general, te pasa la cuenta.</b> Piden una "donación voluntaria" de '+fm(m)+' para las obras del régimen. De las que no se rechazan en público.',
+     cum:'Entregaste la donación y tu nombre salió entre los benefactores.',neg:'Dijiste que no podías. En la Secretaría anotaron tu nombre, y no entre los benefactores.'},
+    {id:'bonos',tipo:'regimen',w:2,peso:1,ok:r=>r.id==='rojas',m:()=>escalaP()*1.5,
+     txt:(r,m)=>'<b>Hacienda coloca bonos de Estado "de adhesión" entre los grandes capitales.</b> A ti te asignaron una cuota de '+fm(m)+'. Rinden poco y se pagan de contado.',
+     cum:'Suscribiste los bonos. Quedaron guardados en un cajón.',neg:'No suscribiste los bonos. En Hacienda dicen que "la patria no olvida".'},
+    {id:'propaganda',tipo:'regimen',w:2,peso:1,ok:r=>r.id==='rojas',m:()=>tieneMedios()?escalaP()*.2:escalaP()*.8,
+     txt:(r,m)=>tieneMedios()?'<b>La Oficina de Información y Propaganda del Estado exige que tus periódicos y emisoras publiquen la versión oficial.</b> Mandan los textos hechos.':'<b>La Oficina de Información y Propaganda pide que pagues avisos oficiales en la prensa del régimen:</b> '+fm(m)+' en "pauta de adhesión".',
+     ef:(r,f)=>{ const e=medios(); if(!e||f<.5) return ''; e.marca=cl((e.marca||50)-6,5,100); prest(-2,'la línea oficial en sus medios'); return ' La credibilidad de <b>'+E(e.nombre)+'</b> se resintió.'; },
+     cum:'Publicaste lo que mandaron.',neg:'Dijiste que no. Quedó anotado quién publica y quién no.',lab:['Publicar la versión oficial','Publicar solo una parte','Negarte']},
+    {id:'empleos',tipo:'regimen',w:2,peso:1,ok:r=>r.id==='rojas'&&!!mayor(),m:()=>0,lab:['Contratarlos a todos','Contratar a unos pocos','No contratarlos'],
+     txt:()=>'<b>El régimen te pide colocar en tu nómina a oficiales retirados y parientes de funcionarios.</b> Cobran sin trabajar mucho, y de eso dependen tus buenas relaciones.',
+     ef:(r,f)=>{ const e=mayor(); if(!e||f<.3) return ''; const x=e.ingresos*.012*f; nomCarga(e,x,3,'recomendados del régimen'); e.eficiencia=cl((e.eficiencia||50)-3*f,0,100); return ' Los nuevos le cuestan a <b>'+E(e.nombre)+'</b> '+fm(x)+' al año durante tres años.'; },
+     cum:'Contrataste a los recomendados.',neg:'Dijiste que la nómina estaba llena. Alguien lo anotó.'},
+    {id:'manifiesto',tipo:'regimen',w:2,peso:1,ok:r=>r.id==='rojas'&&A()>=1954,m:()=>0,lab:['Firmar el manifiesto','Firmar sin ir al acto','No firmar'],
+     txt:()=>'<b>Piden tu firma en el manifiesto de adhesión al general y a su "tercera fuerza".</b> Saldrá en la prensa con los nombres de los empresarios que apoyan.',
+     ef:(r,f)=>{ if(f<.5) return ''; prest(-2,'firmó la adhesión al régimen'); redes(3); return ' Tu nombre salió en la prensa, al lado de los de siempre.'; },
+     cum:'Firmaste.',neg:'No firmaste. En la lista no apareces, y todo el mundo lo notó.'},
+    {id:'suministro',tipo:'regimen',w:2,peso:1,ok:r=>r.id==='rojas'&&!!mayor(),m:()=>{ const e=mayor(); return e?Math.max(20,e.ingresos*.03):0; },
+     txt:(r,m)=>'<b>Las Fuerzas Armadas necesitan que una de tus compañías les entregue mercancía "a precio de costo".</b> Calculan '+fm(m)+' en pérdidas para ti.',
+     cum:'Entregaste la mercancía. Tus contadores lo anotaron como "gastos de relaciones".',neg:'No entregaste. Un coronel dijo que se acordaría.'},
+    {id:'reeleccion',tipo:'regimen',w:4,peso:2,ok:r=>r.id==='rojas'&&A()>=1956,m:()=>escalaP()*2.4,
+     txt:(r,m)=>'<b>El régimen organiza "manifestaciones de respaldo" a la reelección del general hasta 1962.</b> Piden '+fm(m)+' a los empresarios que "quieren orden".',
+     ef:(r,f)=>{ if(f>=.9) r.hundido=(r.hundido||0)+1; return f>=.9?' Pusiste plata en una causa que cada día tiene más enemigos.':''; },
+     cum:'Pusiste la plata. Tu nombre quedó atado a la reelección.',neg:'Dijiste que no. A esta altura, negarse a la reelección es casi una declaración.'},
+    {id:'cuota',tipo:'gobierno',w:3,peso:1,ok:r=>r.tipo==='gobierno',m:()=>escalaP()*1.3,
+     txt:(r,m)=>'<b>'+E(quien(r))+' te hace llamar.</b> El partido de gobierno necesita plata para sus listas y "va a ser agradecido". Pide '+fm(m)+'.',
+     ef:(r,f)=>{ const pr=(P155()||{}).pres; if(pr&&f>=.5) pr.credito=Math.min(150,(pr.credito||0)+8); return ''; },
+     cum:'Pusiste la plata. En Palacio quedó anotado.',neg:'Dijiste que no, con respeto. Se lo tomaron sin él.'},
+    {id:'recomendados',tipo:'gobierno',w:2,peso:1,ok:r=>r.tipo==='gobierno'&&!!mayor(),m:()=>0,lab:['Colocar a todos los recomendados','Colocar a unos pocos','Decir que no hay cupo'],
+     txt:(r)=>'<b>Del gobierno llaman por una lista de recomendados.</b> Quieren que tus compañías los coloquen en la nómina: "es lo normal entre amigos".',
+     ef:(r,f)=>{ const e=mayor(); if(!e||f<.3) return ''; const x=e.ingresos*.01*f; nomCarga(e,x,3,'recomendados del gobierno'); e.eficiencia=cl((e.eficiencia||50)-2*f,0,100); return ' A <b>'+E(e.nombre)+'</b> le cuestan '+fm(x)+' al año durante tres años.'; },
+     cum:'Colocaste a los recomendados.',neg:'Dijiste que no había cupo. No les gustó.'},
+    {id:'respaldo',tipo:'gobierno',w:2,peso:1,ok:r=>r.tipo==='gobierno'&&A()>=1850,m:()=>0,lab:['Respaldar al gobierno en público','Respaldarlo con medias palabras','No respaldarlo'],
+     txt:(r)=>'<b>El gobierno saca adelante un proyecto polémico y quiere el respaldo de los empresarios.</b> Esperan tu firma y, si tienes medios, tu línea editorial.',
+     ef:(r,f)=>{ if(f<.5) return ''; const e=medios(); if(e) e.marca=cl((e.marca||50)-4,5,100); prest(-1,'respaldó al gobierno'); redes(3); return e?' La credibilidad de <b>'+E(e.nombre)+'</b> se resintió.':' Tu firma apareció en el comunicado.'; },
+     cum:'Respaldaste al gobierno.',neg:'No respaldaste. Lo anotaron.'},
+    {id:'obra',tipo:'gobierno',w:2,peso:1.5,ok:r=>r.tipo==='gobierno'&&!!mayor(),m:()=>{ const e=mayor(); return e?Math.max(20,e.ingresos*.03):0; },
+     txt:(r,m)=>'<b>El gobierno quiere que una de tus compañías adelante una obra o un suministro "a cuenta".</b> Se paga después, cuando haya presupuesto. Calculan '+fm(m)+' en esfuerzo.',
+     cum:'Adelantaste la obra. La cuenta sigue pendiente.',neg:'No adelantaste nada. Otro contratista lo hizo y se lo van a recordar a todos.'},
+    {id:'campana',tipo:'gobierno',w:3,peso:2,ok:r=>r.tipo==='gobierno'&&(r.hasta||0)-A()<=1,m:()=>escalaP()*2,
+     txt:(r,m)=>'<b>Se acercan las elecciones y el gobierno quiere que la casa ponga plata para su candidato.</b> Piden '+fm(m)+'.',
+     ef:(r,f)=>{ const pr=(P155()||{}).pres; if(pr&&f>=.5) pr.credito=Math.min(150,(pr.credito||0)+12); return ''; },
+     cum:'Pusiste la plata. Ahora tu suerte va con la del candidato del gobierno.',neg:'No pusiste nada. Si pierde el candidato, no te van a reclamar; si gana, sí.'}
+  ];
+  function cobroDe(rel){ const L=POOL.filter(x=>x.tipo===rel.tipo&&x.ok(rel)); if(!L.length) return null; let t=L.reduce((s,x)=>s+x.w,0), r=Math.random()*t; for(const x of L){ r-=x.w; if(r<=0) return x; } return L[0]; }
+  function resolver(rel,x,m,f){ const peso=x.peso||1; let extra='', txt;
+    if(f>0){ let pag=0; if(m>0) pag=pagarMonto(m*f); const fe=m>0?Math.min(1,pag/m):f;
+      rel.deuda=Math.max(0,R1((rel.deuda||0)-peso*fe)); rel.mora=R1((rel.mora||0)+peso*(1-fe)*.6); rel.pagos++;
+      rel.presion=Math.max(0,rel.presion-(fe>=.9?10:fe>=.3?2:0)); if(x.ef) extra=x.ef(rel,fe,m)||'';
+      txt=(fe>=.9?x.cum:(x.cum+' Pero fue menos de lo que pedían: queda algo en mora.'))+extra; }
+    else{ rel.mora=R1((rel.mora||0)+peso); rel.negaciones=(rel.negaciones||0)+1; rel.presion=Math.min(100,rel.presion+Math.round(14*peso*rigDe(rel)));
+      let q=''; if(rel.postura==='aliado'&&rel.negaciones>=2){ rel.postura='neutral'; q=' Ya no te cuentan entre los suyos.'; } txt=x.neg+q; }
+    return txt; }
+  function evCobro(rel,x){ const m=Math.round(x.m()), lab=x.lab||null;
+    const o=m>0?[{t:'Cumplir ('+fm(m)+')',f:()=>resolver(rel,x,m,1)},{t:'Dar menos ('+fm(m*.4)+')',f:()=>resolver(rel,x,m,.4)},{t:'Negarte',f:()=>resolver(rel,x,m,0)}]
+      :[{t:lab?lab[0]:'Cumplir',f:()=>resolver(rel,x,0,1)},{t:lab?lab[1]:'Cumplir a medias',f:()=>resolver(rel,x,0,.4)},{t:lab?lab[2]:'Negarte',f:()=>resolver(rel,x,0,0)}];
+    return {p:9,c:()=>ACTIVO()&&(rel.tipo==='regimen'?!!regActivo():true),t:()=>x.txt(rel,m)+' <small>(Es el cobro de los favores que te hicieron: debes '+R1(rel.deuda)+'.)</small>',o}; }
+
+  /* ==================== PERSECUCIÓN ==================== */
+  function evVigilancia(rel){ const e=mayor(true); const quienes=rel.tipo==='regimen'?'Agentes del régimen':'Funcionarios del gobierno'; if(!e) return evPersona(rel,1);
+    const m=Math.round(Math.max(15,(e.ingresos||0)*.015));
+    return {p:8,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>'+quienes+' visitan '+E(e.nombre)+'.</b> Piden libros y correspondencia, '+fisco()+' abre una revisión y alguien deja caer que tu nombre está en una lista.',
+      o:[{t:'Atenderlos y pagar lo que pidan ('+fm(m)+')',f:()=>{ gastoE(e,m); rel.presion=Math.max(0,rel.presion-8); return 'Entregaste los libros y pagaste. La visita se acabó sin ruido.'; }},
+         {t:'Resistir con abogados ('+fm(m*.5)+')',f:()=>{ gastoE(e,m*.5); if(chance(.5)) return 'Los abogados sostuvieron el pulso. Por ahora.'; gastoE(e,m); rel.presion=Math.min(100,rel.presion+8); return 'Resistir te salió caro: pagaste el doble y quedaste más anotado.'; }},
+         paces(rel,'Hacer las paces con '+quien(rel))]}; }
+  function evHostigamiento(rel){ const e=mayor(true); if(!e) return evPersona(rel,2); const m=Math.round(Math.max(30,(e.ingresos||0)*.03));
+    try{ e.moral=cl((e.moral||50)-5,0,100); const L=window.licencias150, Rq=window.licenciasRequeridas150; if(typeof L==='function'&&typeof Rq==='function'){ const lic=L(e), ids=Rq(e).filter(k=>lic[k]&&lic[k].estado==='vigente'); if(ids.length){ const k=pick(ids); lic[k]={estado:'suspendida',desde:A(),hasta:A()+1}; } } S.penal&&(S.penal.riesgo=cl((S.penal.riesgo||0)+4,0,100)); }catch(x){}
+    return {p:9,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Las multas y los sellos no paran.</b> A <b>'+E(e.nombre)+'</b> le retienen una licencia, las cuentas se llenan de "irregularidades" y un gerente pasa una noche detenido "para una declaración". Es hostigamiento, y todos lo saben.',
+      o:[{t:'Pagar y callar ('+fm(m)+')',f:()=>{ gastoE(e,m); rel.presion=Math.max(0,rel.presion-12); return 'Pagaste las multas y bajaste la voz. Por ahora, los sellos se quedaron guardados.'; }},
+         {t:'Pelear en los tribunales ('+fm(m*.4)+')',f:()=>{ gastoE(e,m*.4); if(chance(A()>=1991?.5:rel.tipo==='regimen'?.2:.35)){ rel.presion=Math.max(0,rel.presion-5); return 'Un juez se atrevió a darte la razón en una de las multas. No cambió el ambiente.'; } gastoE(e,m*1.2); rel.presion=Math.min(100,rel.presion+10); return 'Perdiste el pleito y pagaste más. Se tomaron la pelea como un desafío.'; }},
+         paces(rel,'Hacer las paces con '+quien(rel))]}; }
+  function evPersona(rel,n){ const m=Math.round(Math.max(20,patr()*.008*n));
+    return {p:8,c:()=>ACTIVO(),t:()=>'<b>'+(rel.tipo==='regimen'?'El régimen':E(quien(rel)))+' te hace sentir su peso.</b> Te citan, te multan y se enteran tus conocidos de que andas "en la mira".',
+      o:[{t:'Pagar y bajar la cabeza ('+fm(m)+')',f:()=>{ pagarMonto(m); rel.presion=Math.max(0,rel.presion-10); return 'Pagaste. La lista de sospechosos perdió una línea.'; }},
+         {t:'Sostener la mirada',f:()=>{ rel.presion=Math.min(100,rel.presion+6); redes(-4); try{ if(S.penal) S.penal.riesgo=cl((S.penal.riesgo||0)+5,0,100); }catch(x){} return 'No agachaste la cabeza. Tus conocidos hablan menos contigo.'; }},
+         paces(rel,'Hacer las paces con '+quien(rel))]}; }
+  function paces(rel,t){ const m=Math.round(escalaP()*1.2); return {t:t+' ('+fm(m)+')',f:()=>{ pagarMonto(m); rel.postura='aliado'; rel.manual=true; rel.presion=Math.max(0,rel.presion-25); rel.deuda=R1((rel.deuda||0)+1); redes(3); return 'Hiciste las paces: fuiste, pagaste y te comprometiste. Ahora estás del lado de '+quien(rel)+', y debes un favor más.'; }}; }
+  function objetivo(rel){ const L=abiertas().filter(e=>!e.banco112); if(!L.length) return null;
+    return L.map(e=>({e,s:(e.sector==='medios'?6:0)-(A()-(e.cierreUlt179||0)<=1?7:0)+(rel.opoSecreta>0?1:0)+Math.log10(Math.max(10,e.ingresos||10))+(e.publica?1:0)+((e.marca||50)/50)+Math.random()})).sort((a,b)=>b.s-a.s)[0].e; }
+  function evClausura(rel,e,dur){ const fijos=Math.round(Math.max(10,(e.cierre179&&e.cierre179.ing0||e.ingresos||10)*.08));
+    return {p:10,c:()=>ACTIVO()&&!!e.cierre179,t:()=>'<b>Clausuraron '+E(e.nombre)+'.</b> '+(rel.tipo==='regimen'?'Una orden del régimen manda cerrarla':'Una orden de las autoridades manda cerrarla')+' por '+(dur===1?'un año':dur+' años')+'. Sin ventas, y con arriendos, deudas y una nómina mínima que siguen corriendo: unos '+fm(fijos)+' al año.',
+      o:[{t:'Acatar y esperar',f:()=>'Cerraste las puertas. Hasta '+e.cierre179.hasta+' no vuelve a abrir, y cuando abra, no todos los clientes volverán.'},
+         {t:'Recurrir a la justicia ('+fm(fijos*.3)+')',f:()=>{ gastoE(e,fijos*.3); const p=A()>=1991?.55:rel.tipo==='regimen'?.12:.35; if(chance(p)){ rel.presion=Math.max(0,rel.presion-15); reabrir(e,' por orden de un juez'); return 'Un juez levantó la clausura. Es una victoria rara y aun así cara.'; } rel.presion=Math.min(100,rel.presion+5); return 'El recurso se perdió en los tribunales. Las puertas siguen selladas.'; }},
+         {t:'Hacer las paces y reabrir ('+fm(escalaP()*1.2+fijos)+')',f:()=>{ pagarMonto(escalaP()*1.2+fijos); rel.postura='aliado'; rel.manual=true; rel.presion=Math.max(0,rel.presion-35); rel.deuda=R1((rel.deuda||0)+1.5); reabrir(e,' después de arreglar cuentas'); return 'Fuiste, pagaste y prometiste. Reabrió, y ahora debes más de lo que debías.'; }}]}; }
+
+  /* ==================== LOS HITOS DEL RÉGIMEN ==================== */
+  const BEATS={
+    1954:rel=>{ const m=Math.round(escalaP()*1.5);
+      return {p:9,c:()=>ACTIVO(),t:()=>'<b>La Asamblea Constituyente prorroga al general en el poder hasta 1958</b> y la Secretaría Nacional de Asistencia Social, que maneja su familia, recibe "donaciones voluntarias" de los empresarios y los gremios.',
+        o:[{t:'Donar con generosidad ('+fm(m)+')',f:()=>{ pagarMonto(m); if(rel.postura==='neutral') rel.postura='aliado'; rel.presion=Math.max(0,rel.presion-12); rel.deuda=Math.max(0,R1(rel.deuda-1)); rel.pagos++; redes(5); return 'Donaste y saliste en la lista de benefactores. En Palacio se acuerdan de los que dieron de primeros.'; }},
+           {t:'Donar lo mínimo ('+fm(m*.3)+')',f:()=>{ pagarMonto(m*.3); return 'Diste lo mínimo y listo. Ni te aplauden ni te señalan.'; }},
+           {t:'No donar',f:()=>{ rel.mora=R1(rel.mora+.6); rel.presion=Math.min(100,rel.presion+8); return 'No donaste. En la Secretaría anotaron tu nombre.'; }}]}; },
+    1955:rel=>{ const em=medios();
+      return {p:10,c:()=>ACTIVO(),t:()=>'<b>El régimen clausura <i>El Tiempo</i> y obliga a los periódicos a publicar la versión oficial.</b> '+(em?'Tu compañía <b>'+E(em.nombre)+'</b> tiene que decidir qué publica.':'Los empresarios deben decidir de qué lado quedan.'),
+        o:[{t:em?'Publicar la versión oficial':'Firmar el respaldo al régimen',f:()=>{ if(rel.postura!=='opositor') rel.postura='aliado'; rel.presion=Math.max(0,rel.presion-15); rel.pagos++; redes(6); prest(-2,'respaldó la censura'); const e=medios(); if(e) e.marca=cl((e.marca||50)-6,5,100); return em?'Publicaste lo que mandaron. Seguiste abierto, con un público que ya no te cree del todo.':'Firmaste. Tu firma salió en la prensa oficial.'; }},
+           {t:'Callar y autocensurarte',f:()=>{ const e=medios(); if(e){ e.moral=cl((e.moral||50)-5,0,100); gastoE(e,Math.max(10,e.ingresos*.01)); } return 'No dijiste nada. Ni a favor ni en contra: la mejor manera de pasar inadvertido o de ser sospechoso.'; }},
+           {t:em?'Publicar y protestar':'Sumarte a la protesta de los empresarios',f:()=>{ rel.postura='opositor'; rel.manual=true; rel.opo=(rel.opo||0)+1; rel.presion=Math.min(100,rel.presion+20); prest(4,'se opuso a la censura'); const e=medios(); if(e&&clausurar(e,ri(1,2),'censura de prensa')) return 'Publicaste lo que no querían. Clausuraron <b>'+E(e.nombre)+'</b>. Ya eres de la oposición.'; return 'Firmaste con los demás empresarios. Quedaste en la lista de los que protestaron.'; }}]}; },
+    1956:rel=>{ const m=Math.round(escalaP()*2.4), s=Math.round(escalaP()*1.5);
+      return {p:10,c:()=>ACTIVO(),t:()=>'<b>Rojas quiere quedarse hasta 1962.</b> En febrero, tropas disparan contra los asistentes a la plaza de toros y la opinión se parte. El régimen organiza "manifestaciones de respaldo" a la reelección y pide plata a los empresarios.',
+        o:[{t:'Financiar la reelección ('+fm(m)+')',f:()=>{ pagarMonto(m); if(rel.postura!=='opositor') rel.postura='aliado'; rel.hundido=(rel.hundido||0)+1; rel.deuda=Math.max(0,R1(rel.deuda-2)); rel.presion=Math.max(0,rel.presion-15); redes(6); prest(-2,'financió la reelección del general'); return 'Pusiste la plata. Ya estás casado con el régimen, para bien y para mal.'; }},
+           {t:'Dar poco y mirar para otro lado ('+fm(m*.25)+')',f:()=>{ pagarMonto(m*.25); return 'Diste un poco y dijiste que andabas escaso. Se hicieron los de la vista gorda.'; }},
+           {t:'Financiar en secreto a la oposición ('+fm(s)+')',f:()=>{ pagarMonto(s); rel.opoSecreta=(rel.opoSecreta||0)+1; return 'Pusiste '+fm(s)+' para los partidos. Si te descubren, lo pagas caro.'; }}]}; },
+    1957:rel=>{ const ing=comps().reduce((t,e)=>t+(e.ingresos||0),0), c=Math.round(Math.max(0,ing*.012));
+      return {p:10,c:()=>ACTIVO(),t:()=>'<b>En mayo, un paro cívico de bancos, gremios, universidades y partidos paraliza el país y el general entrega el poder a una Junta Militar.</b> Los empresarios tienen que escoger entre el régimen que cae y la gente que lo derriba.',
+        o:[{t:'Sumarte al paro (cierras tus compañías unos días'+(c>0?': '+fm(c):'')+')',f:()=>{ comps().forEach(e=>gastoE(e,Math.max(0,(e.ingresos||0)*.012))); rel.postura='opositor'; rel.manual=true; rel.paro=true; rel.opo=(rel.opo||0)+1; redes(4); prest(3,'se sumó al paro que derribó al régimen'); return 'Cerraste y saliste a la calle con los demás. Cuando cayó el general, estabas del lado de los que ganaron.'; }},
+           {t:'Quedarte con el general hasta el final',f:()=>{ if(rel.postura!=='opositor') rel.postura='aliado'; rel.hundido=(rel.hundido||0)+1; prest(-1,'se quedó con el general hasta el final'); return 'Te quedaste con el general. Cuando se fue, tus amigos del régimen se fueron con él.'; }},
+           {t:'Esperar a ver qué pasa',f:()=>'Esperaste. Cuando se supo quién ganaba, ya era tarde para apuntarte.'}]}; }
+  };
+
+  /* el descubrimiento de la plata para los rivales */
+  function evDescubierto(rel){ const m=Math.round(escalaP()*1.2);
+    return {p:10,c:()=>ACTIVO(),t:()=>'<b>Los servicios de inteligencia descubrieron que financias a quienes se oponen a '+(rel.tipo==='regimen'?'el régimen':E(quien(rel)))+'.</b> Tienen recibos y un testigo.',
+      o:[{t:'Negarlo todo ('+fm(m*.5)+' en abogados)',f:()=>{ pagarMonto(m*.5); if(chance(.4)){ rel.opoSecreta=Math.max(0,rel.opoSecreta-1); return 'Los abogados armaron una coartada. Por ahora te creyeron.'; } rel.postura='opositor'; rel.presion=Math.min(100,rel.presion+30); return 'La coartada se cayó. Ahora eres de la oposición a los ojos de todos.'; }},
+         {t:'Pagar la multa y comprometerte ('+fm(m)+')',f:()=>{ pagarMonto(m); rel.opoSecreta=0; rel.postura='aliado'; rel.manual=true; rel.deuda=R1((rel.deuda||0)+2); rel.presion=Math.max(0,rel.presion-5); return 'Pagaste y prometiste lealtad. Quedaste debiendo dos favores y sin opciones.'; }},
+         {t:'Asumirlo: pasar a la oposición abierta',f:()=>{ rel.postura='opositor'; rel.manual=true; rel.opo=(rel.opo||0)+1; rel.opoSecreta=0; rel.presion=Math.min(100,rel.presion+25); prest(3,'dio la cara contra el poder'); return 'Diste la cara. Los que se oponen te reciben como a uno de ellos; el poder, como a un enemigo.'; }}]}; }
+
+  /* ==================== EL AÑO ==================== */
+  const ev=()=>{ if(!S._ev179||S._ev179.a!==A()) S._ev179={a:A(),n:S._ev155===A()?1:0}; return S._ev179; };
+  const empujar=x=>{ const v=ev(); v.n++; try{ cola.push(x); }catch(e){} };
+  function evolucionar(rel){ const rig=rigDe(rel); let d=0;
+    if(rel.postura==='opositor') d+=28*rig;
+    if(rel.opoSecreta>0) d+=4*Math.min(3,rel.opoSecreta)*rig;
+    d+=(rel.mora||0)*5*rig;
+    if(rel.tipo==='gobierno'){ const pr=(P155()||{}).pres; if(pr&&pr.rencor>10) d+=pr.rencor*.12*rig; }
+    if(tieneMedios()&&rel.postura!=='aliado') d+=3*rig;
+    d-=rel.postura==='aliado'?12:rel.postura==='neutral'?6:2;
+    rel.presion=cl(rel.presion+d,0,100); rel.mora=Math.max(0,R1((rel.mora||0)-.35)); }
+  function anual179(){ if(!adulto()) return; if(S._y179===A()) return; S._y179=A();
+    const d=D(); if(!d) return; ajusteFallback();
+    // las compañías cerradas que ya cumplieron su tiempo reabren
+    comps().forEach(e=>{ const c=e.cierre179; if(c&&c.hasta<=A()) reabrir(e,''); else if(c){ e.aniosMalos=c.am0||0; } });
+    d.cargas=d.cargas.filter(k=>k.hasta>=A());
+    const rel=relActiva(); if(!rel) return;
+    if(rel.tipo==='regimen'&&S.gobierno) S.gobierno.apoyado=(rel.postura==='aliado');
+    evolucionar(rel); const vig=vigDe(rel);
+    if(rel.tipo==='gobierno'&&!rel.manual){ const pr=(P155()||{}).pres; if(pr){ if((S.gobierno&&S.gobierno.apoyado)||(pr.credito||0)>=25) rel.postura='aliado'; else if(pr.rencor>10) rel.postura='opositor'; else rel.postura='neutral'; } }
+    // el arco histórico del régimen
+    if(rel.tipo==='regimen'&&BEATS[A()]&&!(d['b'+A()])){ d['b'+A()]=true; empujar(BEATS[A()](rel)); }
+    // la plata escondida para la oposición se descubre
+    if(rel.opoSecreta>0&&ev().n<2&&chance((rel.tipo==='regimen'?.12:.06)+(rel.tipo==='regimen'?.08:.05)*Math.min(3,rel.opoSecreta))) empujar(evDescubierto(rel));
+    // la presión: vigilan, hostigan, cierran
+    if(ev().n<2&&S._ev155!==A()){
+      if(vig>=3&&abiertas().filter(e=>!e.banco112).length&&A()>(rel.ultCierre||0)&&chance(rel.tipo==='regimen'?.75:.5)){ const e=objetivo(rel); if(e){ const dur=rel.tipo==='regimen'?ri(1,2):1; if(clausurar(e,dur,rel.tipo==='regimen'?'orden del régimen':'orden de las autoridades')){ rel.ultCierre=A(); rel.cierres=(rel.cierres||0)+1; rel.presion=Math.min(rel.presion,58); empujar(evClausura(rel,e,dur)); } } }
+      else if(vig>=2&&chance(.6)) empujar(evHostigamiento(rel));
+      else if(vig>=1&&chance(.45)) empujar(evVigilancia(rel)); }
+    // el cobro de los favores
+    if(ev().n<2&&rel.deuda>0&&rel.cobroAnio!==A()&&(A()-(rel.cobroUlt||0)>=2||rel.deuda>=3||rel.tipo==='regimen')){
+      const p=rel.tipo==='regimen'?cl(.22+.12*rel.deuda,.22,.8):cl(.1+.07*rel.deuda,.1,.55);
+      if(chance(p)){ const x=cobroDe(rel); if(x){ rel.cobroAnio=A(); rel.cobroUlt=A(); empujar(evCobro(rel,x));
+        if(rel.deuda>=5&&ev().n<3&&chance(.5)){ const y=cobroDe(rel); if(y&&y.id!==x.id) empujar(evCobro(rel,y)); } } } }
+  }
+  function pre179(){ if(!S||!S.p||S.muerto) return; const sig=S.anio+1, rg=regDe(sig);
+    if(rg){ if(!S.gobierno||S.gobierno.regimen!==rg.id) iniciarRegimen(rg); }
+    else if(S.gobierno&&S.gobierno.regimen&&REG[S.gobierno.regimen]) cerrarRegimen(REG[S.gobierno.regimen]);
+    // si algún día no pasó el tick, reabrir lo vencido
+    comps().forEach(e=>{ const c=e.cierre179; if(c&&c.hasta<sig) reabrir(e,''); }); }
+
+  /* ==================== LA PANTALLA ==================== */
+  const reab=()=>{ cerrarModal(); render(); escenaPoder179(); };
+  function ladder(rel){ const v=vigDe(rel); return VIGN[v]+(v>0?' ('+Math.round(rel.presion)+'/100)':''); }
+  function escenaPoder179(){ if(!ACTIVO()||nino()) return; const rel=relActiva();
+    if(!rel){ escena({rubro:'El poder',titulo:'El poder y tú',cuerpo:'Todavía no hay a quién deberle favores ni de quién temer represalias: mandan la Corona, el Virrey y los cabildos.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const reg=rel.tipo==='regimen', q=quien(rel), v=vigDe(rel), pos=POSN(rel)[rel.postura], cerr=comps().filter(e=>e.cierre179&&e.cierre179.hasta>=A());
+    const favs=rel.fav.slice(-5).map(f=>'<tr><td>'+E(f.txt||f.id)+'<br><small>'+f.anio+'</small></td><td style="text-align:right">debes '+f.w+'</td></tr>').join('');
+    const cargas=D().cargas.filter(k=>k.hasta>=A()).map(k=>'<tr><td>'+E(k.txt)+' en '+E(k.emp)+'<br><small>hasta '+k.hasta+'</small></td><td style="text-align:right">'+fm(k.monto)+' al año</td></tr>').join('');
+    const cierres=cerr.map(e=>'<tr><td><b>'+E(e.nombre)+'</b><br><small>cerrada hasta '+e.cierre179.hasta+'</small></td><td style="text-align:right"><small>'+E(e.cierre179.por||'clausura')+'</small></td></tr>').join('');
+    const cuerpo=(reg?'Manda '+E(REG[rel.id].nombre)+' ('+REG[rel.id].desde+'–'+REG[rel.id].hasta+'). No hay elecciones: lo que valga es lo que el poder decida.':'Gobierna '+E(q)+', desde '+rel.desde+'.')
+      +' Aquí se lleva la cuenta: los favores que recibiste se cobran con otros favores, y quien se opone se expone a que lo vigilen, lo hostiguen y le cierren compañías por un tiempo. '+(v>=3?'<b>Estás en el punto en que pueden cerrarte compañías.</b> ':v>=2?'<b>Ya te hostigan.</b> ':v>=1?'Te están vigilando. ':'')
+      +(rel.deuda>=3?'<b>Debes mucho: el cobro viene.</b> ':'')+(rel.mora>=1?'Tienes cobros sin pagar (mora '+R1(rel.mora)+'). ':'');
+    const html='<div class="k"><div><b>'+E(pos)+'</b><span>tu postura</span></div><div><b>'+R1(rel.deuda)+'</b><span>favores que debes</span></div><div><b>'+E(VIGN[v])+'</b><span>cuánto te persiguen</span></div><div><b>'+cerr.length+'</b><span>compañías cerradas</span></div></div>'
+      +(favs?'<h4>Lo que te han hecho</h4><table class="libro">'+favs+'</table>':'')+(cargas?'<h4>Lo que te toca pagar cada año</h4><table class="libro">'+cargas+'</table>':'')+(cierres?'<h4>Cerradas</h4><table class="libro">'+cierres+'</table>':'');
+    const ops=[], e1=escalaP();
+    if(reg) ops.push({t:'Pedirle un favor al régimen',cat:'riesgo',d:'Un contrato, las licencias, un decreto, frenar una investigación o un cargo para la familia. Todo lo que pidas se te cobra.',cerrar:false,dis:rel.postura==='opositor'?'No hacen favores a quien se les opone':sinMov(),run:()=>{ cerrarModal(); escenaFavoresReg179(); }});
+    else if(typeof window.escenaFavores155==='function') ops.push({t:'Cobrar favores del presidente',cat:'riesgo',d:'Lo que pidas cuesta crédito y además se anota como deuda: te lo cobran con otros favores.',cerrar:false,run:()=>{ cerrarModal(); window.escenaFavores155(); }});
+    if(rel.deuda>0) ops.push({t:'Saldar una parte de lo que debes · '+fm(e1*Math.min(rel.deuda,2)),cat:'capital',d:'Quitas hasta dos favores de la cuenta pagando de una vez.',cerrar:false,dis:S.efectivo<e1*Math.min(rel.deuda,2)?'No tienes '+fm(e1*Math.min(rel.deuda,2)):sinMov(),run:()=>{ if(!movida()) return; const k=Math.min(rel.deuda,2); pagarMonto(e1*k); rel.deuda=Math.max(0,R1(rel.deuda-k)); rel.pagos++; rel.presion=Math.max(0,rel.presion-6); log('Saldaste '+R1(k)+' de lo que debías a '+E(q)+'.','bien'); reab(); }});
+    if(rel.postura!=='aliado') ops.push({t:(reg?'Acercarte al régimen':'Acercarte al gobierno')+' · '+fm(e1*1.2),cat:'riesgo',d:'Te ofreces como amigo. Baja la presión, se abren puertas y quedas atado.',cerrar:false,dis:S.efectivo<e1*1.2?'No tienes '+fm(e1*1.2):sinMov(),run:()=>{ if(!movida()) return; pagarMonto(e1*1.2); rel.postura='aliado'; rel.manual=true; rel.presion=Math.max(0,rel.presion-15); redes(5); log('Te acercaste a '+E(q)+'. Ahora te cuentan entre los suyos.'); reab(); }});
+    else ops.push({t:'Tomar distancia',cat:'riesgo',d:'Dejas de ser de los suyos. Si les debes, lo notan.',cerrar:false,run:()=>{ rel.postura='neutral'; rel.manual=true; if(rel.deuda>0){ rel.mora=R1(rel.mora+rel.deuda*.4); rel.presion=Math.min(100,rel.presion+6); } log('Tomaste distancia de '+E(q)+'.'); reab(); }});
+    if(rel.postura!=='opositor') ops.push({t:'Oponerte abiertamente',cat:'riesgo',d:'Prestigio y puertas con los que se oponen. Pero la presión sube cada año y pueden llegar a cerrarte compañías.',cerrar:false,run:()=>{ rel.postura='opositor'; rel.manual=true; rel.opo=(rel.opo||0)+1; rel.presion=Math.min(100,rel.presion+Math.round(15*rigDe(rel))); prest(reg?3:2,'se opuso abiertamente al poder'); log('Te declaraste en contra de '+E(q)+'.','mal'); reab(); }});
+    else ops.push({t:'Bajar el tono',cat:'riesgo',d:'Dejas la oposición abierta. La presión baja de a poco.',cerrar:false,run:()=>{ rel.postura='neutral'; rel.manual=true; rel.presion=Math.max(0,rel.presion-5); log('Bajaste el tono frente a '+E(q)+'.'); reab(); }});
+    ops.push({t:'Financiar en secreto a la oposición · '+fm(e1*1.5),cat:'riesgo',d:'Cada año hay riesgo de que te descubran, y entonces la presión se dispara. Si el poder cae, te lo reconocen.',cerrar:false,dis:S.efectivo<e1*1.5?'No tienes '+fm(e1*1.5):sinMov(),run:()=>{ if(!movida()) return; pagarMonto(e1*1.5); rel.opoSecreta=(rel.opoSecreta||0)+1; rel.opo=(rel.opo||0)+.5; log('Pusiste plata para la oposición, sin que se note.'); reab(); }});
+    cerr.forEach(e=>ops.push({t:'Negociar la reapertura de '+E(e.nombre),cat:'riesgo',d:'Cerrada hasta '+e.cierre179.hasta+'.',cerrar:false,run:()=>{ cerrarModal(); escenaReabrir179(e); }}));
+    escena({rubro:'El poder',titulo:'El poder y tú',ancho:true,cerrable:true,clase:'pol155',cuerpo,html,opciones:ops}); }
+  function escenaReabrir179(e){ const rel=relActiva(); if(!rel||!e||!e.cierre179){ return; } const c=e.cierre179, fijos=Math.round(Math.max(10,c.ing0*.08)), m=Math.round(escalaP()*1.2+fijos);
+    const ops=[{t:'Hacer las paces y reabrir · '+fm(m),cat:'riesgo',d:'Reabre ya. Quedas del lado de '+E(quien(rel))+' y debiendo un favor y medio.',cerrar:false,dis:S.efectivo<m?'No tienes '+fm(m):null,run:()=>{ pagarMonto(m); rel.postura='aliado'; rel.manual=true; rel.presion=Math.max(0,rel.presion-35); rel.deuda=R1((rel.deuda||0)+1.5); reabrir(e,' después de arreglar cuentas'); cerrarModal(); render(); escenaPoder179(); }},
+      {t:'Recurrir a la justicia · '+fm(fijos*.3),cat:'riesgo',d:'Probabilidad de que prospere: '+Math.round((A()>=1991?.55:rel.tipo==='regimen'?.12:.35)*100)+'%.',cerrar:false,run:()=>{ pagarMonto(fijos*.3); if(chance(A()>=1991?.55:rel.tipo==='regimen'?.12:.35)){ rel.presion=Math.max(0,rel.presion-15); reabrir(e,' por orden de un juez'); } else { rel.presion=Math.min(100,rel.presion+5); log('El recurso se perdió en los tribunales.','mal'); } cerrarModal(); render(); escenaPoder179(); }},
+      {t:'Mover influencias',cat:'riesgo',d:'Con tus relaciones ('+Math.round(S.p.redes||0)+'/100) puedes acortar el cierre un año.',cerrar:false,dis:(S.p.redes||0)<45?'Tus relaciones no alcanzan (45)':sinMov(),run:()=>{ if(!movida()) return; if(chance(cl((S.p.redes||0)/130,.1,.7))){ c.hasta=Math.max(A(),c.hasta-1); if(c.hasta<=A()) reabrir(e,' tras mover influencias'); else log('Con una llamada acortaron el cierre de <b>'+E(e.nombre)+'</b>: abre en '+(c.hasta+1)+'.','bien'); } else { redes(-3); log('Las influencias no alcanzaron.','mal'); } cerrarModal(); render(); escenaPoder179(); }}];
+    escena({rubro:'El poder',titulo:'Reabrir '+E(e.nombre),ancho:true,cerrable:true,clase:'pol155',cuerpo:'Cerrada hasta '+c.hasta+' por '+E(c.por||'orden del poder')+'. Cada año cerrada cuesta unos '+fm(fijos)+' y parte de la clientela.',opciones:ops}); }
+  function escenaFavoresReg179(){ const rel=relActiva(); if(!rel||rel.tipo!=='regimen') return; const p=P155();
+    const hay=comps().length>0;
+    const ops=[{t:'Un contrato del Estado para tu compañía mayor',cat:'riesgo',d:'Ventas extra por varios años. Debes 2 favores.',cerrar:false,dis:hay?sinMov():'No tienes compañías',run:()=>{ cerrarModal(); pedirReg('contrato'); render(); escenaFavoresReg179(); }},
+      {t:'Que te agilicen las licencias',cat:'riesgo',d:'Los trámites pendientes salen ya. Debes 1 favor.',cerrar:false,dis:hay?sinMov():'No tienes compañías',run:()=>{ cerrarModal(); pedirReg('licencias'); render(); escenaFavoresReg179(); }},
+      {t:'Un decreto a la medida de tu sector',cat:'riesgo',d:'Años de reglas que te favorecen. Debes 3 favores.',cerrar:false,dis:hay?sinMov():'No tienes compañías',run:()=>{ cerrarModal(); pedirReg('decreto'); render(); escenaFavoresReg179(); }},
+      {t:'Que "se pierda" un expediente',cat:'riesgo',d:'Baja tu riesgo legal. Debes 3 favores.',cerrar:false,dis:sinMov(),run:()=>{ cerrarModal(); pedirReg('frenar'); render(); escenaFavoresReg179(); }}];
+    const per=(typeof window.personasPol155==='function')?window.personasPol155():[];
+    if(per.length) ops.push({t:'Un cargo para alguien de la familia',cat:'familia',d:'Ministerio, embajada o empresa pública. Debes entre 2 y 4 favores.',cerrar:false,dis:sinMov(),run:()=>{ cerrarModal();
+      escena({rubro:'El régimen',titulo:'¿Para quién?',ancho:true,cerrable:true,clase:'pol155',opciones:per.slice(0,8).map(x=>({t:x.nombre,cat:'familia',d:x.rel+', '+x.edad+' años. Capacidad '+x.capaz+'/10.',cerrar:false,run:()=>{ cerrarModal(); pedirCargoReg(x); render(); escenaFavoresReg179(); }}))}); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPoder179(); }});
+    escena({rubro:'El régimen',titulo:'Pedirle un favor al régimen',ancho:true,cerrable:true,clase:'pol155',cuerpo:'El general y su gente dan lo que piden sus amigos, y anotan todo. Cada favor es una deuda y se cobra con otros favores. Hoy debes '+R1(rel.deuda)+'. '+(rel.postura==='aliado'?'Eres de los suyos: casi siempre te dicen que sí.':'No eres de los suyos: a veces te dan largas.'),opciones:ops}); }
+
+  /* ==================== LAS ELECCIONES ==================== */
+  function eleccion179(g,info){ try{ const d=D(), p=P155(); if(!d||!p||!p.pres) return; info=info||{}; relGob(); const rel=d.gob; if(!rel) return;
+    if(info.lineas){ if(info.aporte>0) info.lineas.push('<b>Ojo:</b> los favores que te haga se anotan: te los van a cobrar con otros favores.'); else if(info.perd>0) info.lineas.push('<b>Ojo:</b> quien financia a los que pierden queda en la mira: pueden vigilarte, hostigarte y, si insistes en oponerte, cerrarte compañías.'); }
+  }catch(e){ console.error(e); } }
+
+  /* ==================== EL CONSEJERO ==================== */
+  function gPoder(){ if(!adulto()) return []; const out=[]; let rel=null; try{ rel=relActiva(); }catch(e){} if(!rel) return out; const v=vigDe(rel), q=quien(rel);
+    const cerr=comps().filter(e=>e.cierre179&&e.cierre179.hasta>=A());
+    if(cerr.length) out.push({id:'poder-cierre:'+cerr[0].nombre,peso:46,tono:'rojo',txt:'<b>'+E(cerr[0].nombre)+'</b> está cerrada por orden del poder hasta '+cerr[0].cierre179.hasta+'.',por:'Cada año cerrada cuesta plata y clientela.',si:'Puedes hacer las paces, recurrir a la justicia o mover influencias.',ir:'El poder y tú',irT:'Negociar la reapertura',pre:()=>{ try{ escenaPoder179(); }catch(x){} }});
+    else if(v>=2) out.push({id:'poder-vig:'+rel.id,peso:36,tono:'rojo',txt:'<b>Te hostigan.</b> '+(rel.tipo==='regimen'?'El régimen':E(q))+' tiene tu nombre en una lista.',por:'La presión está en '+Math.round(rel.presion)+' de 100; al pasar de 75 pueden cerrarte compañías.',si:'Puedes hacer las paces, bajar el tono o pagar lo que debes.',ir:'El poder y tú',irT:'Ver la situación',pre:()=>{ try{ escenaPoder179(); }catch(x){} }});
+    else if(rel.deuda>=2.5) out.push({id:'poder-deuda:'+rel.id,peso:28,tono:'oro',txt:'<b>Debes '+R1(rel.deuda)+' favores a '+(rel.tipo==='regimen'?'el régimen':E(q))+'.</b>',por:'Los favores se cobran con otros favores, y lo que no se paga queda en mora.',si:'Puedes saldar una parte antes de que llegue el cobro.',ir:'El poder y tú',irT:'Saldar',pre:()=>{ try{ escenaPoder179(); }catch(x){} }});
+    return out.slice(0,1); }
+
+  /* ==================== ENGANCHES ==================== */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA179_PASO) return; window.__SA179_PASO=true;
+    window.pasarAnio=function(){ try{ pre179(); }catch(e){ console.error(e); } const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual179(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA179_ACC) return; window.__SA179_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(!Array.isArray(L)||!adulto()) return L; const enGrupo=!window.__crudo91&&L.some(x=>x.t==='Influencia y palancas'&&x.modal);
+        if(!enGrupo&&!L.some(x=>x.t==='El poder y tú')){ const rel=relActiva(); if(rel){ const v=vigDe(rel);
+          L.push({t:'El poder y tú',cat:'riesgo',d:POSN(rel)[rel.postura]+(rel.deuda>0?' · debes '+R1(rel.deuda)+' favor'+(rel.deuda===1?'':'es'):'')+(v>0?' · '+VIGN[v].toLowerCase():'')+'. Favores que se cobran, y qué pasa si te opones.',mov:0,modal:true,run:()=>escenaPoder179()}); } } }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v179=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA179_CAT) return; window.__SA179_CAT=true;
+    window.catDe=function(t){ if(t==='El poder y tú') return 'riesgo'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='palancas'); if(!g||!Array.isArray(g.miembros)) return; if(!g.miembros.some(m=>m[1]==='El poder y tú')) g.miembros.push(['Influencia','El poder y tú']); }
+  function wrapV106(){ const H=window.H106; if(!Array.isArray(H)||H.__v179) return; const a=H.find(h=>h.anio===1953), b=H.find(h=>h.anio===1958); if(!a||!b||!Array.isArray(a.o)||!Array.isArray(b.o)) return; H.__v179=true;
+    const post=['neutral','aliado','opositor'], aviso=['',' Pero las puertas que abre un general se pagan: cada favor que le pidas te lo va a cobrar.',' Cuidado: si el régimen se entera, la presión sobre ti y tus compañías puede llegar hasta el cierre.'];
+    a.o.forEach((op,i)=>{ const f0=op.f; op.f=function(){ const m=f0.apply(this,arguments); try{ const rg=REG.rojas; if(!S.gobierno||S.gobierno.regimen!=='rojas') iniciarRegimen(rg); const rel=relReg(rg); if(i===0) rel.postura='neutral'; else if(i===1){ rel.postura='aliado'; rel.manual=true; } else { rel.opoSecreta=(rel.opoSecreta||0)+1; rel.opo=(rel.opo||0)+.5; } }catch(x){ console.error(x); } return m+(aviso[i]||''); }; });
+    b.o.forEach(op=>{ const f0=op.f; op.f=function(){ const m=f0.apply(this,arguments); let t=''; try{ t=ajuste179(); }catch(x){ console.error(x); } return m+(t?' '+t:''); }; }); }
+  function ajusteFallback(){ if(S&&S._ajuste179&&!S._ajuste179.hecho&&S.anio>=1958){ try{ cola.push({p:9,c:()=>!!(S._ajuste179&&!S._ajuste179.hecho),t:()=>'<b>El régimen cayó y empieza el ajuste de cuentas.</b>',o:[{t:'Seguir',f:()=>ajuste179()||'El país respira.'}]}); }catch(e){} } }
+  function init179(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo(); wrapV106();
+    try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA179_CONS){ window.__SA179_CONS=true; window.consejeroRegistrar168(gPoder); } }catch(x){}
+    Object.assign(window,{regimenActivo179:()=>!!regActivo(),relacionPoder179:relActiva,estadoPoder179:D,favor179,eleccion179,clausurar179:clausurar,reabrir179:reabrir,efectoPoder179,anualPoder179:anual179,prePoder179:pre179,escenaPoder179,escenaReabrir179,escenaFavoresReg179,pedirReg179:pedirReg,pedirCargoReg179:pedirCargoReg,vigPoder179:vigDe,cobroPoder179:cobroDe,resolverCobro179:resolver,ajuste179,iniciarRegimen179:iniciarRegimen,PODER_179:{REG,POOL,BEATS},evCobro179:evCobro,evClausura179:evClausura,evVigilancia179:evVigilancia,evHostigamiento179:evHostigamiento,evDescubierto179:evDescubierto}); }
+  init179(); setTimeout(init179,40); setTimeout(init179,220); setTimeout(init179,650); setTimeout(init179,950);
+  window.__SA179={version:V179};
 })();
 </script>
 
