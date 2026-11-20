@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v177</div>
+<div class="version-badge" id="versionBadge">v178</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -32403,6 +32403,7 @@ install();setTimeout(install,1200);
     f*=1-canibal(r,u);
     f*=1+(u.uAdd||0);
     if(u.compet>0) f*=.92;
+    if(t.fed){ const n=abiertas(r).filter(x=>x!==u&&t.fed.de.includes(x.tipo)&&(t.fed.red||x.ciudad===u.ciudad)).length; f*=1+Math.min(t.fed.max,n*t.fed.bono); }   // un nivel alimenta al siguiente: del jardín a la primaria, de la primaria al bachillerato
     return cl(f*.87*rnd(1-.04-vol*.5,1+.04+vol*.5),.1,.95); }
   /* lo que las unidades de apoyo hacen por las de frente */
   function cobertura(r){ const nF=frentes(r).length, libre=6; let mg=0, uAdd=0, rep=0; const det=[];
@@ -32605,7 +32606,7 @@ install();setTimeout(install,1200);
     escena({rubro:'Banco',titulo:'¿Dónde queda la sede principal?',ancho:true,cerrable:true,clase:'red176',cuerpo:'La casa matriz da confianza y marca. Desde ahí se abren las sedes regionales y las oficinas.',opciones:ops}); }
   /* ---- una clase ---- */
   function escenaClase176(id){ const c=CL[id]; if(!c) return; const mine=redes().filter(e=>e.red176.clase===id), ops=[], min=minCosto(id);
-    mine.forEach(e=>{ const r=R(e); ops.push({t:'Administrar '+e.nombre,cat:'compania',d:frentes(r).length+' '+c.un[frentes(r).length===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }}); });
+    mine.forEach(e=>{ const r=R(e); ops.push({t:'Administrar '+e.nombre,cat:'compania',d:frentes(r).length+' '+c.un[frentes(r).length===1?0:1]+' en operación'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }}); });
     ops.push({t:'Empezar uno de cero',cat:'compania',d:'Escoges la ciudad, el tipo de unidad principal y el tamaño. Se paga con tu efectivo y, si no alcanza, con crédito.',dis:S.efectivo<min*.45?'Necesitas al menos '+fm(min*.45)+' (el resto va a crédito)':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaFundar176(id,{}); }});
     ops.push({t:'Comprar uno que está en venta',cat:'capital',d:'Cada año salen algunos a la venta: unos en buen estado, otros caídos. A veces uno con historia.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar176(null,id); }});
     ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(grupoDeClase(id)); }});
@@ -32643,10 +32644,10 @@ install();setTimeout(install,1200);
       return '<div class="fila176'+(ap?' apoyo':'')+'" data-u176="'+E(u.id)+'"><span class="est176">'+(ap?'apoyo':estrellas(u))+'</span><div class="nm176"><b>'+E(u.nom)+'</b><small>'+sub+'</small>'+(ap?'':barra((u.ocu||0)*100,100,(u.ocu||0)<.4?'mal':(u.ocu||0)>.75?'bien':''))+'</div><div class="cf176">'+(ap?'<small>cuesta '+fm(-(u.ebitda||0))+'</small>':((u.ocu?pc(u.ocu)+' uso':'—')+'<br><small>'+(!u.ocu&&!(u.cierre>=A())?'recién abierto':fm(u.ebitda||0)+' de utilidad')+'</small>'))+'</div></div>'; }).join('');
     const cobH=F2.length?(F2.length<=cob.libre?'<div class="cob176 bien">Con '+F2.length+' '+c.un[F2.length===1?0:1]+' la red se maneja sola. A partir de la '+(cob.libre+1)+'.ª necesitas unidades de apoyo.</div>':
       cob.det.map(x=>{ const t=tipoDe(r.clase,x.id); return '<div class="cob176 '+(x.falta?'mal':'bien')+'"><b>'+E(cap(nm(t,A())))+':</b> tienes '+x.n+' y la red alcanza para '+Math.min(F2.length,x.cubre)+' de tus '+F2.length+' '+c.un[1]+(x.falta?'. <b>Te faltan: pierdes margen en las que no cubren.</b>':'.')+'</div>'; }).join('')):'';
-    const hit=HITOS.map(h=>'<span class="hit176'+(r.hitos[h.id]?'':' no')+'">'+(r.hitos[h.id]?'✓ ':'')+E(h.n)+'</span>').join('');
+    const hit=HITOS.filter(h=>!h.clase||h.clase===r.clase).map(h=>'<span class="hit176'+(r.hitos[h.id]?'':' no')+'">'+(r.hitos[h.id]?'✓ ':'')+E(h.n)+'</span>').join('');
     escena({rubro:E(c.grupo),titulo:E(e.nombre)+'<span class="tit176">'+E(titulo(r))+'</span>',ancho:true,cerrable:true,clase:'red176',
-      cuerpo:L.length?('Tu negocio tiene '+F2.length+' '+c.un[F2.length===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' unidad'+(apoyos(r).length===1?'':'es')+' de apoyo':'')+(enObra.length?', más '+enObra.length+' en obra':'')+'.'):'Todavía no hay una unidad abierta: la obra de la primera termina pronto.',
-      html:'<div class="k"><div><b>'+F2.length+'</b><span>'+E(c.un[1])+'</span></div><div><b>'+pc(u0.ocu||0)+'</b><span>uso de la capacidad</span></div><div><b>'+fm(u0.ing||0)+'</b><span>ventas del año</span></div><div><b>'+fm(u0.ebitda||0)+'</b><span>utilidad operativa</span></div><div><b>'+Math.round(r.marca)+'</b><span>marca</span></div><div><b>'+fm(e.deuda||0)+'</b><span>deuda</span></div></div>'+cobH+(filas?'<h4>Tus unidades</h4>'+filas:'')+'<h4>Hitos</h4><div>'+hit+'</div>',opciones:ops}); }
+      cuerpo:L.length?('Tu negocio tiene '+F2.length+' '+c.un[F2.length===1?0:1]+' en operación'+(apoyos(r).length?' y '+apoyos(r).length+' unidad'+(apoyos(r).length===1?'':'es')+' de apoyo':'')+(enObra.length?', más '+enObra.length+' en obra':'')+'.'):'Todavía no hay una unidad abierta: la obra de la primera termina pronto.',
+      html:'<div class="k"><div><b>'+F2.length+'</b><span>'+E(c.un[1])+'</span></div><div><b>'+pc(u0.ocu||0)+'</b><span>uso de la capacidad</span></div><div><b>'+fm(u0.ing||0)+'</b><span>ventas del año</span></div><div><b>'+fm(u0.ebitda||0)+'</b><span>utilidad operativa</span></div><div><b>'+Math.round(r.marca)+'</b><span>marca</span></div><div><b>'+fm(e.deuda||0)+'</b><span>deuda</span></div></div>'+cobH+(typeof c.hubHtml==='function'?c.hubHtml(e,r):'')+(filas?'<h4>Tus unidades</h4>'+filas:'')+'<h4>Hitos</h4><div>'+hit+'</div>',opciones:ops}); }
   /* ---- abrir otra unidad ---- */
   function escenaAbrir176(e,sel){ sel=sel||{}; const r=R(e), c=CL[r.clase], reab=s=>{ cerrarModal(); escenaAbrir176(e,s); };
     if(!sel.tipo){ const ops=tiposDisp(r.clase,'todas').map(t=>({t:cap(nm(t,A()))+' · desde '+fm(costoU(t,t.rol==='apoyo'?'m':'p',(r.unidades[0]||{}).ciudad||'La Estrella','propio')),cat:'casa',d:(t.rol==='apoyo'?'De apoyo. ':'De frente. ')+(t.d||''),cerrar:false,run:()=>reab({tipo:t.id})}));
@@ -32778,7 +32779,7 @@ install();setTimeout(install,1200);
   function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v176) return;
     window.panelCompania86=function(e){ let h=old.apply(this,arguments);
       try{ if(e&&ACTIVO()&&!nino()&&typeof negCat!=='undefined'&&negCat==='resumen'&&e.red176&&CL[e.red176.clase]){ const i=comps().indexOf(e), r=R(e), c=CL[r.clase], n=frentes(r).length;
-          h+='<div class="panel176"><b>'+E(c.n)+'</b><div class="apunte">'+n+' '+c.un[n===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+' · marca '+Math.round(r.marca)+' · '+E(titulo(r))+'.</div><button type="button" class="btn" data-c176="red:'+i+'">Administrar las unidades</button></div>'; } }catch(x){}
+          h+='<div class="panel176"><b>'+E(c.n)+'</b><div class="apunte">'+n+' '+c.un[n===1?0:1]+' en operación'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+' · marca '+Math.round(r.marca)+' · '+E(titulo(r))+'.</div><button type="button" class="btn" data-c176="red:'+i+'">Administrar las unidades</button></div>'; } }catch(x){}
       return h; }; window.panelCompania86.__v176=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
   function clic(ev){ const t=ev.target; if(!t||!t.closest) return; const f=t.closest('[data-u176]');
     if(f){ ev.preventDefault(); ev.stopPropagation(); const id=f.getAttribute('data-u176'), e=redes().find(x=>x.red176.unidades.some(u=>u.id===id))||(S.emp&&S.emp.red176?S.emp:null); if(e){ cerrarModal(); escenaUnidad176(e,id); } return; }
@@ -33094,6 +33095,66 @@ install();setTimeout(install,1200);
     Object.assign(window,{CLASES_NUEVAS_177:NC,SUCESOS_177:EV,convertibles177:convertibles,clasesPara177:clasesPara,convertir177:convertir,escenaConvertir177,confirmarConvertir177:confirmar,MAPA_SECTOR_177:MAPA}); }
   init177(); setTimeout(init177,40); setTimeout(init177,220); setTimeout(init177,650); setTimeout(init177,950);
   window.__SA177={version:V177};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v178 · INSTITUCIONES EDUCATIVAS POR NIVELES
+   Un colegio no se arma como una clínica: sus unidades son los niveles.
+   - Jardín infantil, escuela primaria, colegio de bachillerato, instituto
+     técnico y universidad; además del colegio completo (primaria y
+     bachillerato) y el bilingüe.
+   - Cada nivel alimenta al siguiente: los jardines llenan las primarias de
+     su ciudad, las primarias llenan los bachilleratos, y los bachilleratos
+     alimentan a los institutos técnicos y a las universidades de toda la
+     red. Con el ciclo completo (jardín, primaria, bachillerato y técnico o
+     universidad) hay un hito.
+   - El hub muestra qué niveles tienes y qué te falta; el consejero avisa
+     cuando tus alumnos no tienen a dónde seguir.
+   - Además, los textos del hub dejan de decir "abiertas" para todas las
+     clases ("8 locales abiertas"): ahora dicen "en operación".
+   ========================================================================== */
+(function(){
+  const V178='v178';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const FED_P={de:['jardin'],bono:.05,max:.15}, FED_T={de:['bachillerato','cole','bilingue'],bono:.04,max:.12,red:true}, FED_U={de:['bachillerato','cole','bilingue','tecnico'],bono:.04,max:.12,red:true};
+  const EDU={
+    n:'Instituciones educativas',un:['plantel','planteles'],
+    d:'Jardines, escuelas primarias, colegios de bachillerato, institutos técnicos y universidades. Cada nivel alimenta al siguiente: quien entra a tu jardín llega a tu primaria, luego a tu bachillerato y, si todo va bien, a tu instituto o a tu universidad. Las matrículas se pagan cada año; el activo es la reputación, y crecer exige administración central.',
+    tipos:[
+      {id:'jardin',n:[[1900,'Escuela de párvulos'],[1950,'Jardín infantil']],desde:1900,base:300,rc:0.52,mg:.28,u0:0.7,capN:120,capU:'niños',obra:[0,1,1],princ:true,d:'Los más pequeños, con horario de oficina. Alimenta a tus escuelas primarias.'},
+      {id:'primaria',n:[[1800,'Escuela de primeras letras'],[1900,'Escuela primaria']],desde:1800,base:700,rc:0.4,mg:.27,u0:0.72,capN:350,capU:'alumnos',obra:[0,1,1],princ:true,fed:FED_P,d:'Leer, escribir y contar. Se llena con los niños de tus jardines de la misma ciudad.'},
+      {id:'bachillerato',n:[[1800,'Colegio de humanidades'],[1900,'Colegio de bachillerato']],desde:1800,base:1200,rc:0.4,mg:.27,u0:0.72,capN:500,capU:'alumnos',obra:[1,1,2],princ:true,fed:{de:['primaria'],bono:.05,max:.15},d:'Los últimos años antes de la universidad. Se llena con los alumnos de tus primarias de la misma ciudad.'},
+      {id:'cole',n:[[1800,'Escuela y colegio'],[1930,'Colegio completo (primaria y bachillerato)']],desde:1800,base:1900,rc:0.4,mg:.27,u0:0.72,capN:700,capU:'alumnos',obra:[1,1,2],princ:true,fed:FED_P,d:'Primaria y bachillerato bajo un mismo techo: aulas, patio y una matrícula que sostiene el negocio.'},
+      {id:'bilingue',n:'Colegio bilingüe (primaria y bachillerato)',desde:1965,base:2800,rc:0.46,mg:.3,u0:0.7,capN:700,capU:'alumnos',obra:[1,2,2],princ:true,fed:FED_P,d:'Pensiones altas, jornada completa y fama de buen colegio.'},
+      {id:'tecnico',n:'Instituto técnico',desde:1950,base:900,rc:0.47,mg:.26,u0:0.7,capN:400,capU:'alumnos',obra:[1,1,2],princ:true,fed:FED_T,d:'Oficios y carreras cortas. Recibe a los bachilleres de toda tu red.'},
+      {id:'univ',n:'Universidad privada',desde:1930,base:6000,rc:0.4,mg:.3,u0:0.72,capN:4000,capU:'estudiantes',obra:[2,3,3],fed:FED_U,d:'Facultades, investigación y un nombre que dura generaciones. Recibe a los bachilleres y técnicos de toda tu red.'},
+      {id:'admin',n:'Administración y bienestar central',desde:1900,base:400,rol:'apoyo',cubre:5,bono:.02,falta:.025,d:'Matrículas, nómina y bienestar para todos los planteles. Atiende hasta 5.'},
+      {id:'labs',n:'Biblioteca, laboratorios y deportes',desde:1920,base:700,rol:'apoyo',cubre:4,bono:.012,falta:0,rep:4,d:'Sube la calidad de los planteles que atiende (hasta 4).'},
+      {id:'bus',n:'Transporte escolar',desde:1950,base:350,rol:'apoyo',cubre:6,bono:.01,falta:0,uAdd:.04,d:'Llena más cupos en los planteles que atiende (hasta 6).'}]
+  };
+  const NIV=[['jardin',['jardin']],['primaria',['primaria','cole','bilingue']],['bachillerato',['bachillerato','cole','bilingue']],['tecnico',['tecnico','univ']]];
+  const tn=id=>{ const t=window.tipoDe176('educacion',id); if(!t) return id; if(typeof t.n==='string') return t.n; let r=t.n[0][1]; t.n.forEach(([d,x])=>{ if(A()>=d) r=x; }); return r; };
+  const nombreNivel=(i)=>i===3?(A()>=1950?'Instituto técnico o universidad':'Universidad'):tn(NIV[i][0]);
+  const nivelesDisp=()=>NIV.map((n,i)=>({i,ids:n[1]})).filter(x=>x.ids.some(id=>{ const t=window.tipoDe176('educacion',id); return t&&A()>=t.desde; }));
+  function niveles(r){ const L=window.unidadesAbiertas176(r), tiene=ids=>L.some(u=>ids.includes(u.tipo)); return nivelesDisp().map(x=>({i:x.i,nom:nombreNivel(x.i),ok:tiene(x.ids)})); }
+  function hubEdu(e,r){ const N=niveles(r); if(!N.length) return ''; const completo=N.every(x=>x.ok);
+    return '<div class="cob176 '+(completo?'bien':'')+'"><b>Ciclo educativo:</b> '+N.map(x=>E(x.nom)+' '+(x.ok?'✓':'✗')).join(' · ')+'.<br><small>Cada nivel alimenta al siguiente: tus jardines llenan las primarias de su ciudad (hasta +15%), tus primarias llenan los bachilleratos de su ciudad (hasta +15%), y los bachilleratos alimentan a los institutos técnicos y a las universidades de toda la red (hasta +12%).</small></div>'; }
+  function gEducacion(){ if(!ACTIVO()||nino()||typeof window.redesNegocio176!=='function') return []; const out=[];
+    window.redesNegocio176().filter(e=>e.red176.clase==='educacion').forEach(e=>{ try{ const r=window.redNegocio176(e), N=niveles(r); const falta=N.find((x,k)=>!x.ok&&N.slice(0,k).some(y=>y.ok)); if(!falta||!window.unidadesFrente176(r).length) return;
+      out.push({id:'edu-nivel:'+e.nombre+falta.i,peso:30,tono:'oro',txt:'<b>'+E(e.nombre)+'</b> no tiene '+E(falta.nom.toLowerCase())+'.',por:'Tus alumnos terminan un nivel y no tienen a dónde seguir en tu red: se van a otro colegio.',si:'Cada nivel que falta es clientela que no se queda.',ir:'Tus negocios: sedes y unidades',irT:'Abrir el nivel',pre:()=>{ try{ sentarseEn(comps().indexOf(e)); }catch(x){} }}); }catch(x){} }); return out.slice(0,1); }
+  function instalar(){ const C=window.CLASES_176; if(!C||!C.educacion) return false; if(!C.educacion.__v178){ Object.assign(C.educacion,EDU); C.educacion.hubHtml=hubEdu; C.educacion.__v178=true; }
+    const H=window.HITOS_176; if(Array.isArray(H)&&!H.some(h=>h.id==='ciclo')) H.push({id:'ciclo',n:'Ciclo educativo completo',clase:'educacion',f:r=>r.clase==='educacion'&&niveles(r).every(x=>x.ok)&&niveles(r).length>=3,p:4});
+    return true; }
+  function init178(){ instalar(); try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA178_CONS){ window.__SA178_CONS=true; window.consejeroRegistrar168(gEducacion); } }catch(x){}
+    Object.assign(window,{EDUCACION_178:EDU,nivelesEducacion178:niveles,NIVELES_178:NIV}); }
+  init178(); setTimeout(init178,40); setTimeout(init178,220); setTimeout(init178,650); setTimeout(init178,950);
+  window.__SA178={version:V178};
 })();
 </script>
 
