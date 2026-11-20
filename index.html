@@ -1365,10 +1365,36 @@ svg.foto116{display:block;background:#1d2a23}
 .panel175{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .panel175 .apunte{margin:4px 0 8px}
 </style>
+<style id="estilos-v176">
+.red176 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin:8px 0 12px}
+.red176 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.red176 .k b{display:block;font-size:15px;font-family:var(--display)}
+.red176 .k span{font-size:12px;color:var(--humo2)}
+.red176 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.red176 small{color:var(--humo2)}
+.red176 .fila176{display:flex;gap:10px;align-items:center;padding:9px 10px;margin:6px 0;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer}
+.red176 .fila176:hover{background:rgba(214,166,72,.12);border-color:rgba(214,166,72,.4)}
+.red176 .fila176.apoyo{border-style:dashed}
+.red176 .fila176 .est176{font-size:12px;color:#F0CF86;min-width:58px;letter-spacing:.5px;text-align:center}
+.red176 .fila176 .nm176{flex:1;min-width:0}
+.red176 .fila176 .nm176 b{display:block;font-size:14px}
+.red176 .fila176 .nm176 small{display:block;font-size:11.5px}
+.red176 .fila176 .cf176{text-align:right;font-size:12.5px;white-space:nowrap}
+.red176 .b176{height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px;min-width:70px}
+.red176 .b176 i{display:block;height:100%;background:var(--laton)}
+.red176 .b176.mal i{background:#C25B4E}.red176 .b176.bien i{background:#6FC08F}
+.red176 .tit176{display:inline-block;padding:2px 10px;border-radius:10px;background:rgba(214,166,72,.2);color:#F0CF86;font-size:12px;margin-left:6px}
+.red176 .hit176{display:inline-block;margin:2px 4px 2px 0;padding:2px 9px;border-radius:9px;font-size:11.5px;background:rgba(111,192,143,.18);color:#8fe0b0}
+.red176 .hit176.no{background:rgba(255,255,255,.05);color:var(--humo2)}
+.red176 .cob176{margin:6px 0;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12.5px}
+.red176 .cob176.mal{border-left:3px solid #C25B4E}.red176 .cob176.bien{border-left:3px solid #6FC08F}
+.panel176{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.panel176 .apunte{margin:4px 0 8px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v175</div>
+<div class="version-badge" id="versionBadge">v176</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7296,6 +7322,7 @@ function correrEmpresa(res,cual){
   e.costos=e.ingresos-opu;
   e.caja+=e.utilidad;
   if(e.hotel175&&typeof window.anualHoteles175==='function'){ try{ window.anualHoteles175(e,res); }catch(x){ console.error(x); } }   // v175: el resultado sale de los hoteles
+  else if(e.red176&&typeof window.anualRed176==='function'){ try{ window.anualRed176(e,res); }catch(x){ console.error(x); } }   // v176: el resultado sale de las unidades de cada negocio
   e.innovacion=clamp(e.innovacion-rnd(1.5,4),0,100);
   e.marca=clamp(e.marca-rnd(1,3),0,100);
   e.eficiencia=clamp(e.eficiencia-rnd(.5,2.5),0,100);
@@ -27999,7 +28026,7 @@ install();setTimeout(install,1200);
     const crisis=ciclo<-.05?1+(-ciclo)*12:1, upac=S.anio>=1998&&S.anio<=2000;
     // 1. los depósitos
     const D0=totDep(b), solv0=e.caja/Math.max(1,rwa(b));
-    let g=.05+ciclo*.5+({baja:-.04,mercado:0,alta:.07})[b.capt]+Math.log10(Math.max(1,b.oficinas))*.01+(b.digital?.03:0)+(b.cajeros>0?.01:0)-(solv0<solvMin()?.08:0)-(S.anio>=1998?.005:0);
+    let g=.05+ciclo*.5+({baja:-.04,mercado:0,alta:.07})[b.capt]+Math.log10(Math.max(1,b.oficinas))*.01+(b.digital?.03:0)+(b.cajeros>0?.01:0)-(solv0<solvMin()?.08:0)-(S.anio>=1998?.005:0)+(window.crecRed176?window.crecRed176(e,b):0);
     try{ if((S.esc129||[]).some(x=>x.estado==='abierto'&&String(x.titulo||'').indexOf(e.nombre)>=0)) g-=.06; }catch(x){}
     const mix=b.capt==='alta'?{ahorro:.35,corriente:.2,cdt:.45}:b.capt==='baja'?{ahorro:.5,corriente:.3,cdt:.2}:{ahorro:.45,corriente:.25,cdt:.3};
     const D1=Math.max(10,D0*(1+clamp(g,-.3,.3))); Object.keys(mix).forEach(k=>{ b.dep[k]=b.dep[k]*.7+D1*mix[k]*.3; }); const f=D1/totDep(b); Object.keys(b.dep).forEach(k=>b.dep[k]*=f);
@@ -28015,7 +28042,7 @@ install();setTimeout(install,1200);
       let mo=s.mora*crisis*(b.col==='maxima'?1.3:1)*(k==='hipotecaria'&&upac?5:1)*(e.gerente112==='amigos'?2:1); mo=clamp(mo,.005,.6); moras[k]=mo;
       ingInt+=b.car[k]*tasa*(1-mo*.5); const prov=({minimas:.8,prudentes:1,contraciclicas:ciclo>0?1.15:.8})[b.prov]; perdida+=b.car[k]*mo*.55*prov; b.car[k]*=1-mo*.5; });
     const comis=b.car.tarjetas*.04+totDep(b)*.004;
-    const opex=b.oficinas*1.5*(b.digital?.88:1)+b.cajeros*.08+(b.digital?6:0)+(totDep(b)+totCar(b))*.008+(b.sarlaft?Math.max(2,totDep(b)*.001):0);
+    const opex=b.oficinas*1.5*(b.digital?.88:1)+b.cajeros*.08+(b.digital?6:0)+(totDep(b)+totCar(b))*.008+(b.sarlaft?Math.max(2,totDep(b)*.001):0)+(window.opexRed176?window.opexRed176(e,b):0);
     const intBonos=b.bonos*(i+.02);
     const antesImp=ingInt+comis-costoDep-perdida-opex-intBonos, util=antesImp>0?antesImp*.67:antesImp;
     // 4. a las cuentas de la compañía (el capital del banco es su caja)
@@ -28068,6 +28095,7 @@ install();setTimeout(install,1200);
     ops.push(elegir('Estrategia de cartera','A quién le prestas.',ESTR,'estr'));
     ops.push(elegir('Tasas de colocación','Cobrar hasta la usura deja más margen y trae peores clientes.',{prudente:{n:'Prudentes',d:'Clientes buenos y mora baja.'},maxima:{n:'Hasta el tope de la usura',d:'Más margen, más mora.'}},'col'));
     ops.push(elegir('Provisiones','Cuánto se reserva para lo que no van a pagar.',{minimas:{n:'Mínimas',d:'Más utilidad hoy; más golpe en la crisis.'},prudentes:{n:'Prudentes'},contraciclicas:{n:'Contracíclicas',d:'Guardar en los años buenos para los malos.'}},'prov'));
+    try{ if(typeof window.opcionesRed176==='function') window.opcionesRed176(e,b,ops,reab); }catch(x){ console.error(x); }
     const cO=Math.round(Math.max(20,b.oficinas*2)); ops.push({t:'Abrir 10 oficinas',cat:'casa',d:'Más depósitos y más clientes. '+fmt(cO)+' de inversión y más gastos cada año.',dis:e.caja<cO?'El banco no tiene '+fmt(cO):sinMov,cerrar:false,run:()=>{ e.caja-=cO; S.mov--; b.oficinas+=10; log('<b>'+esc(e.nombre)+'</b> abrió diez oficinas nuevas.','bien'); reab(); }});
     if(b.oficinas>10) ops.push({t:'Cerrar 10 oficinas',cat:'casa',d:'Menos gasto; algunos clientes se van.',cerrar:false,run:()=>{ b.oficinas-=10; Object.keys(b.dep).forEach(k=>b.dep[k]*=.97); reab(); }});
     if(S.anio>=1980){ const cC=Math.round(Math.max(10,b.oficinas*.8)); ops.push({t:'Instalar 50 cajeros automáticos',cat:'casa',d:'Plata a cualquier hora. '+fmt(cC)+'.',dis:e.caja<cC?'El banco no tiene '+fmt(cC):null,cerrar:false,run:()=>{ e.caja-=cC; b.cajeros+=50; reab(); }}); }
@@ -32043,7 +32071,7 @@ install();setTimeout(install,1200);
     c.ofertas={anio:A(),l:L}; return L; }
   function comprarHotel(e,o){ const c=C(e), p=plan(e,o.valor,true); if(!p.ok) return null; pagar(e,p); const h=crearHotel(e,c,o.tipo,o.ciudad,o.hab,'propio',{nom:o.nom,cons:o.cons,resenas:o.resenas,valor:o.valor,hipoteca:p.deuda,abierto:A(),historico:!!o.historico}); if(c.ofertas&&Array.isArray(c.ofertas.l)) c.ofertas.l=c.ofertas.l.filter(x=>x!==o);
     log('Compraste <b>'+E(h.nom)+'</b> en '+E(h.ciudad)+' por '+fm(o.valor)+'.','hito'); if(o.historico) prest(3,'compró un hotel histórico'); revisarHitos(e,c); return h; }
-  function hotelesAportables(){ const out=[]; (S.bienes||[]).forEach(b=>{ if(b.clase==='hotel'&&!b.enConstruccion) out.push({b,tipo:'hotelc',hab:b.habitaciones||30,cons:b.categoria?Math.min(95,45+b.categoria*8):70}); else if(b.clase==='negocio'&&b.neg110&&['hotel','fincahotel'].includes(b.neg110.id)) out.push({b,tipo:b.neg110.id==='hotel'?'hotelc':'boutique',hab:b.neg110.id==='hotel'?24:12,cons:60}); }); return out; }
+  function hotelesAportables(){ const out=[]; (S.bienes||[]).forEach(b=>{ if(b.clase==='hotel'&&!b.enConstruccion) out.push({b,tipo:'hotelc',hab:b.habitaciones||30,cons:b.categoria?Math.min(95,45+b.categoria*8):70}); else if(b.clase==='negocio'&&b.neg110&&['hotel','fincahotel','motel'].includes(b.neg110.id)) out.push({b,tipo:b.neg110.id==='hotel'?'hotelc':b.neg110.id==='motel'?'motel':'boutique',hab:b.neg110.id==='hotel'?24:b.neg110.id==='motel'?16:12,cons:60}); }); return out; }
   function aportarHotel(e,x){ const c=C(e), b=x.b; const ciudad=b.ciudad||S.p.ciudad; const T=TB[x.tipo]; const hab=Math.max(T.hab[0]>>1,x.hab);
     const h=crearHotel(e,c,x.tipo,dest(ciudad).n===ciudad?ciudad:'Bogotá',hab,'propio',{nom:b.nombre,cons:x.cons,resenas:58,valor:b.valor,hipoteca:b.hipoteca||0,abierto:b.comprado||A()-3});
     if(b.hipoteca) e.deuda+=b.hipoteca; S.bienes=S.bienes.filter(y=>y!==b); log('Aportaste <b>'+E(b.nombre)+'</b> a la cadena '+E(e.nombre)+'.','bien'); revisarHitos(e,c); return h; }
@@ -32174,6 +32202,580 @@ install();setTimeout(install,1200);
       venderHotel175:vender,costoAperturaHotel175:costoApertura,planHotel175:plan,nuevoSocioHotel175:nuevoSocio,puedeFranquiciar175:puedeFranq,puedeAdministrar175:puedeAdmin,tituloHotel175:titulo,revisarHitosHotel175:revisarHitos,HITOS_HOTEL_175:HITOS,escenaImperio175,escenaAbrir175,escenaComprar175,escenaHotel175,escenaMarca175,escenaFinanzas175,escenaInicioHotel175:escenaInicio175,sucesosHotel175:sucesos,factorEra175:F,resumenHotel175:resumen}); }
   init175(); setTimeout(init175,40); setTimeout(init175,220); setTimeout(init175,650); setTimeout(init175,950);
   window.__SA175={version:V175};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v176 · UNA SOLA PUERTA PARA LOS NEGOCIOS, Y CADA CLASE CON SUS UNIDADES
+   Antes, fundar una compañía era escoger un sector y poner plata; y además
+   había "Comprar un negocio" (restaurante, colegio, clínica...), "Fundar un
+   banco" y el imperio hotelero, cada uno por su lado. Ahora hay una sola
+   puerta ("Fundar una compañía") y cada clase de negocio se arma con sus
+   propias unidades de producción:
+   - Droguerías: botica o droguería, de cadena o en línea; bodega y
+     laboratorio de genéricos que las abastecen.
+   - Clínicas: consultorios, clínica, especialidades, hospital, urgencias;
+     laboratorio y diagnóstico de apoyo.
+   - Colegios y universidades: colegio, jardín, instituto técnico, bilingüe,
+     universidad; administración central, laboratorios, transporte.
+   - Comercio: tienda, almacén, supermercado, hipermercado, estación de
+     servicio, tienda en línea; centro de distribución y marca propia.
+   - Panaderías y restaurantes: panadería, fonda o restaurante, cafetería,
+     comidas rápidas, cocina oculta; cocina central y planta de panificación.
+   - Servicios y ocio: funeraria, lavandería, cine, discoteca, gimnasio.
+   - Inmuebles de renta: casas, parqueaderos, edificios, centros
+     comerciales, bodegas; administración de propiedades.
+   - Banco: sede principal, sedes regionales, centro de operaciones y centro
+     de cómputo, además de las oficinas.
+   - Hoteles: el imperio hotelero de la v175.
+   Cada negocio tiene una unidad principal (la insignia, que da la marca y
+   cubre a las primeras unidades), unidades de frente (las que venden) y
+   unidades de apoyo (bodegas, laboratorios, cocinas centrales, centros de
+   operaciones) que sin ellas la red se enreda al crecer. Los negocios
+   personales de la v110 se vuelven compañías con su primera unidad.
+   ========================================================================== */
+(function(){
+  const V176='v176';
+  const TIT_PUERTA='Fundar una compañía';
+  const TIT_RED='Tus negocios: sedes y unidades';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const pc=x=>Math.round(x*100)+'%';
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const evento=(t,o,p)=>{ try{ cola.push({p:p||7,c:()=>!!(S&&S.p&&!S.muerto),t:()=>t,o}); }catch(e){} };
+  const movida=()=>{ if(S._mov176===S.anio) return true; if(S.mov<1) return false; S._mov176=S.anio; S.mov--; return true; };
+  const sinMov=()=>(S._mov176!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const sentar=e=>()=>{ try{ const i=comps().indexOf(e); if(i>=0) sentarseEn(i); }catch(x){} };
+  const F=()=>cl(1+(A()-1800)/200,1,2.3);
+  function interp(T,a){ if(!isFinite(a)||a<=T[0][0]) return T[0][1]; for(let i=1;i<T.length;i++){ if(a<=T[i][0]){ const p=T[i-1], q=T[i]; return p[1]+(q[1]-p[1])*(a-p[0])/(q[0]-p[0]); } } return T[T.length-1][1]; }
+  /* ---- los sectores nuevos que traen las clases que antes eran bienes sueltos ---- */
+  const NUEVOS=[
+    {id:'educacion',n:'Educación privada',g:.045,m:.12,mult:9,vol:.06,cap:900,ap:1800,d:'Colegios, institutos y universidades. Matrículas que se pagan cada año; el activo es la reputación.'},
+    {id:'gastronomia',n:'Panaderías y restaurantes',g:.05,m:.11,mult:6.8,vol:.2,cap:90,ap:1800,d:'Pan, comida y cafés. Poca plata para empezar, mucha competencia, y la moda decide.'},
+    {id:'inmobiliario',n:'Inmuebles de renta',g:.04,m:.30,mult:11,vol:.08,cap:380,ap:1800,d:'Parqueaderos, edificios y centros comerciales que se arriendan. Poco riesgo, valorización lenta.'},
+    {id:'servicios',n:'Servicios y ocio',g:.05,m:.12,mult:7,vol:.14,cap:90,ap:1800,d:'Lavanderías, gimnasios, funerarias, cines y discotecas. Negocios de barrio con caja diaria.'}];
+  function sectores(){ try{ NUEVOS.forEach(s=>{ if(!SECTORES.some(x=>x.id===s.id)){ const o=Object.assign({},s); delete o.ap; SECTORES.push(o); } if(typeof APARICION==='object'&&APARICION[s.id]===undefined) APARICION[s.id]=s.ap; if(S&&S.vientos&&!isFinite(S.vientos[s.id])) S.vientos[s.id]=0; }); }catch(e){ console.error(e); } }
+  /* ---- las ciudades ---- */
+  const CIUDADES=[
+    {n:'Bogotá',pob:1.35,suelo:1.3,desde:1800},{n:'Medellín',pob:1.15,suelo:1.15,desde:1800},{n:'Cali',pob:1,suelo:1,desde:1800},
+    {n:'Barranquilla',pob:1,suelo:1,desde:1800},{n:'Bucaramanga',pob:.8,suelo:.9,desde:1800},{n:'Manizales',pob:.6,suelo:.85,desde:1800},
+    {n:'Montería',pob:.55,suelo:.75,desde:1800},{n:'La Estrella',pob:.45,suelo:.7,desde:1800},{n:'Cartagena',pob:.9,suelo:1.35,desde:1800},
+    {n:'Santa Marta',pob:.6,suelo:1,desde:1900},{n:'Pereira',pob:.7,suelo:.85,desde:1900}];
+  const ciu=n=>CIUDADES.find(c=>c.n===n)||{n:n||'Bogotá',pob:.8,suelo:1,desde:1800};
+  const ciudadesDisp=()=>CIUDADES.filter(c=>A()>=c.desde);
+  /* ---- las clases y sus unidades ----
+     base: costo de una unidad mediana (millones, con la época en 1800)
+     rc: ventas al año por cada peso de costo · mg: margen operativo · u0: uso normal de la capacidad
+     princ: puede ser la primera unidad (la insignia) · rol 'apoyo': no vende, abastece a las demás
+     cubre: a cuántas unidades de frente atiende · bono: margen que suma a todas · falta: margen que resta si no alcanza */
+  const CL={
+    farmacia:{n:'Boticas y droguerías',sector:'salud',grupo:'Salud',desde:1800,un:['droguería','droguerías'],emp:'Droguerías',
+      d:'Del mostrador de la botica a la cadena de droguerías con bodega propia y laboratorio de genéricos. La demanda es constante; el riesgo es el abastecimiento y los permisos.',
+      cs:.15,el:.6,rs:.8,sp:.5,ts:.15,vol:.05,pand:[1.15,1.1,1],kv:7.5,aut:[[1800,'el cabildo'],[1920,'la Secretaría de Salud'],[1993,'el Invima']],
+      tit:[[1,'Boticario'],[4,'Droguista'],[10,'Cadena de droguerías'],[25,'Imperio farmacéutico']],
+      tipos:[
+        {id:'drog',n:[[1800,'Botica'],[1930,'Droguería']],desde:1800,base:55,rc:1.1,mg:0.17,u0:.62,capN:150,capU:'clientes al día',obra:[0,0,1],princ:true,d:'Mostrador, recetas y remedios de la región.'},
+        {id:'drogc',n:'Droguería de cadena (autoservicio)',desde:1975,base:160,rc:1.1,mg:0.16,u0:.6,capN:400,capU:'clientes al día',obra:[0,1,1],princ:true,d:'Pasillos, autoservicio y horario extendido.'},
+        {id:'drogd',n:'Farmacia en línea y domicilios',desde:2012,base:90,rc:1.1,mg:.12,u0:.55,capN:300,capU:'pedidos al día',obra:[0,0,1],ciu:false,princ:true,d:'Pedidos por la aplicación y mensajeros en moto.'},
+        {id:'bodega',n:'Bodega y centro de distribución',desde:1950,base:260,rol:'apoyo',cubre:12,bono:.025,falta:.03,d:'Compras al por mayor y surtido a tiempo. Cada una atiende hasta 12 droguerías.'},
+        {id:'lab',n:'Laboratorio de genéricos',desde:1960,base:520,rol:'apoyo',cubre:20,bono:.035,falta:0,d:'Marca propia: más margen en cada caja que se vende. Atiende hasta 20 droguerías.'}]},
+    clinica:{n:'Clínicas y hospitales',sector:'salud',grupo:'Salud',desde:1800,un:['unidad de salud','unidades de salud'],emp:'Salud',
+      d:'De la casa de salud al hospital universitario, con laboratorio y diagnóstico de apoyo. Siempre hay pacientes; lo difícil es contratar buenos médicos y cobrarle a los pagadores.',
+      cs:.1,el:.3,rs:1.1,sp:.5,ts:.2,vol:.06,pand:[.8,.92,1],kv:7.5,aut:[[1800,'el cabildo'],[1920,'la Secretaría de Salud'],[1977,'la Superintendencia de Salud']],
+      tit:[[1,'Médico empresario'],[3,'Director de clínica'],[8,'Red de clínicas'],[18,'Imperio de la salud']],
+      tipos:[
+        {id:'consul',n:[[1800,'Casa de salud'],[1890,'Consultorios y centro médico']],desde:1800,base:380,rc:.62,mg:.24,u0:.66,capN:40,capU:'consultas al día',obra:[0,1,1],princ:true,d:'Consultas, curaciones y partos de la región.'},
+        {id:'clin',n:[[1800,'Hospital de caridad'],[1890,'Clínica']],desde:1800,base:2200,rc:0.46,mg:0.3,u0:.7,capN:60,capU:'camas',obra:[1,2,3],princ:true,d:'Cirugías, hospitalización y urgencias.'},
+        {id:'esp',n:'Clínica de especialidades',desde:1960,base:2800,rc:0.5,mg:0.3,u0:.68,capN:80,capU:'camas',obra:[1,2,3],d:'Cardiología, oncología y alta complejidad.'},
+        {id:'hosp',n:'Hospital universitario',desde:1940,base:5200,rc:0.46,mg:0.28,u0:.72,capN:180,capU:'camas',obra:[2,3,3],d:'Formación de médicos y atención de todo el departamento.'},
+        {id:'urg',n:'Centro de urgencias 24 horas',desde:1985,base:900,rc:.55,mg:.22,u0:.6,capN:50,capU:'urgencias al día',obra:[1,1,2],d:'Puerta abierta toda la noche.'},
+        {id:'diag',n:'Laboratorio y diagnóstico por imágenes',desde:1950,base:1100,rol:'apoyo',cubre:8,bono:.03,falta:.03,d:'Exámenes y rayos X para todas tus unidades. Atiende hasta 8.'}]},
+    educacion:{n:'Colegios y universidades',sector:'educacion',grupo:'Educación',desde:1800,un:['sede','sedes'],emp:'Educación',
+      d:'Escuelas, colegios, institutos y universidades. Las matrículas se pagan cada año; el activo es la reputación, y crecer exige administración central.',
+      cs:.05,el:.45,rs:1.2,sp:.4,ts:.1,vol:.04,pand:[.85,.92,.98],kv:8,aut:[[1800,'el cabildo'],[1886,'el Ministerio de Instrucción Pública'],[1950,'el Ministerio de Educación']],
+      tit:[[1,'Rector fundador'],[3,'Director de colegios'],[8,'Red educativa'],[16,'Imperio educativo']],
+      tipos:[
+        {id:'cole',n:[[1800,'Escuela privada'],[1880,'Colegio privado']],desde:1800,base:1400,rc:0.45,mg:0.27,u0:.82,capN:600,capU:'alumnos',obra:[1,1,2],princ:true,d:'Aulas, patio y una matrícula que sostiene el negocio.'},
+        {id:'jardin',n:'Jardín infantil',desde:1930,base:300,rc:.6,mg:.28,u0:.8,capN:120,capU:'niños',obra:[0,1,1],princ:true,d:'Los más pequeños, con horario de oficina.'},
+        {id:'tecnico',n:'Instituto técnico',desde:1950,base:900,rc:0.52,mg:0.26,u0:.78,capN:400,capU:'alumnos',obra:[1,1,2],princ:true,d:'Oficios y carreras cortas para entrar rápido al trabajo.'},
+        {id:'bilingue',n:'Colegio bilingüe',desde:1965,base:2200,rc:0.52,mg:0.3,u0:.78,capN:700,capU:'alumnos',obra:[1,2,2],princ:true,d:'Pensiones altas, jornada completa y fama de buen colegio.'},
+        {id:'univ',n:'Universidad privada',desde:1930,base:6000,rc:0.45,mg:0.3,u0:.8,capN:4000,capU:'estudiantes',obra:[2,3,3],d:'Facultades, investigación y un nombre que dura generaciones.'},
+        {id:'admin',n:'Administración y bienestar central',desde:1900,base:400,rol:'apoyo',cubre:5,bono:.02,falta:.025,d:'Matrículas, nómina y bienestar para todas las sedes. Atiende hasta 5.'},
+        {id:'labs',n:'Biblioteca, laboratorios y deportes',desde:1920,base:700,rol:'apoyo',cubre:4,bono:.012,falta:0,rep:4,d:'Sube la calidad de las sedes que atiende (hasta 4).'},
+        {id:'bus',n:'Transporte escolar',desde:1950,base:350,rol:'apoyo',cubre:6,bono:.01,falta:0,uAdd:.04,d:'Llena más cupos en las sedes que atiende (hasta 6).'}]},
+    comercio:{n:'Tiendas, supermercados y estaciones',sector:'retail',grupo:'Comercio',desde:1800,un:['punto de venta','puntos de venta'],emp:'Comercial',
+      d:'Desde el almacén general hasta la cadena de supermercados. Volumen puro: un punto de margen es una fortuna, y sin centro de distribución la red se enreda.',
+      cs:.5,el:1.1,rs:.6,sp:.7,ts:.2,vol:.06,pand:[1,1,1],kv:7,aut:[[1800,'el cabildo'],[1920,'la Alcaldía'],[1968,'la Superintendencia de Industria y Comercio']],
+      tit:[[1,'Comerciante'],[5,'Cadena comercial'],[15,'Gran cadena'],[35,'Imperio del comercio']],
+      tipos:[
+        {id:'tienda',n:[[1800,'Almacén general'],[1900,'Tienda de barrio']],desde:1800,base:60,rc:2.6,mg:.06,u0:.6,capN:200,capU:'clientes al día',obra:[0,0,1],princ:true,d:'Mostrador, fiado y el vecino de toda la vida.'},
+        {id:'almac',n:'Almacén de cadena',desde:1920,base:500,rc:2.2,mg:.07,u0:.6,capN:600,capU:'clientes al día',obra:[0,1,1],princ:true,d:'Vitrinas, vendedores y varias secciones.'},
+        {id:'gasol',n:'Estación de servicio',desde:1935,base:800,rc:1.9,mg:0.08,u0:.6,capN:900,capU:'tanqueadas al día',obra:[1,1,2],princ:true,d:'Margen pequeño sobre mucho volumen: los carros siempre necesitan tanquear.'},
+        {id:'super',n:'Supermercado',desde:1950,base:900,rc:2.2,mg:0.07,u0:.62,capN:2000,capU:'clientes al día',obra:[1,1,2],princ:true,d:'Autoservicio, carritos y parqueadero.'},
+        {id:'hiper',n:'Hipermercado',desde:1980,base:4500,rc:2.0,mg:0.065,u0:.62,capN:9000,capU:'clientes al día',obra:[1,2,3],d:'Todo bajo un techo, a precio de volumen.'},
+        {id:'online',n:'Tienda en línea',desde:2000,base:400,rc:3.0,mg:.05,u0:.55,capN:1500,capU:'pedidos al día',obra:[0,1,1],ciu:false,d:'Sin vitrina: bodega, despachos y la aplicación.'},
+        {id:'cd',n:'Centro de distribución',desde:1950,base:1500,rol:'apoyo',cubre:15,bono:.012,falta:.015,d:'Compra, almacena y reparte a las tiendas. Atiende hasta 15 puntos de venta.'},
+        {id:'marcap',n:'Marca propia',desde:1980,base:300,rol:'apoyo',cubre:30,bono:.01,falta:0,d:'Productos con tu nombre en el estante: más margen en hasta 30 puntos de venta.'}]},
+    gastronomia:{n:'Panaderías y restaurantes',sector:'gastronomia',grupo:'Comercio',desde:1800,un:['local','locales'],emp:'Gastronomía',
+      d:'Pan, comida y café. Se empieza con poca plata, la moda manda y, al crecer, una cocina central evita que cada local cocine a su modo.',
+      cs:.6,el:.9,rs:1.2,sp:.5,ts:.35,vol:.2,pand:[.35,.6,.9],kv:6,aut:[[1800,'el cabildo'],[1920,'la Secretaría de Salud'],[1993,'el Invima']],
+      tit:[[1,'Fondero'],[4,'Restaurador'],[12,'Cadena de comidas'],[30,'Imperio gastronómico']],
+      tipos:[
+        {id:'pan',n:'Panadería',desde:1800,base:80,rc:1.4,mg:.12,u0:.6,capN:250,capU:'clientes al día',obra:[0,0,1],princ:true,d:'Pan a las seis de la mañana, todos los días.'},
+        {id:'rest',n:[[1800,'Fonda'],[1880,'Restaurante']],desde:1800,base:260,rc:1.2,mg:.13,u0:.6,capN:90,capU:'puestos',obra:[0,1,1],princ:true,vol:.3,d:'Puede volverse el sitio de moda o quebrar en un año.'},
+        {id:'cafe',n:'Cafetería',desde:1900,base:150,rc:1.2,mg:.12,u0:.6,capN:60,capU:'puestos',obra:[0,0,1],princ:true,d:'Café, almojábanas y conversación.'},
+        {id:'rapida',n:'Comidas rápidas (franquicia)',desde:1975,base:320,rc:1.4,mg:.11,u0:.62,capN:120,capU:'puestos',obra:[0,1,1],d:'Menú corto, servicio rápido y la misma marca en todas partes.'},
+        {id:'dark',n:'Cocina oculta para domicilios',desde:2016,base:180,rc:1.5,mg:.1,u0:.6,capN:400,capU:'pedidos al día',obra:[0,0,1],ciu:false,d:'Sin comedor: solo cocina y motos.'},
+        {id:'cocina',n:'Cocina central',desde:1960,base:420,rol:'apoyo',cubre:10,bono:.03,falta:.03,d:'Prepara y reparte: el mismo sabor en todos los locales. Atiende hasta 10.'},
+        {id:'panif',n:'Planta de panificación',desde:1950,base:600,rol:'apoyo',cubre:12,bono:.025,falta:0,d:'Masas congeladas y hornos industriales para tus panaderías (hasta 12).'}]},
+    servicios:{n:'Servicios y ocio',sector:'servicios',grupo:'Comercio',desde:1800,un:['local','locales'],emp:'Servicios',
+      d:'Funerarias, lavanderías, cines, discotecas y gimnasios: negocios de barrio con caja diaria.',
+      cs:.45,el:.8,rs:.9,sp:.5,ts:.3,vol:.14,pand:[.4,.65,.9],kv:6.5,aut:[[1800,'el cabildo'],[1920,'la Alcaldía'],[1993,'la Alcaldía y la Policía']],
+      tit:[[1,'Empresario de barrio'],[5,'Cadena de servicios'],[15,'Gran operador'],[30,'Imperio de servicios']],
+      tipos:[
+        {id:'fune',n:'Funeraria',desde:1880,base:360,rc:.65,mg:.2,u0:.7,capN:150,capU:'servicios al año',obra:[0,1,1],princ:true,cs:0,vol:.05,d:'La muerte no tiene recesión.'},
+        {id:'lava',n:'Lavandería',desde:1960,base:90,rc:1.0,mg:.16,u0:.6,capN:400,capU:'clientes',obra:[0,0,1],princ:true,d:'Máquinas que trabajan solas. El riesgo es que se dañen.'},
+        {id:'cine',n:'Teatro de cine',desde:1915,base:500,rc:.6,mg:.2,u0:.55,capN:400,capU:'sillas',obra:[1,1,2],princ:true,d:'Funciones de estreno y matinés los domingos.'},
+        {id:'disco',n:'Discoteca',desde:1970,base:380,rc:1.0,mg:.22,u0:.55,capN:300,capU:'personas',obra:[0,1,1],princ:true,vol:.45,rep:-1,d:'Deja plata cuando está de moda y atrae problemas: ruido, peleas y extorsión.'},
+        {id:'gym',n:'Gimnasio',desde:1980,base:190,rc:1.0,mg:.15,u0:.6,capN:500,capU:'socios',obra:[0,1,1],princ:true,d:'Enero se llena; en junio no va nadie. Las mensualidades sostienen el negocio.'},
+        {id:'central',n:'Administración central',desde:1930,base:300,rol:'apoyo',cubre:8,bono:.02,falta:.02,d:'Contabilidad, compras y cobranza de todos los locales. Atiende hasta 8.'}]},
+    inmobiliario:{n:'Inmuebles de renta',sector:'inmobiliario',grupo:'Inmuebles',desde:1800,un:['inmueble','inmuebles'],emp:'Inmobiliaria',propioSolo:true,
+      d:'Casas, parqueaderos, edificios y centros comerciales que se arriendan. Poco riesgo, valorización lenta, y la administración de propiedades evita que se desordene.',
+      cs:.7,el:.7,rs:.4,sp:.5,ts:.25,vol:.07,pand:[.88,.9,.95],kv:10,aut:[[1800,'el cabildo'],[1920,'la Alcaldía'],[1968,'la Curaduría Urbana']],
+      tit:[[1,'Propietario'],[4,'Rentista'],[10,'Gran propietario'],[22,'Imperio inmobiliario']],
+      tipos:[
+        {id:'casas',n:[[1800,'Casas de renta'],[1930,'Locales y apartamentos de renta']],desde:1800,base:420,rc:.14,mg:.78,u0:.88,capN:1200,capU:'m² arrendables',obra:[0,1,1],princ:true,d:'Inquilinos de toda la vida y un canon que sube con la inflación.'},
+        {id:'parq',n:'Parqueadero',desde:1950,base:270,rc:.145,mg:.8,u0:.85,capN:120,capU:'puestos',obra:[0,0,1],princ:true,d:'Un lote, una caseta y un vigilante.'},
+        {id:'edif',n:'Edificio de oficinas',desde:1955,base:3000,rc:.13,mg:.78,u0:.85,capN:4000,capU:'m² arrendables',obra:[1,2,3],princ:true,d:'Diez pisos de oficinas en arriendo.'},
+        {id:'cc',n:'Centro comercial',desde:1975,base:6400,rc:0.15,mg:0.78,u0:.88,capN:20000,capU:'m² arrendables',obra:[2,3,3],d:'Locales, plazoleta de comidas y parqueadero. La ciudad entera pasa por ahí.'},
+        {id:'bod',n:'Bodegas y parque logístico',desde:1990,base:2200,rc:.14,mg:.8,u0:.88,capN:15000,capU:'m² arrendables',obra:[1,2,3],d:'Naves industriales para quien necesita almacenar.'},
+        {id:'admp',n:'Administración de propiedades',desde:1930,base:350,rol:'apoyo',cubre:8,bono:.02,falta:.02,d:'Cobro de cánones, mantenimiento y vigilancia de todos tus inmuebles. Atiende hasta 8.'}]}
+  };
+  const ORDEN=['farmacia','clinica','educacion','comercio','gastronomia','servicios','inmobiliario'];
+  const nm=(t,a)=>{ if(typeof t.n==='string') return t.n; let r=t.n[0][1]; t.n.forEach(([d,x])=>{ if(a>=d) r=x; }); return r; };
+  const claseDisp=c=>A()>=c.desde;
+  const tipoDe=(clase,id)=>{ const c=CL[clase]; return c&&c.tipos.find(t=>t.id===id); };
+  const tiposDisp=(clase,rol)=>{ const c=CL[clase]; return c?c.tipos.filter(t=>A()>=t.desde&&(!t.hasta||A()<=t.hasta)&&(rol==='todas'?true:rol==='apoyo'?t.rol==='apoyo':rol==='princ'?t.princ:t.rol!=='apoyo')):[]; };
+  const autoridad=(c,a)=>{ let r=c.aut[0][1]; c.aut.forEach(([d,x])=>{ if(a>=d) r=x; }); return r; };
+  const TAMX={p:.5,m:1,g:2.2}, TAMN={p:'pequeño',m:'mediano',g:'grande'}, TAMI={p:0,m:1,g:2};
+  const costoU=(t,tam,ciudad,modelo)=>t.base*TAMX[tam]*F()*(t.ciu===false?1:Math.pow(ciu(ciudad).suelo,.6))*(modelo==='arrendado'?.28:1);
+  const capUnit=(t,tam)=>Math.round((t.capN||0)*TAMX[tam]);
+  const aniosObra=(t,tam)=>((t.obra||[0,1,1])[TAMI[tam]]||0);
+  const APO=['Colonial','Real','de la Plaza','Granada','Imperial','Central','Continental','Andino','del Parque','Los Almendros','Las Palmas','del Río','San Rafael','La Esperanza','Cumbre','del Prado','Santa Teresa','Los Arrieros','La Ceiba','Nueva Granada'];
+  /* ==================== EL ESTADO DE CADA RED ==================== */
+  function R(e){ if(!e.red176||typeof e.red176!=='object') e.red176={clase:e.clase176||null,unidades:[],marca:cl(isFinite(e.marca)?e.marca:40,10,90),lealtad:0,hitos:{},hist:[],seq:0};
+    const r=e.red176; r.unidades=Array.isArray(r.unidades)?r.unidades:[]; r.hitos=r.hitos||{}; r.hist=r.hist||[]; r.marca=isFinite(r.marca)?r.marca:40; return r; }
+  const redes=()=>comps().filter(e=>e&&e.red176&&CL[e.red176.clase]);
+  const abiertas=r=>r.unidades.filter(u=>!u.enObra);
+  const rolDe=(r,u)=>((tipoDe(r.clase,u.tipo)||{}).rol)||'frente';
+  const frentes=r=>abiertas(r).filter(u=>rolDe(r,u)!=='apoyo');
+  const apoyos=r=>abiertas(r).filter(u=>rolDe(r,u)==='apoyo');
+  const costoRepos=(r,u)=>{ const t=tipoDe(r.clase,u.tipo); return t?costoU(t,u.tam,u.ciudad,'propio')*(u.amp||1):0; };
+  const barra=(v,max,cls)=>'<div class="b176 '+(cls||'')+'"><i style="width:'+Math.round(cl(v/Math.max(.0001,max)*100,3,100))+'%"></i></div>';
+  const estrellas=u=>{ const x=cl(Math.round(1+u.rep/25),1,5); return '★'.repeat(x)+'☆'.repeat(5-x); };
+  /* ==================== LA DEMANDA ==================== */
+  const ciclo=()=>(S.macro&&S.macro.ciclo)||0;
+  function canibal(r,u){ const t=tipoDe(r.clase,u.tipo); if(!t||t.ciu===false) return 0; const otros=abiertas(r).filter(x=>x!==u&&x.tipo===u.tipo&&x.ciudad===u.ciudad).length; return Math.min(.25,otros*.05); }
+  function demandaU(e,r,u){ const c=CL[r.clase], t=tipoDe(r.clase,u.tipo); if(!c||!t) return 0; const cs=t.cs!==undefined?t.cs:c.cs, vol=t.vol!==undefined?t.vol:c.vol;
+    let f=t.u0*(t.ciu===false?1:1+(ciu(u.ciudad).pob-1)*c.sp);
+    f*=1+ciclo()*cs*2;
+    const tens=((S.tension||35)-45)/170; if(tens>0) f*=1-tens*c.ts;
+    if(A()>=2020&&A()<=2022&&c.pand) f*=c.pand[A()-2020];
+    f*=1+(u.rep-60)/250*c.rs;
+    f*=1+(u.cons-60)/400;
+    f*=1-c.el*(u.mult-1)*.6;
+    f*=1-Math.max(0,u.mult-1)*Math.max(0,(65-u.rep)/65)*1.2;
+    f*=1+r.marca/600;
+    f*=1-canibal(r,u);
+    f*=1+(u.uAdd||0);
+    if(u.compet>0) f*=.92;
+    return cl(f*.87*rnd(1-.04-vol*.5,1+.04+vol*.5),.1,.95); }
+  /* lo que las unidades de apoyo hacen por las de frente */
+  function cobertura(r){ const nF=frentes(r).length, libre=6; let mg=0, uAdd=0, rep=0; const det=[];
+    CL[r.clase].tipos.filter(t=>t.rol==='apoyo'&&A()>=t.desde).forEach(t=>{ const n=apoyos(r).filter(u=>u.tipo===t.id).length;
+      const frac=nF<=libre?1:Math.min(nF,libre+n*(t.cubre||0))/Math.max(1,nF);
+      mg+=(n>0?(t.bono||0)*frac:0)-(nF<=libre?0:(t.falta||0)*(1-frac)); uAdd+=n>0?(t.uAdd||0)*frac:0; rep+=n>0?(t.rep||0)*frac:0;
+      det.push({id:t.id,n,cubre:libre+n*(t.cubre||0),frac:Math.round(frac*100)/100,falta:nF>libre&&frac<1}); });
+    return {nF,libre,mg,uAdd,rep,det}; }
+  /* ==================== EL AÑO DE CADA UNIDAD ==================== */
+  function anualU(e,r,u,tot,cob){ const t=tipoDe(r.clase,u.tipo); if(!t) return; const c=CL[r.clase];
+    if(u.enObra){ u.enObra.restan--; if(u.enObra.restan<=0){ u.abierto=A(); u.enObra=null; u.cons=96; u.rep=Math.max(u.rep,60); log('<b>'+E(u.nom)+'</b> abrió sus puertas'+(u.ciudad&&u.ciudad!=='En línea'?' en '+E(u.ciudad):'')+'.','hito'); } return; }
+    if(u.amplia){ u.amplia.restan--; if(u.amplia.restan<=0){ u.amp=(u.amp||1)+u.amplia.f; log('La ampliación de <b>'+E(u.nom)+'</b> quedó lista.','bien'); u.amplia=null; } }
+    if(u.compet>0) u.compet--;
+    const propia=u.modelo==='propio', repos=costoRepos(r,u);
+    if(t.rol==='apoyo'){ const g=repos*.06+(propia?u.valor*.012:0); u.ebitda=-g; u.rev=0; u.ocu=0; u.ocu=0; tot.ebitda-=g; u.cons=cl(u.cons-rnd(3,5)+1.5,5,100);
+      if(propia) u.valor=u.valor*.9+repos*(.5+u.cons/250)*.1; tot.dep+=propia?u.valor*.01:0; u.hist.push({a:A(),ebitda:Math.round(-g)}); u.hist=u.hist.slice(-25); return; }
+    if(u.cierre&&u.cierre>=A()){ u.ocu=0; u.rev=0; u.ebitda=0; u.cons=Math.max(10,u.cons-2); u.hist.push({a:A(),cerrado:1}); u.hist=u.hist.slice(-25); return; }
+    const f=demandaU(e,r,u), tec=cl((tot.f.gan||0)-(tot.f.rez||0),-.1,.15);
+    const rev=repos*t.rc*(f/t.u0)*u.mult*(1+tec);
+    const persMg=(u.pers===0?.05:u.pers===2?-.05:0)*Math.min(1,t.mg*3), escala=Math.min(.02,frentes(r).length*.002);
+    const mg=cl(t.mg+cob.mg+persMg+escala+(f-t.u0)*.45*Math.min(1,t.mg*3)+((e.eficiencia||50)-50)/500,0,Math.min(.92,t.mg+.2));
+    const mant=propia?u.valor*.012:(u.modelo==='arrendado'?rev*.01:0), imp=propia?u.valor*.003:0, renta=u.modelo==='arrendado'?rev*.2:0;
+    const ebitda=rev*mg-mant-imp-renta;
+    // estado, servicio y reputación
+    const meta=u.pers===0?36:u.pers===2?82:60;
+    u.cons=cl(u.cons-rnd(3,5)+1.5,5,100);
+    u.serv=cl(u.serv+(meta-u.serv)*.3+rnd(-2,2)+((e.eficiencia||50)-50)/80,10,98);
+    const objetivo=cl(50+(u.cons-60)*.35+(u.serv-50)*.5+(cob.rep||0)+(t.rep||0)*2,8,98);
+    u.rep=cl(u.rep*.65+objetivo*.35+rnd(-2,2),5,99);
+    if(t.rep) try{ S.p.reputacion=cl(S.p.reputacion+t.rep*.25,0,100); }catch(x){}
+    if(propia){ const mercado=Math.max(repos*(.5+u.cons/250),Math.max(0,ebitda)*(c.kv||7.5)); u.valor=u.valor*.7+mercado*.3; u.valor*=1+((S.macro&&S.macro.inflacion)||0)*.25; }
+    u.ocu=f; u.rev=rev; u.ebitda=ebitda; u.cap=capUnit(t,u.tam)*(u.amp||1);
+    u.hist.push({a:A(),ocu:Math.round(f*100)/100,ebitda:Math.round(ebitda)}); u.hist=u.hist.slice(-25);
+    tot.ing+=rev; tot.ebitda+=ebitda; tot.cap+=u.cap; tot.capUsada+=u.cap*f; tot.dep+=propia?u.valor*.01:0; tot.res+=u.rep*Math.max(1,rev); tot.resW+=Math.max(1,rev); }
+  /* ==================== EL AÑO DE LA RED (gancho en el núcleo, junto al de los hoteles) ==================== */
+  function anualRed176(e,res){ if(!e||!e.red176) return; const r=R(e); if(!CL[r.clase]) return;
+    const ingPrev=e.ingresos; const cob=cobertura(r); r.cob=cob;
+    const tot={f:(function(){ try{ return (typeof window.efectosTec169==='function'&&window.efectosTec169(e))||{gan:0,rez:0}; }catch(x){ return {gan:0,rez:0}; } })(),ing:0,ebitda:0,cap:0,capUsada:0,dep:0,res:0,resW:0};
+    r.unidades.slice().forEach(u=>{ try{ u.uAdd=cob.uAdd; anualU(e,r,u,tot,cob); }catch(x){ console.error(x); } });
+    const n=frentes(r).length;
+    const base=Math.max(0,tot.ebitda), over=base*(.08+Math.min(.12,n*.004)+(r.unidades.some(u=>u.principal&&!u.enObra)?.03:0));   // la sede y la administración central cuestan una parte de la utilidad
+    const mark=base*.05*(1+(r.lealtad||0)*.2);
+    const ebitda=tot.ebitda-over-mark;
+    const tasa=((S.macro&&S.macro.tasa)||.08)+.03, interes=Math.max(0,e.deuda||0)*tasa;
+    const antes=ebitda-tot.dep-interes, imp=antes>0?antes*(typeof tarifaRenta==='function'?tarifaRenta():.3):0, util=antes-imp;
+    const delta=util-(e.utilidad||0);
+    e.ingresos=Math.max(1,tot.ing); e.costos=e.ingresos-Math.max(0,ebitda); e.utilidad=util; e.caja+=delta;
+    e.crecimiento=cl(e.ingresos/Math.max(1,r.ingPrev||ingPrev)-1,-.9,3); r.ingPrev=e.ingresos;
+    e.empleados=Math.max(2,Math.round(tot.ing/(18*F())));
+    if(tot.resW>0){ const prom=tot.res/tot.resW; r.marca=cl(r.marca*.82+prom*.18+(n>=5?.3:0),5,99); }
+    e.marca=r.marca;
+    r.ult={anio:A(),ing:tot.ing,ebitda,util,ocu:tot.cap>0?tot.capUsada/tot.cap:0,cap:tot.cap,n,apoyo:apoyos(r).length};
+    r.hist.push({a:A(),ing:Math.round(tot.ing),ebitda:Math.round(ebitda),n}); r.hist=r.hist.slice(-40);
+    try{ revisarHitos(e,r); }catch(x){}
+    sucesos(e,r); }
+  /* ==================== HITOS Y TÍTULOS ==================== */
+  const HITOS=[
+    {id:'u1',n:'Tu primera unidad',f:r=>frentes(r).length>=1,p:1},{id:'u5',n:'Cinco unidades',f:r=>frentes(r).length>=5,p:2},{id:'u10',n:'Diez unidades',f:r=>frentes(r).length>=10,p:3},{id:'u25',n:'Veinticinco unidades',f:r=>frentes(r).length>=25,p:5},
+    {id:'c3',n:'Presencia en tres ciudades',f:r=>new Set(abiertas(r).map(u=>u.ciudad)).size>=3,p:2},{id:'c6',n:'Presencia en seis ciudades',f:r=>new Set(abiertas(r).map(u=>u.ciudad)).size>=6,p:3},
+    {id:'ap1',n:'Tu primer centro de apoyo',f:r=>apoyos(r).length>=1,p:1},{id:'m80',n:'Una marca de 80',f:r=>r.marca>=80,p:3},
+    {id:'hist',n:'Una unidad con historia',f:r=>r.unidades.some(u=>u.historico),p:2},
+    {id:'big',n:'Una de las grandes',f:r=>abiertas(r).some(u=>{ const t=tipoDe(r.clase,u.tipo); return t&&t.base>=2000&&u.tam!=='p'&&u.rep>=65; }),p:3}];
+  function titulo(r){ const c=CL[r.clase]; if(!c) return ''; const n=frentes(r).length; if(!n) return 'Sin unidades abiertas'; let t=c.tit[0][1]; c.tit.forEach(([m,x])=>{ if(n>=m) t=x; }); return t; }
+  function revisarHitos(e,r){ HITOS.forEach(h=>{ if(!r.hitos[h.id]&&h.f(r)){ r.hitos[h.id]=A(); prest(h.p,h.n.toLowerCase()); log('<b>Hito de '+E(e.nombre)+':</b> '+E(h.n)+'.','hito'); try{ if(typeof hito==='function') hito(e.nombre+': '+h.n); }catch(x){} } }); }
+  /* ==================== LOS SUCESOS ==================== */
+  function gasto(e,monto){ e.caja-=monto; if(e.caja<0){ e.deuda+=-e.caja*1.1; e.caja=0; } }
+  const seguro=()=>Object.keys(S.seguros||{}).length>0;
+  function vender(e,r,u,precio){ const neto=Math.max(0,precio-(u.hipoteca||0)); e.caja+=neto; if(u.hipoteca) e.deuda=Math.max(0,e.deuda-u.hipoteca); r.unidades=r.unidades.filter(x=>x!==u); if(u.principal){ const s=abiertas(r).filter(x=>rolDe(r,x)!=='apoyo').sort((a,b)=>(b.valor||0)-(a.valor||0))[0]; if(s) s.principal=true; } log('Vendiste <b>'+E(u.nom)+'</b> por '+fm(precio)+'.','bien'); }
+  function sucesos(e,r){ if((S._ev176n||0)>=2&&S._ev176a===A()) return; if(S._ev176a!==A()){ S._ev176a=A(); S._ev176n=0; }
+    const L=frentes(r); if(!L.length||!chance(Math.min(.45,.1+L.length*.02))) return; const u=pick(L), c=CL[r.clase], lis=[];
+    lis.push(()=>evTemporada(e,r,u)); lis.push(()=>evOferta(e,r,u)); if(A()>=1930) lis.push(()=>evHuelga(e,r,u));
+    if(u.ciudad!=='En línea') lis.push(()=>evIncendio(e,r,u)); lis.push(()=>evInspeccion(e,r,u)); lis.push(()=>evCompetidor(e,r,u));
+    if(A()>=1985&&A()<=2008&&['servicios','gastronomia','comercio'].includes(r.clase)&&u.ciudad!=='En línea') lis.push(()=>evExtorsion(e,r,u));
+    (EVC[r.clase]||[]).forEach(f=>{ try{ const x=f(e,r,u); if(x) lis.push(x); }catch(z){} });
+    S._ev176n++; pick(lis)(); }
+  const reposU=(r,u)=>costoRepos(r,u);
+  function evTemporada(e,r,u){ const t=tipoDe(r.clase,u.tipo), ing=Math.round(reposU(r,u)*t.rc*.1);
+    evento('<b>Temporada excepcional en '+E(u.nom)+'.</b> Una fiesta, un puente largo o una moda llenó '+(u.ciudad&&u.ciudad!=='En línea'?E(u.ciudad):'el negocio')+' y no se da abasto.',
+      [{t:'Subir los precios unos días',f:()=>{ e.caja+=ing*1.4; u.rep=cl(u.rep-3,5,99); return 'Subiste los precios y entraron '+fm(ing*1.4)+' extra. A algunos clientes no les gustó.'; }},
+       {t:'Mantener los precios y atender bien',f:()=>{ e.caja+=ing; u.rep=cl(u.rep+4,5,99); R(e).marca=cl(R(e).marca+1,5,99); return 'Entraron '+fm(ing)+' extra y la fama del servicio subió.'; }}]); }
+  function evOferta(e,r,u){ if(u.modelo!=='propio') return evTemporada(e,r,u); const precio=Math.round(u.valor*rnd(1.2,1.45));
+    evento('<b>Alguien quiere comprar '+E(u.nom)+'.</b> Ofrece '+fmt(precio)+', un 25% o 30% sobre lo que vale.',
+      [{t:'Vender ('+fmt(precio)+')',f:()=>{ vender(e,r,u,precio); return 'Vendiste '+E(u.nom)+' por '+fm(precio)+'.'; }},{t:'Rechazar la oferta',f:()=>{ u.valor*=1.03; return 'Dijiste que no. Ahora sabes lo que vale.'; }}]); }
+  function evHuelga(e,r,u){ const costo=Math.round(reposU(r,u)*.03);
+    evento('<b>Paro en '+E(u.nom)+'.</b> Los trabajadores piden nivelar salarios y estabilidad.',
+      [{t:'Negociar y subir salarios ('+fmt(costo)+')',f:()=>{ gasto(e,costo); u.serv=cl(u.serv+4,10,98); return 'Firmaste una convención por '+fm(costo)+'. El servicio mejoró.'; }},
+       {t:'Resistir',f:()=>{ u.cierre=A(); u.serv=cl(u.serv-8,10,98); u.rep=cl(u.rep-8,5,99); return 'El negocio estuvo cerrado buena parte del año y la reputación se resintió.'; }}]); }
+  function evIncendio(e,r,u){ const dano=Math.round((u.modelo==='propio'?u.valor:reposU(r,u))*.12);
+    evento('<b>Un incendio en '+E(u.nom)+'.</b> Se quemó una parte; nadie resultó herido, pero hay que decidir qué hacer.',
+      [{t:'Reparar de inmediato ('+fmt(dano)+')',f:()=>{ const neto=seguro()?dano*.35:dano; gasto(e,neto); u.cons=cl(u.cons+10,5,100); return (seguro()?'El seguro cubrió la mayor parte: ':'No tenías seguro: ')+'la reparación te costó '+fm(neto)+'.'; }},
+       {t:'Dejar esa parte cerrada',f:()=>{ u.cons=cl(u.cons-15,5,100); u.rep=cl(u.rep-5,5,99); return 'Dejaste esa parte cerrada: menos capacidad y un negocio que se ve deteriorado.'; }}]); }
+  function evInspeccion(e,r,u){ const c=CL[r.clase], aut=autoridad(c,A()), costo=Math.round(reposU(r,u)*.04);
+    evento('<b>'+E(cap(aut))+' visitó '+E(u.nom)+'.</b> Encontró fallas en las instalaciones y en los permisos.',
+      [{t:'Corregir todo ('+fmt(costo)+')',f:()=>{ gasto(e,costo); u.cons=cl(u.cons+10,5,100); u.rep=cl(u.rep+2,5,99); return 'Corregiste lo que pedían por '+fm(costo)+'.'; }},
+       {t:'Impugnar la visita',f:()=>{ if(chance(.5)) return 'Tu abogado logró que se archivara el asunto.'; const m=Math.round(costo*1.5); gasto(e,m); u.rep=cl(u.rep-3,5,99); return 'Perdiste el pulso: multa de '+fm(m)+'.'; }},
+       {t:'No hacer nada',f:()=>{ const m=Math.round(costo*1.8); gasto(e,m); u.rep=cl(u.rep-6,5,99); return 'La multa fue de '+fm(m)+' y quedó el expediente abierto.'; }}]); }
+  function evCompetidor(e,r,u){ const costo=Math.round(reposU(r,u)*.05);
+    evento('<b>Un competidor grande abrió a pocas cuadras de '+E(u.nom)+'.</b> Se lleva clientes con precios y publicidad.',
+      [{t:'Bajar los precios',f:()=>{ u.mult=Math.max(.85,u.mult-.1); return 'Bajaste los precios para defender la clientela.'; }},
+       {t:'Invertir en servicio ('+fmt(costo)+')',f:()=>{ gasto(e,costo); u.serv=cl(u.serv+8,10,98); return 'Mejoraste el servicio por '+fm(costo)+'. Tus clientes lo notaron.'; }},
+       {t:'Esperar a ver qué pasa',f:()=>{ u.compet=2; return 'Esperaste: durante un par de años perdiste algo de clientela.'; }}]); }
+  function evExtorsion(e,r,u){ const x=Math.round(reposU(r,u)*.03);
+    evento('<b>Unos hombres le piden una "vacuna" a '+E(u.nom)+'.</b> Dicen que es por la seguridad del barrio.',
+      [{t:'Pagar ('+fmt(x)+' al año)',f:()=>{ gasto(e,x); return 'Pagaste '+fm(x)+' y te dejaron tranquilo, por ahora.'; }},
+       {t:'Denunciar',f:()=>{ if(chance(.5)){ u.rep=cl(u.rep+3,5,99); return 'La denuncia prosperó y cayeron los que te cobraban.'; } u.cons=cl(u.cons-15,5,100); u.cierre=A(); return 'Hubo represalias: un atentado contra el local y varios meses cerrado.'; }}]); }
+  const EVC={
+    farmacia:[(e,r,u)=>()=>{ const x=Math.round(reposU(r,u)*.03); evento('<b>Falta un medicamento muy pedido en '+E(u.nom)+'.</b> Los clientes preguntan todos los días y se van a la competencia.',
+      [{t:'Conseguirlo por otra vía ('+fmt(x)+')',f:()=>{ gasto(e,x); u.rep=cl(u.rep+3,5,99); return 'Lo trajiste a un costo mayor, pero no perdiste a la gente.'; }},{t:'Esperar el despacho',f:()=>{ u.rep=cl(u.rep-4,5,99); return 'Se perdieron clientes mientras llegaba.'; }}]); }],
+    clinica:[(e,r,u)=>A()>=1993?()=>{ const x=Math.round(Math.max(1,(R(e).ult&&R(e).ult.ing)||reposU(r,u)*.4)*.06); evento('<b>Los pagadores se atrasan con '+E(u.nom)+'.</b> Las cuentas por cobrar se acumulan y la caja se aprieta.',
+      [{t:'Esperar el pago ('+fmt(x)+' de caja)',f:()=>{ gasto(e,x); return 'Aguantaste el atraso con tu caja: '+fm(x)+'.'; }},{t:'Vender la cartera con descuento',f:()=>{ gasto(e,x*.35); return 'Vendiste la cartera con descuento y te costó '+fm(x*.35)+'.'; }},{t:'Reducir la atención a esos pagadores',f:()=>{ u.rep=cl(u.rep-8,5,99); return 'Cortaste servicios y la reputación se resintió.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(reposU(r,u)*.12*((tipoDe(r.clase,u.tipo)||{}).rc||.4)); evento('<b>Una epidemia llena '+E(u.nom)+'.</b> No hay camas ni médicos suficientes y la gente espera horas.',
+      [{t:'Contratar refuerzos y atender',f:()=>{ e.caja+=x; u.rep=cl(u.rep+5,5,99); return 'Atendiste a todos: entraron '+fm(x)+' extra y ganaste fama.'; }},{t:'Atender solo lo que se alcance',f:()=>{ e.caja+=x*.5; return 'Entraron '+fm(x*.5)+' extra.'; }}]); }],
+    educacion:[(e,r,u)=>()=>{ const x=Math.round(reposU(r,u)*.4*.08); evento('<b>Matrícula récord en '+E(u.nom)+'.</b> Hay lista de espera y los padres preguntan si se puede ampliar.',
+      [{t:'Subir la pensión',f:()=>{ u.mult=Math.min(1.3,u.mult+.15); e.caja+=x; return 'Subiste la pensión: entraron '+fm(x)+' extra y el colegio se volvió más selecto.'; }},{t:'Abrir más cupos',f:()=>{ e.caja+=x; u.serv=cl(u.serv-3,10,98); return 'Abriste más cupos: entraron '+fm(x)+' extra, con salones más llenos.'; }}]); },
+      (e,r,u)=>()=>evento('<b>Un escándalo disciplinario en '+E(u.nom)+'.</b> La noticia llegó a los periódicos y varios padres hablan de retirar a sus hijos.',
+      [{t:'Abrir una investigación y dar la cara',f:()=>{ u.rep=cl(u.rep-3,5,99); gasto(e,Math.round(reposU(r,u)*.01)); return 'Diste la cara: el golpe fue moderado.'; }},{t:'Callar y esperar que pase',f:()=>{ u.rep=cl(u.rep-12,5,99); return 'El silencio empeoró las cosas: la reputación cayó.'; }}])],
+    inmobiliario:[(e,r,u)=>()=>{ const x=Math.round(reposU(r,u)*.14*.5); evento('<b>El inquilino principal de '+E(u.nom)+' anuncia que se va.</b> Deja un hueco grande en las rentas.',
+      [{t:'Conseguirle reemplazo con descuento',f:()=>{ gasto(e,x*.4); return 'Reemplazaste al inquilino con un descuento de '+fm(x*.4)+'.'; }},{t:'Dejarlo vacío un tiempo',f:()=>{ gasto(e,x); return 'El espacio estuvo vacío y perdiste '+fm(x)+' en rentas.'; }}]); },
+      (e,r,u)=>u.modelo==='propio'?()=>evento('<b>Una obra pública valoriza la zona de '+E(u.nom)+'.</b> Una avenida nueva, una estación o un parque cambian el barrio.',
+      [{t:'Aprovechar y subir los cánones',f:()=>{ u.valor*=1.12; u.mult=Math.min(1.3,u.mult+.1); return 'El inmueble se valorizó y subiste los cánones.'; }},{t:'Dejar los cánones como están',f:()=>{ u.valor*=1.1; return 'El inmueble se valorizó.'; }}]):null],
+    gastronomia:[(e,r,u)=>A()>=2008?()=>{ const buena=chance(.55+(u.rep-50)/200); evento('<b>Una reseña de '+E(u.nom)+' se volvió viral.</b> '+(buena?'Un cliente contó su experiencia y miles de personas la compartieron.':'Un cliente publicó una queja con fotos y se regó por todas partes.'),
+      buena?[{t:'Aprovechar y promocionar',f:()=>{ u.rep=cl(u.rep+6,5,99); R(e).marca=cl(R(e).marca+2,5,99); return 'La reseña llenó el local por meses.'; }}]:
+        [{t:'Pedir disculpas y compensar',f:()=>{ gasto(e,Math.round(reposU(r,u)*.01)); u.rep=cl(u.rep-2,5,99); return 'Pediste disculpas y la historia se enfrió.'; }},{t:'Ignorarla',f:()=>{ u.rep=cl(u.rep-8,5,99); return 'No dijiste nada y la queja se quedó como la imagen del local.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(reposU(r,u)*.04); evento('<b>Un cocinero de fama quiere trabajar en '+E(u.nom)+'.</b> Pide un sueldo alto y libertad en la carta.',
+      [{t:'Contratarlo ('+fmt(x)+' al año)',f:()=>{ gasto(e,x); u.rep=cl(u.rep+8,5,99); u.serv=cl(u.serv+5,10,98); return 'El nuevo cocinero trajo clientela y buena prensa.'; }},{t:'Dejarlo ir',f:()=>'Se fue a la competencia.'}]); }],
+    comercio:[(e,r,u)=>A()>=1950?()=>{ const x=Math.round(reposU(r,u)*.04); evento('<b>Un paro de transportadores bloquea las vías.</b> Las góndolas de '+E(u.nom)+' se vacían.',
+      [{t:'Comprar a proveedores locales a mayor costo ('+fmt(x)+')',f:()=>{ gasto(e,x); return 'Surtiste con proveedores locales a un costo mayor: '+fm(x)+'.'; }},{t:'Esperar a que se abran las vías',f:()=>{ u.rep=cl(u.rep-5,5,99); return 'Hubo estantes vacíos y los clientes se fueron a otro lado.'; }}]); }:null],
+    servicios:[(e,r,u)=>u.tipo==='fune'?null:()=>{ const x=Math.round(reposU(r,u)*.02); evento('<b>Se dañó el equipo principal de '+E(u.nom)+'.</b> Hay que repararlo o reemplazarlo.',
+      [{t:'Reparar ('+fmt(x)+')',f:()=>{ gasto(e,x); u.cons=cl(u.cons+5,5,100); return 'Lo reparaste por '+fm(x)+'.'; }},{t:'Seguir con lo que hay',f:()=>{ u.cons=cl(u.cons-10,5,100); u.rep=cl(u.rep-4,5,99); return 'Seguiste con el equipo averiado y la calidad bajó.'; }}]); }]
+  };
+  /* ==================== ABRIR, COMPRAR, VENDER ==================== */
+  function plan(e,costo,personal){ const caja=Math.max(0,e.caja); let falta=Math.max(0,costo-caja); const usoCaja=Math.min(costo,caja); let aporte=0,deuda=0;
+    const mp=(typeof miPct==='function')?miPct(e):1;
+    if(falta>0&&personal&&mp>=.99&&S.efectivo>0){ aporte=Math.min(falta,S.efectivo); falta-=aporte; }
+    const tope=costo*.55; if(falta>0){ deuda=Math.min(falta,tope); falta-=deuda; }
+    return {ok:falta<=.0001,usoCaja,aporte,deuda,falta}; }
+  function pagar(e,p){ e.caja-=p.usoCaja; if(p.aporte>0) S.efectivo-=p.aporte; if(p.deuda>0) e.deuda+=p.deuda; }
+  function nuevoNombre(r,t){ const base=nm(t,A()), usados=r.unidades.map(u=>u.nom); for(let i=0;i<40;i++){ const n=base+' '+pick(APO); if(!usados.includes(n)) return n; } return base+' '+ri(2,99); }
+  function crearUnidad(e,r,t,ciudad,tam,modelo,extra){
+    const u=Object.assign({id:'u'+(r.seq=(r.seq||0)+1),nom:nuevoNombre(r,t),tipo:t.id,ciudad:t.ciu===false?'En línea':ciudad,tam:t.rol==='apoyo'?'m':tam,modelo,cons:92,serv:55,rep:58,mult:1,pers:1,amp:1,ocu:0,rev:0,ebitda:0,valor:0,hipoteca:0,abierto:null,enObra:null,amplia:null,hist:[],principal:false},extra||{});
+    if(!r.unidades.some(x=>x.principal)&&t.rol!=='apoyo') u.principal=true; r.unidades.push(u); return u; }
+  function abrirUnidad(e,t,ciudad,tam,modelo,personal){ const r=R(e), costo=costoU(t,tam,ciudad,modelo), p=plan(e,costo,personal); if(!p.ok) return null; pagar(e,p);
+    const u=crearUnidad(e,r,t,ciudad,tam,modelo); u.valor=modelo==='propio'?costo:0; u.hipoteca=modelo==='propio'?p.deuda:0; const o=aniosObra(t,tam);
+    if(o>0) u.enObra={restan:o,costo:Math.round(costo)}; else u.abierto=A();
+    log((o>0?'Empezó la obra de ':'Empezó a funcionar ')+'<b>'+E(u.nom)+'</b>'+(u.ciudad!=='En línea'?' en '+E(u.ciudad):'')+' ('+fm(costo)+').','hito'); try{ revisarHitos(e,r); }catch(x){} return u; }
+  function nombreCompania(claseId){ const c=CL[claseId], base=((S.p&&S.p.apellido)?S.p.apellido+' ':'')+c.emp, usados=comps().map(x=>x.nombre); let n=base, i=1; while(usados.includes(n)&&i<30){ i++; n=base+' '+i; } return n; }
+  function fundarRed(claseId,costo){ const c=CL[claseId], nombre=nombreCompania(claseId), aporte=Math.min(S.efectivo,costo), anterior=S.emp;
+    try{ fundarEn(nombre,c.sector,aporte); }catch(x){ console.error(x); return null; }
+    const e=comps().find(z=>z.nombre===nombre); if(!e) return null; e.caja=aporte; e.clase176=claseId; R(e).clase=claseId; return {e,anterior}; }
+  /* los negocios que están en venta este año */
+  function ofertas(claseId){ if(!S.of176||S.of176.anio!==A()) S.of176={anio:A(),l:{}}; if(S.of176.l[claseId]) return S.of176.l[claseId];
+    const L=[], cs=ciudadesDisp(), ts=tiposDisp(claseId,'frente'), pr=ts.filter(x=>x.princ); if(!ts.length) return L; const n=ri(3,5);
+    for(let i=0;i<n;i++){ const t=pick(ts), d=pick(cs), tam=pick(['p','m','m','g']), cons=ri(28,82), rep=ri(35,80), valor=Math.round(costoU(t,tam,d.n,'propio')*(.55+cons/250)*rnd(.85,1.15)); L.push({id:'o'+i,tipo:t.id,ciudad:t.ciu===false?'En línea':d.n,tam,cons,rep,valor,princ:!!t.princ}); }
+    if(A()>=1900&&chance(.25)&&(pr.length||ts.length)){ const t=pick(pr.length?pr:ts), d=pick(cs); L.push({id:'oh',tipo:t.id,ciudad:t.ciu===false?'En línea':d.n,tam:'m',cons:ri(40,70),rep:ri(60,85),valor:Math.round(costoU(t,'m',d.n,'propio')*rnd(1.1,1.5)),historico:true,princ:!!t.princ}); }
+    S.of176.l[claseId]=L; return L; }
+  function comprarUnidad(e,claseId,o){ const t=tipoDe(claseId,o.tipo); if(!t) return null; let ant=null, nueva=false;
+    if(!e){ if(S.efectivo<o.valor*.45) return null; const x=fundarRed(claseId,o.valor); if(!x) return null; e=x.e; ant=x.anterior; nueva=true; }
+    const r=R(e), p=plan(e,o.valor,true); if(!p.ok) return null; pagar(e,p);
+    const u=crearUnidad(e,r,t,o.ciudad,o.tam,'propio',{cons:o.cons,rep:o.rep,valor:o.valor,hipoteca:p.deuda,abierto:A(),historico:!!o.historico});
+    if(o.historico){ u.nom=cap(nm(t,A()))+' '+pick(APO)+' (con historia)'; prest(3,'compró un negocio con historia'); }
+    const L=S.of176&&S.of176.l&&S.of176.l[claseId]; if(L){ const i=L.indexOf(o); if(i>=0) L.splice(i,1); }
+    log('Compraste <b>'+E(u.nom)+'</b>'+(u.ciudad!=='En línea'?' en '+E(u.ciudad):'')+' por '+fm(o.valor)+'.','hito'); try{ revisarHitos(e,r); }catch(x){}
+    return {e,u,ant,nueva}; }
+  const minCosto=id=>{ const ts=tiposDisp(id,'princ'); return ts.length?Math.min(...ts.map(t=>costoU(t,'p','La Estrella','propio'))):Infinity; };
+  const crudas=()=>{ const p1=window.__crudo91, p2=window.__sinOcultar176; window.__crudo91=true; window.__sinOcultar176=true; try{ return listaAcciones()||[]; }catch(x){ return []; } finally{ window.__crudo91=p1; window.__sinOcultar176=p2; } };
+  const termino=(e,ant)=>{ cerrarModal(); render(); if(ant&&ant!==e&&!ant.presidente&&typeof escenaPresidente==='function') escenaPresidente(ant,true); else escenaRed176(e); };
+  /* ==================== LAS PANTALLAS: LA PUERTA ==================== */
+  function escenaPuerta176(){ if(!ACTIVO()||nino()) return; sectores(); const ops=[], acc=crudas();
+    ORDEN.filter(id=>claseDisp(CL[id])&&tiposDisp(id,'princ').length).forEach(id=>{ const c=CL[id], mine=redes().filter(e=>e.red176.clase===id), min=minCosto(id);
+      ops.push({t:c.n,cat:'compania',d:c.grupo+' · desde '+fm(min)+'. '+(mine.length?'Ya tienes '+mine.length+' negocio'+(mine.length===1?'':'s')+' de esta clase.':'')+' '+c.d.split('.')[0]+'.',cerrar:false,run:()=>{ cerrarModal(); escenaClase176(id); }}); });
+    const tuBanco=acc.find(a=>a.t==='Tu banco'), fundarB=acc.find(a=>a.t==='Fundar un banco'), licencia=acc.find(a=>a.t==='Pedir licencia bancaria');
+    if(A()>=1870) ops.push({t:tuBanco?'Banco: '+(bancosNom()||'tu banco'):'Banco',cat:'compania',d:tuBanco?'Administrar la sede principal, las sedes regionales, las oficinas y los centros de operaciones y de cómputo.':'Sede principal, sucursales y centro de operaciones. Captas depósitos y prestas; la licencia la da la Superintendencia.',dis:(tuBanco||fundarB||licencia)?null:'No cumples las condiciones o ya hay un banco en trámite',cerrar:false,run:()=>{ cerrarModal(); if(tuBanco) tuBanco.run(); else escenaSedeBanco176(fundarB||licencia); }});
+    if(typeof window.escenaImperio175==='function') ops.push({t:'Hoteles: el imperio hotelero',cat:'compania',d:'Desde la posada de arrieros hasta la cadena de hoteles y los resorts.',cerrar:false,run:()=>{ cerrarModal(); window.escenaImperio175(); }});
+    ops.push({t:'Industria, tecnología, energía y otros sectores',cat:'compania',d:'Fábricas, agroindustria, minería, software, energía, medios, seguros y más: la fundación de siempre, con plantas donde las hay.',cerrar:false,run:()=>{ cerrarModal(); window.__soloOtros176=true; try{ modalFundar(); }finally{ window.__soloOtros176=false; } }});
+    if(typeof escenaCrearSociedad==='function') ops.push({t:'Una sociedad que administra otro',cat:'capital',d:'Pones la plata y un gerente la maneja. No es una compañía con unidades: rinde un porcentaje al año.',cerrar:false,run:()=>{ cerrarModal(); escenaCrearSociedad(); }});
+    escena({rubro:'Cámara de Comercio',titulo:'Fundar o comprar un negocio',ancho:true,cerrable:true,clase:'red176',
+      cuerpo:'Escoge la clase de negocio. Cada una se arma con sus propias unidades: una sede principal, las unidades que venden y las de apoyo que las abastecen. Tienes '+fmt(S.efectivo)+'.',opciones:ops}); }
+  const bancosNom=()=>{ try{ const b=comps().find(e=>e.banco112); return b?b.nombre:''; }catch(x){ return ''; } };
+  function escenaSedeBanco176(accion){ if(!accion) return; if(accion.t!=='Fundar un banco'){ cerrarModal(); return accion.run(); }
+    const ops=ciudadesDisp().map(d=>({t:d.n,cat:'casa',d:'Sede principal del banco. '+(d.pob>=1.1?'Plaza financiera. ':d.pob<=.6?'Plaza pequeña. ':'')+'Suelo '+(d.suelo>=1.2?'caro':d.suelo<=.85?'barato':'normal')+'.',cerrar:false,run:()=>{ window.__sedeBanco176=d.n; cerrarModal(); accion.run(); }}));
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+    escena({rubro:'Banco',titulo:'¿Dónde queda la sede principal?',ancho:true,cerrable:true,clase:'red176',cuerpo:'La casa matriz da confianza y marca. Desde ahí se abren las sedes regionales y las oficinas.',opciones:ops}); }
+  /* ---- una clase ---- */
+  function escenaClase176(id){ const c=CL[id]; if(!c) return; const mine=redes().filter(e=>e.red176.clase===id), ops=[], min=minCosto(id);
+    mine.forEach(e=>{ const r=R(e); ops.push({t:'Administrar '+e.nombre,cat:'compania',d:frentes(r).length+' '+c.un[frentes(r).length===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }}); });
+    ops.push({t:'Empezar uno de cero',cat:'compania',d:'Escoges la ciudad, el tipo de unidad principal y el tamaño. Se paga con tu efectivo y, si no alcanza, con crédito.',dis:S.efectivo<min*.45?'Necesitas al menos '+fm(min*.45)+' (el resto va a crédito)':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaFundar176(id,{}); }});
+    ops.push({t:'Comprar uno que está en venta',cat:'capital',d:'Cada año salen algunos a la venta: unos en buen estado, otros caídos. A veces uno con historia.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar176(null,id); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+    const cat=tiposDisp(id,'todas').concat([]); const tipos=CL[id].tipos.filter(t=>A()>=t.desde&&(!t.hasta||A()<=t.hasta));
+    const html='<h4>Unidades que existen en '+A()+'</h4>'+tipos.map(t=>'<div class="cob176"><b>'+E(cap(nm(t,A())))+'</b> · '+(t.rol==='apoyo'?'de apoyo':t.princ?'puede ser la principal':'de frente')+'<br><small>'+E(t.d||'')+'</small></div>').join('');
+    escena({rubro:'Negocios',titulo:E(c.n),ancho:true,cerrable:true,clase:'red176',cuerpo:E(c.d),html,opciones:ops}); }
+  /* ---- el asistente para empezar ---- */
+  function escenaFundar176(id,sel){ sel=sel||{}; const c=CL[id], reab=s=>{ cerrarModal(); escenaFundar176(id,s); };
+    if(!sel.ciudad){ const ops=ciudadesDisp().map(d=>({t:d.n,cat:'casa',d:(d.pob>=1.1?'Mucha población. ':d.pob<=.6?'Poca población. ':'')+'Suelo '+(d.suelo>=1.2?'caro':d.suelo<=.85?'barato':'normal')+'.',cerrar:false,run:()=>reab({ciudad:d.n})}));
+      ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaClase176(id); }});
+      return escena({rubro:'Negocios',titulo:'¿Dónde queda la sede principal?',ancho:true,cerrable:true,clase:'red176',cuerpo:'La primera unidad es la insignia de tu negocio: da la marca y atiende a las primeras unidades que abras.',opciones:ops}); }
+    const d=ciu(sel.ciudad);
+    if(!sel.tipo){ const ops=tiposDisp(id,'princ').map(t=>({t:cap(nm(t,A()))+' · desde '+fm(costoU(t,'p',d.n,'propio')),cat:'casa',d:t.d+' Capacidad mediana: '+capUnit(t,'m').toLocaleString('es-CO')+' '+t.capU+'.',cerrar:false,run:()=>reab({ciudad:d.n,tipo:t.id})}));
+      ops.push({t:'Volver a las ciudades',cat:'legado',cerrar:false,run:()=>reab({})});
+      return escena({rubro:'Negocios',titulo:'¿Qué abres primero en '+E(d.n)+'?',ancho:true,cerrable:true,clase:'red176',cuerpo:'Después podrás abrir más unidades y las de apoyo que necesite la red.',opciones:ops}); }
+    const t=tipoDe(id,sel.tipo), ops=[];
+    ['p','m','g'].forEach(tam=>['propio','arrendado'].forEach(mod=>{ if(mod==='arrendado'&&(A()<1860||c.propioSolo)) return; const costo=costoU(t,tam,d.n,mod), posible=S.efectivo>=costo*.45, o=aniosObra(t,tam);
+      ops.push({t:cap(TAMN[tam])+' · '+capUnit(t,tam).toLocaleString('es-CO')+' '+t.capU+' · '+mod+' · '+fm(costo),cat:'casa',d:(mod==='arrendado'?'Alquilas el local (28% de adecuación) y pagas 20% de tus ventas de renta. ':'Compras o construyes y eres dueño. ')+(o>0?o+' año'+(o===1?'':'s')+' de obra.':'Abre ya.')+' Pones '+fm(Math.min(S.efectivo,costo))+' de tu efectivo'+(S.efectivo<costo?' y el resto va a crédito.':'.'),dis:posible?sinMov():'Necesitas al menos '+fm(costo*.45),cerrar:false,
+        run:()=>{ if(!movida()) return; const x=fundarRed(id,costo); if(!x){ aviso('No se pudo constituir.'); return; } const u=abrirUnidad(x.e,t,d.n,tam,mod,true); if(!u){ aviso('No alcanzó la plata.'); } termino(x.e,x.anterior); }}); }));
+    ops.push({t:'Volver a los tipos',cat:'legado',cerrar:false,run:()=>reab({ciudad:d.n})});
+    escena({rubro:'Negocios',titulo:E(cap(nm(t,A())))+' en '+E(d.n),ancho:true,cerrable:true,clase:'red176',cuerpo:t.d,opciones:ops}); }
+  /* ==================== EL HUB DE UNA RED ==================== */
+  function escenaRed176(e){ if(!ACTIVO()||nino()) return; const g=redes(); e=e||(S.emp&&S.emp.red176?S.emp:g[0]); if(!e) return escenaPuerta176();
+    const r=R(e), c=CL[r.clase]; if(!c) return; const L=abiertas(r), F2=frentes(r), cob=cobertura(r), u0=r.ult||{};
+    const ops=[], enObra=r.unidades.filter(u=>u.enObra);
+    ops.push({t:'Abrir una unidad nueva',cat:'compania',d:'Una de frente (que vende) o de apoyo (que abastece). Elegir tipo, ciudad y tamaño.',cerrar:false,run:()=>{ cerrarModal(); escenaAbrir176(e,{}); }});
+    ops.push({t:'Comprar una que está en venta',cat:'capital',d:'Cada año salen algunas a la venta: unas en buen estado, otras caídas. A veces una con historia.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar176(e,r.clase); }});
+    ops.push({t:'La marca y la calidad',cat:'mercado',d:'Marca '+Math.round(r.marca)+'/100. Campañas, fidelización y certificaciones.',cerrar:false,run:()=>{ cerrarModal(); escenaMarca176(e); }});
+    ops.push({t:'Las finanzas de la red',cat:'capital',d:'Hipotecar, vender y arrendar y cuánto debe la compañía.',cerrar:false,run:()=>{ cerrarModal(); escenaFinanzas176(e); }});
+    if(g.length>1){ const sig=g[(g.indexOf(e)+1)%g.length]; ops.push({t:'Ver otro negocio: '+sig.nombre,cat:'compania',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(sig); }}); }
+    ops.push({t:'Volver a la puerta de negocios',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+    const filas=r.unidades.slice().sort((a,b)=>(a.enObra?1:0)-(b.enObra?1:0)||(b.principal?1:0)-(a.principal?1:0)||(b.ebitda||0)-(a.ebitda||0)).map(u=>{ const t=tipoDe(r.clase,u.tipo)||{}, ap=t.rol==='apoyo';
+      if(u.enObra) return '<div class="fila176" data-u176="'+E(u.id)+'"><span class="est176">en obra</span><div class="nm176"><b>'+E(u.nom)+'</b><small>'+E(u.ciudad)+' · '+E(nm(t,A()).toLowerCase())+' · abre en '+u.enObra.restan+' año'+(u.enObra.restan===1?'':'s')+'</small></div><div class="cf176">'+fm(u.enObra.costo)+'</div></div>';
+      const sub=E(u.ciudad)+' · '+E(nm(t,A()).toLowerCase())+' · '+TAMN[u.tam]+' · '+u.modelo+(u.principal?' · principal':'')+(u.cierre>=A()?' · cerrado':'');
+      return '<div class="fila176'+(ap?' apoyo':'')+'" data-u176="'+E(u.id)+'"><span class="est176">'+(ap?'apoyo':estrellas(u))+'</span><div class="nm176"><b>'+E(u.nom)+'</b><small>'+sub+'</small>'+(ap?'':barra((u.ocu||0)*100,100,(u.ocu||0)<.4?'mal':(u.ocu||0)>.75?'bien':''))+'</div><div class="cf176">'+(ap?'<small>cuesta '+fm(-(u.ebitda||0))+'</small>':((u.ocu?pc(u.ocu)+' uso':'—')+'<br><small>'+(!u.ocu&&!(u.cierre>=A())?'recién abierto':fm(u.ebitda||0)+' de utilidad')+'</small>'))+'</div></div>'; }).join('');
+    const cobH=F2.length?(F2.length<=cob.libre?'<div class="cob176 bien">Con '+F2.length+' '+c.un[F2.length===1?0:1]+' la red se maneja sola. A partir de la '+(cob.libre+1)+'.ª necesitas unidades de apoyo.</div>':
+      cob.det.map(x=>{ const t=tipoDe(r.clase,x.id); return '<div class="cob176 '+(x.falta?'mal':'bien')+'"><b>'+E(cap(nm(t,A())))+':</b> tienes '+x.n+' y la red alcanza para '+Math.min(F2.length,x.cubre)+' de tus '+F2.length+' '+c.un[1]+(x.falta?'. <b>Te faltan: pierdes margen en las que no cubren.</b>':'.')+'</div>'; }).join('')):'';
+    const hit=HITOS.map(h=>'<span class="hit176'+(r.hitos[h.id]?'':' no')+'">'+(r.hitos[h.id]?'✓ ':'')+E(h.n)+'</span>').join('');
+    escena({rubro:E(c.grupo),titulo:E(e.nombre)+'<span class="tit176">'+E(titulo(r))+'</span>',ancho:true,cerrable:true,clase:'red176',
+      cuerpo:L.length?('Tu negocio tiene '+F2.length+' '+c.un[F2.length===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' unidad'+(apoyos(r).length===1?'':'es')+' de apoyo':'')+(enObra.length?', más '+enObra.length+' en obra':'')+'.'):'Todavía no hay una unidad abierta: la obra de la primera termina pronto.',
+      html:'<div class="k"><div><b>'+F2.length+'</b><span>'+E(c.un[1])+'</span></div><div><b>'+pc(u0.ocu||0)+'</b><span>uso de la capacidad</span></div><div><b>'+fm(u0.ing||0)+'</b><span>ventas del año</span></div><div><b>'+fm(u0.ebitda||0)+'</b><span>utilidad operativa</span></div><div><b>'+Math.round(r.marca)+'</b><span>marca</span></div><div><b>'+fm(e.deuda||0)+'</b><span>deuda</span></div></div>'+cobH+(filas?'<h4>Tus unidades</h4>'+filas:'')+'<h4>Hitos</h4><div>'+hit+'</div>',opciones:ops}); }
+  /* ---- abrir otra unidad ---- */
+  function escenaAbrir176(e,sel){ sel=sel||{}; const r=R(e), c=CL[r.clase], reab=s=>{ cerrarModal(); escenaAbrir176(e,s); };
+    if(!sel.tipo){ const ops=tiposDisp(r.clase,'todas').map(t=>({t:cap(nm(t,A()))+' · desde '+fm(costoU(t,t.rol==='apoyo'?'m':'p',(r.unidades[0]||{}).ciudad||'La Estrella','propio')),cat:'casa',d:(t.rol==='apoyo'?'De apoyo. ':'De frente. ')+(t.d||''),cerrar:false,run:()=>reab({tipo:t.id})}));
+      ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }});
+      return escena({rubro:E(c.grupo),titulo:'¿Qué abres?',ancho:true,cerrable:true,clase:'red176',cuerpo:'Las de apoyo no venden: abastecen a las de frente, y sin ellas la red se enreda al pasar de 6 unidades.',opciones:ops}); }
+    const t=tipoDe(r.clase,sel.tipo);
+    if(!sel.ciudad&&t.ciu!==false){ const ops=ciudadesDisp().map(d=>({t:d.n,cat:'casa',d:(d.pob>=1.1?'Mucha población. ':d.pob<=.6?'Poca población. ':'')+'Suelo '+(d.suelo>=1.2?'caro':d.suelo<=.85?'barato':'normal')+'. '+(abiertas(r).filter(u=>u.ciudad===d.n).length?'Ya tienes '+abiertas(r).filter(u=>u.ciudad===d.n).length+' aquí.':''),cerrar:false,run:()=>reab({tipo:t.id,ciudad:d.n})}));
+      ops.push({t:'Volver a los tipos',cat:'legado',cerrar:false,run:()=>reab({})});
+      return escena({rubro:E(c.grupo),titulo:'¿Dónde abres '+E(nm(t,A()).toLowerCase())+'?',ancho:true,cerrable:true,clase:'red176',cuerpo:'Dos unidades iguales en la misma ciudad se quitan clientes.',opciones:ops}); }
+    const ciudad=t.ciu===false?'En línea':sel.ciudad, ops=[];
+    (t.rol==='apoyo'?['m']:['p','m','g']).forEach(tam=>['propio','arrendado'].forEach(mod=>{ if(mod==='arrendado'&&(A()<1860||c.propioSolo)) return; const costo=costoU(t,tam,ciudad,mod), p=plan(e,costo,true), o=aniosObra(t,tam);
+      ops.push({t:(t.rol==='apoyo'?'':cap(TAMN[tam])+' · '+capUnit(t,tam).toLocaleString('es-CO')+' '+t.capU+' · ')+mod+' · '+fm(costo),cat:'casa',d:(mod==='arrendado'?'Alquilas (28% de adecuación) y pagas 20% de las ventas de renta. ':'Eres dueño. ')+(o>0?o+' año'+(o===1?'':'s')+' de obra. ':'Abre ya. ')+(p.ok?'Plan: caja '+fm(p.usoCaja)+(p.aporte?' · tu aporte '+fm(p.aporte):'')+(p.deuda?' · deuda '+fm(p.deuda):''):'No alcanza: faltan '+fm(p.falta)+'.'),dis:p.ok?sinMov():'No alcanza ni con tu aporte y crédito',cerrar:false,
+        run:()=>{ if(!movida()) return; const u=abrirUnidad(e,t,ciudad,tam,mod,true); cerrarModal(); render(); if(!u) aviso('No alcanzó la plata.'); escenaRed176(e); }}); }));
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>reab({})});
+    escena({rubro:E(c.grupo),titulo:E(cap(nm(t,A())))+(ciudad!=='En línea'?' en '+E(ciudad):''),ancho:true,cerrable:true,clase:'red176',cuerpo:t.d||'',opciones:ops}); }
+  /* ---- comprar ---- */
+  function escenaComprar176(e,claseId){ const c=CL[claseId], L=ofertas(claseId).filter(o=>e||o.princ);
+    const ops=L.map(o=>{ const t=tipoDe(claseId,o.tipo), p=e?plan(e,o.valor,true):{ok:S.efectivo>=o.valor*.45};
+      return {t:cap(nm(t,A()))+(o.historico?' con historia':'')+' · '+fm(o.valor),cat:'capital',d:(o.ciudad==='En línea'?'En línea':E(o.ciudad))+' · '+TAMN[o.tam]+' · '+capUnit(t,o.tam).toLocaleString('es-CO')+' '+t.capU+' · estado '+o.cons+'/100 · reputación '+Math.round(o.rep)+'/100.'+(o.historico?' Prestigio al comprarlo.':'')+(p.ok?'':' No alcanza.'),dis:p.ok?sinMov():'No alcanza ni con tu aporte y crédito',cerrar:false,
+        run:()=>{ if(!movida()) return; const x=comprarUnidad(e,claseId,o); if(!x){ aviso('No se pudo comprar.'); return; } if(x.nueva) termino(x.e,x.ant); else { cerrarModal(); render(); escenaRed176(x.e); } }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); if(e) escenaRed176(e); else escenaClase176(claseId); }});
+    escena({rubro:E(c.grupo),titulo:'En venta: '+E(c.n.toLowerCase()),ancho:true,cerrable:true,clase:'red176',cuerpo:L.length?'Esto salió este año al mercado. Los caídos son baratos, pero hay que ponerles plata.'+(e?'':' Comprar uno funda tu compañía con esa unidad como principal.'):'Este año no hay nada a la venta.',opciones:ops}); }
+  /* ---- la ficha de una unidad ---- */
+  function escenaUnidad176(e,id){ const r=R(e), u=r.unidades.find(x=>x.id===id), c=CL[r.clase]; if(!u) return escenaRed176(e); const t=tipoDe(r.clase,u.tipo)||{}, reab=()=>{ cerrarModal(); render(); escenaUnidad176(e,id); }, ops=[], ap=t.rol==='apoyo';
+    if(u.enObra){ ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }}); return escena({rubro:E(c.grupo),titulo:E(u.nom),ancho:true,cerrable:true,clase:'red176',cuerpo:'En obra en '+E(u.ciudad)+'. Abre en '+u.enObra.restan+' año'+(u.enObra.restan===1?'':'s')+'. Ya se pagaron '+fm(u.enObra.costo)+'.',opciones:ops}); }
+    const repos=costoRepos(r,u), ren=Math.round(repos*.22), mant=Math.round(repos*.09), propiaOArr=u.modelo==='propio'||u.modelo==='arrendado';
+    ops.push({t:'Renovar todo · '+fm(ren),cat:'compania',d:'Obra completa: estado a 95 y mejor reputación. Estado hoy '+Math.round(u.cons)+'/100.',dis:e.caja<ren?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=ren; u.cons=95; u.rep=cl(u.rep+6,5,99); u.serv=cl(u.serv+3,10,98); log('Renovaste <b>'+E(u.nom)+'</b> por '+fm(ren)+'.','bien'); reab(); }});
+    ops.push({t:'Mantenimiento mayor · '+fm(mant),cat:'compania',d:'Pintura, techos y plomería: sube el estado 25 puntos.',dis:e.caja<mant?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mant; u.cons=cl(u.cons+25,5,100); reab(); }});
+    if(!ap){ const pols=[[.85,'Económica (−15%)'],[1,'Media'],[1.15,'Alta (+15%)'],[1.3,'Premium (+30%)']], idx=pols.findIndex(p=>Math.abs(p[0]-u.mult)<.01), sig=pols[(idx+1)%pols.length];
+      ops.push({t:'Cambiar la política de precios: '+sig[1],cat:'mercado',d:'Hoy: '+pols[Math.max(0,idx)][1]+'. Precios altos dejan más por cliente pero bajan el uso, sobre todo si la reputación es baja.',cerrar:false,run:()=>{ u.mult=sig[0]; reab(); }});
+      const pn=['Plantilla mínima','Plantilla estándar','Plantilla premium']; ops.push({t:'Cambiar la plantilla: '+pn[(u.pers+1)%3],cat:'compania',d:'Hoy: '+pn[u.pers]+'. Más gente mejora el servicio y la reputación, y cuesta margen.',cerrar:false,run:()=>{ u.pers=(u.pers+1)%3; reab(); }});
+      if(u.modelo==='propio'){ const f=.3, cA=Math.round(repos*f*.9); ops.push({t:'Ampliar un 30% · '+fm(cA),cat:'compania',d:'Un año de obra; la unidad sigue abierta.',dis:u.amplia?'Ya hay una ampliación en curso':(e.caja<cA?'La compañía no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cA; u.amplia={restan:1,f}; u.valor+=cA; reab(); }}); }
+      const mk=Math.round(repos*.02)+1; ops.push({t:'Campaña de mercadeo local · '+fm(mk),cat:'mercado',d:'Sube la reputación y la marca un poco.',dis:e.caja<mk?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mk; u.rep=cl(u.rep+3,5,99); r.marca=cl(r.marca+1,5,99); reab(); }}); }
+    if(!u.principal&&!ap) ops.push({t:'Hacerla la unidad principal',cat:'compania',d:'La principal da marca y atiende a las primeras unidades.',cerrar:false,run:()=>{ r.unidades.forEach(x=>{ x.principal=false; }); u.principal=true; reab(); }});
+    if(u.modelo==='propio') ops.push({t:'Vender · '+fm(Math.max(0,u.valor-(u.hipoteca||0))),cat:'capital',d:'Vale '+fm(u.valor)+(u.hipoteca?' y debe '+fm(u.hipoteca):'')+'. La plata entra a la caja de la compañía.',cerrar:false,run:()=>{ vender(e,r,u,Math.round(u.valor)); cerrarModal(); render(); escenaRed176(e); }});
+    else ops.push({t:'Dejar esta unidad',cat:'capital',d:'Terminas el contrato y sales de ella.',cerrar:false,run:()=>{ r.unidades=r.unidades.filter(x=>x!==u); if(u.principal){ const s=frentes(r)[0]; if(s) s.principal=true; } log('Dejaste <b>'+E(u.nom)+'</b>.'); cerrarModal(); render(); escenaRed176(e); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }});
+    const ult=u.hist.slice(-6).map(x=>x.cerrado?'cerrado':(x.ocu!==undefined?pc(x.ocu):'—')).join(' · ');
+    escena({rubro:E(c.grupo),titulo:E(u.nom)+' <span class="tit176">'+(ap?'apoyo':estrellas(u))+'</span>',ancho:true,cerrable:true,clase:'red176',cuerpo:E(u.ciudad)+' · '+E(nm(t,A()).toLowerCase())+(ap?'':' · '+TAMN[u.tam]+' · '+Math.round(capUnit(t,u.tam)*(u.amp||1)).toLocaleString('es-CO')+' '+t.capU)+' · '+u.modelo+(u.principal?' · principal':'')+'.',
+      html:'<div class="k">'+(ap?'':'<div><b>'+pc(u.ocu||0)+'</b><span>uso de la capacidad</span></div><div><b>'+fm(u.rev||0)+'</b><span>ventas del año</span></div>')+'<div><b>'+fm(u.ebitda||0)+'</b><span>'+(ap?'costo anual':'utilidad operativa')+'</span></div><div><b>'+Math.round(u.cons)+'/100</b><span>estado</span></div>'+(ap?'':'<div><b>'+Math.round(u.serv)+'/100</b><span>servicio</span></div><div><b>'+Math.round(u.rep)+'/100</b><span>reputación</span></div>')+'</div>'+(u.modelo==='propio'?'<div class="apunte">Vale '+fm(u.valor)+(u.hipoteca?' · hipoteca '+fm(u.hipoteca):'')+'.</div>':'')+(ult&&!ap?'<h4>Últimos años</h4><div><small>'+ult+'</small></div>':'')+(t.d?'<div class="apunte"><small>'+E(t.d)+'</small></div>':''),opciones:ops}); }
+  /* ---- marca y calidad ---- */
+  function escenaMarca176(e){ const r=R(e), c=CL[r.clase], ops=[], reab=()=>{ cerrarModal(); render(); escenaMarca176(e); }, ing=(r.ult&&r.ult.ing)||1000;
+    const mk=Math.round(ing*.03)+5; ops.push({t:'Campaña de marca · '+fm(mk),cat:'mercado',d:'Sube la marca 4 puntos. Marca hoy: '+Math.round(r.marca)+'/100.',dis:e.caja<mk?'La compañía no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mk; r.marca=cl(r.marca+4,5,99); reab(); }});
+    if(A()>=1990&&['farmacia','comercio','gastronomia','servicios'].includes(r.clase)){ const niv=r.lealtad||0, cL=Math.round(ing*.02*(niv+1))+4; ops.push({t:niv>=3?'Programa de fidelización: nivel máximo':'Programa de fidelización: pasar al nivel '+(niv+1)+' · '+fm(cL),cat:'mercado',d:'Cada nivel suma clientela fiel (+2% de uso) y cuesta 0,6% de las ventas al año. Hoy nivel '+niv+'.',dis:niv>=3?'Ya está en el máximo':(e.caja<cL?'La compañía no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cL; r.lealtad=niv+1; frentes(r).forEach(u=>{ u.uAdd=(u.uAdd||0); }); reab(); }}); }
+    if(A()>=1990){ const cC=Math.round(ing*.04)+8; ops.push({t:r.certificada?'Certificación de calidad: vigente':'Certificar la calidad · '+fm(cC),cat:'compania',d:'Una auditoría externa avala tus procesos: sube el servicio de todas las unidades y la marca.',dis:r.certificada?'Ya está certificada':(e.caja<cC?'La compañía no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cC; r.certificada=A(); abiertas(r).forEach(u=>{ u.serv=cl(u.serv+6,10,98); }); r.marca=cl(r.marca+3,5,99); reab(); }}); }
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }});
+    escena({rubro:E(c.grupo),titulo:'La marca de '+E(e.nombre),ancho:true,cerrable:true,clase:'red176',cuerpo:'La marca la hace la reputación de todas tus unidades. Con una marca fuerte se llenan más rápido y cobran más.',html:'<div class="k"><div><b>'+Math.round(r.marca)+'</b><span>marca</span></div><div><b>'+(r.lealtad||0)+'</b><span>nivel de fidelización</span></div><div><b>'+(r.certificada?'sí':'no')+'</b><span>certificación de calidad</span></div></div>',opciones:ops}); }
+  /* ---- finanzas ---- */
+  function escenaFinanzas176(e){ const r=R(e), c=CL[r.clase], ops=[], reab=()=>{ cerrarModal(); render(); escenaFinanzas176(e); };
+    r.unidades.filter(u=>u.modelo==='propio'&&!u.enObra).forEach(u=>{ const hip=Math.round(u.valor*.5), puede=(u.hipoteca||0)<u.valor*.45;
+      ops.push({t:'Hipotecar '+u.nom+' · '+fm(hip),cat:'capital',d:'Recibes la mitad de lo que vale y sube la deuda de la compañía.',dis:puede?sinMov():'Ya está hipotecada',cerrar:false,run:()=>{ if(!movida()) return; u.hipoteca=(u.hipoteca||0)+hip; e.deuda+=hip; e.caja+=hip; reab(); }});
+      if(A()>=1900&&!c.propioSolo&&rolDe(r,u)!=='apoyo') ops.push({t:'Vender y arrendar '+u.nom+' · '+fm(u.valor*.9),cat:'capital',d:'Vendes el inmueble y sigues operando, pagando 20% de las ventas de renta. Sacas el capital sin perder el negocio.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const neto=Math.max(0,u.valor*.9-(u.hipoteca||0)); e.caja+=neto; e.deuda=Math.max(0,e.deuda-(u.hipoteca||0)); u.modelo='arrendado'; u.valor=0; u.hipoteca=0; log('Vendiste el inmueble de <b>'+E(u.nom)+'</b> y lo arrendaste: entraron '+fm(neto)+'.','bien'); reab(); }}); });
+    if(e.deuda>0&&e.caja>e.deuda*.2){ const pg=Math.min(Math.round(e.deuda),Math.round(e.caja*.8)); ops.push({t:'Pagar deuda · '+fm(pg),cat:'capital',d:'Abonas a la deuda con la caja de la compañía.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=pg; e.deuda-=pg; let x=pg; r.unidades.forEach(u=>{ if(x>0&&u.hipoteca>0){ const a=Math.min(u.hipoteca,x); u.hipoteca-=a; x-=a; } }); reab(); }}); }
+    if(!ops.length) ops.push({t:'No hay nada que mover por ahora',cat:'legado',d:'Cuando tengas unidades propias abiertas podrás hipotecarlas o venderlas y arrendarlas.',dis:'Nada que hacer',run:()=>{}});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }});
+    escena({rubro:E(c.grupo),titulo:'Las finanzas de '+E(e.nombre),ancho:true,cerrable:true,clase:'red176',cuerpo:'Un negocio propio es una operación y un inmueble. Se puede sacar capital del inmueble sin perder el negocio.',html:'<div class="k"><div><b>'+fm(e.caja)+'</b><span>caja</span></div><div><b>'+fm(e.deuda||0)+'</b><span>deuda</span></div><div><b>'+fm(r.unidades.filter(u=>u.modelo==='propio').reduce((s,u)=>s+(u.enObra?(u.enObra.costo||0):(u.valor||0)),0))+'</b><span>inmuebles propios</span></div></div>',opciones:ops}); }
+  /* ==================== EL BANCO: SEDE PRINCIPAL, REGIONALES Y CENTROS ==================== */
+  const CENTRO=[{n:'Sin centro de operaciones',cap:20,cost:0,anual:0},{n:'Centro de operaciones',cap:60,cost:40,anual:6},{n:'Centro de operaciones regional',cap:150,cost:120,anual:18},{n:'Centro de operaciones nacional',cap:1e9,cost:400,anual:50}];
+  const SEDE=[{n:'Casa matriz sencilla',cost:0,anual:2,crec:0},{n:'Edificio propio',cost:60,anual:6,crec:.002,desde:1870},{n:'Torre corporativa',cost:300,anual:18,crec:.004,desde:1950},{n:'Centro financiero',cost:900,anual:40,crec:.007,desde:1985}];
+  const TEC=[{n:'Sin centro de cómputo',cost:0,anual:0},{n:'Centro de cómputo',cost:60,anual:8,desde:1975},{n:'Centro de datos y banca digital',cost:200,anual:25,desde:2005}];
+  function RB(e,b){ if(!b.red176||typeof b.red176!=='object'){ const of=b.oficinas||0; b.red176={sede:{ciudad:e.sede176||e.ciudad||(S.hogar&&S.hogar.ciudad)||'Bogotá',nivel:of>150?2:1},reg:[],centro:of>150?3:of>60?2:of>20?1:0,tec:(A()>=2005&&b.digital)?2:(A()>=1975&&(b.cajeros>0||b.digital))?1:0}; }
+    const x=b.red176; x.reg=Array.isArray(x.reg)?x.reg:[]; x.sede=x.sede||{ciudad:'Bogotá',nivel:1}; return x; }
+  function opexRed176(e,b){ try{ const x=RB(e,b), f=F(); let o=SEDE[x.sede.nivel].anual*f+x.reg.length*4*f+CENTRO[x.centro].anual*f+TEC[x.tec].anual*f;
+      o+=Math.max(0,(b.oficinas||0)-CENTRO[x.centro].cap)*1.5*.25;
+      if(A()>=1975&&b.cajeros>0&&x.tec<1) o+=b.cajeros*.08*.3; if(A()>=2005&&b.digital&&x.tec<2) o+=3;
+      return isFinite(o)?o:0; }catch(z){ return 0; } }
+  function crecRed176(e,b){ try{ const x=RB(e,b); return SEDE[x.sede.nivel].crec+Math.min(6,x.reg.length)*.006; }catch(z){ return 0; } }
+  function escenaRedBanco176(e){ e=e||comps().find(z=>z.banco112); if(!e||!e.banco112) return; const b=(typeof window.banco151==='function')?window.banco151(e):e.banco112, x=RB(e,b), f=F(), reab=()=>{ cerrarModal(); render(); escenaRedBanco176(e); }, ops=[], of=b.oficinas||0;
+    const cuesta=c=>Math.round(c*f), puede=c=>e.caja<cuesta(c)?'El banco no tiene '+fm(cuesta(c)):sinMov();
+    const sn=SEDE[x.sede.nivel+1]; if(sn&&A()>=(sn.desde||0)) ops.push({t:'Mejorar la sede principal: '+sn.n+' · '+fm(cuesta(sn.cost)),cat:'casa',d:'Da confianza y atrae depósitos (+'+(sn.crec*100).toFixed(1)+'% al año). Cuesta '+fm(sn.anual*f)+' al año.',dis:puede(sn.cost),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cuesta(sn.cost); x.sede.nivel++; log('<b>'+E(e.nombre)+'</b> estrenó su '+sn.n.toLowerCase()+' en '+E(x.sede.ciudad)+'.','hito'); prest(1,'la nueva sede de su banco'); reab(); }});
+    if(x.reg.length<8){ const usadas=[x.sede.ciudad].concat(x.reg.map(z=>z.ciudad)); ciudadesDisp().filter(d=>!usadas.includes(d.n)).sort((a,c)=>c.pob-a.pob).slice(0,4).forEach(d=>{ const c=Math.round(25*f*Math.pow(d.suelo,.6)); ops.push({t:'Abrir una sede regional en '+d.n+' · '+fm(c),cat:'casa',d:'Presencia en otra plaza: más depósitos (+0,6% al año por ciudad, hasta 6). Cuesta '+fm(4*f)+' al año.',dis:e.caja<c?'El banco no tiene '+fm(c):sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=c; x.reg.push({ciudad:d.n,desde:A()}); log('<b>'+E(e.nombre)+'</b> abrió una sede regional en '+E(d.n)+'.','bien'); reab(); }}); }); }
+    const cn=CENTRO[x.centro+1]; if(cn) ops.push({t:'Subir a '+cn.n.toLowerCase()+' · '+fm(cuesta(cn.cost)),cat:'casa',d:'Sostiene hasta '+(cn.cap>=1e9?'todas':cn.cap)+' oficinas sin sobrecosto. Cuesta '+fm(cn.anual*f)+' al año.',dis:puede(cn.cost),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cuesta(cn.cost); x.centro++; reab(); }});
+    const tn=TEC[x.tec+1]; if(tn&&A()>=(tn.desde||0)) ops.push({t:'Montar '+tn.n.toLowerCase()+' · '+fm(cuesta(tn.cost)),cat:'casa',d:(x.tec===0?'Sin él, los cajeros automáticos cuestan más de operar.':'Sin él, la banca digital cuesta más y rinde menos.')+' Cuesta '+fm(tn.anual*f)+' al año.',dis:puede(tn.cost),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cuesta(tn.cost); x.tec++; reab(); }});
+    ops.push({t:'Volver al banco',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); if(typeof window.escenaBanco151==='function') window.escenaBanco151(e); }});
+    const exceso=Math.max(0,of-CENTRO[x.centro].cap);
+    escena({rubro:'Tu banco',titulo:'La red de '+E(e.nombre),ancho:true,cerrable:true,clase:'red176',cuerpo:'Una casa matriz, las sedes en otras ciudades, las oficinas y los centros que las sostienen. Sin centro de operaciones suficiente, las oficinas de más cuestan 25% extra.',
+      html:'<div class="k"><div><b>'+E(x.sede.ciudad)+'</b><span>'+E(SEDE[x.sede.nivel].n.toLowerCase())+'</span></div><div><b>'+x.reg.length+'</b><span>sede'+(x.reg.length===1?'':'s')+' regional'+(x.reg.length===1?'':'es')+(x.reg.length?': '+E(x.reg.map(z=>z.ciudad).join(', ')):'')+'</span></div><div><b>'+of+'</b><span>oficinas</span></div><div><b>'+E(CENTRO[x.centro].n)+'</b><span>aguanta '+(CENTRO[x.centro].cap>=1e9?'todas':CENTRO[x.centro].cap)+' oficinas</span></div><div><b>'+E(TEC[x.tec].n)+'</b><span>cómputo</span></div></div>'+(exceso?'<div class="cob176 mal">Tienes '+exceso+' oficinas por encima de lo que aguanta tu centro de operaciones: te cuestan 25% más.</div>':'<div class="cob176 bien">Tu centro de operaciones sostiene las oficinas que tienes.</div>'),opciones:ops}); }
+  function opcionesRed176(e,b,ops,reab){ const x=RB(e,b); ops.push({t:'La red del banco: sede, regionales y centros',cat:'casa',d:'Sede principal en '+x.sede.ciudad+' ('+SEDE[x.sede.nivel].n.toLowerCase()+'), '+x.reg.length+' sede'+(x.reg.length===1?'':'s')+' regional'+(x.reg.length===1?'':'es')+' y '+CENTRO[x.centro].n.toLowerCase()+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRedBanco176(e); }}); }
+  /* ==================== LOS NEGOCIOS PERSONALES DE v110 PASAN A SER COMPAÑÍAS ==================== */
+  const MAPA110={panaderia:['gastronomia','pan'],restaurante:['gastronomia','rest'],lavanderia:['servicios','lava'],gimnasio:['servicios','gym'],funeraria:['servicios','fune'],cine:['servicios','cine'],discoteca:['servicios','disco'],
+    parqueadero:['inmobiliario','parq'],edificio:['inmobiliario','edif'],centrocomercial:['inmobiliario','cc'],gasolinera:['comercio','gasol'],colegio:['educacion','cole'],clinica:['clinica','clin']};
+  const HOTEL110=['hotel','fincahotel','motel'];
+  const gerente=()=>{ try{ return nombreLocal(S.hogar.ciudad,pick(['h','m']))+' '+pick(['Botero','Gaviria','Londoño','Arango','Jaramillo','Mejía','Correa','Echeverri']); }catch(x){ return 'un gerente de confianza'; } };
+  function crearPasiva(nombre,sectorId,caja,deuda,clase){ const ing=Math.max(30,caja*1.2);
+    const e={nombre,ticker:typeof ticker==='function'?ticker(nombre):nombre.slice(0,4).toUpperCase(),sector:sectorId,fundada:A(),ingresos:ing,costos:ing*.9,utilidad:0,caja:Math.max(5,caja),deuda:deuda||0,innovacion:45,marca:40,moral:62,eficiencia:55,empleados:6,crecimiento:0,publica:false,aniosMalos:0,historia:[],productos:[],
+      holders:[{id:'tu',nombre:'Tú',tipo:'fundador',n:1000000}],junta:[],ciudad:S.hogar&&S.hogar.ciudad,presidente:{nombre:gerente(),capaz:6,honrado:7,sueldo:Math.max(3,Math.round(caja*.02)),tipo:'gerente'}};
+    if(clase) e.clase176=clase; S.grupo=comps(); S.grupo.push(e); if(!S.emp) sentarseEn(S.grupo.length-1); return e; }
+  function migrar176(){ if(window.__noMigrar176||!ACTIVO()||!Array.isArray(S.bienes)) return; sectores();
+    const L=S.bienes.filter(b=>b&&b.clase==='negocio'&&b.neg110); if(!L.length) return; const hechos=[], resumen=[];
+    // los hoteles van a la cadena hotelera
+    const hot=L.filter(b=>HOTEL110.includes(b.neg110.id));
+    if(hot.length&&typeof window.cadenaHotel175==='function'&&typeof window.aportarHotel175==='function'){ let ch=comps().find(z=>z.hotel175); if(!ch){ ch=crearPasiva('Hoteles '+((S.p&&S.p.apellido)||'Casa'),'turismo',Math.round(hot.reduce((s,b)=>s+b.valor,0)*.03),0); window.cadenaHotel175(ch); }
+      (window.hotelesAportables175()||[]).filter(x=>x.b&&x.b.neg110&&hot.includes(x.b)).forEach(x=>{ try{ window.aportarHotel175(ch,x); resumen.push(x.b.nombre); }catch(z){ console.error(z); } }); }
+    // el resto, a la compañía de su clase
+    const por={}; L.forEach(b=>{ const m=MAPA110[b.neg110.id]; if(m&&S.bienes.includes(b)) (por[m[0]]=por[m[0]]||[]).push([b,m[1]]); });
+    Object.keys(por).forEach(clase=>{ const c=CL[clase], lista=por[clase], val=lista.reduce((s,[b])=>s+b.valor,0), hip=lista.reduce((s,[b])=>s+(b.hipoteca||0),0);
+      let e=comps().find(z=>z.red176&&z.red176.clase===clase&&!z.presidente&&false); e=comps().find(z=>z.red176&&z.red176.clase===clase);
+      if(!e){ e=crearPasiva(nombreCompania(clase),c.sector,Math.round(val*.03),0,clase); R(e).clase=clase; }
+      const r=R(e);
+      lista.forEach(([b,tid])=>{ const t=tipoDe(clase,tid); if(!t) return; const ciudad=(b.ciudad&&ciu(b.ciudad).n===b.ciudad)?b.ciudad:((S.hogar&&ciu(S.hogar.ciudad).n===S.hogar.ciudad)?S.hogar.ciudad:'Bogotá'), ratio=b.valor/Math.max(1,costoU(t,'m',ciudad,'propio')), tam=ratio<.7?'p':ratio>1.7?'g':'m';
+        const u=crearUnidad(e,r,t,ciudad,tam,'propio',{nom:b.nombre||undefined,valor:b.valor,hipoteca:b.hipoteca||0,abierto:b.neg110.desde||A(),cons:75,rep:60}); if(!b.nombre) u.nom=nuevoNombre(r,t); e.deuda+=b.hipoteca||0; hechos.push(b); resumen.push(u.nom); }); });
+    if(hechos.length) S.bienes=S.bienes.filter(b=>!hechos.includes(b));
+    if(resumen.length){ log('Tus negocios <b>('+E(resumen.slice(0,4).join(', ')+(resumen.length>4?' y '+(resumen.length-4)+' más':''))+')</b> pasaron a ser compañías con sus unidades: ahora los administras desde "'+TIT_RED+'".','hito'); try{ hito('Sus negocios pasaron a ser compañías'); }catch(x){} } }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top176) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()){ migrar176(); sectores();
+          if(!window.__sinOcultar176) for(let i=L.length-1;i>=0;i--){ const t=L[i]&&L[i].t; if(t==='Comprar un negocio'||t==='Fundar un banco') L.splice(i,1); }
+          const a=L.find(x=>x&&x.t===TIT_PUERTA);
+          if(a){ const mins=ORDEN.filter(id=>claseDisp(CL[id])&&tiposDisp(id,'princ').length).map(minCosto), min=mins.length?Math.min(...mins):0;
+            a.d='Una sola puerta para todos los negocios: banco, droguerías, clínicas, colegios, tiendas, restaurantes, inmuebles, hoteles y la industria. Cada clase se arma con sus propias unidades.'; a.dis=S.efectivo<min*.45?'Te falta capital (mínimo '+fm(min*.45)+')':null; a.run=()=>escenaPuerta176(); }
+          const se=S.emp; if(se&&(se.red176||se.hotel175)){   // las compañías de unidades crecen por unidades: las acciones genéricas de expansión llevan a su pantalla
+            L.forEach(x=>{ if(!x) return; if(x.t==='Expandirte a otra región'||x.t==='Adquirir un competidor'||x.t==='Construir una planta nueva'){ x.d='Este negocio crece por unidades: abre una sede o unidad nueva, compra una que esté en venta o amplía las que tienes.'; x.mov=0; x.modal=true; x.dis=null; x.run=()=>{ if(se.red176) escenaRed176(se); else if(typeof window.escenaImperio175==='function') window.escenaImperio175(se); }; }
+              else if(x.t==='Campaña de marca'){ x.d='La marca de este negocio la hace la reputación de sus unidades: las campañas se contratan desde su pantalla de marca.'; x.mov=0; x.modal=true; x.dis=null; x.run=()=>{ if(se.red176) escenaMarca176(se); else if(typeof window.escenaMarca175==='function') window.escenaMarca175(se); }; } }); }
+          const g=redes(); if(g.length&&!L.some(z=>z.t===TIT_RED)){ const n=g.reduce((s,e)=>s+frentes(R(e)).length,0); L.push({t:TIT_RED,cat:'compania',d:'Tienes '+g.length+' negocio'+(g.length===1?'':'s')+' con '+n+' unidad'+(n===1?'':'es')+' de venta abierta'+(n===1?'':'s')+'. Abrir, comprar, renovar y administrar cada red.',mov:0,modal:true,run:()=>escenaRed176()}); } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top176=true; Object.keys(old).forEach(k=>{ if(/^__(v|top)\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA176_CAT) return; window.__SA176_CAT=true; window.catDe=function(t){ if(t===TIT_RED) return 'compania'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_101||[]; const g=G.find(x=>x.id==='negocio'); if(g&&Array.isArray(g.miembros)) g.miembros=g.miembros.filter(m=>m[1]!=='Comprar un negocio');
+    const G91=window.GRUPOS_91; if(Array.isArray(G91)){ const g2=G91.find(x=>x.id==='negocio'); if(g2&&g2!==g&&Array.isArray(g2.miembros)) g2.miembros=g2.miembros.filter(m=>m[1]!=='Comprar un negocio'); }
+    if(g){ g.d='Una sola puerta: banco, droguerías, clínicas, colegios, tiendas, restaurantes, inmuebles, hoteles, la industria y las sociedades que maneja otro.'; } }
+  function wrapSectores(){ const old=window.sectoresDisponibles; if(typeof old!=='function'||old.__top176) return; const f=function(){ const L=old.apply(this,arguments); return window.__soloOtros176?L.filter(s=>!['salud','retail','financiero','turismo','educacion','gastronomia','inmobiliario','servicios'].includes(s.id)):L; }; f.__top176=true; window.sectoresDisponibles=f; }
+  function wrapFundarEn(){ const old=window.fundarEn; if(typeof old!=='function'||old.__top176) return;
+    const f=function(nombre,sectorId){ const r=old.apply(this,arguments); try{ if(sectorId==='financiero'&&window.__sedeBanco176){ const e=comps().find(x=>x.nombre===nombre); if(e){ e.ciudad=window.__sedeBanco176; e.sede176=window.__sedeBanco176; } window.__sedeBanco176=null; } }catch(x){} return r; };
+    f.__top176=true; Object.keys(old).forEach(k=>{ f[k]=old[k]; }); window.fundarEn=f; }
+  function wrapValuar(){ const old=window.valuar; if(typeof old!=='function'||old.__top176) return;
+    const f=function(e){ let v=old.apply(this,arguments); try{ if(e&&e.red176&&Array.isArray(e.red176.unidades)){ const prop=e.red176.unidades.filter(u=>u.modelo==='propio').reduce((s,u)=>s+(u.enObra?(u.enObra.costo||0):(u.valor||0)),0), piso=prop*.85+Math.max(0,e.caja||0)*.5-(e.deuda||0); if(isFinite(piso)&&piso>v) v=piso; } }catch(x){} return v; };
+    Object.keys(old).forEach(k=>{ f[k]=old[k]; }); f.__top176=true; window.valuar=f; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v176) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&typeof negCat!=='undefined'&&negCat==='resumen'&&e.red176&&CL[e.red176.clase]){ const i=comps().indexOf(e), r=R(e), c=CL[r.clase], n=frentes(r).length;
+          h+='<div class="panel176"><b>'+E(c.n)+'</b><div class="apunte">'+n+' '+c.un[n===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+' · marca '+Math.round(r.marca)+' · '+E(titulo(r))+'.</div><button type="button" class="btn" data-c176="red:'+i+'">Administrar las unidades</button></div>'; } }catch(x){}
+      return h; }; window.panelCompania86.__v176=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
+  function clic(ev){ const t=ev.target; if(!t||!t.closest) return; const f=t.closest('[data-u176]');
+    if(f){ ev.preventDefault(); ev.stopPropagation(); const id=f.getAttribute('data-u176'), e=redes().find(x=>x.red176.unidades.some(u=>u.id===id))||(S.emp&&S.emp.red176?S.emp:null); if(e){ cerrarModal(); escenaUnidad176(e,id); } return; }
+    const b=t.closest('[data-c176]'); if(b){ ev.preventDefault(); ev.stopPropagation(); const v=String(b.getAttribute('data-c176')||''); if(v.indexOf('red:')===0){ const e=comps()[+v.slice(4)]; if(e&&e.red176) escenaRed176(e); } } }
+  /* ==================== EL CONSEJERO ==================== */
+  function gRedes(){ if(!ACTIVO()||nino()) return []; const out=[];
+    redes().forEach(e=>{ try{ const r=R(e), c=CL[r.clase], L=frentes(r), cob=r.cob||cobertura(r);
+      const feo=L.filter(u=>u.cons<45).sort((a,b)=>a.cons-b.cons)[0];
+      if(feo) out.push({id:'red-cons:'+e.nombre+feo.id,peso:52,tono:'mal',txt:'<b>'+E(feo.nom)+'</b> está deteriorada ('+Math.round(feo.cons)+'/100).',por:'Una unidad que se cae a pedazos pierde reputación, precio y clientela.',si:'La marca de toda la red paga el costo.',ir:TIT_RED,irT:'Renovar',pre:sentar(e)});
+      const falta=cob.det.filter(x=>x.falta)[0];
+      if(falta){ const t=tipoDe(r.clase,falta.id); out.push({id:'red-apoyo:'+e.nombre+falta.id,peso:54,tono:'oro',txt:'A <b>'+E(e.nombre)+'</b> le hace falta: '+E(nm(t,A()).toLowerCase())+'.',por:'Pasaste de '+cob.libre+' '+c.un[1]+' y sin apoyo pierdes margen en las que quedan sin cubrir.',si:'Cada unidad nueva sin apoyo rinde menos.',ir:TIT_RED,irT:'Abrir apoyo',pre:sentar(e)}); }
+      const vacia=L.filter(u=>(u.ocu||0)>0&&u.ocu<.35&&u.hist.length>=2).sort((a,b)=>a.ocu-b.ocu)[0];
+      if(vacia) out.push({id:'red-vacia:'+e.nombre+vacia.id,peso:48,tono:'mal',txt:'<b>'+E(vacia.nom)+'</b> está casi vacía ('+pc(vacia.ocu)+' de uso).',por:'Puede ser el precio, el estado, la reputación o la ciudad: revisa la política de precios y el servicio.',si:'Una unidad vacía se come la utilidad de las demás.',ir:TIT_RED,irT:'Ver la unidad',pre:sentar(e)});
+    }catch(x){} }); return out.slice(0,2); }
+  function init176(){ sectores(); wrapSectores(); wrapFundarEn(); wrapAcciones(); wrapCat(); grupo(); wrapValuar(); wrapPanel();
+    if(!window.__SA176_CLIC){ window.__SA176_CLIC=true; document.addEventListener('click',clic,true); }
+    try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA176_CONS){ window.__SA176_CONS=true; window.consejeroRegistrar168(gRedes); } }catch(x){}
+    Object.assign(window,{CLASES_176:CL,CIUDADES_176:CIUDADES,ORDEN_176:ORDEN,NUEVOS_SECTORES_176:NUEVOS,redesNegocio176:redes,redNegocio176:R,unidadesAbiertas176:abiertas,unidadesFrente176:frentes,unidadesApoyo176:apoyos,coberturaRed176:cobertura,demandaUnidad176:demandaU,costoUnidad176:costoU,tiposDisp176:tiposDisp,tipoDe176:tipoDe,
+      abrirUnidad176:abrirUnidad,comprarUnidad176:comprarUnidad,ofertas176:ofertas,fundarRed176:fundarRed,venderUnidad176:vender,plan176:plan,anualRed176,sucesosRed176:sucesos,revisarHitos176:revisarHitos,HITOS_176:HITOS,tituloRed176:titulo,migrar176,minCosto176:minCosto,nombreCompania176:nombreCompania,
+      escenaPuerta176,escenaClase176,escenaFundar176,escenaRed176,escenaAbrir176,escenaComprar176,escenaUnidad176,escenaMarca176,escenaFinanzas176,escenaRedBanco176,opcionesRed176,opexRed176,crecRed176,redBanco176:RB,SEDES_BANCO_176:SEDE,CENTROS_BANCO_176:CENTRO,TEC_BANCO_176:TEC,factorEra176:F}); }
+  init176(); setTimeout(init176,40); setTimeout(init176,220); setTimeout(init176,650); setTimeout(init176,950);
+  window.__SA176={version:V176};
 })();
 </script>
 
