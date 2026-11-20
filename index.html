@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v176</div>
+<div class="version-badge" id="versionBadge">v177</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -26161,7 +26161,7 @@ install();setTimeout(install,1200);
     agro:{ins:'fertilizantes y empaques',peso:.22,planta:'Planta de beneficio',dolar:.6,petroleo:.5},
     salud:{ins:'principios activos importados',peso:.18,planta:'Laboratorio',dolar:.8},
     mineria:{ins:'combustible y explosivos',peso:.15,planta:'Planta de procesamiento',dolar:.3,petroleo:.8}};
-  const industrial=e=>!!(e&&IND[e.sector]&&!e.cafe148);   /* v148: las empresas del café llevan sus propias cuentas */
+  const industrial=e=>!!(e&&IND[e.sector]&&!e.cafe148&&!e.red176);   /* v148: las empresas del café llevan sus propias cuentas */
   const P1=n=>String(n||'').split(' ')[0];
   const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
 
@@ -30713,7 +30713,12 @@ install();setTimeout(install,1200);
     {id:'supersalud',desde:1977,sect:['salud'],n:a=>'la Superintendencia de Salud',ambito:'atención, cartera y habilitación'},
     {id:'superservicios',desde:1994,sect:['energia'],n:a=>'la Superintendencia de Servicios Públicos',ambito:'tarifas, calidad y continuidad del servicio'},
     {id:'supertransporte',desde:1992,sect:['logistica'],n:a=>'la Superintendencia de Transporte',ambito:'seguridad, tarifas y habilitación'},
-    {id:'turismo',desde:1968,sect:['turismo'],n:a=>a>=2002?'el Ministerio de Comercio, Industria y Turismo':a>=1996?'el Viceministerio de Turismo':'la Corporación Nacional de Turismo',ambito:'calidad, sanidad y seguridad de los establecimientos'}];
+    {id:'turismo',desde:1968,sect:['turismo'],n:a=>a>=2002?'el Ministerio de Comercio, Industria y Turismo':a>=1996?'el Viceministerio de Turismo':'la Corporación Nacional de Turismo',ambito:'calidad, sanidad y seguridad de los establecimientos'},
+    {id:'educacion',desde:1886,sect:['educacion'],n:a=>a>=1950?'el Ministerio de Educación':'el Ministerio de Instrucción Pública',ambito:'licencias, calidad y matrículas'},
+    {id:'sanidad',desde:1920,sect:['alimentos','gastronomia'],n:a=>a>=1993?'el Invima':'la Secretaría de Salud',ambito:'sanidad y calidad de los alimentos'},
+    {id:'medios',desde:1954,sect:['medios'],n:a=>'el Ministerio de Comunicaciones',ambito:'licencias de frecuencia y contenidos'},
+    {id:'ambiental',desde:1974,sect:['mineria'],n:a=>a>=1993?'la autoridad ambiental':'el Ministerio de Minas',ambito:'licencias, vertimientos y seguridad minera'},
+    {id:'curaduria',desde:1968,sect:['construccion'],n:a=>'la Curaduría Urbana',ambito:'licencias de construcción y seguridad de las obras'}];
   function intensidad(a){ a=a||A(); return a<1900?0:a<1923?.12:a<1960?.4:a<1991?.65:a<2005?1:1.25; }
   const regsDe=e=>REGS.filter(g=>A()>=g.desde&&(g.sect==='*'||g.sect.includes(e.sector))&&(!g.min||e.ingresos>=g.min));
   const SENS={financiero:1.5,seguros:1.3,salud:1.4,energia:1.2,logistica:1.1,mineria:1.15,alimentos:1.1};
@@ -32386,6 +32391,8 @@ install();setTimeout(install,1200);
   function demandaU(e,r,u){ const c=CL[r.clase], t=tipoDe(r.clase,u.tipo); if(!c||!t) return 0; const cs=t.cs!==undefined?t.cs:c.cs, vol=t.vol!==undefined?t.vol:c.vol;
     let f=t.u0*(t.ciu===false?1:1+(ciu(u.ciudad).pob-1)*c.sp);
     f*=1+ciclo()*cs*2;
+    if(c.vc&&typeof vientoDe==='function') f*=1+cl(vientoDe(c.sector),-1,1)*c.vc*.12;   // el viento del sector: precios de la materia prima, clima, moda
+    if(c.usd){ const w=S.mundo167, us=S.macro&&S.macro.usd, pr=w&&w.usdPrev, sh=(isFinite(us)&&isFinite(pr)&&pr>0)?cl(us/pr-1,-.3,.5):0; f*=1+c.usd*sh*.3; }   // lo que vende afuera se mueve con el dólar
     const tens=((S.tension||35)-45)/170; if(tens>0) f*=1-tens*c.ts;
     if(A()>=2020&&A()<=2022&&c.pand) f*=c.pand[A()-2020];
     f*=1+(u.rep-60)/250*c.rs;
@@ -32416,9 +32423,10 @@ install();setTimeout(install,1200);
     const f=demandaU(e,r,u), tec=cl((tot.f.gan||0)-(tot.f.rez||0),-.1,.15);
     const rev=repos*t.rc*(f/t.u0)*u.mult*(1+tec);
     const persMg=(u.pers===0?.05:u.pers===2?-.05:0)*Math.min(1,t.mg*3), escala=Math.min(.02,frentes(r).length*.002);
-    const mg=cl(t.mg+cob.mg+persMg+escala+(f-t.u0)*.45*Math.min(1,t.mg*3)+((e.eficiencia||50)-50)/500,0,Math.min(.92,t.mg+.2));
+    let insumo=0; try{ const I=window.INDUSTRIA_137&&window.INDUSTRIA_137[c.sector]; if(c.ins&&I&&typeof window.indiceInsumo137==='function') insumo=-(window.indiceInsumo137(c.sector).ind-1)*I.peso*.45; }catch(x){}   // el precio de los insumos (v137)
+    const mg=cl(t.mg+cob.mg+persMg+escala+insumo+(f-t.u0)*.45*Math.min(1,t.mg*3)+((e.eficiencia||50)-50)/500,0,Math.min(.92,t.mg+.2));
     const mant=propia?u.valor*.012:(u.modelo==='arrendado'?rev*.01:0), imp=propia?u.valor*.003:0, renta=u.modelo==='arrendado'?rev*.2:0;
-    const ebitda=rev*mg-mant-imp-renta;
+    const ebitda=rev*mg-mant-imp-renta+(c.flot?rev*c.flot*Math.max(0,(S.macro&&S.macro.tasa)||.08)*.5:0);   // las aseguradoras ganan también con lo que tienen en reserva
     // estado, servicio y reputación
     const meta=u.pers===0?36:u.pers===2?82:60;
     u.cons=cl(u.cons-rnd(3,5)+1.5,5,100);
@@ -32433,6 +32441,7 @@ install();setTimeout(install,1200);
   /* ==================== EL AÑO DE LA RED (gancho en el núcleo, junto al de los hoteles) ==================== */
   function anualRed176(e,res){ if(!e||!e.red176) return; const r=R(e); if(!CL[r.clase]) return;
     const ingPrev=e.ingresos; const cob=cobertura(r); r.cob=cob;
+    try{ if(CL[r.clase].ins&&typeof window.anualInsumos137==='function') window.anualInsumos137(); }catch(x){}
     const tot={f:(function(){ try{ return (typeof window.efectosTec169==='function'&&window.efectosTec169(e))||{gan:0,rez:0}; }catch(x){ return {gan:0,rez:0}; } })(),ing:0,ebitda:0,cap:0,capUsada:0,dep:0,res:0,resW:0};
     r.unidades.slice().forEach(u=>{ try{ u.uAdd=cob.uAdd; anualU(e,r,u,tot,cob); }catch(x){ console.error(x); } });
     const n=frentes(r).length;
@@ -32563,27 +32572,43 @@ install();setTimeout(install,1200);
   const crudas=()=>{ const p1=window.__crudo91, p2=window.__sinOcultar176; window.__crudo91=true; window.__sinOcultar176=true; try{ return listaAcciones()||[]; }catch(x){ return []; } finally{ window.__crudo91=p1; window.__sinOcultar176=p2; } };
   const termino=(e,ant)=>{ cerrarModal(); render(); if(ant&&ant!==e&&!ant.presidente&&typeof escenaPresidente==='function') escenaPresidente(ant,true); else escenaRed176(e); };
   /* ==================== LAS PANTALLAS: LA PUERTA ==================== */
-  function escenaPuerta176(){ if(!ACTIVO()||nino()) return; sectores(); const ops=[], acc=crudas();
-    ORDEN.filter(id=>claseDisp(CL[id])&&tiposDisp(id,'princ').length).forEach(id=>{ const c=CL[id], mine=redes().filter(e=>e.red176.clase===id), min=minCosto(id);
-      ops.push({t:c.n,cat:'compania',d:c.grupo+' · desde '+fm(min)+'. '+(mine.length?'Ya tienes '+mine.length+' negocio'+(mine.length===1?'':'s')+' de esta clase.':'')+' '+c.d.split('.')[0]+'.',cerrar:false,run:()=>{ cerrarModal(); escenaClase176(id); }}); });
-    const tuBanco=acc.find(a=>a.t==='Tu banco'), fundarB=acc.find(a=>a.t==='Fundar un banco'), licencia=acc.find(a=>a.t==='Pedir licencia bancaria');
-    if(A()>=1870) ops.push({t:tuBanco?'Banco: '+(bancosNom()||'tu banco'):'Banco',cat:'compania',d:tuBanco?'Administrar la sede principal, las sedes regionales, las oficinas y los centros de operaciones y de cómputo.':'Sede principal, sucursales y centro de operaciones. Captas depósitos y prestas; la licencia la da la Superintendencia.',dis:(tuBanco||fundarB||licencia)?null:'No cumples las condiciones o ya hay un banco en trámite',cerrar:false,run:()=>{ cerrarModal(); if(tuBanco) tuBanco.run(); else escenaSedeBanco176(fundarB||licencia); }});
-    if(typeof window.escenaImperio175==='function') ops.push({t:'Hoteles: el imperio hotelero',cat:'compania',d:'Desde la posada de arrieros hasta la cadena de hoteles y los resorts.',cerrar:false,run:()=>{ cerrarModal(); window.escenaImperio175(); }});
-    ops.push({t:'Industria, tecnología, energía y otros sectores',cat:'compania',d:'Fábricas, agroindustria, minería, software, energía, medios, seguros y más: la fundación de siempre, con plantas donde las hay.',cerrar:false,run:()=>{ cerrarModal(); window.__soloOtros176=true; try{ modalFundar(); }finally{ window.__soloOtros176=false; } }});
-    if(typeof escenaCrearSociedad==='function') ops.push({t:'Una sociedad que administra otro',cat:'capital',d:'Pones la plata y un gerente la maneja. No es una compañía con unidades: rinde un porcentaje al año.',cerrar:false,run:()=>{ cerrarModal(); escenaCrearSociedad(); }});
+  const GRUPOS_PUERTA=[
+    {n:'Salud',ids:['farmacia','clinica'],d:'Droguerías y clínicas.'},
+    {n:'Educación',ids:['educacion'],d:'Colegios, institutos y universidades.'},
+    {n:'Comercio y comida',ids:['comercio','gastronomia','servicios'],d:'Tiendas, supermercados, panaderías, restaurantes y servicios de barrio.'},
+    {n:'Inmuebles',ids:['inmobiliario'],d:'Casas, parqueaderos, edificios y centros comerciales de renta.'},
+    {n:'Industria',ids:['moda','alimentos','construccion'],d:'Textiles, alimentos y construcción, con sus plantas.'},
+    {n:'Campo y minas',ids:['agro','mineria'],d:'Fincas, haciendas, minas y campos petroleros.'},
+    {n:'Energía y transporte',ids:['energia','logistica'],d:'Centrales, redes, flotas, puertos y aviones.'},
+    {n:'Tecnología y medios',ids:['tech','juegos','medios'],d:'Software, videojuegos, periódicos, radio y televisión.'},
+    {n:'Finanzas y servicios profesionales',ids:['banco','financiera','seguros','juridico','sociedad'],d:'Bancos, casas de bolsa, aseguradoras, bufetes y sociedades.'},
+    {n:'Turismo',ids:['hoteles','viajes'],d:'Hoteles, agencias, parques y experiencias.'}];
+  const grupoDeClase=id=>(GRUPOS_PUERTA.find(g=>g.ids.includes(id))||{}).n;
+  function opClase(id){ const c=CL[id]; if(!c||!claseDisp(c)||!tiposDisp(id,'princ').length) return null; const mine=redes().filter(e=>e.red176.clase===id), min=minCosto(id);
+    return {t:c.n,cat:'compania',d:'Desde '+fm(min)+'. '+(mine.length?'Ya tienes '+mine.length+' negocio'+(mine.length===1?'':'s')+' de esta clase. ':'')+c.d.split('.')[0]+'.',cerrar:false,run:()=>{ cerrarModal(); escenaClase176(id); }}; }
+  function opBanco(acc){ if(A()<1870) return null; const tuBanco=acc.find(a=>a.t==='Tu banco'), fundarB=acc.find(a=>a.t==='Fundar un banco'), licencia=acc.find(a=>a.t==='Pedir licencia bancaria');
+    return {t:tuBanco?'Banco: '+(bancosNom()||'tu banco'):'Banco',cat:'compania',d:tuBanco?'Administrar la sede principal, las sedes regionales, las oficinas y los centros de operaciones y de cómputo.':'Sede principal, sucursales y centro de operaciones. Captas depósitos y prestas; la licencia la da la Superintendencia.',dis:(tuBanco||fundarB||licencia)?null:'No cumples las condiciones o ya hay un banco en trámite',cerrar:false,run:()=>{ cerrarModal(); if(tuBanco) tuBanco.run(); else escenaSedeBanco176(fundarB||licencia); }}; }
+  const opHoteles=()=>typeof window.escenaImperio175==='function'?{t:'Hoteles: el imperio hotelero',cat:'compania',d:'Desde la posada de arrieros hasta la cadena de hoteles y los resorts.',cerrar:false,run:()=>{ cerrarModal(); window.escenaImperio175(); }}:null;
+  const opSociedad=()=>typeof escenaCrearSociedad==='function'?{t:'Una sociedad que administra otro',cat:'capital',d:'Pones la plata y un gerente la maneja. No es una compañía con unidades: rinde un porcentaje al año.',cerrar:false,run:()=>{ cerrarModal(); escenaCrearSociedad(); }}:null;
+  const opsGrupo=(g,acc)=>g.ids.map(id=>id==='banco'?opBanco(acc):id==='hoteles'?opHoteles():id==='sociedad'?opSociedad():opClase(id)).filter(Boolean);
+  function escenaPuerta176(gn){ if(!ACTIVO()||nino()) return; sectores(); const acc=crudas(), g0=gn&&GRUPOS_PUERTA.find(x=>x.n===gn);
+    if(g0){ const ops=opsGrupo(g0,acc); ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+      return escena({rubro:'Cámara de Comercio',titulo:E(g0.n),ancho:true,cerrable:true,clase:'red176',cuerpo:E(g0.d)+' Tienes '+fmt(S.efectivo)+'.',opciones:ops}); }
+    const ops=[]; GRUPOS_PUERTA.forEach(g=>{ if(!opsGrupo(g,acc).length) return; const n=redes().filter(e=>g.ids.includes(e.red176.clase)).length; ops.push({t:g.n,cat:'compania',d:g.d+(n?' Ya tienes '+n+' negocio'+(n===1?'':'s')+' aquí.':''),cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(g.n); }}); });
+    const cv=(typeof window.convertibles177==='function')?window.convertibles177():[]; if(cv.length&&typeof window.escenaConvertir177==='function') ops.push({t:'Organizar por unidades lo que ya tienes',cat:'compania',d:cv.length+' compañía'+(cv.length===1?'':'s')+' tuya'+(cv.length===1?'':'s')+' se puede'+(cv.length===1?'':'n')+' organizar por unidades: principal, frente y apoyo.',cerrar:false,run:()=>{ cerrarModal(); window.escenaConvertir177(); }});
     escena({rubro:'Cámara de Comercio',titulo:'Fundar o comprar un negocio',ancho:true,cerrable:true,clase:'red176',
-      cuerpo:'Escoge la clase de negocio. Cada una se arma con sus propias unidades: una sede principal, las unidades que venden y las de apoyo que las abastecen. Tienes '+fmt(S.efectivo)+'.',opciones:ops}); }
+      cuerpo:'Escoge el tipo de negocio. Cada clase se arma con sus propias unidades: una sede principal, las unidades que venden y las de apoyo que las abastecen. Tienes '+fmt(S.efectivo)+'.',opciones:ops}); }
   const bancosNom=()=>{ try{ const b=comps().find(e=>e.banco112); return b?b.nombre:''; }catch(x){ return ''; } };
   function escenaSedeBanco176(accion){ if(!accion) return; if(accion.t!=='Fundar un banco'){ cerrarModal(); return accion.run(); }
     const ops=ciudadesDisp().map(d=>({t:d.n,cat:'casa',d:'Sede principal del banco. '+(d.pob>=1.1?'Plaza financiera. ':d.pob<=.6?'Plaza pequeña. ':'')+'Suelo '+(d.suelo>=1.2?'caro':d.suelo<=.85?'barato':'normal')+'.',cerrar:false,run:()=>{ window.__sedeBanco176=d.n; cerrarModal(); accion.run(); }}));
-    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176('Finanzas y servicios profesionales'); }});
     escena({rubro:'Banco',titulo:'¿Dónde queda la sede principal?',ancho:true,cerrable:true,clase:'red176',cuerpo:'La casa matriz da confianza y marca. Desde ahí se abren las sedes regionales y las oficinas.',opciones:ops}); }
   /* ---- una clase ---- */
   function escenaClase176(id){ const c=CL[id]; if(!c) return; const mine=redes().filter(e=>e.red176.clase===id), ops=[], min=minCosto(id);
     mine.forEach(e=>{ const r=R(e); ops.push({t:'Administrar '+e.nombre,cat:'compania',d:frentes(r).length+' '+c.un[frentes(r).length===1?0:1]+' abiertas'+(apoyos(r).length?' y '+apoyos(r).length+' de apoyo':'')+'.',cerrar:false,run:()=>{ cerrarModal(); escenaRed176(e); }}); });
     ops.push({t:'Empezar uno de cero',cat:'compania',d:'Escoges la ciudad, el tipo de unidad principal y el tamaño. Se paga con tu efectivo y, si no alcanza, con crédito.',dis:S.efectivo<min*.45?'Necesitas al menos '+fm(min*.45)+' (el resto va a crédito)':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaFundar176(id,{}); }});
     ops.push({t:'Comprar uno que está en venta',cat:'capital',d:'Cada año salen algunos a la venta: unos en buen estado, otros caídos. A veces uno con historia.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar176(null,id); }});
-    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaPuerta176(grupoDeClase(id)); }});
     const cat=tiposDisp(id,'todas').concat([]); const tipos=CL[id].tipos.filter(t=>A()>=t.desde&&(!t.hasta||A()<=t.hasta));
     const html='<h4>Unidades que existen en '+A()+'</h4>'+tipos.map(t=>'<div class="cob176"><b>'+E(cap(nm(t,A())))+'</b> · '+(t.rol==='apoyo'?'de apoyo':t.princ?'puede ser la principal':'de frente')+'<br><small>'+E(t.d||'')+'</small></div>').join('');
     escena({rubro:'Negocios',titulo:E(c.n),ancho:true,cerrable:true,clase:'red176',cuerpo:E(c.d),html,opciones:ops}); }
@@ -32771,11 +32796,304 @@ install();setTimeout(install,1200);
   function init176(){ sectores(); wrapSectores(); wrapFundarEn(); wrapAcciones(); wrapCat(); grupo(); wrapValuar(); wrapPanel();
     if(!window.__SA176_CLIC){ window.__SA176_CLIC=true; document.addEventListener('click',clic,true); }
     try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA176_CONS){ window.__SA176_CONS=true; window.consejeroRegistrar168(gRedes); } }catch(x){}
-    Object.assign(window,{CLASES_176:CL,CIUDADES_176:CIUDADES,ORDEN_176:ORDEN,NUEVOS_SECTORES_176:NUEVOS,redesNegocio176:redes,redNegocio176:R,unidadesAbiertas176:abiertas,unidadesFrente176:frentes,unidadesApoyo176:apoyos,coberturaRed176:cobertura,demandaUnidad176:demandaU,costoUnidad176:costoU,tiposDisp176:tiposDisp,tipoDe176:tipoDe,
+    Object.assign(window,{CLASES_176:CL,CIUDADES_176:CIUDADES,ORDEN_176:ORDEN,NUEVOS_SECTORES_176:NUEVOS,EVC_176:EVC,GRUPOS_PUERTA_176:GRUPOS_PUERTA,reposUnidad176:costoRepos,gastoRed176:gasto,evento176:evento,redesNegocio176:redes,redNegocio176:R,unidadesAbiertas176:abiertas,unidadesFrente176:frentes,unidadesApoyo176:apoyos,coberturaRed176:cobertura,demandaUnidad176:demandaU,costoUnidad176:costoU,tiposDisp176:tiposDisp,tipoDe176:tipoDe,
       abrirUnidad176:abrirUnidad,comprarUnidad176:comprarUnidad,ofertas176:ofertas,fundarRed176:fundarRed,venderUnidad176:vender,plan176:plan,anualRed176,sucesosRed176:sucesos,revisarHitos176:revisarHitos,HITOS_176:HITOS,tituloRed176:titulo,migrar176,minCosto176:minCosto,nombreCompania176:nombreCompania,
       escenaPuerta176,escenaClase176,escenaFundar176,escenaRed176,escenaAbrir176,escenaComprar176,escenaUnidad176,escenaMarca176,escenaFinanzas176,escenaRedBanco176,opcionesRed176,opexRed176,crecRed176,redBanco176:RB,SEDES_BANCO_176:SEDE,CENTROS_BANCO_176:CENTRO,TEC_BANCO_176:TEC,factorEra176:F}); }
   init176(); setTimeout(init176,40); setTimeout(init176,220); setTimeout(init176,650); setTimeout(init176,950);
   window.__SA176={version:V176};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v177 · FASE 2: TODOS LOS NEGOCIOS CON SUS UNIDADES
+   La puerta única de la v176 ahora cubre los doce sectores que faltaban, cada
+   uno con su principal, sus unidades de frente y sus unidades de apoyo:
+   - Industria: moda (talleres, fábricas textiles, plantas de confección,
+     tiendas propias), alimentos (molinos, lácteos, bebidas, empaque) y
+     construcción (frentes de obra, proyectos de vivienda, infraestructura,
+     plantas de concreto).
+   - Campo y minas: agro (fincas, haciendas, plantaciones, flores) y minería
+     (minas, canteras, campos petroleros).
+   - Energía y transporte: centrales, redes, plantas solares; recuas, flotas,
+     puertos, aviones, última milla.
+   - Tecnología y medios: software, aplicaciones, nube; videojuegos;
+     periódicos, radio, televisión y portales.
+   - Finanzas y servicios profesionales: casas de bolsa, fiduciarias, fondos;
+     aseguradoras (con ingreso por reservas); bufetes, notarías y arbitraje.
+   - Turismo: agencias, operadores, parques y cruceros.
+   Las clases usan el motor de la v176 y suman tres cosas: el viento del
+   sector, la exposición al dólar y el precio de los insumos (v137). Cada
+   clase trae sus sucesos. Las compañías que ya existían se pueden organizar
+   por unidades desde su panel o desde la puerta.
+   Además: las compañías con unidades dejan de pasar por las plantas de la
+   v137, que les topaban las ventas y les cobraban capacidad ociosa.
+   ========================================================================== */
+(function(){
+  const V177='v177';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  /* ---- las clases nuevas ---- */
+  const NC={
+    moda:{n:'Moda y textiles',sector:'moda',grupo:'Industria',desde:1800,un:['taller','talleres'],emp:'Textiles',
+      d:'Del taller de costura a la fábrica textil y la planta de confección. Sin diseño, corte y acabados, la red se enreda al crecer; y el precio del algodón manda.',
+      cs:.6,el:1,rs:.9,sp:.4,ts:.2,vol:.13,vc:.5,usd:.4,ins:true,pand:[.7,.85,.95],kv:6.5,aut:[[1800,'el cabildo'],[1920,'la Alcaldía'],[1968,'la Superintendencia de Industria y Comercio']],
+      tit:[[1,'Maestro sastre'],[4,'Industrial textil'],[10,'Gran confeccionista'],[25,'Imperio de la moda']],
+      tipos:[
+        {id:'taller',n:[[1800,'Taller de costura y sastrería'],[1930,'Taller de confección']],desde:1800,base:150,rc:1.25,mg:.11,u0:.7,capN:40,capU:'operarios',obra:[0,1,1],princ:true,d:'Máquinas, patrones y una clientela que repite.'},
+        {id:'textil',n:'Fábrica textil (hilandería y tejeduría)',desde:1900,base:1500,rc:1.1,mg:.13,u0:.72,capN:300,capU:'operarios',obra:[1,2,3],princ:true,d:'Hilos y telas por toneladas, con turnos de día y de noche.'},
+        {id:'confec',n:'Planta de confección',desde:1930,base:800,rc:1.2,mg:.12,u0:.72,capN:250,capU:'operarios',obra:[1,1,2],princ:true,d:'Líneas de producción de prendas para toda la región.'},
+        {id:'outlet',n:'Tienda propia de la marca',desde:1960,base:220,rc:1.8,mg:.09,u0:.6,capN:300,capU:'clientes al día',obra:[0,0,1],d:'Vender directo, sin intermediarios, y ver qué quiere la gente.'},
+        {id:'expo',n:'Planta de exportación (zona franca)',desde:1990,base:1800,rc:1.1,mg:.14,u0:.7,capN:400,capU:'operarios',obra:[1,2,2],d:'Producción para el exterior, atada al dólar.'},
+        {id:'diseno',n:'Estudio de diseño y marca',desde:1930,base:300,rol:'apoyo',cubre:6,bono:.02,falta:.015,rep:3,d:'Colecciones propias y una marca reconocible. Atiende hasta 6 unidades.'},
+        {id:'corte',n:'Centro de corte y bodega',desde:1950,base:450,rol:'apoyo',cubre:8,bono:.018,falta:.02,d:'Corta por lotes y despacha a todos los talleres. Atiende hasta 8.'},
+        {id:'tinto',n:'Planta de tintorería y acabados',desde:1950,base:600,rol:'apoyo',cubre:6,bono:.015,falta:.015,d:'Teñido y acabados sin depender de terceros. Atiende hasta 6.'}]},
+    alimentos:{n:'Alimentos y bebidas',sector:'alimentos',grupo:'Industria',desde:1800,un:['planta','plantas'],emp:'Alimentos',
+      d:'Molinos, plantas de lácteos, de procesados y de bebidas. Demanda estable; el riesgo es un lote defectuoso y el precio del trigo, el azúcar y los aceites.',
+      cs:.15,el:.8,rs:.6,sp:.4,ts:.1,vol:.09,vc:.2,usd:.3,ins:true,pand:[1.05,1,1],kv:8,aut:[[1800,'el cabildo'],[1920,'la Secretaría de Salud'],[1993,'el Invima']],
+      tit:[[1,'Molinero'],[4,'Industrial de alimentos'],[10,'Gran procesador'],[25,'Imperio de los alimentos']],
+      tipos:[
+        {id:'molino',n:[[1800,'Molino y trilla'],[1930,'Planta de molienda']],desde:1800,base:220,rc:1.3,mg:.12,u0:.72,capN:80,capU:'toneladas al día',obra:[0,1,1],princ:true,d:'Granos que llegan del campo y salen como harina y arroz.'},
+        {id:'lacteos',n:'Planta de lácteos',desde:1920,base:800,rc:1.25,mg:.13,u0:.72,capN:150,capU:'miles de litros al día',obra:[1,1,2],princ:true,d:'Leche, queso y mantequilla con frío y control de calidad.'},
+        {id:'procesada',n:'Planta de alimentos procesados',desde:1930,base:1500,rc:1.2,mg:.13,u0:.72,capN:120,capU:'toneladas al día',obra:[1,2,2],princ:true,d:'Conservas, galletas, salsas y pastas para todo el país.'},
+        {id:'bebidas',n:'Planta de bebidas y cervecería',desde:1890,base:2800,rc:1.0,mg:.17,u0:.75,capN:200,capU:'miles de litros al día',obra:[1,2,3],princ:true,d:'Cerveza, gaseosa y agua, y la distribución para venderla.'},
+        {id:'empaque',n:'Planta de empaque',desde:1960,base:600,rc:1.2,mg:.11,u0:.7,capN:100,capU:'toneladas al día',obra:[0,1,1],d:'Envases y empaques propios.'},
+        {id:'frio',n:'Bodega refrigerada y cadena de frío',desde:1930,base:800,rol:'apoyo',cubre:6,bono:.02,falta:.025,d:'Sin frío, lo perecedero se pierde. Atiende hasta 6 plantas.'},
+        {id:'calidad',n:'Laboratorio de calidad',desde:1950,base:400,rol:'apoyo',cubre:8,bono:.015,falta:.02,rep:3,d:'Revisa cada lote antes de que salga. Atiende hasta 8 plantas.'},
+        {id:'cdist',n:'Centro de distribución',desde:1950,base:1000,rol:'apoyo',cubre:10,bono:.015,falta:.015,d:'Reparte a tiendas y supermercados de todo el país. Atiende hasta 10.'}]},
+    construccion:{n:'Construcción e infraestructura',sector:'construccion',grupo:'Industria',desde:1800,un:['frente de obra','frentes de obra'],emp:'Constructora',
+      d:'Cuadrillas, proyectos de vivienda, vías y puentes, y plantas de concreto. Depende del ciclo, de las licencias y de tener maquinaria y ingenieros a la altura.',
+      cs:1,el:.9,rs:.5,sp:.5,ts:.3,vol:.22,vc:.6,ins:true,pand:[.7,.85,.95],kv:6,aut:[[1800,'el cabildo'],[1920,'la Alcaldía'],[1968,'la Curaduría Urbana']],
+      tit:[[1,'Maestro de obra'],[4,'Constructor'],[10,'Gran constructor'],[25,'Imperio de la construcción']],
+      tipos:[
+        {id:'obra',n:[[1800,'Cuadrilla de albañiles'],[1900,'Frente de obra']],desde:1800,base:250,rc:1.5,mg:.09,u0:.7,capN:30,capU:'obreros',obra:[0,1,1],princ:true,d:'Tapias, casas y obras pequeñas.'},
+        {id:'vivienda',n:'Proyecto de vivienda',desde:1900,base:1600,rc:1.4,mg:.1,u0:.72,capN:120,capU:'viviendas al año',obra:[1,2,3],princ:true,d:'Casas y apartamentos para vender sobre planos.'},
+        {id:'concreto',n:'Planta de concreto y prefabricados',desde:1930,base:1300,rc:1.15,mg:.12,u0:.7,capN:200,capU:'metros cúbicos al día',obra:[1,1,2],princ:true,d:'Cemento, bloques y vigas para tus obras y las ajenas.'},
+        {id:'infra',n:'Contrato de infraestructura (vías y puentes)',desde:1920,base:5000,rc:1.3,mg:.095,u0:.72,capN:50,capU:'kilómetros de obra',obra:[2,3,3],d:'Carreteras, puentes y túneles para el Estado.'},
+        {id:'maq',n:'Parque de maquinaria',desde:1920,base:1800,rol:'apoyo',cubre:5,bono:.02,falta:.025,d:'Excavadoras, volquetas y grúas. Atiende hasta 5 frentes.'},
+        {id:'ing',n:'Oficina de ingeniería y licitaciones',desde:1950,base:500,rol:'apoyo',cubre:6,bono:.015,falta:.02,rep:2,d:'Diseños, presupuestos y propuestas para ganar contratos. Atiende hasta 6.'}]},
+    energia:{n:'Energía',sector:'energia',grupo:'Energía y transporte',desde:1900,un:['central','centrales'],emp:'Energía',
+      d:'Centrales, plantas y redes de distribución. Mucho capital, tarifas reguladas y un riesgo grande: la sequía.',
+      cs:.1,el:.2,rs:.3,sp:.1,ts:.15,vol:.17,vc:.5,usd:.3,ins:true,pand:[.93,.97,1],kv:9,aut:[[1900,'la Alcaldía'],[1950,'el Ministerio de Minas y Energía'],[1994,'la Superintendencia de Servicios Públicos']],
+      tit:[[1,'Empresario de la luz'],[3,'Generador'],[8,'Gran generador'],[18,'Imperio de la energía']],
+      tipos:[
+        {id:'hidro',n:'Pequeña central hidroeléctrica',desde:1900,base:3500,rc:.3,mg:.55,u0:.75,capN:20,capU:'MW',obra:[2,3,4],princ:true,d:'Un río, una caída de agua y una turbina.'},
+        {id:'termo',n:'Planta térmica',desde:1930,base:2500,rc:.45,mg:.33,u0:.6,capN:40,capU:'MW',obra:[1,2,3],princ:true,d:'Quema carbón o gas cuando las represas no alcanzan.'},
+        {id:'distrib',n:'Red de distribución y subestaciones',desde:1940,base:2000,rc:.3,mg:.5,u0:.8,capN:60000,capU:'usuarios',obra:[1,2,3],princ:true,d:'Postes, cables y contadores hasta la casa del cliente.'},
+        {id:'solar',n:'Parque solar o eólico',desde:2005,base:3000,rc:.28,mg:.6,u0:.55,capN:30,capU:'MW',obra:[1,2,3],princ:true,d:'Paneles y turbinas de viento sin combustible.'},
+        {id:'gran',n:'Gran central hidroeléctrica',desde:1960,base:15000,rc:.26,mg:.6,u0:.75,capN:300,capU:'MW',obra:[3,4,5],d:'Una represa de las grandes, que ilumina media región.'},
+        {id:'despacho',n:'Centro de control y despacho',desde:1950,base:900,rol:'apoyo',cubre:4,bono:.03,falta:.035,d:'Decide qué central entrega y cuándo. Atiende hasta 4 centrales.'},
+        {id:'mant',n:'Taller de mantenimiento',desde:1930,base:500,rol:'apoyo',cubre:4,bono:.02,falta:.02,d:'Repuestos y mecánicos para que nada se pare. Atiende hasta 4.'}]},
+    agro:{n:'Agroindustria',sector:'agro',grupo:'Campo y minas',desde:1800,un:['finca','fincas'],emp:'Agroindustrial',
+      d:'Fincas de cultivos, haciendas, plantaciones y flores. El clima y los precios deciden más que tu estrategia; el riego y los silos ayudan a aguantar. (El café tiene su propio negocio en "Tu finca cafetera".)',
+      cs:.3,el:.4,rs:.3,sp:.1,ts:.25,vol:.24,vc:1,usd:.6,ins:true,pand:[1,1,1],kv:7,aut:[[1800,'el cabildo'],[1920,'el Ministerio de Agricultura'],[1993,'el Instituto Colombiano Agropecuario']],
+      tit:[[1,'Agricultor'],[4,'Hacendado'],[10,'Gran agroindustrial'],[25,'Imperio del campo']],
+      tipos:[
+        {id:'finca',n:'Finca de cultivos',desde:1800,base:300,rc:.5,mg:.28,u0:.72,capN:100,capU:'hectáreas',obra:[0,1,1],princ:true,d:'Maíz, papa, caña y lo que dé la tierra.'},
+        {id:'hacienda',n:'Hacienda ganadera',desde:1800,base:600,rc:.4,mg:.32,u0:.7,capN:500,capU:'cabezas de ganado',obra:[0,1,1],princ:true,d:'Ganado de carne y de leche en potreros extensos.'},
+        {id:'plantacion',n:'Plantación (banano, palma o caña)',desde:1900,base:1200,rc:.5,mg:.28,u0:.72,capN:300,capU:'hectáreas',obra:[1,1,2],princ:true,d:'Un solo cultivo, a gran escala, para vender afuera.'},
+        {id:'flores',n:'Cultivo de flores en invernadero',desde:1965,base:1000,rc:.75,mg:.22,u0:.72,capN:40,capU:'hectáreas bajo plástico',obra:[1,1,2],princ:true,d:'Rosas y claveles que viajan en avión a Estados Unidos.'},
+        {id:'beneficio',n:'Planta de beneficio y empaque',desde:1920,base:600,rc:1.0,mg:.12,u0:.7,capN:80,capU:'toneladas al día',obra:[0,1,1],d:'Lava, clasifica y empaca la cosecha.'},
+        {id:'riego',n:'Sistema de riego y drenaje',desde:1950,base:600,rol:'apoyo',cubre:6,bono:.025,falta:.02,d:'Agua cuando falta y desagües cuando sobra. Atiende hasta 6 fincas.'},
+        {id:'silo',n:'Silos y bodegas',desde:1930,base:450,rol:'apoyo',cubre:8,bono:.015,falta:.02,d:'Guardar la cosecha hasta que el precio mejore. Atiende hasta 8.'},
+        {id:'invest',n:'Centro de investigación agrícola',desde:1960,base:700,rol:'apoyo',cubre:10,bono:.02,falta:0,rep:3,d:'Semillas mejoradas y control de plagas. Atiende hasta 10.'}]},
+    mineria:{n:'Minería y petróleo',sector:'mineria',grupo:'Campo y minas',desde:1800,un:['mina','minas'],emp:'Minera',
+      d:'Minas de carbón, esmeraldas y oro, canteras y, con los años, el petróleo. Ciclos brutales, conflicto con las comunidades y mucha caja cuando el precio sube.',
+      cs:.6,el:.3,rs:.2,sp:.05,ts:.3,vol:.32,vc:1,usd:.5,ins:true,pand:[.9,1,1],kv:6,aut:[[1800,'el cabildo'],[1920,'el Ministerio de Minas'],[1993,'la autoridad ambiental']],
+      tit:[[1,'Minero'],[3,'Empresario minero'],[8,'Gran minero'],[18,'Imperio de las minas']],
+      tipos:[
+        {id:'mina',n:'Mina de carbón o esmeraldas',desde:1800,base:1500,rc:.38,mg:.4,u0:.7,capN:200,capU:'mineros',obra:[1,2,2],princ:true,vol:.35,d:'Túneles, picas y un riesgo que no se ve desde afuera.'},
+        {id:'oro',n:'Mina de oro aluvial',desde:1800,base:900,rc:.5,mg:.32,u0:.65,capN:80,capU:'mineros',obra:[0,1,1],princ:true,vol:.45,d:'Barequeo y dragas en los ríos de oro.'},
+        {id:'cantera',n:'Cantera de materiales',desde:1900,base:700,rc:.6,mg:.24,u0:.72,capN:100,capU:'camiones al día',obra:[0,1,1],princ:true,d:'Piedra, arena y gravilla para las obras.'},
+        {id:'petroleo',n:'Campo petrolero',desde:1920,base:12000,rc:.33,mg:.5,u0:.75,capN:20,capU:'miles de barriles al día',obra:[2,3,4],vol:.4,d:'Pozos, oleoductos y la bomba que sube y baja.'},
+        {id:'carbon',n:'Mina de carbón a cielo abierto',desde:1980,base:9000,rc:.3,mg:.5,u0:.75,capN:300,capU:'mineros',obra:[2,3,4],vol:.4,d:'Una explotación enorme, de las que se ven desde el cielo.'},
+        {id:'bene',n:'Planta de beneficio y procesamiento',desde:1920,base:1500,rol:'apoyo',cubre:3,bono:.03,falta:.035,d:'Convierte la piedra en producto que se pueda vender. Atiende hasta 3 minas.'},
+        {id:'puerto',n:'Puerto y vía férrea propios',desde:1950,base:4000,rol:'apoyo',cubre:4,bono:.03,falta:.03,d:'Sacar la producción sin depender de nadie. Atiende hasta 4.'},
+        {id:'ambiental',n:'Gestión ambiental y social',desde:1990,base:500,rol:'apoyo',cubre:5,bono:.01,falta:.03,rep:4,d:'Relación con las comunidades y cuidado de los ríos. Atiende hasta 5.'}]},
+    logistica:{n:'Logística y transporte',sector:'logistica',grupo:'Energía y transporte',desde:1800,un:['unidad de transporte','unidades de transporte'],emp:'Transportes',
+      d:'Desde las recuas de mulas hasta las flotas, los puertos y la aviación. Aburrido y necesario; con taller y central de despacho la flota rinde, sin ellos se desgasta.',
+      cs:.7,el:.8,rs:.5,sp:.6,ts:.25,vol:.14,vc:.3,pand:[.85,1.05,1.05],kv:7,aut:[[1800,'el cabildo'],[1920,'el Ministerio de Obras Públicas'],[1992,'la Superintendencia de Transporte']],
+      tit:[[1,'Arriero'],[4,'Transportador'],[10,'Gran operador logístico'],[25,'Imperio del transporte']],
+      tipos:[
+        {id:'recua',n:'Recua de mulas (arriería)',desde:1800,hasta:1955,base:120,rc:1,mg:.18,u0:.65,capN:20,capU:'mulas',obra:[0,0,1],princ:true,d:'Caminos de herradura, semanas de ida y de vuelta.'},
+        {id:'champan',n:'Champanes y vapores del Magdalena',desde:1850,hasta:1935,base:500,rc:.7,mg:.22,u0:.65,capN:30,capU:'toneladas por viaje',obra:[0,1,1],princ:true,d:'El río grande, la puerta del país.'},
+        {id:'buses',n:'Flota de buses de pasajeros',desde:1920,base:600,rc:1,mg:.13,u0:.7,capN:20,capU:'buses',obra:[0,1,1],princ:true,d:'Rutas entre pueblos y ciudades.'},
+        {id:'camiones',n:'Flota de camiones',desde:1930,base:700,rc:0.95,mg:.14,u0:.7,capN:20,capU:'camiones',obra:[0,1,1],princ:true,d:'Carga de un puerto a otro, de una finca a la ciudad.'},
+        {id:'bodega',n:'Bodega y logística',desde:1950,base:1200,rc:.55,mg:.3,u0:.75,capN:5000,capU:'metros cuadrados',obra:[1,1,2],princ:true,d:'Almacenar y despachar para otros.'},
+        {id:'terminal',n:'Terminal portuario',desde:1900,base:5000,rc:.3,mg:.5,u0:.75,capN:300,capU:'contenedores al día',obra:[2,3,3],d:'Muelles, grúas y la aduana al lado.'},
+        {id:'aereo',n:'Línea aérea de carga y pasajeros',desde:1935,base:6000,rc:0.95,mg:0.14,u0:.72,capN:10,capU:'aviones',obra:[1,2,3],d:'De una ciudad a otra en horas.'},
+        {id:'ultima',n:'Última milla (motos y domicilios)',desde:2012,base:150,rc:1.5,mg:.09,u0:.65,capN:300,capU:'entregas al día',obra:[0,0,1],d:'Repartir lo que se compró por la aplicación.'},
+        {id:'taller',n:'Taller y repuestos',desde:1930,base:400,rol:'apoyo',cubre:8,bono:.02,falta:.025,d:'Mantener la flota rodando. Atiende hasta 8 unidades.'},
+        {id:'central',n:'Central de despacho y rastreo',desde:1960,base:350,rol:'apoyo',cubre:12,bono:.02,falta:.02,d:'Ordena rutas y sabe dónde está cada carga. Atiende hasta 12.'}]},
+    tech:{n:'Software y datos',sector:'tech',grupo:'Tecnología y medios',desde:2000,un:['producto','productos'],emp:'Tecnología',
+      d:'Productos de software, aplicaciones y plataformas. Márgenes altos y caídas igual de rápidas: sin centro de datos, laboratorio y ventas, los productos no escalan.',
+      cs:.5,el:.6,rs:.8,sp:.3,ts:.05,vol:.28,vc:.8,pand:[1.1,1.1,1.05],kv:12,aut:[[2000,'la Superintendencia de Industria y Comercio']],
+      tit:[[1,'Programador independiente'],[4,'Empresario de software'],[10,'Gran empresa tecnológica'],[25,'Imperio digital']],
+      tipos:[
+        {id:'soft',n:'Producto de software',desde:2000,base:250,rc:1.2,mg:.17,u0:.65,capN:2000,capU:'clientes',obra:[0,1,1],princ:true,vol:.3,d:'Un programa que se vende a empresas.'},
+        {id:'fabrica',n:'Fábrica de software y consultoría',desde:2000,base:200,rc:1.4,mg:.13,u0:.7,capN:50,capU:'programadores',obra:[0,0,1],princ:true,d:'Desarrollar a la medida para otros.'},
+        {id:'app',n:'Aplicación móvil',desde:2010,base:200,rc:1.3,mg:.17,u0:.6,capN:50000,capU:'usuarios activos',obra:[0,0,1],ciu:false,princ:true,vol:.4,d:'Una aplicación para el celular de todos.'},
+        {id:'saas',n:'Plataforma en la nube (SaaS)',desde:2008,base:700,rc:1.1,mg:.24,u0:.65,capN:5000,capU:'suscriptores',obra:[0,1,1],ciu:false,vol:.35,d:'Se paga por mes y escala sin fábricas.'},
+        {id:'pagos',n:'Plataforma de pagos',desde:2012,base:900,rc:1,mg:.22,u0:.65,capN:100000,capU:'transacciones al día',obra:[0,1,2],ciu:false,d:'Mover plata entre personas y comercios.'},
+        {id:'dc',n:'Centro de datos y nube',desde:2005,base:800,rol:'apoyo',cubre:6,bono:.02,falta:.03,d:'Servidores propios para que nada se caiga. Atiende hasta 6 productos.'},
+        {id:'labid',n:'Laboratorio de investigación y desarrollo',desde:2000,base:600,rol:'apoyo',cubre:5,bono:.02,falta:.01,rep:4,d:'Lo siguiente que va a pegar. Atiende hasta 5.'},
+        {id:'ventas',n:'Oficina comercial',desde:2000,base:300,rol:'apoyo',cubre:5,bono:.015,falta:.02,d:'Quien vende los productos a las empresas. Atiende hasta 5.'}]},
+    juegos:{n:'Videojuegos y entretenimiento digital',sector:'juegos',grupo:'Tecnología y medios',desde:2000,un:['estudio','estudios'],emp:'Juegos',
+      d:'Estudios de videojuegos y entretenimiento digital. Todo depende de si algo pega de verdad, y casi nunca pega. Servidores, publicación y pruebas de calidad ayudan.',
+      cs:.3,el:.6,rs:1,sp:.1,ts:0,vol:.26,vc:.6,pand:[1.3,1.2,1.1],kv:10,aut:[[2000,'la Superintendencia de Industria y Comercio']],
+      tit:[[1,'Desarrollador independiente'],[4,'Estudio reconocido'],[10,'Gran editor'],[25,'Imperio del entretenimiento']],
+      tipos:[
+        {id:'estudio',n:'Estudio de videojuegos',desde:2000,base:300,rc:1.2,mg:.17,u0:.6,capN:40,capU:'desarrolladores',obra:[0,1,1],princ:true,vol:.5,d:'Un equipo, una idea y un lanzamiento.'},
+        {id:'movil',n:'Estudio de juegos móviles',desde:2010,base:150,rc:1.4,mg:.16,u0:.6,capN:20,capU:'desarrolladores',obra:[0,0,1],princ:true,vol:.5,d:'Títulos gratuitos con compras dentro de la aplicación.'},
+        {id:'stream',n:'Servicio de streaming',desde:2010,base:1500,rc:.9,mg:.24,u0:.65,capN:100000,capU:'suscriptores',obra:[1,1,2],ciu:false,d:'Series, música y juegos a demanda.'},
+        {id:'esports',n:'Equipo y liga de esports',desde:2015,base:500,rc:1,mg:.15,u0:.6,capN:30,capU:'jugadores',obra:[0,1,1],vol:.4,d:'Torneos, patrocinadores y transmisiones.'},
+        {id:'serv',n:'Servidores y plataforma en línea',desde:2008,base:800,rol:'apoyo',cubre:4,bono:.025,falta:.03,d:'Partidas sin caídas. Atiende hasta 4 estudios.'},
+        {id:'pub',n:'Publicación y mercadeo',desde:2005,base:500,rol:'apoyo',cubre:4,bono:.02,falta:.02,d:'Que el juego llegue a las manos de quien lo quiere. Atiende hasta 4.'},
+        {id:'qa',n:'Pruebas y control de calidad',desde:2005,base:300,rol:'apoyo',cubre:5,bono:.015,falta:.02,rep:3,d:'Encontrar los errores antes que los jugadores. Atiende hasta 5.'}]},
+    medios:{n:'Medios de comunicación',sector:'medios',grupo:'Tecnología y medios',desde:1800,un:['medio','medios'],emp:'Medios',
+      d:'Periódicos y, con los años, radio, televisión y medios digitales. Dan influencia política y fama; los resultados son impredecibles y una central de noticias sostiene la credibilidad.',
+      cs:.6,el:.5,rs:1.2,sp:.6,ts:.15,vol:.3,vc:.4,pand:[.9,1,1],kv:8,aut:[[1800,'el cabildo'],[1920,'el Ministerio de Gobierno'],[1954,'el Ministerio de Comunicaciones']],
+      tit:[[1,'Editor'],[3,'Empresario de medios'],[8,'Gran grupo de medios'],[18,'Imperio de la comunicación']],
+      tipos:[
+        {id:'periodico',n:[[1800,'Imprenta y gaceta'],[1850,'Periódico']],desde:1800,base:300,rc:.9,mg:.15,u0:.6,capN:20000,capU:'ejemplares al día',obra:[0,1,1],princ:true,vol:.2,d:'Titulares, avisos y una opinión que pesa.'},
+        {id:'radio',n:'Emisora de radio',desde:1930,base:450,rc:.8,mg:.2,u0:.65,capN:100000,capU:'oyentes',obra:[0,1,1],princ:true,d:'Música, noticias y radionovelas por todo el país.'},
+        {id:'tv',n:'Canal de televisión',desde:1954,base:4000,rc:.55,mg:.26,u0:.65,capN:2000000,capU:'televidentes',obra:[1,2,3],princ:true,d:'La pantalla que reúne a la familia.'},
+        {id:'productora',n:'Productora de contenidos',desde:1960,base:1500,rc:.8,mg:.17,u0:.6,capN:60,capU:'producciones al año',obra:[0,1,2],d:'Series, noticieros y programas para los canales.'},
+        {id:'portal',n:'Portal digital y redes',desde:2000,base:350,rc:1.1,mg:.15,u0:.6,capN:500000,capU:'visitas al día',obra:[0,0,1],ciu:false,princ:true,vol:.35,d:'Noticias y contenido para el celular.'},
+        {id:'redaccion',n:'Central de noticias',desde:1900,base:400,rol:'apoyo',cubre:5,bono:.02,falta:.03,rep:4,d:'Periodistas y corresponsales para todos los medios. Atiende hasta 5.'},
+        {id:'imprenta',n:'Imprenta y distribución',desde:1850,base:700,rol:'apoyo',cubre:4,bono:.02,falta:.025,d:'Rotativas y camiones de reparto. Atiende hasta 4 medios.'},
+        {id:'transmision',n:'Torres de transmisión',desde:1930,base:800,rol:'apoyo',cubre:4,bono:.02,falta:.025,d:'Llegar a donde no llega la señal. Atiende hasta 4.'}]},
+    seguros:{n:'Seguros y reaseguro',sector:'seguros',grupo:'Finanzas y servicios',desde:1850,un:['unidad de negocio','unidades de negocio'],emp:'Seguros',flot:1.2,
+      d:'Agencias, ramos de vida y de generales y reaseguro. Cobran primas hoy y pagan siniestros mañana: ganan también con las reservas, hasta que llega el desastre que nadie previó.',
+      cs:.2,el:.5,rs:.6,sp:.5,ts:.2,vol:.1,pand:[1,1,1],kv:8,aut:[[1850,'el cabildo'],[1923,'la Superintendencia Bancaria'],[2005,'la Superintendencia Financiera']],
+      tit:[[1,'Agente de seguros'],[3,'Director de aseguradora'],[8,'Gran aseguradora'],[18,'Imperio de los seguros']],
+      tipos:[
+        {id:'agencia',n:'Agencia de seguros',desde:1850,base:250,rc:1,mg:.16,u0:.62,capN:400,capU:'pólizas nuevas al año',obra:[0,0,1],princ:true,d:'Vender pólizas casa por casa.'},
+        {id:'vida',n:'Ramo de vida y rentas',desde:1900,base:2000,rc:.4,mg:.32,u0:.7,capN:5000,capU:'pólizas',obra:[0,1,1],princ:true,d:'Primas de largo plazo y reservas que rinden.'},
+        {id:'gen',n:'Ramo de seguros generales',desde:1920,base:1800,rc:.5,mg:.24,u0:.68,capN:8000,capU:'pólizas',obra:[0,1,1],princ:true,vol:.25,d:'Incendio, transporte, autos y hogar.'},
+        {id:'prepag',n:'Medicina prepagada y seguros de salud',desde:1970,base:2200,rc:.5,mg:.2,u0:.7,capN:6000,capU:'afiliados',obra:[1,1,2],d:'Una red de clínicas y médicos para los afiliados.'},
+        {id:'rease',n:'Reaseguro',desde:1920,base:4000,rc:.35,mg:.32,u0:.65,capN:300,capU:'contratos',obra:[0,1,1],vol:.4,d:'Asegurar a otras aseguradoras: poco ruido y riesgos enormes.'},
+        {id:'sini',n:'Centro de siniestros',desde:1930,base:500,rol:'apoyo',cubre:6,bono:.02,falta:.03,rep:3,d:'Atender y pagar a tiempo lo que se debe. Atiende hasta 6 unidades.'},
+        {id:'actuaria',n:'Área actuarial y reservas',desde:1930,base:400,rol:'apoyo',cubre:8,bono:.02,falta:.03,d:'Calcular el riesgo y guardar lo necesario. Atiende hasta 8.'}]},
+    juridico:{n:'Servicios jurídicos',sector:'juridico',grupo:'Finanzas y servicios',desde:1800,un:['oficina','oficinas'],emp:'Abogados',
+      d:'Bufetes, notarías, consultoría y arbitraje. El activo es el conocimiento y la reputación; una biblioteca y un área de cumplimiento sostienen la calidad a medida que crece.',
+      cs:.35,el:.5,rs:1.3,sp:.6,ts:.1,vol:.12,pand:[.85,.95,1],kv:8,aut:[[1800,'el cabildo'],[1886,'el Ministerio de Justicia'],[1991,'el Consejo Superior de la Judicatura']],
+      tit:[[1,'Abogado'],[3,'Socio principal'],[8,'Gran bufete'],[18,'Imperio jurídico']],
+      tipos:[
+        {id:'bufete',n:'Bufete de abogados',desde:1800,base:200,rc:0.65,mg:.28,u0:.68,capN:15,capU:'abogados',obra:[0,0,1],princ:true,d:'Escritos, pleitos y clientes que recomiendan.'},
+        {id:'notaria',n:'Notaría',desde:1880,base:700,rc:0.42,mg:.4,u0:.75,capN:200,capU:'escrituras al mes',obra:[0,1,1],princ:true,d:'Fe pública: escrituras, autenticaciones y registros.'},
+        {id:'consult',n:'Consultoría tributaria y empresarial',desde:1930,base:300,rc:.7,mg:.26,u0:.68,capN:20,capU:'consultores',obra:[0,0,1],princ:true,d:'Asesorar a las empresas con la ley en la mano.'},
+        {id:'litigio',n:'Firma de litigio de alto perfil',desde:1950,base:600,rc:.7,mg:.3,u0:.65,capN:25,capU:'abogados',obra:[0,1,1],vol:.35,d:'Casos que salen en los periódicos.'},
+        {id:'arbitraje',n:'Centro de arbitraje y conciliación',desde:1990,base:400,rc:.55,mg:.32,u0:.65,capN:100,capU:'casos al año',obra:[0,1,1],d:'Resolver los pleitos sin ir a juicio.'},
+        {id:'biblio',n:'Archivo y biblioteca jurídica',desde:1850,base:300,rol:'apoyo',cubre:4,bono:.015,falta:.015,rep:2,d:'Jurisprudencia al alcance. Atiende hasta 4 oficinas.'},
+        {id:'cumpl',n:'Área de cumplimiento',desde:1995,base:350,rol:'apoyo',cubre:5,bono:.02,falta:.02,d:'Revisar que todo se haga como manda la norma. Atiende hasta 5.'}]},
+    financiera:{n:'Casas de bolsa, fiduciarias y fondos',sector:'financiero',grupo:'Finanzas y servicios',desde:1800,un:['oficina financiera','oficinas financieras'],emp:'Financiera',flot:.3,
+      d:'Casas de crédito y, con los años, bolsa, fiduciarias, fondos y leasing. Margen enorme y vigilancia encima; los bancos van aparte.',
+      cs:.8,el:.5,rs:.8,sp:.5,ts:.2,vol:.19,pand:[1,1,1],kv:7,aut:[[1800,'el cabildo'],[1923,'la Superintendencia Bancaria'],[2005,'la Superintendencia Financiera']],
+      tit:[[1,'Prestamista'],[3,'Financiero'],[8,'Gran grupo financiero'],[18,'Imperio financiero']],
+      tipos:[
+        {id:'prest',n:'Casa de crédito y prestamista',desde:1800,base:800,rc:.35,mg:.38,u0:.7,capN:300,capU:'clientes',obra:[0,1,1],princ:true,d:'Prestar con garantía y cobrar con paciencia.'},
+        {id:'bolsa',n:'Casa de bolsa (comisionista)',desde:1928,base:600,rc:.7,mg:0.27,u0:.65,capN:200,capU:'clientes',obra:[0,1,1],princ:true,cs:.9,vol:.35,d:'Comprar y vender acciones para otros.'},
+        {id:'fidu',n:'Fiduciaria',desde:1960,base:900,rc:.5,mg:.36,u0:.7,capN:150,capU:'negocios fiduciarios',obra:[0,1,1],princ:true,d:'Administrar la plata y los bienes de otros.'},
+        {id:'fondos',n:'Administradora de fondos de inversión',desde:1990,base:1200,rc:.45,mg:.4,u0:.7,capN:100,capU:'fondos',obra:[0,1,1],d:'Juntar el ahorro de muchos para invertirlo.'},
+        {id:'leasing',n:'Compañía de leasing y factoring',desde:1980,base:1500,rc:.4,mg:.34,u0:.7,capN:250,capU:'contratos',obra:[0,1,1],d:'Financiar máquinas, vehículos y facturas.'},
+        {id:'riesgos',n:'Mesa de riesgos y cumplimiento',desde:1930,base:450,rol:'apoyo',cubre:5,bono:.02,falta:.03,rep:2,d:'Medir lo que se arriesga antes de arriesgarlo. Atiende hasta 5 oficinas.'}]},
+    viajes:{n:'Agencias, parques y experiencias',sector:'turismo',grupo:'Turismo',desde:1900,un:['oficina de turismo','oficinas de turismo'],emp:'Turismo',
+      d:'Agencias de viajes, operadores de excursiones, parques y cruceros. Vive de la confianza del país y se cae rápido con cualquier crisis. (Los hoteles van en "El imperio hotelero".)',
+      cs:.7,el:.9,rs:.8,sp:.5,ts:.4,vol:.21,vc:.3,usd:.3,pand:[.15,.35,.8],kv:7,aut:[[1900,'la Alcaldía'],[1968,'la Corporación Nacional de Turismo'],[2002,'el Ministerio de Comercio, Industria y Turismo']],
+      tit:[[1,'Agente de viajes'],[4,'Empresario del turismo'],[10,'Gran operador turístico'],[25,'Imperio del turismo']],
+      tipos:[
+        {id:'agencia',n:'Agencia de viajes',desde:1900,base:120,rc:1.2,mg:.13,u0:.62,capN:100,capU:'viajeros al mes',obra:[0,0,1],princ:true,d:'Tiquetes, paquetes y un asesor que conoce los destinos.'},
+        {id:'operador',n:'Operador de excursiones',desde:1950,base:350,rc:1,mg:.16,u0:.62,capN:200,capU:'viajeros al mes',obra:[0,1,1],princ:true,d:'Guías, buses y planes de un día.'},
+        {id:'crucero',n:'Lanchas y cruceros turísticos',desde:1960,base:2500,rc:.5,mg:.28,u0:.6,capN:300,capU:'pasajeros',obra:[1,2,3],d:'Bahías, islas y atardeceres desde el agua.'},
+        {id:'parque',n:'Parque temático o de naturaleza',desde:1975,base:6000,rc:0.4,mg:0.4,u0:.6,capN:5000,capU:'visitantes al día',obra:[2,3,3],d:'Atracciones, naturaleza y plazoleta de comidas.'},
+        {id:'reservas',n:'Central de reservas y mercadeo',desde:1980,base:400,rol:'apoyo',cubre:8,bono:.02,falta:.02,d:'Llenar todo el año y no solo en temporada alta. Atiende hasta 8 unidades.'}]}
+  };
+  const NUEVAS=['moda','alimentos','construccion','energia','agro','mineria','logistica','tech','juegos','medios','seguros','juridico','financiera','viajes'];
+  function instalar(){ const CL=window.CLASES_176, OR=window.ORDEN_176; if(!CL||!OR) return false; NUEVAS.forEach(id=>{ if(!CL[id]) CL[id]=NC[id]; if(!OR.includes(id)) OR.push(id); }); return true; }
+  /* ==================== LOS SUCESOS DE CADA CLASE ==================== */
+  const X=(t,o)=>window.evento176(t,o), G=(e,m)=>window.gastoRed176(e,m), RP=(r,u)=>window.reposUnidad176(r,u), TD=(r,u)=>window.tipoDe176(r.clase,u.tipo)||{rc:1};
+  const ING=(r,u)=>Math.round(Math.max(1,u.rev||RP(r,u)*TD(r,u).rc));
+  const rr=(e)=>window.redNegocio176(e);
+  const EV={
+    moda:[(e,r,u)=>A()>=1900?()=>{ const x=Math.round(ING(r,u)*.15); X('<b>Una cadena grande le hace un pedido enorme a '+E(u.nom)+'</b> para la temporada.',[{t:'Aceptar y subcontratar parte ('+fm(x*.2)+')',f:()=>{ G(e,x*.2); e.caja+=x; return 'Cumpliste con ayuda de talleres vecinos: entraron '+fm(x)+' y pagaste '+fm(x*.2)+' a los subcontratistas.'; }},{t:'Aceptarlo con tu propia gente',f:()=>{ e.caja+=x*.8; u.serv=cl(u.serv-5,10,98); return 'Lo sacaste con turnos dobles: entraron '+fm(x*.8)+' y el personal quedó agotado.'; }},{t:'Rechazarlo',f:()=>'Dijiste que no: no quisiste arriesgar la calidad.'}]); }:null,
+      (e,r,u)=>A()>=1950?()=>X('<b>Llegan prendas de contrabando a la mitad del precio.</b> Las tiendas de '+E(u.ciudad)+' empiezan a preferirlas.',[{t:'Bajar los precios',f:()=>{ u.mult=Math.max(.85,u.mult-.1); return 'Bajaste los precios para defender la clientela.'; }},{t:'Diferenciarte con diseño ('+fm(RP(r,u)*.03)+')',f:()=>{ G(e,RP(r,u)*.03); u.rep=cl(u.rep+4,5,99); return 'Invertiste en diseño y calidad: tu marca se separó del contrabando.'; }},{t:'Pedir protección al Gobierno',f:()=>{ if(chance(.5)){ u.compet=0; return 'El Gobierno puso aranceles y el contrabando se frenó.'; } u.compet=2; return 'El Gobierno no hizo nada y el contrabando siguió.'; }}]):null],
+    alimentos:[(e,r,u)=>A()>=1930?()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Un lote de '+E(u.nom)+' salió defectuoso.</b> Varios consumidores se enfermaron y ya hay quejas.',[{t:'Retiro voluntario y compensación ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+2,5,99); return 'Retiraste el lote y pagaste '+fm(x)+': el golpe a la reputación fue pequeño.'; }},{t:'Negar el problema',f:()=>{ if(chance(.4)) return 'Nadie pudo probar nada. Por ahora.'; G(e,x*2); u.rep=cl(u.rep-12,5,99); return 'Salió a la luz: multa de '+fm(x*2)+' y mala fama.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.04); X('<b>Se disparó el precio del trigo, el azúcar y los aceites.</b> Las materias primas de '+E(u.nom)+' cuestan mucho más.',[{t:'Comprar por adelantado ('+fm(x*.6)+')',f:()=>{ G(e,x*.6); return 'Compraste por adelantado y te cubriste del alza: '+fm(x*.6)+'.'; }},{t:'Subir los precios',f:()=>{ u.mult=Math.min(1.3,u.mult+.1); u.rep=cl(u.rep-2,5,99); return 'Trasladaste el alza al cliente y lo notaron.'; }},{t:'Absorberlo',f:()=>{ G(e,x); return 'Absorbiste el alza: costó '+fm(x)+' este año.'; }}]); }],
+    construccion:[(e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.2); X('<b>Se abre una licitación grande</b> y '+E(u.nom)+' puede presentarse.',[{t:'Competir con un precio muy bajo',f:()=>{ if(chance(.45)){ e.caja+=x; return 'Ganaste el contrato con el precio más bajo: entraron '+fm(x)+' pero el margen quedó pelado.'; } return 'Perdiste la licitación: otro ofreció menos.'; }},{t:'Presentar una propuesta técnica ('+fm(x*.05)+')',f:()=>{ G(e,x*.05); if(chance(.6)){ e.caja+=x*1.2; u.rep=cl(u.rep+3,5,99); return 'Ganaste el contrato por calidad: entraron '+fm(x*1.2)+'.'; } return 'Perdiste, y la propuesta costó '+fm(x*.05)+'.'; }},{t:'No participar',f:()=>'Dejaste pasar la licitación.'}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.04); X('<b>Un invierno muy fuerte inunda las obras de '+E(u.nom)+'.</b>',[{t:'Pagar horas extra y recuperar ('+fm(x)+')',f:()=>{ G(e,x); return 'Recuperaste el tiempo con horas extra: '+fm(x)+'.'; }},{t:'Suspender hasta que pare',f:()=>{ u.cierre=A(); u.rep=cl(u.rep-3,5,99); return 'Suspendiste la obra el resto del año.'; }}]); }],
+    energia:[(e,r,u)=>u.tipo==='hidro'||u.tipo==='gran'?()=>{ const x=Math.round(ING(r,u)*.25); X('<b>Una sequía seca el embalse de '+E(u.nom)+'.</b> Un fenómeno de El Niño golpea el país.',[{t:'Comprar energía en bolsa para cumplir ('+fm(x*.7)+')',f:()=>{ G(e,x*.7); return 'Compraste energía para cumplir tus contratos: '+fm(x*.7)+'.'; }},{t:'Racionar el servicio',f:()=>{ G(e,x*.3); u.rep=cl(u.rep-8,5,99); return 'Racionaste: perdiste ingresos y buena parte de la reputación.'; }}]); }:null,
+      (e,r,u)=>A()>=1994?()=>X('<b>La comisión de regulación recorta las tarifas</b> de '+E(u.nom)+'.',[{t:'Aceptar el nuevo marco',f:()=>{ u.mult=Math.max(.85,u.mult-.1); return 'Aceptaste la tarifa nueva: menos ingreso por kilovatio.'; }},{t:'Demandar ('+fm(RP(r,u)*.01)+')',f:()=>{ G(e,RP(r,u)*.01); if(chance(.4)) return 'El tribunal suspendió el recorte.'; u.mult=Math.max(.85,u.mult-.1); return 'Perdiste el pleito y la tarifa bajó igual.'; }}]):null,
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Una falla grave deja sin servicio a clientes de '+E(u.nom)+'.</b>',[{t:'Reparar de urgencia ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+10,5,100); return 'Reparaste en tiempo récord por '+fm(x)+'.'; }},{t:'Reparar con calma',f:()=>{ u.rep=cl(u.rep-7,5,99); u.cons=cl(u.cons+5,5,100); return 'Tardaste en reparar y los clientes se quejaron.'; }}]); }],
+    agro:[(e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.25), hielo=A()%2===0; X('<b>'+(hielo?'Una helada':'Una sequía')+' golpea los cultivos de '+E(u.nom)+'.</b>',[{t:'Replantar ('+fm(x*.4)+')',f:()=>{ G(e,x*.4); return 'Replantaste y salvaste parte de la cosecha: '+fm(x*.4)+'.'; }},{t:'Asumir la pérdida',f:()=>{ G(e,x*.25); u.rep=cl(u.rep-2,5,99); return 'Perdiste una parte de la cosecha: '+fm(x*.25)+'.'; }}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.03); X('<b>Una plaga ataca '+E(u.nom)+'.</b>',[{t:'Fumigar ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons-3,5,100); return 'Fumigaste a tiempo: costó '+fm(x)+' y dejó huella en el suelo.'; }},{t:'Control biológico ('+fm(x*1.6)+')',f:()=>{ G(e,x*1.6); u.rep=cl(u.rep+2,5,99); return 'Un control más caro pero más limpio.'; }},{t:'No hacer nada',f:()=>{ u.rep=cl(u.rep-5,5,99); u.cons=cl(u.cons-10,5,100); return 'La plaga se comió buena parte del cultivo.'; }}]); },
+      (e,r,u)=>A()>=2013?()=>X('<b>Un paro agrario bloquea las carreteras.</b> La cosecha de '+E(u.nom)+' no sale.',[{t:'Esperar a que se abran las vías',f:()=>{ u.cierre=A(); return 'Perdiste buena parte de la cosecha por el bloqueo.'; }},{t:'Unirte al paro',f:()=>{ u.rep=cl(u.rep+2,5,99); return 'Te sumaste a los campesinos y ganaste simpatía.'; }}]):null],
+    mineria:[(e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.06); X('<b>Un derrumbe en '+E(u.nom)+' deja heridos.</b>',[{t:'Indemnizar y reforzar ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+10,5,100); u.rep=cl(u.rep+2,5,99); return 'Indemnizaste y reforzaste los túneles por '+fm(x)+'.'; }},{t:'Negar responsabilidad',f:()=>{ if(chance(.4)) return 'Nadie lo investigó a fondo.'; G(e,x*2); u.rep=cl(u.rep-12,5,99); return 'Hubo investigación y multa de '+fm(x*2)+'.'; }}]); },
+      (e,r,u)=>A()>=1990?()=>{ const x=Math.round(RP(r,u)*.04); X('<b>La comunidad de '+E(u.ciudad)+' se opone a '+E(u.nom)+'.</b> Piden compensaciones y cuidado del río.',[{t:'Negociar regalías ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'Acordaste regalías y programas sociales por '+fm(x)+'.'; }},{t:'Litigar',f:()=>{ G(e,x*.3); if(chance(.5)) return 'El juez te dio la razón.'; u.cierre=A(); return 'Perdiste el pleito y la operación estuvo suspendida.'; }},{t:'Ignorarlos',f:()=>{ u.rep=cl(u.rep-10,5,99); u.cierre=A(); return 'Bloquearon la entrada: la mina se paró buena parte del año.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.15); X('<b>Se dispara el precio internacional</b> de lo que produce '+E(u.nom)+'.',[{t:'Vender de inmediato',f:()=>{ e.caja+=x; return 'Vendiste al precio alto: entraron '+fm(x)+' extra.'; }},{t:'Guardar para vender más caro',f:()=>{ if(chance(.5)){ e.caja+=x*1.6; return 'El precio siguió subiendo: entraron '+fm(x*1.6)+' extra.'; } e.caja+=x*.4; return 'El precio se devolvió: solo entraron '+fm(x*.4)+'.'; }}]); }],
+    logistica:[(e,r,u)=>A()>=1960?()=>{ const x=Math.round(ING(r,u)*.08); X('<b>Un paro de transportadores bloquea las vías.</b> '+E(u.nom)+' no puede salir.',[{t:'Cumplir con rutas alternas ('+fm(x)+')',f:()=>{ G(e,x); return 'Buscaste rutas alternas a un costo de '+fm(x)+'.'; }},{t:'Sumarte al paro',f:()=>{ u.cierre=A(); return 'Te sumaste al paro y perdiste buena parte del año.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Un accidente de un vehículo de '+E(u.nom)+'.</b> Hay heridos y carga perdida.',[{t:'Responder por todo ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+1,5,99); return 'Respondiste por los daños: '+fm(x)+'.'; }},{t:'Dejar que lo resuelva el seguro',f:()=>{ G(e,x*.4); u.rep=cl(u.rep-4,5,99); return 'El seguro pagó parte; tardó y la reputación bajó.'; }}]); }],
+    tech:[(e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Un ciberataque golpea los sistemas de '+E(u.nom)+'.</b> Los datos de los clientes quedaron expuestos.',[{t:'Pagar la recuperación y avisar ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep-2,5,99); return 'Recuperaste los sistemas y avisaste a los clientes: '+fm(x)+'.'; }},{t:'Callarlo',f:()=>{ if(chance(.4)) return 'Nadie se enteró... esta vez.'; G(e,x*2); u.rep=cl(u.rep-14,5,99); return 'Se supo: multa de '+fm(x*2)+' y desconfianza.'; }}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.04); X('<b>Una multinacional intenta llevarse a tus mejores programadores de '+E(u.nom)+'.</b>',[{t:'Mejorarles el sueldo ('+fm(x)+')',f:()=>{ G(e,x); u.serv=cl(u.serv+5,10,98); return 'Les subiste el sueldo: se quedaron.'; }},{t:'Dejarlos ir',f:()=>{ u.serv=cl(u.serv-10,10,98); u.rep=cl(u.rep-3,5,99); return 'Se fueron y el producto lo sintió.'; }}]); },
+      (e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.25); X('<b>Un producto de '+E(u.nom)+' pega de verdad.</b> Los usuarios llegan por miles.',[{t:'Escalar con servidores y publicidad ('+fm(x*.2)+')',f:()=>{ G(e,x*.2); e.caja+=x; return 'Escalaste a tiempo: entraron '+fm(x)+' extra.'; }},{t:'Disfrutarlo sin invertir',f:()=>{ e.caja+=x*.5; return 'Entraron '+fm(x*.5)+' extra, pero otros se llevaron el resto.'; }}]); }],
+    medios:[(e,r,u)=>A()>=1900?()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Te demandan por injuria</b> por algo que publicó '+E(u.nom)+'.',[{t:'Rectificar ('+fm(x*.3)+')',f:()=>{ G(e,x*.3); u.rep=cl(u.rep-2,5,99); return 'Rectificaste y el asunto se enfrió.'; }},{t:'Defender lo publicado ('+fm(x*.2)+')',f:()=>{ G(e,x*.2); if(chance(.5)){ u.rep=cl(u.rep+4,5,99); return 'Ganaste el pleito y subió tu credibilidad.'; } G(e,x*1.5); u.rep=cl(u.rep-6,5,99); return 'Perdiste el pleito: condena de '+fm(x*1.5)+'.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.12); X('<b>Un escándalo publicado por '+E(u.nom)+' lo vende todo.</b> La gente no habla de otra cosa.',[{t:'Seguir con el tema',f:()=>{ e.caja+=x; u.rep=cl(u.rep-2,5,99); return 'Seguiste con el tema: entraron '+fm(x)+' extra, con enemigos nuevos.'; }},{t:'Bajarle el tono',f:()=>{ e.caja+=x*.4; u.rep=cl(u.rep+2,5,99); return 'Le bajaste el tono: entraron '+fm(x*.4)+' y ganaste respeto.'; }}]); },
+      (e,r,u)=>A()>=1900?()=>X('<b>Un poderoso le pide a '+E(u.nom)+' que no publique algo.</b>',[{t:'Ceder',f:()=>{ u.rep=cl(u.rep-6,5,99); try{ if(S.p) S.p.redes=cl((S.p.redes||0)+3,0,100); }catch(x){} return 'No publicaste: quedaste bien con él y mal con tus lectores.'; }},{t:'Publicar igual',f:()=>{ u.rep=cl(u.rep+5,5,99); return 'Publicaste y subió tu credibilidad, a costa de un enemigo.'; }}]):null],
+    juegos:[(e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.4); X('<b>Un lanzamiento de '+E(u.nom)+' se vuelve viral.</b> Todo el mundo está jugando.',[{t:'Aprovechar con actualizaciones y publicidad ('+fm(x*.15)+')',f:()=>{ G(e,x*.15); e.caja+=x; u.rep=cl(u.rep+5,5,99); return 'Aprovechaste el momento: entraron '+fm(x)+' extra.'; }},{t:'Dejar que crezca solo',f:()=>{ e.caja+=x*.5; return 'Entraron '+fm(x*.5)+' extra.'; }}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.08); X('<b>El lanzamiento de '+E(u.nom)+' fracasa.</b> Las reseñas son malas y nadie lo descarga.',[{t:'Arreglarlo y relanzar ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+2,5,99); return 'Lo arreglaste y relanzaste por '+fm(x)+'.'; }},{t:'Cerrar el proyecto',f:()=>{ G(e,x*.3); u.rep=cl(u.rep-6,5,99); return 'Cerraste el proyecto y perdiste lo invertido.'; }}]); }],
+    seguros:[(e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.12); X('<b>Una catástrofe natural golpea a los asegurados de '+E(u.nom)+'.</b> Un terremoto o una inundación dispara los reclamos.',[{t:'Pagar todo a tiempo ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+6,5,99); return 'Pagaste los siniestros completos: '+fm(x)+' y mucha confianza.'; }},{t:'Pagar lo mínimo y demorarte',f:()=>{ G(e,x*.6); u.rep=cl(u.rep-12,5,99); return 'Pagaste '+fm(x*.6)+' y demoraste el resto: la gente no lo perdona.'; }}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.04); X('<b>Una red organizada de fraudes golpea a '+E(u.nom)+'.</b> Reclamos falsos por todas partes.',[{t:'Investigar a fondo ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); return 'Descubriste la red y recuperaste buena parte: costó '+fm(x*.5)+'.'; }},{t:'Pagar y ya',f:()=>{ G(e,x); return 'Pagaste los reclamos falsos: '+fm(x)+'.'; }}]); }],
+    juridico:[(e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.3); X('<b>'+E(u.nom)+' recibe un caso famoso.</b> Todos los periódicos hablan de él.',[{t:'Tomarlo con tus mejores abogados',f:()=>{ if(chance(.65)){ e.caja+=x; u.rep=cl(u.rep+8,5,99); return 'Ganaste el caso: entraron '+fm(x)+' y mucha fama.'; } u.rep=cl(u.rep-4,5,99); return 'Perdiste el caso, con la prensa mirando.'; }},{t:'Rechazarlo',f:()=>'No quisiste el riesgo.'}]); },
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.05); X('<b>Hay un conflicto entre los socios de '+E(u.nom)+'.</b> Uno de ellos amenaza con llevarse a sus clientes.',[{t:'Negociar una salida ('+fm(x)+')',f:()=>{ G(e,x); return 'Acordaste una salida ordenada por '+fm(x)+'.'; }},{t:'Pelear',f:()=>{ u.rep=cl(u.rep-6,5,99); u.serv=cl(u.serv-6,10,98); return 'Peleaste en público y el despacho quedó golpeado.'; }}]); }],
+    financiera:[(e,r,u)=>A()>=1928?()=>{ const x=Math.round(ING(r,u)*.2); X('<b>Una crisis de bolsa golpea a los clientes de '+E(u.nom)+'.</b> Todos quieren vender y nadie quiere comprar.',[{t:'Acompañar a tus clientes ('+fm(x*.3)+')',f:()=>{ G(e,x*.3); u.rep=cl(u.rep+4,5,99); return 'Acompañaste a tus clientes: costó '+fm(x*.3)+' y ganaste lealtad.'; }},{t:'Cuidar tu propia caja',f:()=>{ u.rep=cl(u.rep-6,5,99); return 'Cuidaste tu caja y perdiste clientes.'; }}]); }:null,
+      (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.06); X('<b>Un empleado de '+E(u.nom)+' defraudó a varios clientes.</b>',[{t:'Responder por todo ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep-2,5,99); return 'Devolviste lo defraudado: '+fm(x)+'.'; }},{t:'Dejar que el empleado lo resuelva',f:()=>{ u.rep=cl(u.rep-12,5,99); return 'Los clientes se sintieron abandonados.'; }}]); }],
+    viajes:[(e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.15); X('<b>Temporada alta en '+E(u.nom)+'.</b> Un puente largo llena los destinos.',[{t:'Subir los precios',f:()=>{ e.caja+=x*1.3; u.rep=cl(u.rep-3,5,99); return 'Subiste los precios y entraron '+fm(x*1.3)+' extra.'; }},{t:'Mantener los precios',f:()=>{ e.caja+=x; u.rep=cl(u.rep+4,5,99); return 'Entraron '+fm(x)+' extra y la clientela quedó contenta.'; }}]); },
+      (e,r,u)=>A()>=1980?()=>X('<b>Una alerta de viaje por orden público</b> espanta a los turistas de '+E(u.ciudad)+'.',[{t:'Hacer promoción de seguridad ('+fm(RP(r,u)*.02)+')',f:()=>{ G(e,RP(r,u)*.02); u.rep=cl(u.rep+2,5,99); return 'Hiciste campaña de seguridad y recuperaste algo de confianza.'; }},{t:'Esperar a que pase',f:()=>{ u.compet=2; return 'Esperaste: el turismo cayó un par de años.'; }}]):null]
+  };
+  function instalarSucesos(){ const E2=window.EVC_176; if(!E2) return; Object.keys(EV).forEach(id=>{ if(!E2[id]) E2[id]=EV[id]; }); }
+  /* ==================== LAS COMPAÑÍAS QUE YA EXISTÍAN ==================== */
+  const MAPA={moda:['moda'],alimentos:['alimentos'],construccion:['construccion'],energia:['energia'],agro:['agro'],mineria:['mineria'],logistica:['logistica'],tech:['tech'],juegos:['juegos'],medios:['medios'],seguros:['seguros'],juridico:['juridico'],financiero:['financiera'],turismo:['viajes'],salud:['farmacia','clinica'],retail:['comercio'],educacion:['educacion'],gastronomia:['gastronomia'],inmobiliario:['inmobiliario'],servicios:['servicios']};
+  const CLd=()=>window.CLASES_176||{};
+  function clasesPara(e){ const C=CLd(); return (MAPA[e.sector]||[]).filter(id=>C[id]&&A()>=C[id].desde&&window.tiposDisp176(id,'princ').length); }
+  function convertibles(){ return comps().filter(e=>e&&!e.red176&&!e.hotel175&&!e.banco112&&!e.licencia112&&!e.cafe148&&clasesPara(e).length); }
+  function convertir(e,claseId){ const C=CLd()[claseId]; if(!C||!e||e.red176||!clasesPara(e).includes(claseId)) return null; const ts=window.tiposDisp176(claseId,'princ'), cds=window.CIUDADES_176.filter(d=>A()>=d.desde);
+    const home=(S.hogar&&S.hogar.ciudad)||'Bogotá', ciudad0=cds.some(d=>d.n===e.ciudad)?e.ciudad:(cds.some(d=>d.n===home)?home:cds[0].n);
+    e.clase176=claseId; const r=window.redNegocio176(e); r.clase=claseId; r.marca=cl(isFinite(e.marca)?e.marca:40,10,90);
+    const ing=Math.max(1,e.ingresos), t0=ts[0], revG=window.costoUnidad176(t0,'g',ciudad0,'propio')*t0.rc, n=cl(Math.round(ing/revG),1,10);
+    const lista=[ciudad0].concat(cds.map(d=>d.n).filter(x=>x!==ciudad0)); const meta=ing/n; const out=[];
+    for(let i=0;i<n;i++){ const t=ts[i%ts.length], ciudad=t.ciu===false?'En línea':lista[i%lista.length];
+      const tam=['p','m','g'].map(z=>[z,Math.abs(window.costoUnidad176(t,z,ciudad,'propio')*t.rc-meta)]).sort((a,b)=>a[1]-b[1])[0][0];
+      const costo=window.costoUnidad176(t,tam,ciudad,'propio'), u={id:'u'+(r.seq=(r.seq||0)+1),nom:t.n&&typeof t.n==='string'?t.n:(Array.isArray(t.n)?t.n[t.n.length-1][1]:'Unidad'),tipo:t.id,ciudad:t.ciu===false?'En línea':ciudad,tam,modelo:'propio',cons:70,serv:55,rep:cl(55+((e.marca||50)-50)/4,20,90),mult:1,pers:1,amp:1,ocu:0,rev:0,ebitda:0,valor:costo*.9,hipoteca:0,abierto:e.fundada||A()-5,enObra:null,amplia:null,hist:[],principal:i===0};
+      const usados=r.unidades.map(x=>x.nom); let nom=u.nom, k=0; while(usados.includes(nom)&&k<30){ k++; nom=u.nom+' '+(k+1); } u.nom=nom; r.unidades.push(u); out.push(u); }
+    if(n>6){ C.tipos.filter(t=>t.rol==='apoyo'&&A()>=t.desde).forEach(t=>{ const costo=window.costoUnidad176(t,'m',ciudad0,'propio'); r.unidades.push({id:'u'+(r.seq=(r.seq||0)+1),nom:String(typeof t.n==='string'?t.n:t.n[t.n.length-1][1]),tipo:t.id,ciudad:ciudad0,tam:'m',modelo:'propio',cons:75,serv:55,rep:60,mult:1,pers:1,amp:1,ocu:0,rev:0,ebitda:0,valor:costo*.9,hipoteca:0,abierto:A()-3,enObra:null,amplia:null,hist:[],principal:false}); }); }
+    log('<b>'+E(e.nombre)+'</b> se organizó por unidades: '+n+' '+(n===1?C.un[0]:C.un[1])+(n>6?' y sus unidades de apoyo':'')+'. Conserva su caja y su deuda.','hito'); try{ window.revisarHitos176(e,r); }catch(x){} return r; }
+  function escenaConvertir177(){ if(!ACTIVO()||nino()) return; const L=convertibles(), ops=[];
+    L.forEach(e=>clasesPara(e).forEach(id=>{ const C=CLd()[id]; ops.push({t:'Organizar '+e.nombre+' como '+C.n.toLowerCase(),cat:'compania',d:'Ventas de '+fm(e.ingresos)+', caja de '+fm(e.caja)+'. Pasa a manejarse con unidades principal, de frente y de apoyo.',cerrar:false,run:()=>{ cerrarModal(); confirmar(e,id); }}); }));
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); if(typeof window.escenaPuerta176==='function') window.escenaPuerta176(); }});
+    escena({rubro:'Cámara de Comercio',titulo:'Organizar por unidades',ancho:true,cerrable:true,clase:'red176',cuerpo:L.length?'Estas compañías se crearon antes de que los negocios tuvieran unidades. Al organizarlas por unidades, sus ventas salen de cada sede, planta o local, y se pueden abrir, comprar, ampliar y vender una por una.':'No hay compañías por organizar.',opciones:ops}); }
+  function confirmar(e,id){ const C=CLd()[id]; escena({rubro:'Cámara de Comercio',titulo:'Organizar '+E(e.nombre),ancho:true,cerrable:true,clase:'red176',
+      cuerpo:'<b>'+E(e.nombre)+'</b> pasará a ser '+E(C.n.toLowerCase())+'. Se arma con '+Math.max(1,Math.min(10,Math.round(e.ingresos/Math.max(1,window.costoUnidad176(window.tiposDisp176(id,'princ')[0],'g','Bogotá','propio')*window.tiposDisp176(id,'princ')[0].rc))))+' unidades de tamaño parecido a sus ventas de hoy ('+fm(e.ingresos)+'). Conserva su caja, su deuda y sus accionistas; las plantas de la v137 y los productos que lanzó dejan de contar como antes.',
+      opciones:[{t:'Organizarla por unidades',cat:'compania',cerrar:false,run:()=>{ cerrarModal(); const r=convertir(e,id); render(); if(r&&typeof window.escenaRed176==='function') window.escenaRed176(e); }},{t:'Dejarla como está',cat:'legado',run:()=>{}}]}); }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v177) return;
+    const f=function(e){ let h=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&typeof negCat!=='undefined'&&negCat==='resumen'&&!e.red176&&!e.hotel175&&!e.banco112&&!e.cafe148&&clasesPara(e).length){ const i=comps().indexOf(e);
+          h+='<div class="panel176"><b>Organizar por unidades</b><div class="apunte">Esta compañía todavía se maneja en bloque. Organizada por unidades, cada sede, planta o local se abre, compra, amplía y vende por separado, con sus unidades de apoyo.</div><button type="button" class="btn" data-c177="conv:'+i+'">Organizar por unidades</button></div>'; } }catch(x){}
+      return h; };
+    Object.keys(old).forEach(k=>{ f[k]=old[k]; }); f.__v177=true; window.panelCompania86=f; }
+  function clic(ev){ const t=ev.target; if(!t||!t.closest) return; const b=t.closest('[data-c177]'); if(!b) return; ev.preventDefault(); ev.stopPropagation(); const v=String(b.getAttribute('data-c177')||'');
+    if(v.indexOf('conv:')===0){ const e=comps()[+v.slice(5)]; if(!e) return; const L=clasesPara(e); if(L.length===1) confirmar(e,L[0]); else escenaConvertir177(); } }
+  function gConvertir(){ if(!ACTIVO()||nino()) return []; const L=convertibles(); if(!L.length) return []; const e=L.slice().sort((a,b)=>b.ingresos-a.ingresos)[0];
+    return [{id:'conv177:'+e.nombre,peso:30,tono:'oro',txt:'<b>'+E(e.nombre)+'</b> todavía se maneja en bloque.',por:'Organizada por unidades se pueden abrir, comprar, ampliar y vender sedes, plantas y locales uno por uno, con sus unidades de apoyo.',si:'Mientras tanto no puedes crecerla por piezas.',ir:'Fundar una compañía',irT:'Organizar',pre:()=>{}}]; }
+  function init177(){ instalar(); instalarSucesos(); wrapPanel(); try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA177_CONS){ window.__SA177_CONS=true; window.consejeroRegistrar168(gConvertir); } }catch(x){} if(!window.__SA177_CLIC){ window.__SA177_CLIC=true; document.addEventListener('click',clic,true); }
+    Object.assign(window,{CLASES_NUEVAS_177:NC,SUCESOS_177:EV,convertibles177:convertibles,clasesPara177:clasesPara,convertir177:convertir,escenaConvertir177,confirmarConvertir177:confirmar,MAPA_SECTOR_177:MAPA}); }
+  init177(); setTimeout(init177,40); setTimeout(init177,220); setTimeout(init177,650); setTimeout(init177,950);
+  window.__SA177={version:V177};
 })();
 </script>
 
