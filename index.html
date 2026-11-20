@@ -1342,10 +1342,33 @@ svg.foto116{display:block;background:#1d2a23}
 .reg166 .ext170{margin-top:6px}
 .reg166 .ext170 .apunte{margin:4px 0}
 </style>
+<style id="estilos-v175">
+.hot175 .k{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin:8px 0 12px}
+.hot175 .k div{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.hot175 .k b{display:block;font-size:15px;font-family:var(--display)}
+.hot175 .k span{font-size:12px;color:var(--humo2)}
+.hot175 h4{margin:14px 0 6px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--humo2)}
+.hot175 small{color:var(--humo2)}
+.hot175 .fila175{display:flex;gap:10px;align-items:center;padding:9px 10px;margin:6px 0;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer}
+.hot175 .fila175:hover{background:rgba(214,166,72,.12);border-color:rgba(214,166,72,.4)}
+.hot175 .fila175 .est175{font-size:13px;color:#F0CF86;min-width:62px;letter-spacing:1px}
+.hot175 .fila175 .nm175{flex:1;min-width:0}
+.hot175 .fila175 .nm175 b{display:block;font-size:14px}
+.hot175 .fila175 .nm175 small{display:block;font-size:11.5px}
+.hot175 .fila175 .cf175{text-align:right;font-size:12.5px;white-space:nowrap}
+.hot175 .b175{height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px;min-width:70px}
+.hot175 .b175 i{display:block;height:100%;background:var(--laton)}
+.hot175 .b175.mal i{background:#C25B4E}.hot175 .b175.bien i{background:#6FC08F}
+.hot175 .tit175{display:inline-block;padding:2px 10px;border-radius:10px;background:rgba(214,166,72,.2);color:#F0CF86;font-size:12px;margin-left:6px}
+.hot175 .hit175{display:inline-block;margin:2px 4px 2px 0;padding:2px 9px;border-radius:9px;font-size:11.5px;background:rgba(111,192,143,.18);color:#8fe0b0}
+.hot175 .hit175.no{background:rgba(255,255,255,.05);color:var(--humo2)}
+.panel175{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.panel175 .apunte{margin:4px 0 8px}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v174</div>
+<div class="version-badge" id="versionBadge">v175</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -7272,6 +7295,7 @@ function correrEmpresa(res,cual){
   e.utilidad=antes-imp;
   e.costos=e.ingresos-opu;
   e.caja+=e.utilidad;
+  if(e.hotel175&&typeof window.anualHoteles175==='function'){ try{ window.anualHoteles175(e,res); }catch(x){ console.error(x); } }   // v175: el resultado sale de los hoteles
   e.innovacion=clamp(e.innovacion-rnd(1.5,4),0,100);
   e.marca=clamp(e.marca-rnd(1,3),0,100);
   e.eficiencia=clamp(e.eficiencia-rnd(.5,2.5),0,100);
@@ -30660,7 +30684,8 @@ install();setTimeout(install,1200);
     {id:'sic',desde:1968,sect:'*',n:a=>'la Superintendencia de Industria y Comercio',ambito:'competencia, precios y consumidores'},
     {id:'supersalud',desde:1977,sect:['salud'],n:a=>'la Superintendencia de Salud',ambito:'atención, cartera y habilitación'},
     {id:'superservicios',desde:1994,sect:['energia'],n:a=>'la Superintendencia de Servicios Públicos',ambito:'tarifas, calidad y continuidad del servicio'},
-    {id:'supertransporte',desde:1992,sect:['logistica'],n:a=>'la Superintendencia de Transporte',ambito:'seguridad, tarifas y habilitación'}];
+    {id:'supertransporte',desde:1992,sect:['logistica'],n:a=>'la Superintendencia de Transporte',ambito:'seguridad, tarifas y habilitación'},
+    {id:'turismo',desde:1968,sect:['turismo'],n:a=>a>=2002?'el Ministerio de Comercio, Industria y Turismo':a>=1996?'el Viceministerio de Turismo':'la Corporación Nacional de Turismo',ambito:'calidad, sanidad y seguridad de los establecimientos'}];
   function intensidad(a){ a=a||A(); return a<1900?0:a<1923?.12:a<1960?.4:a<1991?.65:a<2005?1:1.25; }
   const regsDe=e=>REGS.filter(g=>A()>=g.desde&&(g.sect==='*'||g.sect.includes(e.sector))&&(!g.min||e.ingresos>=g.min));
   const SENS={financiero:1.5,seguros:1.3,salud:1.4,energia:1.2,logistica:1.1,mineria:1.15,alimentos:1.1};
@@ -30756,7 +30781,7 @@ install();setTimeout(install,1200);
       opciones:ops}); }
   /* --- los enganches --- */
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top166) return;
-    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e._y166!==S.anio){ e._y166=S.anio; anualCompania(e); } }catch(x){ console.error(x); } return r; };   // una sola vez por compañía y año (la envoltura se re-instala en cada arranque)
     f.__top166=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA166_PASO) return; window.__SA166_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
@@ -30930,7 +30955,7 @@ install();setTimeout(install,1200);
       opciones:ops}); }
   /* ==================== LOS ENGANCHES ==================== */
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top167) return;
-    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e._y167!==S.anio){ e._y167=S.anio; anualCompania(e); } }catch(x){ console.error(x); } return r; };   // una sola vez por compañía y año (la envoltura se re-instala en cada arranque)
     f.__top167=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA167_PASO) return; window.__SA167_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto&&S.macro){ S.mundo167=S.mundo167||{ruido:0}; S.mundo167.usdPrev=S.macro.usd; } }catch(e){} return r; }; }
@@ -31334,7 +31359,7 @@ install();setTimeout(install,1200);
     return [{id:'tec:'+t.id+':'+e.nombre,peso:Math.round(peso),tono:f==='madura'?'mal':'oro',txt,por:f==='madura'?'Cada año que pasa pierdes clientes frente a quienes ya la tienen.':'Adoptarla a tiempo sube la eficiencia, las ventas y el margen durante años.',si:f==='madura'?'Pierdes hasta '+Math.round(t.al*W(e,t)*60)/10+'% de las ventas en cinco años.':'Cuando se vuelva lo normal, adoptarla ya no te dará ventaja y no hacerlo te costará.',ir:TIT,irT:'Ver tecnologías',pre:()=>{ try{ const i=comps().indexOf(e); if(i>=0) sentarseEn(i); }catch(x){} }}]; }
   /* ==================== LOS ENGANCHES ==================== */
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top169) return;
-    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e._y169!==S.anio){ e._y169=S.anio; anualCompania(e); } }catch(x){ console.error(x); } return r; };   // una sola vez por compañía y año (la envoltura se re-instala en cada arranque)
     f.__top169=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA169_PASO) return; window.__SA169_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()) pasoAnio(); }catch(e){ console.error(e); } return r; }; }
@@ -31492,7 +31517,7 @@ install();setTimeout(install,1200);
     return out.slice(0,2); }
   /* ==================== LOS ENGANCHES ==================== */
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__top170) return;
-    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e) anualCompania(e); }catch(x){ console.error(x); } return r; };
+    const f=function(res,cual){ const e=cual||S.emp; const r=old.apply(this,arguments); try{ if(e&&e._y170!==S.anio){ e._y170=S.anio; anualCompania(e); } }catch(x){ console.error(x); } return r; };   // una sola vez por compañía y año (la envoltura se re-instala en cada arranque)
     f.__top170=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA170_PASO) return; window.__SA170_PASO=true;
     window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()&&!nino()) anualSic(); }catch(e){ console.error(e); } return r; }; }
@@ -31773,6 +31798,382 @@ install();setTimeout(install,1200);
   function init174(){ instalarRuta(); wrapAcciones(); wrapCat(); Object.assign(window,{OFICIOS_174:OFICIOS,oficiosDisponibles174:disponibles,escenaOficios174,empezarOficio174:empezar,SALARIOS_OFICIO_174:SAL}); }
   init174(); setTimeout(init174,40); setTimeout(init174,220); setTimeout(init174,650); setTimeout(init174,950);
   window.__SA174={version:V174};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v175 · EL IMPERIO HOTELERO
+   De la hospedería de arrieros al gran hotel, del motel de carretera al resort
+   todo incluido: una cadena hotelera se construye hotel por hotel, y cada
+   hotel tiene su propia vida.
+   - Una cadena es una compañía de turismo cuyo resultado sale de sus hoteles.
+     Cada hotel tiene tipo (hospedería, posada, hotel de ciudad, gran hotel,
+     motel, aeropuerto, resort, boutique, hostal, apartahotel; cada uno desde
+     su época), destino (nueve ciudades colombianas, la costa, el Eje
+     Cafetero, San Andrés... y desde 1985 el exterior), habitaciones,
+     tarifa, ocupación, estado de conservación, servicio y reseñas.
+   - La demanda depende del destino (negocios u ocio), del ciclo, del orden
+     público, de la época del turismo, de tu tarifa, de tus reseñas, de tu
+     marca, de la tecnología que uses, de los extranjeros y del dólar, de
+     las otras tuyas en la misma ciudad (se canibalizan) y, en 2020, de la
+     pandemia.
+   - Cuatro modelos: propio, arrendado, franquicia (cobras regalías por tu
+     marca) y administrado (cobras por manejar un hotel ajeno).
+   - Construir, comprar uno que está en venta (a veces uno histórico),
+     ampliar, renovar, vender, vender y arrendar, hipotecar, aportar a la
+     cadena los hoteles que ya tenías.
+   - La marca de la cadena sube con las reseñas, y con ella la ocupación, la
+     tarifa y la posibilidad de franquiciar; el programa de lealtad (desde
+     1990) y las agencias en línea (desde 2005) pesan en el resultado.
+   - Sucesos: temporadas, huelgas, incendios, intoxicaciones, reseñas
+     virales, terremotos, ofertas de compra y la pandemia.
+   - Hitos y títulos: posadero, hotelero, magnate, imperio hotelero.
+   ========================================================================== */
+(function(){
+  const V175='v175';
+  const TIT='El imperio hotelero';
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cap=x=>String(x||'').charAt(0).toUpperCase()+String(x||'').slice(1);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const evento=(t,o,p)=>{ try{ cola.push({p:p||7,c:()=>!!(S&&S.p&&!S.muerto),t:()=>t,o}); }catch(e){} };
+  const movida=()=>{ if(S._mov175===S.anio) return true; if(S.mov<1) return false; S._mov175=S.anio; S.mov--; return true; };
+  const sinMov=()=>(S._mov175!==S.anio&&S.mov<1)?'No te quedan movidas':null;
+  const sentar=e=>()=>{ try{ const i=comps().indexOf(e); if(i>=0){ sentarseEn(i); try{ negSel=i; }catch(x){} } }catch(x){} };
+  function interp(T,a){ if(!isFinite(a)||a<=T[0][0]) return T[0][1]; for(let i=1;i<T.length;i++){ if(a<=T[i][0]){ const p=T[i-1], q=T[i]; return p[1]+(q[1]-p[1])*(a-p[0])/(q[0]-p[0]); } } return T[T.length-1][1]; }
+  /* ---- las épocas del turismo y de los precios ---- */
+  const ERA_TUR=[[1800,.85],[1850,.88],[1900,.92],[1930,.92],[1950,.95],[1970,1.0],[1990,.92],[2000,.86],[2005,1.0],[2015,1.05],[2026,1.08]];
+  const PAND={2020:.28,2021:.58,2022:.88};
+  const F=()=>cl(1+(A()-1800)/200,1,2.3);
+  /* ---- los tipos de hotel: costo por habitación, tarifa por noche, ocupación base, margen operativo ---- */
+  const TIPOS=[
+    {id:'hosp',n:'Hospedería de arrieros',desde:1800,hasta:1965,est:0,costo:4,adr:.0045,ocu0:0.5,mg:.36,hab:[4,14],ext:.02,ocio:.1,pr:.25,d:'Cuartos y pesebrera para arrieros y viajeros del camino real.'},
+    {id:'posada',n:'Posada o mesón',desde:1800,hasta:1990,est:1,costo:9,adr:.011,ocu0:0.47,mg:.37,hab:[8,28],ext:.04,ocio:.25,pr:.28,d:'Cuartos limpios, comida casera y el patio donde se junta el pueblo.'},
+    {id:'hotelc',n:'Hotel de ciudad',desde:1860,est:3,costo:38,adr:.045,ocu0:0.52,mg:.34,hab:[30,120],ext:.12,ocio:.3,pr:.30,d:'El hotel de los negocios y los viajeros importantes, cerca de la plaza o de la estación.'},
+    {id:'gran',n:'Gran hotel',desde:1905,est:5,costo:90,adr:.13,ocu0:0.5,mg:.33,hab:[40,300],ext:.3,ocio:.45,pr:.38,d:'Salones, orquesta, mármoles y el nombre de la ciudad. Es una declaración.'},
+    {id:'motel',n:'Motel de carretera',desde:1955,est:2,costo:22,adr:.03,ocu0:0.56,mg:.45,hab:[12,50],ext:.05,ocio:.6,pr:.12,d:'Rotación alta, discreción y margen. Vive de las carreteras.'},
+    {id:'aero',n:'Hotel de aeropuerto',desde:1960,est:3,costo:55,adr:.07,ocu0:0.6,mg:.36,hab:[60,200],ext:.35,ocio:.2,pr:.27,d:'Tripulaciones, conexiones perdidas y ejecutivos de paso.',aire:true},
+    {id:'resort',n:'Resort todo incluido',desde:1985,est:5,costo:110,adr:.16,ocu0:0.47,mg:.34,hab:[100,400],ext:.4,ocio:.9,pr:.33,d:'Playa, buffet y manilla. La temporada alta paga el año.',playa:true},
+    {id:'boutique',n:'Hotel boutique',desde:1995,est:4,costo:80,adr:.11,ocu0:0.5,mg:.38,hab:[10,40],ext:.45,ocio:.7,pr:.3,d:'Pocas habitaciones, casa antigua y el detalle que no se copia.',hist:true},
+    {id:'hostal',n:'Hostal económico',desde:2000,est:2,costo:14,adr:.02,ocu0:0.55,mg:.34,hab:[20,80],ext:.55,ocio:.85,pr:.22,d:'Camarotes, cocina compartida y viajeros con poca plata y mucho tiempo.'},
+    {id:'apart',n:'Apartahotel',desde:1990,est:3,costo:48,adr:.055,ocu0:0.55,mg:.36,hab:[30,150],ext:.2,ocio:.3,pr:.22,d:'Estadías largas de ejecutivos y familias.'}];
+  const TB={}; TIPOS.forEach(t=>{ TB[t.id]=t; });
+  /* ---- los destinos: negocios (neg), ocio, precio del suelo, año desde el que hay hoteles de verdad ---- */
+  const DESTINOS=[
+    {n:'Bogotá',neg:1.25,ocio:.8,suelo:1.3,desde:1800,aire:true,hist:true},{n:'Medellín',neg:1.1,ocio:.85,suelo:1.15,desde:1800,aire:true,hist:true},
+    {n:'Cali',neg:.95,ocio:.8,suelo:1.0,desde:1800,aire:true},{n:'Barranquilla',neg:1.05,ocio:.85,suelo:1.0,desde:1800,aire:true},
+    {n:'Bucaramanga',neg:.85,ocio:.6,suelo:.9,desde:1800},{n:'Manizales',neg:.7,ocio:.75,suelo:.85,desde:1800},{n:'Montería',neg:.7,ocio:.5,suelo:.75,desde:1800},
+    {n:'La Estrella',neg:.5,ocio:.35,suelo:.7,desde:1800},{n:'Cartagena',neg:.8,ocio:1.35,suelo:1.35,desde:1800,playa:true,aire:true,hist:true},
+    {n:'Santa Marta',neg:.55,ocio:1.2,suelo:1.0,desde:1900,playa:true},{n:'San Andrés',neg:.3,ocio:1.3,suelo:1.1,desde:1950,playa:true,aire:true},
+    {n:'Villa de Leyva',neg:.2,ocio:1.1,suelo:.9,desde:1970,hist:true},{n:'Eje Cafetero',neg:.5,ocio:1.1,suelo:.8,desde:1990}];
+  const DB=()=>DESTINOS.concat(((typeof CIUDADES_GLOBALES!=='undefined')?CIUDADES_GLOBALES:[]).map(g=>({n:g.n,neg:cl((g.neg||12)/11,.9,1.5),ocio:1.1,suelo:cl((g.costo||3)/1.7,1.2,2.6),desde:1985,aire:true,hist:true,global:true,pais:g.pais})));
+  const dest=n=>DB().find(d=>d.n===n)||DESTINOS[0];
+  const destDisp=e=>DB().filter(d=>A()>=d.desde&&(!d.global||(((e&&e.hotel175)?e.hotel175.hoteles.filter(h=>!h.enObra).length:0)>=5&&A()>=1985)));
+  const tiposDisp=d=>TIPOS.filter(t=>tipoOK(t,d));
+  function tipoOK(t,d){ if(A()<t.desde||(t.hasta&&A()>t.hasta)) return false; if(t.playa&&!d.playa) return false; if(t.aire&&!d.aire) return false; if(t.hist&&!(d.hist||d.global)) return false; return true; }
+  /* ---- nombres ---- */
+  const NOM={hosp:['Hospedería','Posada del camino','Mesón'],posada:['Posada','Mesón','Casa de huéspedes'],hotelc:['Hotel'],gran:['Gran Hotel'],motel:['Motel'],aero:['Hotel Aeropuerto'],resort:['Resort'],boutique:['Boutique Hotel'],hostal:['Hostal'],apart:['Apartahotel']};
+  const APO=['Colonial','Real','de la Plaza','Granada','Imperial','Central','Continental','Andino','del Parque','Los Almendros','Las Palmas','del Río','San Rafael','La Esperanza','Cumbre','del Prado','Sol y Mar','Los Arrieros','La Ceiba','Casa Vieja'];
+  function nombreHotel(c,tipo,ciudad){ const base=pick(NOM[tipo]||['Hotel']); const usados=c.hoteles.map(h=>h.nom); let n=''; for(let i=0;i<30;i++){ n=(tipo==='gran'||tipo==='aero')?(tipo==='gran'?'Gran Hotel '+(i<4?ciudad:pick(APO)):base+' '+ciudad):(base+' '+pick(APO)); if(!usados.includes(n)) return n; } return n+' '+ri(2,99); }
+  /* ---- el estado de la cadena ---- */
+  function C(e){ if(!e.hotel175||typeof e.hotel175!=='object') e.hotel175={hoteles:[],marca:cl(isFinite(e.marca)?e.marca:40,10,90),lealtad:0,ota:A()>=2005?.4:0,directo:0,hitos:{},hist:[],ofertas:null,seq:0,pers:1,nombre:e.nombre}; const c=e.hotel175; c.hoteles=c.hoteles||[]; c.hitos=c.hitos||{}; c.hist=c.hist||[]; c.marca=isFinite(c.marca)?c.marca:40; return c; }
+  const cadenas=()=>comps().filter(e=>e&&e.hotel175);
+  const abiertos=c=>c.hoteles.filter(h=>!h.enObra);
+  const propios=c=>c.hoteles.filter(h=>h.modelo==='propio');
+  const costoRepos=h=>{ const T=TB[h.tipo]||TIPOS[0]; return T.costo*h.hab*F()*dest(h.ciudad).suelo; };
+  const estrellas=h=>{ const r=cl(Math.round(1+h.resenas/25),1,5); return '★'.repeat(r)+'☆'.repeat(5-r); };
+  const pr1=x=>Math.round(x*100)/100;
+  /* ==================== LA DEMANDA ==================== */
+  function ciclo(){ return (S.macro&&S.macro.ciclo)||0; }
+  function mundo(){ try{ return typeof window.cicloMundo167==='function'?window.cicloMundo167():0; }catch(e){ return 0; } }
+  function techBono(e){ let b=0; try{ const c=e&&e.hotel175; if(c&&c._tb&&c._tb.a===A()) return c._tb.v; if(typeof window.estadoTec169!=='function') return 0; const ad=(window.estadoTec169(e)||{}).adop||{}; const W={electricidad:.02,telefono:.03,aviacion:.03,radio:.015,internet:.04,ecommerce:.05,redes:.02,smartphone:.025,pagos:.01};
+      Object.keys(W).forEach(id=>{ if(ad[id]) b+=W[id]*(ad[id].pion?1.3:1); }); b=Math.min(.2,b); if(c) c._tb={a:A(),v:b}; }catch(x){} return b; }
+  function canibal(c,h){ const otros=abiertos(c).filter(x=>x!==h&&x.ciudad===h.ciudad&&Math.abs((TB[x.tipo]||{}).est-(TB[h.tipo]||{}).est)<=1).length; return Math.min(.25,otros*.05); }
+  function demanda(e,c,h){ const T=TB[h.tipo]||TIPOS[0], D=dest(h.ciudad), ocio=T.ocio;
+    let f=T.ocu0*(1+(D.neg-1)*(1-ocio)+(D.ocio-1)*ocio);
+    f*=interp(ERA_TUR,A());
+    f*=1+ciclo()*(.9+ocio*.4);
+    const tens=((S.tension||35)-45)/170; if(tens>0) f*=1-tens*(1-T.ext*.4);
+    if(PAND[A()]) f*=PAND[A()]*(c.pandemia==='mantener'&&A()>2020?1.1:c.pandemia==='cerrar'&&A()>2020?.9:1);
+    f*=1+(h.resenas-60)/250;
+    f*=1+(h.cons-60)/400;
+    f*=1-.6*(h.mult-1);
+    f*=1+c.marca/600;
+    f*=1-canibal(c,h);
+    f*=1+techBono(e)+((c.lealtad||0)*.02)+((c.directo||0)*.01);
+    f*=1+T.ext*(mundo()*1.6+((S.macro&&S.macro.usd&&S.mundo167&&S.mundo167.usdPrev)?cl(S.macro.usd/S.mundo167.usdPrev-1,-.2,.2)*.6:0));
+    if(h.modelo==='franquicia') f*=.97;
+    return cl(f*rnd(.94,1.06),.12,.93); }
+  function tarifa(e,c,h){ const T=TB[h.tipo]||TIPOS[0], D=dest(h.ciudad);
+    return 1.08*T.adr*F()*h.mult*(1+(h.resenas-60)/300)*(1+c.marca/500)*Math.pow(D.suelo,.35)*(1+T.ext*cl(mundo(),-.2,.2)*.5)*(D.global?1.25:1); }
+  /* ==================== EL AÑO DE CADA HOTEL ==================== */
+  function anualHotel(e,c,h,tot){ const T=TB[h.tipo]||TIPOS[0], D=dest(h.ciudad);
+    // obra
+    if(h.enObra){ h.enObra.restan--; if(h.enObra.restan<=0){ h.abierto=A(); h.enObra=null; h.cons=96; h.resenas=Math.max(h.resenas,62); log('<b>'+E(h.nom)+'</b> abrió sus puertas en '+E(h.ciudad)+' con '+h.hab+' habitaciones.','hito'); hitoHotel(e,c,h); } else h.hist.push({a:A(),obra:1}); return; }
+    if(h.amplia){ h.amplia.restan--; if(h.amplia.restan<=0){ h.hab+=h.amplia.hab; log('La ampliación de <b>'+E(h.nom)+'</b> quedó lista: '+h.hab+' habitaciones.','bien'); h.amplia=null; } }
+    if(h.cierre&&h.cierre>=A()){ h.ocu=0; h.adr=0; tot.cerrados++; h.hist.push({a:A(),cerrado:1}); h.cons=Math.max(10,h.cons-2); return; }
+    const ocu=demanda(e,c,h), adr=tarifa(e,c,h);
+    const rCuartos=h.hab*365*ocu*adr, otros=rCuartos*(T.est>=3?.28:T.est>=1?.12:.05)*(h.pers>=2?1.1:1);
+    const f=tot.f||{gan:0,rez:0};
+    const rev=(rCuartos+otros)*(1+cl((f.gan||0)-(f.rez||0),-.1,.15));
+    const persMg=h.pers===0?.05:h.pers===2?-.05:0;
+    const ownerOp=(h.modelo==='propio'&&h.hab<=14)?.08:0;
+    const escala=Math.min(.03,abiertos(c).length*.003);
+    let mg=T.mg+persMg+ownerOp+escala+(ocu-T.ocu0)*.45+((e.eficiencia||50)-50)/500;
+    mg=cl(mg,.0,.55);
+    const comOta=A()>=2005?rCuartos*(c.ota||0)*.17:0;
+    const lealtadCosto=rev*(c.lealtad||0)*.006;
+    let gop=rev*mg-comOta-lealtadCosto;
+    const valorBase=h.modelo==='propio'?h.valor:0;
+    const mant=valorBase*.012+(h.modelo==='arrendado'?rev*.01:0), imp=valorBase*.003;
+    let renta=h.modelo==='arrendado'?rev*.24:0;
+    let ebitda=gop-mant-imp-renta;
+    let ingreso=rev, ebitdaCadena=ebitda;
+    if(h.modelo==='franquicia'){ const base=rCuartos; ingreso=base*.06; ebitdaCadena=base*.06-base*.012; c.fran=(c.fran||0)+1; }
+    if(h.modelo==='administrado'){ ingreso=rev*.03+Math.max(0,gop)*.12; ebitdaCadena=ingreso*.8; }
+    // conservación, servicio y reseñas
+    const meta=h.pers===0?36:h.pers===2?82:60, propiaOp=h.modelo==='propio'||h.modelo==='arrendado';
+    h.cons=cl(h.cons-rnd(3,5)+(propiaOp?1.5:2.5),5,100);
+    h.serv=cl(h.serv+(meta-h.serv)*.3+rnd(-2,2)+((e.eficiencia||50)-50)/80,10,98);
+    const objetivo=cl(50+(h.cons-60)*.35+(h.serv-50)*.5+((h.modelo==='franquicia')?(c.marca-50)*.2:0),8,98);
+    h.resenas=cl(h.resenas*.65+objetivo*.35+rnd(-2,2),5,99);
+    // valor de mercado de lo propio
+    if(h.modelo==='propio'){ const mercado=Math.max(costoRepos(h)*(.5+h.cons/250),Math.max(0,ebitda)*7.5); h.valor=h.valor*.7+mercado*.3; h.valor*=1+((S.macro&&S.macro.inflacion)||0)*.25; }
+    h.ocu=ocu; h.adr=adr; h.rev=rev; h.ebitda=ebitda; h.aporte=ebitdaCadena; h.ingreso=ingreso;
+    h.hist.push({a:A(),ocu:Math.round(ocu*100)/100,adr:pr1(adr),ebitda:Math.round(ebitda)}); h.hist=h.hist.slice(-25);
+    tot.ing+=ingreso; tot.ebitda+=ebitdaCadena; tot.hab+=(h.modelo==='franquicia'?0:h.hab); tot.habTotal+=h.hab; tot.noches+=h.hab*365; tot.ocup+=h.hab*365*ocu; tot.revCuartos+=rCuartos; tot.dep+=valorBase*.01;
+    tot.res+=h.resenas*h.hab*(h.modelo==='franquicia'?.5:1); tot.resW+=h.hab*(h.modelo==='franquicia'?.5:1); }
+  function hitoHotel(e,c,h){ }
+  const HITOS=[
+    {id:'h1',n:'Tu primer hotel',ok:c=>abiertos(c).length>=1,p:1},{id:'h5',n:'Cinco hoteles',ok:c=>abiertos(c).length>=5,p:2},{id:'h10',n:'Diez hoteles',ok:c=>abiertos(c).length>=10,p:3},{id:'h25',n:'Veinticinco hoteles',ok:c=>abiertos(c).length>=25,p:5},
+    {id:'k1',n:'Mil habitaciones',ok:c=>abiertos(c).reduce((s,h)=>s+h.hab,0)>=1000,p:3},{id:'k5',n:'Cinco mil habitaciones',ok:c=>abiertos(c).reduce((s,h)=>s+h.hab,0)>=5000,p:5},
+    {id:'e5',n:'Un cinco estrellas',ok:c=>abiertos(c).some(h=>(TB[h.tipo]||{}).est>=5&&h.resenas>=70),p:3},{id:'c5',n:'Hoteles en cinco destinos',ok:c=>new Set(abiertos(c).map(h=>h.ciudad)).size>=5,p:3},
+    {id:'ext',n:'Un hotel en el exterior',ok:c=>abiertos(c).some(h=>dest(h.ciudad).global),p:4},{id:'m80',n:'Una marca de 80',ok:c=>c.marca>=80,p:4},{id:'fr',n:'Tu primera franquicia',ok:c=>c.hoteles.some(h=>h.modelo==='franquicia'&&!h.enObra),p:2},
+    {id:'hist',n:'Un hotel histórico',ok:c=>c.hoteles.some(h=>h.historico),p:3}];
+  const TITULOS=[[0,'Sin hoteles'],[1,'Posadero'],[3,'Hotelero'],[8,'Gran hotelero'],[15,'Magnate hotelero'],[30,'Imperio hotelero']];
+  function titulo(c){ const n=abiertos(c).length, hb=abiertos(c).reduce((s,h)=>s+h.hab,0); const pts=n+hb/150+new Set(abiertos(c).map(h=>h.ciudad)).size*.6+(abiertos(c).some(h=>dest(h.ciudad).global)?4:0)+c.marca/25; let t=TITULOS[0][1]; TITULOS.forEach(([m,x])=>{ if(n>=1&&pts>=m*1.0&&(m<=n*2||m<=1)) t=x; }); return t; }
+  function revisarHitos(e,c){ HITOS.forEach(h=>{ if(!c.hitos[h.id]&&h.ok(c)){ c.hitos[h.id]=A(); prest(h.p,h.n.toLowerCase()); log('<b>Hito hotelero:</b> '+E(h.n)+' ('+E(e.nombre)+').','hito'); try{ if(typeof hito==='function') hito(e.nombre+': '+h.n); }catch(x){} } }); }
+  /* ==================== EL AÑO DE LA CADENA (gancho en el cierre de año de cada compañía) ==================== */
+  function anualCadena(e,res){ if(!e||!e.hotel175) return; const c=C(e);
+    if(c.ofertas&&c.ofertas.anio!==A()) c.ofertas=null;
+    if(c.pandemia&&A()>2022) c.pandemia=null;
+    const ingPrev=e.ingresos;
+    const tot={f:(function(){ try{ return typeof window.efectosTec169==='function'?window.efectosTec169(e):null; }catch(x){ return null; } })(),ing:0,ebitda:0,hab:0,habTotal:0,noches:0,ocup:0,revCuartos:0,dep:0,res:0,resW:0,cerrados:0};
+    c.hoteles.slice().forEach(h=>{ try{ anualHotel(e,c,h,tot); }catch(x){ console.error(x); } });
+    const n=abiertos(c).length;
+    const over=tot.ing*(.015+Math.min(.03,n*.001));
+    const mark=tot.ing*.008*(1+(c.lealtad||0)*.2), directo=(c.directo||0)*tot.ing*.002;
+    const ebitda=tot.ebitda-over-mark-directo;
+    const tasa=((S.macro&&S.macro.tasa)||.08)+.03, interes=Math.max(0,e.deuda||0)*tasa;
+    const antes=ebitda-tot.dep-interes, imp=antes>0?antes*(typeof tarifaRenta==='function'?tarifaRenta():.3):0, util=antes-imp;
+    const delta=util-(e.utilidad||0);
+    e.ingresos=Math.max(1,tot.ing); e.costos=e.ingresos-Math.max(0,ebitda); e.utilidad=util; e.caja+=delta; e.crecimiento=cl(e.ingresos/Math.max(1,c.ingPrev||ingPrev)-1,-.9,3); c.ingPrev=e.ingresos;
+    e.empleados=Math.max(2,Math.round(tot.habTotal*(.4+(TB[(c.hoteles[0]||{}).tipo]||{est:2}).est*.25)));
+    // la marca sigue a las reseñas de los hoteles
+    if(tot.resW>0){ const prom=tot.res/tot.resW; c.marca=cl(c.marca*.82+prom*.18+(n>=5?.3:0),5,99); }
+    e.marca=c.marca;
+    c.ult={anio:A(),ing:tot.ing,ebitda,util,ocu:tot.noches>0?tot.ocup/tot.noches:0,revpar:tot.noches>0?tot.revCuartos/tot.noches:0,adr:tot.ocup>0?tot.revCuartos/tot.ocup:0,hab:tot.habTotal,hoteles:n};
+    c.hist.push({a:A(),ing:Math.round(tot.ing),ebitda:Math.round(ebitda),ocu:Math.round(c.ult.ocu*100)/100,hab:tot.habTotal}); c.hist=c.hist.slice(-40);
+    try{ revisarHitos(e,c); }catch(x){}
+    sucesos(e,c); }
+  /* ==================== LOS SUCESOS ==================== */
+  function sucesos(e,c){ if(S._ev175===A()) return; const L=abiertos(c).filter(h=>h.modelo!=='franquicia'); if(!L.length&&A()!==2020) return;
+    if(A()===2020&&!c.pandemia&&L.length){ S._ev175=A(); return evPandemia(e,c); }
+    if(!chance(Math.min(.45,.12+L.length*.025))) return; const h=pick(L); const lis=[];
+    lis.push(()=>evTemporada(e,c,h)); lis.push(()=>evOferta(e,c,h)); if(A()>=1930) lis.push(()=>evHuelga(e,c,h)); lis.push(()=>evIncendio(e,c,h)); if((TB[h.tipo]||{}).est>=2) lis.push(()=>evIntoxicacion(e,c,h)); if(A()>=2008) lis.push(()=>evResena(e,c,h));
+    if(A()>=1990&&c.marca>=55&&abiertos(c).length>=3) lis.push(()=>evInternacional(e,c)); if(h.ciudad==='Eje Cafetero'&&A()===1999) lis.length=0, lis.push(()=>evTerremoto(e,c,h));
+    S._ev175=A(); pick(lis)(); }
+  function evTemporada(e,c,h){ const ing=Math.round(h.hab*365*.12*(h.adr||.01)); evento('<b>Temporada excepcional en '+E(h.nom)+'.</b> Un festival, un congreso o un puente largo llenó '+E(h.ciudad)+' y todas las habitaciones están reservadas.',
+      [{t:'Subir tarifas por unos días',f:()=>{ e.caja+=ing*1.4; h.resenas=cl(h.resenas-3,5,99); return 'Subiste las tarifas y entraron '+fm(ing*1.4)+' extra. Algunos huéspedes lo notaron.'; }},
+       {t:'Mantener las tarifas y atender bien',f:()=>{ e.caja+=ing; h.resenas=cl(h.resenas+4,5,99); c.marca=cl(c.marca+1,5,99); return 'Entraron '+fm(ing)+' extra y la fama del servicio subió.'; }}]); }
+  function evOferta(e,c,h){ if(h.modelo!=='propio') return evTemporada(e,c,h); const precio=Math.round(h.valor*rnd(1.2,1.45)); evento('<b>Un inversionista quiere comprar '+E(h.nom)+'.</b> Ofrece '+fmt(precio)+', un 25% o 30% sobre lo que vale.',
+      [{t:'Vender ('+fmt(precio)+')',f:()=>{ vender(e,c,h,precio); return 'Vendiste '+E(h.nom)+' por '+fm(precio)+'.'; }},{t:'Rechazar la oferta',f:()=>{ h.valor*=1.03; return 'Dijiste que no. Ahora sabes lo que vale.'; }}]); }
+  function evHuelga(e,c,h){ const costo=Math.round(h.hab*.35*F()); evento('<b>Huelga en '+E(h.nom)+'.</b> Camareras y meseros piden nivelar salarios y estabilidad.',
+      [{t:'Negociar y subir salarios ('+fmt(costo)+')',f:()=>{ gasto(e,costo); h.serv=cl(h.serv+4,10,98); return 'Firmaste una convención por '+fm(costo)+'. El servicio mejoró.'; }},
+       {t:'Resistir',f:()=>{ h.cierre=A(); h.serv=cl(h.serv-8,10,98); h.resenas=cl(h.resenas-8,5,99); return 'El hotel estuvo cerrado buena parte del año y la reputación se resintió.'; }}]); }
+  function evIncendio(e,c,h){ const dano=Math.round((h.modelo==='propio'?h.valor:costoRepos(h))*.12); const asegurado=Object.keys(S.seguros||{}).length>0;
+    evento('<b>Un incendio en '+E(h.nom)+'.</b> Se quemó un ala del hotel; nadie resultó herido, pero hay habitaciones fuera de servicio.',
+      [{t:'Reparar de inmediato ('+fmt(dano)+')',f:()=>{ const neto=asegurado?dano*.35:dano; gasto(e,neto); h.cons=cl(h.cons+10,5,100); return (asegurado?'El seguro cubrió la mayor parte: ':'No tenías seguro: ')+'la reparación te costó '+fm(neto)+'.'; }},
+       {t:'Dejar el ala cerrada',f:()=>{ h.ocu=0; h.cons=cl(h.cons-15,5,100); h.resenas=cl(h.resenas-5,5,99); return 'Dejaste el ala cerrada: menos habitaciones y un hotel que se ve deteriorado.'; }}]); }
+  function evIntoxicacion(e,c,h){ const c1=Math.round(h.hab*.25*F()); evento('<b>Intoxicación en el restaurante de '+E(h.nom)+'.</b> Varios huéspedes se enfermaron y la prensa local lo publicó.',
+      [{t:'Asumir todo y pagar a los afectados ('+fmt(c1)+')',f:()=>{ gasto(e,c1); h.resenas=cl(h.resenas-4,5,99); return 'Pagaste '+fm(c1)+' y el hotel salió con un golpe moderado a la reputación.'; }},
+       {t:'Negar responsabilidad',f:()=>{ h.resenas=cl(h.resenas-14,5,99); c.marca=cl(c.marca-3,5,99); return 'Negaste todo y la historia creció: la reputación y la marca se resintieron.'; }}]); }
+  function evResena(e,c,h){ const buena=chance(.55+(h.resenas-50)/200); evento('<b>Una reseña de '+E(h.nom)+' se volvió viral.</b> '+(buena?'Un viajero contó su estadía y miles de personas la compartieron.':'Un huésped publicó una queja con fotos y se regó por todas partes.'),
+      buena?[{t:'Aprovechar y promocionar',f:()=>{ h.resenas=cl(h.resenas+5,5,99); c.marca=cl(c.marca+2,5,99); return 'La reseña trajo reservas por meses.'; }}]:
+        [{t:'Pedir disculpas y compensar',f:()=>{ const x=Math.round(h.hab*.1*F()); gasto(e,x); h.resenas=cl(h.resenas-2,5,99); return 'Pediste disculpas y compensaste por '+fm(x)+'. La historia se enfrió.'; }},{t:'Ignorarla',f:()=>{ h.resenas=cl(h.resenas-8,5,99); c.marca=cl(c.marca-2,5,99); return 'No dijiste nada y la queja se quedó como la imagen del hotel.'; }}]); }
+  function evTerremoto(e,c,h){ const dano=Math.round(costoRepos(h)*.25); evento('<b>Un terremoto sacudió '+E(h.ciudad)+'.</b> '+E(h.nom)+' sufrió grietas y hay habitaciones inhabitables.',
+      [{t:'Reparar y reabrir ('+fmt(dano)+')',f:()=>{ gasto(e,Object.keys(S.seguros||{}).length?dano*.4:dano); h.cons=cl(h.cons+5,5,100); h.cierre=A(); return 'Reparaste: el hotel estuvo cerrado el resto del año.'; }},{t:'Vender las ruinas',f:()=>{ vender(e,c,h,Math.round(Math.max(1,h.valor*.45))); return 'Vendiste lo que quedaba.'; }}],9); }
+  function evInternacional(e,c){ evento('<b>Una cadena internacional te propone una alianza.</b> Quiere que sus huéspedes se alojen en tus hoteles a cambio de usar su sistema de reservas.',
+      [{t:'Aceptar la alianza',f:()=>{ c.directo=Math.min(5,(c.directo||0)+2); c.marca=cl(c.marca+3,5,99); prest(1,'alianza hotelera internacional'); return 'Entraste a su sistema de reservas: más ocupación y un poco más de marca, y un poco menos de independencia.'; }},{t:'Seguir solo',f:()=>'Rechazaste. Sigues con tu propia marca.'}]); }
+  function evPandemia(e,c){ const nom=Math.round(tot2(c)*.12);
+    evento('<b>La pandemia cerró los hoteles.</b> Las fronteras están cerradas y no hay quién viaje. Hay que decidir qué hacer con la nómina y con las deudas.',
+      [{t:'Mantener la nómina con créditos ('+fmt(nom)+')',f:()=>{ c.pandemia='mantener'; e.deuda+=nom; e.caja+=nom; abiertos(c).forEach(h=>{ h.serv=cl(h.serv+3,10,98); }); return 'Tomaste '+fm(nom)+' de deuda para mantener a tu gente. Cuando se reabra, tendrás el equipo.'; }},
+       {t:'Cerrar y recortar personal',f:()=>{ c.pandemia='cerrar'; abiertos(c).forEach(h=>{ h.serv=cl(h.serv-10,10,98); h.resenas=cl(h.resenas-3,5,99); }); c.marca=cl(c.marca-3,5,99); return 'Recortaste la planta: el año duele menos, pero recuperar el servicio tomará tiempo.'; }},
+       {t:'Negociar con los dueños y con los bancos',f:()=>{ c.pandemia='negociar'; const a=Math.round(nom*.5); e.caja+=a; return 'Lograste aplazar arriendos y cuotas: un alivio de '+fm(a)+'.'; }}],9); }
+  const tot2=c=>abiertos(c).reduce((s,h)=>s+(h.rev||h.hab*20),0);
+  /* ==================== COMPRAR, VENDER, ABRIR ==================== */
+  function vender(e,c,h,precio){ const neto=Math.max(0,precio-(h.hipoteca||0)); e.caja+=neto; if(h.hipoteca) e.deuda=Math.max(0,e.deuda-h.hipoteca); c.hoteles=c.hoteles.filter(x=>x!==h); log('Vendiste <b>'+E(h.nom)+'</b> por '+fm(precio)+'.','bien'); }
+  function plan(e,costo,personal){ const caja=Math.max(0,e.caja); let falta=Math.max(0,costo-caja); const usoCaja=Math.min(costo,caja); let aporte=0,deuda=0;
+    const miPct1=(typeof miPct==='function')?miPct(e):1;
+    if(falta>0&&personal&&miPct1>=.99&&S.efectivo>0){ aporte=Math.min(falta,S.efectivo); falta-=aporte; }
+    const tope=costo*.55; if(falta>0){ deuda=Math.min(falta,tope); falta-=deuda; }
+    return {ok:falta<=.0001,usoCaja,aporte,deuda,falta}; }
+  /* un gasto imprevisto: si la caja no alcanza, la cadena se endeuda (con recargo) */
+  function gasto(e,monto){ e.caja-=monto; if(e.caja<0){ e.deuda+=-e.caja*1.1; e.caja=0; } }
+  function pagar(e,p){ e.caja-=p.usoCaja; if(p.aporte>0){ S.efectivo-=p.aporte; } if(p.deuda>0){ e.deuda+=p.deuda; } }
+  function nuevoId(c){ c.seq=(c.seq||0)+1; return 'h'+c.seq; }
+  function crearHotel(e,c,tipo,ciudad,hab,modelo,extra){ const h=Object.assign({id:nuevoId(c),nom:nombreHotel(c,tipo,ciudad),ciudad,tipo,hab,modelo,cons:92,serv:55,resenas:58,mult:1,pers:1,ocu:0,adr:0,valor:0,hipoteca:0,abierto:null,enObra:null,amplia:null,hist:[]},extra||{});
+    c.hoteles.push(h); return h; }
+  function costoApertura(tipo,ciudad,hab,modelo){ const T=TB[tipo], D=dest(ciudad); const full=T.costo*hab*F()*D.suelo*(D.global?1.3:1); return modelo==='arrendado'?full*.28:full; }
+  function aniosObra(hab){ return Math.max(1,Math.min(3,Math.ceil(hab/90))); }
+  function abrirHotel(e,tipo,ciudad,hab,modelo,personal){ const c=C(e); const costo=costoApertura(tipo,ciudad,hab,modelo), p=plan(e,costo,personal); if(!p.ok) return null;
+    pagar(e,p); const h=crearHotel(e,c,tipo,ciudad,hab,modelo); h.valor=modelo==='propio'?costo:0; h.hipoteca=modelo==='propio'?p.deuda:0; h.enObra={restan:aniosObra(hab),costo:Math.round(costo)};
+    log('Empezó la obra de <b>'+E(h.nom)+'</b> en '+E(ciudad)+' ('+hab+' habitaciones, '+fm(costo)+').','hito'); return h; }
+  /* los hoteles que hay en venta cada año */
+  function ofertas(e,c){ if(c.ofertas&&c.ofertas.anio===A()) return c.ofertas.l; const L=[]; const ds=destDisp(e); const n=ri(3,5);
+    for(let i=0;i<n;i++){ const d=pick(ds), ts=TIPOS.filter(t=>tipoOK(t,d)&&t.id!=='resort'||tipoOK(t,d)&&d.playa); const t=pick(ts); if(!t) continue; const hab=Math.round(ri(t.hab[0],Math.max(t.hab[0],Math.round((t.hab[0]+t.hab[1])/2)))); const cons=ri(28,82), res=ri(35,80);
+      const valor=Math.round(costoApertura(t.id,d.n,hab,'propio')*(.55+cons/250)*rnd(.8,1.15)); L.push({id:'o'+i,tipo:t.id,ciudad:d.n,hab,cons,resenas:res,valor,nom:nombreHotel(c,t.id,d.n)}); }
+    if(A()>=1880&&chance(.3)){ const d=pick(ds.filter(x=>x.hist)); const hab=ri(60,160); L.push({id:'oh',tipo:A()>=1905?'gran':'hotelc',ciudad:d.n,hab,cons:ri(40,70),resenas:ri(60,85),valor:Math.round(costoApertura(A()>=1905?'gran':'hotelc',d.n,hab,'propio')*rnd(1.1,1.5)),nom:(A()>=1905?'Gran Hotel ':'Hotel ')+d.n+' (histórico)',historico:true}); }
+    c.ofertas={anio:A(),l:L}; return L; }
+  function comprarHotel(e,o){ const c=C(e), p=plan(e,o.valor,true); if(!p.ok) return null; pagar(e,p); const h=crearHotel(e,c,o.tipo,o.ciudad,o.hab,'propio',{nom:o.nom,cons:o.cons,resenas:o.resenas,valor:o.valor,hipoteca:p.deuda,abierto:A(),historico:!!o.historico}); if(c.ofertas&&Array.isArray(c.ofertas.l)) c.ofertas.l=c.ofertas.l.filter(x=>x!==o);
+    log('Compraste <b>'+E(h.nom)+'</b> en '+E(h.ciudad)+' por '+fm(o.valor)+'.','hito'); if(o.historico) prest(3,'compró un hotel histórico'); revisarHitos(e,c); return h; }
+  function hotelesAportables(){ const out=[]; (S.bienes||[]).forEach(b=>{ if(b.clase==='hotel'&&!b.enConstruccion) out.push({b,tipo:'hotelc',hab:b.habitaciones||30,cons:b.categoria?Math.min(95,45+b.categoria*8):70}); else if(b.clase==='negocio'&&b.neg110&&['hotel','fincahotel'].includes(b.neg110.id)) out.push({b,tipo:b.neg110.id==='hotel'?'hotelc':'boutique',hab:b.neg110.id==='hotel'?24:12,cons:60}); }); return out; }
+  function aportarHotel(e,x){ const c=C(e), b=x.b; const ciudad=b.ciudad||S.p.ciudad; const T=TB[x.tipo]; const hab=Math.max(T.hab[0]>>1,x.hab);
+    const h=crearHotel(e,c,x.tipo,dest(ciudad).n===ciudad?ciudad:'Bogotá',hab,'propio',{nom:b.nombre,cons:x.cons,resenas:58,valor:b.valor,hipoteca:b.hipoteca||0,abierto:b.comprado||A()-3});
+    if(b.hipoteca) e.deuda+=b.hipoteca; S.bienes=S.bienes.filter(y=>y!==b); log('Aportaste <b>'+E(b.nombre)+'</b> a la cadena '+E(e.nombre)+'.','bien'); revisarHitos(e,c); return h; }
+  /* ==================== LA FRANQUICIA Y LA ADMINISTRACIÓN ==================== */
+  const puedeFranq=c=>A()>=1950&&c.marca>=55&&propios(c).filter(h=>!h.enObra).length>=3;
+  const puedeAdmin=c=>A()>=1950&&c.marca>=45&&abiertos(c).length>=2;
+  function nuevoSocio(e,c,modelo,ciudad,tipo,hab){ const h=crearHotel(e,c,tipo,ciudad,hab,modelo,{cons:modelo==='franquicia'?rnd(60,88):rnd(45,80),resenas:rnd(52,75),serv:rnd(45,70),abierto:A(),socio:pick(['un inversionista local','una familia hotelera','un fondo regional','un empresario de la región'])});
+    log('<b>'+E(h.nom)+'</b> ('+E(ciudad)+') entró a la cadena como '+(modelo==='franquicia'?'franquicia':'hotel administrado')+', con '+hab+' habitaciones.','bien'); revisarHitos(e,c); return h; }
+  /* ==================== LAS PANTALLAS ==================== */
+  const barra=(v,max,cls)=>'<div class="b175 '+(cls||'')+'"><i style="width:'+Math.round(cl(v/Math.max(.0001,max)*100,3,100))+'%"></i></div>';
+  const pc=x=>Math.round(x*100)+'%';
+  function resumen(e,c){ const L=abiertos(c); const u=c.ult||{}; const hb=L.reduce((s,h)=>s+h.hab,0); return {n:L.length,hab:hb,ocu:u.ocu||0,revpar:u.revpar||0,adr:u.adr||0,ebitda:u.ebitda||0,marca:c.marca}; }
+  function escenaImperio175(e){ if(!ACTIVO()||nino()) return; const g=cadenas(); e=e||(S.emp&&S.emp.hotel175?S.emp:g[0]);
+    if(!e){ return escenaInicio175(); }
+    const c=C(e), r=resumen(e,c), reab=()=>{ cerrarModal(); render(); escenaImperio175(e); }; const ops=[];
+    const enObra=c.hoteles.filter(h=>h.enObra);
+    ops.push({t:'Abrir un hotel',cat:'compania',d:'Elegir destino, tipo y modelo. Se paga con la caja de la cadena, con tu aporte o con deuda.',cerrar:false,run:()=>{ cerrarModal(); escenaAbrir175(e); }});
+    ops.push({t:'Comprar un hotel que está en venta',cat:'capital',d:'Cada año salen algunos a la venta: unos en buen estado, otros caídos. A veces uno histórico.',cerrar:false,run:()=>{ cerrarModal(); escenaComprar175(e); }});
+    ops.push({t:'La marca, la lealtad y los socios',cat:'mercado',d:'Marca '+Math.round(c.marca)+'/100. Franquicia'+(puedeFranq(c)?'':' (necesitas marca 55 y 3 hoteles propios)')+', administración, programa de lealtad y reservas directas.',cerrar:false,run:()=>{ cerrarModal(); escenaMarca175(e); }});
+    ops.push({t:'Las finanzas de los hoteles',cat:'capital',d:'Hipotecar, vender y arrendar, y aportar a la cadena los hoteles que ya tienes.',cerrar:false,run:()=>{ cerrarModal(); escenaFinanzas175(e); }});
+    if(g.length>1){ const sig=g[(g.indexOf(e)+1)%g.length]; ops.push({t:'Ver otra cadena: '+sig.nombre,cat:'compania',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(sig); }}); }
+    const filas=c.hoteles.slice().sort((a,b)=>(b.enObra?0:b.ebitda||0)-(a.enObra?0:a.ebitda||0)).map(h=>{ const T=TB[h.tipo]||TIPOS[0];
+      if(h.enObra) return '<div class="fila175" data-h175="'+E(h.id)+'"><span class="est175">en obra</span><div class="nm175"><b>'+E(h.nom)+'</b><small>'+E(h.ciudad)+' · '+h.hab+' hab. · abre en '+h.enObra.restan+' año'+(h.enObra.restan===1?'':'s')+'</small></div><div class="cf175">'+fm(h.enObra.costo)+'</div></div>';
+      const mal=h.ocu<.4||h.cons<45; return '<div class="fila175" data-h175="'+E(h.id)+'"><span class="est175">'+estrellas(h)+'</span><div class="nm175"><b>'+E(h.nom)+'</b><small>'+E(h.ciudad)+' · '+E(T.n.toLowerCase())+' · '+h.hab+' hab. · '+({propio:'propio',arrendado:'arrendado',franquicia:'franquicia',administrado:'administrado'})[h.modelo]+(h.cierre>=A()?' · cerrado':'')+'</small>'+barra(h.ocu*100,100,h.ocu<.4?'mal':h.ocu>.7?'bien':'')+'</div><div class="cf175">'+(h.ocu?pc(h.ocu)+' ocup.':'—')+'<br><small>'+(!h.ocu&&!(h.cierre>=A())?'recién abierto':(h.modelo==='franquicia'||h.modelo==='administrado'?'cobras '+fm(h.ingreso||0):fm(h.ebitda||0)+' de utilidad'))+'</small></div></div>'; }).join('');
+    const hit=HITOS.map(h=>'<span class="hit175'+(c.hitos[h.id]?'':' no')+'">'+(c.hitos[h.id]?'✓ ':'')+E(h.n)+'</span>').join('');
+    escena({rubro:'Hoteles',titulo:E(e.nombre)+'<span class="tit175">'+E(titulo(c))+'</span>',ancho:true,cerrable:true,clase:'hot175',
+      cuerpo:r.n?('Tu cadena tiene '+r.n+' hotel'+(r.n===1?'':'es')+' abiertos'+(enObra.length?' y '+enObra.length+' en obra':'')+'. Cada uno tiene su ocupación, su tarifa, su estado y su reputación.'):'Todavía no hay un hotel abierto. Abre el primero: lo demás se construye hotel por hotel.',
+      html:'<div class="k"><div><b>'+r.n+'</b><span>hoteles abiertos</span></div><div><b>'+r.hab.toLocaleString('es-CO')+'</b><span>habitaciones</span></div><div><b>'+pc(r.ocu)+'</b><span>ocupación media</span></div><div><b>'+fmt(r.revpar)+'</b><span>ingreso por habitación y noche</span></div><div><b>'+fm(r.ebitda)+'</b><span>utilidad operativa del año</span></div><div><b>'+Math.round(r.marca)+'</b><span>marca</span></div></div>'
+        +(filas?'<h4>Tus hoteles</h4>'+filas:'')+'<h4>Hitos</h4><div>'+hit+'</div>',opciones:ops}); }
+  function escenaInicio175(){ const ts=comps().filter(x=>x.sector==='turismo'&&!x.hotel175); const ops=[];
+    ops.push({t:'Fundar una cadena hotelera',cat:'compania',d:'Una compañía de turismo que crece hotel por hotel. Empieza con un primer hotel pequeño.',cerrar:false,run:()=>{ cerrarModal(); escenaAbrir175(null); }});
+    ts.forEach(x=>ops.push({t:'Convertir '+x.nombre+' en cadena hotelera',cat:'compania',d:'Tu compañía de turismo pasa a operar hoteles.',cerrar:false,run:()=>{ const c=C(x); sentar(x)(); cerrarModal(); log('<b>'+E(x.nombre)+'</b> se convierte en cadena hotelera.','hito'); render(); escenaImperio175(x); }}));
+    escena({rubro:'Hoteles',titulo:'El imperio hotelero',ancho:true,cerrable:true,clase:'hot175',cuerpo:A()<1860?'En esta época lo que hay son posadas, mesones y hospederías de camino. Es el principio de todo imperio: un techo, una cama y una comida caliente.':'Un imperio hotelero se construye hotel por hotel: de la hospedería al gran hotel, del motel de carretera al resort. Empieza por uno.',opciones:ops}); }
+  /* abrir un hotel, paso a paso */
+  function escenaAbrir175(e,sel){ sel=sel||{}; const g=destDisp(e); const reab=s=>{ cerrarModal(); escenaAbrir175(e,s); };
+    if(!sel.destino){ const ops=g.map(d=>({t:d.n+(d.global?' (exterior)':''),cat:'casa',d:(d.neg>=1.1?'Plaza de negocios. ':'')+(d.ocio>=1.1?'Destino turístico. ':'')+(d.playa?'Playa. ':'')+'Suelo '+(d.suelo>=1.2?'caro':d.suelo<=.85?'barato':'normal')+'.',cerrar:false,run:()=>reab({destino:d.n})}));
+      ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); if(e) escenaImperio175(e); }});
+      return escena({rubro:'Hoteles',titulo:'¿Dónde abrir?',ancho:true,cerrable:true,clase:'hot175',cuerpo:'Cada destino vive de lo suyo: negocios, ocio o ambos, y cada uno tiene su precio del suelo.',opciones:ops}); }
+    const d=dest(sel.destino);
+    if(!sel.tipo){ const ts=TIPOS.filter(t=>tipoOK(t,d)); const ops=ts.map(t=>{ const hab=Math.round((t.hab[0]+t.hab[1])/3), c0=costoApertura(t.id,d.n,t.hab[0],'propio'); return {t:t.n+' · desde '+fm(c0),cat:'casa',d:t.d+' Entre '+t.hab[0]+' y '+t.hab[1]+' habitaciones.',cerrar:false,run:()=>reab({destino:d.n,tipo:t.id})}; });
+      ops.push({t:'Volver a los destinos',cat:'legado',cerrar:false,run:()=>reab({})});
+      return escena({rubro:'Hoteles',titulo:'¿Qué hotel en '+E(d.n)+'?',ancho:true,cerrable:true,clase:'hot175',cuerpo:'En '+A()+' esto es lo que se construye.',opciones:ops}); }
+    const T=TB[sel.tipo]; const tamaños=[['pequeño',T.hab[0]],['mediano',Math.round((T.hab[0]+T.hab[1])/2)],['grande',T.hab[1]]]; const ops=[];
+    tamaños.forEach(([nm,hab])=>['propio','arrendado'].forEach(mod=>{ if(mod==='arrendado'&&A()<1860) return; const costo=costoApertura(T.id,d.n,hab,mod), p=e?plan(e,costo,true):plan({caja:0,deuda:0},costo,true);
+        const fundando=!e; const efec=S.efectivo; const posible=fundando?(efec>=costo*.45):p.ok;
+        ops.push({t:cap(nm)+' · '+hab+' habitaciones · '+mod+' · '+fm(costo),cat:'casa',d:(mod==='arrendado'?'Alquilas el edificio (28% de adecuación) y pagas 24% de tus ventas de renta. ':'Construyes y eres dueño del edificio. ')+aniosObra(hab)+' año'+(aniosObra(hab)===1?'':'s')+' de obra.'+(fundando?' Pones '+fm(Math.min(efec,costo))+' de tu efectivo'+(efec<costo?' y el resto va a crédito.':'.'):(p.ok?' Plan: caja '+fm(p.usoCaja)+(p.aporte?' · tu aporte '+fm(p.aporte):'')+(p.deuda?' · deuda '+fm(p.deuda):''):' No alcanza: faltan '+fm(p.falta)+'.')),dis:posible?sinMov():(fundando?'Necesitas al menos '+fm(costo*.45)+' de efectivo (el resto va a crédito)':'No alcanza con lo que tienes'),cerrar:false,
+          run:()=>{ if(!movida()) return; cerrarModal(); let x=e;
+            if(!x){ const nombre='Hoteles '+((S.p&&S.p.apellido)||S.dinastia||'Casa'); const aporte=Math.min(S.efectivo,costo); try{ fundarEn(nombre,'turismo',aporte); }catch(z){ console.error(z); } x=comps().find(q=>q.nombre===nombre&&!q.hotel175)||comps()[comps().length-1]; if(!x) return; C(x); try{ sentar(x)(); }catch(z){} x.caja=aporte; }
+            const h=abrirHotel(x,T.id,d.n,hab,mod,true); if(!h){ aviso('No alcanzó la plata.'); render(); return; } render(); escenaImperio175(x); }}); }));
+    ops.push({t:'Volver a los tipos',cat:'legado',cerrar:false,run:()=>reab({destino:d.n})});
+    escena({rubro:'Hoteles',titulo:E(T.n)+' en '+E(d.n),ancho:true,cerrable:true,clase:'hot175',cuerpo:T.d,opciones:ops}); }
+  function escenaComprar175(e){ const c=C(e), L=ofertas(e,c), ops=L.map(o=>{ const T=TB[o.tipo], p=plan(e,o.valor,true); return {t:o.nom+' · '+fm(o.valor),cat:'capital',d:E(o.ciudad)+' · '+T.n.toLowerCase()+' · '+o.hab+' hab. · estado '+o.cons+'/100 · reputación '+Math.round(o.resenas)+'/100.'+(o.historico?' Un hotel con historia: prestigio al comprarlo.':'')+(p.ok?'':' No alcanza.'),dis:p.ok?sinMov():'No alcanza ni con tu aporte y deuda',cerrar:false,run:()=>{ if(!movida()) return; cerrarModal(); comprarHotel(e,o); render(); escenaImperio175(e); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(e); }});
+    escena({rubro:'Hoteles',titulo:'Hoteles en venta',ancho:true,cerrable:true,clase:'hot175',cuerpo:L.length?'Esto salió este año al mercado. Los caídos son baratos, pero hay que ponerles plata.':'Este año no hay nada a la venta.',opciones:ops}); }
+  function escenaHotel175(e,id){ const c=C(e), h=c.hoteles.find(x=>x.id===id); if(!h) return escenaImperio175(e); const T=TB[h.tipo]||TIPOS[0], reab=()=>{ cerrarModal(); render(); escenaHotel175(e,id); }; const ops=[]; const propioOArr=h.modelo==='propio'||h.modelo==='arrendado';
+    if(h.enObra){ ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(e); }}); return escena({rubro:'Hoteles',titulo:E(h.nom),ancho:true,cerrable:true,clase:'hot175',cuerpo:'En obra en '+E(h.ciudad)+'. Abre en '+h.enObra.restan+' año'+(h.enObra.restan===1?'':'s')+'. Ya se pagaron '+fm(h.enObra.costo)+'.',opciones:ops}); }
+    const repos=costoRepos(h), ren=Math.round(repos*.22), mant=Math.round(repos*.09);
+    if(propioOArr){ ops.push({t:'Renovar todo el hotel · '+fm(ren),cat:'compania',d:'Obra completa: estado a 95, mejor reputación y calidad. Estado hoy '+Math.round(h.cons)+'/100.',dis:e.caja<ren?'La cadena no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=ren; h.cons=95; h.resenas=cl(h.resenas+6,5,99); h.serv=cl(h.serv+3,10,98); log('Renovaste <b>'+E(h.nom)+'</b> por '+fm(ren)+'.','bien'); reab(); }});
+      ops.push({t:'Mantenimiento mayor · '+fm(mant),cat:'compania',d:'Pintura, techos y plomería: sube el estado 25 puntos.',dis:e.caja<mant?'La cadena no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mant; h.cons=cl(h.cons+25,5,100); reab(); }}); }
+    const pols=[[.85,'Económica (−15%)'],[1,'Media'],[1.15,'Alta (+15%)'],[1.3,'Premium (+30%)']]; const idx=pols.findIndex(p=>Math.abs(p[0]-h.mult)<.01), sig=pols[(idx+1)%pols.length];
+    ops.push({t:'Cambiar la política de tarifas: '+sig[1],cat:'mercado',d:'Hoy: '+pols[Math.max(0,idx)][1]+'. Tarifas altas dejan más por noche pero bajan la ocupación.',cerrar:false,run:()=>{ h.mult=sig[0]; reab(); }});
+    const pn=['Personal mínimo','Personal estándar','Personal premium']; ops.push({t:'Cambiar el personal: '+pn[(h.pers+1)%3],cat:'compania',d:'Hoy: '+pn[h.pers]+'. Más personal mejora el servicio y la reputación, y cuesta margen.',cerrar:false,run:()=>{ h.pers=(h.pers+1)%3; reab(); }});
+    if(h.modelo==='propio'){ const ampl=Math.max(4,Math.round(h.hab*.3)), cA=Math.round(T.costo*ampl*F()*dest(h.ciudad).suelo*.9);
+      ops.push({t:'Ampliar '+ampl+' habitaciones · '+fm(cA),cat:'compania',d:'Un año de obra; el hotel sigue abierto.',dis:h.amplia?'Ya hay una ampliación en curso':(e.caja<cA?'La cadena no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cA; h.amplia={restan:1,hab:ampl}; h.valor+=cA; reab(); }});
+      const mk=Math.round(h.hab*.18*F()); ops.push({t:'Campaña de mercadeo local · '+fm(mk),cat:'mercado',d:'Sube la reputación y la marca un poco.',dis:e.caja<mk?'La cadena no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mk; h.resenas=cl(h.resenas+3,5,99); c.marca=cl(c.marca+1,5,99); reab(); }});
+      ops.push({t:'Vender el hotel · '+fm(Math.max(0,h.valor-(h.hipoteca||0))),cat:'capital',d:'Vale '+fm(h.valor)+(h.hipoteca?' y debe '+fm(h.hipoteca):'')+'. La plata entra a la caja de la cadena.',cerrar:false,run:()=>{ vender(e,c,h,Math.round(h.valor)); cerrarModal(); render(); escenaImperio175(e); }}); }
+    if(h.modelo==='arrendado'||h.modelo==='administrado'||h.modelo==='franquicia') ops.push({t:'Dejar este hotel',cat:'capital',d:'Terminas el contrato y sales de él.',cerrar:false,run:()=>{ c.hoteles=c.hoteles.filter(x=>x!==h); log('Dejaste <b>'+E(h.nom)+'</b>.'); cerrarModal(); render(); escenaImperio175(e); }});
+    ops.push({t:'Volver al imperio',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(e); }});
+    const ult=h.hist.slice(-6).map(x=>x.cerrado?'cerrado':(x.obra?'obra':pc(x.ocu||0))).join(' · ');
+    escena({rubro:'Hoteles',titulo:E(h.nom)+' <span class="tit175">'+estrellas(h)+'</span>',ancho:true,cerrable:true,clase:'hot175',cuerpo:E(h.ciudad)+' · '+E(T.n.toLowerCase())+' · '+h.hab+' habitaciones · '+({propio:'propio',arrendado:'arrendado',franquicia:'franquicia'+(h.socio?' de '+E(h.socio):''),administrado:'administrado para '+E(h.socio||'su dueño')})[h.modelo]+'.',
+      html:'<div class="k"><div><b>'+pc(h.ocu||0)+'</b><span>ocupación</span></div><div><b>'+fmt(h.adr||0)+'</b><span>tarifa por noche</span></div><div><b>'+fm(h.ebitda||0)+'</b><span>utilidad operativa</span></div><div><b>'+Math.round(h.cons)+'/100</b><span>estado</span></div><div><b>'+Math.round(h.serv)+'/100</b><span>servicio</span></div><div><b>'+Math.round(h.resenas)+'/100</b><span>reputación</span></div></div>'+(h.modelo==='propio'?'<div class="apunte">Vale '+fm(h.valor)+(h.hipoteca?' · hipoteca '+fm(h.hipoteca):'')+'.</div>':'')+(ult?'<h4>Últimos años</h4><div><small>'+ult+'</small></div>':''),opciones:ops}); }
+  function escenaMarca175(e){ const c=C(e), ops=[]; const reab=()=>{ cerrarModal(); render(); escenaMarca175(e); };
+    const mk=Math.round(tot2(c)*.03)+5; ops.push({t:'Campaña de marca de la cadena · '+fm(mk),cat:'mercado',d:'Sube la marca 4 puntos. Marca hoy: '+Math.round(c.marca)+'/100.',dis:e.caja<mk?'La cadena no tiene esa caja':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=mk; c.marca=cl(c.marca+4,5,99); reab(); }});
+    if(A()<1950){ /* todavía no existen las marcas que se alquilan ni los contratos de administración */ }
+    else if(puedeFranq(c)){ const ds=destDisp(e).filter(d=>!d.global); const d=pick(ds), ts=TIPOS.filter(t=>tipoOK(t,d)&&t.est>=2); const t=pick(ts)||TB.hotelc; const hab=Math.round((t.hab[0]+t.hab[1])/3);
+      ops.push({t:'Franquiciar la marca a un socio en '+d.n,cat:'mercado',d:'Un socio construye y opera con tu marca; tú cobras 6% de sus ventas de cuartos. Un '+t.n.toLowerCase()+' de '+hab+' habitaciones. Si lo opera mal, te daña la marca.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; nuevoSocio(e,c,'franquicia',d.n,t.id,hab); reab(); }}); }
+    else ops.push({t:'Franquiciar la marca',cat:'mercado',d:'Necesitas marca 55 y tres hoteles propios abiertos. Hoy: marca '+Math.round(c.marca)+', '+propios(c).filter(h=>!h.enObra).length+' propios.',dis:'Todavía no cumples los requisitos',run:()=>{}});
+    if(puedeAdmin(c)){ const ds=destDisp(e).filter(d=>!d.global); const d=pick(ds), ts=TIPOS.filter(t=>tipoOK(t,d)&&t.est>=2); const t=pick(ts)||TB.hotelc; const hab=Math.round((t.hab[0]+t.hab[1])/2.5);
+      ops.push({t:'Administrar un hotel ajeno en '+d.n,cat:'mercado',d:'Operas un '+t.n.toLowerCase()+' de '+hab+' habitaciones de otro dueño: cobras 3% de las ventas y 12% de la utilidad operativa. Sin inversión.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; nuevoSocio(e,c,'administrado',d.n,t.id,hab); reab(); }}); }
+    if(A()>=1990){ const niv=(c.lealtad||0), cL=Math.round(tot2(c)*.02*(niv+1))+4; ops.push({t:niv>=3?'Programa de lealtad: nivel máximo':'Programa de lealtad: pasar al nivel '+(niv+1)+' · '+fm(cL),cat:'mercado',d:'Cada nivel suma 2% de ocupación y cuesta 0,6% de las ventas al año. Hoy nivel '+niv+'.',dis:niv>=3?'Ya está en el máximo':(e.caja<cL?'La cadena no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cL; c.lealtad=niv+1; reab(); }}); }
+    if(A()>=2000){ const cD=Math.round(tot2(c)*.015)+3; ops.push({t:'Motor de reservas directas · '+fm(cD),cat:'mercado',d:'Cada paso suma 1% de ocupación y baja 10 puntos la dependencia de las agencias en línea ('+pc(c.ota||0)+' hoy).',dis:(c.directo||0)>=5?'Ya está al máximo':(e.caja<cD?'La cadena no tiene esa caja':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; e.caja-=cD; c.directo=(c.directo||0)+1; c.ota=Math.max(0,(c.ota||0)-.1); reab(); }}); }
+    ops.push({t:'Volver al imperio',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(e); }});
+    escena({rubro:'Hoteles',titulo:'La marca de '+E(e.nombre),ancho:true,cerrable:true,clase:'hot175',cuerpo:'La marca la hace la reputación de todos tus hoteles. Con una marca fuerte se llenan más rápido, cobran más y se pueden franquiciar.',html:'<div class="k"><div><b>'+Math.round(c.marca)+'</b><span>marca</span></div><div><b>'+(c.lealtad||0)+'</b><span>nivel de lealtad</span></div>'+(A()>=2005?'<div><b>'+pc(c.ota||0)+'</b><span>ventas por agencias en línea</span></div>':'')+'<div><b>'+c.hoteles.filter(h=>h.modelo==='franquicia').length+'</b><span>franquicias</span></div></div>',opciones:ops}); }
+  function escenaFinanzas175(e){ const c=C(e), ops=[]; const reab=()=>{ cerrarModal(); render(); escenaFinanzas175(e); };
+    propios(c).filter(h=>!h.enObra).forEach(h=>{ const hip=Math.round(h.valor*.5), puede=(h.hipoteca||0)<h.valor*.45;
+      ops.push({t:'Hipotecar '+h.nom+' · '+fm(hip),cat:'capital',d:'Recibes la mitad de lo que vale y sube la deuda de la cadena.',dis:puede?sinMov():'Ya está hipotecado',cerrar:false,run:()=>{ if(!movida()) return; h.hipoteca=(h.hipoteca||0)+hip; e.deuda+=hip; e.caja+=hip; reab(); }});
+      if(A()>=1900) ops.push({t:'Vender y arrendar '+h.nom+' · '+fm(h.valor*.9),cat:'capital',d:'Vendes el edificio y sigues operándolo, pagando 24% de las ventas de renta. Sacas el capital sin perder el hotel.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const neto=Math.max(0,h.valor*.9-(h.hipoteca||0)); e.caja+=neto; e.deuda=Math.max(0,e.deuda-(h.hipoteca||0)); h.modelo='arrendado'; h.valor=0; h.hipoteca=0; log('Vendiste el edificio de <b>'+E(h.nom)+'</b> y lo arrendaste: entraron '+fm(neto)+'.','bien'); reab(); }}); });
+    hotelesAportables().forEach(x=>ops.push({t:'Aportar a la cadena: '+x.b.nombre,cat:'capital',d:'Pasa de tus bienes personales a la cadena ('+fm(x.b.valor)+'). Tu patrimonio lo sigue contando por la valoración de la cadena.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; aportarHotel(e,x); reab(); }}));
+    if(!ops.length) ops.push({t:'No hay nada que mover por ahora',cat:'legado',d:'Cuando tengas hoteles propios abiertos podrás hipotecarlos o venderlos y arrendarlos.',dis:'Nada que hacer',run:()=>{}});
+    ops.push({t:'Volver al imperio',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaImperio175(e); }});
+    escena({rubro:'Hoteles',titulo:'Las finanzas de los hoteles',ancho:true,cerrable:true,clase:'hot175',cuerpo:'Un hotel propio es un negocio y un edificio. Se puede sacar capital del edificio sin perder el negocio.',opciones:ops}); }
+  /* ==================== EL CONSEJERO ==================== */
+  function gHoteles(){ if(!ACTIVO()||nino()) return []; const out=[];
+    cadenas().forEach(e=>{ try{ const c=C(e), L=abiertos(c);
+      const feo=L.filter(h=>h.modelo!=='franquicia'&&h.modelo!=='administrado'&&h.cons<45).sort((a,b)=>a.cons-b.cons)[0];
+      if(feo) out.push({id:'hotel-cons:'+e.nombre+feo.id,peso:56,tono:'mal',txt:'<b>'+E(feo.nom)+'</b> está deteriorado ('+Math.round(feo.cons)+'/100).',por:'Un hotel que se cae a pedazos pierde reputación, tarifa y ocupación.',si:'La marca de toda la cadena paga el costo.',ir:TIT,irT:'Renovar',pre:sentar(e)});
+      const vacio=L.filter(h=>(h.ocu||0)>0&&h.ocu<.38&&h.hist.length>=2&&h.modelo!=='franquicia').sort((a,b)=>a.ocu-b.ocu)[0];
+      if(vacio) out.push({id:'hotel-vacio:'+e.nombre+vacio.id,peso:50,tono:'mal',txt:'<b>'+E(vacio.nom)+'</b> está casi vacío ('+pc(vacio.ocu)+' de ocupación).',por:'Puede ser el precio, el estado, la reputación o el destino: revisa la tarifa y el servicio.',si:'Un hotel vacío se come la utilidad de los demás.',ir:TIT,irT:'Ver el hotel',pre:sentar(e)});
+      if(A()===2020||A()===2021) out.push({id:'hotel-pand:'+e.nombre,peso:58,tono:'mal',txt:'La pandemia tiene a los hoteles de <b>'+E(e.nombre)+'</b> casi vacíos.',por:'Con las fronteras cerradas la demanda cae a una fracción; el año se pasa cuidando la caja y el equipo.',si:'Una cadena sin caja no llega a la reapertura.',ir:TIT,irT:'Ver la cadena',pre:sentar(e)});
+      if(puedeFranq(c)&&!c.hoteles.some(h=>h.modelo==='franquicia')) out.push({id:'hotel-franq:'+e.nombre,peso:38,tono:'oro',txt:'La marca de <b>'+E(e.nombre)+'</b> ya da para <b>franquiciar</b>.',por:'Un socio pone el edificio y tú cobras regalías sin invertir.',si:'La expansión depende solo de tu caja.',ir:TIT,irT:'Franquiciar',pre:sentar(e)});
+      if(!c.hoteles.some(h=>h.enObra)&&e.caja>5000*F()&&L.length>=1&&L.length<25) out.push({id:'hotel-crecer:'+e.nombre,peso:34,tono:'oro',txt:'La caja de <b>'+E(e.nombre)+'</b> ('+fm(e.caja)+') ya da para otro hotel.',por:'Cada hotel nuevo diluye el riesgo y suma marca y escala.',si:'La plata parada no rinde.',ir:TIT,irT:'Abrir otro',pre:sentar(e)}); }catch(x){} });
+    return out.slice(0,2); }
+  /* ==================== LOS ENGANCHES ==================== */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__top175) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&S.p.edad>=18){ const enGrupo=!window.__crudo91&&L.some(x=>x.t==='Empezar un negocio'&&x.modal);
+          if(!enGrupo&&!L.some(z=>z.t===TIT)){ const g=cadenas(), n=g.reduce((s,e)=>s+abiertos(C(e)).length,0);
+            L.push({t:TIT,cat:'compania',d:g.length?('Tienes '+n+' hotel'+(n===1?'':'es')+' abiertos. Abrir, comprar, renovar, franquiciar y administrar la cadena.'):'Desde una posada hasta una cadena de hoteles: abrir, comprar, renovar, franquiciar y administrar.',mov:0,modal:true,run:()=>escenaImperio175()}); } } }catch(x){ console.error(x); }
+      return L; };
+    f.__top175=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA175_CAT) return; window.__SA175_CAT=true; window.catDe=function(t){ if(t===TIT) return 'compania'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_101||[]; const g=G.find(x=>x.id==='negocio'); if(!g||!Array.isArray(g.miembros)) return; if(!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Hoteles',TIT]);
+    const G91=window.GRUPOS_91; if(Array.isArray(G91)){ const g2=G91.find(x=>x.id==='negocio'); if(g2&&g2!==g&&Array.isArray(g2.miembros)&&!g2.miembros.some(m=>m[1]===TIT)) g2.miembros.push(['Hoteles',TIT]); } }
+  function wrapValuar(){ const old=window.valuar; if(typeof old!=='function'||old.__top175) return;
+    const f=function(e){ let v=old.apply(this,arguments); try{ if(e&&e.hotel175){ const c=e.hotel175; const prop=(c.hoteles||[]).filter(h=>h.modelo==='propio').reduce((s,h)=>s+(h.enObra?(h.enObra.costo||0):(h.valor||0)),0), fees=(c.hoteles||[]).filter(h=>h.modelo==='franquicia'||h.modelo==='administrado').reduce((s,h)=>s+Math.max(0,h.aporte||0)*5.5,0); const piso=prop*.85+fees+Math.max(0,e.caja||0)*.5-(e.deuda||0); if(isFinite(piso)&&piso>v) v=piso; } }catch(x){} return v; };
+    f.__top175=true; Object.keys(old).forEach(k=>{ if(!/^__top/.test(k)) f[k]=old[k]; }); window.valuar=f; }
+  function wrapPanel(){ const old=window.panelCompania86; if(typeof old!=='function'||old.__v175) return;
+    window.panelCompania86=function(e){ let h=old.apply(this,arguments);
+      try{ if(e&&ACTIVO()&&!nino()&&typeof negCat!=='undefined'&&negCat==='resumen'&&(e.hotel175||e.sector==='turismo')){ const i=comps().indexOf(e), c=e.hotel175?C(e):null, r=c?resumen(e,c):null;
+          h+='<div class="panel175"><b>Hoteles</b><div class="apunte">'+(c?(r.n+' hotel'+(r.n===1?'':'es')+' abiertos · '+r.hab+' habitaciones · ocupación '+pc(r.ocu)+' · marca '+Math.round(c.marca)+'.'):'Esta compañía de turismo puede convertirse en una cadena hotelera.')+'</div><button type="button" class="btn" data-c175="abrir:'+i+'">'+(c?'Ver el imperio hotelero':'Convertir en cadena hotelera')+'</button></div>'; } }catch(x){}
+      return h; }; window.panelCompania86.__v175=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) window.panelCompania86[k]=true; }); }
+  function clic(ev){ const t=ev.target; if(!t||!t.closest) return; const f=t.closest('[data-h175]'); if(f){ ev.preventDefault(); ev.stopPropagation(); const e=comps().find(x=>x.hotel175&&x.hotel175.hoteles.some(h=>h.id===f.getAttribute('data-h175')))||S.emp; if(e){ cerrarModal(); escenaHotel175(e,f.getAttribute('data-h175')); } return; }
+    const b=t.closest('[data-c175]'); if(b){ ev.preventDefault(); ev.stopPropagation(); const v=String(b.getAttribute('data-c175')||''); if(v.indexOf('abrir:')===0){ const e=comps()[+v.slice(6)]; if(e&&e.hotel175) escenaImperio175(e); else if(e){ C(e); sentar(e)(); log('<b>'+E(e.nombre)+'</b> se convierte en cadena hotelera.','hito'); render(); escenaImperio175(e); } } } }
+  function init175(){ wrapAcciones(); wrapCat(); grupo(); wrapValuar(); wrapPanel();
+    if(!window.__SA175_CLIC){ window.__SA175_CLIC=true; document.addEventListener('click',clic,true); }
+    try{ if(typeof window.consejeroRegistrar168==='function') window.consejeroRegistrar168(gHoteles); }catch(x){}
+    Object.assign(window,{anualHoteles175:anualCadena,TIPOS_HOTEL_175:TIPOS,DESTINOS_HOTEL_175:DESTINOS,destinosHotel175:destDisp,tiposHotel175:tiposDisp,cadenaHotel175:C,cadenasHotel175:cadenas,demandaHotel175:demanda,tarifaHotel175:tarifa,abrirHotel175:abrirHotel,comprarHotel175:comprarHotel,ofertasHotel175:ofertas,aportarHotel175:aportarHotel,hotelesAportables175:hotelesAportables,
+      venderHotel175:vender,costoAperturaHotel175:costoApertura,planHotel175:plan,nuevoSocioHotel175:nuevoSocio,puedeFranquiciar175:puedeFranq,puedeAdministrar175:puedeAdmin,tituloHotel175:titulo,revisarHitosHotel175:revisarHitos,HITOS_HOTEL_175:HITOS,escenaImperio175,escenaAbrir175,escenaComprar175,escenaHotel175,escenaMarca175,escenaFinanzas175,escenaInicioHotel175:escenaInicio175,sucesosHotel175:sucesos,factorEra175:F,resumenHotel175:resumen}); }
+  init175(); setTimeout(init175,40); setTimeout(init175,220); setTimeout(init175,650); setTimeout(init175,950);
+  window.__SA175={version:V175};
 })();
 </script>
 
