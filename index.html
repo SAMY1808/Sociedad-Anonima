@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v182</div>
+<div class="version-badge" id="versionBadge">v183</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3857,7 +3857,7 @@ const PUERTAS=[
   {id:'plaza',t:'La plaza y el control',d:'La rueda de Bogotá, tomas hostiles y enroques con otras casas.',cat:'mercado',
    re:/rueda de la bolsa|Toma hostil|Proponer enroque|moneda extranjera|filial en el exterior/},
   {id:'fisco',t:'La plata y el fisco',d:'Fideicomiso afuera, fundación familiar, seguros, testamento y mausoleo.',cat:'capital',
-   re:/fideicomiso|fundación familiar|Administrar la fundación|Revisar los seguros|Dictar testamento|mausoleo|nichos/},
+   re:/fideicomiso|fundación familiar|Administrar la fundación|Revisar los seguros|Dictar testamento|Nombrar un albacea|Impugnar el testamento|El pleito por la sucesión|mausoleo|nichos/},
   {id:'gris',t:'Poder e influencia',d:'Gremios, mover leyes en el Congreso, aceitar funcionarios y palancas.',cat:'riesgo',
    re:/Mover una ley|Aceitar a un funcionario|Mover palancas|Gremios y agremiaciones/},
   {id:'hogar',t:'La casa y las propiedades',d:'Dónde viven, tren de vida, comprar finca o local, hipotecas, meter bienes al negocio.',cat:'casa',
@@ -34078,6 +34078,200 @@ install();setTimeout(install,1200);
     Object.assign(window,{tipoMatrimonio182:tipoDe,viaFinMatrimonio182:viaDe,escenaTipo182,escenaProceso182,escenaInicio182,procesoSeparacion182:empezar,evRepartoSeparacion182:evReparto,evCustodiaSeparacion182:evCustodia,evDemandaSeparacion182:evDemanda,evInfoSeparacion182:evInfo,resolverSeparacion182:resolver,reconciliarSeparacion182:reconciliar,anualSeparacion182:anual182,sellarMatrimonio182:sellar,ABOGADOS_182:ABOG,costoAbogado182:costoAb,probAcuerdo182:probAcuerdo,reprogramarSeparacion182:reprogramar}); }
   init182(); setTimeout(init182,40); setTimeout(init182,220); setTimeout(init182,650); setTimeout(init182,950);
   window.__SA182={version:V182};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v183 · LA HERENCIA SE DISCUTE
+   La v119 ya abre la sucesión y la reparte según el testamento o la ley. Esta
+   capa agrega lo que pasa cuando la familia no está de acuerdo:
+   - El albacea: una persona de confianza que el testador nombra desde la
+     notaría (un amigo, un abogado o una fiduciaria). Baja la probabilidad de
+     pleito y, si lo hay, trae la defensa de la sucesión.
+   - La impugnación: un hijo desheredado, o uno que quedó con menos por la
+     "mejora" del testamento o por la fundación, demanda la sucesión. Si te
+     demandan, eliges abogado (barato, bueno o el mejor), puedes pagar de una
+     lo que piden o ir a juicio. Si el que quedó corto eres tú, puedes
+     impugnar el testamento desde "La sucesión de…".
+   - El juicio dura dos años y congela la partición: peritaje de los bienes,
+     bienes escondidos en el fideicomiso o la fundación (declararlos,
+     defenderlos o esconderlos mejor: si los encuentran, es escándalo y
+     delito), la compañía cuyas acciones están en la sucesión (comprarles la
+     parte o dejarlos entrar a la junta) y la sentencia, que mueve plata de
+     una parte a la otra.
+   ========================================================================== */
+(function(){
+  const V183='v183';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const SUC=()=>(typeof S!=='undefined'&&S&&S.sucesion119&&!S.sucesion119.cerrada)?S.sucesion119:null;
+  const IMP=()=>{ const p=typeof S!=='undefined'&&S&&S.impug183; return p&&SUC()?p:null; };
+  const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
+  const ABOG=()=>Array.isArray(window.ABOGADOS_182)?window.ABOGADOS_182:[{n:'Un abogado de barrio',f:.008,m:20,d:'Barato, con prisa y poca influencia.'},{n:'Un bufete reconocido',f:.025,m:60,d:'Buenos argumentos y buenos contactos.'},{n:'El mejor abogado del país',f:.06,m:150,d:'Caro. Se nota en los juzgados.'}];
+  const costoAb=i=>{ const s=SUC(), b=ABOG()[i]; return Math.max(b.m,((s&&s.M0)||0)*b.f*.5); };
+  const jug=s=>(s&&s.her||[]).find(x=>x.jugador)||null;
+  const parienteDe=nom=>(S.parientes||[]).find(q=>q.vivo&&q.nombre===primer(nom))||null;
+  const afecto=(nom,d)=>{ const q=parienteDe(nom); if(q) q.afecto=cl((q.afecto||55)+d,0,100); };
+  const movida=()=>{ if(S._mov183===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov183=A(); return true; };
+  const sinMov=()=>(S._mov183!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  function pagar(c){ c=Math.max(0,c); const x=Math.min(Math.max(0,S.efectivo),c); S.efectivo-=x; const r=c-x, s=SUC(); if(r>1&&s){ s.caja=Math.max(0,s.caja-r); s.costos=(s.costos||0)+r; } return c; }
+
+  /* ==================== EL ALBACEA ==================== */
+  const ALB=[
+    {id:'amigo',n:'Un amigo de la familia',d:'No cuesta nada. Pesa poco si hay pelea.',f:0,red:.08,ab:0},
+    {id:'abogado',n:'Un abogado de confianza',d:'Ordena el inventario y defiende la sucesión. Cuesta cerca del 0,6% de la herencia.',f:.006,red:.18,ab:1},
+    {id:'fiduciaria',n:'Una fiduciaria',d:'Neutral y cara: cerca del 1,2% de la herencia. Los herederos desconfían menos.',f:.012,red:.22,ab:1}];
+  const albDe=id=>ALB.find(a=>a.id===id)||null;
+  function escenaAlbacea183(){ const cur=S.albacea183; let M=0; try{ M=Math.max(0,patrimonio()); }catch(e){}
+    const ops=ALB.map(a=>({t:a.n+(a.f?' · cerca de '+fm(Math.max(15,M*a.f))+' al morir':' · sin costo'),cat:'legado',d:a.d,dis:cur&&cur.id===a.id?'Ya es tu albacea':sinMov(),
+      run:()=>{ if(!movida()) return; S.albacea183={id:a.id,n:a.n,anio:A()}; log('Nombraste albacea a <b>'+E(a.n.toLowerCase())+'</b>: se encargará de la sucesión cuando mueras y de que el testamento se cumpla.','hito'); }}));
+    if(cur) ops.push({t:'Quitar al albacea',cat:'legado',d:'Vuelves a dejar la sucesión sin quien la ordene.',dis:sinMov(),run:()=>{ if(!movida()) return; delete S.albacea183; log('Quitaste al albacea del testamento.'); }});
+    escena({rubro:'Notaría',titulo:'Nombrar un albacea',ancho:true,cerrable:true,
+      cuerpo:'El albacea es quien hace cumplir el testamento: abre el inventario, atiende a los herederos y responde cuando alguien reclama. Con uno de confianza, es menos probable que los hijos terminen en un juzgado'+(cur?'. Hoy tienes a <b>'+E(cur.n.toLowerCase())+'</b>':'')+'.',opciones:ops}); }
+
+  /* ==================== LA SUCESIÓN SE ABRE ==================== */
+  function pre183(h){ const hijos=(S.familia&&S.familia.hijos)||[], T=S.testamento||null;
+    const otros=hijos.filter(x=>x!==h&&x.vivo!==false&&!x.muerto);
+    let bl=0; try{ bl=valorFideicomiso()+valorFundacion(); }catch(e){}
+    return {desh:hijos.filter(x=>x!==h&&x.desheredado129).map(x=>({nombre:x.nombre,sexo:x.sexo})),temps:otros.filter(x=>!x.desheredado129).map(x=>x.temperamento),
+      afecto:otros.length?otros.reduce((a,x)=>a+(isFinite(x.vinculo)?x.vinculo:55),0)/otros.length:60,blindado:bl,albacea:S.albacea183?Object.assign({},S.albacea183):null,
+      tipoT:T&&T.tipo||null,nombreT:T&&T.nombre||null}; }
+  function probImpug(pre,s){ const j=jug(s)||{pct:0,key:''}; let p=.06;
+    if(s.base==='testamento'){ if(pre.tipoT==='hijo'){ p+=(pre.nombreT&&j.key==='h:'+pre.nombreT)?.16:.04; } if(pre.tipoT==='fundacion') p+=.08; } else p-=.03;
+    if(pre.desh.length) p+=.34;
+    if(pre.temps.includes('ambicioso')) p+=.12; if(pre.temps.includes('prodigo')) p+=.05; if(pre.temps.includes('conciliador')) p-=.1;
+    if(pre.blindado>0) p+=.06; if(pre.afecto<40) p+=.1; else if(pre.afecto>70) p-=.07;
+    const al=pre.albacea&&albDe(pre.albacea.id); if(al) p-=al.red;
+    return cl(p,.03,.8); }
+  function abrir183(pre){ const s=SUC(); if(!s||s.tutor||nino()||S.impug183) return null;
+    if(pre.albacea){ const al=albDe(pre.albacea.id); if(al){ s.albacea183=al.id; const c=al.f*(s.M0||0); if(c>0){ s.caja=Math.max(0,s.caja-c); s.costos=(s.costos||0)+c; }
+      log('<b>'+E(al.n)+'</b>, nombrado albacea en el testamento, abrió el inventario'+(c>0?' y cobró '+fm(c)+' de la masa':'')+'.'); } }
+    const j=jug(s); if(!j||!(j.pct>.001)) return null;
+    const otros=s.her.filter(x=>!x.jugador&&!x._cony&&x.pct>0);
+    if(!otros.length&&!pre.desh.length) return null;
+    if(!chance(probImpug(pre,s))) return null;
+    let contra,key=null,desh=false,sexo=null;
+    if(pre.desh.length){ contra=pre.desh[0].nombre+' '+S.p.apellido; desh=true; sexo=pre.desh[0].sexo; }
+    else { const x=pick(otros); contra=x.nombre; key=x.key; sexo=x.sexo; }
+    const fav=s.base==='testamento'&&pre.tipoT==='hijo'&&pre.nombreT&&j.key==='h:'+pre.nombreT;
+    const gap=Math.min((s.M0||0)*cl(rnd(.06,.14)+(desh?.12:0)+(fav?.07:0)+(pre.tipoT==='fundacion'?.03:0),.05,.3),Math.max(0,j.E||0)*.5);
+    if(!(gap>1)) return null;
+    const p={rol:'demandado',contra,key,desh,sexo,gap,abogado:null,tick:0,agenda:[],pagado:0,pendiente:'demanda',avisado:false,inicioAnio:A(),blind:pre.blindado,albacea:pre.albacea?pre.albacea.id:null,mods:0,compromiso:null};
+    S.impug183=p;
+    log('<b>'+E(contra)+'</b> '+(desh?'—a quien dejaron por fuera del testamento—':'')+' no está de acuerdo con la sucesión y se prepara para <b>impugnarla</b>. La demanda llega en cualquier momento.','mal');
+    return p; }
+
+  /* ==================== EL JUICIO ==================== */
+  const vivo=p=>S.impug183===p&&!!SUC();
+  const agendaDe=()=>{ const L=[{t:1,e:'peritaje'}]; if(empresaSuc()) L.push({t:1,e:'empresa'}); L.push({t:2,e:'sentencia'}); return L; };
+  function empresaSuc(){ try{ return (companias()||[]).find(e=>(e.holders||[]).some(h=>h.id==='suc119'&&h.n>0))||null; }catch(e){ return null; } }
+  function comenzar(p){ p.pendiente=null; p.inicioAnio=A(); p.tick=0; p.agenda=agendaDe();
+    iniciarCompromiso({titulo:'Pleito por la sucesión',restan:2,mov:1,cerrar:()=>{}}); p.compromiso=compromisos().slice(-1)[0]; }
+  function reprogramar(p){ p.agenda=[{t:p.tick+1,e:'sentencia'}]; if(p.compromiso) p.compromiso.restan=1; }
+  function cerrarImpug(p){ if(p.compromiso){ const cs=compromisos(), i=cs.indexOf(p.compromiso); if(i>=0) cs.splice(i,1); } S.impug183=null; const s=SUC(); if(s){ s.impugnada183=true; if(s.via) s.duracion=Math.min(s.duracion||0,s.anios+1); } }
+  function transferir(s,de,a,d){ d=Math.max(0,d); if(!(d>0)) return 0; const M0=s.M0||1; de.E=(de.E||0)-d; a.E=(a.E||0)+d; const dp=d/M0; de.pct=Math.max(0,(de.pct||0)-dp); a.pct=(a.pct||0)+dp; return d; }
+  function lado(p,s){ const j=jug(s); let otro=null;
+    if(p.key) otro=s.her.find(x=>x.key===p.key); if(!otro) otro=s.her.find(x=>!x.jugador&&primer(x.nombre)===primer(p.contra));
+    if(!otro&&p.rol==='demandado'){ otro={key:'d:'+p.contra,nombre:p.contra,rel:p.sexo==='m'?'hija':'hijo',sexo:p.sexo,pct:0,E:0}; s.her.push(otro); }
+    return {j,otro}; }
+  function aplicar(p,monto){ const s=SUC(); if(!s) return 0; const L=lado(p,s); if(!L.j||!L.otro) return 0;
+    return p.rol==='demandado'?transferir(s,L.j,L.otro,Math.min(monto,Math.max(0,L.j.E||0)*.6)):transferir(s,L.otro,L.j,Math.min(monto,Math.max(0,L.otro.E||0)*.6)); }
+  function incluir(s,monto){ let m=Math.max(0,monto), tom=0; const f=S.fideicomiso, fu=S.fundacion;
+    if(f&&f.valor>0){ const x=Math.min(f.valor,m); f.valor-=x; tom+=x; m-=x; }
+    if(m>0&&fu&&fu.activos>0){ const x=Math.min(fu.activos,m); fu.activos-=x; tom+=x; m-=x; }
+    if(tom>0){ const tp=s.her.reduce((a,x)=>a+(x.pct||0),0)||1; s.caja+=tom; s.M0=(s.M0||0)+tom; s.her.forEach(x=>{ x.E=(x.E||0)+tom*(x.pct||0)/tp; }); }
+    return tom; }
+  function probAcuerdo(p,ab){ const q=parienteDe(p.contra); return cl(.5+(((q?q.afecto:55)-50)/300)+((ab||0)>=1?.05:0)+(p.albacea?.06:0)-(p.desh?.12:0),.15,.85); }
+
+  function evDemanda(p){ const al=p.albacea&&albDe(p.albacea); const g=p.gap;
+    const ops=[]; if(al&&al.ab) ops.push({t:'Seguir con el bufete del albacea · sin costo',f:()=>{ p.abogado=1; comenzar(p); return 'El albacea te prestó su bufete para responder. Va a pleito de dos años.'; }});
+    ABOG().forEach((b,i)=>ops.push({t:b.n+' ('+fm(costoAb(i))+')',f:()=>{ const c=costoAb(i); pagar(c); p.abogado=i; p.pagado+=c; comenzar(p); let t='Contrataste a '+b.n.toLowerCase()+' para responder.';
+      if(chance(probAcuerdo(p,i)*.4)){ p.arreglo=g*rnd(.4,.65); reprogramar(p); t+=' Los abogados llegaron a un arreglo: el pleito se acorta a un año.'; } else t+=' Va a pleito de dos años.'; return t; }}));
+    ops.push({t:'Pagar lo que pide ('+fm(g*.85)+')',f:()=>{ const x=aplicar(p,g*.85); afecto(p.contra,8); cerrarImpug(p); return 'Le reconociste '+fm(x)+' de tu parte y retiró la demanda. Se acabó el pleito.'; }});
+    return {p:10,c:()=>vivo(p)&&p.pendiente==='demanda',t:()=>'<b>'+E(p.contra)+' presentó la demanda de impugnación de la sucesión.</b> '+(p.desh?'Dice que lo dejaron por fuera sin causa. ':'Dice que el reparto es injusto. ')+'Pide cerca de <b>'+fm(g)+'</b> más de lo que le tocó, y el juez congeló la partición. Hay que contestar.',o:ops}; }
+  function evPeritaje(p){ const s=SUC(), M0=(s&&s.M0)||0, c=Math.max(15,M0*.004), bl=(p.blind||0)>0&&p.rol==='demandado'&&((S.fideicomiso&&S.fideicomiso.valor)||0)+((S.fundacion&&S.fundacion.activos)||0)>1, ab=p.abogado||0;
+    if(bl) return {p:10,c:()=>vivo(p),t:()=>'<b>El juez ordenó el inventario y el peritaje de la herencia.</b> Los abogados de '+E(primer(p.contra))+' señalan el fideicomiso y la fundación como un montaje para sacar bienes de la sucesión. ¿Qué haces?',
+      o:[{t:'Declararlo y negociar',f:()=>{ const x=incluir(SUC(),p.blind*.2); p.mods-=.05; return 'Reconociste una parte ('+fm(x)+') y la devolviste a la masa. El juez lo tomó como buena fe.'; }},
+         {t:'Sostener que es legítimo',f:()=>{ if(chance(cl(.5+ab*.12,.3,.8))) return 'El juez aceptó que las estructuras son legítimas y las dejó por fuera.'; const x=incluir(SUC(),p.blind*.4); prest(-3,'una herencia con bienes escondidos'); return 'El juez no creyó el argumento: devolvió '+fm(x)+' a la masa y salió en la prensa.'; }},
+         {t:'Esconderlo mejor, con testaferros ('+fm(p.blind*.01)+')',f:()=>{ pagar(p.blind*.01); if(chance(cl(.5-ab*.1,.15,.5))){ const x=incluir(SUC(),p.blind*.6); prest(-8,'esconder bienes de una herencia'); p.gap*=1.3; try{ if(typeof registrarDelito==='function') registrarDelito('fraude en una sucesión',2,'bienes escondidos de la herencia'); }catch(e){} return 'El peritaje <b>encontró los testaferros</b>: '+fm(x)+' volvieron a la masa, el escándalo es público y tu contraparte pide más.'; } return 'El peritaje no encontró nada. Esta vez.'; }}]};
+    return {p:10,c:()=>vivo(p),t:()=>'<b>El juez ordenó el inventario y el peritaje de la herencia.</b> Un avalúo bien hecho pesa en la sentencia.',
+      o:[{t:'Pagar un perito de parte ('+fm(c)+')',f:()=>{ pagar(c); p.pagado+=c; p.mods+=.08; return 'El perito de parte mejoró tu posición en el expediente.'; }},{t:'Aceptar el avalúo oficial',f:()=>'El avalúo oficial quedó como estaba.'}]}; }
+  function evEmpresa(p){ const e=empresaSuc(); if(!e) return null; const h=e.holders.find(y=>y.id==='suc119'); const costo=valuar(e)*h.n/totalAcciones(e)*1.15;
+    return {p:10,c:()=>vivo(p)&&!!empresaSuc(),t:()=>'<b>Las acciones de '+E(e.nombre)+' siguen en la sucesión.</b> Con la sentencia, los herederos entran a la junta con su parte. Puedes comprarles esa participación antes de que pase.',
+      o:[{t:'Comprarles su parte ('+fm(costo)+')',f:()=>{ const tu=e.holders.find(y=>y.id==='tu'), hh=e.holders.find(y=>y.id==='suc119'); if(!tu||!hh) return 'Ya no había acciones en la sucesión.'; if(S.efectivo<costo) return 'No te alcanzó la plata: los herederos entrarán a la junta.';
+          S.efectivo-=costo; tu.n+=hh.n; e.holders=e.holders.filter(y=>y!==hh); if(Array.isArray(e.junta)) e.junta=e.junta.filter(x=>!x.albacea119); return 'Les compraste su parte por '+fm(costo)+': todo el control de '+E(e.nombre)+' queda contigo.'; }},
+         {t:'Dejar que entren a la junta',f:()=>'Los herederos entrarán a la junta de '+E(e.nombre)+' cuando se parta la herencia.'}]}; }
+  function evSentencia(p){ return {p:10,c:()=>vivo(p),t:()=>'<b>Llega la sentencia del juicio por la sucesión.</b> '+(p.rol==='demandado'?'El juez resuelve la demanda de '+E(p.contra)+'.':'El juez resuelve tu demanda contra '+E(p.contra)+'.'),
+      o:[{t:'Ver la sentencia',f:()=>sentenciar(p)}]}; }
+  function sentenciar(p){ const s=SUC(); if(!s||S.impug183!==p) return ''; const dem=p.rol==='demandado', ab=p.abogado||0;
+    let k=dem?rnd(.25,.85)-ab*.1-(p.albacea?.05:0)-p.mods+(p.desh?.1:0):rnd(.2,.75)+ab*.1+p.mods; k=cl(k,.05,1);
+    const gap=p.arreglo!=null?p.arreglo:p.gap, pedido=k*(p.arreglo!=null?1:1)*gap, x=aplicar(p,pedido), q=p.contra;
+    const ganoYo=dem?k<.45:k>=.45; prest(ganoYo?1:-2,dem?'el pleito por la sucesión':'el pleito por el testamento'); afecto(q,dem?-12:-14);
+    S.p.felicidad=cl((S.p.felicidad||50)-(ganoYo?2:6),0,100);
+    log((dem?'El juez resolvió la impugnación de <b>'+E(q)+'</b>: ':'El juez resolvió tu demanda contra <b>'+E(q)+'</b>: ')+(x>0?(dem?'te tocó pasarle '+fm(x)+' de tu parte. ':'te reconoció '+fm(x)+' más. '):'no cambió nada del reparto. ')+'Entre abogados, peritos y trámites se fueron '+fm(p.pagado)+'.',ganoYo?'bien':'mal');
+    hito(dem?'Pleito por la sucesión con '+q:'Impugnó el testamento'); cerrarImpug(p);
+    return ganoYo?'La sentencia te fue favorable.':'La sentencia te fue adversa. Se reparte lo que queda.'; }
+  function reconocer(p){ const x=aplicar(p,p.gap*.85); afecto(p.contra,p.rol==='demandado'?8:-6); log('Cerraron el pleito de la sucesión con <b>'+E(p.contra)+'</b>: se movieron '+fm(x)+' de una parte a la otra.'); cerrarImpug(p); }
+
+  /* ==================== EL AÑO ==================== */
+  function anual183(){ if(!S||!S.p||S.muerto) return; const p=S.impug183; if(!p) return; const s=SUC(); if(!s){ S.impug183=null; return; }
+    for(let i=cola.length-1;i>=0;i--){ let tx=''; try{ tx=String(typeof cola[i].t==='function'?cola[i].t():cola[i].t); }catch(e){} if(/está lista para la partición/.test(tx)) cola.splice(i,1); }
+    s.duracion=Math.max(s.duracion||0,(s.anios||0)+2);
+    if(p.pendiente==='demanda'){ if(A()>p.inicioAnio&&(!p.avisado||A()>p.inicioAnio+1)){ p.avisado=true; p.inicioAnio=Math.max(p.inicioAnio,A()-1); cola.push(evDemanda(p)); } return; }
+    if(A()<=p.inicioAnio) return; p.tick++;
+    const L=p.agenda.filter(x=>x.t===p.tick); L.forEach(x=>{ const ev=x.e==='peritaje'?evPeritaje(p):x.e==='empresa'?evEmpresa(p):evSentencia(p); if(ev) cola.push(ev); });
+    if(!p.agenda.some(x=>x.t>p.tick)&&!L.some(x=>x.e==='sentencia')) cola.push(evSentencia(p)); }
+
+  /* ==================== LA PANTALLA DEL PLEITO ==================== */
+  function escenaImpug183(){ const p=IMP(); if(!p){ escena({rubro:'La sucesión',titulo:'El pleito por la sucesión',cuerpo:'No hay ningún pleito en curso.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const s=SUC(), dem=p.rol==='demandado', reab=()=>{ cerrarModal(); render(); escenaImpug183(); }, ops=[];
+    const arr=p.gap*.6;
+    if(p.pendiente!=='demanda'){
+      ops.push({t:'Ofrecer un arreglo · '+fm(arr),cat:'familia',d:'Probabilidad de que '+E(primer(p.contra))+' acepte: '+Math.round(probAcuerdo(p,p.abogado)*100)+'%. Si acepta, se cierra el pleito con ese monto.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return;
+        if(chance(probAcuerdo(p,p.abogado))){ const x=aplicar(p,arr); afecto(p.contra,dem?6:-4); log('<b>'+E(p.contra)+'</b> aceptó el arreglo ('+fm(x)+'). Se terminó el pleito.','bien'); cerrarImpug(p); cerrarModal(); render(); return; }
+        afecto(p.contra,-4); log(E(p.contra)+' rechazó el arreglo. El pleito sigue.','mal'); reab(); }});
+      ops.push({t:'Cambiar de abogado',cat:'familia',d:'Subir de nivel mejora tus posibilidades; cuesta lo que cuesta el nuevo.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal();
+        escena({rubro:'El pleito',titulo:'¿Con quién sigues?',cerrable:true,opciones:ABOG().map((b,i)=>({t:b.n+(i===p.abogado?' (el actual)':' · '+fm(costoAb(i))),cat:'familia',d:b.d,dis:i===p.abogado?'Es el actual':null,cerrar:false,run:()=>{ if(!movida()) return; const c=costoAb(i); pagar(c); p.abogado=i; p.pagado+=c; log('Cambiaste de abogado: ahora te lleva '+b.n.toLowerCase()+'.'); reab(); }}))}); }});
+    }
+    ops.push({t:dem?'Pagar lo que pide · '+fm(p.gap*.85):'Retirar la demanda y reconocer el testamento',cat:'familia',d:dem?'Se cierra el pleito ya y se acaba el desgaste.':'Pierdes lo gastado, pero el pleito se acaba y la familia respira.',cerrar:false,run:()=>{ reconocer(p); cerrarModal(); render(); }});
+    escena({rubro:'La sucesión de '+E(s.causante),titulo:'El pleito por la sucesión',ancho:true,cerrable:true,clase:'pol155',
+      cuerpo:(dem?E(p.contra)+' impugna la sucesión'+(p.desh?' (lo dejaron por fuera)':'')+'.':'Impugnaste el testamento: demandaste a '+E(p.contra)+'.')+' '+(p.pendiente==='demanda'?'La demanda llega pronto.':'Año '+Math.min(p.tick+1,2)+' de 2. La partición está congelada hasta la sentencia.'),
+      html:'<div class="k"><div><b>'+(p.abogado==null?'—':E(ABOG()[p.abogado].n.replace(/^(Un |El )/,'')))+'</b><span>tu abogado</span></div><div><b>'+fm(p.pagado)+'</b><span>gastado en el pleito</span></div><div><b>'+fm(p.gap)+'</b><span>en discusión</span></div><div><b>'+(p.albacea?E(albDe(p.albacea).n.replace(/^(Un |Una )/,'')):'sin albacea')+'</b><span>albacea</span></div></div>',opciones:ops}); }
+
+  /* ==================== IMPUGNAR EL TESTAMENTO ==================== */
+  function candidato(){ const s=SUC(); if(!s||s.tutor||nino()||S.impug183||s.impugnada183||s.base!=='testamento') return null; const j=jug(s); if(!j) return null;
+    const fav=s.her.filter(x=>!x.jugador&&!x._cony).sort((a,b)=>b.pct-a.pct)[0]; if(!fav||fav.pct-j.pct<.05) return null; return {fav,j}; }
+  function escenaImpugnar183(){ const c=candidato(), s=SUC(); if(!c||!s) return; const gap=Math.max(0,(c.fav.pct-c.j.pct)*(s.M0||0)*.5);
+    escena({rubro:'El juzgado',titulo:'Impugnar el testamento',ancho:true,cerrable:true,
+      cuerpo:'El testamento dejó a <b>'+E(c.fav.nombre)+'</b> con bastante más que a ti. Puedes demandar la sucesión y pedir que se repartan las partes: cerca de '+fm(gap)+' en discusión. Es un pleito de dos años que congela la partición y se comenta en la familia.',
+      opciones:ABOG().map((b,i)=>({t:b.n+' · '+fm(costoAb(i)),cat:'riesgo',d:b.d,dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; cerrarModal(); const cc=costoAb(i); pagar(cc);
+        const p={rol:'demandante',contra:c.fav.nombre,key:c.fav.key,desh:false,sexo:c.fav.sexo,gap,abogado:i,tick:0,agenda:[],pagado:cc,pendiente:null,avisado:true,inicioAnio:A(),blind:0,albacea:s.albacea183||null,mods:0,compromiso:null};
+        S.impug183=p; comenzar(p); afecto(c.fav.nombre,-8); prest(-1,'demandar a un hermano por la herencia');
+        log('Impugnaste el testamento: demandaste a <b>'+E(c.fav.nombre)+'</b> con '+b.n.toLowerCase()+'. Pagaste '+fm(cc)+' y la partición queda congelada hasta la sentencia, dos años.','mal'); render(); }}))}); }
+
+  /* ==================== ENGANCHES ==================== */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA183_ACC) return; window.__SA183_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)){
+        if(!SUC()&&!S.muerto&&((S.familia&&S.familia.hijos)||[]).length&&!L.some(x=>x.t==='Nombrar un albacea')) L.push({t:'Nombrar un albacea',cat:'legado',d:S.albacea183?'Hoy: '+S.albacea183.n.toLowerCase()+'. Puedes cambiarlo.':'Quien haga cumplir el testamento y calme a los herederos cuando no estés.',mov:1,modal:true,run:()=>escenaAlbacea183()});
+        const p=IMP(); if(p&&!L.some(x=>x.t==='El pleito por la sucesión')) L.push({t:'El pleito por la sucesión',cat:'legado',d:p.rol==='demandado'?E(p.contra)+' impugna la sucesión: abogado, arreglo y estado del juicio.':'Tu demanda contra '+E(p.contra)+': abogado, arreglo y estado del juicio.',mov:0,modal:true,run:()=>escenaImpug183()});
+        else if(!p&&candidato()&&!L.some(x=>x.t==='Impugnar el testamento')) L.push({t:'Impugnar el testamento',cat:'legado',d:'Te dejó menos que a '+E(candidato().fav.nombre)+'. Un pleito de dos años que congela la partición.',mov:1,modal:true,run:()=>escenaImpugnar183()}); } }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v183=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA183_CAT) return; window.__SA183_CAT=true; window.catDe=function(t){ if(/^(Nombrar un albacea|El pleito por la sucesión|Impugnar el testamento)$/.test(String(t))) return 'legado'; return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA183_PASO) return; window.__SA183_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual183(); }catch(e){ console.error(e); } return r; }; }
+  function wrapHeredar(){ const old=window.heredar; if(typeof old!=='function'||window.__SA183_HER||!window.__SA119_HER) return; window.__SA183_HER=true;
+    const f=function(h,frac,vivo,pleito){ if(vivo||!h) return old.apply(this,arguments); let pre=null; try{ pre=pre183(h); }catch(e){ console.error(e); }
+      const g0=S.gen, r=old.apply(this,arguments); try{ if(pre&&S&&S.gen!==g0) abrir183(pre); }catch(e){ console.error(e); } return r; };
+    f.__v183=true; window.heredar=f; }
+  function init183(){ wrapAcciones(); wrapCat(); wrapPaso(); wrapHeredar();
+    Object.assign(window,{escenaAlbacea183,escenaImpug183,escenaImpugnar183,preImpug183:pre183,abrirImpug183:abrir183,probImpug183:probImpug,anualImpug183:anual183,sentenciaImpug183:sentenciar,evDemandaImpug183:evDemanda,evPeritajeImpug183:evPeritaje,evEmpresaImpug183:evEmpresa,ALBACEAS_183:ALB}); }
+  init183(); setTimeout(init183,40); setTimeout(init183,220); setTimeout(init183,650); setTimeout(init183,950); setTimeout(init183,1500);
+  window.__SA183={version:V183};
 })();
 </script>
 
