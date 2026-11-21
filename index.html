@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v186</div>
+<div class="version-badge" id="versionBadge">v187</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -34623,6 +34623,121 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaCasas186,escenaCasa186,anualCasas186:anual186,casaViva186:V,evHerenciaCasa186:evHerencia,evQuiebraCasa186:evQuiebra,evAlianzaCasa186:evAlianza,evMatrimonioCasa186:evMatrimonio,evGuerraCasa186:evGuerra,evHostilCasa186:evHostil,partirCasa186:partirCasa,guerraNuevaCasa186:guerraNueva,cerrarGuerrasCasa186:cerrarGuerras}); }
   init186(); setTimeout(init186,40); setTimeout(init186,220); setTimeout(init186,650); setTimeout(init186,950);
   window.__SA186={version:V186};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v187 · LA PRENSA Y EL PODER
+   El juego ya tiene escándalos (v129) y un "imperio mediático" para quien
+   tiene un medio (v75), pero la prensa era un telón de fondo. Ahora tiene
+   caras:
+   - Cada época trae sus medios (diario, revista, radio, televisión, portal) y
+     cada medio, un periodista con su línea (liberal, conservadora o
+     independiente) y su "hostilidad" hacia ti. La hostilidad sube con los
+     escándalos abiertos, con los delitos registrados y cuando eres del
+     partido contrario, y baja con el tiempo y con lo que inviertas en
+     cortejarlos o en pauta.
+   - Un periodista hostil te investiga. Puedes dar la versión, comprar el
+     silencio (con riesgo de que lo publiquen y sea delito), demandar por
+     calumnia, contraatacar desde tu propio medio o dejar que salga y se abra
+     un escándalo. Si todo está tranquilo, alguien te ofrece un perfil.
+   - Puedes comprar medios (según la época y tu fortuna), hasta tres. Sus
+     periodistas dejan de ser hostiles; tus compañías de medios sirven para
+     contraatacar. Con un régimen en el poder (v179) tener medios te pone en
+     la mira, salvo que seas aliado; y los gobiernos te ofrecen pauta oficial
+     (plata a cambio de un favor).
+   - "La prensa" muestra a los periodistas y te deja cortejarlos o comprar
+     un medio.
+   ========================================================================== */
+(function(){
+  const V187='v187';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const ADU=()=>{ try{ return typeof adulto==='function'?adulto():true; }catch(e){ return true; } };
+  const movida=()=>{ if(S._mov187===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov187=A(); return true; };
+  const sinMov=()=>(S._mov187!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  const pagar=c=>{ c=Math.max(0,c); const x=Math.min(Math.max(0,S.efectivo),c); S.efectivo-=x; return x; };
+  const OUT=[{id:'obs',n:'El Observador',tipo:'diario',desde:1850,linea:'conservador',f:.05},{id:'gac',n:'La Gaceta Liberal',tipo:'diario',desde:1850,linea:'liberal',f:.05},
+    {id:'rev',n:'Revista Nueva',tipo:'revista',desde:1920,linea:'independiente',f:.03},{id:'rad',n:'Radio Capital',tipo:'radio',desde:1935,linea:'independiente',f:.06},
+    {id:'tv',n:'Noticiero Nacional',tipo:'tv',desde:1955,linea:'independiente',f:.12},{id:'web',n:'El Portal',tipo:'digital',desde:2000,linea:'independiente',f:.05}];
+  const TIPON={diario:'un periódico',revista:'una revista',radio:'una cadena de radio',tv:'un noticiero de televisión',digital:'un portal de noticias'};
+  const D=()=>{ if(typeof S==='undefined'||!S) return null; let d=S.prensa187; if(!d||typeof d!=='object') d=S.prensa187={per:[],comprados:[],silenciados:0,investig:0,pauta:0,aviso:0,hist:[]}; return d; };
+  const hecho=t=>{ const d=D(); d.hist.push({a:A(),t}); if(d.hist.length>20) d.hist.shift(); };
+  function po(){ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } }
+  const afinDe=id=>{ const p=po(); return p&&p.part&&p.part[id]?(p.part[id].afin||0):0; };
+  const miPartido=()=>{ const l=afinDe('liberal'), c=afinDe('conservador'); if(Math.max(l,c)<15) return null; return l>c?'liberal':'conservador'; };
+  const dueno=p=>!!D().comprados.some(x=>x.id===p.outlet);
+  const propios=()=>{ try{ return companias().filter(e=>e.sector==='medios'); }catch(e){ return []; } };
+  const abiertos=()=>{ try{ return typeof window.escandalos129==='function'?window.escandalos129().filter(x=>x.estado==='abierto'):[]; }catch(e){ return []; } };
+  const delitos=()=>{ try{ return ((S.penal&&S.penal.crimes)||[]).length; }catch(e){ return 0; } };
+  function asegurar(){ const d=D(); OUT.forEach(o=>{ if(o.desde>A()||d.per.some(p=>p.outlet===o.id)) return; let n='Alberto', ap='Rojas', sx=chance(.5)?'h':'m'; try{ n=nombreLocal(S.p.ciudad,sx); ap=apellidoCiudad(S.p.ciudad); }catch(e){}
+      d.per.push({outlet:o.id,medio:o.n,tipo:o.tipo,linea:o.linea,nombre:n+' '+ap,sexo:sx,afan:o.linea==='independiente'?22:28,integ:ri(3,9)}); }); }
+  function pasaje(p){ const d=D(); let dl=-3; if(dueno(p)) return -p.afan; dl+=abiertos().length*2+(delitos()>0?2:0);
+    const mp=miPartido(); if(p.linea!=='independiente'&&mp&&p.linea!==mp) dl+=2; if(p.linea!=='independiente'&&mp&&p.linea===mp) dl-=1; return dl; }
+
+  /* ==================== LOS EPISODIOS ==================== */
+  const TITULOS=['los contratos que ganó tu casa','el origen de tu fortuna','cómo trataste a tus trabajadores','una compra que nadie explica','tus cuentas fuera del país'];
+  function evInvestigacion(p){ const d=D(), grav=cl(1+(delitos()>0?1:0)+(abiertos().length>0?1:0),1,3), tema=pick(TITULOS), c=Math.max(25,pat()*.01), c2=Math.max(20,pat()*.006), medio=propios()[0]||null;
+    const abrir=(t,g)=>{ try{ if(typeof window.abrirEscandalo129==='function') window.abrirEscandalo129('negocios',t,g); }catch(e){} };
+    const o=[{t:'Dar tu versión y colaborar',f:()=>{ p.afan=cl(p.afan-25,0,100); if(grav>=2&&chance(.35)){ abrir('Reportaje de '+p.medio+' sobre '+tema,1); return 'Diste tu versión, pero el reportaje salió igual, con tus respuestas al lado.'; } hecho('Colaboró con una investigación'); return E(p.nombre)+' publicó tu versión completa y la historia se quedó en nada.'; }},
+      {t:'Comprar el silencio ('+fm(c)+')',f:()=>{ pagar(c); if(chance(cl(.65-p.integ*.05,.15,.65))){ p.afan=cl(p.afan-10,0,100); d.silenciados++; hecho('Compró el silencio de un periodista'); return 'Un sobre y una llamada. La historia no salió.'; }
+          abrir('Intentó comprar a '+p.nombre,grav+1); try{ if(typeof registrarDelito==='function') registrarDelito('soborno a la prensa',2,'intentaste comprar a un periodista'); }catch(e){} prest(-3,'intentó comprar a un periodista'); return E(p.nombre)+' publicó que intentaste comprarle el silencio. Ahora la noticia eres tú.'; }},
+      {t:'Demandar por calumnia ('+fm(c2)+')',f:()=>{ pagar(c2); if(chance(cl(.3+(grav===1?.25:0)+(S.p.reputacion||50)/300,.2,.7))){ p.afan=cl(p.afan+8,0,100); prest(2,'ganó una demanda por calumnia'); hecho('Ganó una demanda contra un medio'); return 'El juez ordenó rectificar. Ganaste, pero '+E(p.nombre)+' no lo va a olvidar.'; } p.afan=cl(p.afan+15,0,100); abrir('Reportaje de '+p.medio+' sobre '+tema,grav); return 'Perdiste la demanda y el reportaje salió con más fuerza.'; }}];
+    if(medio) o.push({t:'Contraatacar desde tu medio ('+E(medio.nombre)+')',f:()=>{ medio.caja=Math.max(0,(medio.caja||0)-Math.max(5,c2*.4)); if(chance(.7)){ p.afan=cl(p.afan-15,0,100); hecho('Contraatacó desde su medio'); return 'Tu medio puso otra historia en portada y la investigación perdió fuerza.'; } abrir('El abuso del poder mediático de '+S.p.apellido,1); return 'Se notó que usabas tu propio medio para tapar la historia. Es un escándalo más.'; }});
+    o.push({t:'Dejar que salga',f:()=>{ abrir('Reportaje de '+p.medio+' sobre '+tema,grav); p.afan=cl(p.afan-10,0,100); return 'Salió en portada. Duele, pero ya se sabe todo lo que se iba a saber.'; }});
+    return {p:9,c:()=>ADU(),t:()=>'<b>'+E(p.nombre)+', de '+E(p.medio)+', te está investigando.</b> Prepara un reportaje sobre '+tema+' y pidió hablar contigo antes de publicar. '+(grav>=2?'Tiene documentos.':'Aún no tiene mucho.'),o}; }
+  function evPerfil(p){ const c=Math.max(15,pat()*.004);
+    return {p:7,c:()=>ADU(),t:()=>'<b>'+E(p.nombre)+', de '+E(p.medio)+', quiere hacerte un perfil.</b> Será largo, con fotos de la casa y de la familia.',
+      o:[{t:'Aceptar y posar',f:()=>{ p.afan=cl(p.afan-5,0,100); prest(2,'el perfil en '+p.medio); try{ S.p.redes=cl((S.p.redes||0)+3,0,100); }catch(e){} return 'El perfil salió amable. Te lo pidieron en tres clubes.'; }},
+         {t:'Pagar un publirreportaje ('+fm(c)+')',f:()=>{ pagar(c); prest(3,'un publirreportaje'); if(chance(.25)){ p.afan=cl(p.afan+10,0,100); return 'Alguien notó que era propaganda pagada y lo comentó en la competencia.'; } return 'Salió espléndido, y nadie preguntó cuánto costó.'; }},
+         {t:'Declinar',f:()=>{ p.afan=cl(p.afan+4,0,100); return 'Declinaste. '+E(p.nombre)+' lo va a escribir de todos modos, sin ti.'; }}]}; }
+  function evPauta(){ const e=propios()[0]; if(!e) return null; const rel=(()=>{ try{ return typeof window.relacionPoder179==='function'?window.relacionPoder179():null; }catch(x){ return null; } })(); const reg=rel&&rel.tipo==='regimen';
+    return {p:8,c:()=>!!propios()[0],t:()=>'<b>'+(reg?'El régimen':'El Gobierno')+' ofrece pauta oficial a <i>'+E(e.nombre)+'</i>:</b> millones en avisos del Estado, a cambio de una línea editorial "responsable".',
+      o:[{t:'Aceptar la pauta',f:()=>{ e.ingresos*=1.06; D().pauta=A(); try{ if(typeof window.favor179==='function') window.favor179('contrato',{txt:'pauta oficial para '+e.nombre}); }catch(x){} prest(-1,'aceptó pauta oficial'); return 'Los avisos del Estado entraron. Quedaste debiendo un favor.'; }},
+         {t:'Rechazarla',f:()=>{ D().pauta=A(); prest(1,'rechazó la pauta oficial'); if(rel){ rel.presion=Math.min(100,(rel.presion||0)+8); } return 'Dijiste que tu medio no se vende. En Palacio lo anotaron.'; }},
+         {t:'Dejarlo sin responder',f:()=>{ D().pauta=A(); return 'No contestaste. La oferta se enfrió sola.'; }}]}; }
+
+  /* ==================== EL AÑO ==================== */
+  function anual187(){ if(!S||!S.p||S.muerto||!ADU()||A()<1850) return; const d=D(); asegurar(); d.per.forEach(p=>{ p.afan=cl(p.afan+pasaje(p),0,100); if(dueno(p)) p.afan=0; });
+    // los medios propios y el régimen
+    try{ const rel=typeof window.relacionPoder179==='function'?window.relacionPoder179():null; if(rel&&rel.tipo==='regimen'&&propios().length&&rel.postura!=='aliado'){ rel.presion=Math.min(100,(rel.presion||0)+4); if(A()-d.aviso>=4){ d.aviso=A(); log('Tus medios están en la mira del régimen: la presión sobre ti sube.','mal'); } } }catch(e){}
+    const rest=d.per.filter(p=>!dueno(p)).sort((a,b)=>b.afan-a.afan), hosco=rest[0], amable=rest[rest.length-1];
+    if(hosco&&hosco.afan>=35&&chance(cl((hosco.afan-30)/160+abiertos().length*.1,0,.5))){ d.investig++; cola.push(evInvestigacion(hosco)); return; }
+    if(propios().length&&A()-d.pauta>=4&&chance(.25)){ const e=evPauta(); if(e){ cola.push(e); return; } }
+    if(amable&&amable.afan<15&&!abiertos().length&&chance(.1)) cola.push(evPerfil(amable)); }
+
+  /* ==================== LA PRENSA (pantalla) ==================== */
+  function escenaPrensa187(){ const d=D(); asegurar(); const per=d.per.slice().sort((a,b)=>b.afan-a.afan), pro=propios();
+    const ops=[]; per.forEach(p=>{ if(dueno(p)) return; const c=Math.max(8,pat()*.003);
+      ops.push({t:'Cortejar a '+E(p.nombre)+' ('+E(p.medio)+') · '+fm(c),cat:'legado',d:'Un almuerzo, una exclusiva o una pauta. Baja su hostilidad (hoy '+Math.round(p.afan)+'). Si es incorruptible, puede ofenderse.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(c);
+        if(chance(cl(.8-p.integ*.05,.3,.8))){ p.afan=cl(p.afan-15,0,100); log('Almorzaste con <b>'+E(p.nombre)+'</b>, de '+E(p.medio)+'. Salió más amable.'); } else { p.afan=cl(p.afan+6,0,100); log(E(p.nombre)+' se ofendió con el intento de seducirlo.','mal'); } cerrarModal(); render(); escenaPrensa187(); }}); });
+    ops.push({t:'Comprar un medio',cat:'compania',d:'Un periódico, una radio, un canal: tu propia voz y menos periodistas hostiles. Hasta tres.',dis:d.comprados.length>=3?'Ya tienes tres medios':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaComprar187(); }});
+    const html='<table class="libro">'+per.map(p=>'<tr><td>'+E(p.nombre)+' <span style="color:var(--humo2)">· '+E(p.medio)+' · '+E(p.linea)+'</span></td><td>'+(dueno(p)?'tuyo':Math.round(p.afan)+' de hostilidad')+'</td></tr>').join('')+'</table>';
+    escena({rubro:'La prensa',titulo:'Los periodistas y sus medios',ancho:true,cerrable:true,cuerpo:'La prensa decide qué se sabe de ti. '+(pro.length?'Tienes '+pro.length+' medio'+(pro.length>1?'s':'')+' propio'+(pro.length>1?'s':'')+'. ':'No tienes medios propios. ')+'Escándalos abiertos: '+abiertos().length+'.',html,opciones:ops}); }
+  function escenaComprar187(){ const d=D(); const L=OUT.filter(o=>o.desde<=A()&&!d.comprados.some(x=>x.id===o.id)); if(!L.length){ escena({rubro:'La prensa',titulo:'Comprar un medio',cuerpo:'No hay medios en venta.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    escena({rubro:'La prensa',titulo:'Comprar un medio',ancho:true,cerrable:true,cuerpo:'Un medio da audiencia, influencia y la tranquilidad de no tener un periodista hostil, pero también atención: con un régimen en el poder te pone en la mira.',
+      opciones:L.map(o=>{ const c=Math.max(80,pat()*o.f); return {t:o.n+' · '+fm(c),cat:'compania',d:E(TIPON[o.tipo])+' de línea '+o.linea+'.',dis:S.efectivo<c?'No te alcanza ('+fm(c)+')':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; comprar(o,c); cerrarModal(); render(); }}; })}); }
+  function comprar(o,c){ const idx=S.empIdx, car=Object.assign({},S.carrera||{}), n0=companias().length; try{ fundarEn(o.n,'medios',c); }catch(e){ log('No se pudo cerrar la compra de '+E(o.n)+'.','mal'); return false; } try{ sentarseEn(idx); }catch(e){} try{ Object.assign(S.carrera,car); }catch(e){}
+    const e=companias()[companias().length-1]; if(!e||companias().length<=n0) return false; e.ingresos*=1.4; e.marca=cl((e.marca||40)+10,0,100); e.empleados=Math.round((e.empleados||4)*1.5);
+    D().comprados.push({id:o.id,nombre:e.nombre,linea:o.linea,anio:A()}); const p=D().per.find(x=>x.outlet===o.id); if(p){ p.afan=0; }
+    hecho('Compró '+o.n); try{ prest(1,'compró '+o.n); }catch(x){} log('Compraste <b>'+E(o.n)+'</b> por '+fm(c)+'. Ahora tienes un medio propio de línea '+o.linea+'.','hito'); return true; }
+
+  /* ==================== ENGANCHES ==================== */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA187_ACC) return; window.__SA187_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ADU()&&A()>=1850&&!L.some(x=>x.t==='La prensa')) L.push({t:'La prensa',cat:'legado',d:'Periodistas, hostilidad, compra de medios.',mov:0,modal:true,run:()=>escenaPrensa187()}); }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v187=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA187_CAT) return; window.__SA187_CAT=true; window.catDe=function(t){ if(t==='La prensa') return 'legado'; return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA187_PASO) return; window.__SA187_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual187(); }catch(e){ console.error(e); } return r; }; }
+  function init187(){ wrapAcciones(); wrapCat(); wrapPaso();
+    Object.assign(window,{escenaPrensa187,escenaComprarMedio187:escenaComprar187,estadoPrensa187:D,anualPrensa187:anual187,evInvestigacion187:evInvestigacion,evPerfil187:evPerfil,evPauta187:evPauta,comprarMedio187:comprar,MEDIOS_187:OUT,periodistasPrensa187:()=>{ asegurar(); return D().per; }}); }
+  init187(); setTimeout(init187,40); setTimeout(init187,220); setTimeout(init187,650); setTimeout(init187,950);
+  window.__SA187={version:V187};
 })();
 </script>
 
