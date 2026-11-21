@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v180</div>
+<div class="version-badge" id="versionBadge">v181</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6909,7 +6909,7 @@ function listaAcciones(){
       run:()=>escenaMatrimonioEnCasa()});
   if(!S.familia.pareja) A.push({t:'Buscar un buen matrimonio', d:'Las familias que reciben a una casa '+nivelCasa().n+'. Dote, alianza y apellido.', mov:1, modal:true,
     run:()=>escenaCortejo()});
-  if(S.familia.pareja&&S.familia.pareja.casados) A.push({t:'Divorciarte', d:'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.', mov:1, modal:true,
+  if(S.familia.pareja&&S.familia.pareja.casados) A.push({t:(typeof window.tituloFin181==='function'?window.tituloFin181():'Divorciarte'), d:(typeof window.descFin181==='function'?window.descFin181():'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.'), mov:1, modal:true,
     run:()=>escenaDivorcio()});
   if(S.p.edad>=25&&S.familia.hijos.length<7)
     A.push({t:'Adoptar un hijo', d:'Por el ICBF, con su proceso y su espera, o criando a un niño de la familia.', mov:1, modal:true,
@@ -7204,9 +7204,11 @@ function pasarAnio(){
     S.familia.pareja.paciencia=clamp((isFinite(S.familia.pareja.paciencia)?S.familia.pareja.paciencia:60)-desatendida+ri(0,6),0,100);
     if(S.familia.pareja.paciencia<12&&S.familia.pareja.casados&&!S.familia.pareja.divorcioEnCurso&&chance(.45)){
       const nom=S.familia.pareja.nombre;
+      if(typeof window.iniciarFinMatrimonio181==='function'&&window.iniciarFinMatrimonio181(nom)){ /* v181: antes de 1991 no hay divorcio: pide la anulación */ }
+      else {
       S.familia.pareja.divorcioEnCurso=true;
       iniciarCompromiso({titulo:'Proceso de divorcio con '+nom,restan:2,mov:1,cerrar:()=>ejecutarDivorcio()});
-      log('<b>'+esc(nom)+'</b> inició una separación formal. El divorcio tardará dos años y ocupará una movida por año.','mal');
+      log('<b>'+esc(nom)+'</b> inició una separación formal. El divorcio tardará dos años y ocupará una movida por año.','mal'); }
     } else if(S.familia.pareja.paciencia<12&&!S.familia.pareja.casados&&chance(.45)){
       const nom=S.familia.pareja.nombre;
       log('La relación con <b>'+esc(nom)+'</b> terminó antes del matrimonio.','mal');
@@ -8189,7 +8191,7 @@ function catDe(t){
   if(/mausoleo|nichos|crónica de la casa/.test(t)) return 'legado';
   if(/Constituir una sociedad|Nombrar gerente|reorganización|Mover capital|Armar el holding|Fusionar/.test(t)) return 'capital';
   if(/Fundar otra compañía|Sentarte en la presidencia|Nombrar presidente/.test(t)) return 'compania';
-  if(/conocer gente|Casarte|hijo|Vida sentimental|amante|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
+  if(/conocer gente|Casarte|hijo|Vida sentimental|amante|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|anulación del matrimonio|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
   if(/Cuidarte|Vacaciones/.test(t)) return 'salud';
   if(/palancas/.test(t)) return 'riesgo';
   if(/Obra social/.test(t)) return 'legado';
@@ -9332,7 +9334,7 @@ function modalMatrimonio(){
   escena({rubro:'Régimen de bienes',titulo:'Casarte con '+esc(S.familia.pareja.nombre),
     cuerpo:'Lo que firmes decide qué pasa con el patrimonio si esto se rompe.',
     opciones:[
-      {t:'Sociedad conyugal, sin más papeles',cat:'familia',d:'Más confianza y paciencia. En un divorcio se va cerca de un tercio de todo.',
+      {t:'Sociedad conyugal, sin más papeles',cat:'familia',d:'Más confianza y paciencia. Si el matrimonio termina, se va cerca de un tercio de todo.',
        run:()=>{ const pa=S.familia.pareja; pa.casados=true; pa.paciencia=clamp(pa.paciencia+20,0,100);
          S.p.felicidad+=12; log('Te casaste con <b>'+esc(pa.nombre)+'</b>.','hito'); hito('Se casó con '+pa.nombre); S.mov--; setTimeout(()=>escenaLunaDeMiel(pa),0); }},
       {t:'Firmar capitulaciones',cat:'familia',d:'Protege la fortuna y la compañía. Se nota, y se cobra.',
@@ -19414,7 +19416,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      d:'Casarte (con quién, con qué régimen y con qué boda), conocer a alguien, tus capitulaciones o un divorcio: todo en un solo lugar.',
      miembros:[['Casarse','Casarte'],['Casarse','Buscar un buen matrimonio'],['Casarse','Casarse dentro de la familia'],
        ['Conocer a alguien','Salir a conocer gente'],['Conocer a alguien','Buscar intimidad'],
-       ['Tu matrimonio','Vida sentimental y relaciones'],['Tu matrimonio','Negociar capitulaciones matrimoniales'],['Tu matrimonio','Divorciarte']]},
+       ['Tu matrimonio','Vida sentimental y relaciones'],['Tu matrimonio','Negociar capitulaciones matrimoniales'],['Tu matrimonio','Divorciarte'],['Tu matrimonio','Pedir la anulación del matrimonio']]},
     {id:'hijos',t:'Casar a un hijo',cat:'familia',
      d:'Elegir a cuál de tus hijos casar y con qué casa: dote, contactos y prestigio para el apellido.',
      prefijos:[['Tus hijos','Casar a ']]},
@@ -24162,7 +24164,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const plan=()=>(S.familia&&S.familia.plan108)||'natural';
   const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
   const rasgoTxt=q=>{ const R=window.RASGOS_108||{}; const r=R[q.rasgo108]; return r?(q.sexo==='m'?r.na:r.n):''; };
-  const SACADAS=['Negociar capitulaciones matrimoniales','Divorciarte'];
+  const SACADAS=['Negociar capitulaciones matrimoniales','Divorciarte','Pedir la anulación del matrimonio'];
   function accionCruda(t){
     try{ window.__sa113SinFiltro=true; const A=typeof window.accionesCrudas91==='function'?window.accionesCrudas91():listaAcciones(); return (A||[]).find(a=>a.t===t); }
     catch(e){ return null; } finally{ window.__sa113SinFiltro=false; }
@@ -24205,7 +24207,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     } else {
       if(!q.separacionBienes&&!q.divorcioEnCurso){ const a=accionCruda('Negociar capitulaciones matrimoniales');
         op.push({t:'Capitulaciones matrimoniales',cat:'capital',d:'Separar bienes protege tu patrimonio si el matrimonio termina. '+esc(P1(q.nombre))+' lo va a leer como desconfianza.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); if(a) a.run(); else { S.mov--; q.separacionBienes=true; q.paciencia=clamp((q.paciencia||50)-18,0,100); log('Firmaron capitulaciones. Quedó un silencio largo.','mal'); render(); } }}); }
-      if(typeof escenaDivorcio==='function') op.push({t:'Divorciarte',cat:'riesgo',d:'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaDivorcio(); }});
+      if(typeof escenaDivorcio==='function') op.push({t:(typeof window.tituloFin181==='function'?window.tituloFin181():'Divorciarte'),cat:'riesgo',d:(typeof window.descFin181==='function'?window.descFin181():'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.'),dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaDivorcio(); }});
     }
     escena({rubro:'Tu vida',titulo:q.casados?(q.sexo==='m'?'Tu esposa':'Tu esposo'):'Tu pareja',ancho:true,cerrable:true,cuerpo:'Una relación se cuida o se gasta. Si la descuidas varios años, se acaba.',html,opciones:op});
   }
@@ -24954,6 +24956,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const oa=()=>S&&S.p&&S.p.sexo==='m'?'a':'o';
   const HITOS=[   // [patrón, ilustración, (m)=>[título, texto], años mínimos entre láminas]
     [/^Se divorció de (.+)/,'divorcio',m=>['Te divorciaste de '+m[1].split(' ')[0],'Se acabó el matrimonio. Ahora toca repartir lo que había.']],
+    [/^Anuló su matrimonio con (.+)/,'divorcio',m=>['Anulaste tu matrimonio con '+m[1].split(' ')[0],'El tribunal eclesiástico concedió la nulidad. Ahora toca repartir lo que había.']],
     [/^Enviudó de (.+)/,'viudez',m=>['Murió '+m[1],'Quedaste viud'+oa()+'. La casa está de luto.']],
     [/^Se mudó a (.+?) por (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Por tu nuevo cargo: '+m[2]+'.'],2],
     [/^Se instaló en (.+?) · (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Nueva casa en '+m[2]+'.'],2],
@@ -33818,6 +33821,82 @@ install();setTimeout(install,1200);
     Object.assign(window,{CRISIS_180:CRISIS,crisisActiva180:crisisAct,efectoCrisis180,shockCrisis180:shockDe,estresCrisis180:estres,escenaCrisis180,escenaMedidas180,salvavidas180:salvavidas,anualCrisis180:anual180,evCredito180:evCredito,evOportunidad180:evOportunidad,evCorrida180:evCorrida,evInicioCrisis180:evInicio,intensidadCrisis180:inten}); }
   init180(); setTimeout(init180,40); setTimeout(init180,220); setTimeout(init180,650); setTimeout(init180,950);
   window.__SA180={version:V180};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v181 · ANULACIÓN ANTES DEL DIVORCIO
+   El divorcio vincular llega a Colombia con la Constitución de 1991. Antes,
+   un matrimonio solo se acababa con la muerte o con una anulación (la
+   nulidad que concede el tribunal eclesiástico). Desde 1976 existe un
+   divorcio civil, pero casi todos los matrimonios de la clase de la casa
+   eran católicos: para ellos sigue siendo la nulidad.
+   - Antes de 1991 la acción ya no dice "Divorciarte": dice "Pedir la
+     anulación del matrimonio", en la pantalla de la pareja y en el grupo.
+   - Es más cara (abogados y tribunal: un porcentaje del patrimonio, se paga
+     al empezar) y más demorada (cuatro años en vez de dos, una movida por
+     año), y no está garantizada: el tribunal puede negarla (la probabilidad
+     sube con las relaciones y el prestigio de la casa y baja con los hijos).
+     Si la niegan, el matrimonio sigue y se puede volver a pedir.
+   - Si la conceden, se reparte el patrimonio igual que en un divorcio, pero
+     con menos estigma (-3 de prestigio en vez de -5) y queda en la crónica
+     como "Anuló su matrimonio".
+   - Cuando el cónyuge es quien inicia la separación, también pide la
+     anulación (cuatro años) mientras no exista el divorcio.
+   - Desde 1991 todo sigue como antes: el divorcio de dos años.
+   ========================================================================== */
+(function(){
+  const V181='v181';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const ANUL=()=>A()<1991;
+  const AÑOS=4;
+  const costoLegal=()=>Math.max(60,pat()*.045);
+  function prob(){ const hijos=((S.familia&&S.familia.hijos)||[]).length; let p=.6+(S.p.redes||0)/400+(typeof prestigio==='function'?prestigio():0)/500-(hijos>=3?.08:0);
+    return cl(p,.35,.9); }
+  window.tituloFin181=()=>ANUL()?'Pedir la anulación del matrimonio':'Divorciarte';
+  window.descFin181=()=>ANUL()?'Antes de 1991 no hay divorcio: solo la nulidad del tribunal eclesiástico. Cuesta '+fm(costoLegal())+', tarda '+AÑOS+' años y no está garantizada.':'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.';
+
+  const oldEsc=window.escenaDivorcio, oldEj=window.ejecutarDivorcio;
+  function escenaAnulacion(){ const pa=S.familia.pareja; if(!pa) return; const corte=pa.separacionBienes?.06:.33, c=costoLegal(), p=prob();
+    const sinMov=S.mov<1?'No te quedan movidas':null;
+    escena({rubro:'Tribunal eclesiástico',titulo:'Anular tu matrimonio con '+E(pa.nombre),
+      cuerpo:(A()>=1976?'Desde 1976 existe el divorcio civil, pero casi todos los matrimonios de tu clase fueron católicos: para ponerles fin hay que pedir la nulidad ante el tribunal eclesiástico.':'Aquí no existe el divorcio: un matrimonio solo se acaba con la muerte o con una anulación que conceda el tribunal eclesiástico.')
+        +' Hay que probar una causal, llevar testigos y esperar años. Cuesta '+fm(c)+' en abogados y tribunal, y nada garantiza que la concedan. '
+        +(pa.separacionBienes?'Con capitulaciones firmadas, el patrimonio casi no se toca.':'Sin capitulaciones, al final se va cerca de un tercio de todo lo que hay.')
+        +' En esta ciudad una anulación se comenta, aunque menos que un escándalo.',
+      opciones:[{t:'Pedir la anulación · '+fm(c),cat:'familia',d:AÑOS+' años de trámite, una movida por año. Probabilidad de que la concedan: '+Math.round(p*100)+'%. Si la conceden, se va cerca de '+fm(pat()*corte)+'.',
+          dis:pa.divorcioEnCurso?'Ya hay un proceso en curso':(S.efectivo<c?'No te alcanza para el proceso ('+fm(c)+')':sinMov),
+          run:()=>{ if(pa.divorcioEnCurso){ log('La anulación ya está en trámite.','mal'); return; } S.efectivo-=Math.min(S.efectivo,c); pa.divorcioEnCurso=true; pa.anulacion181=true;
+            iniciarCompromiso({titulo:'Proceso de anulación con '+pa.nombre,restan:AÑOS,mov:1,cerrar:()=>window.ejecutarDivorcio()});
+            log('Iniciaste ante el tribunal eclesiástico la anulación de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Pagaste '+fm(c)+' y el trámite tomará '+AÑOS+' años, una movida por año.','mal'); S.mov--; }},
+        {t:'Aguantar un año más',cat:'familia',d:'Nada cambia, pero nada se pierde todavía.',run:()=>{}}],cerrable:true}); }
+  function escenaDivorcio181(){ if(!ANUL()||!S.familia.pareja) return typeof oldEsc==='function'?oldEsc.apply(this,arguments):undefined; return escenaAnulacion(); }
+
+  function ejecutarAnulacion(){ const pa=S.familia.pareja; if(!pa||!pa.divorcioEnCurso) return;
+    if(!chance(prob())){ pa.divorcioEnCurso=false; pa.anulacion181=false; pa.paciencia=cl((pa.paciencia||50)-10,0,100); S.p.felicidad=cl(S.p.felicidad-6,0,100); try{ moverPrestigio(-1,'una anulación negada'); }catch(e){}
+      log('El tribunal eclesiástico <b>negó la nulidad</b> de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Sigues casado, y el proceso te costó años y plata. Puedes volver a pedirla.','mal'); return 'El tribunal negó la anulación.'; }
+    const corte=pa.separacionBienes?.06:.33, perd=pat()*corte; let resta=perd; const caja=Math.min(S.efectivo,resta); S.efectivo-=caja; resta-=caja;
+    while(resta>1&&(S.bienes||[]).length>1){ const b=S.bienes.filter(x=>x.uid!==(S.hogar&&S.hogar.vivienda)).sort((a,c)=>a.valor-c.valor)[0]; if(!b) break; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); resta-=Math.max(0,b.valor-(b.hipoteca||0)); log('En la anulación se fue <b>'+E(b.nombre)+'</b>.','mal'); }
+    S.familia.hijos.forEach(h=>{ if(h.edad<20) h.vinculo=cl(h.vinculo-12,0,100); }); try{ moverPrestigio(-3,'la anulación del matrimonio'); }catch(e){} S.p.felicidad=cl(S.p.felicidad-10,0,100);
+    log('El tribunal eclesiástico <b>concedió la anulación</b> de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Repartir lo que había costó cerca de '+fm(perd)+'.','mal'); hito('Anuló su matrimonio con '+pa.nombre); S.familia.pareja=null;
+    return 'La anulación quedó concedida después de los años de trámite.'; }
+  function ejecutarDivorcio181(){ const pa=S.familia&&S.familia.pareja; if(pa&&pa.divorcioEnCurso&&pa.anulacion181) return ejecutarAnulacion(); return typeof oldEj==='function'?oldEj.apply(this,arguments):undefined; }
+
+  /* el cónyuge que inicia el proceso: antes de 1991 pide la anulación */
+  function iniciarFin181(nom){ if(!ANUL()||!S.familia.pareja) return false; const pa=S.familia.pareja; pa.divorcioEnCurso=true; pa.anulacion181=true;
+    iniciarCompromiso({titulo:'Proceso de anulación con '+nom,restan:AÑOS,mov:1,cerrar:()=>window.ejecutarDivorcio()});
+    log('<b>'+E(nom)+'</b> pidió ante el tribunal eclesiástico la anulación del matrimonio. El trámite tomará '+AÑOS+' años y ocupará una movida por año.','mal'); return true; }
+
+  function init181(){ if(typeof oldEsc==='function'&&!window.escenaDivorcio.__v181){ window.escenaDivorcio=escenaDivorcio181; window.escenaDivorcio.__v181=true; }
+    if(typeof oldEj==='function'&&!window.ejecutarDivorcio.__v181){ window.ejecutarDivorcio=ejecutarDivorcio181; window.ejecutarDivorcio.__v181=true; }
+    Object.assign(window,{iniciarFinMatrimonio181:iniciarFin181,costoAnulacion181:costoLegal,probAnulacion181:prob,escenaAnulacion181:escenaAnulacion,ANIOS_ANULACION_181:AÑOS}); }
+  init181(); setTimeout(init181,40); setTimeout(init181,220); setTimeout(init181,650);
+  window.__SA181={version:V181};
 })();
 </script>
 
