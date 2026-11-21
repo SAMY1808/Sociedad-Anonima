@@ -34256,7 +34256,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA183_ACC) return; window.__SA183_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)){
         if(!SUC()&&!S.muerto&&((S.familia&&S.familia.hijos)||[]).length&&!L.some(x=>x.t==='Nombrar un albacea')) L.push({t:'Nombrar un albacea',cat:'legado',d:S.albacea183?'Hoy: '+S.albacea183.n.toLowerCase()+'. Puedes cambiarlo.':'Quien haga cumplir el testamento y calme a los herederos cuando no estés.',mov:1,modal:true,run:()=>escenaAlbacea183()});
         const p=IMP(); if(p&&!L.some(x=>x.t==='El pleito por la sucesión')) L.push({t:'El pleito por la sucesión',cat:'legado',d:p.rol==='demandado'?E(p.contra)+' impugna la sucesión: abogado, arreglo y estado del juicio.':'Tu demanda contra '+E(p.contra)+': abogado, arreglo y estado del juicio.',mov:0,modal:true,run:()=>escenaImpug183()});
@@ -34268,7 +34268,8 @@ install();setTimeout(install,1200);
     const f=function(h,frac,vivo,pleito){ if(vivo||!h) return old.apply(this,arguments); let pre=null; try{ pre=pre183(h); }catch(e){ console.error(e); }
       const g0=S.gen, r=old.apply(this,arguments); try{ if(pre&&S&&S.gen!==g0) abrir183(pre); }catch(e){ console.error(e); } return r; };
     f.__v183=true; window.heredar=f; }
-  function init183(){ wrapAcciones(); wrapCat(); wrapPaso(); wrapHeredar();
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Nombrar un albacea')) g.miembros.push(['Testamento','Nombrar un albacea']); }
+  function init183(){ wrapAcciones(); wrapCat(); wrapPaso(); wrapHeredar(); grupo();
     Object.assign(window,{escenaAlbacea183,escenaImpug183,escenaImpugnar183,preImpug183:pre183,abrirImpug183:abrir183,probImpug183:probImpug,anualImpug183:anual183,sentenciaImpug183:sentenciar,evDemandaImpug183:evDemanda,evPeritajeImpug183:evPeritaje,evEmpresaImpug183:evEmpresa,ALBACEAS_183:ALB}); }
   init183(); setTimeout(init183,40); setTimeout(init183,220); setTimeout(init183,650); setTimeout(init183,950); setTimeout(init183,1500);
   window.__SA183={version:V183};
@@ -34614,7 +34615,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA186_ACC) return; window.__SA186_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&ADU()&&RV().length&&!L.some(x=>x.t==='Las otras casas')) L.push({t:'Las otras casas',cat:'legado',d:'Patriarcas, alianzas, guerras y matrimonios entre las casas del país.',mov:0,modal:true,run:()=>escenaCasas186()}); }catch(x){ console.error(x); }
       return L; }; window.listaAcciones.__v186=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA186_CAT) return; window.__SA186_CAT=true; window.catDe=function(t){ if(t==='Las otras casas') return 'legado'; return old.apply(this,arguments); }; }
@@ -34730,7 +34731,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA187_ACC) return; window.__SA187_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&ADU()&&A()>=1850&&!L.some(x=>x.t==='La prensa')) L.push({t:'La prensa',cat:'legado',d:'Periodistas, hostilidad, compra de medios.',mov:0,modal:true,run:()=>escenaPrensa187()}); }catch(x){ console.error(x); }
       return L; }; window.listaAcciones.__v187=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA187_CAT) return; window.__SA187_CAT=true; window.catDe=function(t){ if(t==='La prensa') return 'legado'; return old.apply(this,arguments); }; }
