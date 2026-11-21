@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v188</div>
+<div class="version-badge" id="versionBadge">v189</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -9278,7 +9278,7 @@ function modalVenderAcciones(){
     cuerpo:'Tienes '+pc(miPct(e))+' de '+esc(e.nombre)+' y la acción está en '+fmt(pa)+'. Esta plata sí entra a tu bolsillo, pero vender mucho de golpe tumba el precio y tu control.',
     etiqueta:'Cuánto de tu parte vendes',max:1,valor:20,boton:'Dar la orden de venta',
     nota:f=>{ const n=Math.round(mio.n*f); return 'Vendes '+n.toLocaleString('es-CO')+' acciones por unos '+fmt(n*pa*(1-f/4))
-      +'. Tu control caería a '+pc((mio.n-n)/totalAcciones(e))+'.'; },
+      +'. Tu control caería a '+pc((mio.n-n)/totalAcciones(e))+'.'+((mio.n-n)<=0?' Si vendes todo, la compañía sale de tu grupo.':''); },
     accion:f=>venderMisAcciones(f)});
 }
 function modalVender(){
@@ -34865,6 +34865,49 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaVejez188,estadoVejez188:D,anualVejez188:anual188,evEnferma188:evEnferma,evCaida188:evCaida,evRelevo188:evRelevo,evConflicto188:evConflicto,cuidarPadres188:cuidar,riesgoVejez188:riesgoVejez,sedeRelevo188:sede,MODOS_188:MODOS}); }
   init188(); setTimeout(init188,40); setTimeout(init188,220); setTimeout(init188,650); setTimeout(init188,950);
   window.__SA188={version:V188};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v189 · SIN ACCIONES, SIN COMPAÑÍA EN TU GRUPO
+   Un jugador vio cuadros de accionistas con "Tú 0.0%" y "Tu control 0.0%"
+   de compañías que seguían en su perfil de negocios. Se llega a 0% de dos
+   maneras: vendiendo todas tus acciones (el deslizador de "Vender parte de
+   tus acciones" llegaba al 100%) o heredando una sucesión en la que el
+   testamento o la ley no te dejan acciones (los demás herederos reciben las
+   suyas y tú sigues con la compañía en el grupo).
+   - Una compañía en la que tu participación es 0% deja de ser parte de tu
+     grupo: sale del perfil de negocios, se te avisa y queda anotada. Se
+     revisa antes de pintar cada pantalla, al pasar el año y justo después de
+     vender acciones, así que una partida guardada con esas compañías también
+     se corrige sola. Si era tu última compañía, la carrera de fundador pasa
+     a "sin empleo", igual que cuando la vendes entera.
+   - El deslizador de venta avisa cuando venderías todo.
+   - Las compañías con una participación pequeña pero real (aunque sea 1%)
+     se quedan.
+   ========================================================================== */
+(function(){
+  const V189='v189';
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const UMBRAL=.0005;
+  let busy=false;
+  const pctTu=e=>{ try{ const t=(e&&e.holders||[]).find(h=>h.id==='tu'); if(!t) return null; const T=totalAcciones(e); return T>0?(t.n||0)/T:0; }catch(x){ return null; } };
+  function sinAcciones(){ if(typeof S==='undefined'||!S||!Array.isArray(S.grupo)) return []; return S.grupo.filter(e=>{ const p=pctTu(e); return p!==null&&p<UMBRAL; }); }
+  function barrer(){ if(busy) return 0; const fuera=sinAcciones(); if(!fuera.length) return 0; busy=true;
+    try{ fuera.forEach(e=>{ try{ sacarDelGrupo(e); }catch(x){ S.grupo=S.grupo.filter(y=>y!==e); }
+        (S.exGrupo189=S.exGrupo189||[]).push({nombre:e.nombre,anio:S.anio}); if(S.exGrupo189.length>30) S.exGrupo189.shift();
+        try{ log('Ya no tienes acciones de <b>'+E(e.nombre)+'</b> (0%): dejó de ser parte de tu grupo de negocios.','hito'); hito('Salió del accionariado de '+e.nombre); }catch(x){} });
+      if(S.grupo&&!S.grupo.length&&S.carrera&&S.carrera.ruta==='fundador') Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:60});
+    } finally{ busy=false; }
+    return fuera.length; }
+  function wrapRender(){ const old=window.render; if(typeof old!=='function'||window.__SA189_REN) return; window.__SA189_REN=true; window.render=function(){ try{ barrer(); }catch(e){ console.error(e); } return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA189_PASO) return; window.__SA189_PASO=true; window.pasarAnio=function(){ try{ barrer(); }catch(e){ console.error(e); } const r=old.apply(this,arguments); try{ barrer(); }catch(e){ console.error(e); } return r; }; }
+  function wrapVender(){ const old=window.venderMisAcciones; if(typeof old!=='function'||window.__SA189_VEN) return; window.__SA189_VEN=true; window.venderMisAcciones=function(){ const r=old.apply(this,arguments); try{ barrer(); }catch(e){ console.error(e); } return r; }; }
+  function init189(){ wrapRender(); wrapPaso(); wrapVender(); try{ if(typeof S!=='undefined'&&S&&S.grupo) barrer(); }catch(e){}
+    Object.assign(window,{barrerSinAcciones189:barrer,sinAcciones189:sinAcciones,pctTu189:pctTu}); }
+  init189(); setTimeout(init189,40); setTimeout(init189,220); setTimeout(init189,650); setTimeout(init189,950);
+  window.__SA189={version:V189};
 })();
 </script>
 
