@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v188</div>
+<div class="version-badge" id="versionBadge">v189</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -9278,7 +9278,7 @@ function modalVenderAcciones(){
     cuerpo:'Tienes '+pc(miPct(e))+' de '+esc(e.nombre)+' y la acción está en '+fmt(pa)+'. Esta plata sí entra a tu bolsillo, pero vender mucho de golpe tumba el precio y tu control.',
     etiqueta:'Cuánto de tu parte vendes',max:1,valor:20,boton:'Dar la orden de venta',
     nota:f=>{ const n=Math.round(mio.n*f); return 'Vendes '+n.toLocaleString('es-CO')+' acciones por unos '+fmt(n*pa*(1-f/4))
-      +'. Tu control caería a '+pc((mio.n-n)/totalAcciones(e))+'.'; },
+      +'. Tu control caería a '+pc((mio.n-n)/totalAcciones(e))+'.'+((mio.n-n)<=0?' Si vendes todo, la compañía sale de tu grupo.':''); },
     accion:f=>venderMisAcciones(f)});
 }
 function modalVender(){
@@ -34256,7 +34256,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA183_ACC) return; window.__SA183_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)){
         if(!SUC()&&!S.muerto&&((S.familia&&S.familia.hijos)||[]).length&&!L.some(x=>x.t==='Nombrar un albacea')) L.push({t:'Nombrar un albacea',cat:'legado',d:S.albacea183?'Hoy: '+S.albacea183.n.toLowerCase()+'. Puedes cambiarlo.':'Quien haga cumplir el testamento y calme a los herederos cuando no estés.',mov:1,modal:true,run:()=>escenaAlbacea183()});
         const p=IMP(); if(p&&!L.some(x=>x.t==='El pleito por la sucesión')) L.push({t:'El pleito por la sucesión',cat:'legado',d:p.rol==='demandado'?E(p.contra)+' impugna la sucesión: abogado, arreglo y estado del juicio.':'Tu demanda contra '+E(p.contra)+': abogado, arreglo y estado del juicio.',mov:0,modal:true,run:()=>escenaImpug183()});
@@ -34268,7 +34268,8 @@ install();setTimeout(install,1200);
     const f=function(h,frac,vivo,pleito){ if(vivo||!h) return old.apply(this,arguments); let pre=null; try{ pre=pre183(h); }catch(e){ console.error(e); }
       const g0=S.gen, r=old.apply(this,arguments); try{ if(pre&&S&&S.gen!==g0) abrir183(pre); }catch(e){ console.error(e); } return r; };
     f.__v183=true; window.heredar=f; }
-  function init183(){ wrapAcciones(); wrapCat(); wrapPaso(); wrapHeredar();
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Nombrar un albacea')) g.miembros.push(['Testamento','Nombrar un albacea']); }
+  function init183(){ wrapAcciones(); wrapCat(); wrapPaso(); wrapHeredar(); grupo();
     Object.assign(window,{escenaAlbacea183,escenaImpug183,escenaImpugnar183,preImpug183:pre183,abrirImpug183:abrir183,probImpug183:probImpug,anualImpug183:anual183,sentenciaImpug183:sentenciar,evDemandaImpug183:evDemanda,evPeritajeImpug183:evPeritaje,evEmpresaImpug183:evEmpresa,ALBACEAS_183:ALB}); }
   init183(); setTimeout(init183,40); setTimeout(init183,220); setTimeout(init183,650); setTimeout(init183,950); setTimeout(init183,1500);
   window.__SA183={version:V183};
@@ -34614,7 +34615,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA186_ACC) return; window.__SA186_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&ADU()&&RV().length&&!L.some(x=>x.t==='Las otras casas')) L.push({t:'Las otras casas',cat:'legado',d:'Patriarcas, alianzas, guerras y matrimonios entre las casas del país.',mov:0,modal:true,run:()=>escenaCasas186()}); }catch(x){ console.error(x); }
       return L; }; window.listaAcciones.__v186=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA186_CAT) return; window.__SA186_CAT=true; window.catDe=function(t){ if(t==='Las otras casas') return 'legado'; return old.apply(this,arguments); }; }
@@ -34730,7 +34731,7 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA187_ACC) return; window.__SA187_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&ADU()&&A()>=1850&&!L.some(x=>x.t==='La prensa')) L.push({t:'La prensa',cat:'legado',d:'Periodistas, hostilidad, compra de medios.',mov:0,modal:true,run:()=>escenaPrensa187()}); }catch(x){ console.error(x); }
       return L; }; window.listaAcciones.__v187=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA187_CAT) return; window.__SA187_CAT=true; window.catDe=function(t){ if(t==='La prensa') return 'legado'; return old.apply(this,arguments); }; }
@@ -34865,6 +34866,49 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaVejez188,estadoVejez188:D,anualVejez188:anual188,evEnferma188:evEnferma,evCaida188:evCaida,evRelevo188:evRelevo,evConflicto188:evConflicto,cuidarPadres188:cuidar,riesgoVejez188:riesgoVejez,sedeRelevo188:sede,MODOS_188:MODOS}); }
   init188(); setTimeout(init188,40); setTimeout(init188,220); setTimeout(init188,650); setTimeout(init188,950);
   window.__SA188={version:V188};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v189 · SIN ACCIONES, SIN COMPAÑÍA EN TU GRUPO
+   Un jugador vio cuadros de accionistas con "Tú 0.0%" y "Tu control 0.0%"
+   de compañías que seguían en su perfil de negocios. Se llega a 0% de dos
+   maneras: vendiendo todas tus acciones (el deslizador de "Vender parte de
+   tus acciones" llegaba al 100%) o heredando una sucesión en la que el
+   testamento o la ley no te dejan acciones (los demás herederos reciben las
+   suyas y tú sigues con la compañía en el grupo).
+   - Una compañía en la que tu participación es 0% deja de ser parte de tu
+     grupo: sale del perfil de negocios, se te avisa y queda anotada. Se
+     revisa antes de pintar cada pantalla, al pasar el año y justo después de
+     vender acciones, así que una partida guardada con esas compañías también
+     se corrige sola. Si era tu última compañía, la carrera de fundador pasa
+     a "sin empleo", igual que cuando la vendes entera.
+   - El deslizador de venta avisa cuando venderías todo.
+   - Las compañías con una participación pequeña pero real (aunque sea 1%)
+     se quedan.
+   ========================================================================== */
+(function(){
+  const V189='v189';
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const UMBRAL=.0005;
+  let busy=false;
+  const pctTu=e=>{ try{ const t=(e&&e.holders||[]).find(h=>h.id==='tu'); if(!t) return null; const T=totalAcciones(e); return T>0?(t.n||0)/T:0; }catch(x){ return null; } };
+  function sinAcciones(){ if(typeof S==='undefined'||!S||!Array.isArray(S.grupo)) return []; return S.grupo.filter(e=>{ const p=pctTu(e); return p!==null&&p<UMBRAL; }); }
+  function barrer(){ if(busy) return 0; const fuera=sinAcciones(); if(!fuera.length) return 0; busy=true;
+    try{ fuera.forEach(e=>{ try{ sacarDelGrupo(e); }catch(x){ S.grupo=S.grupo.filter(y=>y!==e); }
+        (S.exGrupo189=S.exGrupo189||[]).push({nombre:e.nombre,anio:S.anio}); if(S.exGrupo189.length>30) S.exGrupo189.shift();
+        try{ log('Ya no tienes acciones de <b>'+E(e.nombre)+'</b> (0%): dejó de ser parte de tu grupo de negocios.','hito'); hito('Salió del accionariado de '+e.nombre); }catch(x){} });
+      if(S.grupo&&!S.grupo.length&&S.carrera&&S.carrera.ruta==='fundador') Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:60});
+    } finally{ busy=false; }
+    return fuera.length; }
+  function wrapRender(){ const old=window.render; if(typeof old!=='function'||window.__SA189_REN) return; window.__SA189_REN=true; window.render=function(){ try{ barrer(); }catch(e){ console.error(e); } return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA189_PASO) return; window.__SA189_PASO=true; window.pasarAnio=function(){ try{ barrer(); }catch(e){ console.error(e); } const r=old.apply(this,arguments); try{ barrer(); }catch(e){ console.error(e); } return r; }; }
+  function wrapVender(){ const old=window.venderMisAcciones; if(typeof old!=='function'||window.__SA189_VEN) return; window.__SA189_VEN=true; window.venderMisAcciones=function(){ const r=old.apply(this,arguments); try{ barrer(); }catch(e){ console.error(e); } return r; }; }
+  function init189(){ wrapRender(); wrapPaso(); wrapVender(); try{ if(typeof S!=='undefined'&&S&&S.grupo) barrer(); }catch(e){}
+    Object.assign(window,{barrerSinAcciones189:barrer,sinAcciones189:sinAcciones,pctTu189:pctTu}); }
+  init189(); setTimeout(init189,40); setTimeout(init189,220); setTimeout(init189,650); setTimeout(init189,950);
+  window.__SA189={version:V189};
 })();
 </script>
 
