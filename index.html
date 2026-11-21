@@ -35110,10 +35110,11 @@ install();setTimeout(install,1200);
     if(!g.P) g.P={}; if(!g.U) g.U={}; if(!Array.isArray(g.L)) g.L=[]; if(!g.K) g.K={}; return g; }
   const toca=g=>{ g.rev=(g.rev||0)+1; };
   function crear(g,d){ if(Object.keys(g.P).length>=MAXP) return null; const id='g'+(++g.n); const p=Object.assign({id,sexo:'h',nac:null,mue:null,casa:'',rol:'',orig:'pariente',nota:''},d); if(!p.sem) p.sem=(p.nombre||'')+' '+(p.apellido||''); g.P[id]=p; toca(g); return id; }
-  function enlazar(g,padre,hijo,k,u){ if(!padre||!hijo||padre===hijo) return false; if(g.L.some(x=>x.p===padre&&x.h===hijo)) return false; g.L.push({p:padre,h:hijo,k:k||K_BIO,u:u||null}); toca(g); return true; }
+  function enlazar(g,padre,hijo,k,u){ if(!padre||!hijo||padre===hijo) return false; if(g.L.some(x=>x.p===padre&&x.h===hijo)) return false;
+    const a=g.P[padre], b=g.P[hijo]; if((k||K_BIO)===K_BIO&&a&&b&&a.nac!=null&&b.nac!=null&&b.nac<a.nac+12){ g.omitidos=(g.omitidos||0)+1; return false; } g.L.push({p:padre,h:hijo,k:k||K_BIO,u:u||null}); toca(g); return true; }
   function unir(g,a,b,ini,estado){ if(!a||!b||a===b) return null; let u=Object.values(g.U).find(x=>x.socios.includes(a)&&x.socios.includes(b)&&(x.fin==null)); if(u){ if(estado&&u.estado!==estado&&(u.estado==='union'||u.estado==='casados')){ u.estado=estado; toca(g); } return u.id; }
     const id='u'+(++g.n); g.U[id]={id,socios:[a,b],ini:ini==null?A():ini,fin:null,estado:estado||'casados'}; toca(g); return id; }
-  function buscar(g,nombre,sexo,nac,excluir){ const n=norm(nombre); return Object.values(g.P).find(p=>norm(p.nombre)===n&&(!sexo||p.sexo===sexo)&&(nac==null||p.nac==null||Math.abs(p.nac-nac)<=2)&&(!excluir||!excluir(p)))||null; }
+  function buscar(g,nombre,sexo,nac,excluir){ const n=norm(nombre); return Object.values(g.P).find(p=>norm(p.nombre)===n&&(!sexo||p.sexo===sexo)&&(nac==null||p.nac==null||Math.abs(p.nac-nac)<=(p.aprox?7:2))&&(!excluir||!excluir(p)))||null; }
   const vivo=p=>p&&p.mue==null;
 
   /* ==================== FAMILIA NATAL DE LOS CÓNYUGES (UNA VEZ, CON SEMILLA) ==================== */
@@ -35137,7 +35138,7 @@ install();setTimeout(install,1200);
 
   /* ==================== EL ADAPTADOR: ESTADO DEL JUEGO → REGISTRO ==================== */
   function ligar(g,obj,clave,datos,excluir){ if(!obj) return null; if(obj.gid191&&g.P[obj.gid191]) return obj.gid191; let id=g.K[clave]; if(id&&!g.P[id]) id=null;
-    if(!id&&datos.nombre){ const e=buscar(g,datos.nombre,datos.sexo,datos.nac,excluir||(p=>p.orig==='natal')); if(e&&(e.orig!=='natal')) id=e.id; }
+    if(!id&&datos.nombre){ const e=buscar(g,datos.nombre,datos.sexo,datos.nac,excluir||(p=>p.orig==='natal')); if(e&&(e.orig!=='natal')){ id=e.id; if(e.aprox&&datos.nac!=null){ e.nac=datos.nac; delete e.aprox; } } }
     let nuevo=false; if(!id){ id=crear(g,datos); nuevo=!!id; } if(!id) return null; if(!nuevo) Object.assign(g.P[id],Object.fromEntries(Object.entries(datos).filter(([k,v])=>v!==undefined&&v!==null&&v!==''&&(g.P[id][k]==null||g.P[id][k]===''||k==='rol'||k==='gen'))));
     obj.gid191=id; g.K[clave]=id; return id; }
   const sexoDe=s=>s==='m'?'m':'h';
@@ -35173,10 +35174,10 @@ install();setTimeout(install,1200);
       else if(rel==='sobrino'||rel==='sobrina'){ const h=por(['hermano','hermana']); if(h.length===1) enlazar(g,h[0],id,K_BIO,null); } }); }
   function importarLegado(g){ const R=((S.legado&&S.legado.arbol107)||[]).slice().sort((a,b)=>a.gen-b.gen);
     R.forEach(r=>{ if(r.gen===S.gen) return; const jid=ligarLeg(g,{nombre:r.nombre,apellido:r.apellido,sexo:sexoDe(r.sexo),nac:r.nac,casa:S.dinastia||r.apellido,rol:'Generación '+r.gen,orig:'jugador',gen:r.gen},'jug:'+r.gen); const P=g.P[jid]; if(!P) return; if(r.murio&&r.fin&&P.mue==null) P.mue=r.fin; if(r.herederoRel) P.nota='sucedido por '+(r.herederoNombre||'?')+(r.herederoRel?' ('+r.herederoRel+')':'');
-      let pid=null; if(r.pareja&&r.pareja.nombre){ pid=ligarLeg(g,{nombre:r.pareja.nombre,apellido:r.pareja.apellido,sexo:sexoDe(r.pareja.sexo),nac:(r.nac||A()-60)+ri(-3,4),casa:r.pareja.apellido,rol:'Cónyuge',orig:'pareja'},'lpar:'+r.gen); if(pid){ unir(g,jid,pid,null,r.pareja.casados?'casados':'union'); if(!g.P[pid].natalHecho) natal(g,pid); } }
+      let pid=null; if(r.pareja&&r.pareja.nombre){ pid=ligarLeg(g,{nombre:r.pareja.nombre,apellido:r.pareja.apellido,sexo:sexoDe(r.pareja.sexo),nac:(r.nac||A()-60),aprox:1,casa:r.pareja.apellido,rol:'Cónyuge',orig:'pareja'},'lpar:'+r.gen); if(pid){ unir(g,jid,pid,null,r.pareja.casados?'casados':'union'); if(!g.P[pid].natalHecho) natal(g,pid); } }
       const u=pid?Object.values(g.U).find(x=>x.socios.includes(jid)&&x.socios.includes(pid)):null;
       (r.hijos||[]).forEach(h=>{ const hid=ligarLeg(g,{nombre:h.nombre,apellido:r.apellido,sexo:sexoDe(h.sexo),nac:h.nac,casa:S.dinastia||r.apellido,rol:'Hijo',orig:'hijo',gen:r.gen+1},'lh:'+r.gen+':'+norm(h.nombre)); if(!hid) return; if(h.muerto&&h.fin&&g.P[hid].mue==null) g.P[hid].mue=h.fin; enlazar(g,jid,hid,K_BIO,u?u.id:null); if(pid) enlazar(g,pid,hid,K_BIO,u?u.id:null); if(h.heredero) g.K['jug:'+(r.gen+1)]=hid; });
-      (r.padres||[]).forEach(x=>{ const xid=ligarLeg(g,{nombre:x.nombre,apellido:x.apellido,sexo:sexoDe(x.sexo),nac:(r.nac||A()-60)-ri(22,34),casa:x.apellido,rol:'Progenitor',orig:'pariente'},'lpad:'+r.gen+':'+norm(x.nombre)); if(xid){ if(x.muerto&&g.P[xid].mue==null) g.P[xid].mue=r.nac+ri(20,60); enlazar(g,xid,jid,K_BIO,null); } }); });
+      (r.padres||[]).forEach(x=>{ const xid=ligarLeg(g,{nombre:x.nombre,apellido:x.apellido,sexo:sexoDe(x.sexo),nac:(r.nac||A()-60)-28,aprox:1,casa:x.apellido,rol:'Progenitor',orig:'pariente'},'lpad:'+r.gen+':'+norm(x.nombre)); if(xid){ if(x.muerto&&g.P[xid].mue==null) g.P[xid].mue=r.nac+ri(20,60); enlazar(g,xid,jid,K_BIO,null); } }); });
     ((S.legado&&S.legado.ancestros)||[]).forEach(a=>{ if(g.K['jug:'+a.gen]) return; const t=partes(a.nombre); const id=ligarLeg(g,{nombre:t.nombre,apellido:t.apellido,sexo:'h',nac:a.muerte?a.muerte-(a.edad||60):null,casa:S.dinastia||t.apellido,rol:'Generación '+a.gen,orig:'jugador',gen:a.gen,nota:'sucesión sin detalle de parentesco'},'jug:'+a.gen); if(id&&a.muerte&&g.P[id].mue==null) g.P[id].mue=a.muerte; }); }
   function ligarLeg(g,datos,clave){ let id=g.K[clave]; if(id&&g.P[id]) return id; const e=buscar(g,datos.nombre,datos.sexo,datos.nac,p=>p.orig==='natal'); id=e?e.id:crear(g,datos); if(id) g.K[clave]=id; return id; }
   function planes(g){ Object.values(g.P).forEach(p=>{ if(p.muePlan&&p.mue==null&&p.muePlan<=A()){ p.mue=p.muePlan; toca(g); } }); }
