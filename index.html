@@ -35419,16 +35419,39 @@ install();setTimeout(install,1200);
 
   /* ==================== ENGANCHES ==================== */
   function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='El archivo genealógico')) g.miembros.push(['Familia','El archivo genealógico']); }
+  /* Red de seguridad del plegado: si por el orden en que cargaron los módulos (una carga lenta basta) este envoltorio
+     quedó por fuera del que agrupa las acciones, lo que se empujó después quedaría suelto en la lista principal.
+     Aquí se pliega de nuevo, igual que lo hace el agrupador, sin tocar nada cuando ya está plegado. */
+  function replegar(A){
+    try{
+      if(window.__crudo91||!Array.isArray(A)) return;
+      const G=window.GRUPOS_91; if(!Array.isArray(G)||typeof window.escenaGrupo91!=='function') return;
+      if(!A.some(a=>a&&a.t==='Operaciones ilegales')) return;   // el agrupador aún no pasó: lo hará él
+      const titulos=new Set(G.map(g=>g.t));
+      G.forEach(g=>{
+        const ti=new Set((g.miembros||[]).map(m=>m[1])), pre=(g.prefijos||[]).map(x=>x[1]);
+        const sueltas=A.filter(a=>a&&typeof a.t==='string'&&!titulos.has(a.t)&&(ti.has(a.t)||pre.some(x=>a.t.indexOf(x)===0)));
+        if(!sueltas.length) return;
+        sueltas.forEach(a=>{ const i=A.indexOf(a); if(i>=0) A.splice(i,1); });
+        const libres=sueltas.some(a=>!a.dis), gi=A.findIndex(a=>a&&a.t===g.t&&a.modal);
+        const txt=n=>'('+n+' opci'+(n===1?'ón':'ones')+')';
+        if(gi>=0){ const ge=A[gi], m=/\((\d+) opci(?:ón|ones)\)\s*$/.exec(ge.d||''), n=(m?+m[1]:0)+sueltas.length;
+          ge.d=m?(ge.d||'').replace(/\(\d+ opci(?:ón|ones)\)\s*$/,txt(n)):(ge.d||'')+' '+txt(n); if(libres) ge.dis=null; }
+        else A.push({t:g.t,cat:g.cat,d:g.d+' '+txt(sueltas.length),mov:1,modal:true,dis:libres?null:'Ahora mismo ninguna está disponible',run:()=>window.escenaGrupo91(g.id)});
+      });
+    }catch(e){}
+  }
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA192_ACC) return; window.__SA192_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); wrapArbol(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p&&S.p.edad>=14&&!L.some(x=>x.t==='El archivo genealógico')) L.push({t:'El archivo genealógico',cat:'familia',d:'La red de la dinastía: antepasados, descendientes, matrimonios, otras casas y parentescos.',mov:0,modal:false,run:()=>abrir()}); }catch(x){ console.error(x); }
+      replegar(L);
       return L; }; window.listaAcciones.__v192=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA192_CAT) return; window.__SA192_CAT=true; window.catDe=function(t){ if(t==='El archivo genealógico') return 'familia'; return old.apply(this,arguments); }; }
   function wrapArbol(){ const old=window.arbolSVG; if(typeof old!=='function'||old.__v192) return;
     const f=function(){ const h=old.apply(this,arguments); return String(h||'')+'<div style="margin:10px 0 0"><button type="button" data-ag192-abrir="1" class="btn" style="padding:9px 14px;border:1px solid #9b855c;border-radius:6px;background:#263a30;color:#f4e4ca;cursor:pointer">Abrir el archivo genealógico completo</button> <span style="font-size:12px;opacity:.75">matrimonios, divorcios, otras casas y parentescos</span></div>'; }; f.__v192=true; window.arbolSVG=f; }
   if(!window.__SA192_CLICK){ window.__SA192_CLICK=true; document.addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('[data-ag192-abrir]'); if(b){ e.preventDefault(); abrir(); } }); }
   function init192(){ wrapAcciones(); wrapCat(); wrapArbol(); grupo();
-    Object.assign(window,{abrirArchivo192:abrir,cerrarArchivo192:cerrar,estadoArchivo192:est,layoutArchivo192:()=>lay,modoArchivo192:modo,enfocarArchivo192:enfocar,volverArchivo192:volver,buscarArchivo192:buscar,svgArchivo192:()=>svgExportado(),pngArchivo192:pngExportado,seleccionarArchivo192:seleccionar,zoomArchivo192:zoom,ajustarArchivo192:ajustar,dibujarArchivo192:dibujar,MAX_TARJETAS_192:MAXN}); }
+    Object.assign(window,{replegarAcciones192:replegar,abrirArchivo192:abrir,cerrarArchivo192:cerrar,estadoArchivo192:est,layoutArchivo192:()=>lay,modoArchivo192:modo,enfocarArchivo192:enfocar,volverArchivo192:volver,buscarArchivo192:buscar,svgArchivo192:()=>svgExportado(),pngArchivo192:pngExportado,seleccionarArchivo192:seleccionar,zoomArchivo192:zoom,ajustarArchivo192:ajustar,dibujarArchivo192:dibujar,MAX_TARJETAS_192:MAXN}); }
   init192(); setTimeout(init192,40); setTimeout(init192,220); setTimeout(init192,650); setTimeout(init192,950); setTimeout(init192,1500); setTimeout(init192,2500);
   window.__SA192={version:V192};
 })();
