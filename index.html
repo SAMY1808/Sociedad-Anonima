@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v181</div>
+<div class="version-badge" id="versionBadge">v182</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -19478,6 +19478,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(gid==='matrimonio'){
       html+='<div class="form91-boda" id="f91-boda">'
         +selectHTML91('f91-regimen','Régimen de bienes',[{v:'sociedad',t:'Sociedad conyugal, sin más papeles'},{v:'separacion',t:'Con capitulaciones (separación de bienes)'}])
+        +(S.anio>=1976?selectHTML91('f91-tipo','Tipo de matrimonio',[{v:'catolico',t:'Católico, por la Iglesia',sel:true},{v:'civil',t:'Civil, ante notario o juez'}]):'')
         +selectHTML91('f91-celebracion','La boda',bodaOpts91())+'</div>';
     }
     html+='</div>';
@@ -19486,6 +19487,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         const m=lista[parseInt(val91('f91-accion'),10)]; if(!m) return;
         const a=m.a; if(a.dis||(a.mov||0)>S.mov) return;
         const reg=val91('f91-regimen')||'sociedad', boda=val91('f91-celebracion')||'social';
+        if(gid==='matrimonio'&&esBoda91(a.t)&&S.anio>=1976){ S._tipo182=val91('f91-tipo')||'catolico'; S._tipo182a=S.anio; }   // v182: civil o católico
         cerrarModal();
         if(gid==='matrimonio'&&a.t==='Casarte'){ casarConPareja91(reg,boda); render(); return; }
         if(gid==='matrimonio'&&esBoda91(a.t)) S._pref91={reg,boda,anio:S.anio};
@@ -33897,6 +33899,185 @@ install();setTimeout(install,1200);
     Object.assign(window,{iniciarFinMatrimonio181:iniciarFin181,costoAnulacion181:costoLegal,probAnulacion181:prob,escenaAnulacion181:escenaAnulacion,ANIOS_ANULACION_181:AÑOS}); }
   init181(); setTimeout(init181,40); setTimeout(init181,220); setTimeout(init181,650);
   window.__SA181={version:V181};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v182 · MATRIMONIO CIVIL Y CATÓLICO, Y UN DIVORCIO CON PLEITO
+   - Desde 1976 se puede casar por lo civil o por la Iglesia (antes, solo por
+     la Iglesia). El tipo se elige al casarse y pesa al terminar:
+       · Católico: bien visto (prestigio), pero antes de 1991 solo se acaba
+         con la nulidad del tribunal eclesiástico.
+       · Civil: antes de 1991 se comenta en la familia y en el club, pero
+         se puede terminar con el divorcio civil de 1976.
+       · Desde 1991, los dos terminan en divorcio.
+   - Terminar un matrimonio deja de ser un trámite: es un proceso por etapas.
+       1. Eliges abogado (barato, bueno o el mejor) y cómo lo planteas:
+          proponer un acuerdo o demandar. Si es el otro quien demanda, tú
+          respondes (acuerdo, pleito o reconciliación).
+       2. La propuesta de reparto: el otro pide más de lo legal. Puedes
+          aceptar, contraproponer, demandar y ir a juicio, o esconder bienes
+          (si te descubren, pagas más y te cuesta el nombre).
+       3. Con hijos menores: custodia (pedirla, compartirla o dejarla) y la
+          cuota de alimentos, que se paga cada año hasta que cumplan 18.
+       4. La sentencia: se reparte según lo que decidiste, el abogado y la
+          suerte. En una anulación primero el tribunal concede o niega.
+     En cualquier momento se puede intentar la reconciliación, cambiar de
+     abogado o pedir un acuerdo desde "El proceso de separación".
+   ========================================================================== */
+(function(){
+  const V182='v182';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const R1=x=>Math.round(x*10)/10;
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const menores=()=>((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<18);
+  const ACTIVO=()=>!!(S&&S.p&&!S.muerto);
+
+  /* ==================== EL TIPO DE MATRIMONIO ==================== */
+  const tipoDe=pa=>(pa&&pa.tipoMat182)||'catolico';
+  function sellar(pa,conEfectos){ if(!pa||pa.tipoMat182||!pa.casados) return;
+    let t='catolico'; if(A()>=1976&&S._tipo182&&(S._tipo182a==null||S._tipo182a>=A()-1)) t=S._tipo182; delete S._tipo182; delete S._tipo182a; pa.tipoMat182=t; if(!conEfectos||A()<1976) return;
+    if(t==='catolico'){ if(A()<1991){ prest(1,'se casó por la Iglesia'); } pa.paciencia=cl((pa.paciencia||50)+3,0,100); log('La boda fue por la Iglesia, con misa y los suyos en las bancas.','bien'); }
+    else{ if(A()<1991){ prest(-2,'se casó solo por lo civil'); try{ S.p.redes=cl((S.p.redes||0)-2,0,100); }catch(e){} pa.paciencia=cl((pa.paciencia||50)-3,0,100); log('Se casaron solo por lo civil. En la familia y en el club se comenta: algunos parientes no fueron a la ceremonia.','mal'); }
+      else log('Se casaron por lo civil, sin ceremonia religiosa.'); } }
+  function escenaTipo182(sig){ const ops=[{t:'Católico, por la Iglesia',cat:'familia',d:(A()<1991?'Bien visto en la familia y en el club. Pero antes de 1991 solo se acaba con la nulidad del tribunal eclesiástico.':'La ceremonia de siempre. Desde 1991 también termina en divorcio.'),cerrar:false,run:()=>{ S._tipo182='catolico'; S._tipo182a=A(); cerrarModal(); sig(); }},
+      {t:'Civil, ante notario o juez',cat:'familia',d:(A()<1991?'Se comenta en la familia y en el club, y puede costar prestigio. A cambio, se puede terminar con el divorcio civil de 1976.':'Sin ceremonia religiosa. Desde 1991 termina igual que el católico: en divorcio.'),cerrar:false,run:()=>{ S._tipo182='civil'; S._tipo182a=A(); cerrarModal(); sig(); }}];
+    escena({rubro:'El matrimonio',titulo:'¿Cómo se casan?',ancho:true,cerrable:true,cuerpo:'Desde 1976 se puede casar por lo civil o por la Iglesia. Lo que elijas pesa en la familia y, si algún día se acaba, en cómo se acaba.',opciones:ops}); }
+
+  /* ==================== LA VÍA Y LOS NÚMEROS ==================== */
+  const viaDe=pa=>A()>=1991?'divorcio':(A()>=1976&&tipoDe(pa)==='civil'?'divorcio':'anulacion');
+  const ABOG=[{n:'Un abogado de barrio',f:.008,m:20,d:'Barato, con prisa y poca influencia.'},{n:'Un bufete reconocido',f:.025,m:60,d:'Buenos argumentos y buenos contactos.'},{n:'El mejor abogado del país',f:.06,m:150,d:'Caro. Se nota en los juzgados y en la prensa.'}];
+  const costoAb=(i,via)=>Math.max(ABOG[i].m,pat()*ABOG[i].f)*(via==='anulacion'?1.5:1);
+  const legal=pa=>pa.separacionBienes?.06:.33;
+  const probAnul=()=>{ try{ return typeof window.probAnulacion181==='function'?window.probAnulacion181():.6; }catch(e){ return .6; } };
+  const movida=()=>{ if(S._mov182===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov182=A(); return true; };
+  const sinMov=()=>(S._mov182!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  const agendaDe=(via,modo,hijos)=>{ const L=[]; if(via==='anulacion'){ L.push({t:1,e:'info'},{t:2,e:'reparto'}); if(hijos) L.push({t:3,e:'custodia'}); L.push({t:4,e:'sentencia'}); }
+    else if(modo==='acuerdo'){ if(hijos) L.push({t:1,e:'custodia'}); L.push({t:1,e:'sentencia'}); }
+    else { L.push({t:1,e:'reparto'}); if(hijos) L.push({t:2,e:'custodia'}); L.push({t:3,e:'sentencia'}); } return L; };
+  const durDe=L=>L.reduce((m,x)=>Math.max(m,x.t),0);
+
+  /* ==================== EMPEZAR EL PROCESO ==================== */
+  function empezar(o){ const pa=PA(); if(!pa||pa.proceso182) return null; const via=viaDe(pa), hijos=menores().length>0, modo=o.modo||'contencioso';
+    const p={via,inicia:o.inicia||'tu',abogado:o.abogado==null?1:o.abogado,modo,tick:0,inicioAnio:A(),agenda:agendaDe(via,modo,hijos),share:null,propuesta:null,oculto:0,custodia:null,alimentos:0,pagado:o.pagado||0,testigos:0,pendiente:o.inicia==='conyuge'?'demanda':null,litigio:false,tipo:tipoDe(pa)};
+    pa.proceso182=p; pa.divorcioEnCurso=true; const dur=durDe(p.agenda);
+    iniciarCompromiso({titulo:(via==='anulacion'?'Proceso de anulación con ':'Proceso de divorcio con ')+pa.nombre,restan:dur,mov:1,cerrar:()=>{}}); p.compromiso=compromisos().slice(-1)[0]; return p; }
+  function reprogramar(p,modo){ p.modo=modo; const nt=p.tick+1; let L;
+    if(p.via==='anulacion') L=p.agenda.filter(x=>x.t>p.tick); else{ L=[]; if(menores().length&&!p.custodia) L.push({t:nt,e:'custodia'}); L.push({t:nt,e:'sentencia'}); }
+    p.agenda=L; if(p.compromiso) p.compromiso.restan=Math.max(1,durDe(L)-p.tick); return p; }
+  function escenaInicio182(){ const pa=PA(); if(!pa) return; if(pa.proceso182) return escenaProceso182(); const via=viaDe(pa), an=via==='anulacion';
+    const cuerpo=an?((A()>=1976?'Desde 1976 existe el divorcio civil, pero tu matrimonio fue católico: para terminarlo hay que pedir la nulidad ante el tribunal eclesiástico. ':'Aquí no existe el divorcio: un matrimonio solo se acaba con la muerte o con una anulación que conceda el tribunal eclesiástico. ')+'Hay que probar una causal, llevar testigos y esperar años: cuatro. Nada garantiza que la concedan. ')
+      :(A()>=1991?'Desde la Constitución de 1991 los matrimonios, civiles o católicos, terminan en divorcio. ':'Tu matrimonio fue civil: desde 1976 la ley permite el divorcio. ')+'Hay un juzgado de familia, un reparto de bienes y, si hay hijos, custodia y alimentos. ';
+    escena({rubro:an?'Tribunal eclesiástico':'Juzgado de familia',titulo:(an?'Anular tu matrimonio con ':'Divorciarte de ')+E(pa.nombre),ancho:true,cerrable:true,
+      cuerpo:'Llevan '+(tipoDe(pa)==='civil'?'casados por lo civil':'casados por la Iglesia')+'. '+cuerpo+(pa.separacionBienes?'Con capitulaciones firmadas, el patrimonio casi no se toca. ':'Sin capitulaciones, se va cerca de un tercio de todo lo que hay. ')+'Primero, ¿con qué abogado?',
+      opciones:ABOG.map((b,i)=>{ const c=costoAb(i,via); return {t:b.n+' · '+fm(c),cat:'familia',d:b.d+(an?' El trámite lo encarece.':''),dis:S.efectivo<c?'No te alcanza ('+fm(c)+')':sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaModo182(i,c); }}; })}); }
+  function escenaModo182(ab,c){ const pa=PA(); if(!pa) return; const via=viaDe(pa), an=via==='anulacion';
+    if(an){ if(!movida()) return; S.efectivo-=Math.min(S.efectivo,c); const p=empezar({abogado:ab,modo:'contencioso',pagado:c}); S.mov=Math.max(0,S.mov);
+      log('Iniciaste ante el tribunal eclesiástico la anulación de tu matrimonio con <b>'+E(pa.nombre)+'</b>, con '+ABOG[ab].n.toLowerCase()+'. Pagaste '+fm(c)+' y el trámite tomará '+durDe(p.agenda)+' años, una movida por año.','mal'); render(); return; }
+    const pAc=probAcuerdo(pa,ab);
+    escena({rubro:'Juzgado de familia',titulo:'¿Cómo lo planteas?',ancho:true,cerrable:true,cuerpo:'Con '+ABOG[ab].n.toLowerCase()+'. Un acuerdo es rápido y barato, pero el otro tiene que aceptarlo. Un pleito es largo, caro y público.',
+      opciones:[{t:'Proponer un acuerdo · '+fm(c),cat:'familia',d:'Probabilidad de que '+E(pa.nombre.split(' ')[0])+' acepte: '+Math.round(pAc*100)+'%. Si acepta, el proceso dura un año. Si no, va a pleito de tres.',dis:S.efectivo<c?'No te alcanza':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=Math.min(S.efectivo,c); const ok=chance(pAc); const p=empezar({abogado:ab,modo:ok?'acuerdo':'contencioso',pagado:c});
+          if(ok){ p.share=legal(pa)*rnd(.9,1.05); log('<b>'+E(pa.nombre)+'</b> aceptó el acuerdo. El proceso tomará un año, una movida.','mal'); } else log('<b>'+E(pa.nombre)+'</b> rechazó el acuerdo: va a pleito, tres años, una movida por año.','mal'); cerrarModal(); render(); }},
+        {t:'Demandar · '+fm(c),cat:'riesgo',d:'Tres años de juzgado. Sale en el club y en la prensa, y cada reparto se discute.',dis:S.efectivo<c?'No te alcanza':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; S.efectivo-=Math.min(S.efectivo,c); const p=empezar({abogado:ab,modo:'contencioso',pagado:c}); p.litigio=true; prest(-1,'una demanda de divorcio'); log('Demandaste a <b>'+E(pa.nombre)+'</b> para terminar el matrimonio. Serán tres años, una movida por año.','mal'); cerrarModal(); render(); }},
+        {t:'Aguantar un año más',cat:'familia',d:'Nada cambia, pero nada se pierde todavía.',cerrar:true,run:()=>{}}]}); }
+  function probAcuerdo(pa,ab){ return cl(.5+(pa.separacionBienes?.2:0)-(menores().length>=2?.1:0)+(ab>=1?.05:0)+(((pa.paciencia||50)-40)/400)-(pa.infiel108?.1:0),.15,.85); }
+
+  /* ==================== EVENTOS DEL PROCESO ==================== */
+  const vivo=p=>{ const pa=PA(); return !!(pa&&pa.proceso182===p); };
+  function evDemanda(p){ const pa=PA(); const pAc=n=>probAcuerdo(pa,n);
+    return {p:10,c:()=>vivo(p),t:()=>'<b>'+E(pa.nombre)+' presentó la demanda para terminar el matrimonio.</b> '+(p.via==='anulacion'?'Pidió la nulidad ante el tribunal eclesiástico. ':'Pidió el divorcio y el reparto de los bienes. ')+'Hay que responder, y primero escoger abogado.',
+      o:ABOG.map((b,i)=>({t:b.n+' ('+fm(costoAb(i,p.via))+')',f:()=>{ const c=costoAb(i,p.via); S.efectivo-=Math.min(S.efectivo,c); p.abogado=i; p.pagado+=c; p.pendiente=null; let t='Contrataste a '+b.n.toLowerCase()+' para responder.';
+          if(p.via==='divorcio'&&chance(pAc(i)*.8)){ p.share=legal(pa)*rnd(.95,1.2); reprogramar(p,'acuerdo'); t+=' Los abogados llegaron a un acuerdo: el proceso se acorta a un año.'; }
+          else t+=' Va a pleito.'; return t; }})).concat([{t:'Intentar reconciliarte',f:()=>reconciliar(p)}])}; }
+  function evInfo(p){ const pa=PA(), c=Math.max(10,pat()*.004);
+    return {p:9,c:()=>vivo(p),t:()=>'<b>El tribunal eclesiástico cita a las partes y a los testigos.</b> Un buen testimonio pesa en la nulidad.',
+      o:[{t:'Llevar testigos de peso ('+fm(c)+')',f:()=>{ S.efectivo-=Math.min(S.efectivo,c); p.pagado+=c; p.testigos=1; return 'Llevaste testigos de la familia y del club. Su palabra sube la probabilidad de la nulidad.'; }},{t:'Dejar que el abogado se encargue',f:()=>'Dejaste el asunto en manos de tu abogado.'}]}; }
+  function evReparto(p){ const pa=PA(); const lg=legal(pa); const ask=cl(lg*(p.inicia==='conyuge'?rnd(1.3,1.8):rnd(1.15,1.6)),lg,.65); p.propuesta={ask:ask}; const P=pat();
+    return {p:10,c:()=>vivo(p),t:()=>'<b>'+E(pa.nombre)+' presenta su propuesta de reparto.</b> Pide cerca de '+fm(P*ask)+' ('+Math.round(ask*100)+'% del patrimonio), cuando lo que corresponde por ley es cerca de '+fm(P*lg)+'.',
+      o:[{t:'Aceptar la propuesta ('+fm(P*ask)+')',f:()=>{ p.share=ask; return 'Aceptaste. Se va cerca de '+fm(P*ask)+' cuando se firme.'; }},
+         {t:'Contraproponer con tu abogado',f:()=>{ const pr=cl(.3+p.abogado*.15+(typeof prestigio==='function'?prestigio():0)/500+(S.p.redes||0)/600,.2,.8); if(chance(pr)){ p.share=lg*(1+(ask/lg-1)*.35); return 'Tu abogado negoció y el reparto quedó en cerca de '+fm(P*p.share)+'.'; } p.litigio=true; const f=Math.max(10,P*.01); S.efectivo-=Math.min(S.efectivo,f); p.pagado+=f; return 'No hubo acuerdo. Va a juicio, y '+E(pa.nombre.split(' ')[0])+' quedó más duro.'; }},
+         {t:'Demandar y ir a juicio ('+fm(Math.max(15,P*(.01+.012*p.abogado)))+')',f:()=>{ const f=Math.max(15,P*(.01+.012*p.abogado)); S.efectivo-=Math.min(S.efectivo,f); p.pagado+=f; p.litigio=true; prest(-2,'el pleito por el reparto'); return 'Rechazaste la propuesta y pediste que decida el juez. Se paga la demanda y se espera la sentencia.'; }},
+         {t:'Esconder bienes (15% del patrimonio)',f:()=>{ p.oculto=.15; p.litigio=true; return 'Pusiste una parte del patrimonio a nombre de otros. Si el peritaje la encuentra, lo vas a pagar caro.'; }},
+         {t:'Intentar reconciliarte',f:()=>reconciliar(p)}]}; }
+  function evCustodia(p){ const pa=PA(), H=menores(); if(!H.length) return null; const P=pat(), cuota=Math.max(10,P*.012), nom=E(pa.nombre.split(' ')[0]);
+    const fijar=(c,al,quien)=>{ p.custodia=c; p.alimentos=al; p.quienPaga=quien; };
+    return {p:10,c:()=>vivo(p)&&menores().length>0,t:()=>'<b>Hay '+(H.length===1?'un hijo menor':H.length+' hijos menores')+': toca decidir la custodia y los alimentos.</b> Quien no los tenga paga una cuota cada año hasta que cumplan 18.',
+      o:[{t:'Pedir la custodia',f:()=>{ const pr=cl(.45+p.abogado*.1+(pa.infiel108?.08:0)-(S.p.edad>60?.1:0),.2,.8); const f=Math.max(10,P*.01); S.efectivo-=Math.min(S.efectivo,f); p.pagado+=f;
+            if(chance(pr)){ fijar('tuya',0,null); H.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+6,0,100); }); return 'Te dieron la custodia. Los niños se quedan contigo y no pagas alimentos.'; }
+            fijar('conyuge',cuota,'tu'); H.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-10,0,100); }); return 'El juez dio la custodia a '+nom+'. Pagarás '+fm(cuota)+' al año de alimentos y los niños te lo reprochan.'; }},
+         {t:'Custodia compartida',f:()=>{ fijar('compartida',cuota*.5,'tu'); H.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-3,0,100); }); return 'Acordaron custodia compartida: pagarás la mitad de los alimentos ('+fm(cuota*.5)+' al año) y los niños pasan tiempo con los dos.'; }},
+         {t:'Dejarla con '+nom+' y pagar alimentos ('+fm(cuota)+' al año)',f:()=>{ fijar('conyuge',cuota,'tu'); H.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-8,0,100); }); p.cede=true; return 'Dejaste la custodia con '+nom+' y pagarás '+fm(cuota)+' al año. El reparto se suaviza un poco por la buena voluntad.'; }}]}; }
+  function evSentencia(p){ const pa=PA(); return {p:10,c:()=>vivo(p),t:()=>'<b>Llega la sentencia'+(p.via==='anulacion'?' del tribunal eclesiástico':' del juzgado de familia')+'.</b> Después de '+(p.tick===1?'un año':p.tick+' años')+' de trámite, el proceso se decide.',o:[{t:'Escuchar la sentencia',f:()=>resolver(p)}]}; }
+  function reconciliar(p){ const pa=PA(); if(!pa||!vivo(p)) return 'Ya no había proceso.'; const f=Math.max(8,pat()*.004); S.efectivo-=Math.min(S.efectivo,f);
+    const pr=cl(.15+(pa.paciencia||0)/250+(menores().length?.05:0),.1,.6);
+    if(chance(pr)){ if(p.compromiso){ const cs=compromisos(); const i=cs.indexOf(p.compromiso); if(i>=0) cs.splice(i,1); } pa.proceso182=null; pa.divorcioEnCurso=false; pa.paciencia=cl((pa.paciencia||50)+25,0,100); S.p.felicidad=cl(S.p.felicidad+6,0,100); log('<b>'+E(pa.nombre)+'</b> y tú retiraron el proceso y decidieron intentarlo otra vez. Lo gastado en abogados no se recupera.','bien'); return 'Se reconciliaron. El proceso se retiró.'; }
+    pa.paciencia=cl((pa.paciencia||50)-8,0,100); return E(pa.nombre.split(' ')[0])+' no quiso volver a intentarlo: el proceso sigue.'; }
+
+  /* ==================== LA SENTENCIA ==================== */
+  function repartir(share,oculto,etiqueta){ const base=pat(), visible=base*(1-oculto); const perd=visible*share; let resta=perd; const caja=Math.min(S.efectivo,resta); S.efectivo-=caja; resta-=caja;
+    while(resta>1&&(S.bienes||[]).length>1){ const b=S.bienes.filter(x=>x.uid!==(S.hogar&&S.hogar.vivienda)).sort((a,c)=>a.valor-c.valor)[0]; if(!b) break; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); resta-=Math.max(0,b.valor-(b.hipoteca||0)); log('En '+etiqueta+' se fue <b>'+E(b.nombre)+'</b>.','mal'); } return perd; }
+  function resolver(p){ const pa=PA(); if(!pa||pa.proceso182!==p) return '';
+    const an=p.via==='anulacion';
+    if(an){ const pr=cl(probAnul()+p.abogado*.05+(p.testigos?.06:0)+(p.tipo==='catolico'?.03:0),.3,.93);
+      if(!chance(pr)){ pa.proceso182=null; pa.divorcioEnCurso=false; pa.anulacion181=false; pa.paciencia=cl((pa.paciencia||50)-10,0,100); S.p.felicidad=cl(S.p.felicidad-6,0,100); prest(-1,'una anulación negada');
+        log('El tribunal eclesiástico <b>negó la nulidad</b> de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Sigues casado, y los años y los abogados te costaron '+fm(p.pagado)+'. Puedes volver a pedirla.','mal'); return 'El tribunal negó la anulación.'; } }
+    const lg=legal(pa); let share=p.share;
+    if(share==null){ const mult=cl(rnd(.7,1.25)+(p.abogado-1)*.1-(pa.infiel108?.1:0)+(p.inicia==='conyuge'?.05:0),.5,1.6); share=lg*mult; }
+    if(p.cede) share*=.95;
+    let extra=''; if(p.oculto>0){ const pr=cl(.5-p.abogado*.12,.15,.5); if(chance(pr)){ share=Math.min(.7,share+.12); prest(-6,'esconder bienes en un divorcio'); try{ if(typeof registrarDelito==='function') registrarDelito('ocultamiento de bienes en un proceso de familia',2,'bienes escondidos en el reparto'); }catch(e){} extra=' El peritaje <b>encontró los bienes escondidos</b>: el juez te cobró 12 puntos más y quedó el escándalo.'; } else extra=' Nadie encontró los bienes escondidos.'; }
+    const perd=repartir(share,p.oculto,an?'la anulación':'el divorcio');
+    menores().forEach(h=>{ if(!p.custodia) h.vinculo=cl((h.vinculo||60)-10,0,100); }); (S.familia.hijos||[]).forEach(h=>{ if((h.edad||0)>=18&&(h.edad||0)<20) h.vinculo=cl((h.vinculo||60)-6,0,100); });
+    prest(an?-3:-5-(p.litigio?2:0),an?'la anulación del matrimonio':'el divorcio'); S.p.felicidad=cl(S.p.felicidad-(an?10:12),0,100);
+    if(p.alimentos>0){ const H=menores(), hasta=A()+Math.max(1,Math.min(15,18-Math.min.apply(null,H.map(h=>h.edad||0).concat([17])))); S.alimentos182={cuota:p.alimentos,hasta,quien:pa.nombre}; }
+    log((an?'El tribunal eclesiástico <b>concedió la anulación</b> de tu matrimonio con ':'Terminó el proceso de divorcio con ')+'<b>'+E(pa.nombre)+'</b>. El reparto fue de '+Math.round(share*100)+'% ('+fm(perd)+').'+extra+(p.alimentos>0?' Pagarás alimentos de '+fm(p.alimentos)+' al año.':''),'mal');
+    hito(an?'Anuló su matrimonio con '+pa.nombre:'Se divorció de '+pa.nombre); S.familia.pareja=null; return (an?'La anulación quedó concedida.':'El divorcio quedó formalizado.')+' Se repartió el '+Math.round(share*100)+'% del patrimonio.'; }
+
+  /* ==================== EL AÑO ==================== */
+  function anual182(){ if(!ACTIVO()) return; const pa=PA();
+    // los alimentos
+    const al=S.alimentos182; if(al){ if(A()>al.hasta||!isFinite(al.cuota)) delete S.alimentos182; else { const x=Math.min(Math.max(0,S.efectivo),al.cuota); S.efectivo-=x; try{ if(window.anotar147) window.anotar147('Alimentos de los hijos',-x); }catch(e){} if(x<al.cuota){ prest(-1,'no pagar los alimentos'); log('No alcanzaste a pagar los alimentos completos este año.','mal'); } } }
+    if(pa&&pa.casados&&!pa.tipoMat182) sellar(pa,false);
+    if(!pa||!pa.proceso182){ if(pa&&pa.divorcioEnCurso&&!pa.proceso182&&!(compromisos()||[]).some(c=>/divorcio|anulación/.test(c.titulo||''))) pa.divorcioEnCurso=false; return; }
+    const p=pa.proceso182; if(p.pendiente==='demanda'){ cola.push(evDemanda(p)); p.pendiente=null; return; } if(A()<=p.inicioAnio) return;
+    p.tick++; const lst=p.agenda.filter(x=>x.t===p.tick); lst.forEach(x=>{ const ev=x.e==='info'?evInfo(p):x.e==='reparto'?evReparto(p):x.e==='custodia'?evCustodia(p):evSentencia(p); if(ev) cola.push(ev); });
+    if(!p.agenda.some(x=>x.t>p.tick)&&!lst.some(x=>x.e==='sentencia')) cola.push(evSentencia(p)); }
+
+  /* ==================== LA PANTALLA DEL PROCESO ==================== */
+  function escenaProceso182(){ const pa=PA(); if(!pa||!pa.proceso182){ escena({rubro:'Tu vida',titulo:'El proceso de separación',cuerpo:'No hay ningún proceso en curso.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const p=pa.proceso182, an=p.via==='anulacion', total=durDe(p.agenda), reab=()=>{ cerrarModal(); render(); escenaProceso182(); }, P=pat();
+    const sig=p.agenda.filter(x=>x.t>p.tick).map(x=>({info:'la audiencia',reparto:'la propuesta de reparto',custodia:'la custodia',sentencia:'la sentencia'})[x.e]);
+    const ops=[];
+    ops.push({t:'Intentar reconciliarte',cat:'familia',d:'Retiran el proceso si '+E(pa.nombre.split(' ')[0])+' acepta. Cuesta una movida y un regalo. Lo gastado en abogados no vuelve.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const m=reconciliar(p); log(m); reab(); }});
+    ops.push({t:'Cambiar de abogado',cat:'familia',d:'Subir de nivel mejora tus posibilidades; cuesta lo que cuesta el nuevo.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal();
+      escena({rubro:'El proceso',titulo:'¿Con quién sigues?',cerrable:true,opciones:ABOG.map((b,i)=>({t:b.n+(i===p.abogado?' (el actual)':' · '+fm(costoAb(i,p.via))),cat:'familia',d:b.d,dis:i===p.abogado?'Es el actual':(S.efectivo<costoAb(i,p.via)?'No te alcanza':null),cerrar:false,run:()=>{ if(!movida()) return; const c=costoAb(i,p.via); S.efectivo-=Math.min(S.efectivo,c); p.abogado=i; p.pagado+=c; log('Cambiaste de abogado: ahora te lleva '+b.n.toLowerCase()+'.'); reab(); }}))}); }});
+    if(!an&&p.modo==='contencioso'&&p.share==null&&p.tick<total-1) ops.push({t:'Proponer un acuerdo',cat:'familia',d:'Probabilidad de que acepte: '+Math.round(probAcuerdo(pa,p.abogado)*100)+'%. Si acepta, el proceso se acorta.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; if(chance(probAcuerdo(pa,p.abogado))){ p.share=legal(pa)*rnd(.95,1.15); reprogramar(p,'acuerdo'); log('<b>'+E(pa.nombre)+'</b> aceptó un acuerdo: el proceso se acorta.','mal'); } else { pa.paciencia=cl((pa.paciencia||50)-4,0,100); log(E(pa.nombre)+' rechazó el acuerdo.','mal'); } reab(); }});
+    escena({rubro:an?'Tribunal eclesiástico':'Juzgado de familia',titulo:'El proceso de separación',ancho:true,cerrable:true,clase:'pol155',cuerpo:(an?'Anulación':'Divorcio')+' con '+E(pa.nombre)+' ('+(p.inicia==='conyuge'?'lo pidió '+E(pa.nombre.split(' ')[0]):'lo pediste tú')+'). Año '+Math.min(p.tick+1,total)+' de '+total+'. Faltan: '+(sig.length?sig.join(', '):'la sentencia')+'.',
+      html:'<div class="k"><div><b>'+E(ABOG[p.abogado].n.replace(/^(Un |El )/,'').replace(/^./,c=>c.toUpperCase()))+'</b><span>tu abogado</span></div><div><b>'+fm(p.pagado)+'</b><span>gastado en el proceso</span></div><div><b>'+(p.share!=null?Math.round(p.share*100)+'%':(p.propuesta?'pide '+Math.round(p.propuesta.ask*100)+'%':'por decidir'))+'</b><span>del patrimonio al otro</span></div><div><b>'+(p.custodia?({tuya:'Contigo',compartida:'Compartida',conyuge:'Con '+E(pa.nombre.split(' ')[0])})[p.custodia]:(menores().length?'por decidir':'sin hijos menores'))+'</b><span>custodia</span></div></div>'+(p.oculto>0?'<div class="apunte">Escondiste parte del patrimonio. Si el peritaje la encuentra, lo pagas caro.</div>':''),opciones:ops}); }
+
+  /* ==================== ENGANCHES ==================== */
+  const prevEsc=window.escenaDivorcio, prevEj=window.ejecutarDivorcio;
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA182_ACC) return; window.__SA182_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ const pa=PA(); if(Array.isArray(L)&&pa&&pa.proceso182&&!L.some(x=>x.t==='El proceso de separación')) L.push({t:'El proceso de separación',cat:'familia',d:'Ya hay un proceso con '+pa.nombre.split(' ')[0]+': abogado, reparto, custodia y reconciliación.',mov:0,modal:true,run:()=>escenaProceso182()}); }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v182=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA182_CAT) return; window.__SA182_CAT=true; window.catDe=function(t){ if(t==='El proceso de separación') return 'familia'; return old.apply(this,arguments); }; }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='matrimonio'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='El proceso de separación')) g.miembros.push(['Tu matrimonio','El proceso de separación']); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA182_PASO) return; window.__SA182_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual182(); }catch(e){ console.error(e); } return r; }; }
+  function wrapLuna(){ const old=window.escenaLunaDeMiel; if(typeof old!=='function'||window.__SA182_LUNA) return; window.__SA182_LUNA=true; const f=function(pa){ try{ sellar(pa,true); }catch(e){ console.error(e); } return old.apply(this,arguments); }; f.__v182=true; window.escenaLunaDeMiel=f; }
+  function wrapMatrimonio(){ const old=window.modalMatrimonio; if(typeof old!=='function'||window.__SA182_MAT) return; window.__SA182_MAT=true; const f=function(){ if(A()>=1976&&PA()&&!PA().casados) return escenaTipo182(()=>old.apply(this,arguments)); return old.apply(this,arguments); }; f.__v182=true; window.modalMatrimonio=f; }
+  function instalar(){ if(typeof prevEsc==='function'&&!window.escenaDivorcio.__v182){ const f=function(){ const pa=PA(); if(!pa) return typeof prevEsc==='function'?prevEsc.apply(this,arguments):undefined; return escenaInicio182(); }; f.__v182=true; f.__v181=true; window.escenaDivorcio=f; }
+    if(typeof prevEj==='function'&&!window.ejecutarDivorcio.__v182){ const f=function(){ const pa=PA(); if(pa&&pa.proceso182) return; return prevEj.apply(this,arguments); }; f.__v182=true; f.__v181=true; window.ejecutarDivorcio=f; }
+    window.iniciarFinMatrimonio181=(nom)=>{ const pa=PA(); if(!pa||pa.proceso182) return true; const p=empezar({inicia:'conyuge',modo:'contencioso',abogado:1}); if(p) log('<b>'+E(nom)+'</b> inició '+(p.via==='anulacion'?'ante el tribunal eclesiástico la anulación del matrimonio':'el proceso de divorcio')+'. Hay que contestar la demanda y escoger abogado.','mal'); return true; }; }
+  function init182(){ instalar(); wrapAcciones(); wrapCat(); grupo(); wrapPaso(); wrapLuna(); wrapMatrimonio();
+    Object.assign(window,{tipoMatrimonio182:tipoDe,viaFinMatrimonio182:viaDe,escenaTipo182,escenaProceso182,escenaInicio182,procesoSeparacion182:empezar,evRepartoSeparacion182:evReparto,evCustodiaSeparacion182:evCustodia,evDemandaSeparacion182:evDemanda,evInfoSeparacion182:evInfo,resolverSeparacion182:resolver,reconciliarSeparacion182:reconciliar,anualSeparacion182:anual182,sellarMatrimonio182:sellar,ABOGADOS_182:ABOG,costoAbogado182:costoAb,probAcuerdo182:probAcuerdo,reprogramarSeparacion182:reprogramar}); }
+  init182(); setTimeout(init182,40); setTimeout(init182,220); setTimeout(init182,650); setTimeout(init182,950);
+  window.__SA182={version:V182};
 })();
 </script>
 
