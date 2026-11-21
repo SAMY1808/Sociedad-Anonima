@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v183</div>
+<div class="version-badge" id="versionBadge">v184</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -34272,6 +34272,83 @@ install();setTimeout(install,1200);
     Object.assign(window,{escenaAlbacea183,escenaImpug183,escenaImpugnar183,preImpug183:pre183,abrirImpug183:abrir183,probImpug183:probImpug,anualImpug183:anual183,sentenciaImpug183:sentenciar,evDemandaImpug183:evDemanda,evPeritajeImpug183:evPeritaje,evEmpresaImpug183:evEmpresa,ALBACEAS_183:ALB}); }
   init183(); setTimeout(init183,40); setTimeout(init183,220); setTimeout(init183,650); setTimeout(init183,950); setTimeout(init183,1500);
   window.__SA183={version:V183};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v184 · CADA COMPAÑÍA CON SU NOMBRE Y SU CAJA
+   Un jugador reportó que una textil con 200 M en caja no podía pagar una
+   publicidad "porque no había fondos en la agroindustrial". Muchos eventos
+   y pantallas encuentran a la compañía por su nombre; si dos compañías se
+   llaman igual, la acción cae en la primera de la lista y se paga con su
+   caja. Esta capa lo cierra:
+   - Los nombres de las compañías son únicos. Al fundar o comprar una con un
+     nombre que ya existe, se agrega el sector ("Restrepo (Textil)") o un
+     numeral ("Restrepo II"). Una partida vieja con nombres repetidos se
+     corrige sola, y la segunda compañía avisa su nuevo nombre.
+   - Cuando una compañía no puede pagar algo, el aviso dice cuál, cuánta
+     caja tiene, cuánto crédito le queda y recuerda que las cajas no se
+     mezclan: cada compañía paga con la suya (se le aporta capital desde la
+     plata personal). Los botones bloqueados por falta de caja también
+     nombran a la compañía y su caja.
+   - La compañía que tienes "sentada" siempre es la misma del grupo, aunque
+     la partida se haya cargado de un guardado antiguo.
+   ========================================================================== */
+(function(){
+  const V184='v184';
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const norm=n=>String(n==null?'':n).trim().toLowerCase().replace(/\s+/g,' ');
+  const fm=x=>fmt(Math.round(x));
+  let ult=null, firma='', ocupado=false;
+
+  /* ==================== NOMBRES ÚNICOS ==================== */
+  function sectorDe(e){ try{ const s=(typeof SECTORES!=='undefined'?SECTORES:[]).find(x=>x.id===(e&&e.sector)); return s&&s.n?String(s.n).split(':')[0].trim():''; }catch(x){ return ''; } }
+  function candidato(base,sec,usados){ const k=norm(base); if(!usados.has(k)) return base;
+    const s=sec&&!new RegExp('\\('+sec.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\)','i').test(base)?base+' ('+sec+')':null; if(s&&!usados.has(norm(s))) return s;
+    const R=['II','III','IV','V','VI','VII','VIII','IX','X']; for(let i=0;i<R.length;i++){ const c=(s||base)+' '+R[i]; if(!usados.has(norm(c))) return c; }
+    for(let i=11;i<200;i++){ const c=base+' '+i; if(!usados.has(norm(c))) return c; } return base+' '+Date.now(); }
+  const nombreLibre=(nombre,sector)=>{ const g=(typeof S!=='undefined'&&S&&S.grupo)||[]; const usados=new Set(g.map(e=>norm(e.nombre)));
+    let sec=''; try{ const s=SECTORES.find(x=>x.id===sector); sec=s&&s.n?String(s.n).split(':')[0].trim():''; }catch(x){} return candidato(nombre,sec,usados); };
+  function dedupe(){ if(ocupado||typeof S==='undefined'||!S||!Array.isArray(S.grupo)||S.grupo.length<2) return 0; const g=S.grupo, f=g.map(e=>norm(e&&e.nombre)).join('|'); if(f===firma) return 0;
+    ocupado=true; let n=0; try{ const usados=new Set();
+      g.forEach(e=>{ if(!e) return; const k=norm(e.nombre); if(!usados.has(k)){ usados.add(k); return; }
+        const viejo=e.nombre, nuevo=candidato(viejo,sectorDe(e),usados); e.nombre=nuevo; usados.add(norm(nuevo)); n++;
+        try{ if(!e.publica&&typeof ticker==='function') e.ticker=ticker(nuevo); }catch(x){}
+        try{ if(S.carrera&&S.carrera.empleador===viejo&&e===S.emp) S.carrera.empleador=nuevo; }catch(x){}
+        try{ log('Dos compañías se llamaban <b>'+E(viejo)+'</b>. Para no confundirlas, la segunda pasó a llamarse <b>'+E(nuevo)+'</b>: cada compañía tiene su propia caja y sus propios avisos.','hito'); }catch(x){} });
+    } finally{ ocupado=false; firma=g.map(e=>norm(e&&e.nombre)).join('|'); }
+    return n; }
+  function wrapCompanias(){ const old=window.companias; if(typeof old!=='function'||window.__SA184_COMP) return; window.__SA184_COMP=true;
+    const f=function(){ const g=old.apply(this,arguments); if(g&&g.length>1) dedupe(); return g; }; f.__v184=true; window.companias=f; }
+  function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||window.__SA184_FUN) return; window.__SA184_FUN=true;
+    window.fundarEn=function(nombre,sectorId,aporte){ let n=nombre; try{ n=nombreLibre(nombre,sectorId); if(n!==nombre) log('Ya tienes una compañía llamada <b>'+E(nombre)+'</b>: la nueva se llama <b>'+E(n)+'</b> para no confundirlas.','hito'); }catch(x){} return old.call(this,n,sectorId,aporte); }; }
+
+  /* ==================== AVISOS CON LA COMPAÑÍA Y SU CAJA ==================== */
+  function cupo(e){ try{ return Math.max(0,capacidadDeudaDe(e)); }catch(x){ return 0; } }
+  function wrapFinanciar(){ const old=window.financiarEmpresa; if(typeof old!=='function'||window.__SA184_FIN) return; window.__SA184_FIN=true;
+    window.financiarEmpresa=function(e,costo){ const r=old.apply(this,arguments);
+      try{ if(r&&r.ok===false&&e&&costo>0){ ult={n:e.nombre,t:Date.now()};
+        log('<b>'+E(e.nombre)+'</b> no puede pagar '+fm(costo)+': tiene '+fm(e.caja)+' en caja y '+fm(cupo(e))+' de crédito disponible. Cada compañía paga con su propia caja: si hay plata en otra, no se mezcla. Aporta capital desde tu bolsillo o espera al año que viene.','mal'); } }catch(x){}
+      return r; }; window.financiarEmpresa.__v184=true; }
+  function wrapLog(){ const old=window.log; if(typeof old!=='function'||window.__SA184_LOG) return; window.__SA184_LOG=true;
+    window.log=function(txt,clase){ try{ if(ult&&Date.now()-ult.t<900&&typeof txt==='string'&&/^(La compañía|La cadena|La unidad) no tiene con qué|^No alcanza la caja de la compañía/.test(txt)) return; }catch(x){} return old.apply(this,arguments); }; window.log.__v184=true; }
+  function wrapEscena(){ const old=window.escena; if(typeof old!=='function'||window.__SA184_ESC) return; window.__SA184_ESC=true;
+    window.escena=function(cfg){ try{ if(cfg&&Array.isArray(cfg.opciones)){ const g=(S&&S.grupo)||[], rub=String(cfg.rubro||'');
+        const e=g.find(x=>x&&x.nombre&&rub.indexOf(E(x.nombre))>=0)||(S&&S.emp);
+        if(e) cfg.opciones.forEach(o=>{ if(o&&typeof o.dis==='string'&&/(no tiene esa caja|caja de la compañía no alcanza|no alcanza la caja)/i.test(o.dis)&&o.dis.indexOf(e.nombre)<0) o.dis=o.dis.replace(/\.$/,'')+' ('+e.nombre+' tiene '+fm(e.caja)+')'; }); } }catch(x){}
+      return old.apply(this,arguments); }; window.escena.__v184=true; }
+
+  /* ==================== LA COMPAÑÍA SENTADA ES LA DEL GRUPO ==================== */
+  function amarrar(){ try{ if(!S||!Array.isArray(S.grupo)||!S.grupo.length) return false; if(S.emp&&!S.grupo.includes(S.emp)){ if(typeof asegurarGrupo==='function') asegurarGrupo(); return true; } }catch(x){ console.error(x); } return false; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA184_PASO) return; window.__SA184_PASO=true; window.pasarAnio=function(){ try{ amarrar(); dedupe(); }catch(x){ console.error(x); } return old.apply(this,arguments); }; }
+
+  function auditoria(){ const g=(S&&S.grupo)||[], seen={}, dup=[]; g.forEach(e=>{ const k=norm(e.nombre); if(seen[k]) dup.push(e.nombre); seen[k]=1; });
+    return {n:g.length,duplicados:dup,sentadaEnGrupo:!S.emp||g.includes(S.emp),cajas:g.map(e=>({n:e.nombre,caja:Math.round(e.caja)}))}; }
+  function init184(){ wrapCompanias(); wrapFundar(); wrapFinanciar(); wrapLog(); wrapEscena(); wrapPaso();
+    Object.assign(window,{nombreLibre184:nombreLibre,dedupeCompanias184:()=>{ firma=''; return dedupe(); },auditoriaCompanias184:auditoria,amarrarCompania184:amarrar}); }
+  init184(); setTimeout(init184,40); setTimeout(init184,220); setTimeout(init184,650); setTimeout(init184,950);
+  window.__SA184={version:V184};
 })();
 </script>
 
