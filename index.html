@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v184</div>
+<div class="version-badge" id="versionBadge">v185</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -34349,6 +34349,142 @@ install();setTimeout(install,1200);
     Object.assign(window,{nombreLibre184:nombreLibre,dedupeCompanias184:()=>{ firma=''; return dedupe(); },auditoriaCompanias184:auditoria,amarrarCompania184:amarrar}); }
   init184(); setTimeout(init184,40); setTimeout(init184,220); setTimeout(init184,650); setTimeout(init184,950);
   window.__SA184={version:V184};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v185 · LA VIOLENCIA (1948–1958), EN TU PROPIA ZONA
+   Hasta ahora el 9 de abril y la Violencia eran decisiones sueltas. Esta
+   capa es un arco de diez años que se juega año por año.
+   - El ambiente del país sube después del Bogotazo, llega a su punto más
+     alto con el Gobierno conservador (1950–1952), baja con la amnistía del
+     general Rojas en 1953 y se apaga con la Junta y el Frente Nacional (1958).
+   - Tu riesgo personal depende de ese ambiente, de tu partido frente al
+     Gobierno de turno (un liberal con un Gobierno conservador está más
+     expuesto), de tus fincas y compañías agrícolas, de la guardia que tengas
+     y de lo que pagues por protección.
+   - Cada año puede llegar un episodio: una cuadrilla de "pájaros" que cobra
+     "vacuna", peones del otro partido, familias desplazadas que piden
+     refugio, un vecino que vende su finca por miedo, el gamonal que te
+     exige declarar tu partido. Si no tienes tierra, la Violencia llega a la
+     ciudad como migrantes y polarización.
+   - Desde "La Violencia en tu zona" puedes armar guardia, declararte de un
+     partido, pedir protección al Gobierno (un favor que se cobra, v179),
+     acoger desplazados o vender las fincas con descuento y salir.
+   - En 1958 el Frente Nacional cierra el arco con un balance: lo que
+     acogiste, lo que compraste a precio de miedo y lo que pagaste.
+   ========================================================================== */
+(function(){
+  const V185='v185';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const BASE={1948:25,1949:50,1950:70,1951:78,1952:78,1953:60,1954:35,1955:40,1956:38,1957:28,1958:15};
+  const D=()=>{ if(typeof S==='undefined'||!S) return null; let d=S.violencia185; if(!d||typeof d!=='object') d=S.violencia185={iniciada:false,nivel:0,partido:null,guardia:0,vacunas:0,acogidos:0,compradas:0,pagado:0,hechos:[],cerrada:false,protAnio:0,perdidas:0}; return d; };
+  const ACT=()=>{ const d=D(); return !!d&&A()>=1948&&A()<=1958&&!d.cerrada; };
+  const ADU=()=>{ try{ return typeof adulto==='function'?adulto():true; }catch(e){ return true; } };
+  const fincas=()=>(S.bienes||[]).filter(b=>b&&(b.clase==='finca'||b.tipo==='cafe'||b.tipo==='finca'));
+  const agros=()=>{ try{ return companias().filter(e=>/agro|cafe|ganad/i.test(String(e.sector||''))); }catch(e){ return []; } };
+  const expo=()=>fincas().length>0||agros().length>0;
+  const valF=()=>fincas().reduce((t,b)=>t+Math.max(0,(b.valor||0)-(b.hipoteca||0)),0);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const movida=()=>{ if(S._mov185===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov185=A(); return true; };
+  const sinMov=()=>(S._mov185!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  const pagar=c=>{ c=Math.max(0,c); const x=Math.min(Math.max(0,S.efectivo),c); S.efectivo-=x; D().pagado+=x; return x; };
+  const hecho=t=>{ const d=D(); d.hechos.push({a:A(),t}); if(d.hechos.length>20) d.hechos.shift(); };
+  function po(){ try{ return typeof window.politica155==='function'?window.politica155():null; }catch(e){ return null; } }
+  function afinDe(id){ const p=po(); return p&&p.part&&p.part[id]?(p.part[id].afin||0):0; }
+  function afin(id,dl){ try{ const p=po(); if(!p) return; p.part=p.part||{}; const q=p.part[id]||(p.part[id]={afin:0,credito:0}); q.afin=cl((q.afin||0)+dl,0,100); if(dl>0) q.credito=(q.credito||0)+dl; }catch(e){} }
+  function partidoDe(){ const d=D(); if(d.partido) return d.partido; const l=afinDe('liberal'), c=afinDe('conservador'); if(Math.max(l,c)<15) return null; return l>c?'liberal':'conservador'; }
+  const gobPartido=a=>a<=1953?'conservador':null;
+
+  /* ==================== EL RIESGO ==================== */
+  function riesgo(){ const d=D(), a=A(), amb=BASE[a]||0, p=partidoDe(), g=gobPartido(a); let m=1;
+    if(g){ if(p===g) m=.7; else if(p) m=1.45; else m=1.1; }
+    m*=1-.2*Math.min(2,d.guardia||0); if(d.protAnio===a) m*=.8; return Math.round(cl(amb*m,0,100)); }
+  function favorGob(txt){ try{ if(typeof window.favor179==='function') window.favor179('frenar',{txt}); }catch(e){} }
+
+  /* ==================== LOS EPISODIOS ==================== */
+  function evCuadrilla(){ const d=D(), v=valF(), vac=Math.max(8,v*.03), gua=Math.max(15,v*.05), quien=pick(['una cuadrilla de "pájaros"','una banda de "chusmeros"','unos hombres armados del directorio del pueblo']);
+    return {p:9,c:()=>ACT()&&expo(),t:()=>'<b>'+E(quien).replace(/^./,x=>x.toUpperCase())+' llegó a tu finca.</b> Piden "vacuna": plata, comida y que los peones dejen de hablar con los del otro bando. Se oyen tiros en la vereda de al lado.',
+      o:[{t:'Pagar la vacuna ('+fm(vac)+')',f:()=>{ pagar(vac); d.vacunas++; hecho('Pagó la vacuna a una cuadrilla'); return 'Pagaste. Se fueron, y sabes que vendrán por más.'; }},
+         {t:'Armar guardia ('+fm(gua)+')',f:()=>{ pagar(gua); d.guardia=Math.min(3,(d.guardia||0)+1); hecho('Armó una guardia en la finca'); if(chance(.4)){ fincas().forEach(b=>{ b.valor*=.92; }); agros().forEach(e=>{ e.moral=cl((e.moral||50)-4,0,100); }); return 'La guardia los espantó, pero volvieron de noche y quemaron un beneficiadero. Las fincas valen menos.'; } return 'La guardia los espantó. En la vereda ya saben que en tu finca no se entra gratis.'; }},
+         {t:'Pedir protección al Ejército',f:()=>{ favorGob('una patrulla del Ejército para la finca'); if(chance(.6)){ d.protAnio=A(); return 'Mandaron una patrulla. Quedaste anotado en el cuartel.'; } return 'La patrulla llegó cuando ya se habían ido. Quedaste debiendo el favor igual.'; }},
+         {t:'No hacer nada',f:()=>{ if(chance(.5)){ fincas().forEach(b=>{ b.valor*=.88; }); agros().forEach(e=>{ e.ingresos*=.92; }); hecho('Le quemaron la cosecha'); return 'Se llevaron las bestias y quemaron la cosecha. Perdiste buena parte del año.'; } return 'Esta vez se fueron sin hacer daño. No cuentes con que se repita.'; }}]}; }
+  function evPeones(){ const d=D(), nomOtro=partidoDe()==='liberal'?'conservadores':'liberales', c=Math.max(8,valF()*.015);
+    return {p:9,c:()=>ACT()&&(expo()||companias().length>0),t:()=>'<b>En tu propiedad trabajan peones "'+nomOtro+'" y el directorio del pueblo los tiene marcados.</b> Si siguen aquí, vendrán por ellos y por ti.',
+      o:[{t:'Esconderlos y protegerlos ('+fm(c)+')',f:()=>{ pagar(c); prest(2,'protegió a sus peones en la Violencia'); afin(nomOtro==='liberales'?'liberal':'conservador',4); hecho('Escondió a sus peones'); if(chance(.3)){ d.vacunas++; return 'Los escondiste, pero el directorio te mandó el recado: te va a salir caro.'; } return 'Pasaron la noche en el cafetal. Cuando se calmó, volvieron a trabajar y no lo olvidan.'; }},
+         {t:'Despedirlos para no meterte en problemas',f:()=>{ prest(-2,'despidió a sus peones por su partido'); companias().forEach(e=>{ e.empleados=Math.max(1,Math.round((e.empleados||4)*.97)); }); hecho('Despidió peones por su partido'); return 'Se fueron esa noche. Alguien dijo que al otro lado del río los mataron.'; }},
+         {t:'Mirar para otro lado',f:()=>{ if(chance(.4)){ prest(-1,'no protegió a sus peones'); return 'Mataron a dos peones en el camino. En la finca nadie te volvió a mirar igual.'; } return 'Esa vez no pasó nada. La próxima, quién sabe.'; }}]}; }
+  function evDesplazados(){ const d=D(), c=Math.max(6,valF()*.012);
+    return {p:9,c:()=>ACT(),t:()=>'<b>Llegan familias desplazadas:</b> huyen de una vereda quemada y piden dónde quedarse y trabajar. Son manos que se necesitan, y bocas que alimentar.',
+      o:[{t:'Acogerlas como aparceros ('+fm(c)+')',f:()=>{ pagar(c); d.acogidos++; prest(2,'acogió familias desplazadas'); companias().forEach(e=>{ e.empleados=Math.round((e.empleados||4)*1.04)+1; }); fincas().forEach(b=>{ b.valor*=1.03; }); hecho('Acogió familias desplazadas'); if(chance(.25)){ d.vacunas++; return 'Las acogiste. Una cuadrilla los siguió hasta tu finca y ahora te vigilan.'; } return 'Se instalaron en el lote de arriba. Hay brazos para la cosecha y una deuda de gratitud.'; }},
+         {t:'Ayudarles a seguir su camino ('+fm(c*.4)+')',f:()=>{ pagar(c*.4); prest(1,'ayudó a unos desplazados'); return 'Les diste plata y un mapa. Siguieron hacia la ciudad.'; }},
+         {t:'Cerrar el portón',f:()=>{ prest(-2,'cerró el portón a los desplazados'); return 'Cerraste el portón. En el pueblo se acuerdan de quién lo hizo.'; }}]}; }
+  function evTierras(){ const d=D(), x=Math.max(15,valF()*.15);
+    return {p:9,c:()=>ACT()&&fincas().length>0,t:()=>'<b>Un vecino se va a la ciudad y quiere vender su finca por lo que le den.</b> Tiene miedo y no volverá. La tierra está casi regalada: vale más de lo que te piden.',
+      o:[{t:'Comprarla a precio de miedo ('+fm(x)+')',f:()=>{ pagar(x); d.compradas++; fincas().slice(0,1).forEach(b=>{ b.valor+=x*1.9; }); prest(-4,'compró tierras a precio de miedo'); hecho('Compró tierra a precio de miedo'); return 'Compraste por '+fm(x)+' lo que valía casi el doble. Hay quien lo llama oportunismo.'; }},
+         {t:'Pagar un precio justo ('+fm(x*1.7)+')',f:()=>{ pagar(x*1.7); fincas().slice(0,1).forEach(b=>{ b.valor+=x*1.7*1.15; }); prest(1,'pagó un precio justo en plena Violencia'); return 'Pagaste lo que valía. El vecino se fue tranquilo y tú sumaste tierra.'; }},
+         {t:'No comprar',f:()=>'Dejaste pasar la oferta. Alguien más la compró esa tarde.'}]}; }
+  function evDirectorio(){ const d=D();
+    return {p:9,c:()=>ACT()&&!d.partido&&(expo()||companias().length>0),t:()=>'<b>El gamonal del pueblo te cita al directorio.</b> Dice que "en estos tiempos hay que saber de qué lado se está", y que la finca y el comercio los cuida quien se declara.',
+      o:[{t:'Declararte conservador',f:()=>{ d.partido='conservador'; afin('conservador',12); afin('liberal',-6); hecho('Se declaró conservador'); return 'Pasaste por el directorio. Con el Gobierno de tu lado, las cosas se calman un poco; en los pueblos liberales ya no te saludan.'; }},
+         {t:'Declararte liberal',f:()=>{ d.partido='liberal'; afin('liberal',12); afin('conservador',-6); hecho('Se declaró liberal'); return 'Te declaraste liberal. Los tuyos te abren las puertas, y los del Gobierno te anotan en la lista de los que hay que vigilar.'; }},
+         {t:'Pagar para quedar al margen ('+fm(Math.max(10,valF()*.02))+')',f:()=>{ pagar(Math.max(10,valF()*.02)); d.vacunas++; return 'Pagaste la cuota y te dejaron sin bandera. Es caro, pero conservas tu libertad.'; }}]}; }
+  function evMigrantes(){ const c=Math.max(8,pat()*.004);
+    return {p:9,c:()=>ACT()&&!expo(),t:()=>'<b>La Violencia llega a la ciudad como gente.</b> Miles de campesinos desplazados se ubican en los barrios del borde y buscan trabajo por lo que sea. Las discusiones de café entre liberales y conservadores se vuelven peligrosas.',
+      o:[{t:'Contratar mano de obra barata',f:()=>{ companias().forEach(e=>{ e.empleados=Math.round((e.empleados||4)*1.05)+1; e.costos=(e.costos||0)*.99; }); prest(-1,'contrató desplazados a salarios de hambre'); return 'Contrataste a los que llegaron. Hay brazos baratos, y quejas en los sindicatos.'; }},
+         {t:'Apoyar los albergues ('+fm(c)+')',f:()=>{ pagar(c); prest(2,'apoyó los albergues de desplazados'); return 'Pusiste plata en los albergues de la parroquia. Te lo agradecen en los barrios.'; }},
+         {t:'No meterte',f:()=>'Dejaste que otros se encarguen. El país no se arregla desde un escritorio.'}]}; }
+  function evAmnistia(){ const d=D();
+    return {p:10,c:()=>ACT(),t:()=>'<b>El general Rojas Pinilla ofrece una amnistía a los guerrilleros liberales de los Llanos y a las cuadrillas.</b> Miles entregan las armas. En los campos hay quien lo celebra y quien no se fía: los que se desmovilizan buscan dónde trabajar.',
+      o:[{t:'Contratar a unos desmovilizados como vigilantes',f:()=>{ d.guardia=Math.min(3,(d.guardia||0)+1); prest(-1,'contrató ex combatientes'); hecho('Contrató desmovilizados'); return 'Pusiste a unos desmovilizados de vigilantes. Conocen el monte, pero no todos duermen tranquilos.'; }},
+         {t:'Apoyar la amnistía en la región ('+fm(Math.max(10,valF()*.02))+')',f:()=>{ pagar(Math.max(10,valF()*.02)); prest(2,'apoyó la amnistía de 1953'); d.protAnio=A(); hecho('Apoyó la amnistía'); return 'Pusiste plata en el comité regional. En la vereda bajaron los tiros y ganaste respeto.'; }},
+         {t:'Desconfiar y esperar',f:()=>'No te metiste. Si la paz dura, otros se llevarán el crédito; si no, estabas advertido.'}]}; }
+  function evFrente(){ const d=D(), tally=[]; if(d.acogidos>0) tally.push('acogiste a '+d.acogidos+' grupo'+(d.acogidos>1?'s':'')+' de familias desplazadas'); if(d.compradas>0) tally.push('compraste '+d.compradas+' finca'+(d.compradas>1?'s':'')+' a precio de miedo'); if(d.vacunas>0) tally.push('pagaste '+d.vacunas+' vez'+(d.vacunas>1?'ces':'')+' la "vacuna"'); if(d.guardia>0) tally.push('armaste guardia'); tally.push('pagaste en total '+fm(d.pagado)+' por protección, ayudas y refugio');
+    return {p:10,c:()=>true,t:()=>'<b>El Frente Nacional cierra diez años de Violencia.</b> Liberales y conservadores se reparten el poder y las armas bajan, pero deja cientos de miles de muertos y millones de desplazados. En tu zona: '+tally.join('; ')+'.',
+      o:[{t:'Desmontar la guardia y reconstruir',f:()=>{ d.guardia=0; fincas().forEach(b=>{ b.valor*=1.08; }); agros().forEach(e=>{ e.moral=cl((e.moral||50)+6,0,100); }); finish(); if(d.acogidos>0) prest(3,'acogió desplazados en la Violencia'); if(d.compradas>0){ prest(-3,'se quedó con las tierras de la Violencia'); try{ S.p.redes=cl((S.p.redes||0)-3,0,100); }catch(e){} } return 'Quitaste las cercas y las armas. Las fincas se recuperan con el tiempo y en la vereda se hace memoria de cada quien.'; }},
+         {t:'Dejar la guardia por si acaso',f:()=>{ finish(); return 'Dejaste los vigilantes: "la paz de los políticos no es la de los campos". Cuesta, pero nadie se acerca.'; }}]}; }
+  function finish(){ const d=D(); d.cerrada=true; hecho('Cerró el arco de La Violencia'); log('<b>Terminó La Violencia en tu zona.</b> Quedan los muertos, los desplazados y lo que cada quien hizo en esos diez años.','hito'); }
+
+  /* ==================== EL AÑO ==================== */
+  function anual185(){ if(!S||!S.p||S.muerto||!ADU()) return; const d=D(), a=A(); if(!d) return; if(a>1958){ if(d.iniciada&&!d.cerrada) finish(); return; } if(!ACT()) return;
+    if(!d.iniciada){ d.iniciada=true; log('<b>Empieza La Violencia.</b> Desde el 9 de abril de 1948 el país se parte en dos bandos, y la violencia política llega a las veredas, los pueblos y las ciudades.','hito'); }
+    d.nivel=riesgo(); d.protAnio=d.protAnio===a?d.protAnio:0; if(a===1958){ cola.push(evFrente()); return; }
+    if(d.guardia>0){ const c=Math.max(5,valF()*.008*d.guardia); const x=Math.min(Math.max(0,S.efectivo),c); S.efectivo-=x; d.pagado+=x; }
+    if(expo()&&d.nivel>35){ const k=d.nivel/100*.03; fincas().forEach(b=>{ b.valor*=1-k; }); agros().forEach(e=>{ e.ingresos*=1-k; e.moral=cl((e.moral||50)-d.nivel/60,0,100); }); }
+    if(a===1953){ cola.push(evAmnistia()); return; }
+    if(!chance(cl(d.nivel/100*1.1,.12,.85))) return;
+    const pool=expo()?[evCuadrilla,evPeones,evDesplazados,evTierras,evDirectorio,evCuadrilla]:[evMigrantes,evDirectorio,evPeones];
+    const ev=pick(pool)(); if(ev&&ev.c()) cola.push(ev); }
+
+  /* ==================== LA PANTALLA ==================== */
+  function escenaZona185(){ const d=D(); if(!ACT()){ escena({rubro:'La Violencia',titulo:'La Violencia en tu zona',cuerpo:'No hay nada en curso.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const p=partidoDe(), ex=expo(), reab=()=>{ cerrarModal(); render(); escenaZona185(); }, v=valF(), ops=[];
+    const gua=Math.max(15,v*.05);
+    if(ex) ops.push({t:'Reforzar la guardia · '+fm(gua),cat:'riesgo',d:'Baja tu riesgo cerca de 20% por nivel (hoy '+d.guardia+' de 3). Cuesta mantenerla cada año.',dis:d.guardia>=3?'Ya tienes la guardia al máximo':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(gua); d.guardia++; hecho('Reforzó la guardia'); log('Reforzaste la guardia de tus fincas por '+fm(gua)+'.'); reab(); }});
+    if(!p||!d.partido) ['conservador','liberal'].forEach(pt=>{ if(d.partido) return; ops.push({t:'Declararte '+pt,cat:'legado',d:'Con el Gobierno'+(gobPartido(A())===pt?' de tu partido, bajas tu exposición.':' del otro lado, te expones más.')+' Te cierra puertas en el otro bando.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; d.partido=pt; afin(pt,12); afin(pt==='liberal'?'conservador':'liberal',-6); hecho('Se declaró '+pt); log('Te declaraste <b>'+pt+'</b> ante el directorio de tu zona.'); reab(); }}); });
+    ops.push({t:'Pedir protección al Gobierno',cat:'legado',d:'Una patrulla o un oficial amigo. Es un favor que después se cobra.',dis:d.protAnio===A()?'Ya tienes protección este año':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; favorGob('protección del Ejército para tu zona'); d.protAnio=A(); hecho('Pidió protección al Gobierno'); log('Pediste protección al Gobierno. Esta vez te la dieron.'); reab(); }});
+    const c=Math.max(6,v*.012); ops.push({t:'Acoger familias desplazadas · '+fm(c),cat:'familia',d:'Más brazos para la cosecha y prestigio; a veces la cuadrilla las sigue.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(c); d.acogidos++; prest(2,'acogió familias desplazadas'); companias().forEach(e=>{ e.empleados=Math.round((e.empleados||4)*1.03)+1; }); hecho('Acogió desplazados'); log('Acogiste a unas familias desplazadas en tu zona.','bien'); reab(); }});
+    if(ex&&fincas().length) ops.push({t:'Vender las fincas con descuento y salir',cat:'capital',d:'Recibes cerca del 55% de lo que valen y te vas a la ciudad. Sales de la zona de riesgo.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; let x=0; fincas().forEach(b=>{ x+=Math.max(0,(b.valor||0)-(b.hipoteca||0))*.55; S.bienes=S.bienes.filter(y=>y.uid!==b.uid); if(S.hogar&&S.hogar.vivienda===b.uid) S.hogar.vivienda=null; }); S.efectivo+=x; hecho('Vendió las fincas y salió'); log('Vendiste tus fincas con descuento por '+fm(x)+' y te fuiste de la zona.','mal'); cerrarModal(); render(); }});
+    escena({rubro:'1948–1958',titulo:'La Violencia en tu zona',ancho:true,cerrable:true,clase:'pol155',
+      cuerpo:'El país está partido entre liberales y conservadores. '+(A()<=1953?'Gobierna el partido conservador. ':A()<=1957?'Gobierna el general Rojas Pinilla. ':'La Junta Militar prepara el Frente Nacional. ')+(ex?'Tus fincas y compañías agrícolas están en la zona de riesgo.':'No tienes tierra en el campo, pero la Violencia llega a la ciudad con los desplazados.'),
+      html:'<div class="k"><div><b>'+(BASE[A()]||0)+'</b><span>ambiente del país</span></div><div><b>'+riesgo()+'</b><span>tu riesgo</span></div><div><b>'+(p?E(p):'ninguno')+'</b><span>tu partido</span></div><div><b>'+d.guardia+' / 3</b><span>guardia</span></div></div><div class="apunte">Has acogido '+d.acogidos+' grupo(s) de familias, pagado la "vacuna" '+d.vacunas+' vez(ces) y comprado '+d.compradas+' finca(s) a precio de miedo. Total pagado: '+fm(d.pagado)+'.</div>',opciones:ops}); }
+
+  /* ==================== ENGANCHES ==================== */
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA185_ACC) return; window.__SA185_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACT()&&D().iniciada&&ADU()&&!L.some(x=>x.t==='La Violencia en tu zona')) L.push({t:'La Violencia en tu zona',cat:'riesgo',d:'Ambiente '+(BASE[A()]||0)+', tu riesgo '+riesgo()+'. Guardia, partido, protección, desplazados.',mov:0,modal:true,run:()=>escenaZona185()}); }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v185=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA185_CAT) return; window.__SA185_CAT=true; window.catDe=function(t){ if(t==='La Violencia en tu zona') return 'riesgo'; return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA185_PASO) return; window.__SA185_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual185(); }catch(e){ console.error(e); } return r; }; }
+  function init185(){ wrapAcciones(); wrapCat(); wrapPaso();
+    Object.assign(window,{escenaViolencia185:escenaZona185,riesgoViolencia185:riesgo,estadoViolencia185:D,anualViolencia185:anual185,evCuadrilla185:evCuadrilla,evPeones185:evPeones,evDesplazados185:evDesplazados,evTierras185:evTierras,evDirectorio185:evDirectorio,evMigrantes185:evMigrantes,evAmnistia185:evAmnistia,evFrente185:evFrente,VIOLENCIA_BASE_185:BASE}); }
+  init185(); setTimeout(init185,40); setTimeout(init185,220); setTimeout(init185,650); setTimeout(init185,950);
+  window.__SA185={version:V185};
 })();
 </script>
 
