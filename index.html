@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v179</div>
+<div class="version-badge" id="versionBadge">v181</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2135,8 +2135,7 @@ const HISTORIA=[
      return 'El que tenga café sembrado está haciendo el año de su vida. Tú no.'; }},
   {anio:1982,t:'Se cae el sistema financiero: el gobierno interviene bancos y la plata se vuelve cara.',
    f:()=>{ S.macro.tasa=clamp(S.macro.tasa+.10,0,.45); S.macro.ciclo=-.10;
-     if(S.emp&&S.emp.deuda>S.emp.ingresos*.4){ S.emp.deuda*=1.14; return 'Te refinanciaron la deuda a lo que quisieron: ahora debes '+fmt(S.emp.deuda)+'.'; }
-     return 'El crédito se cerró para todo el mundo. El que no debía, respira.'; }},
+     return 'El crédito se cerró para todo el mundo. El que no debía, respira; el que debía mucho lo va a sentir en cada una de sus compañías.'; }},
   {anio:1991,t:'Apertura económica: bajan los aranceles y entra competencia de afuera por todos lados.',
    f:()=>{ S.macro.ciclo=-.04;
      if(S.emp){ const s=sectorDe(S.emp);
@@ -2148,10 +2147,9 @@ const HISTORIA=[
   {anio:1999,t:'La peor crisis del siglo: se desploma la construcción, quiebran empresas y el desempleo llega al 20%.',
    f:()=>{ S.macro.ciclo=-.17; S.macro.tasa=clamp(S.macro.tasa+.08,0,.45);
      (S.bienes||[]).forEach(b=>{ if(b.clase!=='finca') b.valor*=.72; });
-     if(S.emp){ S.emp.ingresos*=.80; S.emp.aniosMalos++; }
-     return 'La finca raíz perdió casi un tercio de su valor y el negocio se frenó en seco.'; }},
+     return 'La finca raíz perdió casi un tercio de su valor y los negocios se frenaron en seco: las compañías más endeudadas lo van a pagar.'; }},
   {anio:2008,t:'Crisis mundial: se cierran los mercados de afuera y el crédito se encarece.',
-   f:()=>{ S.macro.ciclo=-.09; if(S.emp&&S.emp.publica) S.emp.primaMercado=.82;
+   f:()=>{ S.macro.ciclo=-.09; companias().forEach(e=>{ if(e.publica) e.primaMercado=.82; });
      return 'Los que dependían de exportar la están viendo dura.'; }},
   {anio:2014,t:'Se desploma el precio del petróleo: el dólar se dispara y el país descubre que vivía de eso.',
    f:()=>{ S.macro.usd*=1.55; S.macro.ciclo=-.08;
@@ -6911,7 +6909,7 @@ function listaAcciones(){
       run:()=>escenaMatrimonioEnCasa()});
   if(!S.familia.pareja) A.push({t:'Buscar un buen matrimonio', d:'Las familias que reciben a una casa '+nivelCasa().n+'. Dote, alianza y apellido.', mov:1, modal:true,
     run:()=>escenaCortejo()});
-  if(S.familia.pareja&&S.familia.pareja.casados) A.push({t:'Divorciarte', d:'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.', mov:1, modal:true,
+  if(S.familia.pareja&&S.familia.pareja.casados) A.push({t:(typeof window.tituloFin181==='function'?window.tituloFin181():'Divorciarte'), d:(typeof window.descFin181==='function'?window.descFin181():'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.'), mov:1, modal:true,
     run:()=>escenaDivorcio()});
   if(S.p.edad>=25&&S.familia.hijos.length<7)
     A.push({t:'Adoptar un hijo', d:'Por el ICBF, con su proceso y su espera, o criando a un niño de la familia.', mov:1, modal:true,
@@ -7206,9 +7204,11 @@ function pasarAnio(){
     S.familia.pareja.paciencia=clamp((isFinite(S.familia.pareja.paciencia)?S.familia.pareja.paciencia:60)-desatendida+ri(0,6),0,100);
     if(S.familia.pareja.paciencia<12&&S.familia.pareja.casados&&!S.familia.pareja.divorcioEnCurso&&chance(.45)){
       const nom=S.familia.pareja.nombre;
+      if(typeof window.iniciarFinMatrimonio181==='function'&&window.iniciarFinMatrimonio181(nom)){ /* v181: antes de 1991 no hay divorcio: pide la anulación */ }
+      else {
       S.familia.pareja.divorcioEnCurso=true;
       iniciarCompromiso({titulo:'Proceso de divorcio con '+nom,restan:2,mov:1,cerrar:()=>ejecutarDivorcio()});
-      log('<b>'+esc(nom)+'</b> inició una separación formal. El divorcio tardará dos años y ocupará una movida por año.','mal');
+      log('<b>'+esc(nom)+'</b> inició una separación formal. El divorcio tardará dos años y ocupará una movida por año.','mal'); }
     } else if(S.familia.pareja.paciencia<12&&!S.familia.pareja.casados&&chance(.45)){
       const nom=S.familia.pareja.nombre;
       log('La relación con <b>'+esc(nom)+'</b> terminó antes del matrimonio.','mal');
@@ -7324,6 +7324,7 @@ function correrEmpresa(res,cual){
   if(e.hotel175&&typeof window.anualHoteles175==='function'){ try{ window.anualHoteles175(e,res); }catch(x){ console.error(x); } }   // v175: el resultado sale de los hoteles
   else if(e.red176&&typeof window.anualRed176==='function'){ try{ window.anualRed176(e,res); }catch(x){ console.error(x); } }   // v176: el resultado sale de las unidades de cada negocio
   if(typeof window.efectoPoder179==='function'){ try{ window.efectoPoder179(e,res); }catch(x){ console.error(x); } }   // v179: clausuras y compromisos con el poder
+  if(typeof window.efectoCrisis180==='function'){ try{ window.efectoCrisis180(e,res); }catch(x){ console.error(x); } }   // v180: las crisis golpean a cada compañía según lo frágil que esté
   e.innovacion=clamp(e.innovacion-rnd(1.5,4),0,100);
   e.marca=clamp(e.marca-rnd(1,3),0,100);
   e.eficiencia=clamp(e.eficiencia-rnd(.5,2.5),0,100);
@@ -8190,7 +8191,7 @@ function catDe(t){
   if(/mausoleo|nichos|crónica de la casa/.test(t)) return 'legado';
   if(/Constituir una sociedad|Nombrar gerente|reorganización|Mover capital|Armar el holding|Fusionar/.test(t)) return 'capital';
   if(/Fundar otra compañía|Sentarte en la presidencia|Nombrar presidente/.test(t)) return 'compania';
-  if(/conocer gente|Casarte|hijo|Vida sentimental|amante|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
+  if(/conocer gente|Casarte|hijo|Vida sentimental|amante|formación de|Meter a|Retirarte|buen matrimonio|Divorciarte|anulación del matrimonio|testamento|Casar a|Atender a la familia|Adoptar|dentro de la familia/.test(t)) return 'familia';
   if(/Cuidarte|Vacaciones/.test(t)) return 'salud';
   if(/palancas/.test(t)) return 'riesgo';
   if(/Obra social/.test(t)) return 'legado';
@@ -9333,7 +9334,7 @@ function modalMatrimonio(){
   escena({rubro:'Régimen de bienes',titulo:'Casarte con '+esc(S.familia.pareja.nombre),
     cuerpo:'Lo que firmes decide qué pasa con el patrimonio si esto se rompe.',
     opciones:[
-      {t:'Sociedad conyugal, sin más papeles',cat:'familia',d:'Más confianza y paciencia. En un divorcio se va cerca de un tercio de todo.',
+      {t:'Sociedad conyugal, sin más papeles',cat:'familia',d:'Más confianza y paciencia. Si el matrimonio termina, se va cerca de un tercio de todo.',
        run:()=>{ const pa=S.familia.pareja; pa.casados=true; pa.paciencia=clamp(pa.paciencia+20,0,100);
          S.p.felicidad+=12; log('Te casaste con <b>'+esc(pa.nombre)+'</b>.','hito'); hito('Se casó con '+pa.nombre); S.mov--; setTimeout(()=>escenaLunaDeMiel(pa),0); }},
       {t:'Firmar capitulaciones',cat:'familia',d:'Protege la fortuna y la compañía. Se nota, y se cobra.',
@@ -19415,7 +19416,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      d:'Casarte (con quién, con qué régimen y con qué boda), conocer a alguien, tus capitulaciones o un divorcio: todo en un solo lugar.',
      miembros:[['Casarse','Casarte'],['Casarse','Buscar un buen matrimonio'],['Casarse','Casarse dentro de la familia'],
        ['Conocer a alguien','Salir a conocer gente'],['Conocer a alguien','Buscar intimidad'],
-       ['Tu matrimonio','Vida sentimental y relaciones'],['Tu matrimonio','Negociar capitulaciones matrimoniales'],['Tu matrimonio','Divorciarte']]},
+       ['Tu matrimonio','Vida sentimental y relaciones'],['Tu matrimonio','Negociar capitulaciones matrimoniales'],['Tu matrimonio','Divorciarte'],['Tu matrimonio','Pedir la anulación del matrimonio']]},
     {id:'hijos',t:'Casar a un hijo',cat:'familia',
      d:'Elegir a cuál de tus hijos casar y con qué casa: dote, contactos y prestigio para el apellido.',
      prefijos:[['Tus hijos','Casar a ']]},
@@ -24163,7 +24164,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const plan=()=>(S.familia&&S.familia.plan108)||'natural';
   const compatTxt=c=>c>=75?'se entienden sin hablar':c>=55?'se llevan bien':c>=40?'hay que ponerle trabajo':'son agua y aceite';
   const rasgoTxt=q=>{ const R=window.RASGOS_108||{}; const r=R[q.rasgo108]; return r?(q.sexo==='m'?r.na:r.n):''; };
-  const SACADAS=['Negociar capitulaciones matrimoniales','Divorciarte'];
+  const SACADAS=['Negociar capitulaciones matrimoniales','Divorciarte','Pedir la anulación del matrimonio'];
   function accionCruda(t){
     try{ window.__sa113SinFiltro=true; const A=typeof window.accionesCrudas91==='function'?window.accionesCrudas91():listaAcciones(); return (A||[]).find(a=>a.t===t); }
     catch(e){ return null; } finally{ window.__sa113SinFiltro=false; }
@@ -24206,7 +24207,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     } else {
       if(!q.separacionBienes&&!q.divorcioEnCurso){ const a=accionCruda('Negociar capitulaciones matrimoniales');
         op.push({t:'Capitulaciones matrimoniales',cat:'capital',d:'Separar bienes protege tu patrimonio si el matrimonio termina. '+esc(P1(q.nombre))+' lo va a leer como desconfianza.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); if(a) a.run(); else { S.mov--; q.separacionBienes=true; q.paciencia=clamp((q.paciencia||50)-18,0,100); log('Firmaron capitulaciones. Quedó un silencio largo.','mal'); render(); } }}); }
-      if(typeof escenaDivorcio==='function') op.push({t:'Divorciarte',cat:'riesgo',d:'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.',dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaDivorcio(); }});
+      if(typeof escenaDivorcio==='function') op.push({t:(typeof window.tituloFin181==='function'?window.tituloFin181():'Divorciarte'),cat:'riesgo',d:(typeof window.descFin181==='function'?window.descFin181():'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.'),dis:sinMov(),cerrar:false,run:()=>{ cerrarModal(); escenaDivorcio(); }});
     }
     escena({rubro:'Tu vida',titulo:q.casados?(q.sexo==='m'?'Tu esposa':'Tu esposo'):'Tu pareja',ancho:true,cerrable:true,cuerpo:'Una relación se cuida o se gasta. Si la descuidas varios años, se acaba.',html,opciones:op});
   }
@@ -24955,6 +24956,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const oa=()=>S&&S.p&&S.p.sexo==='m'?'a':'o';
   const HITOS=[   // [patrón, ilustración, (m)=>[título, texto], años mínimos entre láminas]
     [/^Se divorció de (.+)/,'divorcio',m=>['Te divorciaste de '+m[1].split(' ')[0],'Se acabó el matrimonio. Ahora toca repartir lo que había.']],
+    [/^Anuló su matrimonio con (.+)/,'divorcio',m=>['Anulaste tu matrimonio con '+m[1].split(' ')[0],'El tribunal eclesiástico concedió la nulidad. Ahora toca repartir lo que había.']],
     [/^Enviudó de (.+)/,'viudez',m=>['Murió '+m[1],'Quedaste viud'+oa()+'. La casa está de luto.']],
     [/^Se mudó a (.+?) por (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Por tu nuevo cargo: '+m[2]+'.'],2],
     [/^Se instaló en (.+?) · (.+)$/,'mudanza',m=>['Te mudaste a '+m[1],'Nueva casa en '+m[2]+'.'],2],
@@ -33210,9 +33212,14 @@ install();setTimeout(install,1200);
 
   /* ==================== LOS REGÍMENES ==================== */
   const REG={
-    rojas:{id:'rojas',desde:1953,hasta:1957,nombre:'la dictadura del general Rojas Pinilla',corto:'el régimen',jefe:'el general Rojas Pinilla',rig:1.15,gob:'populista'}
+    rojas:{id:'rojas',modo:'dictadura',desde:1953,hasta:1957,nombre:'la dictadura del general Rojas Pinilla',corto:'el régimen',jefe:'el general Rojas Pinilla',presNombre:'el general Gustavo Rojas Pinilla',rig:1.15,gob:'populista',
+      agentes:'Agentes del régimen',orden:'Una orden del régimen manda cerrarla',por:'orden del régimen',
+      caida:{nombre:'la Junta Militar',gob:'tecnocratico',txt:'Una Junta Militar gobierna hasta las elecciones del Frente Nacional.'}}
   };
-  const regDe=a=>Object.keys(REG).map(k=>REG[k]).find(r=>a>=r.desde&&a<=r.hasta)||null;
+  /* una dictadura reemplaza al gobierno elegido; un estado de excepción lo deja y lo endurece */
+  const regDe=a=>Object.keys(REG).map(k=>REG[k]).find(r=>r.modo!=='excepcion'&&a>=r.desde&&a<=r.hasta)||null;
+  const excDe=a=>Object.keys(REG).map(k=>REG[k]).find(r=>r.modo==='excepcion'&&a>=r.desde&&a<=r.hasta)||null;
+  const excActiva=()=>{ try{ return (typeof S!=='undefined'&&S&&isFinite(S.anio)&&!regDe(S.anio))?excDe(S.anio):null; }catch(e){ return null; } };
   const regActivo=()=>{ try{ return (typeof S!=='undefined'&&S&&isFinite(S.anio))?regDe(S.anio):null; }catch(e){ return null; } };
 
   /* ==================== EL ESTADO ==================== */
@@ -33222,9 +33229,10 @@ install();setTimeout(install,1200);
   function nuevaRel(tipo,id,extra){ return Object.assign({id,tipo,postura:'neutral',manual:false,deuda:0,mora:0,presion:0,opoSecreta:0,opo:0,recibidos:0,hundido:0,pagos:0,negaciones:0,fav:[],desde:A(),cobroAnio:0,paro:false},extra||{}); }
   const relReg=r=>{ const d=D(); return d.reg[r.id]||(d.reg[r.id]=nuevaRel('regimen',r.id,{nombre:r.nombre,quien:r.jefe,hasta:r.hasta,desde:r.desde})); };
   const quien=rel=>rel.tipo==='regimen'?'el régimen':(rel.quien||'el gobierno');
+  function ordenDe(rel){ const r=rel.tipo==='regimen'?REG[rel.id]:excActiva(); const d={agentes:rel.tipo==='regimen'?'Agentes del régimen':'Funcionarios del gobierno',orden:rel.tipo==='regimen'?'Una orden del régimen manda cerrarla':'Una orden de las autoridades manda cerrarla',por:rel.tipo==='regimen'?'orden del régimen':'orden de las autoridades'}; return Object.assign(d,r?{agentes:r.agentes||d.agentes,orden:r.orden||d.orden,por:r.por||d.por}:{}); }
   function rigDe(rel){ if(rel.tipo==='regimen'){ const r=REG[rel.id]; return r?r.rig:1; }
     const k=rel.gobId||(S.gobierno&&S.gobierno.id); const m={conservador:.7,liberal:.6,tecnocratico:.35,reformista:.65,populista:.9}[k]||.6;
-    return m*(A()<1991?1:.75)*(A()>=1958&&A()<=1974?.85:1); }
+    const ex=excActiva(); return m*(A()<1991?1:.75)*(A()>=1958&&A()<=1974?.85:1)*(ex?(ex.rig||1.3):1); }
   const vigDe=rel=>rel.presion>=75?3:rel.presion>=50?2:rel.presion>=25?1:0;
   const VIGN=['Nadie te molesta','Te vigilan','Te hostigan','Te pueden cerrar'];
   const POSN=r=>({aliado:r.tipo==='regimen'?'Con el régimen':'Con el gobierno',neutral:'A distancia',opositor:'En contra'});
@@ -33246,14 +33254,15 @@ install();setTimeout(install,1200);
 
   /* ==================== COMIENZA Y TERMINA UN RÉGIMEN ==================== */
   function iniciarRegimen(rg){ try{ S.gobierno={id:rg.gob,desde:rg.desde,apoyado:false,regimen:rg.id}; S.tension=cl((S.tension||35)+6,0,100);
-    const p=P155(); if(p){ p.camp=null; p.pres={id:'regimen:'+rg.id,nombre:'el general Gustavo Rojas Pinilla',sexo:'h',partido:'regimen',gob:rg.gob,integ:4,cumple:8,desde:rg.desde,hasta:rg.hasta,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true}; }
+    const p=P155(); if(p){ p.camp=null; p.pres={id:'regimen:'+rg.id,nombre:rg.presNombre||rg.jefe||'el gobierno',sexo:'h',partido:'regimen',gob:rg.gob,integ:4,cumple:8,desde:rg.desde,hasta:rg.hasta,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true}; }
   }catch(e){ console.error(e); } }
   function cerrarRegimen(rg){ try{ const d=D(), rel=relReg(rg), sig=A()+1;
     rel.fin=true; const a={id:rg.id,postura:rel.postura,recibidos:rel.recibidos,hundido:rel.hundido,deuda:rel.deuda,opo:rel.opo,opoSecreta:rel.opoSecreta,paro:!!rel.paro,hecho:false};
     S._ajuste179=a;
-    S.gobierno={id:'tecnocratico',desde:rg.hasta-3,apoyado:false}; S.tension=cl((S.tension||35)-6,0,100);   // una Junta Militar gobierna hasta que se vote
-    log('<b>Cayó '+rg.nombre+'.</b> Una Junta Militar gobierna hasta las elecciones del Frente Nacional.','hito');
-    const p=P155(); if(p){ p.camp=null; p.contratos=[]; p.decretos=[]; p.pres={id:'junta:'+rg.id,nombre:'la Junta Militar',sexo:'h',partido:'regimen',gob:'tecnocratico',integ:6,cumple:6,desde:rg.hasta,hasta:rg.hasta+1,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true};
+    const ca=rg.caida||{nombre:'un gobierno de transición',gob:'tecnocratico',txt:'Un gobierno de transición convoca elecciones.'};
+    S.gobierno={id:ca.gob,desde:rg.hasta-3,apoyado:false}; S.tension=cl((S.tension||35)-6,0,100);   // un gobierno de transición gobierna hasta que se vote
+    log('<b>Cayó '+rg.nombre+'.</b> '+ca.txt,'hito');
+    const p=P155(); if(p){ p.camp=null; p.contratos=[]; p.decretos=[]; p.pres={id:'junta:'+rg.id,nombre:ca.nombre,sexo:'h',partido:'regimen',gob:ca.gob,integ:6,cumple:6,desde:rg.hasta,hasta:rg.hasta+1,credito:0,aporte:0,rencor:0,reelecto:false,regimen:true};
       (p.cargos||[]).filter(c=>c.nombrado&&c.pt!=='pres').forEach(c=>{ try{ if(typeof window.soltarCargo155==='function') window.soltarCargo155(c,'<b>'+E(c.nombre)+'</b> salió de '+E(c.pn)+' con la caída del régimen.'); }catch(x){} }); }
     archivar(rel,null);
   }catch(e){ console.error(e); } }
@@ -33304,7 +33313,7 @@ install();setTimeout(install,1200);
   }catch(x){ console.error(x); } }
 
   /* ==================== FAVORES = DEUDA ==================== */
-  const PESO={contrato:2,licencias:1,decreto:3,frenar:3};
+  const PESO={contrato:2,licencias:1,decreto:3,frenar:3,salvavidas:2};
   function favor179(id,info){ try{ if(!adulto()) return; const rel=relActiva(); if(!rel) return; info=info||{};
     const w=(id==='cargo'?cl(Math.round(1+(info.poder||3)*.6),2,4):(PESO[id]||1))*(rel.tipo==='gobierno'?.8:1);
     rel.deuda=R1((rel.deuda||0)+w); rel.recibidos=(rel.recibidos||0)+1; rel.fav.push({id,anio:A(),w:R1(w),txt:info.txt||''}); if(rel.fav.length>14) rel.fav.shift();
@@ -33394,7 +33403,7 @@ install();setTimeout(install,1200);
     return {p:9,c:()=>ACTIVO()&&(rel.tipo==='regimen'?!!regActivo():true),t:()=>x.txt(rel,m)+' <small>(Es el cobro de los favores que te hicieron: debes '+R1(rel.deuda)+'.)</small>',o}; }
 
   /* ==================== PERSECUCIÓN ==================== */
-  function evVigilancia(rel){ const e=mayor(true); const quienes=rel.tipo==='regimen'?'Agentes del régimen':'Funcionarios del gobierno'; if(!e) return evPersona(rel,1);
+  function evVigilancia(rel){ const e=mayor(true); const quienes=ordenDe(rel).agentes; if(!e) return evPersona(rel,1);
     const m=Math.round(Math.max(15,(e.ingresos||0)*.015));
     return {p:8,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>'+quienes+' visitan '+E(e.nombre)+'.</b> Piden libros y correspondencia, '+fisco()+' abre una revisión y alguien deja caer que tu nombre está en una lista.',
       o:[{t:'Atenderlos y pagar lo que pidan ('+fm(m)+')',f:()=>{ gastoE(e,m); rel.presion=Math.max(0,rel.presion-8); return 'Entregaste los libros y pagaste. La visita se acabó sin ruido.'; }},
@@ -33415,13 +33424,13 @@ install();setTimeout(install,1200);
   function objetivo(rel){ const L=abiertas().filter(e=>!e.banco112); if(!L.length) return null;
     return L.map(e=>({e,s:(e.sector==='medios'?6:0)-(A()-(e.cierreUlt179||0)<=1?7:0)+(rel.opoSecreta>0?1:0)+Math.log10(Math.max(10,e.ingresos||10))+(e.publica?1:0)+((e.marca||50)/50)+Math.random()})).sort((a,b)=>b.s-a.s)[0].e; }
   function evClausura(rel,e,dur){ const fijos=Math.round(Math.max(10,(e.cierre179&&e.cierre179.ing0||e.ingresos||10)*.08));
-    return {p:10,c:()=>ACTIVO()&&!!e.cierre179,t:()=>'<b>Clausuraron '+E(e.nombre)+'.</b> '+(rel.tipo==='regimen'?'Una orden del régimen manda cerrarla':'Una orden de las autoridades manda cerrarla')+' por '+(dur===1?'un año':dur+' años')+'. Sin ventas, y con arriendos, deudas y una nómina mínima que siguen corriendo: unos '+fm(fijos)+' al año.',
+    return {p:10,c:()=>ACTIVO()&&!!e.cierre179,t:()=>'<b>Clausuraron '+E(e.nombre)+'.</b> '+ordenDe(rel).orden+' por '+(dur===1?'un año':dur+' años')+'. Sin ventas, y con arriendos, deudas y una nómina mínima que siguen corriendo: unos '+fm(fijos)+' al año.',
       o:[{t:'Acatar y esperar',f:()=>'Cerraste las puertas. Hasta '+e.cierre179.hasta+' no vuelve a abrir, y cuando abra, no todos los clientes volverán.'},
          {t:'Recurrir a la justicia ('+fm(fijos*.3)+')',f:()=>{ gastoE(e,fijos*.3); const p=A()>=1991?.55:rel.tipo==='regimen'?.12:.35; if(chance(p)){ rel.presion=Math.max(0,rel.presion-15); reabrir(e,' por orden de un juez'); return 'Un juez levantó la clausura. Es una victoria rara y aun así cara.'; } rel.presion=Math.min(100,rel.presion+5); return 'El recurso se perdió en los tribunales. Las puertas siguen selladas.'; }},
          {t:'Hacer las paces y reabrir ('+fm(escalaP()*1.2+fijos)+')',f:()=>{ pagarMonto(escalaP()*1.2+fijos); rel.postura='aliado'; rel.manual=true; rel.presion=Math.max(0,rel.presion-35); rel.deuda=R1((rel.deuda||0)+1.5); reabrir(e,' después de arreglar cuentas'); return 'Fuiste, pagaste y prometiste. Reabrió, y ahora debes más de lo que debías.'; }}]}; }
 
   /* ==================== LOS HITOS DEL RÉGIMEN ==================== */
-  const BEATS={
+  const BEATS_ROJAS={
     1954:rel=>{ const m=Math.round(escalaP()*1.5);
       return {p:9,c:()=>ACTIVO(),t:()=>'<b>La Asamblea Constituyente prorroga al general en el poder hasta 1958</b> y la Secretaría Nacional de Asistencia Social, que maneja su familia, recibe "donaciones voluntarias" de los empresarios y los gremios.',
         o:[{t:'Donar con generosidad ('+fm(m)+')',f:()=>{ pagarMonto(m); if(rel.postura==='neutral') rel.postura='aliado'; rel.presion=Math.max(0,rel.presion-12); rel.deuda=Math.max(0,R1(rel.deuda-1)); rel.pagos++; redes(5); return 'Donaste y saliste en la lista de benefactores. En Palacio se acuerdan de los que dieron de primeros.'; }},
@@ -33443,6 +33452,8 @@ install();setTimeout(install,1200);
            {t:'Quedarte con el general hasta el final',f:()=>{ if(rel.postura!=='opositor') rel.postura='aliado'; rel.hundido=(rel.hundido||0)+1; prest(-1,'se quedó con el general hasta el final'); return 'Te quedaste con el general. Cuando se fue, tus amigos del régimen se fueron con él.'; }},
            {t:'Esperar a ver qué pasa',f:()=>'Esperaste. Cuando se supo quién ganaba, ya era tarde para apuntarte.'}]}; }
   };
+
+  const BEATS={rojas:BEATS_ROJAS}, EXCBEATS={};
 
   /* el descubrimiento de la plata para los rivales */
   function evDescubierto(rel){ const m=Math.round(escalaP()*1.2);
@@ -33472,12 +33483,16 @@ install();setTimeout(install,1200);
     evolucionar(rel); const vig=vigDe(rel);
     if(rel.tipo==='gobierno'&&!rel.manual){ const pr=(P155()||{}).pres; if(pr){ if((S.gobierno&&S.gobierno.apoyado)||(pr.credito||0)>=25) rel.postura='aliado'; else if(pr.rencor>10) rel.postura='opositor'; else rel.postura='neutral'; } }
     // el arco histórico del régimen
-    if(rel.tipo==='regimen'&&BEATS[A()]&&!(d['b'+A()])){ d['b'+A()]=true; empujar(BEATS[A()](rel)); }
+    const bt=rel.tipo==='regimen'?BEATS[rel.id]:null;
+    if(bt&&bt[A()]&&!d['b'+A()]&&!d['b'+rel.id+A()]){ d['b'+rel.id+A()]=true; empujar(bt[A()](rel)); }
+    // y el de un estado de excepción sobre el gobierno de turno
+    const ex=rel.tipo==='gobierno'?excActiva():null, et=ex?EXCBEATS[ex.id]:null;
+    if(et&&et[A()]&&!d['x'+ex.id+A()]){ d['x'+ex.id+A()]=true; empujar(et[A()](rel)); }
     // la plata escondida para la oposición se descubre
     if(rel.opoSecreta>0&&ev().n<2&&chance((rel.tipo==='regimen'?.12:.06)+(rel.tipo==='regimen'?.08:.05)*Math.min(3,rel.opoSecreta))) empujar(evDescubierto(rel));
     // la presión: vigilan, hostigan, cierran
     if(ev().n<2&&S._ev155!==A()){
-      if(vig>=3&&abiertas().filter(e=>!e.banco112).length&&A()>(rel.ultCierre||0)&&chance(rel.tipo==='regimen'?.75:.5)){ const e=objetivo(rel); if(e){ const dur=rel.tipo==='regimen'?ri(1,2):1; if(clausurar(e,dur,rel.tipo==='regimen'?'orden del régimen':'orden de las autoridades')){ rel.ultCierre=A(); rel.cierres=(rel.cierres||0)+1; rel.presion=Math.min(rel.presion,58); empujar(evClausura(rel,e,dur)); } } }
+      if(vig>=3&&abiertas().filter(e=>!e.banco112).length&&A()>(rel.ultCierre||0)&&chance(rel.tipo==='regimen'?.75:.5)){ const e=objetivo(rel); if(e){ const dur=rel.tipo==='regimen'?ri(1,2):1; if(clausurar(e,dur,ordenDe(rel).por)){ rel.ultCierre=A(); rel.cierres=(rel.cierres||0)+1; rel.presion=Math.min(rel.presion,58); empujar(evClausura(rel,e,dur)); } } }
       else if(vig>=2&&chance(.6)) empujar(evHostigamiento(rel));
       else if(vig>=1&&chance(.45)) empujar(evVigilancia(rel)); }
     // el cobro de los favores
@@ -33501,7 +33516,7 @@ install();setTimeout(install,1200);
     const favs=rel.fav.slice(-5).map(f=>'<tr><td>'+E(f.txt||f.id)+'<br><small>'+f.anio+'</small></td><td style="text-align:right">debes '+f.w+'</td></tr>').join('');
     const cargas=D().cargas.filter(k=>k.hasta>=A()).map(k=>'<tr><td>'+E(k.txt)+' en '+E(k.emp)+'<br><small>hasta '+k.hasta+'</small></td><td style="text-align:right">'+fm(k.monto)+' al año</td></tr>').join('');
     const cierres=cerr.map(e=>'<tr><td><b>'+E(e.nombre)+'</b><br><small>cerrada hasta '+e.cierre179.hasta+'</small></td><td style="text-align:right"><small>'+E(e.cierre179.por||'clausura')+'</small></td></tr>').join('');
-    const cuerpo=(reg?'Manda '+E(REG[rel.id].nombre)+' ('+REG[rel.id].desde+'–'+REG[rel.id].hasta+'). No hay elecciones: lo que valga es lo que el poder decida.':'Gobierna '+E(q)+', desde '+rel.desde+'.')
+    const cuerpo=(reg?'Manda '+E(REG[rel.id].nombre)+' ('+REG[rel.id].desde+'–'+REG[rel.id].hasta+'). No hay elecciones: lo que valga es lo que el poder decida.':'Gobierna '+E(q)+', desde '+rel.desde+'.'+(excActiva()?' <b>Rige '+E(excActiva().nombre)+' ('+excActiva().desde+'–'+excActiva().hasta+'):</b> el gobierno aprieta más a quien se le opone.':''))
       +' Aquí se lleva la cuenta: los favores que recibiste se cobran con otros favores, y quien se opone se expone a que lo vigilen, lo hostiguen y le cierren compañías por un tiempo. '+(v>=3?'<b>Estás en el punto en que pueden cerrarte compañías.</b> ':v>=2?'<b>Ya te hostigan.</b> ':v>=1?'Te están vigilando. ':'')
       +(rel.deuda>=3?'<b>Debes mucho: el cobro viene.</b> ':'')+(rel.mora>=1?'Tienes cobros sin pagar (mora '+R1(rel.mora)+'). ':'');
     const html='<div class="k"><div><b>'+E(pos)+'</b><span>tu postura</span></div><div><b>'+R1(rel.deuda)+'</b><span>favores que debes</span></div><div><b>'+E(VIGN[v])+'</b><span>cuánto te persiguen</span></div><div><b>'+cerr.length+'</b><span>compañías cerradas</span></div></div>'
@@ -33566,9 +33581,322 @@ install();setTimeout(install,1200);
   function ajusteFallback(){ if(S&&S._ajuste179&&!S._ajuste179.hecho&&S.anio>=1958){ try{ cola.push({p:9,c:()=>!!(S._ajuste179&&!S._ajuste179.hecho),t:()=>'<b>El régimen cayó y empieza el ajuste de cuentas.</b>',o:[{t:'Seguir',f:()=>ajuste179()||'El país respira.'}]}); }catch(e){} } }
   function init179(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo(); wrapV106();
     try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA179_CONS){ window.__SA179_CONS=true; window.consejeroRegistrar168(gPoder); } }catch(x){}
-    Object.assign(window,{regimenActivo179:()=>!!regActivo(),relacionPoder179:relActiva,estadoPoder179:D,favor179,eleccion179,clausurar179:clausurar,reabrir179:reabrir,efectoPoder179,anualPoder179:anual179,prePoder179:pre179,escenaPoder179,escenaReabrir179,escenaFavoresReg179,pedirReg179:pedirReg,pedirCargoReg179:pedirCargoReg,vigPoder179:vigDe,cobroPoder179:cobroDe,resolverCobro179:resolver,ajuste179,iniciarRegimen179:iniciarRegimen,PODER_179:{REG,POOL,BEATS},evCobro179:evCobro,evClausura179:evClausura,evVigilancia179:evVigilancia,evHostigamiento179:evHostigamiento,evDescubierto179:evDescubierto}); }
+    Object.assign(window,{regimenActivo179:()=>!!regActivo(),relacionPoder179:relActiva,estadoPoder179:D,favor179,eleccion179,clausurar179:clausurar,reabrir179:reabrir,efectoPoder179,anualPoder179:anual179,prePoder179:pre179,escenaPoder179,escenaReabrir179,escenaFavoresReg179,pedirReg179:pedirReg,pedirCargoReg179:pedirCargoReg,vigPoder179:vigDe,cobroPoder179:cobroDe,resolverCobro179:resolver,ajuste179,iniciarRegimen179:iniciarRegimen,PODER_179:{REG,POOL,BEATS,EXCBEATS,excActiva,H:{pagarMonto,escalaP,redes,prest,clausurar,reabrir,medios,mayor,gastoE,R1,nomCarga,fm,E,quien,rigDe,favor:favor179,tieneMedios,abiertas,comps,cl,A,relActiva,vigDe,patr,adulto}},evCobro179:evCobro,evClausura179:evClausura,evVigilancia179:evVigilancia,evHostigamiento179:evHostigamiento,evDescubierto179:evDescubierto}); }
   init179(); setTimeout(init179,40); setTimeout(init179,220); setTimeout(init179,650); setTimeout(init179,950);
   window.__SA179={version:V179};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v180 · MÁS REGÍMENES Y CRISIS JUGABLES
+   El poder que cobra (v179) llega a más épocas, y las crisis dejan de ser
+   un texto: golpean a cada compañía según lo frágil que esté.
+   - El gobierno personal del general Reyes (1905-1909): cierra el Congreso,
+     el atentado de 1906, los bonos de obras y las protestas de 1909. Es una
+     dictadura (no hay elecciones); al caer, un gobierno de transición.
+   - El Estatuto de Seguridad (1978-1982): no cambia al gobierno, lo endurece.
+     Justicia militar para civiles, listas de "agitadores" en las nóminas, la
+     toma de la embajada y la amnistía. Quien se opone sufre más presión.
+   - Cuatro crisis: la Gran Depresión (1929-1932), la crisis financiera de
+     los ochenta (1982-1985), la crisis hipotecaria y financiera (1998-2000)
+     y la crisis mundial (2008-2009). Cada una golpea a TODAS las compañías
+     (antes solo a la que estabas viendo): más a las que más deben y menos
+     caja tienen, y según el sector. El crédito se cierra.
+   - Tú decides: apretarte el cinturón, apostar a comprar barato o pedir el
+     salvavidas del Estado (que es un favor: se anota como deuda con el poder
+     de v179 y se lo niegan al que se opone). Pantalla "La crisis y tú" con
+     medidas por compañía: recorte de emergencia, congelar inversiones,
+     renegociar la deuda y pedir el salvavidas.
+   - Eventos de crisis: el crédito que no se renueva, el rival que quiebra y
+     vende barato, la corrida de ahorradores en un banco.
+   ========================================================================== */
+(function(){
+  const V180='v180';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const adulto=()=>!!(ACTIVO()&&S.p.edad>=18&&!nino());
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const R1=x=>Math.round(x*10)/10;
+  const PD=()=>window.PODER_179||null;
+
+  /* ==================== NUEVOS REGÍMENES ==================== */
+  function registrar(){ const P=PD(); if(!P||!P.H) return false; if(P.__v180) return true; P.__v180=true; const H=P.H, REG=P.REG, POOL=P.POOL;
+    REG.reyes={id:'reyes',modo:'dictadura',desde:1905,hasta:1909,nombre:'el gobierno personal del general Reyes',corto:'el régimen',jefe:'el general Reyes',presNombre:'el general Rafael Reyes',rig:.9,gob:'conservador',
+      agentes:'Agentes de la Policía y de la Gendarmería',orden:'Una orden del gobierno de Reyes manda cerrarla',por:'orden del gobierno de Reyes',
+      caida:{nombre:'el gobierno de transición',gob:'tecnocratico',txt:'Un gobierno de transición convoca elecciones.'}};
+    REG.estatuto={id:'estatuto',modo:'excepcion',desde:1978,hasta:1982,nombre:'el Estatuto de Seguridad',rig:1.4,
+      agentes:'Agentes de las Fuerzas Militares y del DAS',orden:'Una orden de la justicia penal militar manda cerrarla',por:'orden de la justicia penal militar'};
+    const pos=(rel,v)=>{ if(rel.postura!=='opositor') rel.postura=v; };
+    const opo=(rel,n)=>{ rel.postura='opositor'; rel.manual=true; rel.opo=(rel.opo||0)+1; rel.presion=Math.min(100,rel.presion+Math.round(n*H.rigDe(rel))); };
+    /* ---- Reyes ---- */
+    P.BEATS.reyes={
+      1905:rel=>({p:10,c:()=>H.adulto(),t:()=>'<b>El presidente Reyes cierra el Congreso y gobierna con una Asamblea a su medida.</b> Promete "paz y progreso" (ferrocarriles, bancos y obras) y pide a los empresarios y a los gremios que lo respalden en público.',
+        o:[{t:'Respaldarlo en público',f:()=>{ pos(rel,'aliado'); rel.presion=Math.max(0,rel.presion-10); H.redes(6); H.prest(-1,'respaldó el cierre del Congreso'); rel.pagos++; return 'Respaldaste al general. Las obras y los contratos empiezan a hablar de tu nombre.'; }},
+           {t:'Guardar silencio',f:()=>'Guardaste silencio. En una época de cierres, el silencio es una forma de prudencia.'},
+           {t:'Firmar la protesta de los liberales y los gremios',f:()=>{ opo(rel,20); H.prest(3,'firmó la protesta contra el cierre del Congreso'); return 'Firmaste. Tu nombre quedó en la lista de los que protestaron.'; }}]}),
+      1906:rel=>{ const m=Math.round(H.escalaP()*1.4), s=Math.round(H.escalaP()*.9);
+        return {p:10,c:()=>H.adulto(),t:()=>'<b>El 10 de febrero fallan un atentado contra Reyes en Bogotá.</b> Los atacantes son fusilados, empiezan las capturas y cualquiera que haya criticado al gobierno es sospechoso. Piden a los empresarios una "contribución" para la Gendarmería y las víctimas.',
+          o:[{t:'Aportar a la Gendarmería ('+H.fm(m)+')',f:()=>{ H.pagarMonto(m); pos(rel,'aliado'); rel.deuda=Math.max(0,R1(rel.deuda-1)); rel.presion=Math.max(0,rel.presion-12); rel.pagos++; return 'Aportaste. En palacio anotaron quién puso la plata en la hora difícil.'; }},
+             {t:'Dar lo mínimo ('+H.fm(m*.3)+')',f:()=>{ H.pagarMonto(m*.3); return 'Diste lo mínimo y dijiste que andabas escaso.'; }},
+             {t:'Esconder a un perseguido y ayudarle a salir del país ('+H.fm(s)+')',f:()=>{ H.pagarMonto(s); rel.opoSecreta=(rel.opoSecreta||0)+1; rel.opo=(rel.opo||0)+.5; return 'Escondiste a un perseguido y pagaste su salida. Si se sabe, lo pagas caro.'; }}]}; },
+      1907:rel=>{ const m=Math.round(H.escalaP()*1.8);
+        return {p:9,c:()=>H.adulto(),t:()=>'<b>El gobierno lanza bonos de obras para los ferrocarriles y la moneda.</b> Reparte contratos y privilegios entre sus amigos y coloca los bonos entre los empresarios.',
+          o:[{t:'Suscribir los bonos ('+H.fm(m)+')',f:()=>{ H.pagarMonto(m); pos(rel,'aliado'); rel.deuda=Math.max(0,R1(rel.deuda-1)); rel.presion=Math.max(0,rel.presion-10); rel.hundido=(rel.hundido||0)+.5; return 'Suscribiste los bonos. Rinden poco, pero abren puertas.'; }},
+             {t:'Suscribir unos pocos ('+H.fm(m*.4)+')',f:()=>{ H.pagarMonto(m*.4); return 'Suscribiste unos pocos, los que no se podían evitar.'; }},
+             {t:'No suscribirlos',f:()=>{ rel.mora=R1((rel.mora||0)+.6); rel.presion=Math.min(100,rel.presion+8); return 'No suscribiste. En Hacienda dijeron que tomaban nota.'; }}]}; },
+      1909:rel=>({p:10,c:()=>H.adulto(),t:()=>'<b>Las protestas por los tratados con Estados Unidos y Panamá sacuden Bogotá.</b> Los estudiantes, los gremios y los partidos piden que Reyes se vaya, y el general se prepara para salir del país.',
+        o:[{t:'Sumarte a las protestas',f:()=>{ opo(rel,12); rel.paro=true; H.redes(4); H.prest(3,'se sumó a las protestas que derribaron al gobierno'); return 'Saliste a la calle con los demás. Cuando cayó el general, estabas del lado de los que ganaron.'; }},
+           {t:'Quedarte con el general',f:()=>{ pos(rel,'aliado'); rel.hundido=(rel.hundido||0)+1; H.prest(-1,'se quedó con Reyes hasta el final'); return 'Te quedaste con el general. Cuando se fue, tus amigos del gobierno se fueron con él.'; }},
+           {t:'Esperar a ver qué pasa',f:()=>'Esperaste. Cuando se supo quién ganaba, ya era tarde para apuntarte.'}]})
+    };
+    const R=(o)=>Object.assign({tipo:'regimen',w:2,peso:1},o);
+    POOL.push(
+      R({id:'reyes_gend',w:3,ok:r=>r.id==='reyes',m:()=>H.escalaP()*1.2,txt:(r,m)=>'<b>La Gendarmería necesita plata.</b> Piden una "contribución voluntaria" de '+H.fm(m)+' a las casas que "quieren la paz". De las que no se rechazan en público.',cum:'Entregaste la contribución.',neg:'Dijiste que no podías. En palacio anotaron tu nombre.'}),
+      R({id:'reyes_bonos',ok:r=>r.id==='reyes'&&A()>=1906,m:()=>H.escalaP()*1.5,txt:(r,m)=>'<b>Hacienda te asigna una cuota de bonos de obras:</b> '+H.fm(m)+'. Se pagan de contado y rinden poco.',cum:'Suscribiste los bonos.',neg:'No suscribiste. En Hacienda dicen que "el progreso no espera".'}),
+      R({id:'reyes_prensa',ok:r=>r.id==='reyes',m:()=>H.tieneMedios()?H.escalaP()*.2:H.escalaP()*.7,
+        txt:(r,m)=>H.tieneMedios()?'<b>Los voceros del gobierno piden que tus periódicos publiquen su versión de los hechos.</b> Mandan los textos hechos.':'<b>Los periódicos del gobierno piden avisos pagados de las casas "amigas del progreso":</b> '+H.fm(m)+'.',
+        ef:(r,f)=>{ const e=H.medios(); if(!e||f<.5) return ''; e.marca=cl((e.marca||50)-6,5,100); H.prest(-2,'la línea del gobierno en sus medios'); return ' La credibilidad de <b>'+H.E(e.nombre)+'</b> se resintió.'; },
+        cum:'Publicaste lo que mandaron.',neg:'Dijiste que no. Quedó anotado quién publica y quién no.',lab:['Publicar su versión','Publicar solo una parte','Negarte']}),
+      R({id:'reyes_empleos',ok:r=>r.id==='reyes'&&!!H.mayor(),m:()=>0,lab:['Contratarlos a todos','Contratar a unos pocos','No contratarlos'],
+        txt:()=>'<b>El gobierno te pide colocar en tu nómina a parientes y amigos de los funcionarios.</b> Cobran sin trabajar mucho, y de eso dependen tus buenas relaciones.',
+        ef:(r,f)=>{ const e=H.mayor(); if(!e||f<.3) return ''; const x=e.ingresos*.012*f; H.nomCarga(e,x,3,'recomendados del gobierno de Reyes'); e.eficiencia=cl((e.eficiencia||50)-3*f,0,100); return ' Los nuevos le cuestan a <b>'+H.E(e.nombre)+'</b> '+H.fm(x)+' al año durante tres años.'; },
+        cum:'Contrataste a los recomendados.',neg:'Dijiste que la nómina estaba llena. Alguien lo anotó.'}),
+      R({id:'reyes_manifiesto',ok:r=>r.id==='reyes',m:()=>0,lab:['Firmar la adhesión','Firmar sin ir al acto','No firmar'],
+        txt:()=>'<b>Piden tu firma en la adhesión a la Asamblea y a la prolongación del período del general.</b> Saldrá en la prensa con los nombres de los empresarios que lo apoyan.',
+        ef:(r,f)=>{ if(f<.5) return ''; H.prest(-2,'firmó la adhesión al gobierno de Reyes'); H.redes(3); return ' Tu nombre salió en la prensa, al lado de los de siempre.'; },
+        cum:'Firmaste.',neg:'No firmaste. En la lista no apareces, y todo el mundo lo notó.'}),
+      R({id:'reyes_suministro',ok:r=>r.id==='reyes'&&!!H.mayor(),m:()=>{ const e=H.mayor(); return e?Math.max(20,e.ingresos*.03):0; },
+        txt:(r,m)=>'<b>El Ejército necesita que una de tus compañías le entregue mercancía "a precio de costo".</b> Calculan '+H.fm(m)+' en pérdidas para ti.',cum:'Entregaste la mercancía.',neg:'No entregaste. Un coronel dijo que se acordaría.'})
+    );
+    /* ---- Estatuto de Seguridad (sobre el gobierno de turno) ---- */
+    const ex=r=>{ const e=P.excActiva(); return r.tipo==='gobierno'&&!!e&&e.id==='estatuto'; };
+    P.EXCBEATS.estatuto={
+      1978:rel=>({p:10,c:()=>H.adulto(),t:()=>'<b>El gobierno decreta el Estatuto de Seguridad.</b> Los civiles pueden ser juzgados por la justicia militar, hay detenciones sin orden judicial y se endurecen las penas por protestar. Los gremios discuten si apoyarlo.',
+        o:[{t:'Apoyarlo en público',f:()=>{ pos(rel,'aliado'); rel.manual=true; rel.presion=Math.max(0,rel.presion-10); H.redes(5); H.prest(-2,'respaldó el Estatuto de Seguridad'); rel.pagos++; return 'Lo apoyaste. Para el gobierno, ahora eres de los suyos.'; }},
+           {t:'Callar',f:()=>'Callaste. Nadie sabe de qué lado estás, y en estos años eso también es sospechoso.'},
+           {t:'Rechazarlo con los juristas y los sindicatos',f:()=>{ opo(rel,20); H.prest(3,'rechazó el Estatuto de Seguridad'); return 'Lo rechazaste en público. Tu nombre está ahora en las listas de los que protestan.'; }}]}),
+      1979:rel=>({p:10,c:()=>H.adulto(),t:()=>'<b>Detienen a sindicalistas, estudiantes y periodistas, y hay denuncias de torturas.</b> Los militares piden a los empresarios las listas de los "agitadores" que tienen en sus nóminas.',
+        o:[{t:'Entregar la lista y despedirlos',f:()=>{ pos(rel,'aliado'); rel.presion=Math.max(0,rel.presion-12); const e=H.mayor(); if(e){ e.moral=cl((e.moral||50)-10,0,100); e.empleados=Math.max(2,Math.round(e.empleados*.97)); } H.prest(-3,'entregó listas de trabajadores'); return 'Entregaste la lista. La nómina quedó más callada y el ambiente, más pesado.'; }},
+           {t:'Proteger a tus trabajadores',f:()=>{ opo(rel,15); const e=H.mayor(); if(e) e.moral=cl((e.moral||50)+6,0,100); H.prest(3,'protegió a sus trabajadores'); return 'Dijiste que no entregabas a nadie. Tus trabajadores lo supieron; los militares, también.'; }},
+           {t:'Responder que no tienes agitadores',f:()=>'Respondiste que en tus empresas nadie agita nada. Por esta vez, se lo creyeron.'}]}),
+      1980:rel=>{ const m=Math.round(H.escalaP()*2);
+        return {p:10,c:()=>H.adulto(),t:()=>'<b>La guerrilla se toma la embajada de la República Dominicana.</b> El país se llena de retenes y el gobierno pide plata y vehículos para la "seguridad nacional".',
+          o:[{t:'Aportar al fondo de seguridad ('+H.fm(m)+')',f:()=>{ H.pagarMonto(m); pos(rel,'aliado'); rel.deuda=Math.max(0,R1(rel.deuda-1)); rel.presion=Math.max(0,rel.presion-12); rel.pagos++; return 'Aportaste. En el Ministerio de Defensa quedó anotado.'; }},
+             {t:'Prestar vehículos y vigilantes',f:()=>{ const e=H.mayor(); if(e){ const x=e.ingresos*.01; H.nomCarga(e,x,2,'vehículos y vigilantes para las Fuerzas Militares'); } pos(rel,'aliado'); rel.presion=Math.max(0,rel.presion-8); return 'Pusiste camiones y vigilantes a disposición. Te cuesta cada año, mientras dure.'; }},
+             {t:'No aportar',f:()=>{ rel.mora=R1((rel.mora||0)+.6); rel.presion=Math.min(100,rel.presion+8); return 'No aportaste. En esta época, no aportar se nota.'; }}]}; },
+      1981:rel=>({p:9,c:()=>H.adulto(),t:()=>'<b>El Congreso discute una amnistía para los alzados en armas.</b> Los militares la rechazan y el gobierno pide a los empresarios que se pronuncien.',
+        o:[{t:'Apoyar la amnistía',f:()=>{ rel.presion=Math.min(100,rel.presion+Math.round(10*H.rigDe(rel))); H.prest(2,'apoyó la amnistía'); H.redes(-2); return 'Apoyaste la amnistía. Los militares no lo olvidan.'; }},
+           {t:'Rechazarla',f:()=>{ pos(rel,'aliado'); rel.presion=Math.max(0,rel.presion-6); H.prest(-1,'rechazó la amnistía'); return 'La rechazaste. En el gobierno lo agradecen.'; }},
+           {t:'No pronunciarte',f:()=>'No dijiste nada. Cada quien sacó sus propias cuentas.'}]})
+    };
+    const G=(o)=>Object.assign({tipo:'gobierno',w:4,peso:1,ok:ex},o);
+    POOL.push(
+      G({id:'est_seguridad',m:()=>H.escalaP()*1.5,txt:(r,m)=>'<b>El Ministerio de Defensa pide una contribución al fondo de seguridad nacional:</b> '+H.fm(m)+'. Es "voluntaria".',cum:'Aportaste al fondo de seguridad.',neg:'Dijiste que no. En Defensa tomaron nota.'}),
+      G({id:'est_listas',m:()=>0,lab:['Entregar los nombres','Entregar algunos','No entregar nada'],
+        txt:()=>'<b>Los servicios de inteligencia piden los nombres de los trabajadores "sospechosos" de tus nóminas.</b> Prometen discreción.',
+        ef:(r,f)=>{ if(f<.4) return ''; const e=H.mayor(); if(e) e.moral=cl((e.moral||50)-6*f,0,100); H.prest(-2,'entregó nombres de trabajadores'); return ' El ambiente en tus empresas se enrareció.'; },
+        cum:'Entregaste los nombres.',neg:'No entregaste nada. Te miraron con desconfianza.'}),
+      G({id:'est_vehiculos',m:()=>{ const e=H.mayor(); return e?Math.max(20,e.ingresos*.02):0; },
+        txt:(r,m)=>'<b>Las Fuerzas Militares piden vehículos y vigilantes de tus compañías para los retenes.</b> Calculan '+H.fm(m)+' en costos para ti.',cum:'Prestaste los vehículos y los vigilantes.',neg:'No prestaste nada. Un mayor dijo que "lo tendrían presente".'}),
+      G({id:'est_prensa',m:()=>0,lab:['Difundir los comunicados','Difundir solo algunos','No difundirlos'],
+        txt:()=>'<b>El gobierno pide a los medios que difundan los comunicados de seguridad sin comentarios.</b> Quien tenga medios, que se alinee.',
+        ef:(r,f)=>{ const e=H.medios(); if(!e||f<.5) return ''; e.marca=cl((e.marca||50)-5,5,100); H.prest(-1,'difundió los comunicados oficiales'); return ' La credibilidad de <b>'+H.E(e.nombre)+'</b> se resintió.'; },
+        cum:'Difundiste los comunicados.',neg:'No los difundiste. Lo anotaron.'})
+    );
+    return true; }
+
+  /* ==================== LAS CRISIS ==================== */
+  const CRISIS=[
+    {id:'depresion',n:'La Gran Depresión',desde:1929,hasta:1932,int:[.7,1,.9,.5],spread:.03,salv:'el Banco de la República y el Ministerio de Hacienda',
+     intro:'El café se desploma, el crédito de afuera se corta y los bancos aprietan.',
+     sens:{agro:1.2,moda:.9,construccion:1,financiero:1,retail:.9,mineria:.7,alimentos:.5,logistica:.8,energia:.5,medios:.6,seguros:.7,turismo:.7,inmobiliario:1,tech:.4,d:.7}},
+    {id:'ochenta',n:'La crisis financiera de los ochenta',desde:1982,hasta:1985,int:[.8,1,.7,.4],spread:.05,salv:'el Banco de la República y la Superintendencia Bancaria',
+     intro:'Quiebran bancos y grupos, la plata se vuelve cara y las deudas no se pueden renovar.',
+     sens:{financiero:1.3,construccion:1.1,moda:.9,retail:.8,agro:.7,alimentos:.5,logistica:.7,mineria:.6,energia:.5,inmobiliario:1.1,seguros:.8,turismo:.7,tech:.4,d:.65}},
+    {id:'hipotecaria',n:'La crisis hipotecaria y financiera',desde:1998,hasta:2000,int:[.6,1,.6],spread:.04,salv:'el Banco de la República y el Fondo de Garantías',
+     intro:'Se hunde la construcción, las cuotas de las hipotecas se disparan y los bancos pasan a manos del Estado.',
+     sens:{construccion:1.3,financiero:1.2,inmobiliario:1.2,retail:.9,moda:.8,agro:.6,alimentos:.5,logistica:.7,seguros:.8,turismo:.7,tech:.5,d:.65}},
+    {id:'mundial',n:'La crisis financiera mundial',desde:2008,hasta:2009,int:[.6,.9],spread:.03,salv:'el Banco de la República y el Ministerio de Hacienda',
+     intro:'Se cierran los mercados de afuera y el crédito se encarece de un día para otro.',
+     sens:{mineria:.8,agro:.8,moda:.8,tech:.6,financiero:.8,construccion:.8,logistica:.7,retail:.7,turismo:.7,energia:.6,d:.55}}
+  ];
+  const crisisAct=()=>{ const a=A(); return CRISIS.find(k=>a>=k.desde&&a<=k.hasta)||null; };
+  const inten=k=>k.int[cl(A()-k.desde,0,k.int.length-1)];
+  function C180(){ if(typeof S==='undefined'||!S) return null; let c=S.crisis180; if(!c||typeof c!=='object') c=S.crisis180={}; if(!c.vistas||typeof c.vistas!=='object') c.vistas={}; if(!c.postura||typeof c.postura!=='object') c.postura={}; return c; }
+  const postura=k=>{ const c=C180(); return c?c.postura[k.id]||null:null; };
+  const med=e=>{ if(!e.crisis180||typeof e.crisis180!=='object') e.crisis180={}; return e.crisis180; };
+  const kSens=(k,e)=>(k.sens[e.sector]!=null?k.sens[e.sector]:k.sens.d);
+  function estres(e,k){ const ing=Math.max(1,e.ingresos||1), lev=Math.max(0,e.deuda||0)/ing, cajaR=Math.max(0,e.caja||0)/ing; return {sens:kSens(k,e),lev,cajaR,frag:cl(.5+lev*1.2-cajaR*.8,.3,2)}; }
+  function shockDe(e,k){ const s=estres(e,k), pol=postura(k), c=e.crisis180||{}; let f=s.sens*inten(k)*.07*s.frag;
+    f*=(c.rec>=A()?.65:1)*(c.cons>=A()?.9:1)*(pol==='austeridad'?.8:pol==='oportunidad'?1.1:pol==='estado'?.9:1); return cl(f,0,.28); }
+  /* el efecto dentro del año de cada compañía (gancho en correrEmpresa) */
+  function efectoCrisis180(e,res){ try{ if(!e||e._yc180===A()) return; const k=crisisAct(); if(!k) return; e._yc180=A();
+    if(e.cierre179&&e.cierre179.hasta>=A()) return;
+    const sh=shockDe(e,k); if(sh<=.001) return; const perd=(e.ingresos||0)*sh, sp=Math.max(0,e.deuda||0)*k.spread*inten(k), dU=-(perd*.55)-sp;
+    e.ingresos=Math.max(1,(e.ingresos||1)-perd); e.utilidad=(e.utilidad||0)+dU; e.caja=(e.caja||0)+dU; e.crecimiento=(e.crecimiento||0)-sh;
+    med(e).ult={a:A(),sh:Math.round(sh*1000)/10,dU:Math.round(dU)};
+  }catch(x){ console.error(x); } }
+
+  /* el salvavidas: un favor del Estado que se paga */
+  function salvavidas(e,k){ const P=PD(), rel=P&&P.H?P.H.relActiva():null; let p=.55; if(rel){ p=rel.postura==='aliado'?.85:rel.postura==='opositor'?.12:.55; if(rel.presion>=50) p=Math.min(p,.1); }
+    med(e).salv=k.hasta;
+    if(chance(p)){ const x=Math.round((e.ingresos||0)*.12); e.caja+=x; e.deuda=(e.deuda||0)+x*.6; try{ if(P&&P.H) P.H.favor('salvavidas',{w:2,txt:'Un salvavidas para '+e.nombre}); }catch(z){}
+      return 'Te abrieron una línea de salvamento para <b>'+E(e.nombre)+'</b>: entraron '+fm(x)+' a su caja, y '+fm(x*.6)+' son deuda. Eso se paga con favores.'; }
+    if(rel) rel.deuda=R1((rel.deuda||0)+.5);
+    return 'Te dijeron que no había cupo en el salvamento. Quedó anotado que lo pediste.'; }
+
+  /* ==================== EVENTOS ==================== */
+  function evInicio(k){ return {p:9,c:()=>ACTIVO()&&comps().length>0,t:()=>'<b>'+E(k.n)+'.</b> '+E(k.intro)+' Tus compañías la van a sentir según lo que deban, la caja que tengan y su sector. ¿Cómo la enfrenta la casa?',
+    o:[{t:'Apretarse el cinturón (recortes y caja)',f:()=>{ C180().postura[k.id]='austeridad'; comps().forEach(e=>{ const c=med(e); c.cons=k.hasta; e.moral=cl((e.moral||50)-4,0,100); }); return 'Congelaste inversiones y recortaste gastos en todas las compañías. Duele, pero resistes mejor.'; }},
+       {t:'Apostar a comprar barato (guardar caja y esperar)',f:()=>{ C180().postura[k.id]='oportunidad'; return 'Guardaste la caja y te quedaste mirando quién se tambalea. Si aguantas, tendrás ofertas; si no, la crisis te pega más.'; }},
+       {t:'Pedir la ayuda del Estado ('+k.salv+')',f:()=>{ C180().postura[k.id]='estado'; const e=comps().slice().sort((a,b)=>shockDe(b,k)-shockDe(a,k))[0]; return e?salvavidas(e,k):'Pediste la ayuda del Estado.'; }}]}; }
+  function evCredito(e,k){ const x=Math.round((e.deuda||0)*.3);
+    return {p:9,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Los bancos no renuevan el crédito de '+E(e.nombre)+'.</b> Con la crisis el crédito se cerró: vencen '+fm(x)+' y no hay con qué refinanciar.',
+      o:[{t:'Pagar vendiendo activos ('+fm(x)+')',f:()=>{ if(e.caja>=x){ e.caja-=x; e.deuda=Math.max(0,e.deuda-x); return 'Pagaste con la caja de la compañía. Quedó más liviana de deuda y de plata.'; } e.deuda=Math.max(0,e.deuda-x); e.ingresos*=.93; e.eficiencia=cl((e.eficiencia||50)-3,0,100); e.caja=Math.max(0,e.caja-x*.15); return 'Vendiste activos a precio de crisis para pagar. La compañía quedó más chica y más sana.'; }},
+         {t:'Refinanciar a tasa de usura',f:()=>{ e.deuda*=1.10; e.marca=cl((e.marca||50)-2,0,100); return 'Refinanciaste a lo que quisieron los bancos: ahora debes '+fm(e.deuda)+'.'; }},
+         {t:'Pedir el salvavidas del Estado',f:()=>salvavidas(e,k)}]}; }
+  function evOportunidad(e,k){ const x=Math.round((e.ingresos||0)*.25);
+    return {p:8,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Un rival de '+E(e.nombre)+' quiebra</b> y sus dueños venden clientes y bodegas a precio de remate: '+fm(x)+'.',
+      o:[{t:'Comprarlo con la caja de la compañía ('+fm(x)+')',f:()=>{ if(e.caja<x) return 'No alcanzó la caja de la compañía y otro se quedó con la oferta.'; e.caja-=x; e.ingresos*=1.15; e.empleados=Math.round((e.empleados||4)*1.1); e.eficiencia=cl((e.eficiencia||50)-3,0,100); try{ hito(e.nombre+' compró a un rival quebrado en la crisis'); }catch(z){} return 'Compraste a un rival quebrado: '+E(e.nombre)+' vende 15% más y heredó su clientela.'; }},
+         {t:'Dejarlo pasar',f:()=>'Dejaste pasar la oferta. Quien tuvo caja se quedó con el negocio.'}]}; }
+  function evCorrida(e,k){ const x=Math.round((e.ingresos||0)*.2);
+    return {p:10,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Los ahorradores hacen fila en las oficinas de '+E(e.nombre)+'.</b> Retiran su plata ante el rumor de que el banco está en problemas.',
+      o:[{t:'Pedir liquidez al Banco de la República',f:()=>salvavidas(e,k)},
+         {t:'Pagar a todos vendiendo cartera ('+fm(x*.4)+')',f:()=>{ e.caja=Math.max(0,e.caja-x*.4); e.ingresos*=.92; return 'Pagaste a todos vendiendo cartera con descuento. Nadie perdió su plata, pero el banco perdió tamaño.'; }},
+         {t:'Resistir en silencio',f:()=>{ if(chance(.5)) return 'Resististe. La fila se acabó cuando entendieron que había plata.'; e.caja=Math.max(0,e.caja-x*.75); e.marca=cl((e.marca||50)-6,0,100); return 'No funcionó: se llevaron '+fm(x*.75)+' y el nombre del banco quedó golpeado.'; }}]}; }
+  const movida=()=>{ if(S._mov180===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov180=A(); return true; };
+  const sinMov=()=>(S._mov180!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  const nEv=()=>{ if(!S._ev180||S._ev180.a!==A()) S._ev180={a:A(),n:0}; return S._ev180; };
+  function anual180(){ if(!adulto()) return; if(S._y180===A()) return; S._y180=A(); const cs=comps(); const fin=CRISIS.find(k=>A()===k.hasta+1);
+    if(fin&&cs.length&&C180().vistas[fin.id]&&!C180().vistas[fin.id+'_fin']){ C180().vistas[fin.id+'_fin']=true; log('<b>Terminó '+E(fin.n.toLowerCase())+'.</b> Quedan las deudas, las compañías que aguantaron y las que cambiaron de dueño.','hito'); }
+    const k=crisisAct(); if(!k||!cs.length) return; const c=C180();
+    if(!c.vistas[k.id]){ c.vistas[k.id]=true; cola.push(evInicio(k)); nEv().n++; return; }
+    const ord=cs.slice().sort((a,b)=>shockDe(b,k)-shockDe(a,k)), I=inten(k), pol=postura(k);
+    for(const e of ord){ if(nEv().n>=2) break; if(e.cierre179&&e.cierre179.hasta>=A()) continue; const s=estres(e,k);
+      if(e.banco112&&chance(.45*I)){ cola.push(evCorrida(e,k)); nEv().n++; continue; }
+      if(s.lev>.25&&chance(.45*I)){ cola.push(evCredito(e,k)); nEv().n++; continue; }
+      if(s.cajaR>.45&&chance(.25+(pol==='oportunidad'?.25:0))){ cola.push(evOportunidad(e,k)); nEv().n++; continue; } } }
+
+  /* ==================== LA PANTALLA ==================== */
+  const reab=()=>{ cerrarModal(); render(); escenaCrisis180(); };
+  const NIV=s=>s>=.12?'muy expuesta':s>=.07?'expuesta':s>=.03?'algo expuesta':'sólida';
+  function escenaMedidas180(e,k){ const c=med(e), hasta=k.hasta, ops=[];
+    ops.push({t:'Recorte de emergencia',cat:'compania',d:'Menos nómina y gastos: la crisis te pega 35% menos, pero baja la moral y la gente. '+(c.rec>=A()?'Ya está aplicado.':''),dis:c.rec>=A()?'Ya la aplicaste':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; c.rec=hasta; e.empleados=Math.max(2,Math.round((e.empleados||4)*.88)); e.moral=cl((e.moral||50)-10,0,100); log('<b>'+E(e.nombre)+'</b> hizo un recorte de emergencia: salieron personas y la moral se resintió.','mal'); reab(); }});
+    ops.push({t:'Congelar inversiones y guardar caja',cat:'compania',d:'Resiste 10% mejor, pero la compañía se queda sin innovar mientras dure.',dis:c.cons>=A()?'Ya la aplicaste':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; c.cons=hasta; e.innovacion=cl((e.innovacion||50)-4,0,100); log('<b>'+E(e.nombre)+'</b> congeló sus inversiones y guardó caja.'); reab(); }});
+    if((e.deuda||0)>0) ops.push({t:'Renegociar la deuda con los bancos',cat:'capital',d:'Pides rebajas y plazos. Puede salir bien o dejarte peor. Solo una vez por crisis.',dis:c.conc===k.id?'Ya lo intentaste en esta crisis':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; c.conc=k.id; const g=Math.max(5,(e.deuda||0)*.01); e.caja=Math.max(0,e.caja-g);
+      if(chance(.6)){ e.deuda*=.85; log('Los bancos le rebajaron 15% de la deuda a <b>'+E(e.nombre)+'</b>.','bien'); } else { e.deuda*=1.04; e.marca=cl((e.marca||50)-3,0,100); log('La renegociación de <b>'+E(e.nombre)+'</b> salió mal: más deuda y mala fama.','mal'); } reab(); }});
+    ops.push({t:'Pedir el salvavidas del Estado',cat:'riesgo',d:'Es un favor: si te lo dan, queda anotado como deuda con quien manda. A quien se le opone se lo niegan casi siempre.',dis:c.salv>=hasta?'Ya lo pediste en esta crisis':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const m=salvavidas(e,k); log(m,/Te abrieron/.test(m)?'bien':'mal'); reab(); }});
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); escenaCrisis180(); }});
+    escena({rubro:E(k.n),titulo:'Medidas para '+E(e.nombre),ancho:true,cerrable:true,clase:'pol155',cuerpo:'Debe '+fm(e.deuda||0)+' y tiene '+fm(e.caja||0)+' en caja. '+(c.ult&&c.ult.a===A()?'Este año perdió '+c.ult.sh+'% de sus ventas por la crisis.':''),opciones:ops}); }
+  function escenaCrisis180(){ if(!ACTIVO()||nino()) return; const k=crisisAct();
+    if(!k){ escena({rubro:'La crisis',titulo:'La crisis y tú',cuerpo:'Hoy no hay una crisis económica en marcha.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const cs=comps(), pol=postura(k), I=inten(k), filas=cs.map(e=>{ const s=shockDe(e,k), c=e.crisis180||{}; return '<tr><td><b>'+E(e.nombre)+'</b><br><small>'+NIV(s)+' · debe '+fm(e.deuda||0)+' · caja '+fm(e.caja||0)+(c.rec>=A()?' · recorte':'')+(c.cons>=A()?' · inversiones congeladas':'')+'</small></td><td style="text-align:right">'+R1(s*100)+'% de las ventas</td></tr>'; }).join('');
+    const ops=cs.map(e=>({t:'Medidas para '+E(e.nombre),cat:'compania',d:NIV(shockDe(e,k))+'. Recorte, congelar inversiones, renegociar la deuda o pedir el salvavidas.',cerrar:false,run:()=>{ cerrarModal(); escenaMedidas180(e,k); }}));
+    [['austeridad','Apretarse el cinturón'],['oportunidad','Apostar a comprar barato'],['estado','Contar con la ayuda del Estado']].forEach(([id,n])=>{ if(pol!==id) ops.push({t:'Cambiar la postura de la casa: '+n,cat:'capital',d:'Hoy: '+(pol?({austeridad:'apretarse el cinturón',oportunidad:'comprar barato',estado:'contar con el Estado'})[pol]:'sin definir')+'.',dis:sinMov(),cerrar:false,run:()=>{ if(!movida()) return; C180().postura[k.id]=id; if(id==='austeridad') cs.forEach(e=>{ med(e).cons=k.hasta; }); log('La casa cambió su postura ante la crisis: '+n.toLowerCase()+'.'); reab(); }}); });
+    escena({rubro:'La crisis',titulo:'La crisis y tú',ancho:true,cerrable:true,clase:'pol155',cuerpo:'<b>'+E(k.n)+' ('+k.desde+'–'+k.hasta+').</b> '+E(k.intro)+' Este año la crisis está '+(I>=.9?'en su peor momento':I>=.6?'fuerte':'cediendo')+'. El crédito está cerrado: se consigue menos deuda. Pega más a quien más debe y menos caja tiene.',
+      html:'<div class="k"><div><b>'+Math.round(I*100)+'%</b><span>fuerza de la crisis</span></div><div><b>'+(pol?({austeridad:'Cinturón',oportunidad:'Comprar barato',estado:'El Estado'})[pol]:'—')+'</b><span>postura de la casa</span></div><div><b>'+cs.length+'</b><span>compañías</span></div></div>'+(filas?'<table class="libro">'+filas+'</table>':''),opciones:ops}); }
+
+  /* ==================== EL CONSEJERO ==================== */
+  function gCrisis(){ if(!adulto()) return []; const k=crisisAct(), cs=comps(); if(!k||!cs.length) return [];
+    const e=cs.slice().sort((a,b)=>shockDe(b,k)-shockDe(a,k))[0], s=shockDe(e,k), c=e.crisis180||{}; if(s<.04||(c.rec>=A()&&c.cons>=A())) return [];
+    return [{id:'crisis:'+k.id+e.nombre,peso:44,tono:'rojo',txt:'<b>'+E(e.nombre)+'</b> está '+NIV(s)+' a '+E(k.n.toLowerCase())+'.',por:'Debe '+fm(e.deuda||0)+' y tiene '+fm(e.caja||0)+' en caja: este año puede perder '+R1(s*100)+'% de sus ventas.',si:'Puedes recortar, congelar inversiones, renegociar la deuda o pedir el salvavidas.',ir:'La crisis y tú',irT:'Ver medidas',pre:()=>{ try{ escenaCrisis180(); }catch(x){} }}]; }
+
+  /* ==================== ENGANCHES ==================== */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA180_PASO) return; window.__SA180_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual180(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA180_ACC) return; window.__SA180_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ const k=crisisAct(); if(Array.isArray(L)&&k&&adulto()&&comps().length&&!L.some(x=>x.t==='La crisis y tú')) L.push({t:'La crisis y tú',cat:'capital',d:k.n+' ('+k.desde+'–'+k.hasta+'): recorte, caja, deuda y el salvavidas del Estado, compañía por compañía.',mov:0,modal:true,run:()=>escenaCrisis180()}); }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v180=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA180_CAT) return; window.__SA180_CAT=true; window.catDe=function(t){ if(t==='La crisis y tú') return 'capital'; return old.apply(this,arguments); }; }
+  function wrapDeuda(){ const old=window.capacidadDeudaDe; if(typeof old!=='function'||old.__v180) return;
+    const f=function(e){ let v=old.apply(this,arguments); try{ const k=crisisAct(); if(k&&e) v*=(1-.45*inten(k)); }catch(x){} return v; }; f.__v180=true; Object.keys(old).forEach(k=>{ if(!/^__v\d+$/.test(k)) f[k]=old[k]; }); window.capacidadDeudaDe=f; }
+  function init180(){ registrar(); wrapPaso(); wrapAcciones(); wrapCat(); wrapDeuda();
+    try{ if(typeof window.consejeroRegistrar168==='function'&&!window.__SA180_CONS){ window.__SA180_CONS=true; window.consejeroRegistrar168(gCrisis); } }catch(x){}
+    Object.assign(window,{CRISIS_180:CRISIS,crisisActiva180:crisisAct,efectoCrisis180,shockCrisis180:shockDe,estresCrisis180:estres,escenaCrisis180,escenaMedidas180,salvavidas180:salvavidas,anualCrisis180:anual180,evCredito180:evCredito,evOportunidad180:evOportunidad,evCorrida180:evCorrida,evInicioCrisis180:evInicio,intensidadCrisis180:inten}); }
+  init180(); setTimeout(init180,40); setTimeout(init180,220); setTimeout(init180,650); setTimeout(init180,950);
+  window.__SA180={version:V180};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v181 · ANULACIÓN ANTES DEL DIVORCIO
+   El divorcio vincular llega a Colombia con la Constitución de 1991. Antes,
+   un matrimonio solo se acababa con la muerte o con una anulación (la
+   nulidad que concede el tribunal eclesiástico). Desde 1976 existe un
+   divorcio civil, pero casi todos los matrimonios de la clase de la casa
+   eran católicos: para ellos sigue siendo la nulidad.
+   - Antes de 1991 la acción ya no dice "Divorciarte": dice "Pedir la
+     anulación del matrimonio", en la pantalla de la pareja y en el grupo.
+   - Es más cara (abogados y tribunal: un porcentaje del patrimonio, se paga
+     al empezar) y más demorada (cuatro años en vez de dos, una movida por
+     año), y no está garantizada: el tribunal puede negarla (la probabilidad
+     sube con las relaciones y el prestigio de la casa y baja con los hijos).
+     Si la niegan, el matrimonio sigue y se puede volver a pedir.
+   - Si la conceden, se reparte el patrimonio igual que en un divorcio, pero
+     con menos estigma (-3 de prestigio en vez de -5) y queda en la crónica
+     como "Anuló su matrimonio".
+   - Cuando el cónyuge es quien inicia la separación, también pide la
+     anulación (cuatro años) mientras no exista el divorcio.
+   - Desde 1991 todo sigue como antes: el divorcio de dos años.
+   ========================================================================== */
+(function(){
+  const V181='v181';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const ANUL=()=>A()<1991;
+  const AÑOS=4;
+  const costoLegal=()=>Math.max(60,pat()*.045);
+  function prob(){ const hijos=((S.familia&&S.familia.hijos)||[]).length; let p=.6+(S.p.redes||0)/400+(typeof prestigio==='function'?prestigio():0)/500-(hijos>=3?.08:0);
+    return cl(p,.35,.9); }
+  window.tituloFin181=()=>ANUL()?'Pedir la anulación del matrimonio':'Divorciarte';
+  window.descFin181=()=>ANUL()?'Antes de 1991 no hay divorcio: solo la nulidad del tribunal eclesiástico. Cuesta '+fm(costoLegal())+', tarda '+AÑOS+' años y no está garantizada.':'Romper el matrimonio cuesta patrimonio y le baja el tono al apellido.';
+
+  const oldEsc=window.escenaDivorcio, oldEj=window.ejecutarDivorcio;
+  function escenaAnulacion(){ const pa=S.familia.pareja; if(!pa) return; const corte=pa.separacionBienes?.06:.33, c=costoLegal(), p=prob();
+    const sinMov=S.mov<1?'No te quedan movidas':null;
+    escena({rubro:'Tribunal eclesiástico',titulo:'Anular tu matrimonio con '+E(pa.nombre),
+      cuerpo:(A()>=1976?'Desde 1976 existe el divorcio civil, pero casi todos los matrimonios de tu clase fueron católicos: para ponerles fin hay que pedir la nulidad ante el tribunal eclesiástico.':'Aquí no existe el divorcio: un matrimonio solo se acaba con la muerte o con una anulación que conceda el tribunal eclesiástico.')
+        +' Hay que probar una causal, llevar testigos y esperar años. Cuesta '+fm(c)+' en abogados y tribunal, y nada garantiza que la concedan. '
+        +(pa.separacionBienes?'Con capitulaciones firmadas, el patrimonio casi no se toca.':'Sin capitulaciones, al final se va cerca de un tercio de todo lo que hay.')
+        +' En esta ciudad una anulación se comenta, aunque menos que un escándalo.',
+      opciones:[{t:'Pedir la anulación · '+fm(c),cat:'familia',d:AÑOS+' años de trámite, una movida por año. Probabilidad de que la concedan: '+Math.round(p*100)+'%. Si la conceden, se va cerca de '+fm(pat()*corte)+'.',
+          dis:pa.divorcioEnCurso?'Ya hay un proceso en curso':(S.efectivo<c?'No te alcanza para el proceso ('+fm(c)+')':sinMov),
+          run:()=>{ if(pa.divorcioEnCurso){ log('La anulación ya está en trámite.','mal'); return; } S.efectivo-=Math.min(S.efectivo,c); pa.divorcioEnCurso=true; pa.anulacion181=true;
+            iniciarCompromiso({titulo:'Proceso de anulación con '+pa.nombre,restan:AÑOS,mov:1,cerrar:()=>window.ejecutarDivorcio()});
+            log('Iniciaste ante el tribunal eclesiástico la anulación de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Pagaste '+fm(c)+' y el trámite tomará '+AÑOS+' años, una movida por año.','mal'); S.mov--; }},
+        {t:'Aguantar un año más',cat:'familia',d:'Nada cambia, pero nada se pierde todavía.',run:()=>{}}],cerrable:true}); }
+  function escenaDivorcio181(){ if(!ANUL()||!S.familia.pareja) return typeof oldEsc==='function'?oldEsc.apply(this,arguments):undefined; return escenaAnulacion(); }
+
+  function ejecutarAnulacion(){ const pa=S.familia.pareja; if(!pa||!pa.divorcioEnCurso) return;
+    if(!chance(prob())){ pa.divorcioEnCurso=false; pa.anulacion181=false; pa.paciencia=cl((pa.paciencia||50)-10,0,100); S.p.felicidad=cl(S.p.felicidad-6,0,100); try{ moverPrestigio(-1,'una anulación negada'); }catch(e){}
+      log('El tribunal eclesiástico <b>negó la nulidad</b> de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Sigues casado, y el proceso te costó años y plata. Puedes volver a pedirla.','mal'); return 'El tribunal negó la anulación.'; }
+    const corte=pa.separacionBienes?.06:.33, perd=pat()*corte; let resta=perd; const caja=Math.min(S.efectivo,resta); S.efectivo-=caja; resta-=caja;
+    while(resta>1&&(S.bienes||[]).length>1){ const b=S.bienes.filter(x=>x.uid!==(S.hogar&&S.hogar.vivienda)).sort((a,c)=>a.valor-c.valor)[0]; if(!b) break; S.bienes=S.bienes.filter(x=>x.uid!==b.uid); resta-=Math.max(0,b.valor-(b.hipoteca||0)); log('En la anulación se fue <b>'+E(b.nombre)+'</b>.','mal'); }
+    S.familia.hijos.forEach(h=>{ if(h.edad<20) h.vinculo=cl(h.vinculo-12,0,100); }); try{ moverPrestigio(-3,'la anulación del matrimonio'); }catch(e){} S.p.felicidad=cl(S.p.felicidad-10,0,100);
+    log('El tribunal eclesiástico <b>concedió la anulación</b> de tu matrimonio con <b>'+E(pa.nombre)+'</b>. Repartir lo que había costó cerca de '+fm(perd)+'.','mal'); hito('Anuló su matrimonio con '+pa.nombre); S.familia.pareja=null;
+    return 'La anulación quedó concedida después de los años de trámite.'; }
+  function ejecutarDivorcio181(){ const pa=S.familia&&S.familia.pareja; if(pa&&pa.divorcioEnCurso&&pa.anulacion181) return ejecutarAnulacion(); return typeof oldEj==='function'?oldEj.apply(this,arguments):undefined; }
+
+  /* el cónyuge que inicia el proceso: antes de 1991 pide la anulación */
+  function iniciarFin181(nom){ if(!ANUL()||!S.familia.pareja) return false; const pa=S.familia.pareja; pa.divorcioEnCurso=true; pa.anulacion181=true;
+    iniciarCompromiso({titulo:'Proceso de anulación con '+nom,restan:AÑOS,mov:1,cerrar:()=>window.ejecutarDivorcio()});
+    log('<b>'+E(nom)+'</b> pidió ante el tribunal eclesiástico la anulación del matrimonio. El trámite tomará '+AÑOS+' años y ocupará una movida por año.','mal'); return true; }
+
+  function init181(){ if(typeof oldEsc==='function'&&!window.escenaDivorcio.__v181){ window.escenaDivorcio=escenaDivorcio181; window.escenaDivorcio.__v181=true; }
+    if(typeof oldEj==='function'&&!window.ejecutarDivorcio.__v181){ window.ejecutarDivorcio=ejecutarDivorcio181; window.ejecutarDivorcio.__v181=true; }
+    Object.assign(window,{iniciarFinMatrimonio181:iniciarFin181,costoAnulacion181:costoLegal,probAnulacion181:prob,escenaAnulacion181:escenaAnulacion,ANIOS_ANULACION_181:AÑOS}); }
+  init181(); setTimeout(init181,40); setTimeout(init181,220); setTimeout(init181,650);
+  window.__SA181={version:V181};
 })();
 </script>
 
