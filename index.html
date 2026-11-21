@@ -35370,12 +35370,13 @@ install();setTimeout(install,1200);
 
   /* ==================== NAVEGACIÓN ==================== */
   function seleccionar(id){ est.sel=id; if(ui){ ui.nodes.querySelectorAll('[data-ag]').forEach(g=>{ const r=g.firstChild, sel=g.getAttribute('data-ag')===id, foco=g.getAttribute('data-ag')===est.foco; r.setAttribute('stroke',sel?'#be9350':foco?'#c8ab70':'#c9c0ae'); r.setAttribute('stroke-width',sel?3:foco?2:1); }); ficha(); } }
-  function enfocar(id,modo,sinHist){ if(!sinHist) est.hist.push({modo:est.modo,foco:est.foco,sel:est.sel,prof:est.prof}); est.foco=id; est.sel=id; if(modo) est.modo=modo; else if(est.modo==='casa') est.modo='desc'; marcarModo(); dibujar(); ajustar(); }
-  function volver(){ const h=est.hist.pop(); if(!h) return; est.modo=h.modo; est.foco=h.foco; est.sel=h.sel; est.prof=h.prof; ui.q('#ag-prof').value=est.prof; ui.q('#ag-proft').textContent=est.prof; marcarModo(); dibujar(); ajustar(); }
-  function modo(m){ est.modo=m; if(m==='casa'){ est.foco=fundador(); est.sel=est.sel||est.foco; est.abiertos.clear(); est.plegados.clear(); } else { est.foco=est.sel||est.foco||fundador(); } marcarModo(); dibujar(); ajustar(); }
+  function enfocar(id,modo,sinHist){ if(!sinHist) est.hist.push({modo:est.modo,foco:est.foco,sel:est.sel,prof:est.prof}); est.foco=id; est.sel=id; if(modo) est.modo=modo; else if(est.modo==='casa') est.modo='desc'; marcarModo(); dibujar(); centrarRaiz(); }
+  function volver(){ const h=est.hist.pop(); if(!h) return; est.modo=h.modo; est.foco=h.foco; est.sel=h.sel; est.prof=h.prof; ui.q('#ag-prof').value=est.prof; ui.q('#ag-proft').textContent=est.prof; marcarModo(); dibujar(); centrarRaiz(); }
+  function modo(m){ est.modo=m; if(m==='casa'){ est.foco=fundador(); est.sel=est.sel||est.foco; est.abiertos.clear(); est.plegados.clear(); } else { est.foco=est.sel||est.foco||fundador(); } marcarModo(); dibujar(); centrarRaiz(); }
   function marcarModo(){ ui.root.querySelectorAll('[data-modo]').forEach(b=>b.classList.toggle('on',b.dataset.modo===est.modo)); }
   function bounds(){ const r=ui.svg.getBoundingClientRect(); return {w:r.width||800,h:r.height||500}; }
   function ajustar(){ const b=bounds(); est.k=Math.max(.05,Math.min(.95,(b.w-60)/est.ext.w,(b.h-100)/est.ext.h)); est.x=(b.w-est.ext.w*est.k)/2; est.y=(b.h-est.ext.h*est.k)/2+10; aplicar(); }
+  function centrarRaiz(){ if(!ui) return; const b=bounds(), n=lay.nodos.find(x=>x.id===est.foco)||lay.nodos[0]; if(!n){ ajustar(); return; } est.k=Math.max(.5,Math.min(.85,b.w/1150)); if(lay.w*est.k<b.w-40) { ajustar(); est.k=Math.min(est.k,.85); } est.x=b.w/2-(n.x+W/2)*est.k; est.y=(est.modo==='asc'?b.h*.7:Math.max(100,b.h*.18))-(n.y+H/2)*est.k; aplicar(); }
   function centrar(id){ const n=lay.nodos.find(x=>x.id===id); if(!n) return; const b=bounds(); est.k=Math.max(.5,Math.min(1,est.k)); est.x=b.w/2-(n.x+W/2)*est.k; est.y=b.h*.3-(n.y+H/2)*est.k; aplicar(); }
   function zoom(f,cx,cy){ const prev=est.k; est.k=Math.max(.05,Math.min(2.5,est.k*f)); const r=est.k/prev; est.x=cx-(cx-est.x)*r; est.y=cy-(cy-est.y)*r; aplicar(); }
   function buscar(q){ q=String(q||'').trim().toLowerCase(); if(!q||!API()) return null; const L=Object.values(G().P); return L.find(p=>nombreDe(p).toLowerCase()===q)||L.find(p=>(nombreDe(p)+' ('+aniosTxt(p)+')').toLowerCase()===q)||L.find(p=>nombreDe(p).toLowerCase().includes(q))||null; }
@@ -35404,7 +35405,7 @@ install();setTimeout(install,1200);
       +'<aside class="der"><div class="ag-st" style="color:#8e7957">Expediente personal</div><div id="ag-det"></div></aside>';
     document.body.appendChild(r); const q=s=>r.querySelector(s); ui={root:r,q,svg:q('#ag-svg'),vp:q('#ag-vp'),links:q('#ag-links'),nodes:q('#ag-nodes')};
     q('#ag-x').addEventListener('click',cerrar); q('#ag-back').addEventListener('click',volver); r.querySelectorAll('[data-modo]').forEach(b=>b.addEventListener('click',()=>modo(b.dataset.modo)));
-    q('#ag-prof').addEventListener('input',e=>{ est.prof=+e.target.value; q('#ag-proft').textContent=est.prof; dibujar(); ajustar(); }); q('#ag-par').addEventListener('change',e=>{ est.parejas=e.target.checked; dibujar(); ajustar(); }); q('#ag-dif').addEventListener('change',e=>{ est.difuntos=e.target.checked; dibujar(); });
+    q('#ag-prof').addEventListener('input',e=>{ est.prof=+e.target.value; q('#ag-proft').textContent=est.prof; dibujar(); }); q('#ag-par').addEventListener('change',e=>{ est.parejas=e.target.checked; dibujar(); }); q('#ag-dif').addEventListener('change',e=>{ est.difuntos=e.target.checked; dibujar(); });
     q('#ag-q').addEventListener('change',e=>{ const p=buscar(e.target.value); if(p){ enfocar(p.id,est.modo==='casa'?'desc':est.modo); e.target.value=nombreDe(p); } });
     q('#ag-zi').addEventListener('click',()=>{ const b=bounds(); zoom(1.3,b.w/2,b.h/2); }); q('#ag-zo').addEventListener('click',()=>{ const b=bounds(); zoom(1/1.3,b.w/2,b.h/2); }); q('#ag-fit').addEventListener('click',ajustar); q('#ag-cen').addEventListener('click',()=>centrar(est.sel||est.foco));
     q('#ag-svgb').addEventListener('click',()=>descargar(new Blob([svgExportado()],{type:'image/svg+xml;charset=utf-8'}),'Sociedad-Anonima-Arbol.svg')); q('#ag-png').addEventListener('click',()=>pngExportado().then(b=>descargar(b,'Sociedad-Anonima-Arbol.png')).catch(()=>alert('No se pudo exportar el PNG. Usa la exportación SVG.'))); q('#ag-json').addEventListener('click',()=>descargar(new Blob([window.exportarGenealogia191()],{type:'application/json'}),'Sociedad-Anonima-Genealogia.json'));
@@ -35413,7 +35414,7 @@ install();setTimeout(install,1200);
     window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.getElementById('ag192')&&!document.getElementById('ag192').hidden) cerrar(); });
     return ui; }
   function abrir(foco){ if(!API()||typeof S==='undefined'||!S||!S.p) return false; window.sync191(); construir(); ui.root.hidden=false; ui.root.style.display='grid'; est.hist=[]; est.abiertos.clear(); est.plegados.clear(); est.cmp=null; est.modo='casa'; est.foco=foco||fundador(); est.sel=(S.p&&S.p.gid191)||est.foco;
-    const dl=ui.q('#ag-dl'); dl.replaceChildren(); Object.values(G().P).sort((a,b)=>nombreDe(a).localeCompare(nombreDe(b))).forEach(p=>{ const o=document.createElement('option'); o.value=nombreDe(p); o.label=aniosTxt(p); dl.appendChild(o); }); marcarModo(); dibujar(); ajustar(); setTimeout(()=>{ ajustar(); },60); return true; }
+    const dl=ui.q('#ag-dl'); dl.replaceChildren(); Object.values(G().P).sort((a,b)=>nombreDe(a).localeCompare(nombreDe(b))).forEach(p=>{ const o=document.createElement('option'); o.value=nombreDe(p); o.label=aniosTxt(p); dl.appendChild(o); }); marcarModo(); dibujar(); centrarRaiz(); setTimeout(()=>{ centrarRaiz(); },60); return true; }
   function cerrar(){ if(ui){ ui.root.hidden=true; ui.root.style.display='none'; } }
 
   /* ==================== ENGANCHES ==================== */
