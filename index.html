@@ -34619,7 +34619,8 @@ install();setTimeout(install,1200);
       return L; }; window.listaAcciones.__v186=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA186_CAT) return; window.__SA186_CAT=true; window.catDe=function(t){ if(t==='Las otras casas') return 'legado'; return old.apply(this,arguments); }; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA186_PASO) return; window.__SA186_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual186(); }catch(e){ console.error(e); } return r; }; }
-  function init186(){ wrapAcciones(); wrapCat(); wrapPaso();
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Las otras casas')) g.miembros.push(['Influencia','Las otras casas']); }
+  function init186(){ wrapAcciones(); wrapCat(); wrapPaso(); grupo();
     Object.assign(window,{escenaCasas186,escenaCasa186,anualCasas186:anual186,casaViva186:V,evHerenciaCasa186:evHerencia,evQuiebraCasa186:evQuiebra,evAlianzaCasa186:evAlianza,evMatrimonioCasa186:evMatrimonio,evGuerraCasa186:evGuerra,evHostilCasa186:evHostil,partirCasa186:partirCasa,guerraNuevaCasa186:guerraNueva,cerrarGuerrasCasa186:cerrarGuerras}); }
   init186(); setTimeout(init186,40); setTimeout(init186,220); setTimeout(init186,650); setTimeout(init186,950);
   window.__SA186={version:V186};
@@ -34734,7 +34735,8 @@ install();setTimeout(install,1200);
       return L; }; window.listaAcciones.__v187=true; }
   function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA187_CAT) return; window.__SA187_CAT=true; window.catDe=function(t){ if(t==='La prensa') return 'legado'; return old.apply(this,arguments); }; }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA187_PASO) return; window.__SA187_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual187(); }catch(e){ console.error(e); } return r; }; }
-  function init187(){ wrapAcciones(); wrapCat(); wrapPaso();
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='La prensa')) g.miembros.push(['Influencia','La prensa']); }
+  function init187(){ wrapAcciones(); wrapCat(); wrapPaso(); grupo();
     Object.assign(window,{escenaPrensa187,escenaComprarMedio187:escenaComprar187,estadoPrensa187:D,anualPrensa187:anual187,evInvestigacion187:evInvestigacion,evPerfil187:evPerfil,evPauta187:evPauta,comprarMedio187:comprar,MEDIOS_187:OUT,periodistasPrensa187:()=>{ asegurar(); return D().per; }}); }
   init187(); setTimeout(init187,40); setTimeout(init187,220); setTimeout(init187,650); setTimeout(init187,950);
   window.__SA187={version:V187};
