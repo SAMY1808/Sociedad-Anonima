@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v202</div>
+<div class="version-badge" id="versionBadge">v203</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -11517,7 +11517,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     diplomatica:{n:'Diplomática',titulos:['Agregado diplomático','Cónsul','Embajador','Embajador emérito']},
     academica:{n:'Académica',titulos:['Profesor','Investigador','Decano','Académico de número']},
     militar:{n:'Militar',titulos:['Oficial','Comandante','Coronel','General retirado']},
-    bancaria:{n:'Bancaria',titulos:['Analista financiero','Banquero','Banquero senior','Banquero de la casa']}
+    bancaria:{n:'Bancaria',titulos:['Analista financiero','Banquero','Banquero senior','Banquero de la casa']},
+    /*v203*/ judicial:{n:'Judicial',titulos:['Juez','Juez de circuito','Magistrado de tribunal','Magistrado de alta corte']},
+    docente:{n:'Docente',titulos:['Docente','Coordinador académico','Rector de colegio','Maestro de la ciudad']},
+    eclesiastica:{n:'Eclesiástica',titulos:['Seminarista o postulante','Sacerdote o religiosa','Obispo o superiora provincial','Cardenal o madre general']}
   };
 
   function normalizarHistoriaBienes44(bienes){
@@ -37184,6 +37187,77 @@ install();setTimeout(install,1200);
     Object.assign(window,{clero202:Q,registrarClero202:registrar,ingresarClero202:ingresar,salirClero202:salir,anualClero202:anual,escenaClero202:escenaClero,escenaVocacion202:escenaVocacion,escenaFamiliar202:escenaFamiliar,mandarFamiliar202:mandar,candidatosFamilia202:candidatos,puedeVocacion202:puedeVocacion,nivelClero202:nivelNombre,hacerClero202:hacer,dote202:dote,ORDENES_M_202:ORDENES_M,ORDENES_F_202:ORDENES_F,evEscandaloClero202:evEscandalo,evCrisisClero202:evCrisis,evDesamortizacion202:evDesamortizacion,evCamilo202:evCamilo,evPapa202:evPapa,evFugada202:evFugada,familiaresClero202:familiares}); }
   init202(); setTimeout(init202,40); setTimeout(init202,220); setTimeout(init202,650); setTimeout(init202,950); setTimeout(init202,1500);
   window.__SA202={version:V202};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v203 · LAS CARRERAS DE LA CASA Y LAS PENSIONES
+   1. LAS CARRERAS DE LOS HIJOS. Al orientar a un hijo o a un nieto se
+      pueden escoger también la carrera judicial, la docente y la
+      eclesiástica (militar, académica, diplomática, política, empresarial y
+      bancaria ya estaban). Cuando llegan a la mitad de la escalera dejan algo
+      a la casa cada año: un coronel abre puertas, un magistrado frena
+      investigaciones, un obispo es un aliado, una rectora da nombre. Y su
+      cargo aparece en el archivo genealógico.
+   2. LAS PENSIONES. Cada carrera (Estado, docencia, academia, judicatura,
+      Iglesia) cuenta los años de servicio. Con 20 años (o al llegar a los 62)
+      se gana una pensión que se paga cada año: un porcentaje del último
+      sueldo. La asignación de retiro de los militares (v201) entra en la misma
+      cuenta. Hay una pantalla con tus pensiones y los años que llevas en cada
+      carrera.
+   ========================================================================== */
+(function(){
+  const V203='v203';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const FUENTES={publico:'el Estado',docente:'el magisterio',academico:'la universidad',judicial:'la rama judicial',clero:'la Iglesia',militar:'las Fuerzas Militares'};
+  const SAL_REF={publico:140,docente:70,academico:110,judicial:130,clero:40,militar:100};
+
+  /* ---- las carreras de la casa ---- */
+  const EFECTOS={
+    militar:{n:'un oficial superior',f:(d,n)=>{ S.p.redes=clamp((S.p.redes||0)+(n>=3?2:1),0,100); return null; },txt:'abre puertas en los cuarteles y las notarías'},
+    judicial:{n:'un magistrado',f:(d,n)=>{ try{ if(S.penal) S.penal.riesgo=clamp((S.penal.riesgo||0)-(n>=3?4:2),0,100); }catch(e){} return null; },txt:'sabe cómo se mueven los expedientes'},
+    eclesiastica:{n:'un hombre o una mujer de la Iglesia',f:(d,n)=>{ S.p.reputacion=clamp(S.p.reputacion+(n>=3?2:1),0,100); return null; },txt:'es un aliado en la Iglesia y en la sociedad'},
+    docente:{n:'un maestro de la ciudad',f:(d,n)=>{ S.p.reputacion=clamp(S.p.reputacion+1,0,100); return null; },txt:'le da nombre a la casa en el barrio'},
+    academica:{n:'un académico',f:(d,n)=>{ S.p.reputacion=clamp(S.p.reputacion+1,0,100); return null; },txt:'le da lustre a la casa'},
+    diplomatica:{n:'un diplomático',f:(d,n)=>{ S.p.redes=clamp((S.p.redes||0)+1,0,100); return null; },txt:'abre puertas en el exterior'},
+    politica:{n:'un político',f:(d,n)=>{ S.p.redes=clamp((S.p.redes||0)+(n>=3?2:1),0,100); return null; },txt:'tiene oído en el poder'}};
+  function ramas(){ const out=[]; const rec=(arr)=>{ (arr||[]).forEach(h=>{ if(!h) return; if(h.casa43&&h.casa43.carreraPublica) out.push(h); rec(h.hijos); }); }; rec(S.familia&&S.familia.hijos); return out; }
+  function anualCasa(){ if(!S||!S.p||S.muerto) return; const out=[];
+    ramas().forEach(h=>{ const c=h.casa43.carreraPublica, e=EFECTOS[c.tipo]; if(!e||(c.nivel||0)<2) return; const m=e.f(h,c.nivel); out.push({h,c,e}); });
+    if(out.length&&chance(.25)){ const x=pick(out); log(esc(x.h.nombre+' '+(x.h.apellido||S.p.apellido))+', '+esc(x.c.titulo.toLowerCase())+', '+x.e.txt+'.'); }
+    rotular(); }
+  function rotular(){ try{ const g=typeof window.genea191==='function'?window.genea191():null; if(!g||!g.P) return; ramas().forEach(h=>{ const id=h.gid191; const p=id&&g.P[id]; if(!p) return; const c=h.casa43.carreraPublica; const rol=(h.sexo==='m'?'Hija':'Hijo')+' · '+c.titulo; if(p.rol!==rol&&/^(Hij[oa]|Nieto|Nieta)/.test(p.rol||'Hijo')){ p.rol=rol; } }); }catch(e){} }
+
+  /* ---- las pensiones ---- */
+  const E=()=>{ if(!S.serv203||typeof S.serv203!=='object') S.serv203={anios:{},ult:{},otorgada:{},pensiones:[]}; const e=S.serv203; ['anios','ult','otorgada'].forEach(k=>{ if(!e[k]) e[k]={}; }); if(!Array.isArray(e.pensiones)) e.pensiones=[]; return e; };
+  function fuenteActual(){ const c=S.carrera||{}, r=c.ruta; if(r==='militar') return 'militar'; if(r==='clero') return 'clero'; if(r==='publico'||(window.gestion197&&window.gestion197())) return 'publico'; if(r==='docente'||(r==='profesional'&&c.profesion==='pedagogia')) return 'docente'; if(r==='academico') return 'academico'; if(c.judicatura&&c.judicatura.activo) return 'judicial'; return null; }
+  function sueldoActual(f){ try{ const c=S.carrera, r=c.ruta; if(r&&RUTAS[r]&&RUTAS[r].niveles){ const n=RUTAS[r].niveles[clamp(c.nivel||0,0,RUTAS[r].niveles.length-1)]; if(n) return n.s; } if(f==='judicial'){ const j=TRAYECTORIAS_PUBLICAS.judicatura; return j.salarios[clamp(c.judicatura.nivel||0,0,j.salarios.length-1)]; } }catch(e){} return SAL_REF[f]||60; }
+  function otorgar(f,motivo){ const e=E(); if(f==='militar'||e.otorgada[f]) return null; const a=e.anios[f]||0; if(a<20) return null; const monto=Math.round((e.ult[f]||SAL_REF[f])*(.45+Math.min(.3,(a-20)*.015))); e.otorgada[f]=A(); e.pensiones.push({fuente:f,monto,desde:A(),anios:a,motivo}); log('Te reconocieron la <b>pensión de '+esc(FUENTES[f])+'</b>: '+fm(monto)+' al año, por '+a+' años de servicio ('+motivo+').','hito'); return monto; }
+  function anualPensiones(){ if(!S||!S.p||S.muerto) return; const e=E(), f=fuenteActual();
+    Object.keys(FUENTES).forEach(k=>{ if(k!==f&&e.anios[k]>=20&&!e.otorgada[k]&&k!=='militar') otorgar(k,'al dejar la carrera'); });
+    if(f){ e.anios[f]=(e.anios[f]||0)+1; e.ult[f]=sueldoActual(f); if(f!=='militar'&&(S.p.edad||0)>=62&&e.anios[f]>=20&&!e.otorgada[f]) otorgar(f,'por edad'); }
+    let total=0; e.pensiones.forEach(p=>{ total+=p.monto; }); if(total>0){ S.efectivo+=total; log('Tus pensiones de este año: '+fm(total)+'.'); } }
+  function lineas(){ const e=E(); const L=[]; Object.keys(FUENTES).forEach(k=>{ const a=(k==='militar'&&S.milHist201)?S.milHist201.reduce((s,x)=>s+(x.anios||0),0)+((window.mil201&&window.mil201())?window.mil201().anios:0):(e.anios[k]||0); if(a>0) L.push({k,a}); }); return L; }
+  function escenaPensiones(){ const e=E(); const todas=e.pensiones.slice(); if(S.pension201) todas.push({fuente:'militar',monto:S.pension201.monto,desde:S.pension201.desde,anios:null,motivo:S.pension201.grado}); const total=todas.reduce((s,p)=>s+p.monto,0); const L=lineas();
+    let html='<table class="libro">'+(L.length?L.map(x=>'<tr><td>Años en '+esc(FUENTES[x.k])+'</td><td>'+x.a+(x.a>=20?' (cumple los 20)':' · faltan '+(20-x.a))+'</td></tr>').join(''):'<tr><td>Años de servicio</td><td>aún ninguno</td></tr>')
+      +todas.map(p=>'<tr><td>Pensión de '+esc(FUENTES[p.fuente])+'</td><td class="bien">'+fm(p.monto)+' al año (desde '+p.desde+')</td></tr>').join('')+'<tr><td>Total que cobras cada año</td><td>'+fm(total)+'</td></tr></table>';
+    escena({rubro:'Tu vejez',titulo:'Tus pensiones',ancho:true,cerrable:true,cuerpo:'Cada carrera cuenta los años de servicio. Con 20 años, o al llegar a los 62, te reconocen una pensión que se paga cada año.',html:html,opciones:[]}); }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA203_PASO) return; window.__SA203_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto){ anualPensiones(); anualCasa(); } }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tus pensiones')) g.miembros.push(['Influencia','Tus pensiones']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA203_ACC) return; window.__SA203_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p&&(S.p.edad||0)>=30&&!L.some(x=>x.t==='Tus pensiones')){ const e=E(); if(e.pensiones.length||S.pension201||Object.values(e.anios).some(a=>a>=8)) L.push({t:'Tus pensiones',cat:'casa',d:'Años de servicio por carrera, pensiones reconocidas y lo que cobras cada año.',mov:0,modal:false,run:()=>escenaPensiones()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v203=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA203_CAT) return; window.__SA203_CAT=true; window.catDe=function(t){ if(t==='Tus pensiones') return 'casa'; return old.apply(this,arguments); }; }
+  function init203(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{serv203:E,fuenteCarrera203:fuenteActual,anualPensiones203:anualPensiones,otorgarPension203:otorgar,escenaPensiones203:escenaPensiones,anualCasa203:anualCasa,ramasConCarrera203:ramas,EFECTOS_CASA_203:EFECTOS,FUENTES_203:FUENTES,rotularCarreras203:rotular}); }
+  init203(); setTimeout(init203,40); setTimeout(init203,220); setTimeout(init203,650); setTimeout(init203,950); setTimeout(init203,1500);
+  window.__SA203={version:V203};
 })();
 </script>
 
