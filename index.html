@@ -37662,7 +37662,7 @@ install();setTimeout(install,1200);
        {t:'Defenderte en el proceso',f:()=>{ if(chance(.55)) return 'Ganaste el proceso, sin sanciones.'; G(e,x*2); u.rep=cl(u.rep-8,5,99); return 'Te multaron con '+fm(x*2)+' y salió en la prensa.'; }}]); }:null];
   function instalarClase(){ const CLs=window.CLASES_176, OR=window.ORDEN_176, GR=window.GRUPOS_PUERTA_176, EVc=window.EVC_176; if(!CLs||!OR) return false;
     if(!CLs.eps) CLs.eps=EPS; if(!OR.includes('eps')) OR.push('eps');
-    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Salud'); if(g){ if(!g.ids.includes('eps')) g.ids.push('eps'); g.d='Droguerías, clínicas y, desde 1993, EPS.'; } }
+    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Salud'); if(g){ if(!g.ids.includes('eps')) g.ids.push('eps'); try{ Object.defineProperty(g,'d',{configurable:true,enumerable:true,get(){ return A()>=EPS_DESDE?'Droguerías, clínicas y EPS.':'Droguerías y clínicas.'; }}); }catch(e){} } }
     if(EVc&&!EVc.eps) EVc.eps=EV; return true; }
   function init209(){ try{ instalarSeguro(); instalarClase(); }catch(e){ console.error(e); }
     Object.assign(window,{coberturaSalud209:cobertura,factorSalud209:factor,probSalud209:prob,curaSalud209:cura,textoSalud209:texto,textoPantallaSalud209:textoPantalla,textoColombiaSalud209:textoColombia,CLASE_EPS_209:EPS,tieneAfiliacion209:tieneAfiliacion,tienePrepagada209:tienePrepagada}); }
