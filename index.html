@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v205</div>
+<div class="version-badge" id="versionBadge">v206</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25244,11 +25244,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
    ========================================================================== */
 (function(){
   const V125='v125';
-  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pasto':'pasto'};
+  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pereira':'pereira','Armenia':'armenia','Cúcuta':'cucuta','Ibagué':'ibague','Villavicencio':'villavicencio','Neiva':'neiva','Pasto':'pasto','Popayán':'popayan','Santa Marta':'santa_marta','Valledupar':'valledupar','Tunja':'tunja','Sincelejo':'sincelejo','Riohacha':'riohacha','Quibdó':'quibdo','Buenaventura':'buenaventura','Rionegro':'rionegro','Barrancabermeja':'barrancabermeja','Yopal':'yopal','San Andrés':'san_andres','Florencia':'florencia'};
   const TIPOS125=['apartamento','casa','duplex','mansion','penthouse'];
   const ok={};
   function precargar(){ if(window.__SA125_PRE) return; window.__SA125_PRE=true; let pend=0, t=null;
-    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const hh=window.FOTOS_HECHAS_204; if(hh&&hh[c]&&!hh[c].includes(tp)) return; /*v204: no pedir fotos que todavía no existen*/ const k=c+'_'+tp, im=new Image(); pend++;
+    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const hh=window.FOTOS_HECHAS_204; if(hh&&hh[c]){ if(hh[c].includes(tp)) ok[c+'_'+tp]=true; return; } /*v204/v206: las fotos del registro existen y se cargan al mostrarse, no al abrir el juego*/ const k=c+'_'+tp, im=new Image(); pend++;
       const fin=()=>{ clearTimeout(t); t=setTimeout(()=>{ try{ if(S&&S.p&&typeof render==='function'&&!document.querySelector('#escenaHost .lienzo')) render(); }catch(e){} },150); };
       im.onload=()=>{ ok[k]=true; fin(); }; im.onerror=()=>{ ok[k]=false; }; im.src='img/ciudades/'+k+'.jpg'; })); }
   function claveDe(b){
@@ -27795,7 +27795,7 @@ install();setTimeout(install,1200);
     const a=AREA[b.tipo]; return {t,etq:P1[t].r,extra:a?'≈ '+a[i].toLocaleString('es-CO')+' m²':''};
   }
   const barras=t=>{ const i=NIV.indexOf(t); return [0,1,2].map(k=>'<i class="'+(k<=i?'on':'')+'"></i>').join(''); };
-  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pasto':'pasto'};
+  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pereira':'pereira','Armenia':'armenia','Cúcuta':'cucuta','Ibagué':'ibague','Villavicencio':'villavicencio','Neiva':'neiva','Pasto':'pasto','Popayán':'popayan','Santa Marta':'santa_marta','Valledupar':'valledupar','Tunja':'tunja','Sincelejo':'sincelejo','Riohacha':'riohacha','Quibdó':'quibdo','Buenaventura':'buenaventura','Rionegro':'rionegro','Barrancabermeja':'barrancabermeja','Yopal':'yopal','San Andrés':'san_andres','Florencia':'florencia'};
   const TIPOF={apartamento:'apartamento',casa:'casa',casa_pequena:'casa',casa_grande:'duplex',mansion:'mansion',penthouse:'penthouse'};
   function decorar(svg,b,mini){
     if(typeof svg!=='string'||mini||!/<\/svg>\s*$/.test(svg)) return svg;
@@ -37418,6 +37418,34 @@ install();setTimeout(install,1200);
     Object.assign(window,{migrarSociedades205:migrar,crearCompaniaDeSociedad205:crear,MAPA_RAMO_SECTOR_205:MAPA}); }
   init205(); setTimeout(init205,40); setTimeout(init205,220); setTimeout(init205,650); setTimeout(init205,950); setTimeout(init205,1500);
   window.__SA205={version:V205};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v206 · LAS CIUDADES NUEVAS YA TIENEN SUS FOTOS DE VIVIENDA
+   Llegaron las cien fotos (cinco tipos por cada una de las veinte ciudades de
+   la v194) con el estilo de época: apartamento, casa, dúplex, mansión y
+   penthouse. Cada una vive en img/ciudades/{ciudad}_{tipo}.jpg, 300×400.
+   - v125 y v146 conocen ya las veinte ciudades: una vivienda de Pereira, de
+     Quibdó o de San Andrés muestra la foto de su ciudad y su tipo, igual que
+     las nueve de siempre.
+   - Como todas existen, el juego ya no las baja al abrirse (serían cinco
+     megas de más): se piden cuando una vivienda las muestra.
+   - El registro de la v204 queda completo: ya no hay fotos pendientes.
+   Las de las nueve ciudades de siempre y las tres de Pasto de la v204 siguen
+   a color; las nuevas son sepia, con el borde del papel viejo.
+   ========================================================================== */
+(function(){
+  const V206='v206';
+  const TIPOS=['apartamento','casa','duplex','mansion','penthouse'];
+  function completar(){
+    const slug=window.SLUG_CIUDAD_204, hechas=window.FOTOS_HECHAS_204; if(!slug||!hechas) return;
+    Object.keys(slug).forEach(c=>{ hechas[slug[c]]=TIPOS.slice(); });
+  }
+  function init206(){ completar(); Object.assign(window,{TIPOS_FOTO_206:TIPOS}); }
+  init206(); setTimeout(init206,40); setTimeout(init206,220); setTimeout(init206,650);
+  window.__SA206={version:V206};
 })();
 </script>
 
