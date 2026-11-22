@@ -1407,7 +1407,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v207</div>
+<div class="version-badge" id="versionBadge">v208</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4563,7 +4563,7 @@ function escenaAmantes(){
   const cuerpo=(q?'Tu vida sentimental tiene una relación formal y también puede tener relaciones fuera de ella. ':'')+
     'Una relación paralela puede elevar el ánimo, pero introduce riesgo de conflicto, reputación y descendencia natural fuera de la pareja.';
   const opciones=[];
-  if(S.p.edad>=21) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',d:'Una relación adulta, privada y sin promesa de matrimonio. Puede mejorar tu ánimo.',run:()=>{
+  if(S.p.edad>=18) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',d:'Una relación adulta, privada y sin promesa de matrimonio. Puede mejorar tu ánimo.',run:()=>{
     const a=nuevoAmante(); S.familia.amantes.push(a); S.p.felicidad=clamp(S.p.felicidad+ri(7,13),0,100); S.p.escandalos=clamp((S.p.escandalos||0)+(q?0.4:.1),0,20); S.mov--; log('Conociste discretamente a <b>'+esc(a.nombre)+'</b>. Tu ánimo mejoró, pero ahora hay algo más que cuidar.','bien'); cerrarModal(); render();
   }});
   activos.slice(0,4).forEach(a=>opciones.push({t:'Ver a '+a.nombre.split(' ')[0],cat:'familia',d:'Sube el ánimo, pero una relación paralela tiene riesgo.',run:()=>{
@@ -5593,7 +5593,7 @@ function escenaTestamento(){
       +(S.testamento?'<br><br>Hoy tienes testamento a favor de <b>'+esc(S.testamento.nombre||'—')+'</b>.':''),
     opciones:hijos.map(h=>({t:'Que quede '+esc(h.nombre)+' al frente',cat:'familia',
       d:(h.temperamento?tempDe(h).n+'. ':'')+'Intelecto '+h.atr.intelecto+', disciplina '+h.atr.disciplina+', vínculo '+Math.round(h.vinculo)
-        +'. '+(h.edad>=22?h.edad+' años.':h.edad+' años: la junta administraría hasta sus 22.'),
+        +'. '+(h.edad>=18?h.edad+' años.':h.edad+' años: la junta administraría hasta sus 18.'),
       run:()=>{ S.testamento={tipo:'hijo',nombre:h.nombre,frac:.65}; S.mov--;
         log('Testamento firmado: <b>'+esc(h.nombre)+'</b> queda al frente de la casa.','hito'); }}))
       .concat([{t:'Repartir parejo entre todos',cat:'familia',d:'Nadie se queja, y la casa se parte en pedazos.',
@@ -6846,7 +6846,7 @@ function listaAcciones(){
     run:()=>escenaFundacion()});
   A.push({t:S.bancoFamilia?'Administrar la banca privada familiar':'Crear banca privada de la familia', d:S.bancoFamilia?'Capital '+fmt(valorBancoFamilia())+'. Reserva '+fmt(S.bancoFamilia.reserva)+'. Puede financiar compañías de la casa.':'Una banca propia para administrar liquidez familiar y financiar empresas del grupo sin captar depósitos del público.', mov:1, modal:true, run:()=>escenaBancoFamilia()});
   A.push({t:S.familyOffice?'Administrar el family office':'Crear un family office',d:S.familyOffice?'Gestiona '+fmt(valorFamilyOffice())+' del patrimonio familiar.':'Ordena inversiones, propiedades y sucesión bajo una oficina patrimonial.',mov:1,modal:true,run:()=>escenaFamilyOffice()});
-    if((p.edad>=21||S.familia.pareja)) A.push({
+    if((p.edad>=18||S.familia.pareja)) A.push({
       t:S.residenciaInternacional?'Administrar residencia internacional':'Abrir residencia internacional',
       d:S.residenciaInternacional
         ? 'Segunda base en '+S.residenciaInternacional.ciudad+'. Puedes renovarla aunque tu hogar principal esté en Colombia o en otra ciudad.'
@@ -6945,7 +6945,7 @@ function listaAcciones(){
   asegurarHogar();
   {
     const H=S.hogar, viv=viviendaPropia(), z=zonaActual();
-    if(H.conLosPadres && (p.edad>=21||S.familia.pareja))
+    if(H.conLosPadres && (p.edad>=18||S.familia.pareja))
       A.push({t:'Irte a vivir aparte', d:'Dejas de vivir donde tus papás. Arriendo propio, gastos propios.', mov:1, modal:true,
         run:()=>escenaIndependizarse()});
     if(!viv){
@@ -6957,7 +6957,7 @@ function listaAcciones(){
     if(!H.conLosPadres)
       A.push({t:'Cambiar de barrio o de ciudad', d:'Vives en '+z.n+'. El barrio cambia lo que pagas y a quién conoces.', mov:1, modal:true,
         run:()=>escenaMudanza()});
-    else if(p.edad>=21||S.familia.pareja)
+    else if(p.edad>=18||S.familia.pareja)
       A.push({t:'Mudarte a otra ciudad', d:'Aunque todavía vives con tu familia, puedes establecerte por tu cuenta en otra ciudad, incluso en el exterior.', mov:1, modal:true,
         run:()=>escenaCiudad()});
     A.push({t:'Cambiar el tren de vida', d:'Hoy viven '+NIVELES[H.nivel].n+': cerca de '+fmt(costoHogar().total+costoColegios())+' al año.', mov:1, modal:true,
@@ -7026,7 +7026,7 @@ function listaAcciones(){
       } else { S.p.felicidad-=2; log('Año de citas malas y agendas imposibles.'); }}});
   if(S.familia.pareja&&!S.familia.pareja.casados) A.push({t:'Casarte', d:'Sube felicidad y estabilidad. Ojo con el régimen de bienes.', mov:1, modal:true,
     run:()=>modalMatrimonio()});
-  if(S.p.edad>=21) A.push({t:'Vida sentimental y relaciones', d:'La descendencia natural ocurre según los indicadores de fertilidad y la vida de pareja; aquí gestionas relaciones privadas y sus consecuencias.', mov:1, modal:true,
+  if(S.p.edad>=18) A.push({t:'Vida sentimental y relaciones', d:'La descendencia natural ocurre según los indicadores de fertilidad y la vida de pareja; aquí gestionas relaciones privadas y sus consecuencias.', mov:1, modal:true,
     run:()=>escenaAmantes()});
   S.familia.hijos.filter(h=>h.edad>=4&&h.edad<24).forEach(h=>{
     if(h.edad>=15) A.push({t:'Hablar del futuro con '+h.nombre,d:'Universidad, empresa, independencia o una vida lejos del apellido.',mov:1,modal:true,run:()=>escenaFuturoHeredero(h)});
@@ -8179,7 +8179,7 @@ function heredar(h,frac,vivo,pleito){
     pico:Math.round(S.legado.pico), hitos:S.legado.hitos.filter(x=>x.gen===S.gen).length
   }]);
   const logAnterior=S.log.slice(-60);
-  const anio=S.anio, saltos=Math.max(0,22-h.edad);
+  const anio=S.anio, saltos=Math.max(0,18-h.edad);   /* v208: mayoría de edad a los 18 */
 
   if(!h.atr) h.atr={intelecto:ri(3,7),carisma:ri(3,8),disciplina:ri(3,8),suerte:ri(3,9)};
   ['intelecto','carisma','disciplina','suerte'].forEach(k=>{ if(!isFinite(h.atr[k])) h.atr[k]=ri(3,8); });
@@ -8195,7 +8195,7 @@ function heredar(h,frac,vivo,pleito){
   cerrarModal();
   iniciar(cfg,legado);
   S.anio=anio; S.log=logAnterior.concat(S.log);
-  S.p.edad=Math.max(22,h.edad);
+  S.p.edad=Math.max(18,h.edad);
   S.p.educacion=h.formacion>60?4:(h.formacion>25?2:1);
   S.p.atr=h.atr;
   S.carrera.estudio=h.carreraEstudio||S.carrera.estudio||null;
@@ -9827,7 +9827,7 @@ function pantallaSucesion(vivo){
         +'. Formación '+(h.formacion>60?'excelente':h.formacion>25?'media':'básica')
         +', vínculo contigo '+Math.round(h.vinculo||55)+'.'
         +(colateral?' Rama colateral: heredaría la casa para mantener viva la dinastía.':'')
-        +(h.edad>=22?'':' Como aún es menor, la junta administra hasta que cumpla 22.'),
+        +(h.edad>=18?'':' Como aún es menor, la junta administra hasta que cumpla 18.'),
       cerrar:false, run:()=>{ cerrarModal(); modalReparto(h,vivo); }}))
       .concat([{t:'Dejarlo todo a una fundación',cat:'legado',d:'Se acaba la partida y la crónica cierra con tu nombre en una placa.',
         cerrar:false,run:()=>{ cerrarModal(); pantallaFinal(); }}])});
@@ -17245,7 +17245,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(typeof EVENTOS_LOCALES==='undefined'||!Array.isArray(EVENTOS_LOCALES)) return;
     EVENTOS_LOCALES.push({
       p:1.2,
-      c:()=>S.p.edad>=22,
+      c:()=>S.p.edad>=18,
       t:()=>{
         const ap=pick(APELLIDOS.filter(a=>a!==S.p.apellido));
         S._networkAp=ap;
@@ -18705,7 +18705,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     });
     EVENTOS_LOCALES.push({
       p:.6,
-      c:()=>S.p&&S.p.edad>=22&&S.p.edad<=55&&patSeguro88()>=50,
+      c:()=>S.p&&S.p.edad>=18&&S.p.edad<=55&&patSeguro88()>=50,
       t:()=>'Te invitan a la vida nocturna de los que mandan en '+esc(S.p.ciudad||'la ciudad')+': fiestas, viajes, apuestas. Ahí se cierran negocios, y también se pierde la cabeza.',
       o:[
         {t:'Meterte de lleno',f:()=>{
@@ -24567,7 +24567,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       como siempre, el apellido.
    2. Si mueres y tu heredero es menor de edad, puedes jugar su infancia
       (un tutor administra la herencia hasta que cumpla 18) o saltar hasta
-      sus 22 años, como antes.
+      sus 18 años, como antes.
    ========================================================================== */
 (function(){
   const V118='v118';
@@ -24647,12 +24647,12 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           cuerpo:'La casa queda en manos de '+(h.sexo==='m'?'una niña':'un niño')+'. Mientras sea menor, <b>'+esc(t.nombre)+'</b> ('+esc(t.rel.replace(/^tu /,'su '))+') administrará la herencia como tutor.',
           opciones:[
             {t:'Jugar su infancia',cat:'familia',d:'Lo acompañas desde los '+h.edad+' años: colegio, amigos, travesuras. Su plata no se toca hasta los 18 y las compañías siguen andando.',run:()=>{ h.__modo118='infancia'; window.heredar(h,frac,vivo,pleito); }},
-            {t:'Saltar hasta que cumpla 22',cat:'legado',d:'Como antes: pasan los años, la junta administra y retomas la historia con '+esc(h.nombre)+' ya adult'+(h.sexo==='m'?'a':'o')+'.',run:()=>{ h.__modo118='saltar'; window.heredar(h,frac,vivo,pleito); }}]});
+            {t:'Saltar hasta que cumpla 18',cat:'legado',d:'Como antes: pasan los años, la junta administra y retomas la historia con '+esc(h.nombre)+' ya adult'+(h.sexo==='m'?'a':'o')+'.',run:()=>{ h.__modo118='saltar'; window.heredar(h,frac,vivo,pleito); }}]});
         return;
       }
       if(h.__modo118!=='infancia') return old.apply(this,arguments);
       const edad=Math.max(0,h.edad), t=tutorDe(h), form=h.formacion;
-      h.edad=22; let r;
+      h.edad=18; let r;
       try{ r=old.apply(this,arguments); } finally { h.edad=edad; }
       try{
         S.p.edad=edad; S.p.educacion=0;
@@ -24679,7 +24679,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     // el texto de la sucesión ya no dice que la junta administra "hasta los 22" sin más
     const old=window.pantallaSucesion; if(typeof old!=='function'||window.__SA118_SUC) return;
     window.pantallaSucesion=function(){ const r=old.apply(this,arguments);
-      try{ document.querySelectorAll('#escenaHost .carta .txt').forEach(d=>{ d.innerHTML=d.innerHTML.replace('Como aún es menor, la junta administra hasta que cumpla 22.','Es menor de edad: podrás jugar su infancia con un tutor o saltar hasta sus 22.'); }); }catch(e){}
+      try{ document.querySelectorAll('#escenaHost .carta .txt').forEach(d=>{ d.innerHTML=d.innerHTML.replace('Como aún es menor, la junta administra hasta que cumpla 18.','Es menor de edad: podrás jugar su infancia con un tutor o saltar hasta sus 18.'); }); }catch(e){}
       return r; };
     window.__SA118_SUC=true;
   }
@@ -25412,7 +25412,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 (function(){
   const V129='v129';
   const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
-  const adulto=()=>S&&S.p&&S.p.edad>=20&&!nino();
+  const adulto=()=>S&&S.p&&S.p.edad>=18&&!nino();
   const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
   const costo=(f,min)=>Math.max(min||5,Math.round(pat()*f));
   const P1=n=>String(n||'').split(' ')[0];
@@ -26227,7 +26227,7 @@ install();setTimeout(install,1200);
          const b=comprarBien({clase:'renta',tipo:'casa',nombre:'Casa rematada en '+r.z,valor:r.precio,mant:.02,renta:.055,vac:.08,ciudad:r.c,zona:r.i,cuotaInicial:1}); if(!b) return 'El banco se echó para atrás.';
          b.valor=r.v; b.exVivienda109=true; b.compradaParaArrendar127=true; b.arrendado=true; S.p.reputacion=clamp(S.p.reputacion-1,0,100); return 'Compraste barato. La familia que vivía ahí se fue llorando; tú la pusiste en arriendo.'; }},
        {t:'No aprovecharse de la desgracia ajena',f:()=>{ S.p.felicidad=clamp(S.p.felicidad+1,0,100); return 'Dejaste pasar la oportunidad.'; }}]}; }
-  const adulto=()=>S&&S.p&&S.p.edad>=22&&!(window.esNino94&&window.esNino94())&&S.hogar&&S.hogar.ciudad;
+  const adulto=()=>S&&S.p&&S.p.edad>=18&&!(window.esNino94&&window.esNino94())&&S.hogar&&S.hogar.ciudad;
   const fase=c=>{ c=c||(S.hogar&&S.hogar.ciudad); return c?ciudad(c).fase:'estable'; };
   function eventos135(){ if(window.__SA135_EV||typeof EVENTOS_LOCALES==='undefined') return; EVENTOS_LOCALES.push(evPlanos(),evRemate()); window.__SA135_EV=true; }
 
@@ -37533,6 +37533,30 @@ install();setTimeout(install,1200);
   function init207(){ instalar(); Object.assign(window,{SEPULTURAS_207:SEP,ORDEN_SEPULTURA_207:ORDEN,nombreSepultura207:nombreTipo,fotoSepultura207:foto,costoMejoraSepultura207:costoMejora,escenaMausoleo207}); }
   init207(); setTimeout(init207,40); setTimeout(init207,220); setTimeout(init207,650); setTimeout(init207,950); setTimeout(init207,1500);
   window.__SA207={version:V207};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v208 · LA MAYORÍA DE EDAD ES A LOS 18
+   El juego tenía varias mayorías: 18 para quien empieza y para la infancia
+   del heredero (v94 y v118), pero 22 para el heredero que se salta la
+   niñez y 20 o 21 para otras cosas. Ahora es una sola: a los 18.
+   - El heredero que ya cumplió 18 entra a jugar con la herencia en la mano;
+     al menor de 18 lo administra un tutor o la junta hasta que cumpla 18,
+     y quien se salta la infancia retoma la historia a los 18, no a los 22.
+     Los textos de la sucesión y del testamento dicen 18.
+   - A los 18 ya puedes irte a vivir aparte, mudarte de ciudad, abrir una
+     residencia internacional, tener vida sentimental y recibir los eventos
+     de la vida adulta (negocios, contactos, redes, vida nocturna).
+   Lo que sigue pidiendo más años no es mayoría de edad sino oficio: los
+   estudios profesionales, los cargos de elección (25 y 28), las
+   presidencias de compañía (28) y las propuestas de matrimonio a los hijos.
+   ========================================================================== */
+(function(){
+  const V208='v208';
+  window.EDAD_MAYORIA_208=18;
+  window.__SA208={version:V208};
 })();
 </script>
 
