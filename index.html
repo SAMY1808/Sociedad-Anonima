@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v192</div>
+<div class="version-badge" id="versionBadge">v193</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8937,7 +8937,7 @@ function finDeAnio(){
       asegurarColasFamilia();
       while(S.funeralPendientes.length&&isFinite(S.funeralPendientes[0].anio)&&S.funeralPendientes[0].anio<S.anio-1) S.funeralPendientes.shift();
       if(S.funeralPendientes.length){ const f=S.funeralPendientes.shift();
-        escenaFuneral(f.quien,relacionPorSexo(f.rel,f.sexo),()=>{ cerrarModal(); duelo(); });
+        escenaFuneral(f.quien,relacionPorSexo(f.rel,f.sexo),()=>{ cerrarModal(); duelo(); },f.anio);   // v193: el siglo del arte lo da el año del fallecimiento
       } else pliego();
     };
     const pliego=()=>{
@@ -35454,6 +35454,98 @@ install();setTimeout(install,1200);
     Object.assign(window,{replegarAcciones192:replegar,abrirArchivo192:abrir,cerrarArchivo192:cerrar,estadoArchivo192:est,layoutArchivo192:()=>lay,modoArchivo192:modo,enfocarArchivo192:enfocar,volverArchivo192:volver,buscarArchivo192:buscar,svgArchivo192:()=>svgExportado(),pngArchivo192:pngExportado,seleccionarArchivo192:seleccionar,zoomArchivo192:zoom,ajustarArchivo192:ajustar,dibujarArchivo192:dibujar,MAX_TARJETAS_192:MAXN}); }
   init192(); setTimeout(init192,40); setTimeout(init192,220); setTimeout(init192,650); setTimeout(init192,950); setTimeout(init192,1500); setTimeout(init192,2500);
   window.__SA192={version:V192};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v193 · LOS FUNERALES POR SIGLO
+   Los cuatro funerales de siempre (Algo sencillo, Como debe ser, Honras
+   completas y Entierro de beneficencia) ahora se ilustran con el arte del
+   siglo en que murió la persona: XIX (hasta 1899), XX (1900-1999) y XXI
+   (2000 en adelante; después de 2099 se conserva el del XXI).
+   No cambia nada del juego: ni las opciones, ni los precios, ni los efectos.
+   Solo cambia la lámina que acompaña a cada funeral, tanto la del pariente
+   que muere como la de tu propio entierro. Si una imagen no carga, queda la
+   lámina de siempre.
+   ========================================================================== */
+(function(){
+  const V193='v193';
+  const TIPO={funeral_sencillo:'algo_sencillo',funeral_normal:'como_debe_ser',funeral_pompa:'honras_completas',funeral_beneficencia:'beneficencia'};
+  const TIPOS=['beneficencia','algo_sencillo','como_debe_ser','honras_completas'];
+  const siglo=a=>(a>=2000?21:a>=1900?20:19);
+  const url=(a,t)=>'img/eventos/funeral_siglo'+siglo(+a||0)+'_'+t+'.jpg';
+  const imagenFuneral=(anio,opcion)=>url(anio,TIPOS.includes(opcion)?opcion:'como_debe_ser');
+  // dónde mirar cuando la foto es más alta que ancha: el féretro queda siempre en el cuadro
+  const POS={funeral_siglo20_como_debe_ser:'50% 85%'};
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ');
+  const clave=x=>plano(x).replace(/&[a-z#0-9]+;/gi,'').replace(/[^\p{L}\p{N}]/gu,'').toLowerCase();
+  const cache={};        // url -> {ok,r}
+  const anios={};        // "quien" -> año en que murió (para la lámina que sale después de elegir)
+
+  function cargar(u,cb){
+    const c=cache[u]; if(c){ if(cb) cb(c); return; }
+    const im=new Image();
+    im.onload=()=>{ cache[u]={ok:true,r:im.naturalWidth/Math.max(1,im.naturalHeight)}; if(cb) cb(cache[u]); };
+    im.onerror=()=>{ cache[u]={ok:false}; if(cb) cb(cache[u]); };
+    im.src=u;
+  }
+  function precargar(anio){ TIPOS.forEach(t=>cargar(url(anio,t))); }
+
+  function aplicar(fig,u,c){
+    const img=fig.querySelector('img'); if(!img) return;
+    img.src=u; fig.setAttribute('data-siglo193',String(siglo(+fig.getAttribute('data-anio193')||0)));
+    if(c.r<1.25){ img.style.aspectRatio='4 / 3'; img.style.objectFit='cover'; img.style.objectPosition=POS[u.replace(/^.*\//,'').replace(/\.jpg$/,'')]||'50% 70%'; }
+    else{ img.style.aspectRatio=''; img.style.objectFit=''; img.style.objectPosition=''; }
+    // el sello del evento baja junto al título: se recalcula con el alto nuevo
+    const box=fig.closest('.lienzo'), sello=box&&box.querySelector(':scope > .evento90-sello');
+    if(sello){ const aj=()=>{ sello.style.top=(fig.offsetTop+fig.offsetHeight+18)+'px'; }; aj(); if(!img.complete) img.addEventListener('load',aj,{once:true}); }
+  }
+  function anioDe(fig){
+    const box=fig.closest('.lienzo'), h=box&&box.querySelector('h2'), t=plano(h&&h.textContent).trim();
+    const m=/^El funeral de (.+)$/.exec(t);
+    if(m){ const k=clave(m[1]); if(anios[k]!=null){ const a=anios[k]; return a; } }
+    return (S&&isFinite(S.anio))?S.anio:1900;
+  }
+  function revisar(fig){
+    if(!fig||fig.nodeType!==1||fig.__v193) return;
+    const k=fig.getAttribute('data-momento'), tipo=TIPO[k]; if(!tipo) return;
+    fig.__v193=true;
+    const anio=anioDe(fig), u=url(anio,tipo);
+    fig.setAttribute('data-anio193',String(anio)); fig.setAttribute('data-tipo193',tipo);
+    const img=fig.querySelector('img'); if(!img) return;
+    const c=cache[u];
+    if(c){ if(c.ok) aplicar(fig,u,c); return; }     // ya cargada: se cambia en el mismo instante, sin parpadeo
+    img.style.opacity='0';                            // mientras llega la del siglo no se enseña la genérica
+    cargar(u,r=>{ img.style.opacity=''; if(r.ok) aplicar(fig,u,r); });
+  }
+  function barrer(n){
+    if(!n||n.nodeType!==1) return;
+    if(n.matches&&n.matches('figure.momento120')) revisar(n);
+    else if(n.querySelectorAll) n.querySelectorAll('figure.momento120').forEach(revisar);
+  }
+  function observar(){
+    if(window.__SA193_OBS||!document.body||typeof MutationObserver!=='function') return;
+    window.__SA193_OBS=true;
+    new MutationObserver(ms=>{ try{ ms.forEach(m=>m.addedNodes.forEach(barrer)); }catch(e){} }).observe(document.body,{childList:true,subtree:true});
+    document.querySelectorAll('figure.momento120').forEach(revisar);
+  }
+
+  // el pariente que muere: se guarda el año del fallecimiento antes de que salga la lámina
+  function wrapFuneral(){
+    const old=window.escenaFuneral; if(typeof old!=='function'||window.__SA193_FUN) return; window.__SA193_FUN=true;
+    window.escenaFuneral=function(quien,relacion,alTerminar,anio){
+      try{ const a=isFinite(anio)&&anio!==null?+anio:S.anio; anios[clave(quien)]=a; precargar(a); }catch(e){}
+      return old.apply(this,arguments);
+    };
+    window.escenaFuneral.__v193=true;
+  }
+
+  function init193(){ wrapFuneral(); observar();
+    Object.assign(window,{imagenFuneral193:imagenFuneral,sigloFuneral193:siglo,funeralesPorSiglo193:{TIPO,TIPOS,anios,cache}}); }
+  init193(); setTimeout(init193,40); setTimeout(init193,220); setTimeout(init193,650); setTimeout(init193,950);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init193);
+  window.__SA193={version:V193};
 })();
 </script>
 
