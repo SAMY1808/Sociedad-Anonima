@@ -1394,7 +1394,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v189</div>
+<div class="version-badge" id="versionBadge">v190</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -34909,6 +34909,150 @@ install();setTimeout(install,1200);
     Object.assign(window,{barrerSinAcciones189:barrer,sinAcciones189:sinAcciones,pctTu189:pctTu}); }
   init189(); setTimeout(init189,40); setTimeout(init189,220); setTimeout(init189,650); setTimeout(init189,950);
   window.__SA189={version:V189};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v190 · LA COMPAÑÍA HIPERENDEUDADA: EMBARGO, INTERVENCIÓN Y LIQUIDADORES
+   Hasta ahora la quiebra solo se miraba en la compañía que tenías sentada y
+   era una elección tuya (reorganizar, poner plata o liquidar). Ahora el
+   Estado y los acreedores no esperan. Cada compañía de tu grupo que se
+   hunde en la deuda (debe más que lo que vende, pierde plata y no tiene
+   caja) pasa por etapas:
+   1. Cobro: los acreedores se juntan. Puedes abonar, refinanciar con
+      garantía personal (que luego te puede costar) o esperar.
+   2. Embargo: el juez le embarga la caja y el crédito. No puede repartir
+      dividendos ni financiar nada, pierde ingresos y se le va la gente.
+      Se levanta pagando, negociando con los acreedores o bajando la deuda.
+   3. Intervención: entra el Estado (el juzgado y un síndico antes de 1931;
+      la Superintendencia de Sociedades después) y nombra un liquidador.
+      Puedes proponer un acuerdo de reorganización (los acreedores se
+      quedan con parte de la compañía y la Superintendencia la vigila tres
+      años), poner capital para pagar, pedir un favor al Gobierno para ganar
+      un año (v179), vaciarla antes de que llegue el liquidador (es delito)
+      o aceptar la liquidación.
+   4. Liquidación, en dos años: el inventario (perito propio o pujar por los
+      activos clave) y el cierre, con la prelación de pagos (trabajadores
+      primero). Si sobra, te toca lo tuyo; si falta, los administradores
+      pueden responder con su patrimonio, más si hubo vaciamiento o garantía
+      personal. La compañía sale del grupo.
+   - "La insolvencia de X" muestra la etapa y deja aportar capital, levantar
+     el embargo o pedir tiempo.
+   ========================================================================== */
+(function(){
+  const V190='v190';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const fm=x=>fmt(Math.round(x));
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const ADU=()=>{ try{ return typeof adulto==='function'?adulto():true; }catch(e){ return true; } };
+  const movida=()=>{ if(S._mov190===A()) return true; if((S.mov||0)<1) return false; S.mov--; S._mov190=A(); return true; };
+  const sinMov=()=>(S._mov190!==A()&&(S.mov||0)<1)?'No te quedan movidas':null;
+  const pagar=c=>{ c=Math.max(0,c); const x=Math.min(Math.max(0,S.efectivo),c); S.efectivo-=x; return x; };
+  const grupo=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const exenta=e=>/financ|banc/i.test(String(e&&e.sector||''))||!!(e&&e.banco151);
+  function I(e){ if(!e.ins190||typeof e.ins190!=='object') e.ins190={etapa:0,anios:0,desde:null,liq:null,vaciado:0,garantia:false,peritaje:0,activos:0,supervisada:0,gracia:0,t:0,evAnio:0}; return e.ins190; }
+  const presideE=e=>!!(e&&((e.presidente&&e.presidente.tipo==='fundador')||(e===S.emp&&S.carrera&&S.carrera.ruta==='fundador')));
+
+  /* ==================== EL ESTADO, SEGÚN LA ÉPOCA ==================== */
+  function proceso(a){ a=a||A();
+    if(a<1931) return {ente:'el juzgado de comercio',liq:'un síndico',acuerdo:'un concordato con los acreedores',lugar:'el juzgado'};
+    if(a<1999) return {ente:'la Superintendencia de Sociedades',liq:'un liquidador',acuerdo:'un concordato preventivo',lugar:'la Superintendencia'};
+    if(a<2006) return {ente:'la Superintendencia de Sociedades',liq:'un liquidador',acuerdo:'un acuerdo de reestructuración (Ley 550)',lugar:'la Superintendencia'};
+    return {ente:'la Superintendencia de Sociedades',liq:'un liquidador',acuerdo:'un proceso de reorganización (Ley 1116)',lugar:'la Superintendencia'}; }
+  const NOMS=['Álvaro','Beatriz','Camilo','Diana','Eduardo','Fabiola','Germán','Helena','Iván','Julia'], APES=['Quintero','Arbeláez','Pardo','Mantilla','Cifuentes','Escobar','Montoya','Bernal'];
+  const nuevoLiq=()=>({nombre:NOMS[Math.floor(Math.random()*NOMS.length)]+' '+APES[Math.floor(Math.random()*APES.length)],capaz:ri(4,9),honrado:ri(4,10)});
+
+  /* ==================== QUÉ ES "HIPERENDEUDADA" ==================== */
+  function hiper(e){ if(!e||exenta(e)) return false; const d=e.deuda||0, ing=e.ingresos||0; if((e.caja||0)>=d*.08) return false; return (e.utilidad<=0&&d>ing*1.1)||(d>ing*4&&d>(e.utilidad||0)*20); }
+
+  /* ==================== LOS EPISODIOS ==================== */
+  function evCobro(e){ const v=I(e), c=Math.max(15,(e.deuda||0)*.08);
+    return {p:9,c:()=>!!e&&grupo().includes(e),t:()=>'<b>Los acreedores de '+E(e.nombre)+' se juntaron.</b> Debe '+fm(e.deuda)+', pierde plata y la caja no alcanza. Si nada cambia, el juez embargará la compañía.',
+      o:[{t:'Abonar de tu bolsillo ('+fm(c)+')',f:()=>{ const x=pagar(c); e.deuda=Math.max(0,e.deuda-x); if(!hiper(e)){ v.etapa=0; v.anios=0; return 'Abonaste '+fm(x)+' y los acreedores se calmaron.'; } return 'Abonaste '+fm(x)+', pero la deuda sigue siendo demasiada.'; }},
+         {t:'Refinanciar con tu garantía personal',f:()=>{ e.deuda*=.92; v.garantia=true; v.gracia=1; return 'Firmaste como codeudor y ganaste un año. Si la compañía se acaba de hundir, el faltante también es tuyo.'; }},
+         {t:'Esperar a ver si escampa',f:()=>'No hiciste nada. Los acreedores toman nota.'}]}; }
+  function evEmbargo(e){ const v=I(e), c=Math.max(25,(e.deuda||0)*.25), p=proceso();
+    return {p:10,c:()=>!!e&&grupo().includes(e),t:()=>'<b>El juez embargó a '+E(e.nombre)+'.</b> La caja y el crédito quedan congelados: no puede repartir dividendos ni financiar nada, y los clientes y los empleados empiezan a irse. '+E(p.ente).replace(/^./,x=>x.toUpperCase())+' ya está mirando el caso.',
+      o:[{t:'Levantar el embargo pagando ('+fm(c)+')',f:()=>{ if(S.efectivo<c) return 'No tenías esa plata a mano. El embargo sigue.'; pagar(c); e.deuda=Math.max(0,e.deuda-c); levantar(e); return 'Pagaste '+fm(c)+' de tu bolsillo y el juez levantó el embargo.'; }},
+         {t:'Negociar con los acreedores',f:()=>{ if(chance(cl(.35+prestigio()/300+(S.p.redes||0)/500,.2,.75))){ e.deuda*=.85; levantar(e); return 'Los acreedores aceptaron un plan de pagos y levantaron el embargo.'; } return 'Los acreedores no cedieron.'; }},
+         {t:'Dejar que el proceso siga',f:()=>'El embargo sigue. Si la deuda no baja, vendrá la intervención.'}]}; }
+  function levantar(e){ const v=I(e); e.embargada190=false; v.etapa=0; v.anios=0; v.gracia=0; }
+  function evIntervencion(e){ const v=I(e), p=proceso(), liq=v.liq=v.liq||nuevoLiq(); const cAb=Math.max(25,(e.ingresos||0)*.02), cCap=Math.max(40,(e.deuda||0)*.5), vac=Math.max(10,(e.caja||0)+(e.ingresos||0)*.15); v.evAnio=A();
+    const reorg=(mult,c)=>({t:(mult>1?'Presentar el acuerdo con el mejor abogado del país':'Presentar el acuerdo con tu abogado')+' ('+fm(c)+')',f:()=>{ pagar(c); const pr=cl(.35+prestigio()/300+(S.p.redes||0)/500+(mult>1?.2:0),.15,.85);
+        if(chance(pr)){ e.deuda*=.55; const tot=totalAcciones(e), n=Math.round(tot*.4); (e.holders=e.holders||[]).push({id:'acre190_'+ri(1,999),nombre:'Acreedores reunidos',tipo:'acreedor',n}); if(Array.isArray(e.junta)) e.junta.push({nombre:'Vocero de los acreedores',arq:'financiero',lealtad:30,anios:0}); e.caja+=(e.ingresos||0)*.04; levantar(e); v.supervisada=A()+3; v.liq=null; prest(-6,'la reorganización de '+e.nombre); S.p.reputacion=cl((S.p.reputacion||50)-8,0,100); hito(e.nombre+' entró en reorganización');
+          return 'Los acreedores aceptaron '+E(p.acuerdo)+': la deuda baja a '+fm(e.deuda)+', se quedan con parte de la compañía y '+E(p.ente)+' la vigila tres años.'; }
+        v.etapa=4; v.t=0; v.pendiente=false; return 'Los acreedores rechazaron el acuerdo. '+E(liq.nombre)+' queda a cargo de la liquidación.'; }});
+    return {p:10,c:()=>!!e&&grupo().includes(e)&&v.etapa===3,t:()=>'<b>'+E(p.ente).replace(/^./,x=>x.toUpperCase())+' intervino a '+E(e.nombre)+'.</b> Nombró como '+E(p.liq)+' a <b>'+E(liq.nombre)+'</b> y tomó el mando: sin tu firma, sin la junta. Tienes que decidir qué pasa con la compañía.',
+      o:[reorg(1,cAb),reorg(3,cAb*3),
+         {t:'Poner capital para pagar a los acreedores ('+fm(cCap)+')',f:()=>{ if(S.efectivo<cCap) return 'No te alcanzó la plata. La intervención sigue.'; pagar(cCap); e.deuda=Math.max(0,e.deuda-cCap*2); levantar(e); v.liq=null; v.garantia=false; prest(1,'puso capital para salvar '+e.nombre); return 'Pusiste '+fm(cCap)+' y los acreedores retiraron el proceso: '+E(p.ente)+' devolvió la compañía.'; }},
+         {t:'Pedir un favor al Gobierno para ganar tiempo',f:()=>{ try{ if(typeof window.favor179==='function') window.favor179('frenar',{txt:'frenar la intervención de '+e.nombre}); }catch(x){} if(chance(.55)){ v.gracia=1; v.etapa=2; v.anios=0; return 'Un llamado a tiempo y '+E(p.ente)+' le dio otro año a la compañía. Quedaste debiendo un favor.'; } return 'Hiciste la llamada, pero no alcanzó. Quedaste debiendo el favor.'; }},
+         {t:'Vaciarla antes de que llegue el liquidador',f:()=>{ v.vaciado+=vac; S.efectivo+=vac; e.caja=0; try{ if(typeof registrarDelito==='function') registrarDelito('vaciamiento de una compañía',3,'sacaste plata de '+e.nombre+' antes de la liquidación'); }catch(x){} v.etapa=4; v.t=0; return 'Sacaste '+fm(vac)+' de la compañía antes de que el liquidador abriera los libros. Si lo descubren, es delito y lo vas a pagar.'; }},
+         {t:'Aceptar la liquidación',f:()=>{ v.etapa=4; v.t=0; return E(liq.nombre)+' abre el inventario de '+E(e.nombre)+'. La liquidación tomará dos años.'; }}]}; }
+  function evInventario(e){ const v=I(e), p=proceso(), liq=v.liq||nuevoLiq(), cP=Math.max(15,(e.ingresos||0)*.01), cB=Math.max(30,(e.ingresos||0)*.25);
+    return {p:9,c:()=>!!e&&grupo().includes(e),t:()=>'<b>'+E(liq.nombre)+' presenta el inventario de '+E(e.nombre)+'.</b> Los activos se avaluarán y se venderán para pagar a los acreedores. Lo que se pague a trabajadores, fisco y bancos sale de ahí.',
+      o:[{t:'Contratar un perito propio ('+fm(cP)+')',f:()=>{ pagar(cP); v.peritaje=.08; return 'Tu perito logró un avalúo mejor: se recupera más para los acreedores.'; }},
+         {t:'Pujar por los activos clave ('+fm(cB)+')',f:()=>{ if(S.efectivo<cB) return 'No tenías la plata para pujar.'; pagar(cB); v.activos+=cB; const n0=(S.bienes||[]).length; try{ comprarBien({clase:'renta',tipo:'local',nombre:'Activos de '+e.nombre,valor:cB,mant:.01,renta:.06,cuotaInicial:1}); }catch(x){} const b=(S.bienes||[])[(S.bienes||[]).length-1]; if((S.bienes||[]).length>n0&&b) b.valor=cB*1.5; prest(-1,'se quedó con los activos de una compañía liquidada'); return 'Te quedaste con los activos clave por '+fm(cB)+'. Valen más de lo que pagaste, y los acreedores lo notaron.'; }},
+         {t:'Aceptar el avalúo oficial',f:()=>'El avalúo oficial queda como está.'}]}; }
+  function evCierre(e){ const v=I(e), p=proceso(), liq=v.liq||nuevoLiq();
+    return {p:10,c:()=>!!e&&grupo().includes(e),t:()=>'<b>'+E(liq.nombre)+' cierra la liquidación de '+E(e.nombre)+'.</b> Se vendió lo que había y llega la hora de pagar por orden de prelación.',o:[{t:'Ver el balance de la liquidación',f:()=>cerrar(e)}]}; }
+  function cerrar(e){ const v=I(e), liq=v.liq||nuevoLiq(); if(!grupo().includes(e)) return '';
+    const activos=(Math.max(0,e.caja||0)+Math.max(50,(e.ingresos||0)*.6))*(1+(v.peritaje||0))-(v.activos||0)*.5, neto=Math.max(0,activos*.65), laboral=(e.empleados||4)*1.2, pasivo=(e.deuda||0)+laboral, pct=(typeof miPct==='function'?miPct(e):1);
+    const sobra=Math.max(0,neto-pasivo), falta=Math.max(0,pasivo-neto), mio=sobra*pct; let t='<b>'+E(e.nombre)+'</b> se liquidó. ';
+    if(mio>0){ S.efectivo+=mio; t+='Después de pagar a todos sobraron '+fm(sobra)+' y te tocaron '+fm(mio)+'. '; } else t+='No alcanzó para pagar todo: faltaron '+fm(falta)+'. ';
+    if(neto<laboral){ prest(-3,'los trabajadores de '+e.nombre+' sin pagar'); try{ if(typeof window.abrirEscandalo129==='function') window.abrirEscandalo129('empresa','La liquidación de '+e.nombre,1); }catch(x){} t+='Los trabajadores se quedaron sin sus prestaciones y salió en la prensa. '; }
+    let resp=0; if(presideE(e)&&falta>0){ let f=.08+(v.garantia?.2:0); if(v.vaciado>0) f+=.25; resp=Math.min(falta*f,pat()*.45); }
+    if(v.vaciado>0&&chance(cl(.55+liq.honrado*.03,.4,.85))){ const x=Math.min(v.vaciado*1.3,Math.max(0,S.efectivo)); S.efectivo-=x; prest(-10,'vació una compañía antes de la liquidación'); t+=E(liq.nombre)+' <b>descubrió el vaciamiento</b>: tuviste que devolver '+fm(x)+' y el escándalo es público. '; }
+    if(resp>0){ const x=pagar(resp); t+='Como administrador respondiste con '+fm(x)+' de tu patrimonio'+(v.garantia?' (firmaste de codeudor)':'')+'. '; }
+    prest(-14,'la liquidación de '+e.nombre); S.p.reputacion=cl((S.p.reputacion||50)-15,0,100); hito('Se liquidó '+e.nombre);
+    try{ sacarDelGrupo(e); if(!S.emp&&S.carrera) Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:45}); }catch(x){ S.grupo=grupo().filter(y=>y!==e); }
+    log(t,'mal'); return 'La liquidación terminó. '+(mio>0?'Recibiste '+fm(mio)+'.':'No quedó nada para los accionistas.'); }
+
+  /* ==================== EL AÑO ==================== */
+  function anual190(){ if(!S||!S.p||S.muerto||!ADU()) return; grupo().slice().forEach(e=>{ if(!e||exenta(e)) return; const v=I(e), h=hiper(e); const e0=v.etapa;
+      if(v.etapa===0){ if(h){ v.anios++; if(v.anios>=1){ v.etapa=1; v.anios=0; v.desde=A(); cola.push(evCobro(e)); } } else v.anios=0; }
+      else if(v.etapa===1){ if(!h){ v.etapa=0; v.anios=0; log('Los acreedores de <b>'+E(e.nombre)+'</b> se calmaron: la deuda ya no pesa tanto.','bien'); } else if(v.gracia>0){ v.gracia--; } else { v.anios++; if(v.anios>=1){ v.etapa=2; v.anios=0; e.embargada190=true; cola.push(evEmbargo(e)); log('Un juez <b>embargó</b> a '+E(e.nombre)+'.','mal'); } } }
+      else if(v.etapa===2){ if(!h){ levantar(e); log('El embargo de <b>'+E(e.nombre)+'</b> se levantó: la deuda bajó.','bien'); } else if(v.gracia>0){ v.gracia--; } else { v.anios++; if(v.anios>=2){ v.etapa=3; v.anios=0; v.liq=nuevoLiq(); cola.push(evIntervencion(e)); } } }
+      else if(v.etapa===3){ if(A()>v.evAnio){ cola.push(evIntervencion(e)); } }
+      else if(v.etapa===4){ v.t++; e.embargada190=true; if(v.t===1) cola.push(evInventario(e)); else if(v.t>=2) cola.push(evCierre(e)); }
+      if(v.etapa===2||v.etapa===3){ e.ingresos*=.93; e.moral=cl((e.moral||50)-6,0,100); e.empleados=Math.max(1,Math.round((e.empleados||4)*.95)); }
+      if(v.etapa===4){ e.ingresos*=.8; e.empleados=Math.max(1,Math.round((e.empleados||4)*.9)); e.moral=cl((e.moral||50)-8,0,100); }
+      if(v.supervisada&&A()>v.supervisada) v.supervisada=0;
+    }); }
+
+  /* ==================== LA PANTALLA ==================== */
+  const ETAPAS=['Normal','Cobro de los acreedores','Embargada','Intervenida por el Estado','En liquidación'];
+  function escenaInsolvencia190(e){ e=e||grupo().find(x=>x.ins190&&x.ins190.etapa>=1); if(!e||!e.ins190||!e.ins190.etapa){ escena({rubro:'Insolvencia',titulo:'La insolvencia',cuerpo:'No hay ninguna compañía en proceso.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
+    const v=I(e), p=proceso(), ops=[], reab=()=>{ cerrarModal(); render(); escenaInsolvencia190(e); }, x=Math.max(20,Math.min(Math.max(0,S.efectivo),e.deuda*.2));
+    if(v.etapa<=3) ops.push({t:'Aportar capital propio para bajar la deuda · '+fm(x),cat:'capital',d:'Baja la deuda de la compañía con plata tuya. Si deja de estar hundida, el proceso se detiene.',dis:v.etapa===3?'La compañía está en manos del liquidador':(S.efectivo<20?'No tienes esa plata':sinMov()),cerrar:false,run:()=>{ if(!movida()) return; pagar(x); e.deuda=Math.max(0,e.deuda-x); log('Aportaste '+fm(x)+' para bajar la deuda de <b>'+E(e.nombre)+'</b>.'); if(!hiper(e)){ if(v.etapa===2) levantar(e); else { v.etapa=0; v.anios=0; } } reab(); }});
+    if(v.etapa===2){ const c=Math.max(25,e.deuda*.25); ops.push({t:'Levantar el embargo pagando · '+fm(c),cat:'riesgo',d:'Se paga una cuarta parte de la deuda y el juez libera la compañía.',dis:S.efectivo<c?'No te alcanza ('+fm(c)+')':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(c); e.deuda=Math.max(0,e.deuda-c); levantar(e); log('Levantaste el embargo de <b>'+E(e.nombre)+'</b>.','bien'); reab(); }}); }
+    if(v.etapa>=1&&v.etapa<=2) ops.push({t:'Pedir un favor al Gobierno para ganar tiempo',cat:'legado',d:'Un año más antes de la siguiente etapa. Es un favor que se cobra (v179).',dis:v.gracia>0?'Ya tienes un año de gracia':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; try{ if(typeof window.favor179==='function') window.favor179('frenar',{txt:'ganar tiempo para '+e.nombre}); }catch(y){} if(chance(.55)){ v.gracia=1; log('Ganaste un año de gracia para <b>'+E(e.nombre)+'</b>.','bien'); } else log('El favor no alcanzó para frenar el proceso de <b>'+E(e.nombre)+'</b>.','mal'); reab(); }});
+    if(!ops.length) ops.push({t:'Volver',cat:'legado',run:()=>{}});
+    escena({rubro:'Insolvencia',titulo:'La insolvencia de '+E(e.nombre),ancho:true,cerrable:true,clase:'pol155',
+      cuerpo:'Etapa: <b>'+ETAPAS[v.etapa]+'</b>. Debe '+fm(e.deuda)+' y tiene '+fm(e.caja)+' en caja. '+(v.etapa===3?E(p.ente).replace(/^./,x=>x.toUpperCase())+' manda en la compañía con '+E((v.liq&&v.liq.nombre)||'un liquidador')+'.':v.etapa===4?'El liquidador vende lo que hay y paga por prelación.':v.etapa===2?'El juez congeló su caja y su crédito.':'Los acreedores esperan que pagues.')+(v.garantia?' Firmaste con tu garantía personal.':'')+(v.vaciado>0?' Sacaste plata antes de la liquidación.':''),
+      html:'<div class="k"><div><b>'+ETAPAS[v.etapa]+'</b><span>etapa</span></div><div><b>'+fm(e.deuda)+'</b><span>deuda</span></div><div><b>'+fm(e.caja)+'</b><span>caja</span></div><div><b>'+(v.liq?E(v.liq.nombre):'—')+'</b><span>liquidador</span></div></div>',opciones:ops}); }
+
+  /* ==================== ENGANCHES ==================== */
+  let ult=null;
+  function wrapFinanciar(){ const old=window.financiarEmpresa; if(typeof old!=='function'||window.__SA190_FIN) return; window.__SA190_FIN=true;
+    window.financiarEmpresa=function(e,costo){ try{ if(e&&e.embargada190&&costo>0){ ult=Date.now(); log('<b>'+E(e.nombre)+'</b> está embargada: no puede disponer de su caja ni tomar crédito hasta que se levante el embargo o termine el proceso.','mal'); return {ok:false,caja:0,deuda:0,faltante:costo}; } }catch(x){} return old.apply(this,arguments); }; window.financiarEmpresa.__v190=true; }
+  function wrapLog(){ const old=window.log; if(typeof old!=='function'||window.__SA190_LOG) return; window.__SA190_LOG=true; window.log=function(txt,clase){ try{ if(ult&&Date.now()-ult<900&&typeof txt==='string'&&/^(La compañía|La cadena|La unidad) no tiene con qué|^No alcanza la caja de la compañía|no puede pagar/.test(txt)) return; }catch(x){} return old.apply(this,arguments); }; window.log.__v190=true; }
+  function wrapDeuda(){ const old=window.capacidadDeudaDe; if(typeof old!=='function'||window.__SA190_DEU) return; window.__SA190_DEU=true; window.capacidadDeudaDe=function(e){ try{ if(e&&(e.embargada190||(e.ins190&&e.ins190.supervisada>=A()))) return 0; }catch(x){} return old.apply(this,arguments); }; }
+  function wrapDividendos(){ const old=window.repartirDividendos; if(typeof old!=='function'||window.__SA190_DIV) return; window.__SA190_DIV=true; window.repartirDividendos=function(){ try{ const e=S&&S.emp; if(e&&(e.embargada190||(e.ins190&&e.ins190.supervisada>=A()))){ log('<b>'+E(e.nombre)+'</b> no puede repartir dividendos: '+(e.embargada190?'está embargada.':'está bajo vigilancia de la Superintendencia por su reorganización.'),'mal'); return; } }catch(x){} return old.apply(this,arguments); }; }
+  function wrapQuiebra(){ const old=window.escenaQuiebra; if(typeof old!=='function'||window.__SA190_QUI) return; window.__SA190_QUI=true; window.escenaQuiebra=function(luego){ try{ const e=S&&S.emp; if(e&&e.ins190&&e.ins190.etapa>=1){ if(typeof luego==='function') luego(); return; } }catch(x){} return old.apply(this,arguments); }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA190_ACC) return; window.__SA190_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ADU()){ grupo().filter(e=>e.ins190&&e.ins190.etapa>=1).slice(0,2).forEach(e=>{ const t='La insolvencia de '+e.nombre; if(!L.some(x=>x.t===t)) L.push({t,cat:'riesgo',d:ETAPAS[e.ins190.etapa]+': debe '+fm(e.deuda)+'.',mov:0,modal:true,run:()=>escenaInsolvencia190(e)}); }); } }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v190=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA190_CAT) return; window.__SA190_CAT=true; window.catDe=function(t){ if(/^La insolvencia de /.test(String(t))) return 'riesgo'; return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA190_PASO) return; window.__SA190_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual190(); }catch(e){ console.error(e); } return r; }; }
+  function init190(){ wrapFinanciar(); wrapLog(); wrapDeuda(); wrapDividendos(); wrapQuiebra(); wrapAcciones(); wrapCat(); wrapPaso();
+    Object.assign(window,{hiperendeudada190:hiper,insolvencia190:I,procesoEstado190:proceso,anualInsolvencia190:anual190,escenaInsolvencia190,evCobro190:evCobro,evEmbargo190:evEmbargo,evIntervencion190:evIntervencion,evInventario190:evInventario,evCierre190:evCierre,cerrarLiquidacion190:cerrar,levantarEmbargo190:levantar,ETAPAS_190:ETAPAS}); }
+  init190(); setTimeout(init190,40); setTimeout(init190,220); setTimeout(init190,650); setTimeout(init190,950);
+  window.__SA190={version:V190};
 })();
 </script>
 
