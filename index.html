@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v197</div>
+<div class="version-badge" id="versionBadge">v198</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -36496,6 +36496,125 @@ install();setTimeout(install,1200);
       adjudicar197:adjudicar,abrirLicitacion197:abrir,proyecto197:proyecto,evControl197:evControl,evSalida197:evSalida,evAscenso197:evAscenso,syncGestion197:sync,entidad197:entidad,presupuestoDe197:presupuestoDe,candidato197:candidato,estadoCargos197:H}); }
   init197(); setTimeout(init197,40); setTimeout(init197,220); setTimeout(init197,650); setTimeout(init197,950); setTimeout(init197,1500);
   window.__SA197={version:V197};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v198 · LA CARRERA DOCENTE Y LA VIDA ACADÉMICA
+   Dos caminos con su propio panel, que se activa cuando tienes el oficio:
+   - DOCENCIA (nueva ruta «Carrera docente»: maestro de escuela, docente de
+     aula, docente de planta, coordinador, rector de colegio y supervisor
+     educativo, y también la profesión de pedagogía): el aula, la comunidad
+     y el magisterio. Clases, proyectos con los padres, clases particulares,
+     estudiar para subir en el escalafón y el paro del magisterio (FECODE,
+     desde 1959). Cuando hay conflicto armado en tu ciudad, también las
+     amenazas.
+   - UNIVERSIDAD (la ruta «Academia» de siempre: monitor, docente ocasional,
+     profesor asistente, asociado, decano, rector): docencia, investigación,
+     artículos, libros, tesis, grupo de investigación, financiación
+     (Colciencias desde 1968), año sabático en una plaza del exterior y
+     opinión en la prensa. Todo suma a la FAMA ACADÉMICA, que es lo que más
+     adelante abre las rectorías.
+   El desempeño del año empuja los ascensos que ya daba la carrera.
+   ========================================================================== */
+(function(){
+  const V198='v198';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const NIV_DOC=[{n:'Maestro de escuela',s:26,edu:1},{n:'Docente de aula',s:44,edu:2},{n:'Docente de planta',s:68,edu:2},{n:'Coordinador académico',s:98,edu:3},{n:'Rector de colegio',s:140,edu:3},{n:'Supervisor educativo',s:190,edu:4}];
+  function registrar(){ if(typeof RUTAS==='undefined'||RUTAS.docente) return; RUTAS.docente={n:'Carrera docente',niveles:NIV_DOC}; }
+
+  const INDS={docencia:{aula:'El aula',comunidad:'La comunidad y los padres'},universidad:{docencia:'Docencia',inv:'Investigación',red:'Redes y alianzas'}};
+  const pistaDe=()=>{ const c=S.carrera||{}; return c.ruta==='academico'?'universidad':(c.ruta==='docente'||(c.ruta==='profesional'&&c.profesion==='pedagogia'))?'docencia':null; };
+  const nivelNombre=pista=>{ const c=S.carrera||{}; try{ if(c.ruta==='docente') return NIV_DOC[clamp(c.nivel||0,0,5)].n; if(c.ruta==='academico') return RUTAS.academico.niveles[clamp(c.nivel||0,0,RUTAS.academico.niveles.length-1)].n; const cr=carreraProfesionalDe('pedagogia'); return cr&&cr.niveles[clamp(c.nivelProf||0,0,cr.niveles.length-1)].n; }catch(e){} return pista==='universidad'?'Profesor':'Docente'; };
+  function lugar(pista){ const ciu=(S.hogar&&S.hogar.ciudad)||'Bogotá';
+    if(pista==='universidad'){ try{ const us=(window.__SA63&&window.__SA63.universidadesDisponibles(ciu))||[]; const u=us.filter(x=>x&&!/gen[eé]ric/i.test(String(x.id)))[0]||us[0]; if(u) return u.n; }catch(e){} return 'Universidad de '+ciu; }
+    const t=A()<1900?['Escuela de primeras letras','Colegio de varones']:A()<1950?['Escuela rural','Colegio departamental','Escuela Normal']:['Colegio público','Escuela rural','Instituto técnico','Colegio privado'];
+    return pick(t)+' de '+ciu; }
+  function nueva(pista){ const ind={}; Object.keys(INDS[pista]).forEach(k=>{ ind[k]=ri(42,58); });
+    return {pista,ent:lugar(pista),ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá',desde:A(),anios:0,ind,fama:pista==='universidad'?ri(8,16):ri(4,10),pub:0,libros:0,tesis:0,grupo:false,fondos:0,estudios:0,tension:ri(10,25),clases:false,hist:[],buenos:0,malos:0,ultimoDes:null,dec:0}; }
+  const G=()=>S.acad198||null;
+  function cerrar(motivo){ const g=G(); if(!g) return; if(!Array.isArray(S.acadHist198)) S.acadHist198=[]; S.acadHist198.push({pista:g.pista,ent:g.ent,desde:g.desde,hasta:A(),fama:Math.round(g.fama),pub:g.pub,libros:g.libros,motivo}); if(S.acadHist198.length>10) S.acadHist198.shift(); S.acad198=null; }
+  function sync(){ if(!S||!S.p||S.muerto) return; registrar(); const g=G(), pista=pistaDe(); if(!pista){ if(g) cerrar('dejó la carrera'); return; }
+    if(!g||g.pista!==pista){ if(g) cerrar('cambió de carrera'); S.acad198=nueva(pista); }
+    const c=S.carrera; if(c.ruta==='docente'&&(!c.empleador||/Grupo|Banco|Cementos|Alimentos|Aseguradora|Almacenes|Interconexión|Petro|Aerolíneas|Textiles|Gaseosas|Constructora/.test(c.empleador))&&G()) c.empleador=G().ent; }
+
+  /* ---- decisiones ---- */
+  const DEC={
+    docencia:[
+      ['aula','Preparar y renovar tus clases','Material propio, lecturas y mucho cuaderno. Se nota en el aula.',0,m=>{ m.ind.aula+=8; m.fama+=1; return 'Tus clases mejoraron.'; }],
+      ['comunidad','Un proyecto con la comunidad y los padres','Huerta escolar, biblioteca o comedor: el barrio te reconoce.',.5,m=>{ m.ind.comunidad+=9; m.tension-=3; m.fama+=1; return 'El barrio respondió al proyecto.'; }],
+      ['estudio','Estudiar una especialización','Cuesta plata y tiempo y suma puntos para el escalafón.',4,m=>{ m.estudios++; m.ind.aula+=3; S.carrera.desempeno=clamp((S.carrera.desempeno||50)+6,0,100); return 'Sumaste estudios: ya cuentan para subir de grado.'; }],
+      ['clases','Dar clases particulares','Un ingreso extra cada año, a costa de cansarte.',0,m=>{ m.clases=true; m.ind.aula-=2; return 'Empezaste a dar clases particulares: un ingreso extra todos los años.'; }],
+      ['paro','Sumarte al paro del magisterio','Presión por salarios y escalafón. Pierdes clases y ganas peso en el sindicato.',0,m=>{ m.tension+=8; m.ind.comunidad-=5; m.fama+=2; S.carrera.desempeno=clamp((S.carrera.desempeno||50)+3,0,100); return 'Te sumaste al paro: el gremio te ve como uno de los suyos, los padres no tanto.'; },()=>A()>=1959]],
+    universidad:[
+      ['articulo','Escribir y publicar un artículo','Meses de trabajo y un revisor que no te perdona nada.',0,m=>{ if(chance(clamp(.45+m.ind.inv/200,.3,.85))){ m.pub++; m.fama+=3; m.ind.inv+=5; return 'Te publicaron el artículo.'; } m.ind.inv+=2; return 'Rechazaron el artículo; te quedó el borrador.'; }],
+      ['libro','Escribir un libro','Años de trabajo: una obra que pesa más que cinco artículos.',3,m=>{ if(chance(clamp(.35+m.fama/250,.25,.75))){ m.libros++; m.fama+=7; m.ind.inv+=6; return 'Salió tu libro y la crítica lo comentó.'; } m.ind.inv+=2; return 'El libro no encontró editor este año.'; }],
+      ['tesis','Dirigir una tesis','Formas a alguien que seguirá tu escuela.',0,m=>{ m.tesis++; m.ind.docencia+=5; m.ind.red+=3; m.fama+=1; return 'Dirigiste una tesis más.'; }],
+      ['grupo','Montar un grupo de investigación','Estudiantes, un tema y una sala. Cuesta plata y abre puertas.',12,m=>{ m.grupo=true; m.ind.inv+=10; m.ind.red+=6; m.fama+=3; return 'Quedó formado tu grupo de investigación.'; },()=>!G().grupo],
+      ['fondos','Pedir financiación para un proyecto',A()>=1968?'Colciencias y las fundaciones: compites con todos.':'Mecenas, fundaciones y el Ministerio.',0,m=>{ if(chance(clamp(.25+m.fama/180,.2,.7))){ const x=Math.round(20+m.fama*1.6); m.fondos+=x; m.ind.inv+=6; return 'Te aprobaron el proyecto: '+fm(x)+' para tu grupo.'; } return 'No aprobaron la financiación.'; }],
+      ['sabatico','Un año sabático en el exterior','Un año en una gran universidad: fama y contactos.',10,m=>{ m.fama+=8; m.ind.inv+=10; m.ind.red+=8; return 'Volviste de una universidad del exterior con ideas, contactos y un nombre más alto.'; },()=>G().anios>=3],
+      ['prensa','Opinar en la prensa','Te lee el país. Y también el gobierno.',0,m=>{ m.fama+=3; m.tension+=5; return 'Tu columna se comentó en todas partes.'; }]]};
+  const pagoDe=d=>d[3]?(d[3]>=10?d[3]*5:d[3]*8):0;   // millones
+  function hacer(i){ const g=G(); if(!g) return; const d=DEC[g.pista][i], pago=pagoDe(d); if(S.efectivo<pago||S.mov<1) return; S.mov=Math.max(0,S.mov-1); if(pago) tomar(pago);
+    const msg=d[4](g); g.dec++; ['fama','tension'].forEach(k=>{ g[k]=clamp(g[k],0,100); }); Object.keys(g.ind).forEach(k=>{ g.ind[k]=clamp(g.ind[k],0,100); });
+    log(msg+(pago?' Costó '+fm(pago)+'.':'')); escenaPanel(); }
+
+  /* ---- el año ---- */
+  function anual(){ if(!S||!S.p||S.muerto) return; sync(); const g=G(); if(!g) return; g.anios++; const c=S.carrera;
+    Object.keys(g.ind).forEach(k=>{ g.ind[k]=clamp(g.ind[k]-2+ri(-2,3),0,100); });
+    if(g.clases){ const x=Math.round(Math.max(4,(RUTAS[c.ruta]&&RUTAS[c.ruta].niveles[clamp(c.nivel||0,0,5)]?RUTAS[c.ruta].niveles[clamp(c.nivel||0,0,5)].s:30)*.25)); S.efectivo+=x; log('Tus clases particulares dejaron '+fm(x)+'.'); }
+    if(g.pista==='universidad'){ if(g.fondos>0){ g.ind.inv=clamp(g.ind.inv+4,0,100); g.fondos=Math.max(0,g.fondos-Math.round(g.fondos*.5)); } g.fama=clamp(g.fama+(g.ind.inv-50)/40+g.pub*.15-.8,0,100); }
+    else g.fama=clamp(g.fama+(g.ind.aula-50)/50+(g.ind.comunidad-50)/80-.2,0,100);
+    g.tension=clamp(g.tension-3,0,100);
+    const prom=Object.keys(g.ind).reduce((s,k)=>s+g.ind[k],0)/Math.max(1,Object.keys(g.ind).length), des=clamp(Math.round(prom*.7+g.fama*.3-g.tension*.1+8),0,100); g.ultimoDes=des; g.hist.push({a:A(),des}); if(g.hist.length>12) g.hist.shift();
+    if(c) c.desempeno=clamp((c.desempeno||50)+(des-58)/7,0,100);
+    if(des>=62){ g.buenos++; g.malos=0; } else if(des<42){ g.malos++; g.buenos=0; } else { g.buenos=0; g.malos=0; }
+    log('Balance del año en <b>'+esc(g.ent)+'</b>: desempeño '+des+'/100, fama académica '+Math.round(g.fama)+'.',des>=62?'bien':des<42?'mal':'');
+    // sucesos
+    if(g.pista==='docencia'){ if(A()>=1959&&chance(.10+g.tension/300)) cola.push(evParo(g)); let amen=0; try{ amen=(typeof window.riesgoCiudad92==='function'&&A()>=1985&&A()<=2008)?window.riesgoCiudad92(g.ciudad):0; }catch(e){} if(amen>.25&&chance(amen*.4)) cola.push(evAmenaza(g)); if(A()>=2002&&g.anios%3===0&&chance(.5)) cola.push(evEvaluacion(g)); }
+    else { if(A()>=1950&&chance(.08+g.tension/350)) cola.push(evParoU(g)); if(g.pub>=4&&chance(.04)) cola.push(evPlagio(g)); if(g.fama>=45&&chance(.12)) cola.push(evPremio(g)); }
+  }
+  function evParo(g){ return {p:8,c:()=>G()===g,t:()=>'<b>El magisterio convoca un paro nacional.</b> Piden nivelación salarial y respeto al escalafón. Los colegios cierran y el sindicato te mira.',
+    o:[{t:'Sumarte al paro',f:()=>{ g.tension=clamp(g.tension+8,0,100); g.ind.comunidad=clamp(g.ind.comunidad-5,0,100); g.fama=clamp(g.fama+2,0,100); S.carrera.desempeno=clamp((S.carrera.desempeno||50)+2,0,100); return 'Paraste con el gremio.'; }},{t:'Seguir dando clase',f:()=>{ g.ind.comunidad=clamp(g.ind.comunidad+3,0,100); g.tension=clamp(g.tension+3,0,100); return 'Diste clase a puertas cerradas: los padres lo agradecieron y el gremio lo anotó.'; }}]}; }
+  function evAmenaza(g){ return {p:9,c:()=>G()===g,t:()=>'<b>Amenazan a los docentes de tu zona.</b> Llegó un panfleto: los grupos armados que mandan en '+esc(g.ciudad)+' quieren a la escuela quieta. Nadie sabe quién será el próximo.',
+    o:[{t:'Pedir traslado a un lugar más seguro',f:()=>{ g.ind.comunidad=clamp(g.ind.comunidad-6,0,100); g.ent=lugar('docencia'); if(S.carrera.ruta==='docente') S.carrera.empleador=g.ent; return 'Te trasladaron a '+g.ent+'. Dejaste atrás a tus alumnos.'; }},{t:'Quedarte y denunciar',f:()=>{ g.tension=clamp(g.tension+12,0,100); g.fama=clamp(g.fama+3,0,100); S.p.felicidad=clamp(S.p.felicidad-4,0,100); return chance(.25)?'Te sacaron de la región con escoltas: el miedo no se va.':'Denunciaste y la escuela siguió abierta, con miedo.'; }}]}; }
+  function evEvaluacion(g){ return {p:7,c:()=>G()===g,t:()=>'<b>Evaluación docente.</b> El Ministerio mide a los maestros por competencias. De esto depende subir de grado.',
+    o:[{t:'Prepararte a fondo (cuesta una movida)',f:()=>{ S.mov=Math.max(0,S.mov-1); S.carrera.desempeno=clamp((S.carrera.desempeno||50)+8,0,100); return 'Pasaste la evaluación con buen puntaje.'; }},{t:'Presentarla sin preparar',f:()=>{ const ok=chance(.55); S.carrera.desempeno=clamp((S.carrera.desempeno||50)+(ok?4:-6),0,100); return ok?'La pasaste raspando.':'No la pasaste: queda para el próximo año.'; }}]}; }
+  function evParoU(g){ return {p:8,c:()=>G()===g,t:()=>'<b>Paro en la universidad.</b> Estudiantes y profesores toman el campus por el presupuesto y por un asunto político. La rectoría llama al diálogo.',
+    o:[{t:'Acompañar al movimiento profesoral',f:()=>{ g.tension=clamp(g.tension+8,0,100); g.ind.red=clamp(g.ind.red+5,0,100); g.fama=clamp(g.fama+2,0,100); return 'Te viste con los estudiantes y el gremio profesoral.'; }},{t:'Mantenerte al margen',f:()=>{ g.ind.docencia=clamp(g.ind.docencia+2,0,100); return 'Seguiste con tus clases virtuales y tu investigación.'; }}]}; }
+  function evPlagio(g){ return {p:9,c:()=>G()===g,t:()=>'<b>Te acusan de plagio.</b> Un colega encontró párrafos muy parecidos a un artículo anterior. La universidad abrió una revisión.',
+    o:[{t:'Defenderte con pruebas',f:()=>{ const ok=chance(clamp(.65-g.pub*.02,.3,.85)); if(ok) return 'Demostraste que el texto era tuyo: la acusación se archivó.'; g.fama=clamp(g.fama-15,0,100); g.malos++; return 'No lograste demostrarlo: tu fama cayó y la revisión quedó en tu hoja de vida.'; }},{t:'Retractarte del artículo',f:()=>{ g.fama=clamp(g.fama-6,0,100); g.pub=Math.max(0,g.pub-1); return 'Retiraste el artículo y el asunto se enfrió.'; }}]}; }
+  function evPremio(g){ return {p:6,c:()=>G()===g,t:()=>'<b>Te ofrecen un premio de la academia.</b> Reconocen tu trayectoria.',o:[{t:'Aceptarlo y dar la conferencia',f:()=>{ g.fama=clamp(g.fama+9,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); moverPrestigio(2,'un premio académico'); return 'Recibiste el premio: tu nombre subió en la academia y en el país.'; }},{t:'Declinarlo',f:()=>'Preferiste que no te vieran con premios.'}]}; }
+
+  /* ---- panel ---- */
+  const barra=(v)=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaPanel(){ sync(); const g=G(); if(!g){ escena({rubro:'Vida académica',titulo:'Sin cátedra ni aula',cerrable:true,cuerpo:'Cuando tengas la carrera docente o la académica aparecerá aquí tu panel.',opciones:[]}); return; }
+    const uni=g.pista==='universidad', c=S.carrera;
+    let tabla='<table class="libro">'+Object.keys(g.ind).map(k=>'<tr><td>'+esc(INDS[g.pista][k])+'</td><td>'+barra(g.ind[k])+'</td></tr>').join('')+'<tr><td>'+(uni?'Fama académica':'Reconocimiento')+'</td><td>'+barra(g.fama)+'</td></tr>';
+    if(uni) tabla+='<tr><td>Artículos · libros · tesis</td><td>'+g.pub+' · '+g.libros+' · '+g.tesis+'</td></tr><tr><td>Grupo de investigación</td><td>'+(g.grupo?'sí':'no')+(g.fondos?' · fondos '+fm(g.fondos):'')+'</td></tr>'; else tabla+='<tr><td>Estudios para el escalafón</td><td>'+g.estudios+'</td></tr><tr><td>Tensión con el gremio y el gobierno</td><td>'+barra(g.tension)+'</td></tr>';
+    tabla+='</table>';
+    const ops=DEC[g.pista].map((d,i)=>{ const pago=pagoDe(d); const bloq=d[5]&&!d[5](); if(bloq) return null; return {t:d[1]+(pago?' ('+fm(pago)+')':''),cat:uni?'legado':'empleo',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<pago?'No te alcanza':null),run:()=>hacer(i)}; }).filter(Boolean);
+    if(uni&&typeof window.escenaRectoria199==='function') ops.push({t:'La rectoría y las universidades',cat:'legado',cerrar:false,d:'Ofertas y cargos de dirección universitaria.',run:()=>window.escenaRectoria199()});
+    ops.push({t:'Dejar la cátedra',cat:'riesgo',cerrar:false,run:()=>{ cerrar('renuncia'); if(S.carrera) { S.carrera.ruta='desempleado'; S.carrera.empleador=null; } log('Dejaste '+esc(g.ent)+'.'); cerrarModal(); render(); }});
+    escena({rubro:esc(g.ent),titulo:(uni?'Tu vida académica':'Tu vida docente')+' · '+esc(nivelNombre(g.pista)),ancho:true,cerrable:true,
+      cuerpo:'Año '+(g.anios+1)+' en '+esc(g.ent)+'. '+(uni?'Publicar, enseñar y hacerte un nombre: eso decide tus ascensos y, algún día, una rectoría.':'Enseñar, ganarte al barrio y subir en el escalafón: la plata no sobra, el reconocimiento sí.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(g.ultimoDes==null?'aún sin balance':g.ultimoDes+'/100')+'.</span>',html:tabla,opciones:ops}); }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA198_PASO) return; window.__SA198_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu vida académica y docente')) g.miembros.push(['Influencia','Tu vida académica y docente']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA198_ACC) return; window.__SA198_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ sync(); const g=G(); if(g&&!L.some(x=>x.t==='Tu vida académica y docente')) L.push({t:'Tu vida académica y docente',cat:'empleo',d:(g.pista==='universidad'?'Artículos, libros, tesis, grupo de investigación y fama académica en ':'El aula, la comunidad, el escalafón y el magisterio en ')+g.ent+'.',mov:0,modal:false,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v198=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA198_CAT) return; window.__SA198_CAT=true; window.catDe=function(t){ if(t==='Tu vida académica y docente') return 'empleo'; return old.apply(this,arguments); }; }
+  function init198(){ registrar(); wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{acad198:G,syncAcad198:sync,anualAcad198:anual,escenaAcad198:escenaPanel,hacerAcad198:hacer,DEC_ACAD_198:DEC,NIV_DOCENTE_198:NIV_DOC,evParo198:evParo,evAmenaza198:evAmenaza,evEvaluacion198:evEvaluacion,evParoU198:evParoU,evPlagio198:evPlagio,evPremio198:evPremio,pistaAcad198:pistaDe,cerrarAcad198:cerrar}); }
+  init198(); setTimeout(init198,40); setTimeout(init198,220); setTimeout(init198,650); setTimeout(init198,950); setTimeout(init198,1500);
+  window.__SA198={version:V198};
 })();
 </script>
 
