@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v204</div>
+<div class="version-badge" id="versionBadge">v205</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4360,7 +4360,7 @@ function bonoGremio(clave){
 function tengoFinca(tipos){ return (S.bienes||[]).some(b=>b.clase==='finca'&&tipos.indexOf(b.tipo)>=0); }
 /* todo lo que tienes montado: compañías del grupo y sociedades aparte */
 function misSectores(){ return companias().map(e=>e.sector); }
-function misRamos(){ return sociedades().map(x=>x.ramo); }
+function misRamos(){ return sociedades().map(x=>x.ramo).concat(companias().map(e=>e&&e.ramo205).filter(Boolean)); }   /* v205: las sociedades de antes ahora son compañías */
 function tengoNegocio(){ return companias().length>0||sociedades().length>0; }
 function ingresosAgremiables(){
   let t=companias().reduce((a,e)=>a+e.ingresos,0);
@@ -6990,7 +6990,7 @@ function listaAcciones(){
     A.push({t:'Casar a '+h.nombre, d:'Una alianza con otra casa: dote, contactos y prestigio para el apellido.', mov:1, modal:true,
       run:()=>escenaCasarHijo(h)});
   });
-  A.push({t:'Constituir una sociedad', d:'Un negocio aparte que administre alguien más. Desde '+fmt(RAMOS[0].min)+'.', mov:1, modal:true,
+  A.push({t:'Constituir una sociedad', d:'Una compañía igual a las tuyas (misma puerta de negocios, unidades, junta y presidente), pero dirigida por otro: la fundas y escoges quién la preside, sin cambiar de silla ni de oficio. Desde '+fmt(RAMOS[0].min)+'.', mov:1, modal:true,
     dis:S.efectivo<RAMOS[0].min?'Necesitas al menos '+fmt(RAMOS[0].min):null,
     run:()=>escenaCrearSociedad()});
   sociedades().filter(x=>!x.gerente).forEach(soc=>{
@@ -13575,16 +13575,16 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const RAMOS_DISTRIBUCION_51=['comercializadora','importadora','transportadora'];
   const FINCAS_PROCESABLES_51=['cafe','aguacate','ganado'];
   function estaIntegrado51(x){ return !!x.integradoCon51; }
-  function idDeActivo51(x){ return x.sid||x.uid; }
+  function idDeActivo51(x){ return x.sid||x.uid||x.nombre; }
   function nombreDe51(x){ return x.nombre||x.tipo||'activo'; }
-  function valorDe51(x){ return isFinite(x.capital)?x.capital:(isFinite(x.valor)?x.valor:0); }
+  function valorDe51(x){ return isFinite(x.capital)?x.capital:(isFinite(x.valor)?x.valor:(x.sector&&isFinite(x.ingresos)?Math.round(x.ingresos*1.4):0)); }   /* v205: también compañías */
   function candidatosIntegracion51(){
     const pares=[];
     const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s));
-    const distribuidoras=(S.sociedades||[]).filter(s=>RAMOS_DISTRIBUCION_51.includes(s.ramo)&&!estaIntegrado51(s));
+    const distribuidoras=(S.sociedades||[]).filter(s=>RAMOS_DISTRIBUCION_51.includes(s.ramo)&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&(RAMOS_DISTRIBUCION_51.includes(e.ramo205)||['retail','logistica'].includes(e.sector))&&!e.banco112&&!e.hotel175&&!estaIntegrado51(e)));   /* v205: las compañías de comercio y logística distribuyen */
     vinicolas.forEach(v=>distribuidoras.forEach(d=>pares.push({a:v,b:d,tipo:'distribucion'})));
     const fincas=(S.bienes||[]).filter(b=>b.clase==='finca'&&FINCAS_PROCESABLES_51.includes(b.tipo)&&!estaIntegrado51(b));
-    const agro=(S.sociedades||[]).filter(s=>s.ramo==='agroindustria'&&!estaIntegrado51(s));
+    const agro=(S.sociedades||[]).filter(s=>s.ramo==='agroindustria'&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&(e.ramo205==='agroindustria'||e.sector==='alimentos')&&!estaIntegrado51(e)));   /* v205: las procesadoras de alimentos */
     fincas.forEach(f=>agro.forEach(a=>pares.push({a:f,b:a,tipo:'procesamiento'})));
     return pares;
   }
@@ -13620,6 +13620,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   }
   function correrIntegraciones51(){
     (S.sociedades||[]).forEach(s=>{ if(estaIntegrado51(s)) s.capital=Math.max(1,s.capital*(1+rnd(.015,.03))); });
+    companias().forEach(e=>{ if(e&&estaIntegrado51(e)&&isFinite(e.ingresos)) e.ingresos=Math.max(1,e.ingresos*(1+rnd(.015,.03))); });   /* v205 */
   }
 
   /* ==========================================================================
@@ -37287,6 +37288,136 @@ install();setTimeout(install,1200);
   function init204(){ Object.assign(window,{SLUG_CIUDAD_204:SLUG,FOTOS_HECHAS_204:HECHAS,fotosPendientes204:pendientes,ciudadesConFotos204:conFotos}); }
   init204(); setTimeout(init204,40); setTimeout(init204,220); setTimeout(init204,650); setTimeout(init204,950); setTimeout(init204,1500);
   window.__SA204={version:V204};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v205 · UNA SOLA FIGURA: LA SOCIEDAD ES UNA COMPAÑÍA QUE DIRIGE OTRO
+   Había dos clases de negocio. Las compañías que fundabas para ti (con su
+   puerta de negocios, sus unidades, su junta, sus productos, su presidente y
+   todo lo demás) y las «sociedades» de la Cámara de Comercio: una cajita con
+   capital, un ramo y un gerente, sin nada más. Ahora son lo mismo:
+   - «Constituir una sociedad» (la que maneja otro) pasa por la misma puerta
+     de negocios que «Fundar una compañía». La única diferencia es la silla:
+     no te sientas en ella ni cambias de oficio. Al terminar de fundarla
+     escoges quién la preside con el proceso de siempre (cazatalentos,
+     equipo, familia o a dedo, con su contrato y su mandato).
+   - Las sociedades que ya tenías se convierten solas en compañías del
+     grupo: sector según su ramo, organizadas por unidades, con su gerente
+     como presidente (los parientes siguen al frente), el capital como
+     valor de la compañía y la antigüedad que tenían. Las que no tenían
+     gerente quedan sin presidente, como cualquier compañía sin cabeza.
+   - La vinícola de un viñedo sigue siendo una sociedad aparte (vive pegada a
+     la finca). La integración vertical de la v51 ahora también ve las
+     compañías: comercio y logística sirven de distribución y los alimentos
+     procesados, de procesadora.
+   ========================================================================== */
+(function(){
+  const V205='v205';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const MAPA={comercializadora:'retail',inmobiliaria:'inmobiliario',transportadora:'logistica',importadora:'retail',constructora:'construccion',agroindustria:'alimentos'};
+  const ESTILOS=['constructor','financiero','conservador','negociador'];
+
+  /* ---------- las sociedades de antes pasan a ser compañías ---------- */
+  function sectorDe(ramo){ let s=MAPA[ramo]||'retail'; try{ if(!SECTORES.some(x=>x.id===s)) s='construccion'; }catch(e){} return s; }
+  function nombreUnico(n){ const usados=comps().map(x=>x.nombre); let r=n, i=1; const rom=['II','III','IV','V','VI','VII','VIII'];
+    while(usados.includes(r)&&i<9){ r=n+' '+rom[i-1]; i++; } return r; }
+  function presidenteDe(soc,e){
+    const g=soc.gerente; if(!g||g.tipo==='yo'||!g.nombre) return null;
+    const pa=g.pid?(S.parientes||[]).find(x=>x.pid===g.pid):null;
+    const sueldo=Math.max(Math.round(g.sueldo||0),Math.round(Math.max(60,e.ingresos*.008)));
+    const familia=g.tipo==='familia';
+    if(pa){ pa.gerenciaDe=null; pa.presideA=e.nombre; }
+    return {nombre:g.nombre,pid:g.pid||null,capaz:cl(g.capaz||5,1,10),honrado:cl(g.honrado||6,1,10),sueldo,tipo:familia?'familia':'pro',
+      p154:{origen:familia?'familia':'cazatalentos',estilo:ESTILOS[Math.floor(Math.random()*ESTILOS.length)],edad:(pa&&pa.edad)||Math.round(40+Math.random()*20),sector:false,rango:0,verif:true,contrato:'fijo',mandato:'rentabilidad',
+        desde:A(),hasta:A()+3,leal:familia?85:60,hist:[],hijo:null,rel:(pa&&pa.rel)||null,acciones:0,ingAnt:e.ingresos}};
+  }
+  function crear(soc){
+    const sector=sectorDe(soc.ramo), cap=Math.max(20,+soc.capital||0), capaz=(soc.gerente&&isFinite(soc.gerente.capaz))?soc.gerente.capaz:5;
+    const nombre=nombreUnico(soc.nombre||((S.dinastia||'Casa')+' Asociados'));
+    const e={nombre,ticker:(typeof ticker==='function'?ticker(nombre):nombre.slice(0,4).toUpperCase()),sector,fundada:Math.max(1800,A()-Math.max(0,soc.anios||0)),
+      ingresos:cap*1.45,costos:0,utilidad:0,caja:cap*.55,deuda:0,innovacion:45,marca:40,moral:62,eficiencia:cl(40+capaz*3,10,90),
+      empleados:Math.max(4,Math.round(cap/26)),crecimiento:.1,publica:false,aniosMalos:0,historia:[],productos:[],
+      holders:[{id:'tu',nombre:'Tú',tipo:'fundador',n:1000000}],junta:[],ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá',ramo205:soc.ramo,sid205:soc.sid};
+    for(let i=0;i<5;i++){ let v=0; try{ v=valuar(e); }catch(x){} if(!isFinite(v)||v<=0) break; const r=cap/v; if(Math.abs(r-1)<.04) break; e.ingresos=Math.max(10,e.ingresos*cl(r,.4,2.5)); }
+    e.presidente=presidenteDe(soc,e);
+    S.grupo=comps(); S.grupo.push(e);
+    if(!S.emp){ try{ sentarseEn(S.grupo.length-1); }catch(x){} }
+    let u=false; try{ if(typeof window.clasesPara177==='function'&&typeof window.convertir177==='function'){ const cs=window.clasesPara177(e); if(cs.length&&window.convertir177(e,cs[0])) u=true; } }catch(x){ console.error(x); }
+    return {e,u,cap};
+  }
+  function migrar(){
+    if(!ACTIVO()||nino()||window.__noMigrar205||!Array.isArray(S.sociedades)) return 0;
+    const L=S.sociedades.filter(s=>s&&s.ramo!=='vinicola'&&!s.migrada205); if(!L.length) return 0;
+    const hechas=[];
+    L.forEach(soc=>{ try{ const r=crear(soc); hechas.push({soc,r}); soc.migrada205=true; }catch(x){ console.error(x); } });
+    S.sociedades=S.sociedades.filter(s=>!hechas.some(h=>h.soc===s));
+    if(hechas.length){
+      const txt=hechas.map(h=>'<b>'+E(h.r.e.nombre)+'</b>'+(h.r.e.presidente?' (la preside '+E(h.r.e.presidente.nombre)+')':' (sin presidente)')).join(', ');
+      try{ log('Tus sociedades pasaron a ser compañías del grupo, iguales a las que fundaste tú: '+txt+'. Conservan su capital, su gerente como presidente y su antigüedad.','hito'); }catch(x){}
+      try{ hito('Sus sociedades pasaron a ser compañías'); }catch(x){}
+    }
+    return hechas.length;
+  }
+
+  /* ---------- fundar una sociedad: la misma puerta, sin sentarte ---------- */
+  const puertaAbierta=()=>!!document.querySelector('#escenaHost .lienzo.red176');
+  function vigente(fl){ return !!(fl&&fl.anio===A()&&fl.n===comps().length&&Date.now()-fl.t<1800000&&puertaAbierta()); }
+  function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||old.__v205) return;
+    const f=function(nombre,sectorId,aporte){
+      const fl=window.__dirige205; window.__dirige205=null;
+      const delegado=vigente(fl);
+      if(!delegado) return old.apply(this,arguments);
+      const ant={emp:S.emp,carrera:Object.assign({},S.carrera)}, logO=window.log;
+      window.log=function(t){ if(/Eres dueño del 100% y presidente/.test(String(t))) return; return logO.apply(this,arguments); };
+      let r; try{ r=old.apply(this,arguments); } finally{ window.log=logO; }
+      try{
+        const g=comps(), e=g[g.length-1];
+        if(ant.emp){ const i=g.indexOf(ant.emp); if(i>=0) sentarseEn(i); }
+        Object.keys(S.carrera).forEach(k=>{ if(!(k in ant.carrera)) delete S.carrera[k]; }); Object.assign(S.carrera,ant.carrera);
+        window.__pend205=e;
+        log('Constituiste <b>'+E(e.nombre)+'</b> con un aporte de '+fmt(aporte)+'. Eres dueño del 100%; la preside quien tú nombres, y tú sigues donde estabas.','hito');
+        setTimeout(()=>{ try{ if(window.__pend205===e){ window.__pend205=null; if(!e.presidente&&typeof window.escenaPresidente==='function') window.escenaPresidente(e,true); } }catch(x){ console.error(x); } },0);
+      }catch(x){ console.error(x); }
+      return r; };
+    f.__v205=true; Object.keys(old).forEach(k=>{ f[k]=old[k]; }); window.fundarEn=f; }
+  /* la v154 también envuelve escenaPresidente y no llama a la anterior: hay que quedar encima de ella,
+     así que se vuelve a envolver si alguien se puso por encima */
+  let TOPE_PRES=null;
+  function wrapPresidente(){ const old=window.escenaPresidente; if(typeof old!=='function'||old===TOPE_PRES) return;
+    const f=function(e,gratis){ const p=window.__pend205;
+      if(p&&e!==p){ let pres=false; try{ pres=presides(e); }catch(x){}
+        if(pres){ window.__pend205=null; if(!p.presidente) return old.call(this,p,true); return; } }
+      if(p&&e===p) window.__pend205=null;
+      return old.apply(this,arguments); };
+    Object.keys(old).forEach(k=>{ f[k]=old[k]; }); f.__v205=true; TOPE_PRES=f; window.escenaPresidente=f; }
+  let TOPE_CREAR=null;
+  function wrapCrear(){ const old=window.escenaCrearSociedad; if(typeof old!=='function'||old===TOPE_CREAR) return;
+    const f=function(){ if(!ACTIVO()||nino()) return;
+      if(typeof window.escenaPuerta176!=='function') return old.apply(this,arguments);
+      window.__dirige205={t:Date.now(),n:comps().length,anio:A()};
+      try{ if(typeof aviso==='function') aviso('Una sociedad es una compañía como las tuyas, pero dirigida por otro: la fundas por esta puerta y al final escoges quién la preside.'); }catch(x){}
+      window.escenaPuerta176(); };
+    Object.keys(old).forEach(k=>{ f[k]=old[k]; }); f.__v205=true; TOPE_CREAR=f; window.escenaCrearSociedad=f; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__v205) return;
+    const f=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()) migrar(); }catch(x){ console.error(x); }
+      return L; };
+    f.__v205=true; Object.keys(old).forEach(k=>{ if(/^__(v|top)\d+$/.test(k)) f[k]=true; }); window.listaAcciones=f; }
+  /* si cierras la puerta de negocios sin fundar nada, la elección «la dirige otro» se olvida:
+     la próxima compañía que fundes por «Fundar una compañía» la presides tú, como siempre */
+  function vigilarPuerta(){ if(window.__SA205_OBS) return; const h=document.getElementById('escenaHost'); if(!h||typeof MutationObserver==='undefined') return; window.__SA205_OBS=true;
+    new MutationObserver(()=>{ if(window.__dirige205&&!document.querySelector('#escenaHost .lienzo.red176')) window.__dirige205=null; }).observe(h,{childList:true}); }
+  function init205(){ vigilarPuerta(); wrapFundar(); wrapPresidente(); wrapCrear(); wrapAcciones(); try{ migrar(); }catch(x){ console.error(x); }
+    Object.assign(window,{migrarSociedades205:migrar,crearCompaniaDeSociedad205:crear,MAPA_RAMO_SECTOR_205:MAPA}); }
+  init205(); setTimeout(init205,40); setTimeout(init205,220); setTimeout(init205,650); setTimeout(init205,950); setTimeout(init205,1500);
+  window.__SA205={version:V205};
 })();
 </script>
 
