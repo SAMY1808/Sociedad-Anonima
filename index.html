@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v201</div>
+<div class="version-badge" id="versionBadge">v202</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -37036,6 +37036,154 @@ install();setTimeout(install,1200);
     Object.assign(window,{mil201:S2,registrarMil201:registrar,ingresarMil201:ingresar,retirarMil201:retirar,anualMil201:anual,anualPension201:anualPension,escenaMilitar201:escenaMilitar,escenaIngresoMil201:escenaIngreso,escenaDestino201:escenaDestino,escenaOperacion201:escenaOperacion,escenaLibreta201:escenaLibreta,hacerOtraMil201:hacerOtra,operacionResultado201:operacionResultado,ramasMil201:ramasDisponibles,nombreGrado201:nombreGrado,GRADOS_201:GRADOS,RAMAS_201:RAMAS,puntajeAscenso201:puntaje,evHerida201:evHerida,evCalificar201:evCalificar,evDDHH201:evDDHH,evGolpe201:evGolpe,necesitaLibreta201:necesitaLibreta,riesgoVida201:riesgoVida,operacion201:operacion}); }
   init201(); setTimeout(init201,40); setTimeout(init201,220); setTimeout(init201,650); setTimeout(init201,950); setTimeout(init201,1500);
   window.__SA201={version:V201};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v202 · LA IGLESIA: SACERDOCIO, VIDA RELIGIOSA Y EL CONVENTO
+   1. LA VOCACIÓN PROPIA. Los hombres solteros entran al seminario y suben:
+      seminarista, diácono, sacerdote y párroco, canónigo, vicario general,
+      obispo, arzobispo y cardenal. Las mujeres solteras entran como
+      postulantes y suben: novicia, religiosa profesa, superiora de
+      comunidad, priora o directora de colegio, superiora provincial y madre
+      general. Votos: no te casas y, en las comunidades, la plata del
+      noviciado se entrega a la casa (la dote).
+   2. EL PANEL: fe y vida espiritual, obras (parroquia, colegio, hospital,
+      orfanato), apoyo del pueblo, relación con la jerarquía y riesgo de
+      escándalo. Decisiones: predicar, obras, política, recaudar, retiro
+      espiritual. Ascensos por años, obras, jerarquía y padrinos;
+      el obispo lo nombra Roma.
+   3. LA HISTORIA: la desamortización de 1861 (Mosquera), las guerras de
+      religión, el Concordato (1887 y 1973), La Violencia (el púlpito y el
+      partido), Camilo Torres (1965), las visitas del Papa (1968, 1986,
+      2017) y la Constitución de 1991, que separa la Iglesia del Estado.
+   4. EL CONVENTO DE LA FAMILIA: mandar a una hija, una hermana o una tía
+      incómoda al convento (con dote), o a un hijo al seminario. Da prestigio
+      (un cura en la casa) o costos (quien no tiene vocación sufre), y esa
+      persona puede ascender y volverse un aliado en la Iglesia... o un
+      escándalo.
+   Un sacerdote puede ser rector de una universidad confesional (v199).
+   ========================================================================== */
+(function(){
+  const V202='v202';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const NIV_H=['Seminarista','Diácono','Sacerdote y párroco','Canónigo','Vicario general','Obispo','Arzobispo','Cardenal'];
+  const NIV_M=['Postulante','Novicia','Religiosa profesa','Superiora de comunidad','Priora o directora de colegio','Superiora provincial','Madre general','Madre general'];
+  const MIN=[2,1,4,5,5,6,8,0], SAL=[4,8,14,22,34,55,80,110];
+  const ORDENES_M=[['jesuitas',1850,'Compañía de Jesús'],['diocesano',1800,'clero diocesano'],['dominicos',1800,'Orden de Predicadores'],['franciscanos',1800,'Orden Franciscana'],['salesianos',1890,'Salesianos de Don Bosco']];
+  const ORDENES_F=[['carmelitas',1800,'Carmelitas Descalzas'],['clarisas',1800,'Clarisas'],['caridad',1850,'Hermanas de la Caridad'],['presentacion',1850,'Hermanas de la Presentación'],['dominicas',1800,'Dominicas']];
+  const Q=()=>S.clero202||null;
+  const hombre=()=>S.p.sexo==='h';
+  const nivelNombre=(sexo,i)=>(sexo==='m'?NIV_M:NIV_H)[clamp(i,0,7)];
+  function registrar(){ if(typeof RUTAS==='undefined'||RUTAS.clero) return; RUTAS.clero={n:'Vida eclesiástica',niveles:SAL.map((s,i)=>({get n(){ const q=S&&S.clero202; return nivelNombre(q?q.sexo:'h',i); },s,edu:1}))}; }
+  window.esClero202=()=>{ const q=Q(); return !!(q&&q.sexo==='h'&&q.nivel>=2); };
+
+  /* ---- entrar y salir ---- */
+  const soltero=()=>{ const f=S.familia; return !(f&&f.pareja&&f.pareja.casados!==false&&f.pareja.vivo!==false); };
+  const puedeVocacion=()=>{ const e=S.p.edad||0; return !Q()&&e>=16&&e<=45&&soltero()&&!(S.carrera&&S.carrera.ruta&&['fundador','militar','publico','academico','docente','profesional','corporativo','consultor','planta','oficio'].includes(S.carrera.ruta)); };
+  const dote=()=>Math.round(20*(1+(A()-1900)*.004));
+  function ingresar(orden){ if(Q()) return 'Ya tienes una vocación.'; registrar(); const sexo=S.p.sexo; const q={sexo,orden:orden[0],ordenN:orden[2],nivel:0,anios:0,aniosNivel:0,ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá',ind:{fe:ri(55,70),obras:ri(35,50),pueblo:ri(40,55),jerarquia:ri(40,55)},riesgo:0,desde:A(),dec:0,hist:[],ultimoDes:null,buenos:0,malos:0,hitos:{}};
+    S.clero202=q; S.carrera=S.carrera||{}; S.carrera.ruta='clero'; S.carrera.nivel=0; S.carrera.anios=0; S.carrera.desempeno=60; S.carrera.empleador=sexo==='m'?'el convento de las '+orden[2]:'el seminario de '+q.ciudad;
+    if(sexo==='m'||orden[0]!=='diocesano'){ const d=dote(); tomar(d); log('Entregaste '+fm(d)+' a la comunidad: es la dote del noviciado.'); }
+    if(S.familia&&S.familia.pareja){ S.familia.pareja=null; }
+    moverPrestigio(sexo==='h'?1:0,'ingresó a la vida religiosa'); hito(sexo==='h'?'Entró al seminario':'Entró como postulante a '+orden[2]);
+    log(sexo==='h'?'Entraste al seminario de <b>'+esc(q.ciudad)+'</b> ('+esc(orden[2])+'). Se activó el panel de la vida eclesiástica.':'Entraste como postulante a las <b>'+esc(orden[2])+'</b>. Se activó el panel de la vida religiosa.','hito'); return 'Entraste.'; }
+  function salir(motivo,secularizado){ const q=Q(); if(!q) return; const h=(S.cleroHist202||(S.cleroHist202=[])); h.push({sexo:q.sexo,orden:q.ordenN,nivel:nivelNombre(q.sexo,q.nivel),desde:q.desde,hasta:A(),motivo}); S.clero202=null; if(S.carrera&&S.carrera.ruta==='clero'){ S.carrera.ruta='desempleado'; S.carrera.empleador=null; S.carrera.nivel=-1; }
+    if(secularizado){ moverPrestigio(-2,'dejó los hábitos'); } log('Dejaste la vida eclesiástica ('+motivo+').'); }
+
+  /* ---- decisiones ---- */
+  const DEC_H=[['predicar','Predicar y dar misión','Sermones, misiones populares y confesionario: el pueblo te conoce.',0,q=>{ q.ind.pueblo+=7; q.ind.fe+=3; return 'Tu predicación llenó la iglesia.'; }],
+    ['obras','Fundar una obra: escuela, hospital u orfanato','Cuesta plata y trabajo, y se ve.',16,q=>{ q.ind.obras+=10; q.ind.pueblo+=4; return 'Abriste una obra para los pobres.'; }],
+    ['politica','Alinearte con un partido desde el púlpito','Influencia política… y enemigos. Hasta 1991 la Iglesia pesaba mucho en las elecciones.',0,q=>{ q.ind.jerarquia+=4; q.ind.pueblo-=3; q.riesgo+=6; if(S.p.redes!=null) S.p.redes=clamp(S.p.redes+3,0,100); return 'Te pronunciaste por un partido: ganaste padrinos y críticos.'; },()=>A()<1991],
+    ['recaudar','Recaudar para la parroquia o la comunidad','Colectas, bazares y benefactores ricos.',0,q=>{ q.ind.obras+=5; q.ind.jerarquia+=2; return 'Recaudaste para las obras.'; }],
+    ['retiro','Un retiro espiritual','Silencio y oración: sube la fe y baja el riesgo.',0,q=>{ q.ind.fe+=9; q.riesgo-=8; S.p.felicidad=clamp(S.p.felicidad+3,0,100); return 'Volviste del retiro con más fe y más calma.'; }]];
+  const DEC_M=[['oracion','Oración y vida comunitaria','El coro, el trabajo y la regla: la base de la vida religiosa.',0,q=>{ q.ind.fe+=8; q.riesgo-=6; return 'Viviste un año de oración y regla.'; }],
+    ['colegio','Enseñar en el colegio de la comunidad','Educas a las niñas de la ciudad y te conoce el barrio.',0,q=>{ q.ind.pueblo+=7; q.ind.obras+=5; return 'Enseñaste en el colegio de la comunidad.'; },()=>true],
+    ['hospital','Servir en el hospital o el orfanato','Cuidas a los enfermos y a los niños sin familia.',10,q=>{ q.ind.obras+=9; q.ind.pueblo+=5; return 'Serviste a los enfermos y a los huérfanos.'; }],
+    ['recaudar','Pedir limosna para la comunidad','Las visitas a las casas ricas rinden.',0,q=>{ q.ind.obras+=4; q.ind.jerarquia+=3; return 'Recaudaste para tu comunidad.'; }],
+    ['retiro','Un retiro espiritual','Silencio y oración: sube la fe y baja el riesgo.',0,q=>{ q.ind.fe+=9; q.riesgo-=8; return 'Volviste del retiro con más fe y más calma.'; }]];
+  const decs=q=>q.sexo==='m'?DEC_M:DEC_H;
+  const pago=d=>Math.round((d[3]||0)*(1+(A()-1900)*.004));
+  function hacer(i){ const q=Q(); if(!q) return; const d=decs(q)[i], p=pago(d); if(S.mov<1||S.efectivo<p) return; S.mov=Math.max(0,S.mov-1); if(p) tomar(p); const m=d[4](q); Object.keys(q.ind).forEach(k=>{ q.ind[k]=clamp(q.ind[k],0,100); }); q.riesgo=clamp(q.riesgo,0,100); q.dec++; log(m+(p?' Costó '+fm(p)+'.':'')); escenaClero(); }
+
+  /* ---- el año ---- */
+  function anual(){ if(!S||!S.p||S.muerto) return; const q=Q(); if(!q) return; registrar(); if(!S.carrera||S.carrera.ruta!=='clero'){ salir('cambió de camino',false); return; } q.anios++; q.aniosNivel++;
+    Object.keys(q.ind).forEach(k=>{ q.ind[k]=clamp(q.ind[k]-1+ri(-2,2),0,100); }); q.riesgo=clamp(q.riesgo-2,0,100);
+    S.carrera.nivel=q.nivel; S.carrera.desempeno=clamp(50+(q.ind.fe+q.ind.obras+q.ind.pueblo)/9-q.riesgo/5,40,100);
+    const des=clamp(Math.round(q.ind.fe*.3+q.ind.obras*.25+q.ind.pueblo*.2+q.ind.jerarquia*.25-q.riesgo*.2+8),0,100); q.ultimoDes=des; q.hist.push({a:A(),des}); if(q.hist.length>12) q.hist.shift();
+    // ascenso por la jerarquía
+    if(q.nivel<(q.sexo==='m'?6:7)&&q.aniosNivel>=MIN[q.nivel]){ const tope=q.sexo==='h'&&q.nivel>=4; const p=clamp((des-40)/70*(tope?.5:1)+(q.ind.jerarquia-50)/300,.05,.8); if(chance(p)){ q.nivel++; q.aniosNivel=0; S.carrera.nivel=q.nivel; const nm=nivelNombre(q.sexo,q.nivel); moverPrestigio(q.nivel>=5?5:1,'ascendió a '+nm.toLowerCase()); S.p.reputacion=clamp(S.p.reputacion+2,0,100); log('<b>'+esc(q.sexo==='m'?'Tus hermanas te eligieron ':'Te nombraron ')+esc(nm.toLowerCase())+'</b>.','hito'); if(q.nivel>=5||q.sexo==='m'&&q.nivel>=5) hito('Llegó a '+nm); } }
+    log('Balance del año ('+esc(nivelNombre(q.sexo,q.nivel).toLowerCase())+'): desempeño '+des+'/100, fe '+Math.round(q.ind.fe)+', obras '+Math.round(q.ind.obras)+'.',des>=62?'bien':des<42?'mal':'');
+    if(q.riesgo>=35&&chance(q.riesgo/140)) cola.push(evEscandalo(q));
+    if(q.ind.fe<25&&chance(.3)) cola.push(evCrisis(q));
+    const a=A();
+    if(a===1861&&q.sexo&&!q.hitos.d) { q.hitos.d=1; cola.push(evDesamortizacion(q)); }
+    if(a===1965&&q.sexo==='h'&&q.nivel>=2&&!q.hitos.c) { q.hitos.c=1; cola.push(evCamilo(q)); }
+    if((a===1968||a===1986||a===2017)&&!q.hitos['p'+a]) { q.hitos['p'+a]=1; cola.push(evPapa(q,a)); }
+    if(a===1991&&!q.hitos.k){ q.hitos.k=1; log('La nueva Constitución separa la Iglesia del Estado: pierdes el peso político que tenía el clero.'); q.ind.jerarquia=clamp(q.ind.jerarquia-4,0,100); }
+    if(a>=1900) familiares(); }
+  function evEscandalo(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>Se riega un escándalo en torno a ti.</b> '+(q.sexo==='h'?'Dicen que has faltado a tus votos y que el dinero de las colectas no cuadra.':'Dicen que has faltado a la regla y que el dinero de la comunidad no cuadra.')+' Tu superior pide explicaciones.',
+    o:[{t:'Dar la cara y aclararlo',f:()=>{ if(chance(clamp(.7-q.riesgo/150,.2,.8))){ q.riesgo=Math.max(0,q.riesgo-25); return 'Aclaraste todo: el asunto se enfrió.'; } q.ind.jerarquia=clamp(q.ind.jerarquia-12,0,100); q.ind.pueblo=clamp(q.ind.pueblo-10,0,100); moverPrestigio(-3,'un escándalo eclesiástico'); return 'No pudiste aclararlo del todo: tu nombre quedó manchado y tu superior te castigó.'; }},
+       {t:'Pedir traslado a otro lugar',f:()=>{ q.riesgo=Math.max(0,q.riesgo-15); q.ind.obras=clamp(q.ind.obras-8,0,100); return 'Te mandaron a otra parroquia: el escándalo se quedó atrás y tu obra también.'; }},
+       {t:'Dejar la vida religiosa',f:()=>{ salir('salió por un escándalo',true); return 'Dejaste los hábitos.'; }}]}; }
+  function evCrisis(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>Una crisis de fe.</b> Ya no sientes lo que sentías: los rezos son un deber vacío y empiezas a dudar de tu camino.',
+    o:[{t:'Buscar un director espiritual',f:()=>{ q.ind.fe=clamp(q.ind.fe+18,0,100); return 'Un director espiritual te acompañó y recuperaste el rumbo.'; }},{t:'Seguir por deber',f:()=>{ q.ind.fe=clamp(q.ind.fe+4,0,100); S.p.felicidad=clamp(S.p.felicidad-4,0,100); return 'Seguiste adelante con el peso de la duda.'; }},{t:'Pedir la dispensa y volver al mundo',f:()=>{ salir('pidió la dispensa',true); return 'Pediste la dispensa de tus votos y volviste a la vida civil.'; }}]}; }
+  function evDesamortizacion(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>El presidente Mosquera decreta la desamortización de bienes de manos muertas.</b> Las haciendas y los conventos de la Iglesia pasan al Estado y se rematan. '+(q.sexo==='m'?'Tu convento está en la lista.':'Tu comunidad está en la lista.'),
+    o:[{t:'Resistir y esconder los bienes',f:()=>{ q.riesgo=clamp(q.riesgo+12,0,100); q.ind.pueblo=clamp(q.ind.pueblo+6,0,100); return 'La comunidad escondió lo que pudo: el pueblo te lo agradeció y el gobierno te anotó.'; }},{t:'Acatar y negociar',f:()=>{ q.ind.obras=clamp(q.ind.obras-12,0,100); q.ind.jerarquia=clamp(q.ind.jerarquia+3,0,100); return 'Acataron y negociaron: perdieron las propiedades y salvaron la comunidad.'; }}]}; }
+  function evCamilo(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>El padre Camilo Torres se va a la guerrilla.</b> Sacerdote, sociólogo y amigo de muchos curas jóvenes, llama a la lucha armada contra la injusticia. Los obispos lo condenan. Te buscan los de uno y otro lado.',
+    o:[{t:'Respaldar la teología de la liberación',f:()=>{ q.ind.pueblo=clamp(q.ind.pueblo+10,0,100); q.ind.jerarquia=clamp(q.ind.jerarquia-12,0,100); q.riesgo=clamp(q.riesgo+10,0,100); return 'Te pusiste del lado de los pobres: el pueblo te quiere y los obispos te miran con recelo.'; }},{t:'Defender la doctrina de la jerarquía',f:()=>{ q.ind.jerarquia=clamp(q.ind.jerarquia+8,0,100); q.ind.pueblo=clamp(q.ind.pueblo-6,0,100); return 'Te alineaste con la jerarquía: tus superiores lo agradecieron.'; }},{t:'Callar y seguir con tu parroquia',f:()=>'No tomaste partido y te dedicaste a tu parroquia.'}]}; }
+  function evPapa(q,a){ const nom=a===1968?'Pablo VI (Congreso Eucarístico Internacional de Bogotá)':a===1986?'Juan Pablo II':'Francisco'; return {p:7,c:()=>Q()===q,t:()=>'<b>Visita del papa '+nom+' a Colombia.</b> Toda la Iglesia del país se moviliza.',
+    o:[{t:'Organizar la logística de tu diócesis o comunidad',f:()=>{ q.ind.obras=clamp(q.ind.obras+6,0,100); q.ind.jerarquia=clamp(q.ind.jerarquia+8,0,100); return 'Organizaste la visita y tus superiores lo notaron.'; }},{t:'Acompañar a tu gente en la misa',f:()=>{ q.ind.pueblo=clamp(q.ind.pueblo+8,0,100); q.ind.fe=clamp(q.ind.fe+8,0,100); return 'Acompañaste a tu gente en la misa del Papa.'; }}]}; }
+
+  /* ---- el familiar al convento o al seminario ---- */
+  function candidatos(){ const L=[];
+    ((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.edad>=15&&!h.clero202).forEach(h=>L.push({t:'hijo',p:h,sexo:h.sexo,nombre:h.nombre+' '+(h.apellido||S.p.apellido),rel:h.sexo==='m'?'hija':'hijo'}));
+    (S.parientes||[]).filter(p=>p.vivo&&!p.clero202&&p.edad>=15&&['hermana','hermano','tía','tío','prima','primo','sobrina','sobrino','hija'].includes(p.rel)).forEach(p=>L.push({t:'pariente',p,sexo:p.sexo,nombre:nombrePariente(p),rel:p.rel}));
+    return L; }
+  function escenaFamiliar(){ const C=candidatos(); const ops=C.slice(0,8).map(c=>{ const mujer=c.sexo==='m', d=dote(), costo=mujer?d:Math.round(d*.4);
+      return {t:(mujer?'Mandar al convento a ':'Mandar al seminario a ')+c.nombre+' ('+c.rel+')',cat:'familia',cerrar:false,d:(mujer?'La dote del convento cuesta '+fm(costo)+'. ':'El seminario cuesta '+fm(costo)+'. ')+(c.rel==='tía'||c.rel==='tío'||c.rel==='hermana'?'Es una manera conocida de apartar a quien incomoda.':'Un hijo o una hija en la Iglesia da prestigio.'),dis:S.mov<1?'Sin movidas':(S.efectivo<costo?'No te alcanza':null),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(costo); mandar(c); escenaFamiliar(); }}; });
+    if(!ops.length) ops.push({t:'No hay a quién mandar',cat:'casa',cerrar:false,dis:'Hace falta un pariente o un hijo de 15 años o más',run:()=>{}});
+    escena({rubro:'Familia',titulo:'El convento o el seminario',ancho:true,cerrable:true,cuerpo:'En esta familia hay quien incomoda y quien tiene vocación. El convento y el seminario resuelven las dos cosas, con una dote y mucho silencio.',opciones:ops}); }
+  function mandar(c){ const mujer=c.sexo==='m', ord=pick(mujer?ORDENES_F:ORDENES_M).slice(); const lista=(S.clerigos202||(S.clerigos202=[])); const forzado=chance(.55); const r={nombre:c.nombre,rel:c.rel,sexo:c.sexo,orden:ord[2],desde:A(),forzado,nivel:0,pid:c.p.pid||null};
+    lista.push(r); if(c.t==='hijo'){ S.familia.hijos=S.familia.hijos.filter(x=>x!==c.p); c.p.clero202=true; } else { c.p.clero202=true; c.p.oficio=mujer?'religiosa':'sacerdote'; if(forzado) c.p.afecto=clamp((c.p.afecto||50)-18,0,100); }
+    moverPrestigio(mujer?1:2,'un hijo de la casa en la Iglesia'); log('<b>'+esc(c.nombre)+'</b> ingresó '+(mujer?'al convento de las '+esc(ord[2]):'al seminario ('+esc(ord[2])+')')+'.'+(forzado?' No fue por vocación: la familia lo decidió.':' Decía tener vocación.'),'hito'); hito(c.nombre+(mujer?' entró al convento':' entró al seminario')); }
+  function familiares(){ const L=S.clerigos202||[]; L.forEach(r=>{ if(r.nivel>=6) return; if(chance(.06+(r.forzado?0:.03))){ r.nivel++; const nm=nivelNombre(r.sexo,r.nivel); log(esc(r.nombre)+' ascendió en la Iglesia: ahora es <b>'+esc(nm.toLowerCase())+'</b>.','bien'); if(r.nivel>=5){ moverPrestigio(3,'un obispo en la familia'); S.p.redes=clamp((S.p.redes||0)+4,0,100); } } else if(r.forzado&&chance(.04)){ const e=evFugada(r); if(e) cola.push(e); } }); }
+  function evFugada(r){ return {p:8,c:()=>true,t:()=>'<b>'+esc(r.nombre)+' se escapó del '+(r.sexo==='m'?'convento':'seminario')+'.</b> Nunca quiso estar ahí. Aparece una carta: dice que prefiere la deshonra a seguir encerrado.',
+    o:[{t:'Traerlo de vuelta con el obispo',f:()=>{ moverPrestigio(-1,'un escándalo en la familia'); return 'El obispo intervino: volvió, resentido.'; }},{t:'Dejarlo ir y callar',f:()=>{ (S.clerigos202||[]).splice((S.clerigos202||[]).indexOf(r),1); S.p.felicidad=clamp(S.p.felicidad-2,0,100); return 'Lo dejaste ir: la familia comenta y a ti no te pesa.'; }}]}; }
+
+  /* ---- paneles ---- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaClero(){ const q=Q(); if(!q){ escenaVocacion(); return; } registrar(); const nm=nivelNombre(q.sexo,q.nivel), sig=q.nivel<(q.sexo==='m'?6:7)?nivelNombre(q.sexo,q.nivel+1):null;
+    const t='<table class="libro"><tr><td>Estado</td><td>'+esc(nm)+' · '+esc(q.ordenN)+' · '+q.anios+' año'+(q.anios===1?'':'s')+'</td></tr><tr><td>Fe y vida espiritual</td><td>'+barra(q.ind.fe)+'</td></tr><tr><td>Obras (parroquia, colegio, hospital)</td><td>'+barra(q.ind.obras)+'</td></tr><tr><td>Apoyo del pueblo</td><td>'+barra(q.ind.pueblo)+'</td></tr><tr><td>Relación con la jerarquía</td><td>'+barra(q.ind.jerarquia)+'</td></tr><tr><td>Riesgo de escándalo</td><td>'+barra(q.riesgo)+'</td></tr><tr><td>Siguiente paso</td><td>'+(sig?esc(sig.toLowerCase())+': '+Math.max(0,MIN[q.nivel]-q.aniosNivel)+' año(s) mínimo':'cúspide')+'</td></tr></table>';
+    const ops=decs(q).map((d,i)=>{ if(d[5]&&!d[5]()) return null; const p=pago(d); return {t:d[1]+(p?' ('+fm(p)+')':''),cat:'legado',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<p?'No te alcanza':null),run:()=>hacer(i)}; }).filter(Boolean);
+    ops.push({t:'Pedir la dispensa de tus votos',cat:'riesgo',cerrar:false,d:'Vuelves a la vida civil con el costo social que eso tiene.',run:()=>{ salir('pidió la dispensa',true); cerrarModal(); render(); }});
+    escena({rubro:esc(q.sexo==='m'?'Vida religiosa':'La Iglesia'),titulo:esc(nm)+' · '+(q.sexo==='m'?'tu vida religiosa':'tu vida eclesiástica'),ancho:true,cerrable:true,cuerpo:'Año '+(q.anios+1)+'. '+(q.sexo==='m'?'La regla, el colegio y el hospital: la comunidad es tu familia.':'Parroquias, obras y el obispo: el camino de la jerarquía.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(q.ultimoDes==null?'aún sin balance':q.ultimoDes+'/100')+'.</span>',html:t,opciones:ops}); }
+  function escenaVocacion(){ const mujer=S.p.sexo==='m', ORD=(mujer?ORDENES_F:ORDENES_M).filter(o=>A()>=o[1]); const ok=puedeVocacion();
+    const ops=ORD.map(o=>({t:(mujer?'Entrar como postulante a las ':'Entrar al seminario con ')+o[2],cat:'empleo',cerrar:false,d:mujer?'La dote del noviciado cuesta '+fm(dote())+'. Votos de castidad, obediencia y pobreza.':'Seminario y votos de castidad y obediencia'+(o[0]==='diocesano'?'.':'; y pobreza, con una dote de '+fm(dote())+' a la comunidad.'),dis:!ok?'Se entra soltero, entre los 16 y los 45 años y sin otra carrera':(S.mov<1?'Sin movidas':((mujer||o[0]!=='diocesano')&&S.efectivo<dote()?'No te alcanza la dote':null)),run:()=>{ S.mov=Math.max(0,S.mov-1); ingresar(o); cerrarModal(); render(); }}));
+    escena({rubro:'Vocación',titulo:mujer?'La vida religiosa':'El sacerdocio',ancho:true,cerrable:true,cuerpo:mujer?'Una mujer soltera puede entrar a un convento: oración, colegio y hospital, y algún día priora o madre general.':'Un hombre soltero puede entrar al seminario: párroco, canónigo, obispo y quizá cardenal. No hay matrimonio en este camino.',opciones:ops}); }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA202_PASO) return; window.__SA202_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TITULOS=['Tu vida eclesiástica','Seguir la vocación religiosa','Mandar a un familiar al convento o al seminario'];
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)) TITULOS.forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); }
+  const MATRIMONIO=/^(Casarte|Buscar un buen matrimonio|Casarse dentro de la familia|Salir a conocer gente|Buscar intimidad|Vida sentimental y relaciones)/;
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA202_ACC) return; window.__SA202_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ const q=Q();
+        for(let i=L.length-1;i>=0;i--){ const t=L[i]&&L[i].t; if(typeof t!=='string') continue; if(t==='Emplearte: Vida eclesiástica') L.splice(i,1); else if(q&&(MATRIMONIO.test(t)||/^(Pedir el ascenso a|Trabajar duro este año|Negociar salario|Renunciar$)/.test(t))) L.splice(i,1); }
+        if(q&&!L.some(x=>x.t==='Tu vida eclesiástica')) L.push({t:'Tu vida eclesiástica',cat:'empleo',d:nivelNombre(q.sexo,q.nivel)+' · '+q.ordenN+': fe, obras, pueblo y jerarquía.',mov:0,modal:false,run:()=>escenaClero()});
+        if(!q&&puedeVocacion()&&A()>=1800&&!L.some(x=>x.t==='Seguir la vocación religiosa')) L.push({t:'Seguir la vocación religiosa',cat:'empleo',d:hombre()?'El seminario y el sacerdocio.':'El convento y la vida religiosa.',mov:1,modal:true,run:()=>escenaVocacion()});
+        if(!L.some(x=>x.t==='Mandar a un familiar al convento o al seminario')&&candidatos().length) L.push({t:'Mandar a un familiar al convento o al seminario',cat:'familia',d:'Una dote y mucho silencio: a quien incomoda o a quien tiene vocación.',mov:1,modal:true,run:()=>escenaFamiliar()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v202=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA202_CAT) return; window.__SA202_CAT=true; window.catDe=function(t){ if(TITULOS.includes(t)) return t==='Mandar a un familiar al convento o al seminario'?'familia':'empleo'; return old.apply(this,arguments); }; }
+  function init202(){ registrar(); wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{clero202:Q,registrarClero202:registrar,ingresarClero202:ingresar,salirClero202:salir,anualClero202:anual,escenaClero202:escenaClero,escenaVocacion202:escenaVocacion,escenaFamiliar202:escenaFamiliar,mandarFamiliar202:mandar,candidatosFamilia202:candidatos,puedeVocacion202:puedeVocacion,nivelClero202:nivelNombre,hacerClero202:hacer,dote202:dote,ORDENES_M_202:ORDENES_M,ORDENES_F_202:ORDENES_F,evEscandaloClero202:evEscandalo,evCrisisClero202:evCrisis,evDesamortizacion202:evDesamortizacion,evCamilo202:evCamilo,evPapa202:evPapa,evFugada202:evFugada,familiaresClero202:familiares}); }
+  init202(); setTimeout(init202,40); setTimeout(init202,220); setTimeout(init202,650); setTimeout(init202,950); setTimeout(init202,1500);
+  window.__SA202={version:V202};
 })();
 </script>
 
