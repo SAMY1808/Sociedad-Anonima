@@ -643,6 +643,8 @@ html{scroll-behavior:smooth}
 .mapa92 .mar92{fill:#5E7466;font-family:var(--display);font-style:italic;font-size:13px;letter-spacing:.08em}
 .mapa92 .et92{fill:#E6DDCB;font-family:var(--ui);font-size:11.5px;paint-order:stroke;stroke:#0E1813;stroke-width:3px;pointer-events:none}
 .mapa92 .et92.mia{fill:#F2C766;font-weight:600}
+.mapa92 .et92.oculta{opacity:0;transition:opacity .12s}
+.mapa92 .pin92:hover .et92.oculta,.mapa92 .pin92:focus .et92.oculta{opacity:1}   /* v194: las etiquetas de ciudades apiñadas salen al pasar el cursor o tocar */
 .mapa92 .num92{fill:#F2C766;font-family:var(--ui);font-size:8px;font-weight:700;pointer-events:none}.mapa92 .num92.op{fill:#0F1A14;font-size:8.5px}
 .leyenda92 i.rombo{width:8px;height:8px;border-radius:2px;background:#79C897;transform:rotate(45deg)}
 .mapa92 .ins92{fill:#A9B3A6;font-family:var(--ui);font-size:9px;paint-order:stroke;stroke:#0E1813;stroke-width:3px;pointer-events:none}
@@ -1394,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v193</div>
+<div class="version-badge" id="versionBadge">v194</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1495,7 +1497,27 @@ const CIUDADES=[
   {n:'Bucaramanga',ef:{intelecto:1},d:'Ingeniería, calzado y gente que cuenta los pesos.'},
   {n:'Manizales',ef:{intelecto:1},d:'Café, universidad y clase media profesional.'},
   {n:'Montería',ef:{suerte:1},d:'Ganado y tierra; lejos del centro, cerca de la oportunidad.'},
-  {n:'Cartagena',ef:{redes:6},d:'Turismo, zona franca y visitantes con chequera.'}
+  {n:'Cartagena',ef:{redes:6},d:'Turismo, zona franca y visitantes con chequera.'},
+  /*v194*/ {n:"Pereira",ef:{"redes":3},d:"Capital del eje cafetero: comercio, confecciones y plata de café con ganas de crecer.",desde:1870},
+  {n:"Armenia",ef:{"carisma":1},d:"Quindío: café, comercio y reconstrucción tras cada temblor.",desde:1890},
+  {n:"Cúcuta",ef:{"redes":4},d:"Frontera con Venezuela: comercio, cambio de divisas y mucho contrabando.",desde:1800},
+  {n:"Ibagué",ef:{"intelecto":1},d:"Ciudad musical: arroz, café y paso obligado entre Bogotá y el Pacífico.",desde:1800},
+  {n:"Villavicencio",ef:{"suerte":1},d:"Puerta de los Llanos: ganadería, arroz, petróleo y una frontera agrícola que no para.",desde:1850},
+  {n:"Neiva",ef:{"suerte":1},d:"Huila: petróleo, arroz, café y comercio del sur del país.",desde:1800},
+  {n:"Pasto",ef:{"disciplina":1},d:"Nariño: frontera con Ecuador, mucho trabajo y una élite conservadora y cerrada.",desde:1800},
+  {n:"Popayán",ef:{"redes":5},d:"La ciudad blanca: apellidos antiguos, universidad y poder político desde la colonia.",desde:1800},
+  {n:"Santa Marta",ef:{"carisma":1},d:"La más antigua de las ciudades: puerto, banano y turismo de Sierra y de playa.",desde:1800},
+  {n:"Valledupar",ef:{"carisma":1},d:"Cesar: ganadería, algodón, vallenato y negocios de familias de la tierra.",desde:1800},
+  {n:"Tunja",ef:{"intelecto":1},d:"Boyacá: capital de altura, colonial, de curas, abogados y papeles.",desde:1800},
+  {n:"Sincelejo",ef:{"suerte":1},d:"Sucre: ganadería, política de clanes y comercio de sabana.",desde:1800},
+  {n:"Riohacha",ef:{"suerte":1},d:"La Guajira: puerto, sal, carbón y una frontera con contrabando de siglos.",desde:1800},
+  {n:"Quibdó",ef:{"disciplina":1},d:"Chocó: oro, platino, madera y un Estado casi ausente.",desde:1800},
+  {n:"Buenaventura",ef:{"redes":5},d:"El gran puerto del Pacífico: por aquí entra y sale lo que mueve al Valle y al país.",desde:1850},
+  {n:"Rionegro",ef:{"redes":4},d:"Oriente antioqueño: aeropuerto, flores, industria y plata de Medellín que se muda al fresco.",desde:1800},
+  {n:"Barrancabermeja",ef:{"suerte":1},d:"Capital del petróleo: refinería, sindicato y orden público.",desde:1925},
+  {n:"Yopal",ef:{"suerte":1},d:"Casanare: petróleo, ganado y plata nueva en el piedemonte llanero.",desde:1930},
+  {n:"San Andrés",ef:{"carisma":1},d:"Isla de puerto libre: comercio, turismo y otra lengua y otra cultura.",desde:1850},
+  {n:"Florencia",ef:{"disciplina":1},d:"Caquetá: la puerta de la Amazonía, ganadería y colonización.",desde:1905}
 ];
 
 const CIUDADES_GLOBALES=[
@@ -1520,6 +1542,7 @@ const GLOBAL_ZONEAS={
   'Tokio':['Shibuya','Minato','Chiyoda'], 'Shanghái':['Jing’an','Pudong','French Concession'],
   'São Paulo':['Pinheiros','Jardins','Itaim Bibi'], 'Ciudad de Panamá':['San Francisco','Punta Pacífica','Costa del Este']
 };
+/*v194*/ function ciudadVigente(n,anio){ const c=CIUDADES.find(x=>x.n===n); const a=isFinite(anio)?anio:((typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026); return !c||!c.desde||c.desde<=a; }
 function datosCiudad(c){ const l=CIUDADES.find(x=>x.n===c); if(l)return l; const g=CIUDADES_GLOBALES.find(x=>x.n===c); return g?{...g,ef:{redes:g.redes}}:null; }
 function todasLasCiudades(){
   return CIUDADES.concat(CIUDADES_GLOBALES.map(g=>({n:g.n,pais:g.pais,ef:{redes:g.redes},d:g.d,global:true})));
@@ -1687,6 +1710,26 @@ const CULTURAS_CIUDAD={
   'Manizales':{id:'co',pais:'Colombia',h:['Julián','Samuel','Mateo','Tomás','Nicolás','Esteban'],m:['Mariana','Manuela','Isabel','Lucía','Sofía','Catalina'],a:['Jaramillo','Arango','Restrepo','Echeverri','Villegas','Gutiérrez','Duque']},
   'Montería':{id:'co',pais:'Colombia',h:['José','Juan','Carlos','Andrés','Mateo','Santiago'],m:['María','Valeria','Natalia','Carolina','Sofía','Isabella'],a:['Besaile','Burgos','Pineda','Sáenz','Vergara','Petro']},
   'Cartagena':{id:'co',pais:'Colombia',h:['Juan','Andrés','Santiago','Nicolás','Carlos','Sebastián'],m:['María','Sofía','Isabella','Valentina','Camila','Ana'],a:['De la Espriella','Pareja','Badillo','Bermúdez','Pombo','Del Río']},
+  "Pereira":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Arias","Ocampo","Cardona","Henao","Marulanda","Londoño","Gaviria"]},
+  "Armenia":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Londoño","Quintero","Ramírez","Giraldo","Valencia","Cardona"]},
+  "Cúcuta":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Ramírez","Villamizar","Contreras","Cáceres","Rozo","Sandoval","Pérez"]},
+  "Ibagué":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Rengifo","Cuéllar","Gutiérrez","Ospina","Parra","Alvarado","Lozano"]},
+  "Villavicencio":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Molina","Vargas","Cardona","Parrado","Camargo","Torres","Rincón"]},
+  "Neiva":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Perdomo","Trujillo","Cuéllar","Vargas","Ortiz","Silva","Liévano"]},
+  "Pasto":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Delgado","Guerrero","Zambrano","Burbano","Benavides","Eraso","Rosero","Bucheli"]},
+  "Popayán":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Mosquera","Valencia","Arboleda","Caldas","Pombo","Cajiao","Obando"]},
+  "Santa Marta":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Díaz-Granados","Dávila","Vives","Campo","Lafaurie","Pinedo","Trespalacios"]},
+  "Valledupar":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Pavajeau","Araújo","Maestre","Cuello","Murgas","Dangond","Gómez"]},
+  "Tunja":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Suárez","Rojas","Camargo","Pinzón","Cárdenas","Medina","Cely"]},
+  "Sincelejo":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Támara","Arrázola","Martínez","Guerra","Castilla","Pérez","Lacharme"]},
+  "Riohacha":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Iguarán","Pinto","Fuentes","Brito","Gómez","Cotes","Bermúdez"]},
+  "Quibdó":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Mosquera","Palacios","Córdoba","Moreno","Perea","Asprilla","Ramos"]},
+  "Buenaventura":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Caicedo","Angulo","Cuero","Banguera","Hurtado","Rentería","Valencia"]},
+  "Rionegro":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Gómez","Duque","Giraldo","Marín","Ospina","Zuluaga","Londoño"]},
+  "Barrancabermeja":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Rueda","Mantilla","Pérez","Cárdenas","Serrano","Díaz","Ardila"]},
+  "Yopal":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Gutiérrez","Camargo","Pérez","Aguirre","Pinzón","Rincón","Rodríguez"]},
+  "San Andrés":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Archbold","Bent","Livingston","Newball","Robinson","Hawkins","Howard"]},
+  "Florencia":{id:'co',pais:'Colombia',h:["Juan","Carlos","Andrés","Jorge","Luis","Diego","Camilo"],m:["María","Luisa","Ana","Paula","Carolina","Sofía","Natalia"],a:["Cuéllar","Trujillo","Perdomo","Ramírez","Montealegre","Ruiz","Vargas"]},
   'Miami':{id:'us',pais:'Estados Unidos',h:['James','Michael','Daniel','Alexander','William','Ethan','Benjamin'],m:['Olivia','Emma','Sophia','Charlotte','Ava','Mia','Emily'],a:['Smith','Johnson','Williams','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson']},
   'Nueva York':{id:'us',pais:'Estados Unidos',h:['James','Michael','Daniel','Alexander','William','Ethan','Benjamin'],m:['Olivia','Emma','Sophia','Charlotte','Ava','Mia','Emily'],a:['Smith','Johnson','Williams','Brown','Davis','Miller','Wilson','Moore','Taylor','Anderson']},
   'Londres':{id:'uk',pais:'Reino Unido',h:['Oliver','George','Harry','Arthur','Jack','Theodore','Henry'],m:['Olivia','Amelia','Isla','Emily','Charlotte','Poppy','Grace'],a:['Smith','Jones','Taylor','Brown','Williams','Wilson','Evans','Thomas','Roberts','Walker']},
@@ -1732,10 +1775,30 @@ const ZONAS={
   'Bucaramanga':[{n:'Café Madrid',p:1},{n:'La Concordia',p:2},{n:'Cabecera',p:4},{n:'Ruitoque',p:5}],
   'Manizales':  [{n:'La Enea',p:2},{n:'Palermo',p:3},{n:'Milán',p:3},{n:'El Cable',p:4}],
   'Montería':   [{n:'Mocarí',p:1},{n:'La Castellana',p:3},{n:'El Recreo',p:4},{n:'Los Ébanos',p:5}],
-  'Cartagena':  [{n:'Olaya Herrera',p:1},{n:'Manga',p:3},{n:'Bocagrande',p:5},{n:'Castillogrande',p:5}]
+  'Cartagena':  [{n:'Olaya Herrera',p:1},{n:'Manga',p:3},{n:'Bocagrande',p:5},{n:'Castillogrande',p:5}],
+  "Pereira":[{n:"Cuba",p:1},{n:"El centro",p:2},{n:"Álamos",p:3},{n:"Circunvalar",p:4},{n:"Pinares",p:4},{n:"Altos del Campestre",p:5}],
+  "Armenia":[{n:"La Fachada",p:1},{n:"El centro",p:2},{n:"Granada",p:3},{n:"Los Fundadores",p:4},{n:"Armenia Norte",p:5}],
+  "Cúcuta":[{n:"Atalaya",p:1},{n:"El centro",p:2},{n:"Caobos",p:3},{n:"Quinta Oriental",p:4},{n:"Los Patios",p:3},{n:"La Riviera",p:5}],
+  "Ibagué":[{n:"Picaleña",p:1},{n:"El Salado",p:2},{n:"La Pola",p:3},{n:"Ambalá",p:3},{n:"Calambeo",p:4},{n:"Cádiz",p:5}],
+  "Villavicencio":[{n:"Barzal",p:1},{n:"El centro",p:2},{n:"Villa Julia",p:3},{n:"La Esperanza",p:3},{n:"Ciudad Porfía",p:2},{n:"Los Maracos",p:5}],
+  "Neiva":[{n:"Cálamo",p:1},{n:"El centro",p:2},{n:"Quirinal",p:3},{n:"Altico",p:4},{n:"Rodrigo Lara",p:2},{n:"Cándido",p:3}],
+  "Pasto":[{n:"Lorenzo",p:1},{n:"El centro",p:2},{n:"Anganoy",p:3},{n:"Torobajo",p:3},{n:"Chapal",p:4},{n:"Pandiaco",p:4}],
+  "Popayán":[{n:"Bello Horizonte",p:1},{n:"El centro histórico",p:3},{n:"Pomona",p:3},{n:"La Esmeralda",p:4},{n:"Campo Bello",p:5}],
+  "Santa Marta":[{n:"Pescaito",p:1},{n:"El centro",p:2},{n:"Bello Horizonte",p:3},{n:"El Rodadero",p:4},{n:"Pozos Colorados",p:5}],
+  "Valledupar":[{n:"Los Músicos",p:1},{n:"El centro",p:2},{n:"Novalito",p:3},{n:"Cañaguate",p:4},{n:"Altos de Mareigua",p:5}],
+  "Tunja":[{n:"Los Muiscas",p:1},{n:"El centro",p:2},{n:"Pozo Donato",p:3},{n:"Maldonado",p:4},{n:"Santa Inés",p:4}],
+  "Sincelejo":[{n:"La Ford",p:1},{n:"El centro",p:2},{n:"Boston",p:3},{n:"Las Delicias",p:3},{n:"Villa Mady",p:4}],
+  "Riohacha":[{n:"Marbella",p:1},{n:"El centro",p:2},{n:"Los Cerezos",p:3},{n:"Mayapo",p:3},{n:"Las Dunas",p:4}],
+  "Quibdó":[{n:"La Yesquita",p:1},{n:"El centro",p:2},{n:"Cristo Rey",p:2},{n:"Kennedy",p:3},{n:"La Aurora",p:3}],
+  "Buenaventura":[{n:"La Playita",p:1},{n:"El centro",p:2},{n:"Bellavista",p:2},{n:"Cascajal",p:3},{n:"Pueblo Nuevo",p:3},{n:"Ciudadela Nueva",p:4}],
+  "Rionegro":[{n:"San Antonio",p:1},{n:"El centro",p:2},{n:"Llanogrande",p:4},{n:"Chipre",p:3},{n:"Alto de Las Palmas",p:5}],
+  "Barrancabermeja":[{n:"Las Granjas",p:1},{n:"El centro",p:2},{n:"Comuneros",p:2},{n:"El Parnaso",p:3},{n:"Colombia",p:3},{n:"Cabecera",p:4}],
+  "Yopal":[{n:"Llano Lindo",p:1},{n:"El centro",p:2},{n:"La Campiña",p:3},{n:"Los Helechos",p:3},{n:"Villa Salomé",p:4}],
+  "San Andrés":[{n:"San Luis",p:2},{n:"El centro",p:3},{n:"Sarie Bay",p:4},{n:"La Loma",p:3},{n:"Punta Hansa",p:5}],
+  "Florencia":[{n:"Villa Hermosa",p:1},{n:"El centro",p:2},{n:"Las Brisas",p:3},{n:"Torasso",p:3},{n:"Cunduy",p:4}]
 };
 const COSTO_CIUDAD={'Bogotá':1.15,'Medellín':1.0,'Cartagena':1.05,'Cali':.85,'Barranquilla':.85,
-  'Bucaramanga':.78,'Manizales':.72,'Montería':.68,'La Estrella':.8};
+  'Bucaramanga':.78,'Manizales':.72,'Montería':.68,'La Estrella':.8,"Pereira":0.78,"Armenia":0.72,"Cúcuta":0.7,"Ibagué":0.72,"Villavicencio":0.75,"Neiva":0.68,"Pasto":0.66,"Popayán":0.72,"Santa Marta":0.82,"Valledupar":0.7,"Tunja":0.74,"Sincelejo":0.62,"Riohacha":0.66,"Quibdó":0.6,"Buenaventura":0.68,"Rionegro":0.95,"Barrancabermeja":0.74,"Yopal":0.7,"San Andrés":1.05,"Florencia":0.62};
 function multCiudad(ciudad){
   const g=ciudadGlobalDe(ciudad);
   if(g&&isFinite(g.costo)) return g.costo;
@@ -9613,7 +9676,7 @@ function escenaMudanzaGlobal(g){
 }
 
 function escenaCiudad(){
-  const nacionales=Object.keys(ZONAS).filter(c=>c!==S.hogar.ciudad&&!esCiudadGlobal(c));
+  const nacionales=Object.keys(ZONAS).filter(c=>c!==S.hogar.ciudad&&!esCiudadGlobal(c)&&ciudadVigente(c));
   const globales=CIUDADES_GLOBALES.filter(g=>g.n!==S.hogar.ciudad);
   escena({rubro:'Mudanza',titulo:'Irte a otra ciudad',ancho:true,
     cuerpo:'Mudarte dentro del país es relativamente barato. Irte al exterior implica traslado, instalación y depósito, y después un costo de vida acorde con la ciudad que elegiste. Puedes vivir fuera del país aunque todavía vivas con tu familia: al elegir una ciudad extranjera, el juego te instala por tu cuenta.',
@@ -12699,7 +12762,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       z.infraestructura=clamp(z.infraestructura+rnd(-1,2),5,100);
     });
     if(chance(.12)){
-      const ciudad=pick(Object.keys(ZONAS));
+      const ciudad=pick(Object.keys(ZONAS).filter(c=>ciudadVigente(c)));
       const zs=zonasDe(ciudad);
       if(zs&&zs.length){
         const idx=ri(0,zs.length-1);
@@ -14936,7 +14999,27 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     'Bucaramanga':{tech:.015,construccion:.010,retail:-.006},
     'Manizales':{agro:.020,salud:.010,logistica:-.008},
     'Montería':{agro:.022,mineria:.008,tech:-.012},
-    'Cartagena':{retail:.014,logistica:.014,mineria:-.010}
+    'Cartagena':{retail:.014,logistica:.014,mineria:-.010},
+    "Pereira":{"retail":0.014,"moda":0.01,"agro":0.008,"mineria":-0.008},
+    "Armenia":{"agro":0.016,"retail":0.01,"tech":-0.006},
+    "Cúcuta":{"retail":0.018,"logistica":0.014,"agro":-0.006},
+    "Ibagué":{"agro":0.016,"alimentos":0.01,"salud":0.006,"tech":-0.008},
+    "Villavicencio":{"agro":0.02,"energia":0.012,"alimentos":0.008,"tech":-0.01},
+    "Neiva":{"energia":0.016,"agro":0.012,"retail":0.008,"tech":-0.008},
+    "Pasto":{"agro":0.014,"alimentos":0.01,"retail":0.008,"mineria":-0.006},
+    "Popayán":{"juridico":0.016,"salud":0.008,"agro":0.008,"tech":-0.008},
+    "Santa Marta":{"turismo":0.018,"logistica":0.014,"agro":0.01,"tech":-0.008},
+    "Valledupar":{"agro":0.02,"alimentos":0.008,"retail":0.008,"tech":-0.01},
+    "Tunja":{"juridico":0.014,"salud":0.008,"construccion":0.008,"moda":-0.008},
+    "Sincelejo":{"agro":0.02,"retail":0.01,"alimentos":0.008,"tech":-0.012},
+    "Riohacha":{"mineria":0.02,"logistica":0.012,"turismo":0.008,"tech":-0.012},
+    "Quibdó":{"mineria":0.02,"agro":0.008,"logistica":0.008,"tech":-0.012},
+    "Buenaventura":{"logistica":0.022,"retail":0.01,"alimentos":0.008,"tech":-0.01},
+    "Rionegro":{"agro":0.016,"logistica":0.014,"tech":0.008},
+    "Barrancabermeja":{"energia":0.022,"construccion":0.01,"logistica":0.008,"agro":-0.006},
+    "Yopal":{"energia":0.02,"agro":0.014,"construccion":0.008,"tech":-0.012},
+    "San Andrés":{"turismo":0.02,"retail":0.016,"logistica":0.008,"agro":-0.014},
+    "Florencia":{"agro":0.018,"alimentos":0.008,"retail":0.006,"tech":-0.012}
   };
   function bonoCiudadSector61(e){
     const tabla=BONOS_CIUDAD_SECTOR_61[e&&e.ciudad]; if(!tabla) return 0;
@@ -14974,6 +15057,26 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      ========================================================================== */
   const BONOS_FINCA_ZONA_61={
     'Manizales':{cafe:.35,ganado:-.10},
+    "Pereira":{"cafe":0.3,"ganado":-0.05},
+    "Armenia":{"cafe":0.3,"ganado":-0.08},
+    "Cúcuta":{"ganado":0.12,"cafe":0.05},
+    "Ibagué":{"cafe":0.18,"ganado":0.08},
+    "Villavicencio":{"ganado":0.3,"cafe":-0.1},
+    "Neiva":{"cafe":0.2,"ganado":0.12},
+    "Pasto":{"ganado":0.1,"cafe":0.12,"aguacate":0.05},
+    "Popayán":{"cafe":0.22,"ganado":0.05},
+    "Santa Marta":{"recreo":0.18,"ganado":0.05,"cafe":0.1},
+    "Valledupar":{"ganado":0.32,"aguacate":-0.1},
+    "Tunja":{"cafe":-0.15,"ganado":0.12,"aguacate":-0.08},
+    "Sincelejo":{"ganado":0.32,"aguacate":-0.1},
+    "Riohacha":{"recreo":0.1,"ganado":0.08,"cafe":-0.12},
+    "Quibdó":{"ganado":-0.1,"cafe":-0.15,"recreo":0.05},
+    "Buenaventura":{"recreo":0.12,"ganado":-0.12},
+    "Rionegro":{"cafe":0.1,"recreo":0.12,"ganado":0.05,"aguacate":0.12},
+    "Barrancabermeja":{"ganado":0.15,"cafe":-0.1},
+    "Yopal":{"ganado":0.32,"cafe":-0.15},
+    "San Andrés":{"recreo":0.22,"ganado":-0.18,"cafe":-0.2},
+    "Florencia":{"ganado":0.3,"cafe":0.05},
     'Bucaramanga':{cafe:.10,ganado:-.10},
     'Cali':{aguacate:.15,ganado:.10},
     'Montería':{ganado:.35,aguacate:-.10},
@@ -15409,6 +15512,77 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       {id:'unicartagena',n:'Universidad de Cartagena',tier:'publica',calidad:5,prest:1,d:'Pública, tradición colonial y buena reputación regional.'},
       {id:'utb',n:'Universidad Tecnológica de Bolívar',tier:'privada',calidad:6,prest:3,d:'Privada, fuerte en ingeniería y negocios.'}
     ],
+    "Pereira":[
+      {id:"utp",n:"Universidad Tecnológica de Pereira",tier:"publica",calidad:5,prest:1,d:"Pública, fuerte en ingeniería y tecnología."},
+      {id:"ucp",n:"Universidad Católica de Pereira",tier:"privada",calidad:5,prest:2,d:"Privada, tradición católica y buena oferta regional."}
+    ],
+    "Armenia":[
+      {id:"uquindio",n:"Universidad del Quindío",tier:"publica",calidad:5,prest:1,d:"Pública, la universidad del departamento."},
+      {id:"eam",n:"Escuela de Administración y Mercadotecnia del Quindío",tier:"privada",calidad:4,prest:1,d:"Privada, formación comercial y empresarial."}
+    ],
+    "Cúcuta":[
+      {id:"ufps",n:"Universidad Francisco de Paula Santander",tier:"publica",calidad:5,prest:1,d:"Pública, la universidad de la frontera."},
+      {id:"unilibre_cuc",n:"Universidad Libre, seccional Cúcuta",tier:"privada",calidad:4,prest:1,d:"Privada, derecho y negocios."}
+    ],
+    "Ibagué":[
+      {id:"utolima",n:"Universidad del Tolima",tier:"publica",calidad:5,prest:1,d:"Pública, tradición agropecuaria y pedagógica."},
+      {id:"uibague",n:"Universidad de Ibagué",tier:"privada",calidad:5,prest:2,d:"Privada, ingeniería y negocios."}
+    ],
+    "Villavicencio":[
+      {id:"unillanos",n:"Universidad de los Llanos",tier:"publica",calidad:4,prest:1,d:"Pública, agronomía y ganadería de la Orinoquía."},
+      {id:"ucooperativa_vcio",n:"Universidad Cooperativa de Colombia",tier:"privada",calidad:4,prest:1,d:"Privada, derecho y administración."}
+    ],
+    "Neiva":[
+      {id:"usco",n:"Universidad Surcolombiana",tier:"publica",calidad:5,prest:1,d:"Pública, la universidad del sur."},
+      {id:"corhuila",n:"Corporación Universitaria del Huila",tier:"privada",calidad:4,prest:1,d:"Privada, formación regional."}
+    ],
+    "Pasto":[
+      {id:"udenar",n:"Universidad de Nariño",tier:"publica",calidad:5,prest:1,d:"Pública, tradición andina y de frontera."},
+      {id:"umariana",n:"Universidad Mariana",tier:"privada",calidad:4,prest:2,d:"Privada, congregación franciscana."}
+    ],
+    "Popayán":[
+      {id:"ucauca",n:"Universidad del Cauca",tier:"publica",calidad:7,prest:4,d:"Pública, fundada en 1827: la cuna de presidentes y juristas."},
+      {id:"fup",n:"Fundación Universitaria de Popayán",tier:"privada",calidad:4,prest:1,d:"Privada, formación regional."}
+    ],
+    "Santa Marta":[
+      {id:"unimagdalena",n:"Universidad del Magdalena",tier:"publica",calidad:4,prest:1,d:"Pública, la universidad del Caribe medio."}
+    ],
+    "Valledupar":[
+      {id:"upc",n:"Universidad Popular del Cesar",tier:"publica",calidad:4,prest:1,d:"Pública, la universidad del Cesar."}
+    ],
+    "Tunja":[
+      {id:"uptc",n:"Universidad Pedagógica y Tecnológica de Colombia",tier:"publica",calidad:5,prest:1,d:"Pública, tradición pedagógica del altiplano."},
+      {id:"usta_tunja",n:"Universidad Santo Tomás, seccional Tunja",tier:"privada",calidad:5,prest:2,d:"Privada, dominicos y derecho."}
+    ],
+    "Sincelejo":[
+      {id:"usucre",n:"Universidad de Sucre",tier:"publica",calidad:4,prest:1,d:"Pública, la universidad del departamento."}
+    ],
+    "Riohacha":[
+      {id:"uguajira",n:"Universidad de La Guajira",tier:"publica",calidad:4,prest:1,d:"Pública, la universidad de la península."}
+    ],
+    "Quibdó":[
+      {id:"utch",n:"Universidad Tecnológica del Chocó",tier:"publica",calidad:3,prest:1,d:"Pública, la única de un departamento enorme."}
+    ],
+    "Buenaventura":[
+      {id:"univalle_pac",n:"Universidad del Valle, sede Pacífico",tier:"publica",calidad:4,prest:1,d:"Pública, sede del Pacífico de la Universidad del Valle."}
+    ],
+    "Rionegro":[
+      {id:"uco",n:"Universidad Católica de Oriente",tier:"privada",calidad:5,prest:2,d:"Privada, la universidad del oriente antioqueño."},
+      {id:"udea_oriente",n:"Universidad de Antioquia, seccional Oriente",tier:"publica",calidad:5,prest:1,d:"Pública, sede de la Universidad de Antioquia en el Oriente."}
+    ],
+    "Barrancabermeja":[
+      {id:"uis_bga",n:"Universidad Industrial de Santander, sede Barrancabermeja",tier:"publica",calidad:5,prest:2,d:"Pública, ingeniería del petróleo."},
+      {id:"unipaz",n:"Instituto Universitario de la Paz",tier:"publica",calidad:4,prest:1,d:"Pública, tecnológica y regional."}
+    ],
+    "Yopal":[
+      {id:"unitropico",n:"Universidad Internacional del Trópico Americano",tier:"privada",calidad:3,prest:1,d:"Privada, formación agropecuaria del Casanare."}
+    ],
+    "San Andrés":[
+      {id:"unal_caribe",n:"Universidad Nacional de Colombia, sede Caribe",tier:"publica",calidad:5,prest:2,d:"Pública, la sede insular de la Nacional."}
+    ],
+    "Florencia":[
+      {id:"uamazonia",n:"Universidad de la Amazonia",tier:"publica",calidad:4,prest:1,d:"Pública, la universidad de la Amazonía colombiana."}
+    ],
     'Miami':[
       {id:'fiu',n:'Florida International University',tier:'publica',calidad:6,prest:3,d:'Pública, la universidad de investigación más grande del sur de Florida.'},
       {id:'miami',n:'University of Miami',tier:'elite',calidad:8,prest:7,d:'Privada, fuerte en negocios y derecho, con proyección hacia América Latina.'}
@@ -15644,7 +15818,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       const r=old.apply(this,arguments);
       try{
         (S.rivales||[]).forEach(x=>{
-          if(!x.ciudad) x.ciudad=pick(CIUDADES).n;
+          if(!x.ciudad) x.ciudad=pick(CIUDADES.filter(c=>ciudadVigente(c.n))).n;
           if(!isFinite(x.relacionCasa)) x.relacionCasa=50;
         });
       }catch(e){}
@@ -15655,7 +15829,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function asegurarRivales64(){
     if(!S.rivales||!S.rivales.length) generarRivales();
     (S.rivales||[]).forEach(x=>{
-      if(!x.ciudad) x.ciudad=pick(CIUDADES).n;
+      if(!x.ciudad) x.ciudad=pick(CIUDADES.filter(c=>ciudadVigente(c.n))).n;
       if(!isFinite(x.relacionCasa)) x.relacionCasa=50;
     });
   }
@@ -16610,7 +16784,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   const DEPARTAMENTO_DE_CIUDAD_73={
     'Medellín':'Antioquia','La Estrella':'Antioquia','Bogotá':'Bogotá D.C.','Cali':'Valle del Cauca',
-    'Barranquilla':'Atlántico','Bucaramanga':'Santander','Manizales':'Caldas','Montería':'Córdoba','Cartagena':'Bolívar'
+    'Barranquilla':'Atlántico','Bucaramanga':'Santander','Manizales':'Caldas','Montería':'Córdoba','Cartagena':'Bolívar',"Pereira":"Risaralda","Armenia":"Quindío","Cúcuta":"Norte de Santander","Ibagué":"Tolima","Villavicencio":"Meta","Neiva":"Huila","Pasto":"Nariño","Popayán":"Cauca","Santa Marta":"Magdalena","Valledupar":"Cesar","Tunja":"Boyacá","Sincelejo":"Sucre","Riohacha":"La Guajira","Quibdó":"Chocó","Buenaventura":"Valle del Cauca","Rionegro":"Antioquia","Barrancabermeja":"Santander","Yopal":"Casanare","San Andrés":"San Andrés y Providencia","Florencia":"Caquetá"
   };
   function departamentoDe73(ciudad){ return DEPARTAMENTO_DE_CIUDAD_73[ciudad]||null; }
   function ciudadesDelDepartamento73(dep){ return CIUDADES.filter(c=>DEPARTAMENTO_DE_CIUDAD_73[c.n]===dep).map(c=>c.n); }
@@ -20048,10 +20222,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
 
   /* --- geografía --- */
   const GEO_92={'Bogotá':[4.71,-74.07],'Medellín':[6.25,-75.56],'La Estrella':[6.16,-75.64],'Cali':[3.45,-76.53],
-    'Barranquilla':[10.96,-74.80],'Cartagena':[10.39,-75.51],'Bucaramanga':[7.12,-73.12],'Manizales':[5.07,-75.52],'Montería':[8.75,-75.88]};
+    'Barranquilla':[10.96,-74.80],'Cartagena':[10.39,-75.51],'Bucaramanga':[7.12,-73.12],'Manizales':[5.07,-75.52],'Montería':[8.75,-75.88],"Pereira":[4.81,-75.69],"Armenia":[4.53,-75.68],"Cúcuta":[7.89,-72.51],"Ibagué":[4.44,-75.23],"Villavicencio":[4.15,-73.64],"Neiva":[2.93,-75.28],"Pasto":[1.21,-77.28],"Popayán":[2.44,-76.61],"Santa Marta":[11.24,-74.2],"Valledupar":[10.47,-73.25],"Tunja":[5.54,-73.36],"Sincelejo":[9.3,-75.4],"Riohacha":[11.54,-72.91],"Quibdó":[5.69,-76.65],"Buenaventura":[3.88,-77.03],"Rionegro":[6.15,-75.37],"Barrancabermeja":[7.07,-73.85],"Yopal":[5.34,-72.39],"San Andrés":[12.4,-79.3],"Florencia":[1.61,-75.61]};
   const REGION_92={'Bogotá':'Altiplano','Medellín':'Antioquia','La Estrella':'Antioquia','Cali':'Valle del Cauca','Barranquilla':'Caribe',
-    'Cartagena':'Caribe','Bucaramanga':'Santander','Manizales':'Eje cafetero','Montería':'Córdoba'};
-  const ETIQ_92={'La Estrella':{dx:-16,dy:16,izq:true},'Cartagena':{izq:true},'Cali':{izq:true},'Manizales':{izq:true},'Medellín':{arriba:true}};
+    'Cartagena':'Caribe','Bucaramanga':'Santander','Manizales':'Eje cafetero','Montería':'Córdoba',"Pereira":"Eje cafetero","Armenia":"Eje cafetero","Cúcuta":"Frontera oriental","Ibagué":"Alto Magdalena","Villavicencio":"Llanos orientales","Neiva":"Alto Magdalena","Pasto":"Altiplano nariñense","Popayán":"Valle del Cauca","Santa Marta":"Caribe","Valledupar":"Caribe","Tunja":"Altiplano cundiboyacense","Sincelejo":"Caribe","Riohacha":"Caribe","Quibdó":"Pacífico","Buenaventura":"Pacífico","Rionegro":"Antioquia","Barrancabermeja":"Magdalena Medio","Yopal":"Llanos orientales","San Andrés":"Caribe insular","Florencia":"Amazonía"};
+  const ETIQ_92={'La Estrella':{dx:-16,dy:16,izq:true,oculta:true},'Cartagena':{izq:true},'Cali':{izq:true},'Manizales':{izq:true},'Medellín':{arriba:true},
+    /*v194*/ 'Riohacha':{arriba:true},'Barranquilla':{izq:true},'Barrancabermeja':{izq:true},'Quibdó':{izq:true},'Ibagué':{izq:true},'Rionegro':{oculta:true},'Pereira':{oculta:true},'Armenia':{oculta:true},'Tunja':{oculta:true}};
   const PRESENCIA_92={
     'Bogotá':{m19:.5,medellin:.4,cali:.2,farc:.3,eln:.15,auc:.1,clan:.1,disidencias:.15},
     'Medellín':{medellin:1,auc:.6,farc:.35,eln:.2,clan:.3,disidencias:.1,m19:.3},
@@ -20061,11 +20236,51 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     'Cartagena':{auc:.6,clan:.6,farc:.25,eln:.15,medellin:.2},
     'Bucaramanga':{eln:.9,auc:.6,farc:.45,clan:.2,disidencias:.2},
     'Manizales':{farc:.45,eln:.2,auc:.3,medellin:.2,disidencias:.15},
-    'Montería':{auc:1,clan:.9,farc:.4,eln:.15,disidencias:.2}
+    'Montería':{auc:1,clan:.9,farc:.4,eln:.15,disidencias:.2},
+    "Pereira":{"farc":0.25,"auc":0.35,"eln":0.1,"medellin":0.15,"cali":0.1,"clan":0.15},
+    "Armenia":{"farc":0.3,"auc":0.3,"eln":0.1,"cali":0.1,"clan":0.1},
+    "Cúcuta":{"eln":0.8,"auc":0.7,"farc":0.5,"clan":0.3,"disidencias":0.2},
+    "Ibagué":{"farc":0.7,"auc":0.3,"eln":0.15,"m19":0.2,"clan":0.1},
+    "Villavicencio":{"farc":0.85,"auc":0.6,"eln":0.1,"clan":0.3,"disidencias":0.3},
+    "Neiva":{"farc":0.8,"auc":0.25,"eln":0.15,"m19":0.2,"clan":0.1},
+    "Pasto":{"farc":0.45,"eln":0.3,"auc":0.3,"clan":0.2,"disidencias":0.3},
+    "Popayán":{"farc":0.75,"eln":0.3,"m19":0.5,"auc":0.2,"clan":0.1,"disidencias":0.4},
+    "Santa Marta":{"auc":0.9,"clan":0.6,"farc":0.35,"eln":0.25},
+    "Valledupar":{"auc":0.85,"farc":0.5,"eln":0.4,"clan":0.3},
+    "Tunja":{"farc":0.2,"eln":0.2,"auc":0.2,"clan":0.1},
+    "Sincelejo":{"auc":0.85,"farc":0.4,"clan":0.5,"eln":0.1},
+    "Riohacha":{"auc":0.7,"clan":0.6,"farc":0.3,"eln":0.3},
+    "Quibdó":{"farc":0.6,"eln":0.5,"auc":0.5,"clan":0.5,"disidencias":0.2},
+    "Buenaventura":{"auc":0.7,"farc":0.45,"clan":0.8,"eln":0.3,"disidencias":0.4,"cali":0.4},
+    "Rionegro":{"auc":0.5,"farc":0.4,"eln":0.3,"clan":0.35,"medellin":0.4},
+    "Barrancabermeja":{"auc":0.9,"eln":0.8,"farc":0.6,"clan":0.2},
+    "Yopal":{"farc":0.6,"eln":0.6,"auc":0.6,"clan":0.1},
+    "San Andrés":{"clan":0.2,"auc":0.05},
+    "Florencia":{"farc":0.9,"auc":0.3,"eln":0.1,"clan":0.1,"disidencias":0.5}
   };
   const AFINIDAD_92={'Bogotá':['financiero','tech','juridico','medios','seguros','salud'],'Medellín':['moda','construccion','financiero','energia','tech'],
     'La Estrella':['moda','alimentos','construccion'],'Cali':['alimentos','agro','retail','salud'],'Barranquilla':['logistica','energia','retail'],
-    'Cartagena':['turismo','logistica','energia'],'Bucaramanga':['moda','construccion','mineria'],'Manizales':['agro','tech','salud'],'Montería':['agro','alimentos','mineria']};
+    'Cartagena':['turismo','logistica','energia'],'Bucaramanga':['moda','construccion','mineria'],'Manizales':['agro','tech','salud'],'Montería':['agro','alimentos','mineria'],
+    "Pereira":["retail","moda","agro","alimentos"],
+    "Armenia":["agro","retail","turismo"],
+    "Cúcuta":["retail","logistica","mineria"],
+    "Ibagué":["agro","alimentos","salud"],
+    "Villavicencio":["agro","energia","alimentos"],
+    "Neiva":["energia","agro","retail"],
+    "Pasto":["agro","alimentos","retail"],
+    "Popayán":["juridico","salud","agro"],
+    "Santa Marta":["turismo","logistica","agro"],
+    "Valledupar":["agro","alimentos","retail"],
+    "Tunja":["juridico","salud","construccion"],
+    "Sincelejo":["agro","retail","alimentos"],
+    "Riohacha":["mineria","logistica","turismo"],
+    "Quibdó":["mineria","agro","logistica"],
+    "Buenaventura":["logistica","retail","alimentos"],
+    "Rionegro":["agro","logistica","tech","construccion"],
+    "Barrancabermeja":["energia","construccion","logistica"],
+    "Yopal":["energia","agro","construccion"],
+    "San Andrés":["turismo","retail","logistica"],
+    "Florencia":["agro","alimentos","retail"]};
   const ciudades92=()=>(typeof CIUDADES!=='undefined'?CIUDADES:[]).filter(c=>GEO_92[c.n]);
   const proy92=c=>{ const g=GEO_92[c]; const x=(g[1]+180)/360*1000, y=(90-g[0])/180*500; return [(x-279)*10,(y-213.5)*10]; };
   const nombreSector92=id=>{ const s=(typeof SECTORES!=='undefined')&&SECTORES.find(x=>x.id===id); return s?s.n:id; };
@@ -20159,7 +20374,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       g+='<circle cx="'+x+'" cy="'+y+'" r="'+(mia?7:5.5)+'" fill="'+(mia?'#D6A648':'#C9BFA6')+'" stroke="#0F1A14" stroke-width="1.5"/>';
       if(m.capas.casa&&casa.vives) g+='<path d="M'+(x-3.5)+','+(y+.5)+'l3.5-3.2l3.5,3.2v3.2h-7z" fill="#1A1408"/>';
       const lx=off.izq?x-11:x+11, ly=off.arriba?y-9:y+4;
-      g+='<text x="'+lx+'" y="'+ly+'" text-anchor="'+(off.izq?'end':'start')+'" class="et92'+(mia?' mia':'')+'">'+esc(c.n)+'</text>';
+      g+='<text x="'+lx+'" y="'+ly+'" text-anchor="'+(off.izq?'end':'start')+'" class="et92'+(mia?' mia':'')+((off.oculta&&sel!==c.n&&!mia)?' oculta':'')+'">'+esc(c.n)+'</text>';
       const tip=[c.n];
       if(m.capas.casa&&casa.total){ const n=casa.bienes.length+casa.plantas.length+casa.sedes.length;
         if(n){ g+='<circle cx="'+(x+7)+'" cy="'+(y-7)+'" r="6" fill="#0F1A14" stroke="#D6A648" stroke-width="1.2"/><text x="'+(x+7)+'" y="'+(y-4.4)+'" text-anchor="middle" class="num92">'+n+'</text>'; tip.push(n+' cosa'+(n>1?'s':'')+' tuya'+(n>1?'s':'')); }
@@ -26168,7 +26383,7 @@ install();setTimeout(install,1200);
     mineria:{ins:'combustible y explosivos',peso:.15,planta:'Planta de procesamiento',dolar:.3,petroleo:.8}};
   const industrial=e=>!!(e&&IND[e.sector]&&!e.cafe148&&!e.red176);   /* v148: las empresas del café llevan sus propias cuentas */
   const P1=n=>String(n||'').split(' ')[0];
-  const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
+  const ciudadesCol=()=>{ try{ return Object.keys(ZONAS).filter(c=>c!=='La Estrella'&&ciudadVigente(c)); }catch(e){ return ['Medellín','Bogotá','Cali','Barranquilla']; } };
 
   /* --- materias primas: un índice por sector --- */
   function insumos(){ if(!S.insumos137||typeof S.insumos137!=='object') S.insumos137={}; return S.insumos137; }
@@ -27454,8 +27669,8 @@ install();setTimeout(install,1200);
       {n:'Auxiliar del punto de compra',s:18,edu:0},{n:'Catador',s:32,edu:1},{n:'Jefe de compras',s:58,edu:1},
       {n:'Subgerente de la cooperativa',s:92,edu:2},{n:'Gerente de la cooperativa',s:150,edu:2},{n:'Gerente de la cooperativa departamental',s:230,edu:3}]}
   };
-  const DEP={'Manizales':'Caldas','Pereira':'Risaralda','Armenia':'Quindío','Medellín':'Antioquia','La Estrella':'Antioquia','Bogotá':'Cundinamarca','Cali':'Valle','Bucaramanga':'Santander','Montería':'Córdoba','Cartagena':'Bolívar','Barranquilla':'Atlántico'};
-  const MUNI={'Manizales':'Chinchiná','Pereira':'Santa Rosa de Cabal','Armenia':'Calarcá','Medellín':'Andes','La Estrella':'Fredonia','Bogotá':'Viotá','Cali':'Sevilla','Bucaramanga':'San Gil'};
+  const DEP={'Manizales':'Caldas','Pereira':'Risaralda','Armenia':'Quindío','Medellín':'Antioquia','La Estrella':'Antioquia','Bogotá':'Cundinamarca','Cali':'Valle','Bucaramanga':'Santander','Montería':'Córdoba','Cartagena':'Bolívar','Barranquilla':'Atlántico',"Cúcuta":"Norte de Santander","Ibagué":"Tolima","Villavicencio":"Meta","Neiva":"Huila","Pasto":"Nariño","Popayán":"Cauca","Santa Marta":"Magdalena","Valledupar":"Cesar","Tunja":"Boyacá","Rionegro":"Antioquia"};
+  const MUNI={'Manizales':'Chinchiná','Pereira':'Santa Rosa de Cabal','Armenia':'Calarcá','Medellín':'Andes','La Estrella':'Fredonia','Bogotá':'Viotá','Cali':'Sevilla','Bucaramanga':'San Gil',"Cúcuta":"Pamplonita","Ibagué":"Líbano","Villavicencio":"Restrepo","Neiva":"Pitalito","Pasto":"La Unión","Popayán":"Cajibío","Santa Marta":"Aracataca","Valledupar":"Pueblo Bello","Tunja":"Miraflores","Rionegro":"El Retiro"};
   const OFIC=['Nueva York','Londres','Hamburgo','Tokio','Bruselas','Montreal'];
   const fincas=()=>typeof window.fincasCafe141==='function'?window.fincasCafe141():[];
   const depto=()=>{ const f=fincas()[0]; try{ if(f) return window.munCafe141(f.cafe141.mun).dep; }catch(e){} return DEP[S.hogar&&S.hogar.ciudad]||'Caldas'; };
@@ -31913,7 +32128,8 @@ install();setTimeout(install,1200);
     {n:'Bucaramanga',neg:.85,ocio:.6,suelo:.9,desde:1800},{n:'Manizales',neg:.7,ocio:.75,suelo:.85,desde:1800},{n:'Montería',neg:.7,ocio:.5,suelo:.75,desde:1800},
     {n:'La Estrella',neg:.5,ocio:.35,suelo:.7,desde:1800},{n:'Cartagena',neg:.8,ocio:1.35,suelo:1.35,desde:1800,playa:true,aire:true,hist:true},
     {n:'Santa Marta',neg:.55,ocio:1.2,suelo:1.0,desde:1900,playa:true},{n:'San Andrés',neg:.3,ocio:1.3,suelo:1.1,desde:1950,playa:true,aire:true},
-    {n:'Villa de Leyva',neg:.2,ocio:1.1,suelo:.9,desde:1970,hist:true},{n:'Eje Cafetero',neg:.5,ocio:1.1,suelo:.8,desde:1990}];
+    {n:'Villa de Leyva',neg:.2,ocio:1.1,suelo:.9,desde:1970,hist:true},{n:'Eje Cafetero',neg:.5,ocio:1.1,suelo:.8,desde:1990},
+    {n:"Pereira",neg:0.65,ocio:0.8,suelo:0.85,desde:1900},{n:"Armenia",neg:0.55,ocio:0.95,suelo:0.8,desde:1950},{n:"Cúcuta",neg:0.75,ocio:0.6,suelo:0.7,desde:1800},{n:"Ibagué",neg:0.55,ocio:0.8,suelo:0.8,desde:1900},{n:"Villavicencio",neg:0.6,ocio:0.7,suelo:0.8,desde:1900},{n:"Neiva",neg:0.5,ocio:0.7,suelo:0.75,desde:1900},{n:"Pasto",neg:0.5,ocio:0.85,suelo:0.75,desde:1900},{n:"Popayán",neg:0.4,ocio:0.95,suelo:0.8,desde:1900,hist:true},{n:"Valledupar",neg:0.45,ocio:0.8,suelo:0.7,desde:1950},{n:"Tunja",neg:0.4,ocio:0.7,suelo:0.8,desde:1900,hist:true},{n:"Sincelejo",neg:0.45,ocio:0.6,suelo:0.7,desde:1900},{n:"Riohacha",neg:0.4,ocio:0.9,suelo:0.7,desde:1950,playa:true},{n:"Quibdó",neg:0.3,ocio:0.6,suelo:0.65,desde:1950},{n:"Buenaventura",neg:0.65,ocio:0.5,suelo:0.8,desde:1900,playa:true},{n:"Rionegro",neg:0.6,ocio:0.85,suelo:1.0,desde:1960,aire:true},{n:"Barrancabermeja",neg:0.7,ocio:0.5,suelo:0.8,desde:1925},{n:"Yopal",neg:0.55,ocio:0.5,suelo:0.7,desde:1970},{n:"Florencia",neg:0.4,ocio:0.6,suelo:0.65,desde:1950}];
   const DB=()=>DESTINOS.concat(((typeof CIUDADES_GLOBALES!=='undefined')?CIUDADES_GLOBALES:[]).map(g=>({n:g.n,neg:cl((g.neg||12)/11,.9,1.5),ocio:1.1,suelo:cl((g.costo||3)/1.7,1.2,2.6),desde:1985,aire:true,hist:true,global:true,pais:g.pais})));
   const dest=n=>DB().find(d=>d.n===n)||DESTINOS[0];
   const destDisp=e=>DB().filter(d=>A()>=d.desde&&(!d.global||(((e&&e.hotel175)?e.hotel175.hoteles.filter(h=>!h.enObra).length:0)>=5&&A()>=1985)));
@@ -32281,7 +32497,8 @@ install();setTimeout(install,1200);
     {n:'Bogotá',pob:1.35,suelo:1.3,desde:1800},{n:'Medellín',pob:1.15,suelo:1.15,desde:1800},{n:'Cali',pob:1,suelo:1,desde:1800},
     {n:'Barranquilla',pob:1,suelo:1,desde:1800},{n:'Bucaramanga',pob:.8,suelo:.9,desde:1800},{n:'Manizales',pob:.6,suelo:.85,desde:1800},
     {n:'Montería',pob:.55,suelo:.75,desde:1800},{n:'La Estrella',pob:.45,suelo:.7,desde:1800},{n:'Cartagena',pob:.9,suelo:1.35,desde:1800},
-    {n:'Santa Marta',pob:.6,suelo:1,desde:1900},{n:'Pereira',pob:.7,suelo:.85,desde:1900}];
+    {n:'Santa Marta',pob:.6,suelo:1,desde:1900},{n:'Pereira',pob:.7,suelo:.85,desde:1900},
+    {n:"Armenia",pob:0.5,suelo:0.75,desde:1900},{n:"Cúcuta",pob:0.75,suelo:0.8,desde:1800},{n:"Ibagué",pob:0.65,suelo:0.8,desde:1800},{n:"Villavicencio",pob:0.6,suelo:0.8,desde:1900},{n:"Neiva",pob:0.55,suelo:0.75,desde:1800},{n:"Pasto",pob:0.55,suelo:0.75,desde:1800},{n:"Popayán",pob:0.5,suelo:0.8,desde:1800},{n:"Valledupar",pob:0.5,suelo:0.75,desde:1900},{n:"Tunja",pob:0.4,suelo:0.8,desde:1800},{n:"Sincelejo",pob:0.4,suelo:0.7,desde:1900},{n:"Riohacha",pob:0.35,suelo:0.7,desde:1900},{n:"Quibdó",pob:0.3,suelo:0.65,desde:1900},{n:"Buenaventura",pob:0.55,suelo:0.85,desde:1900},{n:"Rionegro",pob:0.5,suelo:0.9,desde:1900},{n:"Barrancabermeja",pob:0.5,suelo:0.85,desde:1925},{n:"Yopal",pob:0.3,suelo:0.7,desde:1970},{n:"San Andrés",pob:0.2,suelo:1.1,desde:1960},{n:"Florencia",pob:0.3,suelo:0.65,desde:1930}];
   const ciu=n=>CIUDADES.find(c=>c.n===n)||{n:n||'Bogotá',pob:.8,suelo:1,desde:1800};
   const ciudadesDisp=()=>CIUDADES.filter(c=>A()>=c.desde);
   /* ---- las clases y sus unidades ----
@@ -35546,6 +35763,49 @@ install();setTimeout(install,1200);
   init193(); setTimeout(init193,40); setTimeout(init193,220); setTimeout(init193,650); setTimeout(init193,950);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init193);
   window.__SA193={version:V193};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v194 · VEINTE CIUDADES MÁS PARA VIVIR
+   Pereira, Armenia, Cúcuta, Ibagué, Villavicencio, Neiva, Pasto, Popayán,
+   Santa Marta, Valledupar, Tunja, Sincelejo, Riohacha, Quibdó, Buenaventura,
+   Rionegro, Barrancabermeja, Yopal, San Andrés y Florencia.
+   Cada una trae lo suyo en todas las tablas del juego: nombres y apellidos
+   de la región, barrios con su estrato, costo de vida, departamento (y con
+   él la gobernación), universidades, vocación económica, bonos por sector y
+   por tipo de finca, presencia de los grupos armados, lugar en el mapa,
+   hoteles, unidades de producción y municipios cafeteros.
+   Las que no existían en 1800 aparecen cuando les toca (Pereira 1870,
+   Armenia 1890, Barrancabermeja 1925...) y no se ofrecen ni se sortean antes.
+   ========================================================================== */
+(function(){
+  const V194='v194';
+  const NUEVAS=['Pereira','Armenia','Cúcuta','Ibagué','Villavicencio','Neiva','Pasto','Popayán','Santa Marta','Valledupar','Tunja','Sincelejo','Riohacha','Quibdó','Buenaventura','Rionegro','Barrancabermeja','Yopal','San Andrés','Florencia'];
+  const vigente=(n,a)=>{ try{ return ciudadVigente(n,a); }catch(e){ return true; } };
+
+  /* --- la pantalla de creación solo ofrece las ciudades que ya existían en el año elegido --- */
+  function filtrarCreacion(){
+    const caja=document.querySelector('#escenaHost .lienzo'); if(!caja||!caja.querySelector('#cCiu')||caja.__v194) return; caja.__v194=true;
+    const ap=()=>{
+      const b=caja.querySelector('#cEpoca .opcion[aria-pressed="true"]'), e=b&&(typeof EPOCAS!=='undefined')&&EPOCAS.find(x=>x.id===b.dataset.v), anio=(e&&isFinite(e.anio))?+e.anio:2026;
+      caja.querySelectorAll('#cCiu .opcion').forEach(x=>{ const ok=vigente(x.dataset.v,anio); x.hidden=!ok; x.style.display=ok?'':'none'; });
+      const sel=caja.querySelector('#cCiu .opcion[aria-pressed="true"]');
+      if(sel&&sel.hidden){ const alt=caja.querySelector('#cCiu .opcion:not([hidden])'); if(alt) alt.click(); }
+    };
+    caja.querySelectorAll('#cEpoca .opcion').forEach(b=>b.addEventListener('click',()=>setTimeout(ap,0)));
+    ap();
+  }
+  function wrapCreacion(){
+    const old=window.pantallaCreacion; if(typeof old!=='function'||window.__SA194_CRE) return; window.__SA194_CRE=true;
+    window.pantallaCreacion=function(){ const r=old.apply(this,arguments); try{ filtrarCreacion(); }catch(e){ console.error(e); } return r; };
+    window.pantallaCreacion.__v194=true;
+  }
+  function init194(){ wrapCreacion();
+    Object.assign(window,{ciudadesNuevas194:NUEVAS,filtrarCreacion194:filtrarCreacion}); }
+  init194(); setTimeout(init194,40); setTimeout(init194,220); setTimeout(init194,650);
+  window.__SA194={version:V194};
 })();
 </script>
 
