@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v194</div>
+<div class="version-badge" id="versionBadge">v195</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -35806,6 +35806,174 @@ install();setTimeout(install,1200);
     Object.assign(window,{ciudadesNuevas194:NUEVAS,filtrarCreacion194:filtrarCreacion}); }
   init194(); setTimeout(init194,40); setTimeout(init194,220); setTimeout(init194,650);
   window.__SA194={version:V194};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v195 · LAS INSTITUCIONES DE CADA CIUDAD
+   Lo que hay en cada lugar depende de dónde se viva y de la época: alcaldía
+   (designada por el gobernador hasta 1988, elegida después), gobernación y
+   asamblea si es capital de departamento, tribunal, notarías, brigada del
+   Ejército, base naval o aérea, escuela militar, arquidiócesis o diócesis,
+   seminario y conventos, universidades, Banco de la República, cámara de
+   comercio, aduana, puerto, aeropuerto, comité de cafeteros, diarios...
+   Es el directorio que usan las carreras nuevas (militar, clero, docente,
+   cargos públicos y rectorías) para saber qué existe dónde y desde cuándo.
+   - Se consulta desde la ficha de cada ciudad y desde la acción «Las
+     instituciones de tu ciudad».
+   - API: institucionesCiudad195(ciudad,año), tieneInstitucion195(ciudad,id,año),
+     capitalDe195, curiaDe195, unidadesMilitares195, conventos195.
+   ========================================================================== */
+(function(){
+  const V195='v195';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+
+  /* ---- por ciudad: [departamento, desde que es sede del gobierno departamental] ----
+     trib: año desde el que hay Tribunal Superior · ej/ar/fa: unidades · esc: escuelas
+     cur: [tipo, desde] arq=arquidiócesis, dioc=diócesis, vic=vicariato · sem: seminarios · conv: conventos
+     br: Banco de la República · cc: Cámara de Comercio · ad: aduana · pu: puerto · ae: aeropuertos · cf: comité de cafeteros
+     ex: otras [categoría, nombre, desde, hasta, descripción] */
+  const SPEC={
+    'Bogotá':{cap:['Cundinamarca',1886],trib:1800,ej:[['Brigada de Institutos Militares',1960],['Batallón de la Guardia Presidencial',1920]],fa:[['Comando de la Fuerza Aérea',1919]],
+      esc:[['Escuela Militar de Cadetes «General José María Córdova»',1907],['Escuela Superior de Guerra',1909],['Escuela de Cadetes de Policía «General Santander»',1940]],
+      cur:['arq',1564],sem:[['Seminario Conciliar de Bogotá',1581]],conv:[['Monasterio de Santa Clara',1800],['Monasterio de la Concepción',1800],['Monasterio del Carmen',1800]],
+      br:1923,cc:1878,ad:1900,ae:[['El Dorado',1959]],
+      ex:[['nacional','Casa de Nariño (Presidencia)',1800,0,'Aquí despacha el presidente y se nombran ministros y directores.'],['nacional','Congreso de la República',1830,0,'Senado y Cámara de Representantes.'],
+        ['nacional','Corte Suprema de Justicia',1886,0,'Cabeza de la justicia ordinaria.'],['nacional','Consejo de Estado',1914,0,'Cabeza de lo contencioso administrativo.'],['nacional','Corte Constitucional',1991,0,'Guarda la Constitución.'],
+        ['nacional','Banco de la República (sede principal)',1923,0,'Emisión, tasas y reservas.'],['nacional','Bolsa de Bogotá',1928,0,'La plaza de valores del país.'],['nacional','Contraloría General de la República',1923,0,'Vigila el gasto público.'],
+        ['nacional','Procuraduría General de la Nación',1886,0,'Vigila a los funcionarios.'],['nacional','Registraduría Nacional del Estado Civil',1948,0,'Cédulas y elecciones.'],['nacional','Ministerios y superintendencias',1886,0,'Donde se negocian las licencias, los contratos y las regulaciones.'],
+        ['medios','El Tiempo',1911,0,'El diario del país.'],['medios','El Espectador',1887,0,'El diario más antiguo en circulación.']]},
+    'Medellín':{cap:['Antioquia',1886],trib:1850,ej:[['Brigada del Ejército en Medellín',1950]],cur:['arq',1868],sem:[['Seminario Mayor de Medellín',1868]],conv:[['Monasterio del Carmen',1900]],br:1927,cc:1904,ae:[['Olaya Herrera',1932]],
+      ex:[['economia','Bolsa de Medellín',1961,0,'Plaza de valores de los grupos antioqueños.'],['medios','El Colombiano',1912,0,'El diario de Antioquia.']]},
+    'La Estrella':{cur:['dioc',1868],cc:1904},
+    'Cali':{cap:['Valle del Cauca',1910],trib:1910,ej:[['Brigada del Ejército en Cali',1950]],fa:[['Escuela Militar de Aviación «Marco Fidel Suárez»',1933]],cur:['arq',1910],sem:[['Seminario Mayor de Cali',1930]],br:1927,cc:1910,ae:[['Alfonso Bonilla Aragón',1946]],
+      ex:[['economia','Bolsa de Occidente',1983,2001,'Plaza de valores del suroccidente.'],['medios','El País',1950,0,'El diario del Valle.']]},
+    'Barranquilla':{cap:['Atlántico',1905],trib:1920,ej:[['Brigada del Ejército en Barranquilla',1950]],ar:[['Capitanía de Puerto',1900]],cur:['arq',1932],br:1923,cc:1905,ad:1880,pu:1870,ae:[['Ernesto Cortissoz',1919]],
+      ex:[['medios','El Heraldo',1933,0,'El diario de la Costa.'],['economia','Zona franca de Barranquilla',1992,0,'Industria y exportación con beneficios.']]},
+    'Cartagena':{cap:['Bolívar',1886],trib:1800,ej:[['Brigada de Infantería de Marina',1960]],ar:[['Base Naval ARC «Bolívar»',1900],['Escuela Naval de Cadetes «Almirante Padilla»',1935]],cur:['arq',1534],sem:[['Seminario Mayor de Cartagena',1800]],
+      conv:[['Convento de Santa Clara',1800],['Convento de San Pedro Claver',1800],['Monasterio de Santa Teresa',1800]],br:1923,cc:1915,ad:1800,pu:1800,ae:[['Rafael Núñez',1950]],
+      ex:[['economia','Refinería de Cartagena',1957,0,'Petróleo y petroquímica.'],['economia','Zona franca de Cartagena',1958,0,'Puerto, industria y exportación.'],['medios','El Universal',1948,0,'El diario de Cartagena.']]},
+    'Bucaramanga':{cap:['Santander',1886],trib:1886,ej:[['Brigada del Ejército en Bucaramanga',1950]],cur:['arq',1952],sem:[['Seminario Mayor de Bucaramanga',1950]],br:1923,cc:1913,ae:[['Palonegro',1940]],ex:[['medios','Vanguardia Liberal',1919,0,'El diario de Santander.']]},
+    'Manizales':{cap:['Caldas',1905],trib:1910,ej:[['Batallón del Ejército en Manizales',1920]],cur:['arq',1954],sem:[['Seminario Mayor de Manizales',1950]],br:1927,cc:1915,cf:1927,ae:[['La Nubia',1950]],ex:[['medios','La Patria',1921,0,'El diario de Caldas.']]},
+    'Montería':{cap:['Córdoba',1951],trib:1951,ej:[['Brigada del Ejército en Montería',1980]],cur:['dioc',1954],br:1951,cc:1963,ae:[['Los Garzones',1960]]},
+    'Santa Marta':{cap:['Magdalena',1886],trib:1886,ej:[['Batallón del Ejército en Santa Marta',1900]],ar:[['Capitanía de Puerto',1900]],cur:['arq',1534],sem:[['Seminario de Santa Marta',1800]],br:1927,cc:1915,ad:1800,pu:1800,ae:[['Simón Bolívar',1960]],
+      ex:[['economia','United Fruit Company y la zona bananera',1900,1970,'Banano, enclave extranjero y conflicto laboral.']]},
+    'Pereira':{cap:['Risaralda',1966],trib:1966,ej:[['Batallón del Ejército en Pereira',1950]],cur:['dioc',1952],br:1950,cc:1916,cf:1927,ae:[['Matecaña',1950]],ex:[['medios','El Diario',1953,0,'El diario de Risaralda.']]},
+    'Armenia':{cap:['Quindío',1966],trib:1966,ej:[['Batallón del Ejército en Armenia',1950]],cur:['dioc',1952],br:1950,cc:1915,cf:1927,ae:[['El Edén',1960]]},
+    'Cúcuta':{cap:['Norte de Santander',1910],trib:1910,ej:[['Brigada del Ejército en Cúcuta',1970]],cur:['dioc',1956],br:1923,cc:1913,ad:1800,pu:1800,ae:[['Camilo Daza',1950]],
+      ex:[['economia','Puente internacional Simón Bolívar',1800,0,'Paso de frontera con Venezuela: aduana, cambio y contrabando.'],['medios','La Opinión',1960,0,'El diario de la frontera.']]},
+    'Ibagué':{cap:['Tolima',1886],trib:1886,ej:[['Brigada del Ejército en Ibagué',1950]],cur:['arq',1900],sem:[['Seminario de Ibagué',1900]],br:1927,cc:1914,cf:1927,ae:[['Perales',1950]],ex:[['educacion','Conservatorio del Tolima',1906,0,'Formación musical.']]},
+    'Villavicencio':{cap:['Meta',1959],trib:1959,ej:[['Brigada del Ejército en Villavicencio',1960]],fa:[['Base Aérea de Apiay',1950]],cur:['arq',1964],br:1950,cc:1930,ae:[['Vanguardia',1950]]},
+    'Neiva':{cap:['Huila',1905],trib:1905,ej:[['Brigada del Ejército en Neiva',1960]],cur:['dioc',1972],br:1927,cc:1915,cf:1930,ae:[['Benito Salas',1950]]},
+    'Pasto':{cap:['Nariño',1904],trib:1904,ej:[['Brigada del Ejército en Pasto',1950]],cur:['arq',1859],sem:[['Seminario Mayor de Pasto',1860]],conv:[['Convento de la Concepción',1800],['Monasterio de Santa Clara',1800]],br:1927,cc:1913,ae:[['Antonio Nariño',1950]],ex:[['medios','Diario del Sur',1983,0,'El diario de Nariño.']]},
+    'Popayán':{cap:['Cauca',1886],trib:1886,ej:[['Batallón del Ejército en Popayán',1900]],cur:['arq',1546],sem:[['Seminario Mayor de Popayán',1800]],conv:[['Monasterio de la Encarnación',1800],['Monasterio de Santo Domingo',1800]],br:1927,cc:1923,ae:[['Guillermo León Valencia',1950]],ex:[['medios','El Liberal',1938,0,'El diario del Cauca.']]},
+    'Valledupar':{cap:['Cesar',1967],trib:1967,ej:[['Batallón del Ejército en Valledupar',1960]],cur:['dioc',1952],br:1960,cc:1961,ae:[['Alfonso López Pumarejo',1960]]},
+    'Tunja':{cap:['Boyacá',1886],trib:1886,ej:[['Batallón del Ejército en Tunja',1900]],cur:['arq',1880],sem:[['Seminario Mayor de Tunja',1880]],conv:[['Convento de Santa Clara',1800],['Convento de Santa Teresa',1800]],br:1927,cc:1914},
+    'Sincelejo':{cap:['Sucre',1966],trib:1966,ej:[['Brigada de Infantería de Marina',1980]],cur:['dioc',1969],br:1970,cc:1965},
+    'Riohacha':{cap:['La Guajira',1964],trib:1964,ej:[['Batallón del Ejército en Riohacha',1980]],cur:['dioc',1905],br:1950,cc:1960,pu:1800,ex:[['economia','El Cerrejón (carbón)',1983,0,'La mina a cielo abierto más grande del país.']]},
+    'Quibdó':{cap:['Chocó',1947],trib:1947,ej:[['Batallón del Ejército en Quibdó',1960]],cur:['dioc',1952],br:1950,cc:1960},
+    'Buenaventura':{ar:[['Base Naval del Pacífico',1950]],cur:['dioc',1952],cc:1925,ad:1900,pu:1800,ex:[['economia','Puerto de Buenaventura',1923,0,'Por aquí salen el café y el azúcar y entra gran parte de lo importado.']]},
+    'Rionegro':{cur:['dioc',1957],cc:1980,ae:[['José María Córdova',1985]]},
+    'Barrancabermeja':{ej:[['Batallón del Ejército en Barrancabermeja',1960]],cur:['dioc',1991],br:1950,cc:1960,ex:[['economia','Refinería de Barrancabermeja',1922,0,'Tropical Oil y luego Ecopetrol: el corazón petrolero del país.'],['economia','Sindicato de la USO',1923,0,'El sindicato petrolero.']]},
+    'Yopal':{cap:['Casanare',1991],trib:1991,ej:[['Brigada del Ejército en Yopal',1990]],cur:['dioc',1999],cc:1990},
+    'San Andrés':{cap:['San Andrés y Providencia',1991],ar:[['Base Naval de San Andrés',1960]],cur:['vic',1912],br:1960,cc:1963,ae:[['Gustavo Rojas Pinilla',1950]],ex:[['economia','Puerto libre',1953,0,'Comercio sin aranceles: electrodomésticos, licores y turismo.']]},
+    'Florencia':{cap:['Caquetá',1981],trib:1981,ej:[['Brigada del Ejército en Florencia',1980]],cur:['dioc',1985],cc:1965}
+  };
+  const UNI_DESDE={'Universidad Nacional':1867,'Universidad de Antioquia':1803,'Universidad del Cauca':1827,'Universidad de Cartagena':1827,'Universidad de Nariño':1904,'Pontificia Universidad Javeriana':1623,'Universidad del Valle':1945,'Universidad del Atlántico':1941,'Universidad de Caldas':1943,'Universidad Industrial de Santander':1948,'Universidad de Córdoba':1964,'Universidad del Tolima':1945};
+  const CURIA={arq:'Arquidiócesis',dioc:'Diócesis',vic:'Vicariato apostólico'};
+
+  const nombreCap=(c,a)=>{ const s=SPEC[c]; return s&&s.cap?s.cap[0]:null; };
+  function lista(ciudad,anio){
+    const a=isFinite(anio)?anio:A(), s=SPEC[ciudad]||{}, out=[];
+    const add=(cat,id,n,desde,hasta,d)=>{ if(a>=desde&&(!hasta||a<=hasta)) out.push({cat,id,n,desde,hasta:hasta||null,d:d||''}); };
+    /* municipio */
+    add('gobierno','alcaldia','Alcaldía de '+ciudad,1800,0,a<1988?'El alcalde lo designa el gobernador.':'El alcalde se elige por voto popular.');
+    add('gobierno','concejo','Concejo de '+ciudad,1800,0,'Aprueba el presupuesto y los impuestos locales.');
+    add('gobierno','registraduria','Registraduría y notarías',1887,0,'Registro de instrumentos públicos, escrituras y elecciones.');
+    add('justicia','juzgados','Juzgados de '+ciudad,1800,0,'Civil, penal y de familia.');
+    add('justicia','personeria','Personería municipal',1900,0,'Defiende a los ciudadanos frente a la administración.');
+    add('fuerza','policia',a<1891?'Guardia municipal':'Policía de '+ciudad,1800,0,a<1891?'Orden público a cargo del cabildo.':'Policía Nacional: orden y convivencia.');
+    add('salud','hospital',a<1900?'Hospital de caridad':'Hospital departamental',1800,0,'Atención pública y de los pobres.');
+    /* departamento */
+    if(s.cap){
+      const dep=s.cap[0], d0=s.cap[1];
+      if(a>=d0){ add('gobierno','gobernacion','Gobernación de '+dep,d0,0,a<1991?'El gobernador lo nombra el presidente de la república.':'El gobernador se elige por voto popular.');
+        add('gobierno','asamblea','Asamblea de '+dep,d0,0,'Ordenanzas, presupuesto y control político departamental.');
+        add('gobierno','secretarias','Secretarías de Gobierno, Hacienda, Obras, Educación y Salud',d0,0,'Los cargos de confianza del gobernador.');
+        add('control','contraloria_dep','Contraloría de '+dep,Math.max(d0,1950),0,'Vigila el gasto departamental.'); }
+      else add('gobierno','prefectura','Delegado del gobierno nacional en '+dep,1800,d0-1,'Territorio que aún no es departamento.');
+      add('gobierno','secretarias_mun','Secretarías de la alcaldía (Gobierno, Hacienda, Obras, Planeación, Tránsito)',1900,0,'Los cargos de confianza del alcalde.');
+    }
+    if(s.trib) add('justicia','tribunal','Tribunal Superior del Distrito Judicial',s.trib,0,'Segunda instancia de la justicia ordinaria.');
+    /* fuerza pública */
+    (s.ej||[]).forEach(u=>add('fuerza','ejercito',u[0],u[1],0,'Ejército Nacional.'));
+    (s.ar||[]).forEach(u=>add('fuerza','armada',u[0],u[1],0,'Armada Nacional.'));
+    (s.fa||[]).forEach(u=>add('fuerza','faa',u[0],u[1],0,'Fuerza Aérea.'));
+    (s.esc||[]).forEach(u=>add('fuerza','escuela_militar',u[0],u[1],0,'Formación de oficiales.'));
+    /* Iglesia */
+    if(s.cur){ const t=CURIA[s.cur[0]]; add('iglesia','curia',t+' de '+ciudad,s.cur[1],0,s.cur[0]==='arq'?'Cabeza de una provincia eclesiástica.':'Curia, párrocos y obras de la Iglesia.'); }
+    (s.sem||[]).forEach(u=>add('iglesia','seminario',u[0],u[1],0,'Aquí se forman los sacerdotes.'));
+    (s.conv||[]).forEach(u=>add('iglesia','convento',u[0],u[1],0,'Clausura: religiosas dedicadas a la oración.'));
+    /* educación */
+    try{ const us=(window.__SA63&&window.__SA63.universidadesDisponibles)?window.__SA63.universidadesDisponibles(ciudad):[];
+      (us||[]).filter(u=>u&&u.n&&!/gen[eé]ric/i.test(String(u.id))).forEach(u=>{ const d0=UNI_DESDE[u.n]||1950; add('educacion','universidad',u.n,d0,0,u.d||''); }); }catch(e){}
+    /* economía y comercio */
+    if(s.br) add('economia','banrep','Sucursal del Banco de la República',s.br,0,'Crédito, cambio y reservas.');
+    if(s.cc) add('economia','camara','Cámara de Comercio de '+ciudad,s.cc,0,'Registro mercantil y voz de los comerciantes.');
+    if(s.ad) add('economia','aduana','Aduana',s.ad,0,'Aranceles, importaciones y contrabando.');
+    if(s.pu) add('economia','puerto','Puerto',s.pu,0,'Salida y entrada de mercancías por mar o por río.');
+    (s.ae||[]).forEach(u=>add('economia','aeropuerto','Aeropuerto '+u[0],u[1],0,'Pasajeros y carga aérea.'));
+    if(s.cf) add('economia','cafeteros','Comité departamental de cafeteros',s.cf,0,'Federación de Cafeteros: compra, asistencia técnica y precio interno.');
+    (s.ex||[]).forEach(u=>add(u[0],u[0]==='nacional'?'nacional':u[0]==='medios'?'diario':'otra',u[1],u[2],u[3],u[4]));
+    return out;
+  }
+  const CATS=[['nacional','El poder nacional'],['gobierno','Gobierno y administración'],['justicia','Justicia'],['control','Control'],['fuerza','Fuerza pública'],['iglesia','La Iglesia'],['educacion','Educación'],['salud','Salud'],['economia','Economía y comercio'],['medios','Prensa']];
+  const memo={};
+  function institucionesCiudad195(ciudad,anio){ const a=isFinite(anio)?anio:A(), k=ciudad+'|'+a; return memo[k]||(memo[k]=lista(ciudad,a)); }
+  const tieneInstitucion195=(ciudad,id,anio)=>institucionesCiudad195(ciudad,anio).some(x=>x.id===id);
+  const capitalDe195=(ciudad,anio)=>{ const a=isFinite(anio)?anio:A(), s=SPEC[ciudad]; return !!(s&&s.cap&&a>=s.cap[1]); };
+  const departamentoDe195=ciudad=>nombreCap(ciudad);
+  const curiaDe195=(ciudad,anio)=>institucionesCiudad195(ciudad,anio).find(x=>x.id==='curia')||null;
+  const unidadesMilitares195=(ciudad,anio)=>institucionesCiudad195(ciudad,anio).filter(x=>['ejercito','armada','faa','escuela_militar'].includes(x.id));
+  const conventos195=(ciudad,anio)=>institucionesCiudad195(ciudad,anio).filter(x=>x.id==='convento');
+
+  /* ---- la pantalla ---- */
+  function escenaInstituciones195(ciudad){
+    ciudad=ciudad||(S&&S.hogar&&S.hogar.ciudad)||'Bogotá';
+    const a=A(), L=institucionesCiudad195(ciudad,a);
+    let html='';
+    CATS.forEach(([cat,titulo])=>{ const xs=L.filter(x=>x.cat===cat); if(!xs.length) return;
+      html+='<div class="seccion"><h3>'+esc(titulo)+'<em>'+xs.length+'</em></h3>'
+        +xs.map(x=>'<div class="retrato"><div class="quien"><div class="nom">'+esc(x.n)+'</div><div class="rol">'+(x.desde>1800?'desde '+x.desde+(x.hasta?' hasta '+x.hasta:''):'de siempre')+(x.d?' · '+esc(x.d):'')+'</div></div></div>').join('')+'</div>'; });
+    const dep=departamentoDe195(ciudad), cap=capitalDe195(ciudad,a);
+    escena({rubro:'Año '+a,titulo:'Las instituciones de '+esc(ciudad),ancho:true,cerrable:true,
+      cuerpo:esc(ciudad)+(dep?(cap?' es la capital de '+esc(dep)+'.':' pertenece a '+esc(dep)+'.'):'')+' Esto es lo que existe aquí en '+a+'; las carreras y los cargos del juego dependen de ello.',
+      html:html,opciones:[]});
+  }
+
+  /* ---- enganches: la ficha de la ciudad y una acción ---- */
+  function wrapEscena(){
+    const old=window.escena; if(typeof old!=='function'||old.__v195) return;
+    const f=function(o){
+      try{ if(o&&Array.isArray(o.opciones)&&o.opciones.some(x=>x&&/^Comprar un terreno aquí$/.test(plano(x.t)))&&!o.opciones.some(x=>x&&x.__v195)){
+        const ciudad=plano(o.titulo); if(ciudad&&(SPEC[ciudad]||typeof ZONAS!=='undefined'&&ZONAS[ciudad])) o=Object.assign({},o,{opciones:o.opciones.concat([{t:'Las instituciones de '+ciudad,cat:'casa',cerrar:false,__v195:true,run:()=>escenaInstituciones195(ciudad)}])}); } }catch(e){}
+      return old.call(this,o);
+    };
+    f.__v195=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.escena=f;
+  }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Las instituciones de tu ciudad')) g.miembros.push(['Familia','Las instituciones de tu ciudad']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA195_ACC) return; window.__SA195_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p&&S.hogar&&!L.some(x=>x.t==='Las instituciones de tu ciudad')){ L.push({t:'Las instituciones de tu ciudad',cat:'casa',d:'Alcaldía, gobernación, tribunal, brigada, curia, universidades y más: lo que hay en '+S.hogar.ciudad+' y desde cuándo.',mov:0,modal:false,run:()=>escenaInstituciones195()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v195=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA195_CAT) return; window.__SA195_CAT=true; window.catDe=function(t){ if(t==='Las instituciones de tu ciudad') return 'casa'; return old.apply(this,arguments); }; }
+  function init195(){ wrapEscena(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{institucionesCiudad195,tieneInstitucion195,capitalDe195,departamentoDe195,curiaDe195,unidadesMilitares195,conventos195,escenaInstituciones195,SPEC_CIUDAD_195:SPEC}); }
+  init195(); setTimeout(init195,40); setTimeout(init195,220); setTimeout(init195,650); setTimeout(init195,950); setTimeout(init195,1500);
+  window.__SA195={version:V195};
 })();
 </script>
 
