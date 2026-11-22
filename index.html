@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v195</div>
+<div class="version-badge" id="versionBadge">v196</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -35974,6 +35974,205 @@ install();setTimeout(install,1200);
     Object.assign(window,{institucionesCiudad195,tieneInstitucion195,capitalDe195,departamentoDe195,curiaDe195,unidadesMilitares195,conventos195,escenaInstituciones195,SPEC_CIUDAD_195:SPEC}); }
   init195(); setTimeout(init195,40); setTimeout(init195,220); setTimeout(init195,650); setTimeout(init195,950); setTimeout(init195,1500);
   window.__SA195={version:V195};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v196 · LAS PLAZAS DEL EXTERIOR
+   Las ciudades del exterior dejan de ser solo un lugar donde vivir o abrir
+   hoteles: son plazas con las que se tiene una relación.
+   - Relación por plaza en tres niveles: cuenta con banquero corresponsal,
+     línea de crédito y banca de inversión. Cada nivel cuesta, pide años y
+     prestigio, y sube el cupo. Antes de 1991 el control de cambios recorta
+     el cupo a la mitad o menos.
+   - Créditos en moneda extranjera (personales o para una compañía del
+     grupo): tasa más baja que la de aquí, pero la deuda se revalúa cada año
+     con el dólar, el euro, la libra, el yen...; si el peso se cae, debes más.
+   - Garantías: si la deuda del exterior pesa demasiado frente al
+     patrimonio, los acreedores piden más (abonar, pagar con tus divisas,
+     renegociar o dejar que declaren el incumplimiento).
+   - Incumplimiento: los acreedores embargan lo que tengas en esa plaza bajo
+     las reglas de su jurisdicción (concurso, administración, capítulo 11...),
+     te cierran la puerta cinco años y la deuda que quede se cobra aquí con
+     recargo.
+   - Quiebras y sustos del exterior: el banco corresponsal cae (con tus
+     divisas dentro), tu socio local quiebra o te traiciona, la filial de tus
+     hoteles entra en concurso afuera.
+   ========================================================================== */
+(function(){
+  const V196='v196';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  /* año desde el que la plaza es una plaza real · cómo se llama la quiebra allá */
+  const PL={
+    'Londres':{d:1800,conc:'una administración (administration) ante la High Court',ley:'el derecho inglés'},
+    'París':{d:1800,conc:'un redressement judiciaire ante el Tribunal de Commerce',ley:'el derecho francés'},
+    'Nueva York':{d:1850,conc:'el Capítulo 11 de la ley de quiebras de Estados Unidos',ley:'los tribunales de Nueva York'},
+    'Fráncfort':{d:1870,conc:'un Insolvenzverfahren ante el juzgado de Fráncfort',ley:'el derecho alemán'},
+    'Hong Kong':{d:1860,conc:'una liquidación provisional ante la High Court de Hong Kong',ley:'el derecho de Hong Kong'},
+    'Tokio':{d:1900,conc:'una rehabilitación civil ante el juzgado de Tokio',ley:'el derecho japonés'},
+    'Shanghái':{d:1900,conc:'un procedimiento de quiebra ante un tribunal de Shanghái',ley:'el derecho chino'},
+    'Ciudad de Panamá':{d:1903,conc:'un concurso de acreedores en Panamá',ley:'el derecho panameño'},
+    'São Paulo':{d:1920,conc:'una recuperação judicial en São Paulo',ley:'el derecho brasileño'},
+    'Miami':{d:1950,conc:'el Capítulo 7 ante la corte de quiebras de Miami',ley:'los tribunales de Florida'},
+    'Singapur':{d:1970,conc:'una administración judicial (judicial management) en Singapur',ley:'el derecho de Singapur'},
+    'Dubái':{d:1975,conc:'un procedimiento de quiebra ante el tribunal de Dubái',ley:'el derecho de Dubái'}
+  };
+  const BASE={GBP:1.30,SGD:.74,HKD:.128,JPY:.0091,BRL:.20};      // contra el dólar
+  const VOL={GBP:.07,SGD:.03,HKD:0,JPY:.08,BRL:.16}, DERIVA={BRL:-.04};
+  const TB={USD:.045,EUR:.03,GBP:.05,CNY:.045,HKD:.045,JPY:.012,SGD:.03,BRL:.115};
+  const NIV=['sin relación','cuenta con banquero corresponsal','línea de crédito','banca de inversión'];
+  const gl=n=>{ try{ return ciudadGlobalDe(n); }catch(e){ return null; } };
+
+  function E(){ const L=S.legado||(S.legado={}); let e=L.ext196; if(!e||typeof e!=='object') e=L.ext196={v:1,n:0,plazas:{},lineas:[],fx:{},hist:[],alerta:0};
+    if(!e.plazas) e.plazas={}; if(!Array.isArray(e.lineas)) e.lineas=[]; if(!e.fx) e.fx={}; if(!Array.isArray(e.hist)) e.hist=[]; return e; }
+  const P=n=>{ const e=E(); return e.plazas[n]||(e.plazas[n]={nivel:0,desde:null,socio:null,veto:0}); };
+  const plazas=()=>(typeof CIUDADES_GLOBALES!=='undefined'?CIUDADES_GLOBALES:[]).filter(g=>PL[g.n]&&A()>=PL[g.n].d);
+  const ctrl=()=>A()<1967?.6:A()<1991?.35:1;
+
+  function tasaMoneda(mon){ const t=tasas(); if(mon==='USD') return t.usd; if(mon==='EUR') return t.eur; if(mon==='CNY') return t.cny; return t.usd*(BASE[mon]||1)*(E().fx[mon]||1); }
+  const tasaCredito=(plaza,nivel)=>{ const g=gl(plaza); return (TB[g.moneda]||.05)+.015+g.risk*.12-Math.max(0,nivel)*.004; };
+  const valor=l=>l.unid*tasaMoneda(l.mon);
+  const empresa=nom=>companias().find(x=>x.nombre===nom)||null;
+  const deudaPlaza=pl=>E().lineas.filter(l=>l.plaza===pl).reduce((s,l)=>s+l.ult,0);
+  const totalExt=()=>E().lineas.reduce((s,l)=>s+l.ult,0);
+  function limite(pl){ const p=P(pl), g=gl(pl); if(!g||p.nivel<2) return 0; const b=Math.max(0,patrimonio())*(.08+.07*(p.nivel-2)+.04)*(1-g.risk*(p.socio?.85:1))*ctrl(); return Math.max(0,b-deudaPlaza(pl)); }
+  const costoNivel=(pl,n)=>{ const g=gl(pl); return Math.round(g.traslado*[0,.35,.8,1.6][n]*(ctrl()<1?1.5:1)); };
+  function requisitos(pl,n){ const p=P(pl), anios=p.desde==null?0:A()-p.desde;
+    if(n===1) return A()<1850?'No hay cómo abrir cuentas todavía':null;
+    if(n===2) return anios<2?'Hacen falta dos años con la cuenta abierta':(prestigio()<30?'Tu nombre aún pesa poco ante los bancos de allá':null);
+    if(n===3) return anios<5?'Hacen falta cinco años de relación':(patrimonio()<400?'Aún no tienes patrimonio para la banca de inversión':null);
+    return null; }
+  const pagar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const hist=t=>{ const e=E(); e.hist.push({a:A(),t}); if(e.hist.length>40) e.hist.shift(); };
+
+  /* ---- crédito ---- */
+  function aplicarDeuda(l,d){ if(l.destino==='personal') S.deuda=Math.max(0,(S.deuda||0)+d); else { const c=empresa(l.destino); if(c) c.deuda=Math.max(0,(c.deuda||0)+d); } }
+  function tomar(pl,monto,destino){ const g=gl(pl), e=E(), p=P(pl); monto=Math.max(0,monto); const r=tasaMoneda(g.moneda);
+    const l={id:'l'+(++e.n),plaza:pl,mon:g.moneda,unid:monto/r,destino:destino||'personal',tasa:tasaCredito(pl,p.nivel),desde:A(),ult:monto}; e.lineas.push(l);
+    if(l.destino==='personal'){ S.efectivo+=monto; S.deuda=(S.deuda||0)+monto; } else { const c=empresa(l.destino); if(c){ c.caja+=monto; c.deuda=(c.deuda||0)+monto; } }
+    hist('Crédito de '+Math.round(monto)+' en '+pl); return l; }
+  function amortizar(monto,filtro){ let resto=Math.max(0,monto), usado=0; const ls=E().lineas.filter(l=>!filtro||filtro(l));
+    const tot=ls.reduce((s,l)=>s+l.ult,0); if(tot<=0) return 0;
+    ls.forEach(l=>{ const x=Math.min(l.ult,monto*(l.ult/tot)); l.unid*=Math.max(0,1-x/l.ult); l.ult=Math.max(0,l.ult-x); aplicarDeuda(l,-x); usado+=x; });
+    E().lineas=E().lineas.filter(l=>l.ult>.5); return usado; }
+
+  /* ---- el año ---- */
+  function mover(){ const e=E(); Object.keys(VOL).forEach(m=>{ const f=e.fx[m]||1; const r=(DERIVA[m]||0)+rnd(-VOL[m],VOL[m]); const sh=(m==='BRL'&&chance(.06))?-.25:0; e.fx[m]=clamp(f*(1+r+sh),.2,3); }); }
+  function anual(){
+    if(!S||!S.p||S.muerto) return; const e=E(); if(!e.lineas.length&&!Object.keys(e.plazas).length) return;
+    mover();
+    // la plata que se prestó a una compañía que ya no existe desaparece con ella
+    e.lineas=e.lineas.filter(l=>l.destino==='personal'||empresa(l.destino));
+    // 1. si pagaste deuda de aquí, primero se va lo del exterior
+    const pers=e.lineas.filter(l=>l.destino==='personal'), sp=pers.reduce((s,l)=>s+l.ult,0);
+    if(sp>(S.deuda||0)+1&&sp>0){ const f=Math.max(0,(S.deuda||0))/sp; pers.forEach(l=>{ l.unid*=f; l.ult*=f; }); e.lineas=e.lineas.filter(l=>l.ult>.5); }
+    companias().forEach(c=>{ const ls=e.lineas.filter(l=>l.destino===c.nombre), s=ls.reduce((a,l)=>a+l.ult,0); if(s>(c.deuda||0)+1&&s>0){ const f=Math.max(0,c.deuda||0)/s; ls.forEach(l=>{ l.unid*=f; l.ult*=f; }); } });
+    e.lineas=e.lineas.filter(l=>l.ult>.5);
+    // 2. la deuda se revalúa con la moneda y se paga la tasa de allá, no la de aquí
+    let dTot=0;
+    e.lineas.forEach(l=>{ const ahora=valor(l), d=ahora-l.ult; l.ult=ahora; aplicarDeuda(l,d); dTot+=d;
+      const dom=(S.macro.tasa||.08)+(l.destino==='personal'?.06:.03), aj=l.ult*(dom-l.tasa);
+      if(l.destino==='personal') S.efectivo+=aj; else { const c=empresa(l.destino); if(c) c.caja+=aj; } });
+    if(e.lineas.length){ const t=totalExt(); if(Math.abs(dTot)>Math.max(5,t*.12)) log(dTot>0?'<b>El peso se devaluó frente a lo que debes afuera</b>: la deuda del exterior subió '+fm(dTot)+' y hoy son '+fm(t)+'.':'La deuda del exterior bajó '+fm(-dTot)+' porque el peso se fortaleció. Hoy son '+fm(t)+'.',dTot>0?'mal':'bien'); }
+    // 3. socios locales
+    Object.keys(e.plazas).forEach(n=>{ const p=e.plazas[n]; if(p.socio&&A()-p.socio.desde>=1){ const g=gl(n); if(g) S.efectivo+=Math.round(g.traslado*.04*(p.socio.lealtad/60)); } });
+    // 4. garantías y sustos
+    const ext=totalExt(); if(ext>0&&ext>Math.max(1,patrimonio())*.55&&A()-(e.alerta||0)>=3){ e.alerta=A(); cola.push(evGarantias()); }
+    plazas().forEach(g=>{ const p=P(g.n); if(p.nivel<1&&!deudaPlaza(g.n)) return; if(!chance(clamp(.03+g.risk*.18,.02,.18))) return;
+      const k=pick(['banco','banco','socio','filial','oferta']);
+      if(k==='banco'&&dineroEn(g)>0) cola.push(evBanco(g.n)); else if(k==='socio'&&p.socio) cola.push(evSocio(g.n)); else if(k==='filial'){ const c=filialEn(g.n); if(c) cola.push(evFilial(c,g.n)); } else if(k==='oferta'&&p.nivel>=1&&p.nivel<3) cola.push(evOferta(g.n)); });
+  }
+  const dineroEn=g=>{ const D=divisas(), k=({USD:'usd',EUR:'eur',CNY:'cny'})[g.moneda]; return k?(D[k]||0):0; };
+  const filialEn=pl=>companias().find(c=>c.hotel175&&Array.isArray(c.hotel175.hoteles)&&c.hotel175.hoteles.some(h=>h.ciudad===pl&&!h.enObra)&&(c.deuda||0)>(c.ingresos||0)*.8)||null;
+
+  /* ---- incumplimiento: los acreedores cobran donde puedan ---- */
+  function incumplir(pl){ const g=gl(pl), e=E(), ls=e.lineas.filter(l=>l.plaza===pl); if(!ls.length) return {embargado:0,resto:0};
+    const total=ls.reduce((s,l)=>s+l.ult,0);
+    const bs=(S.bienes||[]).filter(b=>b.ciudad===pl); let recup=0; bs.forEach(b=>{ recup+=Math.max(0,(b.valor||0)-(b.hipoteca||0))*.7; });
+    S.bienes=(S.bienes||[]).filter(b=>b.ciudad!==pl);
+    const pagado=Math.min(total,recup); amortizar(pagado,l=>l.plaza===pl);
+    const resto=ls.reduce((s,l)=>s+(l.ult||0),0);
+    ls.forEach(l=>{ const rec=l.ult*.10; aplicarDeuda(l,rec); });   // la deuda que queda se cobra aquí con recargo
+    e.lineas=e.lineas.filter(l=>l.plaza!==pl);
+    const p=P(pl); p.nivel=0; p.desde=null; p.socio=null; p.veto=A()+5;
+    moverPrestigio(-6,'incumplió con los acreedores de '+pl); S.p.reputacion=clamp(S.p.reputacion-5,0,100);
+    hist('Incumplimiento en '+pl); hito('Incumplió con sus acreedores de '+pl);
+    return {embargado:pagado,resto:resto,bienes:bs.length}; }
+
+  /* ---- eventos ---- */
+  function evGarantias(){
+    return {p:9,c:()=>E().lineas.length>0,t:()=>'<b>Tus acreedores del exterior piden garantías.</b> Debes '+fm(totalExt())+' en moneda extranjera y tu patrimonio ya no lo respalda como antes. Si no respondes, declaran el incumplimiento y cobran donde puedan.',
+      o:[{t:'Abonar una cuarta parte ('+fm(totalExt()*.25)+')',f:()=>{ const x=pagar(totalExt()*.25); const r=amortizar(x); return 'Abonaste '+fm(r)+' de la deuda del exterior.'; }},
+         {t:'Pagar con tus divisas',f:()=>{ const D=divisas(), t=tasas(); let falta=totalExt()*.3; ['usd','eur','cny'].forEach(k=>{ const v=(D[k]||0)*t[k], u=Math.min(v,falta); if(u>0){ D[k]=Math.max(0,D[k]-u/t[k]); falta-=u; } }); const x=totalExt()*.3-falta; if(x<=0) return 'No tenías divisas para responder.'; const r=amortizar(x); return 'Pagaste '+fm(r)+' con tus divisas.'; }},
+         {t:'Renegociar a una tasa más alta',f:()=>{ E().lineas.forEach(l=>{ l.tasa+=.015; }); E().alerta=A()+1; return 'Los bancos aceptaron esperar a cambio de subir la tasa 1,5 puntos.'; }},
+         {t:'No responder',f:()=>{ const pl=Object.keys(E().plazas).sort((a,b)=>deudaPlaza(b)-deudaPlaza(a))[0]; const g=pl&&gl(pl); if(!g||!deudaPlaza(pl)) return 'Nadie se movió.'; const r=incumplir(pl); return 'Declararon el incumplimiento en '+PL[pl].conc+'. Embargaron '+(r.bienes?r.bienes+' bien(es) tuyo(s) en '+esc(pl)+' ('+fm(r.embargado)+')':'lo que tenías allá')+', quedaron debiendo '+fm(r.resto)+' (con recargo, aquí) y te cerraron la puerta cinco años.'; }}]}; }
+  function evBanco(pl){ const g=gl(pl), D=divisas(), k=({USD:'usd',EUR:'eur',CNY:'cny'})[g.moneda];
+    return {p:8,c:()=>!!k&&(divisas()[k]||0)>0,t:()=>'<b>Cae el banco corresponsal de '+esc(pl)+'.</b> Tienes '+fm((divisas()[k]||0)*tasaMoneda(g.moneda))+' en '+g.moneda+' repartidos en cuentas de allá y los depositantes hacen fila.',
+      o:[{t:'Sacar la plata ya, aunque cueste ('+fm((divisas()[k]||0)*tasaMoneda(g.moneda)*.05)+')',f:()=>{ const c=(divisas()[k]||0)*tasaMoneda(g.moneda)*.05; pagar(c); return 'Sacaste lo que pudiste a tiempo y lo perdiste en comisiones: '+fm(c)+'.'; }},
+         {t:'Esperar a que el gobierno lo rescate',f:()=>{ const perd=(P(pl).nivel>=2?.15:.3)*(divisas()[k]||0); divisas()[k]-=perd; return chance(.35)?'El rescate llegó a tiempo y no perdiste nada.':'El banco quebró: perdiste '+fm(perd*tasaMoneda(g.moneda))+' de tus divisas.'; }}]}; }
+  function evSocio(pl){ const p=P(pl);
+    return {p:8,c:()=>!!P(pl).socio,t:()=>'<b>Tu socio de '+esc(pl)+', '+esc(p.socio.nombre)+', está en problemas.</b> Sus acreedores te buscan a ti: firmaste con él ante los bancos de allá.',
+      o:[{t:'Pagar su parte ('+fm(gl(pl).traslado*1.2)+')',f:()=>{ const x=pagar(gl(pl).traslado*1.2); p.socio.lealtad=Math.min(100,p.socio.lealtad+20); return 'Pagaste '+fm(x)+' y tu socio te quedó debiendo el favor.'; }},
+         {t:'Dejarlo caer',f:()=>{ p.socio=null; moverPrestigio(-2,'dejó caer a su socio de '+pl); return 'Tu socio quebró y tu nombre salió regado por los bancos de allá.'; }}]}; }
+  function evFilial(c,pl){ const g=gl(pl), x=Math.max(40,(c.deuda||0)*.1), n=(c.hotel175.hoteles||[]).filter(h=>h.ciudad===pl).length;
+    return {p:9,c:()=>companias().includes(c)&&Array.isArray(c.hotel175&&c.hotel175.hoteles),t:()=>'<b>La filial de '+esc(c.nombre)+' en '+esc(pl)+' entra en concurso.</b> Los acreedores de allá piden '+PL[pl].conc+' para sus '+n+' hotel'+(n===1?'':'es')+'. Aplican '+PL[pl].ley+', no las reglas de aquí.',
+      o:[{t:'Capitalizar la filial ('+fm(x)+')',f:()=>{ const u=pagar(x); if(u<x) return 'No alcanzó para capitalizarla: el concurso sigue.'; c.marca=clamp((c.marca||50)+2,0,100); return 'Pusiste '+fm(u)+' y la filial salió del concurso.'; }},
+         {t:'Dejar que se liquide',f:()=>{ const hs=c.hotel175.hoteles; const antes=hs.length; c.hotel175.hoteles=hs.filter(h=>h.ciudad!==pl||h.enObra); const perd=antes-c.hotel175.hoteles.length; c.marca=clamp((c.marca||50)-6,0,100); c.caja=Math.max(0,(c.caja||0)-x*.5); return 'Un administrador de '+esc(pl)+' vendió '+perd+' hotel(es) en subasta. La compañía quedó más chica y con peor nombre.'; }}]}; }
+  function evOferta(pl){ const p=P(pl);
+    return {p:6,c:()=>P(pl).nivel>=1&&P(pl).nivel<3,t:()=>'<b>Tu banquero de '+esc(pl)+' te ofrece subir tu relación.</b> Habla bien de ti en su junta: puede ascenderte de '+NIV[p.nivel]+' a '+NIV[p.nivel+1]+' sin cobrarte la comisión.',
+      o:[{t:'Aceptar',f:()=>{ if(p.nivel<3) p.nivel++; if(p.desde==null) p.desde=A(); return 'Quedaste como '+NIV[p.nivel]+' en '+esc(pl)+'.'; }},{t:'Dejarlo para después',f:()=>''}]}; }
+
+  /* ---- pantallas ---- */
+  function escenaExterior(){
+    const L=plazas(), ext=totalExt();
+    escena({rubro:'Año '+A(),titulo:'Tus plazas en el exterior',ancho:true,cerrable:true,
+      cuerpo:'Cada ciudad del exterior es una plaza: abres una cuenta, ganas la confianza de un banquero y después puedes pedir crédito en su moneda. Es más barato que el de aquí, hasta que el peso se cae.'
+        +(ctrl()<1?' <b>Hasta 1990 el control de cambios recorta el cupo y encarece cada trámite.</b>':'')
+        +(ext>0?' Hoy debes '+fm(ext)+' en moneda extranjera.':''),
+      opciones:L.map(g=>{ const p=P(g.n), veto=p.veto>A(); return {t:g.n+' · '+g.pais,cat:'mercado',cerrar:false,
+        d:NIV[p.nivel]+(deudaPlaza(g.n)?' · debes '+fm(deudaPlaza(g.n)):'')+' · '+g.moneda+' a $'+Math.round(tasaMoneda(g.moneda)).toLocaleString('es-CO')+(veto?' · cerrada hasta '+p.veto:''),run:()=>escenaPlaza(g.n)}; })});
+  }
+  function escenaPlaza(pl){
+    const g=gl(pl), p=P(pl), veto=p.veto>A(), lim=limite(pl), dp=deudaPlaza(pl), ops=[];
+    const back=()=>escenaExterior();
+    if(veto) ops.push({t:'Plaza cerrada',cat:'riesgo',dis:'Los bancos de allá no te atienden hasta '+p.veto,cerrar:false,run:()=>{}});
+    else if(p.nivel<3){ const n=p.nivel+1, c=costoNivel(pl,n), rq=requisitos(pl,n);
+      ops.push({t:[,'Abrir cuenta con un banquero corresponsal','Pedir una línea de crédito','Pasar a la banca de inversión'][n]+' ('+fm(c)+')',cat:'mercado',cerrar:false,dis:rq||(S.efectivo<c?'No te alcanza':null),
+        d:n===1?'Una cuenta y un nombre en la plaza. Es el primer paso.':n===2?'Te permite tomar crédito en '+g.moneda+'.':'Cupos grandes y tasas más bajas.',
+        run:()=>{ pagar(c); p.nivel=n; if(p.desde==null) p.desde=A(); log('Ahora eres '+NIV[n]+' en <b>'+esc(pl)+'</b>.','bien'); hist(NIV[n]+' en '+pl); escenaPlaza(pl); }}); }
+    if(p.nivel>=2&&!veto){ [.25,.5,1].forEach(f=>{ const m=Math.round(lim*f); if(m<30) return;
+      ops.push({t:'Tomar '+fm(m)+' en '+g.moneda,cat:'capital',cerrar:false,d:'Tasa '+(tasaCredito(pl,p.nivel)*100).toFixed(1).replace('.',',')+'% en '+g.moneda+', contra '+(((S.macro.tasa||.08)+.06)*100).toFixed(1).replace('.',',')+'% de la deuda personal aquí. La deuda se revalúa con el cambio.',run:()=>escenaDestino(pl,m)}); }); }
+    if(dp>0){ [.25,.5,1].forEach(f=>{ const m=Math.round(dp*f); ops.push({t:(f===1?'Pagar toda la deuda de '+pl:'Abonar '+Math.round(f*100)+'%')+' ('+fm(m)+')',cat:'capital',cerrar:false,dis:S.efectivo<1?'No tienes caja':null,run:()=>{ const x=pagar(m); const r=amortizar(x,l=>l.plaza===pl); log('Pagaste '+fm(r)+' de tu deuda en '+esc(pl)+'.'); escenaPlaza(pl); }}); }); }
+    if(p.nivel>=1&&!p.socio&&!veto){ const c=Math.round(g.traslado*.5); ops.push({t:'Buscar un socio local ('+fm(c)+')',cat:'familia',cerrar:false,dis:S.efectivo<c?'No te alcanza':null,d:'Conoce los jueces, los bancos y las reglas. Baja el riesgo de la plaza y deja una renta, pero también puede fallarte.',
+      run:()=>{ pagar(c); const ap=(CULTURAS_CIUDAD[pl]&&CULTURAS_CIUDAD[pl].a&&pick(CULTURAS_CIUDAD[pl].a))||'Smith'; const nm=(CULTURAS_CIUDAD[pl]&&CULTURAS_CIUDAD[pl].h&&pick(CULTURAS_CIUDAD[pl].h)||'John')+' '+ap; p.socio={nombre:nm,desde:A(),lealtad:60}; log('Te asociaste en '+esc(pl)+' con <b>'+esc(nm)+'</b>.','bien'); escenaPlaza(pl); }}); }
+    ops.push({t:'Volver a las plazas',cat:'casa',cerrar:false,run:back});
+    escena({rubro:esc(g.pais),titulo:esc(pl),ancho:true,cerrable:true,
+      cuerpo:esc(g.d)+'<br>Relación: <b>'+NIV[p.nivel]+'</b>'+(p.socio?' · socio local: <b>'+esc(p.socio.nombre)+'</b>':'')+'. Riesgo de la plaza '+Math.round(g.risk*100)+'%. '+g.moneda+' a $'+Math.round(tasaMoneda(g.moneda)).toLocaleString('es-CO')
+        +(dp>0?'<br>Debes aquí '+fm(dp)+'.':'')+(p.nivel>=2?'<br>Cupo disponible: '+fm(lim)+'.':'')+'<br>Si no pagas, el cobro sería por '+PL[pl].conc+', con '+PL[pl].ley+'.',
+      opciones:ops});
+  }
+  function escenaDestino(pl,m){
+    const cs=companias().slice(0,4), ops=[{t:'Para ti (entra a tu caja)',cat:'capital',cerrar:false,run:()=>{ tomar(pl,m,'personal'); log('Tomaste '+fm(m)+' en '+esc(pl)+' ('+gl(pl).moneda+') para ti.'); escenaPlaza(pl); }}];
+    cs.forEach(c=>ops.push({t:'Para '+c.nombre+' (la deuda queda en la compañía)',cat:'compania',cerrar:false,run:()=>{ tomar(pl,m,c.nombre); log('Tomaste '+fm(m)+' en '+esc(pl)+' ('+gl(pl).moneda+') para <b>'+esc(c.nombre)+'</b>.'); escenaPlaza(pl); }}));
+    ops.push({t:'Volver',cat:'casa',cerrar:false,run:()=>escenaPlaza(pl)});
+    escena({rubro:esc(pl),titulo:'¿Para qué es el crédito?',cerrable:true,cuerpo:'Son '+fm(m)+' en '+gl(pl).moneda+'. Si es para una compañía, la plata entra a su caja y la deuda queda a su nombre.',opciones:ops});
+  }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA196_PASO) return; window.__SA196_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tus plazas en el exterior')) g.miembros.push(['Capital','Tus plazas en el exterior']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA196_ACC) return; window.__SA196_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p&&S.p.edad>=20&&A()>=1850&&!L.some(x=>x.t==='Tus plazas en el exterior')&&plazas().length) L.push({t:'Tus plazas en el exterior',cat:'mercado',d:'Cuentas, crédito en moneda extranjera, socios locales y lo que pasa si algo se rompe afuera.',mov:0,modal:false,run:()=>escenaExterior()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v196=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA196_CAT) return; window.__SA196_CAT=true; window.catDe=function(t){ if(t==='Tus plazas en el exterior') return 'mercado'; return old.apply(this,arguments); }; }
+  function init196(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{extPlazas196:plazas,extEstado196:E,extPlaza196:P,tasaMoneda196:tasaMoneda,tasaCredito196:tasaCredito,limiteCredito196:limite,tomarCredito196:tomar,amortizarCredito196:amortizar,incumplir196:incumplir,anualExterior196:anual,evGarantias196:evGarantias,evBanco196:evBanco,evSocio196:evSocio,evFilial196:evFilial,evOferta196:evOferta,escenaExterior196:escenaExterior,escenaPlaza196:escenaPlaza,deudaExterior196:totalExt,PLAZAS_196:PL}); }
+  init196(); setTimeout(init196,40); setTimeout(init196,220); setTimeout(init196,650); setTimeout(init196,950); setTimeout(init196,1500);
+  window.__SA196={version:V196};
 })();
 </script>
 
