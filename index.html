@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v198</div>
+<div class="version-badge" id="versionBadge">v199</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -35881,7 +35881,7 @@ install();setTimeout(install,1200);
     'San Andrés':{cap:['San Andrés y Providencia',1991],ar:[['Base Naval de San Andrés',1960]],cur:['vic',1912],br:1960,cc:1963,ae:[['Gustavo Rojas Pinilla',1950]],ex:[['economia','Puerto libre',1953,0,'Comercio sin aranceles: electrodomésticos, licores y turismo.']]},
     'Florencia':{cap:['Caquetá',1981],trib:1981,ej:[['Brigada del Ejército en Florencia',1980]],cur:['dioc',1985],cc:1965}
   };
-  const UNI_DESDE={'Universidad Nacional':1867,'Universidad de Antioquia':1803,'Universidad del Cauca':1827,'Universidad de Cartagena':1827,'Universidad de Nariño':1904,'Pontificia Universidad Javeriana':1623,'Universidad del Valle':1945,'Universidad del Atlántico':1941,'Universidad de Caldas':1943,'Universidad Industrial de Santander':1948,'Universidad de Córdoba':1964,'Universidad del Tolima':1945};
+  const UNI_DESDE={'Universidad Nacional':1867,'Universidad de Antioquia':1803,'Universidad del Cauca':1827,'Universidad de Cartagena':1827,'Universidad de Nariño':1904,'Pontificia Universidad Javeriana':1930,'Universidad del Valle':1945,'Universidad del Atlántico':1941,'Universidad de Caldas':1943,'Universidad Industrial de Santander':1948,'Universidad de Córdoba':1964,'Universidad del Tolima':1945};
   const CURIA={arq:'Arquidiócesis',dioc:'Diócesis',vic:'Vicariato apostólico'};
 
   const nombreCap=(c,a)=>{ const s=SPEC[c]; return s&&s.cap?s.cap[0]:null; };
@@ -36615,6 +36615,133 @@ install();setTimeout(install,1200);
     Object.assign(window,{acad198:G,syncAcad198:sync,anualAcad198:anual,escenaAcad198:escenaPanel,hacerAcad198:hacer,DEC_ACAD_198:DEC,NIV_DOCENTE_198:NIV_DOC,evParo198:evParo,evAmenaza198:evAmenaza,evEvaluacion198:evEvaluacion,evParoU198:evParoU,evPlagio198:evPlagio,evPremio198:evPremio,pistaAcad198:pistaDe,cerrarAcad198:cerrar}); }
   init198(); setTimeout(init198,40); setTimeout(init198,220); setTimeout(init198,650); setTimeout(init198,950); setTimeout(init198,1500);
   window.__SA198={version:V198};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v199 · LA RECTORÍA
+   Si te vuelves un académico muy bueno o muy famoso, te ofrecen o puedes
+   postularte a la rectoría de una universidad, y cuanto más prestigiosa,
+   más fama pide. También te pueden sacar.
+   - Públicas: el rector lo elige un consejo superior donde pesan el
+     gobierno, el gobernador, los profesores y los estudiantes; la política
+     manda y el período es de cuatro años, con reelección.
+   - Privadas: lo escoge la junta o el patronato y puede durar mucho; las
+     confesionales (jesuitas, bolivarianas, tomistas...) piden que seas
+     sacerdote.
+   Panel del rector: calidad, finanzas, investigación y bienestar, y los
+   apoyos del consejo, el gobierno, los profesores y los estudiantes. Decides
+   reformas, presupuesto, contrataciones, campus, becas, protestas y a quién
+   admitir. El paro estudiantil, el déficit y una moción del consejo pueden
+   costarte el cargo; una buena gestión deja una universidad mejor y un
+   nombre más grande.
+   ========================================================================== */
+(function(){
+  const V199='v199';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const CONFESIONAL=/Javeriana|Pontificia|Católica|Santo Tomás|Mariana|Bolivariana|Salle/;
+  const clero=()=>{ try{ return typeof window.esClero202==='function'&&window.esClero202(); }catch(e){ return false; } };
+
+  /* ---- las universidades del juego, por ciudad y época ---- */
+  function universidades(anio){ const a=isFinite(anio)?anio:A(), vistos={}, out=[];
+    try{ CIUDADES.forEach(c=>{ const us=(window.__SA63&&window.__SA63.universidadesDisponibles(c.n))||[]; const ins=(typeof window.institucionesCiudad195==='function'?window.institucionesCiudad195(c.n,a):[]).filter(x=>x.id==='universidad').map(x=>x.n);
+      us.forEach(u=>{ if(!u||!u.n||/gen[eé]ric/i.test(String(u.id))||vistos[u.n]) return; if(typeof window.institucionesCiudad195==='function'&&!ins.includes(u.n)) return; vistos[u.n]=1; out.push({n:u.n,ciudad:c.n,tier:u.tier,prest:u.prest||1,calidad:u.calidad||5,conf:CONFESIONAL.test(u.n)}); }); }); }catch(e){}
+    return out; }
+  const famaPide=u=>Math.round(22+u.prest*6.5);
+  const G=()=>S.rector199||null;
+  const pub=u=>u.tier==='publica';
+  function elegibles(){ const g=S.acad198; if(!g||g.pista!=='universidad'||G()) return []; const fama=g.fama, edu=S.p.educacion||0, edad=S.p.edad||0; if(edad<38||edu<4) return [];
+    return universidades().filter(u=>fama>=famaPide(u)-6&&(!u.conf||clero())).sort((a,b)=>b.prest-a.prest); }
+  const probabilidad=u=>{ const g=S.acad198, fama=g?g.fama:0; const base=.35+(fama-famaPide(u))/90; const pol=pub(u)?((S.gobierno&&S.gobierno.apoyado)?.12:-.05)+((S.p.redes||0)-50)/400:((S.p.redes||0)-40)/450+prestigio()/500; return clamp(base+pol,.04,.85); };
+
+  /* ---- posesión y salida ---- */
+  function posesionar(u){ if(G()) return 'Ya diriges una universidad.'; const r={uni:u.n,ciudad:u.ciudad,tier:u.tier,prest:u.prest,conf:u.conf,desde:A(),anios:0,periodo:pub(u)?4:0,ind:{calidad:clamp(30+u.calidad*5+ri(-4,4),20,90),finanzas:ri(45,60),invest:clamp(25+u.prest*5+ri(-5,5),15,85),bienestar:ri(45,60)},
+      apoyo:{consejo:ri(58,72),gobierno:pub(u)?ri(50,66):55,profesores:ri(50,62),estudiantes:ri(50,62)},tension:ri(5,18),riesgo:0,dec:0,hist:[],ultimoDes:null,buenos:0,malos:0,antes:{nivel:S.carrera.nivel,ruta:S.carrera.ruta}};
+    S.rector199=r; try{ const n=RUTAS.academico.niveles.length-1; S.carrera.ruta='academico'; S.carrera.nivel=n; S.carrera.anios=0; S.carrera.empleador=u.n; if(S.acad198) S.acad198.ent=u.n; }catch(e){}
+    moverPrestigio(4+Math.round(u.prest/2),'fue elegido rector'); S.p.reputacion=clamp(S.p.reputacion+5,0,100); hito('Fue elegido rector de '+u.n); log('Te posesionaste como <b>rector de '+esc(u.n)+'</b> ('+esc(u.ciudad)+'). Se activó el panel de la rectoría.','hito'); return 'Aceptaste la rectoría de '+u.n+'.'; }
+  function salir(motivo,bien){ const r=G(); if(!r) return; if(!Array.isArray(S.rectoriasHist199)) S.rectoriasHist199=[]; S.rectoriasHist199.push({uni:r.uni,desde:r.desde,hasta:A(),motivo,desemp:r.ultimoDes,calidad:Math.round(r.ind.calidad)}); if(S.rectoriasHist199.length>8) S.rectoriasHist199.shift(); S.rector199=null;
+    try{ const n=RUTAS.academico.niveles.length; S.carrera.nivel=Math.max(0,Math.min(n-2,r.antes&&r.antes.nivel!=null&&r.antes.nivel<n-1?r.antes.nivel:n-3)); if(S.acad198){ S.acad198.ent=r.uni; S.acad198.fama=clamp(S.acad198.fama+(bien?8:-10),0,100); } }catch(e){} }
+
+  /* ---- decisiones del rector: [id, texto, descripción, costo(M), efecto(r)=>mensaje, disponible] ---- */
+  const DEC=[
+    ['reforma','Reforma académica y acreditación','Planes de estudio, evaluación y la acreditación de alta calidad. Cuesta y tarda, pero se nota.',20,r=>{ r.ind.calidad+=8; r.apoyo.profesores-=3; r.ind.finanzas-=3; return 'Aprobaron la reforma académica.'; }],
+    ['presupuesto','Negociar el presupuesto','La plata del gobierno para las públicas; donaciones y alianzas con empresas para las privadas.',0,r=>{ if(pub({tier:r.tier})){ const ok=chance(clamp(.35+r.apoyo.gobierno/180,.2,.8)); if(ok){ r.ind.finanzas+=10; r.apoyo.gobierno+=3; return 'Conseguiste más plata del gobierno.'; } r.apoyo.gobierno-=4; return 'El gobierno no cedió: este año, a apretarse el cinturón.'; } r.ind.finanzas+=8; r.apoyo.consejo+=2; return 'Cerraste donaciones y alianzas con empresas.'; }],
+    ['profesores','Contratar profesores de primer nivel','Un concurso internacional: caro y de largo plazo.',30,r=>{ r.ind.invest+=9; r.apoyo.profesores+=3; r.ind.finanzas-=5; return 'Llegaron profesores de primera línea.'; }],
+    ['campus','Ampliar el campus','Aulas, laboratorios y una biblioteca nueva.',40,r=>{ r.ind.calidad+=4; r.ind.bienestar+=4; r.ind.finanzas-=8; return 'Inauguraste nuevas instalaciones.'; }],
+    ['becas','Becas y bienestar estudiantil','Comedores, alojamiento y becas de excelencia.',15,r=>{ r.ind.bienestar+=9; r.apoyo.estudiantes+=6; r.ind.finanzas-=4; r.tension-=4; return 'Ampliaste las becas y el bienestar.'; }],
+    ['empresas','Alianza con una empresa tuya o de tu grupo','Prácticas, laboratorios y plata a cambio de un puesto en el consejo. Hay conflicto de intereses.',0,r=>{ const c=companias()[0]; if(!c) return 'No tienes una compañía con la que aliarte.'; r.ind.finanzas+=7; r.ind.invest+=3; r.riesgo+=14; return 'Firmaste una alianza con '+c.nombre+': plata fresca, y quien mire de cerca verá el conflicto de intereses.'; },()=>companias().length>0],
+    ['protesta','Mano dura con la protesta','Cierres, vigilancia y sanciones. Calma el campus y rompe con los estudiantes.',0,r=>{ r.tension-=10; r.apoyo.estudiantes-=10; r.apoyo.gobierno+=6; return 'Frenaste la protesta a la fuerza.'; }],
+    ['recomendados','Admitir a los recomendados del consejo','Cupos para los apoyos del consejo y el gobierno.',0,r=>{ r.apoyo.consejo+=9; r.apoyo.gobierno+=4; r.ind.calidad-=4; r.riesgo+=10; return 'Admitiste a los recomendados: el consejo te lo agradece.'; }]];
+  const pago=d=>Math.round(d[3]*(1+(A()-1900)*.004));
+  function hacer(i){ const r=G(); if(!r) return; const d=DEC[i], p=pago(d); if(S.mov<1||S.efectivo<p) return; S.mov=Math.max(0,S.mov-1); if(p) tomar(p); const m=d[4](r); r.dec++; Object.keys(r.ind).forEach(k=>{ r.ind[k]=clamp(r.ind[k],0,100); }); Object.keys(r.apoyo).forEach(k=>{ r.apoyo[k]=clamp(r.apoyo[k],0,100); }); r.tension=clamp(r.tension,0,100); r.riesgo=clamp(r.riesgo,0,100); log(m+(p?' Costó '+fm(p)+'.':'')); escenaRector(); }
+
+  /* ---- el año ---- */
+  function vigilar(){ if(G()&&S.carrera&&S.carrera.ruta!=='academico'){ const n=G().uni; salir('dejó la carrera',false); try{ log('Dejaste la rectoría de <b>'+esc(n)+'</b> al cambiar de carrera.'); }catch(e){} } }
+  function anual(){ if(!S||!S.p||S.muerto) return; vigilar(); const r=G();
+    if(!r){ const g=S.acad198; if(g&&g.pista==='universidad'&&g.fama>=40&&g.anios>=2&&chance(clamp((g.fama-38)/160,.02,.35))){ const L=elegibles().filter(u=>famaPide(u)<=g.fama+10); if(L.length){ const ev=evOferta(L.slice(0,3)); if(ev) cola.push(ev); } } return; }
+    r.anios++; Object.keys(r.ind).forEach(k=>{ r.ind[k]=clamp(r.ind[k]-2+ri(-2,2),0,100); });
+    if(r.ind.finanzas<35){ r.tension=clamp(r.tension+8,0,100); r.apoyo.profesores=clamp(r.apoyo.profesores-4,0,100); } else r.tension=clamp(r.tension-2,0,100);
+    if(r.ind.bienestar<40) r.apoyo.estudiantes=clamp(r.apoyo.estudiantes-4,0,100);
+    if(r.ind.calidad<40) r.apoyo.consejo=clamp(r.apoyo.consejo-4,0,100);
+    const prom=Object.keys(r.ind).reduce((s,k)=>s+r.ind[k],0)/4, ap=Object.keys(r.apoyo).reduce((s,k)=>s+r.apoyo[k],0)/4, des=clamp(Math.round(prom*.55+ap*.45-r.tension*.1-r.riesgo*.1+6),0,100); r.ultimoDes=des; r.hist.push({a:A(),des});
+    if(des>=62){ r.buenos++; r.malos=0; r.apoyo.consejo=clamp(r.apoyo.consejo+3,0,100); } else if(des<45){ r.malos++; r.buenos=0; r.apoyo.consejo=clamp(r.apoyo.consejo-6,0,100); } else { r.buenos=0; r.malos=0; }
+    if(S.acad198) S.acad198.fama=clamp(S.acad198.fama+(des-55)/40,0,100);
+    log('Balance de la rectoría de <b>'+esc(r.uni)+'</b>: desempeño '+des+'/100 (calidad '+Math.round(r.ind.calidad)+', finanzas '+Math.round(r.ind.finanzas)+').',des>=62?'bien':des<45?'mal':'');
+    r.riesgo=clamp(r.riesgo-3,0,100);
+    if(r.tension>=55&&chance(clamp(r.tension/160,.1,.6))) cola.push(evParo(r));
+    if(r.riesgo>=40&&chance(clamp(r.riesgo/130,.1,.6))) cola.push(evEscandalo(r));
+    if(r.apoyo.consejo<30||r.malos>=2) cola.push(evMocion(r));
+    else if(r.periodo&&r.anios>=r.periodo) cola.push(evReeleccion(r));
+  }
+  function evOferta(L){ const ciu=u=>u.ciudad; return {p:8,c:()=>!G()&&!!S.acad198&&S.acad198.pista==='universidad',t:()=>'<b>Te ofrecen una rectoría.</b> Tu nombre en la academia ya pesa: '+L.map(u=>'<b>'+esc(u.n)+'</b> ('+esc(u.ciudad)+(pub(u)?', pública':', privada')+')').join(', ')+' buscan rector y piensan en ti.',
+    o:L.map(u=>({t:'Aceptar la rectoría de '+u.n,f:()=>{ if(!chance(clamp(probabilidad(u)+.25,.2,.95))) return 'Se la dieron a otra persona: el consejo prefirió a alguien de su círculo.'; return posesionar(u); }})).concat([{t:'Declinar',f:()=>'Preferiste seguir en tu cátedra.'}])}; }
+  function evParo(r){ return {p:9,c:()=>G()===r,t:()=>'<b>Paro estudiantil en '+esc(r.uni)+'.</b> Toman el campus: piden presupuesto, bienestar y que no se toquen los recomendados. La prensa está en la puerta.',
+    o:[{t:'Abrir el diálogo y ceder en algo',f:()=>{ r.tension=clamp(r.tension-14,0,100); r.apoyo.estudiantes=clamp(r.apoyo.estudiantes+6,0,100); r.ind.finanzas=clamp(r.ind.finanzas-5,0,100); return 'Negociaste con los estudiantes y volvieron a clases.'; }},
+       {t:'Llamar a la fuerza pública',f:()=>{ r.tension=clamp(r.tension-8,0,100); r.apoyo.estudiantes=clamp(r.apoyo.estudiantes-14,0,100); r.apoyo.gobierno=clamp(r.apoyo.gobierno+5,0,100); S.p.reputacion=clamp(S.p.reputacion-3,0,100); if(chance(.25)){ moverPrestigio(-3,'la violencia en el campus'); return 'Hubo heridos y la prensa lo contó. El campus se despejó, pero a un costo enorme.'; } return 'Despejaron el campus a la fuerza.'; }},
+       {t:'Cerrar el semestre',f:()=>{ r.tension=clamp(r.tension-12,0,100); r.ind.calidad=clamp(r.ind.calidad-8,0,100); r.apoyo.profesores=clamp(r.apoyo.profesores-6,0,100); return 'Cerraste el semestre: la calidad y los profesores lo pagaron.'; }}]}; }
+  function evEscandalo(r){ return {p:9,c:()=>G()===r,t:()=>'<b>Un escándalo sacude a '+esc(r.uni)+'.</b> La prensa publica que hubo cupos para recomendados y contratos con amigos del consejo. Piden explicaciones.',
+    o:[{t:'Dar la cara y abrir una auditoría',f:()=>{ r.riesgo=Math.max(0,r.riesgo-25); r.apoyo.consejo=clamp(r.apoyo.consejo-6,0,100); r.apoyo.profesores=clamp(r.apoyo.profesores+5,0,100); return 'Abriste la auditoría: duele, pero limpia.'; }},
+       {t:'Negar todo y defender al consejo',f:()=>{ if(chance(.5)){ r.apoyo.consejo=clamp(r.apoyo.consejo+4,0,100); return 'La tormenta pasó.'; } r.apoyo.profesores=clamp(r.apoyo.profesores-10,0,100); moverPrestigio(-4,'el escándalo de '+r.uni); try{ abrirEscandalo129('politica','El escándalo de '+r.uni,2); }catch(e){} return 'Se supo todo: perdiste a los profesores y tu nombre quedó manchado.'; }}]}; }
+  function evMocion(r){ return {p:10,c:()=>G()===r,t:()=>'<b>El consejo superior de '+esc(r.uni)+' pide tu renuncia.</b> '+(r.malos>=2?'Dos años de malos resultados.':'Te quedaste sin apoyos.')+' Hay votos para sacarte.',
+    o:[{t:'Renunciar con dignidad',f:()=>{ const n=r.uni; salir('renuncia',false); return 'Renunciaste a la rectoría de '+n+'.'; }},
+       {t:'Mover tus apoyos para aguantar',f:()=>{ if(chance(clamp(.25+(S.p.redes||0)/220+r.apoyo.gobierno/400,.1,.7))){ r.apoyo.consejo=clamp(r.apoyo.consejo+20,0,100); r.malos=0; return 'Contaste los votos y te quedaste en la rectoría.'; } const n=r.uni; S.p.redes=clamp((S.p.redes||0)-6,0,100); moverPrestigio(-3,'lo sacaron de la rectoría'); salir('destituido por el consejo',false); return 'El consejo te destituyó de '+n+'.'; }}]}; }
+  function evReeleccion(r){ return {p:8,c:()=>G()===r,t:()=>'<b>Se vence tu período en '+esc(r.uni)+'.</b> El consejo superior vota si te reelige para otros cuatro años.',
+    o:[{t:'Buscar la reelección',f:()=>{ const p=clamp(.2+r.apoyo.consejo/130+(r.ultimoDes||50)/400+(r.apoyo.gobierno-50)/500,.1,.9); if(chance(p)){ r.anios=0; r.apoyo.consejo=clamp(r.apoyo.consejo+4,0,100); return 'Te reeligieron por cuatro años más.'; } const n=r.uni; salir('no reelegido',false); return 'El consejo escogió a otra persona: terminó tu rectoría de '+n+'.'; }},
+       {t:'Dejar la rectoría',f:()=>{ const n=r.uni, bien=(r.ultimoDes||50)>=60; salir('terminó el período',bien); return 'Entregaste '+n+(bien?' en mejores condiciones de las que la recibiste.':'.'); }}]}; }
+
+  /* ---- pantallas ---- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaRector(){ const r=G(); if(!r){ escenaRectoria(); return; }
+    const t='<table class="libro">'+[['Calidad académica',r.ind.calidad],['Finanzas',r.ind.finanzas],['Investigación',r.ind.invest],['Bienestar estudiantil',r.ind.bienestar]].map(x=>'<tr><td>'+x[0]+'</td><td>'+barra(x[1])+'</td></tr>').join('')
+      +[['Apoyo del consejo superior',r.apoyo.consejo],['Apoyo del gobierno',r.apoyo.gobierno],['Apoyo de los profesores',r.apoyo.profesores],['Apoyo de los estudiantes',r.apoyo.estudiantes]].map(x=>'<tr><td>'+x[0]+'</td><td>'+barra(x[1])+'</td></tr>').join('')
+      +'<tr><td>Tensión en el campus</td><td>'+barra(r.tension)+'</td></tr><tr><td>Riesgo de escándalo</td><td>'+barra(r.riesgo)+'</td></tr></table>';
+    const ops=DEC.map((d,i)=>{ if(d[5]&&!d[5]()) return null; const p=pago(d); return {t:d[1]+(p?' ('+fm(p)+')':''),cat:'legado',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<p?'No te alcanza':null),run:()=>hacer(i)}; }).filter(Boolean);
+    ops.push({t:'Renunciar a la rectoría',cat:'riesgo',cerrar:false,run:()=>{ const n=r.uni; salir('renuncia voluntaria',(r.ultimoDes||50)>=60); log('Renunciaste a la rectoría de '+esc(n)+'.'); cerrarModal(); render(); }});
+    escena({rubro:esc(r.ciudad)+' · '+(pub({tier:r.tier})?'universidad pública':r.conf?'universidad confesional':'universidad privada'),titulo:'Rector de '+esc(r.uni),ancho:true,cerrable:true,
+      cuerpo:'Año '+(r.anios+1)+' en la rectoría'+(r.periodo?' (período de '+r.periodo+' años)':' (sin período fijo)')+'. '+(pub({tier:r.tier})?'Te sostiene el consejo superior, y en él pesa el gobierno.':'Te sostiene la junta y su círculo.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(r.ultimoDes==null?'aún sin balance':r.ultimoDes+'/100')+'.</span>',html:t,opciones:ops}); }
+  function escenaRectoria(){ const g=S.acad198, L=elegibles(), ops=[];
+    if(G()){ escenaRector(); return; }
+    L.slice(0,6).forEach(u=>{ const p=probabilidad(u); ops.push({t:'Postularte a la rectoría de '+u.n+' ('+u.ciudad+')',cat:'legado',cerrar:false,d:(pub(u)?'Pública: decide el consejo superior y pesa la política. ':'Privada: decide la junta. ')+'Pide fama '+famaPide(u)+'; tú tienes '+Math.round(g?g.fama:0)+'. Probabilidad aproximada '+Math.round(p*100)+'%.',dis:S.mov<1?'Sin movidas':null,
+      run:()=>{ S.mov=Math.max(0,S.mov-1); if(chance(p)){ log(posesionar(u)); } else { S.p.redes=clamp((S.p.redes||0)-2,0,100); log('Te postulaste a la rectoría de '+esc(u.n)+' y el consejo escogió a otra persona.','mal'); } cerrarModal(); render(); }}); });
+    if(!ops.length) ops.push({t:'Todavía no hay rectorías a tu alcance',cat:'casa',cerrar:false,dis:!g||g.pista!=='universidad'?'Hace falta la carrera académica':((S.p.educacion||0)<4?'Pide estudios de maestría o más':(S.p.edad||0)<38?'Pide más trayectoria (38 años)':'Pide más fama académica: publica, forma gente y hazte un nombre'),run:()=>{}});
+    escena({rubro:'Vida académica',titulo:'La rectoría y las universidades',ancho:true,cerrable:true,cuerpo:'Las universidades de prestigio buscan rector entre los académicos más reconocidos. Tu fama académica: <b>'+Math.round(g?g.fama:0)+'/100</b>. Las confesionales piden ser sacerdote.',opciones:ops}); }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA199_PASO) return; window.__SA199_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu rectoría')) g.miembros.push(['Influencia','Tu rectoría']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA199_ACC) return; window.__SA199_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); vigilar(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ const r=G(); if(r&&!L.some(x=>x.t==='Tu rectoría')) L.push({t:'Tu rectoría',cat:'empleo',d:'Rector de '+r.uni+': calidad, finanzas, apoyos y protestas.',mov:0,modal:false,run:()=>escenaRector()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v199=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA199_CAT) return; window.__SA199_CAT=true; window.catDe=function(t){ if(t==='Tu rectoría') return 'empleo'; return old.apply(this,arguments); }; }
+  function init199(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{rector199:G,universidades199:universidades,rectoriasElegibles199:elegibles,famaPide199:famaPide,probRectoria199:probabilidad,posesionarRector199:posesionar,salirRectoria199:salir,anualRectoria199:anual,hacerRector199:hacer,escenaRector199:escenaRector,escenaRectoria199:escenaRectoria,evOfertaRectoria199:evOferta,evParoRector199:evParo,evEscandaloRector199:evEscandalo,evMocionRector199:evMocion,evReeleccionRector199:evReeleccion,DEC_RECTOR_199:DEC,vigilarRector199:vigilar}); }
+  init199(); setTimeout(init199,40); setTimeout(init199,220); setTimeout(init199,650); setTimeout(init199,950); setTimeout(init199,1500);
+  window.__SA199={version:V199};
 })();
 </script>
 
