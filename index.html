@@ -1407,7 +1407,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v208</div>
+<div class="version-badge" id="versionBadge">v209</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -3546,7 +3546,7 @@ function escenaSeguros(){
   escena({rubro:'Pólizas',titulo:'Qué seguros pagas',ancho:true,
     cuerpo:'Un seguro es plata que sale todos los años para algo que ojalá no pase. '
       +'Hoy pagas '+fmt(costoSeguros())+' al año en pólizas.',
-    opciones:SEGUROS.map(s=>({t:(seguros()[s.id]?'Cancelar: ':'Contratar: ')+s.n,
+    opciones:SEGUROS.filter(s=>!s.desde||S.anio>=s.desde).map(s=>({t:(seguros()[s.id]?'Cancelar: ':'Contratar: ')+s.n,
       cat:seguros()[s.id]?'riesgo':'salud',
       d:s.d+' '+fmt(base*s.base)+' al año.',
       run:()=>{ seguros()[s.id]=!seguros()[s.id];
@@ -21425,7 +21425,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(e.animo) pr*=(p.felicidad<30||(p.estres||0)>80)?3:1;
     if(!e.aguda&&!e.animo) pr*=1+Math.max(0,ed-50)/30;
     if(yo('enfermizo')) pr*=1.5; if(yo('robusto')) pr*=.6;
-    if(prepagada()) pr*=.85;
+    pr*=(window.probSalud209?window.probSalud209(.85):(prepagada()?.85:1));   /* v209: también cuenta la afiliación */
     return clamp(pr,0,.5);
   }
 
@@ -21444,13 +21444,13 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     }
     return null;
   }
-  function costoTrat97(e,mejor){ return Math.max(mejor?8:2,Math.round(pat()*e.costo*(mejor?2.5:1)*(prepagada()?.4:1))); }
+  function costoTrat97(e,mejor){ return Math.max(mejor?8:2,Math.round(pat()*e.costo*(mejor?2.5:1)*(window.factorSalud209?window.factorSalud209(.4):(prepagada()?.4:1)))); }
   function tratar97(d,mejor){
     const e=enf(d.id), c=costoTrat97(e,mejor); S.efectivo-=c; d.tratada=true;
     if(e.cronica){ d.controlada=true; S.p.salud=clamp(S.p.salud+(mejor?6:3),0,100);
       if(e.cura&&chance(e.cura*(mejor?1.2:.8))){ d.curada=true; return 'El tratamiento funcionó: superaste la '+e.n+'. Costó '+fmt(c)+'.'; }
       return 'Ahora tu '+e.n+' está bajo control. Cuesta '+fmt(c)+' y hay que seguir el tratamiento cada año.'; }
-    if(chance(clamp(e.cura+(mejor?.15:0)+(prepagada()?.08:0),0,.97))){ d.curada=true; S.p.salud=clamp(S.p.salud+(mejor?8:4),0,100); return 'Te recuperaste de '+e.n+'. Costó '+fmt(c)+'.'; }
+    if(chance(clamp(e.cura+(mejor?.15:0)+(window.curaSalud209?window.curaSalud209(.08):(prepagada()?.08:0)),0,.97))){ d.curada=true; S.p.salud=clamp(S.p.salud+(mejor?8:4),0,100); return 'Te recuperaste de '+e.n+'. Costó '+fmt(c)+'.'; }
     S.p.salud=clamp(S.p.salud-6,0,100); return 'El tratamiento no fue suficiente. Sigues luchando contra '+e.n+'. Costó '+fmt(c)+'.';
   }
   function eventoDiagnostico97(d){
@@ -21458,7 +21458,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const cb=costoTrat97(e,false), cm=costoTrat97(e,true);
     return {p:9,__salud97:true,c:()=>true,
       t:()=>'<b>'+(e.aguda?'Sufriste '+e.n:'Te diagnosticaron '+e.n)+'.</b> '+(e.grave?'Es grave. Los médicos hablan despacio y no te miran a los ojos.':e.cronica?'No se cura del todo, pero se puede controlar.':'Te tocó pasar unas semanas en la clínica.')
-        +(prepagada()?' Tu medicina prepagada cubre buena parte.':''),
+        +(window.textoSalud209?window.textoSalud209():(prepagada()?' Tu medicina prepagada cubre buena parte.':'')),
       o:[{t:'El mejor especialista ('+fmt(cm)+')',f:()=>tratar97(d,true)},
          {t:'El tratamiento básico ('+fmt(cb)+')',f:()=>tratar97(d,false)},
          {t:'No hacer nada',f:()=>{ if(e.grave) S.p.salud=clamp(S.p.salud-10,0,100); return e.grave?'Decidiste no tratarte. Tu cuerpo lo va a cobrar.':'Lo dejaste pasar.'; }}]};
@@ -21480,7 +21480,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     s.enfermedades.forEach(d=>{
       if(d.curada) return; const e=enf(d.id); if(!e) return;
       if(e.aguda){ if(S.anio>d.desde){ d.curada=true; } return; }
-      if(d.controlada){ const c=Math.max(1,Math.round(pat()*e.costo*(prepagada()?.4:1))); S.efectivo-=c; p.salud=clamp(p.salud-e.dano*.3,0,100); }
+      if(d.controlada){ const c=Math.max(1,Math.round(pat()*e.costo*(window.factorSalud209?window.factorSalud209(.4):(prepagada()?.4:1)))); S.efectivo-=c; p.salud=clamp(p.salud-e.dano*.3,0,100); }
       else { p.salud=clamp(p.salud-e.dano,0,100); if(e.felicidad) p.felicidad=clamp(p.felicidad-3,0,100); if(e.mente&&p.atr) p.atr.intelecto=clamp(p.atr.intelecto-(chance(.3)?1:0),1,10); }
     });
     const v=s.vicios;
@@ -21525,11 +21525,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   /* --- tu salud en el Perfil --- */
   function escenaSalud97(){
     const s=sal(), act=s.enfermedades.filter(d=>!d.curada), v=s.vicios;
-    const c=Math.max(3,Math.round(pat()*.004*(prepagada()?.4:1)));
+    const c=Math.max(3,Math.round(pat()*.004*(window.factorSalud209?window.factorSalud209(.4):(prepagada()?.4:1))));
     const filas=act.map(d=>{ const e=enf(d.id); return '<tr><td>'+esc(e.n.charAt(0).toUpperCase()+e.n.slice(1))+' <span style="color:var(--humo2)">desde '+d.desde+'</span></td><td class="'+(d.controlada?'':'mal')+'">'+(d.controlada?'controlada':'sin tratar')+'</td></tr>'; }).join('');
     const vic=Object.keys(v).filter(k=>v[k]>0).map(k=>medida(VICIOS_97[k],v[k],100,v[k]>=60?'r':'')).join('');
     escena({rubro:'Tu salud',titulo:'Tu cuerpo y tus vicios',ancho:true,cerrable:true,
-      cuerpo:'Salud <b>'+Math.round(S.p.salud)+'/100</b>. '+(prepagada()?'Tienes medicina prepagada: los tratamientos te salen mucho más baratos.':'No tienes medicina prepagada (se contrata en "Revisar los seguros").'),
+      cuerpo:'Salud <b>'+Math.round(S.p.salud)+'/100</b>. '+(window.textoPantallaSalud209?window.textoPantallaSalud209():(prepagada()?'Tienes medicina prepagada: los tratamientos te salen mucho más baratos.':'No tienes medicina prepagada (se contrata en "Revisar los seguros").')),
       html:'<table class="libro">'+(filas||'<tr><td>No tienes enfermedades activas</td><td class="bien">bien</td></tr>')+'</table>'+(vic?'<div style="margin-top:10px">'+vic+'</div>':''),
       opciones:[
         {t:'Hacerte un chequeo completo',cat:'salud',d:'Cuesta '+fmt(c)+' y una movida. Detecta a tiempo lo que venga y sube un poco tu salud.',dis:S.mov<1?'No te quedan movidas':null,run:()=>{
@@ -25719,7 +25719,7 @@ install();setTimeout(install,1200);
   const nino=()=>typeof window.esNino94==='function'&&window.esNino94();
   const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
   const prepagada=()=>{ try{ return !!(S.seguros&&S.seguros.salud); }catch(e){ return false; } };
-  const costo=(f,min,cubre)=>Math.max(min||3,Math.round(pat()*f*(cubre!==false&&prepagada()?.5:1)));
+  const costo=(f,min,cubre)=>Math.max(min||3,Math.round(pat()*f*(cubre!==false?(window.factorSalud209?window.factorSalud209(.5):(prepagada()?.5:1)):1)));
   const sal=()=>window.salud97?window.salud97():{enfermedades:[],vicios:{}};
   const ENF=()=>window.ENF_97||[];
   const enf=id=>ENF().find(e=>e.id===id);
@@ -25798,7 +25798,7 @@ install();setTimeout(install,1200);
           if(t.id==='cirugia'||t.id==='exterior') try{ window.momento120&&window.momento120('hospital',nn,txt); }catch(x){}
           cerrarModal(); render(); setTimeout(()=>{ if(activas().length) escenaTratamientos133(); },80); }}); }); });
     escena({rubro:'Tu salud',titulo:'Tratamientos y especialistas',ancho:true,cerrable:true,clase:'trat133',
-      cuerpo:A.length?'Lo que la medicina de '+S.anio+' puede ofrecerte. Cada tratamiento se intenta una vez al año.'+(prepagada()?' Tu prepagada cubre la mitad de lo que se hace en Colombia.':''):'No tienes enfermedades que tratar. Que siga así.',
+      cuerpo:A.length?'Lo que la medicina de '+S.anio+' puede ofrecerte. Cada tratamiento se intenta una vez al año.'+(window.textoColombiaSalud209?window.textoColombiaSalud209():(prepagada()?' Tu prepagada cubre la mitad de lo que se hace en Colombia.':'')):'No tienes enfermedades que tratar. Que siga así.',
       html:'<table class="libro">'+(filas||'<tr><td>Sin enfermedades activas</td><td class="bien">bien</td></tr>')+'</table>',
       opciones:ops.length?ops:[{t:'Volver',cat:'salud'}]});
   }
@@ -37563,6 +37563,111 @@ install();setTimeout(install,1200);
   function init208(){ try{ grupo(); }catch(e){} }
   init208(); setTimeout(init208,40); setTimeout(init208,220); setTimeout(init208,650); setTimeout(init208,950); setTimeout(init208,1500);
   window.__SA208={version:V208};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v209 · LA SALUD CUBIERTA, Y LA EPS COMO NEGOCIO PROPIO
+   1. LA COBERTURA. Hasta hoy solo la medicina prepagada abarataba los
+      tratamientos. Ahora cuenta también la afiliación al sistema de salud:
+        · Seguro Social (desde 1946) y EPS (desde 1993): quien trabaja con
+          contrato ya está afiliado; los independientes, los dueños y los que
+          viven de oficios la contratan en «Revisar los seguros» (cuesta
+          poco). Si eres dueño de una EPS, tú y los tuyos están afiliados.
+        · La prepagada abarata más que la afiliación; las dos juntas, aún más
+          (y si tienes una prepagada propia, cuenta como contratada).
+      La cobertura baja lo que pagas por tratamientos, controles y cuidados,
+      las enfermedades te dan un poco menos y se curan un poco más.
+        Sin cobertura 100% · Seguro Social ~73% · EPS ~64% · prepagada 40%
+        · EPS más prepagada ~32% (de lo que costaría).
+   2. LA EPS. En la puerta de negocios, dentro de Salud (junto a droguerías y
+      clínicas), desde 1993: la EPS. Régimen contributivo y subsidiado,
+      plan complementario y, de apoyo, red propia de clínicas, auditoría
+      médica y dispensación de medicamentos. Entra la UPC por cada afiliado y
+      sale el costo de atenderlo: con red propia y auditoría el margen
+      aguanta; sin ellas, un año malo la deja sin caja. Trae sus sucesos:
+      los giros del Estado que se demoran, las tutelas que obligan a cubrir
+      lo que no estaba en el plan y la Superintendencia de Salud.
+   ========================================================================== */
+(function(){
+  const V209='v209';
+  const SS_DESDE=1946, EPS_DESDE=1993;
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+
+  /* ---------- 1. la cobertura ---------- */
+  const nombreAfil=()=>A()>=EPS_DESDE?'EPS':'Seguro Social';
+  const unidadesAbiertas=(e)=>{ try{ return ((e&&e.red176&&e.red176.unidades)||[]).filter(u=>!u.enObra); }catch(x){ return []; } };
+  const prepagadaPropia=()=>comps().some(e=>e&&e.red176&&unidadesAbiertas(e).some(u=>u.tipo==='prepag'||u.tipo==='compl'));
+  const epsPropia=()=>comps().some(e=>e&&e.red176&&e.red176.clase==='eps'&&unidadesAbiertas(e).some(u=>u.tipo==='contrib'||u.tipo==='subsid'));
+  const conContrato=()=>{ const r=S&&S.carrera&&S.carrera.ruta; return !!r&&!['desempleado','fundador','oficio'].includes(r); };
+  const tienePrepagada=()=>{ try{ return !!(S.seguros&&S.seguros.salud)||prepagadaPropia(); }catch(e){ return false; } };
+  const tieneAfiliacion=()=>{ try{ return A()>=SS_DESDE&&!!((S.seguros&&S.seguros.eps)||conContrato()||epsPropia()); }catch(e){ return false; } };
+  function cobertura(){ const p=tienePrepagada(), a=tieneAfiliacion(); return p&&a?'ambas':p?'prepagada':a?'afiliacion':'ninguna'; }
+  /* fracción de lo que se paga: base es lo que cobraba la prepagada (0,4 o 0,5) */
+  function factor(base){ const c=cobertura(), cub=A()>=EPS_DESDE?.6:.45;
+    if(c==='ambas') return Math.max(.05,base*.8);
+    if(c==='prepagada') return base;
+    if(c==='afiliacion') return 1-(1-base)*cub;
+    return 1; }
+  function prob(base){ const c=cobertura();
+    if(c==='ambas') return base*.95;
+    if(c==='prepagada') return base;
+    if(c==='afiliacion') return 1-(1-base)*(A()>=EPS_DESDE?.5:.4);
+    return 1; }
+  function cura(base){ const c=cobertura();
+    if(c==='ambas') return base*1.25;
+    if(c==='prepagada') return base;
+    if(c==='afiliacion') return base*(A()>=EPS_DESDE?.5:.35);
+    return 0; }
+  function texto(){ const c=cobertura(); return c==='ambas'?' Tu prepagada y tu '+nombreAfil()+' cubren buena parte.':c==='prepagada'?' Tu medicina prepagada cubre buena parte.':c==='afiliacion'?' Tu '+nombreAfil()+' cubre una parte.':''; }
+  function textoPantalla(){ const c=cobertura();
+    return c==='ambas'?'Tienes prepagada y '+nombreAfil()+': los tratamientos te salen mucho más baratos.'
+      :c==='prepagada'?'Tienes medicina prepagada: los tratamientos te salen mucho más baratos.'
+      :c==='afiliacion'?'Estás afiliado al '+(A()>=EPS_DESDE?'sistema de salud (EPS)':'Seguro Social')+': los tratamientos te salen más baratos. Con una prepagada, aún más.'
+      :'No tienes cobertura de salud'+(A()>=SS_DESDE?' (se contrata en "Revisar los seguros")':' (la prepagada se contrata en "Revisar los seguros")')+'.'; }
+  function textoColombia(){ const c=cobertura(); return c==='ambas'||c==='prepagada'?' Tu prepagada cubre la mitad de lo que se hace en Colombia.':c==='afiliacion'?' Tu '+nombreAfil()+' cubre una parte de lo que se hace en Colombia.':''; }
+  function instalarSeguro(){ if(typeof SEGUROS==='undefined'||!Array.isArray(SEGUROS)||SEGUROS.some(s=>s.id==='eps')) return;
+    SEGUROS.push({id:'eps',desde:SS_DESDE,get n(){ return A()>=EPS_DESDE?'EPS (régimen contributivo)':'Seguro Social'; },base:.003,
+      get d(){ return (A()>=EPS_DESDE?'Tu afiliación al sistema de salud: consultas, cirugías y medicamentos con descuento.':'Tu afiliación al Seguro Social: consultas y hospital con descuento.')+' Si trabajas con contrato ya estás afiliado.'; }}); }
+
+  /* ---------- 2. la EPS ---------- */
+  const EPS={n:'EPS: aseguradora de salud',sector:'salud',grupo:'Salud',desde:EPS_DESDE,un:['sede regional','sedes regionales'],emp:'EPS',
+    d:'Una Entidad Promotora de Salud afilia, recibe la UPC por cada afiliado y le paga a las clínicas. Más afiliados, más ingresos y más cuentas por pagar: con red propia de clínicas y buena auditoría el margen aguanta; sin ellas, un año malo (una pandemia, un medicamento nuevo, el Estado que demora los giros) la deja sin caja.',
+    cs:.05,el:.2,rs:.7,sp:.5,ts:.25,vol:.14,pand:[.8,.9,1],kv:6.5,aut:[[1993,'el Ministerio de Salud'],[1997,'la Superintendencia Nacional de Salud']],
+    tit:[[1,'Gestor de salud'],[3,'EPS regional'],[8,'EPS nacional'],[18,'Gigante de la salud']],
+    tipos:[
+      {id:'contrib',n:'Régimen contributivo (sede regional)',desde:1993,base:1800,rc:1.3,mg:.06,u0:.72,capN:50000,capU:'afiliados',obra:[0,1,1],princ:true,d:'Trabajadores e independientes que cotizan: por cada afiliado entra la UPC y sale el costo de sus tratamientos.'},
+      {id:'subsid',n:'Régimen subsidiado',desde:1993,base:1400,rc:1.2,mg:.04,u0:.7,capN:60000,capU:'afiliados',obra:[0,1,1],princ:true,vol:.2,d:'Afiliados que paga el Estado. Mucho volumen, margen delgado y giros que se demoran.'},
+      {id:'compl',n:'Plan complementario (prepagada de la EPS)',desde:1993,base:900,rc:.5,mg:.2,u0:.65,capN:8000,capU:'afiliados',obra:[0,1,1],d:'Un plan que se paga aparte, para quienes quieren más que el plan obligatorio.'},
+      {id:'ips',n:'Red propia de IPS (clínicas y laboratorios)',desde:1993,base:2500,rol:'apoyo',cubre:6,bono:.03,falta:0,rep:3,d:'Atender en casa cuesta menos que pagar tarifa afuera: baja los gastos de hasta 6 sedes.'},
+      {id:'audit',n:'Auditoría médica y autorizaciones',desde:1993,base:500,rol:'apoyo',cubre:8,bono:.02,falta:.03,d:'Autorizar lo necesario y revisar lo que se cobra. Sin ella la red se enreda al crecer. Atiende hasta 8 sedes.'},
+      {id:'dispen',n:'Dispensación de medicamentos',desde:1993,base:600,rol:'apoyo',cubre:10,bono:.015,falta:0,d:'Compras al por mayor y entrega a los afiliados: abarata los medicamentos de hasta 10 sedes.'}]};
+  const RP=(r,u)=>window.reposUnidad176(r,u);
+  const ING=(r,u)=>Math.round(Math.max(1,u.rev||RP(r,u)*((window.tipoDe176(r.clase,u.tipo)||{rc:.5}).rc)));
+  const X=(t,o)=>window.evento176(t,o), G=(e,m)=>window.gastoRed176(e,m);
+  const EV=[
+    (e,r,u)=>u.tipo==='subsid'?()=>{ const x=Math.round(ING(r,u)*.08); X('<b>El Estado se demora en girar los recursos del régimen subsidiado a '+E(u.nom)+'.</b> Las clínicas cobran y tu caja no alcanza.',
+      [{t:'Pedir un crédito puente ('+fm(x*.12)+' de intereses)',f:()=>{ G(e,x*.12); return 'Cubriste el hueco con un crédito puente: costó '+fm(x*.12)+' en intereses.'; }},
+       {t:'Pagarles a las clínicas más tarde',f:()=>{ G(e,x*.04); u.rep=cl(u.rep-7,5,99); return 'Las clínicas esperaron y se quejaron: la reputación se resintió.'; }}]); }:null,
+    (e,r,u)=>()=>{ const x=Math.round(ING(r,u)*.1); X('<b>Una tutela obliga a '+E(u.nom)+' a cubrir un tratamiento carísimo</b> que no estaba en el plan.',
+      [{t:'Pagarlo sin pelear ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'Pagaste '+fm(x)+' y la familia del paciente lo agradeció.'; }},
+       {t:'Pagarlo y tratar de recobrarle al Estado',f:()=>{ G(e,x); if(chance(.5)){ e.caja+=x*.6; return 'Pagaste '+fm(x)+' y te reconocieron el 60%: neto '+fm(x*.4)+'.'; } u.rep=cl(u.rep-4,5,99); return 'El recobro se demora años: el costo completo ('+fm(x)+') quedó en tu caja.'; }}]); },
+    (e,r,u)=>A()>=1997?()=>{ const x=Math.round(RP(r,u)*.04); X('<b>La Superintendencia de Salud revisa a '+E(u.nom)+'.</b> Hay quejas por demoras en las autorizaciones.',
+      [{t:'Presentar un plan de mejora ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'El plan convenció a la Superintendencia: costó '+fm(x)+'.'; }},
+       {t:'Defenderte en el proceso',f:()=>{ if(chance(.55)) return 'Ganaste el proceso, sin sanciones.'; G(e,x*2); u.rep=cl(u.rep-8,5,99); return 'Te multaron con '+fm(x*2)+' y salió en la prensa.'; }}]); }:null];
+  function instalarClase(){ const CLs=window.CLASES_176, OR=window.ORDEN_176, GR=window.GRUPOS_PUERTA_176, EVc=window.EVC_176; if(!CLs||!OR) return false;
+    if(!CLs.eps) CLs.eps=EPS; if(!OR.includes('eps')) OR.push('eps');
+    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Salud'); if(g){ if(!g.ids.includes('eps')) g.ids.push('eps'); try{ Object.defineProperty(g,'d',{configurable:true,enumerable:true,get(){ return A()>=EPS_DESDE?'Droguerías, clínicas y EPS.':'Droguerías y clínicas.'; }}); }catch(e){} } }
+    if(EVc&&!EVc.eps) EVc.eps=EV; return true; }
+  function init209(){ try{ instalarSeguro(); instalarClase(); }catch(e){ console.error(e); }
+    Object.assign(window,{coberturaSalud209:cobertura,factorSalud209:factor,probSalud209:prob,curaSalud209:cura,textoSalud209:texto,textoPantallaSalud209:textoPantalla,textoColombiaSalud209:textoColombia,CLASE_EPS_209:EPS,tieneAfiliacion209:tieneAfiliacion,tienePrepagada209:tienePrepagada}); }
+  init209(); setTimeout(init209,40); setTimeout(init209,220); setTimeout(init209,650); setTimeout(init209,950); setTimeout(init209,1500);
+  window.__SA209={version:V209};
 })();
 </script>
 
