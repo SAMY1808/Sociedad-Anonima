@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v196</div>
+<div class="version-badge" id="versionBadge">v197</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -1592,7 +1592,7 @@ const RUTAS={
     {n:'Vicepresidente',s:540,edu:4},{n:'Presidente',s:940,edu:4}]},
   publico:{n:'Sector público',niveles:[
     {n:'Contratista',s:38,edu:2},{n:'Asesor',s:72,edu:2},{n:'Subdirector',s:124,edu:3},
-    {n:'Director de agencia',s:195,edu:3},{n:'Viceministro',s:265,edu:4},{n:'Ministro',s:345,edu:4}]},
+    {n:'Director general',s:195,edu:3},{n:'Viceministro',s:265,edu:4},{n:'Ministro',s:345,edu:4}]},
   academico:{n:'Academia',niveles:[
     {n:'Monitor',s:9,edu:1},{n:'Docente ocasional',s:42,edu:2},{n:'Profesor asistente',s:84,edu:4},
     {n:'Profesor asociado',s:126,edu:5},{n:'Decano',s:196,edu:5},{n:'Rector',s:290,edu:5}]},
@@ -36173,6 +36173,329 @@ install();setTimeout(install,1200);
     Object.assign(window,{extPlazas196:plazas,extEstado196:E,extPlaza196:P,tasaMoneda196:tasaMoneda,tasaCredito196:tasaCredito,limiteCredito196:limite,tomarCredito196:tomar,amortizarCredito196:amortizar,incumplir196:incumplir,anualExterior196:anual,evGarantias196:evGarantias,evBanco196:evBanco,evSocio196:evSocio,evFilial196:evFilial,evOferta196:evOferta,escenaExterior196:escenaExterior,escenaPlaza196:escenaPlaza,deudaExterior196:totalExt,PLAZAS_196:PL}); }
   init196(); setTimeout(init196,40); setTimeout(init196,220); setTimeout(init196,650); setTimeout(init196,950); setTimeout(init196,1500);
   window.__SA196={version:V196};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v197 · LOS CARGOS DE CONFIANZA Y EL PANEL DE GESTIÓN
+   El sector público llega hasta director general, viceministro y ministro, y
+   en lo local y departamental hay secretarías con funciones propias. Son
+   cargos de libre nombramiento: los ofrece quien gana (presidente, gobernador
+   o alcalde) a quien lo apoyó o tiene el perfil, sea o no de la familia.
+   Cuando tienes uno de esos cargos (o eres alcalde o gobernador) se activa el
+   PANEL DE GESTIÓN:
+   - presupuesto de la entidad, lo comprometido, lo ejecutado y el porcentaje
+     de ejecución (lo normal es quedarse corto);
+   - los frentes de tu cargo (recaudo, obras, servicios sociales, orden
+     público, planeación, servicios públicos, agro, comercio), cada uno con su
+     indicador y tres maneras de moverlo;
+   - las licitaciones: de los estudios a la apertura, la evaluación de ofertas,
+     la adjudicación (al mejor puntaje, al más barato, a un aliado político o a
+     tu propia compañía), la ejecución con sus sobrecostos y la entrega o el
+     elefante blanco;
+   - el equipo: alcalde y gobernador nombran a sus secretarios (técnicos,
+     políticos o parientes: el nepotismo se prohíbe desde 1991);
+   - el control: hallazgos de la Contraloría, procesos de la Procuraduría y la
+     Fiscalía, y lo que pasa cuando el riesgo se acumula;
+   - el desempeño: dos buenos años traen un ascenso; dos malos, la salida.
+   ========================================================================== */
+(function(){
+  const V197='v197';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const plano=x=>String(x||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+
+  /* ---- los frentes: cada uno con su indicador y tres maneras de moverlo ----
+     [texto, descripción, costo como fracción del presupuesto, indicador, apoyo político, control, riesgo] */
+  const FRENTES={
+    recaudo:{n:'Recaudo y finanzas',dec:[
+      ['Cobrar la cartera morosa','Persigues a los grandes deudores: sube el recaudo, pero incomodas a los poderosos.',0,9,-4,3,0],
+      ['Modernizar la caja y la auditoría','Sistemas, cruces de información y auditoría: más transparente y más lento de mostrar.',.03,5,0,8,-5],
+      ['Perdonar multas a los amigos','Alivios a quienes te apoyan: te dan las gracias y alguien lo anota.',0,-3,7,-6,11]]},
+    obras:{n:'Obras e infraestructura',dec:[
+      ['Priorizar las vías troncales','Pocas obras, grandes y útiles. Tardan en inaugurarse.',.08,8,-1,2,2],
+      ['Mantenimiento y parcheo','Lo barato y visible: tapar huecos y repintar.',.03,5,4,0,0],
+      ['Adelantar obras para inaugurar antes de la elección','Cortes de cinta a tiempo, con estudios a medias.',.10,7,8,-8,12]]},
+    social:{n:'Educación, salud y servicios sociales',dec:[
+      ['Ampliar cobertura','Más cupos y más puestos de salud. Cuesta y se nota.',.08,9,5,2,0],
+      ['Mejorar la calidad','Maestros, dotación y seguimiento: resultados lentos y sólidos.',.05,7,1,6,-2],
+      ['Repartir cupos y plazas entre los aliados','Nombras a los recomendados: cumples con tu gente.',0,-2,9,-8,9]]},
+    orden:{n:'Orden público y convivencia',dec:[
+      ['Reforzar patrullajes y alumbrado','Más presencia en los barrios que más lo piden.',.04,8,4,2,0],
+      ['Programas de prevención y mediación','Menos espectacular, más duradero.',.03,6,0,5,-3],
+      ['Mano dura con los que protestan','Resultados rápidos en las cifras, con costo político.',0,6,-6,-5,7]]},
+    plan:{n:'Planeación y proyectos',dec:[
+      ['Estructurar proyectos con calidad','Estudios completos antes de licitar: menos obras, menos sobrecostos.',.04,8,0,7,-4],
+      ['Actualizar el plan y los datos','Catastro, censos y plan de desarrollo al día.',.03,6,1,4,-2],
+      ['Meter proyectos de los aliados en el plan','Obras con nombre propio en la hoja de ruta.',0,-2,8,-7,9]]},
+    serv:{n:'Servicios públicos',dec:[
+      ['Invertir en redes y plantas','Acueducto, energía y aseo: se paga con tarifas y se nota con los años.',.09,9,2,2,0],
+      ['Ajustar las tarifas','Cierra el hueco financiero, pero a nadie le gusta.',0,6,-8,3,-1],
+      ['Congelar las tarifas','Ganas aplausos hoy y pierdes caja mañana.',0,-4,9,-4,3]]},
+    agro:{n:'Agricultura y desarrollo rural',dec:[
+      ['Asistencia técnica y vías veredales','Llegar al campo con lo básico.',.06,8,4,2,0],
+      ['Crédito y comercialización','Compras de cosecha y crédito supervisado.',.07,7,3,3,3],
+      ['Repartir subsidios entre los gremios amigos','Plata para quienes ponen los votos del campo.',0,-2,8,-8,10]]},
+    comercio:{n:'Comercio, industria y cambio',dec:[
+      ['Simplificar trámites y licencias','Menos ventanillas: los empresarios lo agradecen.',.02,7,3,5,-3],
+      ['Misiones comerciales y promoción','Abrir mercados afuera.',.04,7,2,2,0],
+      ['Licencias y cupos para los amigos','Una licencia a tiempo vale más que un discurso.',0,-3,7,-8,11]]}
+  };
+  /* ---- los cargos: [id, nombre, nivel, rango, frentes, desde, hasta, edad, edu, presupuesto base, nombra] ----
+     rango: 2 secretaría local · 3 secretaría departamental o dirección · 4 dirección general · 5 viceministerio · 6 ministerio */
+  const CARTERAS=[['Hacienda',['recaudo','comercio'],1886],['Gobierno',['orden','plan'],1886],['Defensa',['orden','plan'],1886],['Educación',['social','plan'],1886],['Agricultura',['agro','comercio'],1913],['Transporte y Obras Públicas',['obras','plan'],1905],
+    ['Minas y Energía',['serv','obras'],1940],['Trabajo',['social','comercio'],1938],['Salud',['social','serv'],1947],['Comercio',['comercio','recaudo'],1930]];
+  const CARGOS=[
+    ['sec_gobierno','Secretario de Gobierno',   'local',2,['orden','plan'],1800,0,28,3,.14,'alcalde'],
+    ['sec_hacienda','Secretario de Hacienda',   'local',2,['recaudo'],1800,0,28,3,.12,'alcalde'],
+    ['sec_obras','Secretario de Obras Públicas','local',2,['obras','serv'],1905,0,28,3,.30,'alcalde'],
+    ['sec_plan','Jefe de Planeación Municipal', 'local',2,['plan'],1970,0,28,3,.08,'alcalde'],
+    ['sec_educ','Secretario de Educación',      'local',2,['social'],1950,0,28,3,.22,'alcalde'],
+    ['sec_salud','Secretario de Salud',         'local',2,['social'],1960,0,28,3,.20,'alcalde'],
+    ['sec_transito','Director de Tránsito',     'local',2,['orden','recaudo'],1950,0,26,2,.08,'alcalde'],
+    ['ger_epm','Gerente de las Empresas Públicas','local',3,['serv','recaudo'],1920,0,32,3,.35,'alcalde'],
+    ['dep_gobierno','Secretario de Gobierno del departamento','dep',3,['orden','plan'],1886,0,30,3,.12,'gobernador'],
+    ['dep_hacienda','Secretario de Hacienda del departamento','dep',3,['recaudo'],1886,0,30,3,.12,'gobernador'],
+    ['dep_educ','Secretario de Educación del departamento','dep',3,['social'],1930,0,30,3,.28,'gobernador'],
+    ['dep_salud','Secretario de Salud del departamento','dep',3,['social'],1947,0,30,3,.22,'gobernador'],
+    ['dep_agro','Secretario de Agricultura del departamento','dep',3,['agro'],1930,0,30,3,.10,'gobernador'],
+    ['dep_infra','Secretario de Infraestructura del departamento','dep',3,['obras'],1930,0,30,3,.30,'gobernador'],
+    ['dep_licorera','Gerente de la Licorera o la Lotería','dep',3,['recaudo','comercio'],1900,0,32,3,.18,'gobernador'],
+    ['dir_dnp','Director general de Planeación Nacional','nac',4,['plan'],1958,0,34,4,.9,'presidente'],
+    ['dir_dane','Director general del DANE','nac',4,['plan'],1953,0,34,4,.4,'presidente'],
+    ['dir_dian','Director general de la DIAN (impuestos y aduanas)','nac',4,['recaudo','comercio'],1960,0,34,4,1.3,'presidente'],
+    ['dir_invias','Director general del Invías','nac',4,['obras'],1992,0,34,4,1.6,'presidente'],
+    ['dir_aerocivil','Director general de la Aeronáutica Civil','nac',4,['obras','orden'],1967,0,34,4,.9,'presidente'],
+    ['dir_icbf','Director general del ICBF','nac',4,['social'],1968,0,34,4,1.2,'presidente'],
+    ['dir_sena','Director general del SENA','nac',4,['social','comercio'],1957,0,34,4,1.0,'presidente'],
+    ['dir_colciencias','Director general de Colciencias','nac',4,['plan','social'],1968,0,34,4,.35,'presidente']
+  ].map(a=>({id:a[0],n:a[1],nivel:a[2],rango:a[3],frentes:a[4],desde:a[5],hasta:a[6],edad:a[7],edu:a[8],pres:a[9],nombra:a[10]}));
+  CARTERAS.forEach(c=>{ CARGOS.push({id:'vice_'+c[0],n:'Viceministro de '+c[0],nivel:'nac',rango:5,frentes:c[1],desde:c[2],hasta:0,edad:36,edu:4,pres:1.2,nombra:'presidente'});
+    CARGOS.push({id:'min_'+c[0],n:'Ministro de '+c[0],nivel:'nac',rango:6,frentes:c[1],desde:c[2],hasta:0,edad:38,edu:4,pres:2.4,nombra:'presidente'}); });
+  const ELEGIDOS={alcalde:{id:'alcalde',n:'Alcalde',nivel:'local',rango:4,frentes:['plan','obras','social','recaudo','orden'],edad:25,edu:0,pres:1,nombra:'voto'},
+                  gobernador:{id:'gobernador',n:'Gobernador',nivel:'dep',rango:4,frentes:['plan','obras','social','recaudo','agro'],edad:30,edu:0,pres:1,nombra:'voto'}};
+  const cargoPorId=id=>CARGOS.find(c=>c.id===id)||ELEGIDOS[id]||null;
+  const vigente=(c,a)=>a>=c.desde&&(!c.hasta||a<=c.hasta);
+
+  /* ---- el lugar: ciudad, departamento y tamaño de la plaza ---- */
+  const DEP_EXTRA={'La Estrella':'Antioquia','Rionegro':'Antioquia','Buenaventura':'Valle del Cauca','Barrancabermeja':'Santander'};
+  const depDe=ciu=>{ try{ return (window.departamentoDe195&&window.departamentoDe195(ciu))||DEP_EXTRA[ciu]||null; }catch(e){ return null; } };
+  const tamano=ciu=>{ try{ const c=(typeof CIUDADES!=='undefined')&&CIUDADES.find(x=>x.n===ciu); const g=(window.SPEC_CIUDAD_195&&window.SPEC_CIUDAD_195[ciu]); const pob={Bogotá:1.35,Medellín:1.15,Cali:1,Barranquilla:1,Cartagena:.9,Bucaramanga:.8,Cúcuta:.75}[ciu]; return pob||(c&&g&&g.cap?.6:.45); }catch(e){ return .5; } };
+  const eraF=()=>1+.004*(A()-1800);
+  const entidad=(c,ciu)=>c.nivel==='local'?(c.id==='ger_epm'?'Empresas Públicas de '+ciu:'Alcaldía de '+ciu):c.nivel==='dep'?'Gobernación de '+(depDe(ciu)||'tu departamento'):(/^min_|^vice_/.test(c.id)?'Ministerio de '+c.n.replace(/^(Viceministro|Ministro) de /,''):c.n.replace(/^Director general (de la |de |del )?/,'').replace(/ \(.*\)/,''));
+  const presupuestoDe=(c,ciu)=>{ const base=c.nivel==='local'?900*tamano(ciu):c.nivel==='dep'?1100*(.6+tamano(ciu)*.5):2400; return Math.round(Math.max(60,base*c.pres*eraF()*(c.nombra==='voto'?1:1))); };
+
+  /* ---- estado ---- */
+  const G=()=>S.gestion197||null;
+  const H=()=>{ if(!S.cargos197||typeof S.cargos197!=='object') S.cargos197={gobVisto:null,inhab:0,hist:[]}; if(!Array.isArray(S.cargos197.hist)) S.cargos197.hist=[]; return S.cargos197; };
+  const nombreProp=sx=>{ const c=S.hogar&&S.hogar.ciudad||'Bogotá'; try{ return nombreLocal(c,sx||pick(['h','m']))+' '+apellidoCiudad(c); }catch(e){ return 'Funcionario '+ri(1,99); } };
+  function nuevaGestion(c,ciu,extra){
+    const ind={}; c.frentes.forEach(f=>{ ind[f]=ri(42,58); });
+    const g=Object.assign({cargo:c.id,ent:entidad(c,ciu),ciudad:ciu,dep:depDe(ciu),desde:A(),anios:0,gobDesde:(S.gobierno&&S.gobierno.desde)||A(),
+      pres:{total:presupuestoDe(c,ciu),comp:0,ejec:0},ind,pol:{apoyo:55,jefe:60},ctrl:{riesgo:ri(8,16),hallazgos:0,quejas:0},lic:[],sec:[],buenos:0,malos:0,hist:[],dec:0,ultimoDes:null,nlic:0},extra||{});
+    return g; }
+  function iniciarGestion(c,ciu,extra){ const g=nuevaGestion(c,ciu,extra); S.gestion197=g;
+    if(c.nombra==='voto'){ g.sec=(c.id==='alcalde'?['sec_hacienda','sec_obras','sec_gobierno']:['dep_hacienda','dep_infra','dep_gobierno']).map(id=>candidato(id,'tecnico')); }
+    if(c.frentes.some(f=>f==='obras'||f==='plan')) proyecto(g);
+    return g; }
+  function cerrarGestion(motivo,sancion){ const g=G(); if(!g) return; const h=H(); h.hist.push({cargo:g.cargo,ent:g.ent,desde:g.desde,hasta:A(),motivo,desemp:g.ultimoDes}); if(h.hist.length>20) h.hist.shift(); S.gestion197=null;
+    if(sancion){ h.inhab=Math.max(h.inhab||0,A()+sancion); }
+    try{ if(S.carrera&&S.carrera.ruta==='publico'&&cargoPorId(g.cargo)&&cargoPorId(g.cargo).nombra!=='voto'){ S.carrera.ruta=null; S.carrera.empleador=null; } }catch(e){} }
+
+  /* ---- equipo de gobierno (alcalde y gobernador) ---- */
+  function candidato(cargoId,tipo){ const c=cargoPorId(cargoId)||{n:'Secretario'}; const t=tipo||pick(['tecnico','politico','pariente','amigo']); const comp=t==='tecnico'?ri(62,88):t==='politico'?ri(40,68):t==='pariente'?ri(30,70):ri(35,72), lealtad=t==='tecnico'?ri(40,65):t==='politico'?ri(60,85):t==='pariente'?ri(80,98):ri(65,90);
+    return {cargo:cargoId,rol:c.n,nombre:nombreProp(),tipo:t,comp,lealtad,anio:A()}; }
+  const TIPO_TXT={tecnico:'técnico, sin padrino',politico:'aliado político',pariente:'pariente',amigo:'amigo de confianza'};
+
+  /* ---- proyectos y licitaciones ---- */
+  const OBJETOS={obras:['la pavimentación de la vía principal','el puente sobre el río','el mercado público','la variante de la ciudad','el parque y la plaza central','la sede administrativa'],
+    serv:['la planta de tratamiento de agua','la ampliación del acueducto','las redes de alcantarillado','la subestación eléctrica'],
+    social:['el colegio del barrio','el hospital de primer nivel','el comedor escolar','los puestos de salud'],
+    orden:['la estación de policía','el sistema de cámaras','el centro de convivencia'],
+    plan:['el estudio de movilidad','la actualización del catastro','el plan maestro'],
+    agro:['el centro de acopio','la vía veredal','el distrito de riego'],
+    recaudo:['el sistema de recaudo','la modernización de las rentas'],comercio:['la feria comercial','la zona franca de servicios']};
+  function proyecto(g){ if(g.lic.filter(l=>l.estado==='estudios'||l.estado==='abierta').length>=3) return null; const c=cargoPorId(g.cargo); const f=pick(c.frentes.filter(x=>OBJETOS[x]).length?c.frentes.filter(x=>OBJETOS[x]):['obras']);
+    const valor=Math.max(20,Math.round(g.pres.total*rnd(.06,.18))); const l={id:'p'+(++g.nlic),obj:pick(OBJETOS[f]),frente:f,valor,estado:'estudios',ofertas:[],gan:null,avance:0,anio:A(),extra:0,inter:false,calidad:60};
+    g.lic.push(l); return l; }
+  function ofertas(l){ const ap=(S.hogar&&apellidoCiudad(S.hogar.ciudad))||'Pérez'; const tiene=companias().find(c=>/construc|energia/.test(c.sector||''))||companias()[0]||null;
+    const mk=(nom,ptj,p,v)=>({nombre:nom,calif:ptj,precio:Math.round(l.valor*p),vinculo:v});
+    const L=[mk('Constructora '+nombreProp().split(' ').pop()+' & Cía',ri(70,92),rnd(.98,1.12),'ninguno'),mk('Consorcio '+(S.hogar?S.hogar.ciudad:'Regional'),ri(55,80),rnd(.9,1.0),'ninguno'),mk('Ingeniería '+ap,ri(40,70),rnd(.78,.9),'aliado')];
+    if(tiene) L.push(mk(tiene.nombre,ri(55,85),rnd(.95,1.08),'tuyo')); return L; }
+  function abrir(l){ l.estado='abierta'; l.ofertas=ofertas(l); }
+  function adjudicar(l,modo){ const g=G(), O=l.ofertas; let o;
+    if(modo==='puntaje') o=O.slice().sort((a,b)=>b.calif-a.calif)[0]; else if(modo==='barato') o=O.slice().sort((a,b)=>a.precio-b.precio)[0]; else if(modo==='aliado') o=O.find(x=>x.vinculo==='aliado')||O[0]; else o=O.find(x=>x.vinculo==='tuyo')||O[0];
+    l.gan=o; l.estado='ejecucion'; l.avance=0; l.calidad=o.calif; l.precio=o.precio; g.pres.comp+=o.precio;
+    let msg='Adjudicaste '+esc(l.obj)+' a <b>'+esc(o.nombre)+'</b> por '+fm(o.precio)+'.';
+    if(modo==='barato'){ g.ctrl.riesgo=clamp(g.ctrl.riesgo+3,0,100); l.calidad=Math.max(30,o.calif-12); }
+    if(modo==='aliado'){ const c=Math.round(o.precio*.06); S.efectivo+=c; g.ctrl.riesgo=clamp(g.ctrl.riesgo+14,0,100); g.pol.apoyo=clamp(g.pol.apoyo+4,0,100); msg+=' Tu aliado te "agradeció" con '+fm(c)+' por fuera.'; try{ registrarDelito('contratación indebida',.6,'adjudicó '+l.obj+' a un aliado'); }catch(e){} }
+    if(modo==='propia'){ g.ctrl.riesgo=clamp(g.ctrl.riesgo+22,0,100); msg+=' Es una compañía tuya: eso es conflicto de intereses.'; try{ registrarDelito('conflicto de intereses',1,'adjudicó a su propia compañía'); }catch(e){} }
+    return msg; }
+  const avanzar=(g,l)=>{ if(l.estado!=='ejecucion') return; const ritmo=l.inter?38:30; l.avance=Math.min(100,l.avance+ritmo+ri(-8,12));
+    if(!l.inter&&chance(clamp(.34-l.calidad/400,.08,.4))) l.extra=(l.extra||0)+Math.round(l.precio*rnd(.06,.2));
+    if(l.avance>=100){ l.estado='entregada'; const sobre=l.extra||0; g.pres.comp+=sobre; g.pres.ejec+=l.precio+sobre;
+      const bueno=l.calidad>=62&&sobre<l.precio*.12; const f=l.frente;
+      if(g.ind[f]!=null) g.ind[f]=clamp(g.ind[f]+(bueno?10:-4),0,100); g.pol.apoyo=clamp(g.pol.apoyo+(bueno?6:-6),0,100);
+      if(!bueno){ g.ctrl.hallazgos++; g.ctrl.riesgo=clamp(g.ctrl.riesgo+8,0,100); }
+      log((bueno?'Se entregó ':'Se entregó con retrasos y sobrecostos ')+esc(l.obj)+(sobre?' (sobrecosto de '+fm(sobre)+')':'')+'.',bueno?'bien':'mal'); }
+    else g.pres.ejec+=Math.round(l.precio*(ritmo/100)); };
+
+  /* ---- ofertas de cargo ---- */
+  function perfil(){ const redes=S.p.redes||0, rep=S.p.reputacion||0, apoyado=!!(S.gobierno&&S.gobierno.apoyado), edu=S.p.educacion||0;
+    const q=S.carrera&&S.carrera.politica; const base=(q&&q.base)||0;
+    return {pts:clamp(prestigio()*.25+redes*.3+rep*.15+base*.15+(apoyado?18:0),0,100),edu,edad:S.p.edad||0,apoyado}; }
+  function disponibles(){ const h=H(); if((h.inhab||0)>A()) return []; const pf=perfil(), ciu=(S.hogar&&S.hogar.ciudad)||'Bogotá', tope=pf.pts>=75?6:pf.pts>=60?5:pf.pts>=45?4:pf.pts>=30?3:2;
+    return CARGOS.filter(c=>vigente(c,A())&&c.rango<=tope&&pf.edad>=c.edad&&pf.edu>=c.edu-1&&(c.nivel!=='dep'||depDe(ciu))&&(c.nivel!=='local'||(typeof ZONAS!=='undefined'&&ZONAS[ciu]))); }
+  function evOfertaCargos(origen){ const L=disponibles(); if(!L.length) return null; const pf=perfil();
+    const ordenados=L.slice().sort((a,b)=>b.rango-a.rango||Math.random()-.5), tope=ordenados[0].rango, escogidos=[]; ordenados.forEach(c=>{ if(escogidos.length<3&&(c.rango>=tope-1)&&!escogidos.some(x=>x.id===c.id)) escogidos.push(c); });
+    const ciu=(S.hogar&&S.hogar.ciudad)||'Bogotá';
+    return {p:8,c:()=>!G()&&(H().inhab||0)<=A(),t:()=>'<b>'+(origen||'El nuevo gobierno')+' te llama.</b> Entre los cargos de libre nombramiento que reparte, hay '+escogidos.length+' que encajan con tu perfil'+(pf.apoyado?' (y pesa que lo apoyaste)':'')+'. No tienen que ser para un pariente: es un cargo para ti.',
+      o:escogidos.map(c=>({t:'Aceptar: '+c.n+' ('+entidad(c,ciu)+')',f:()=>aceptar(c,ciu)})).concat([{t:'Declinar',f:()=>'Dejaste pasar la oferta.'}])}; }
+  function aceptar(c,ciu){ if(G()) return 'Ya tienes un cargo.'; const niv=Math.min(5,c.rango); S.carrera=S.carrera||{}; S.carrera.ruta='publico'; S.carrera.nivel=niv; S.carrera.anios=0; S.carrera.desempeno=60+(S.p.atr?S.p.atr.disciplina*2:0); S.carrera.empleador=entidad(c,ciu);
+    iniciarGestion(c,ciu); S.p.reputacion=clamp(S.p.reputacion+4,0,100); moverPrestigio(c.rango>=4?4:2,'entró como '+c.n.toLowerCase()); hito('Fue nombrado/a '+c.n.toLowerCase()+' ('+entidad(c,ciu)+')');
+    log('Te posesionaste como <b>'+esc(c.n.toLowerCase())+'</b> de <b>'+esc(entidad(c,ciu))+'</b>. Se activó el panel de gestión: presupuesto, ejecución, licitaciones y control.','hito'); return 'Aceptaste el cargo: '+c.n+'.'; }
+
+  /* ---- sincronizar con la política y con la carrera pública que ya existían ---- */
+  function sync(){ if(!S||!S.p||S.muerto) return; const g=G(), q=S.carrera&&S.carrera.politica, ciu=(S.hogar&&S.hogar.ciudad)||'Bogotá';
+    const ele=q&&q.activo&&(q.cargo==='alcalde'||q.cargo==='gobernador')?q.cargo:null;
+    if(ele){ if(!g||g.cargo!==ele){ if(g) cerrarGestion('cambió de cargo'); iniciarGestion(ELEGIDOS[ele],q.ciudad||ciu); } return; }
+    if(g&&g.cargo&&ELEGIDOS[g.cargo]){ cerrarGestion('terminó el período'); return; }
+    if(g&&!(S.carrera&&S.carrera.ruta==='publico')){ cerrarGestion('dejó el cargo'); return; }
+    if(!g&&S.carrera&&S.carrera.ruta==='publico'&&(S.carrera.nivel||0)>=2){ const nm=['Contratista','Asesor','Subdirector','Director general','Viceministro','Ministro'][S.carrera.nivel]; const emp=S.carrera.empleador||'el Estado';
+      const c=nm==='Ministro'?{id:'min_X',n:'Ministro',nivel:'nac',rango:6,frentes:['plan','comercio'],pres:2.4,nombra:'presidente'}:nm==='Viceministro'?{id:'vice_X',n:'Viceministro',nivel:'nac',rango:5,frentes:['plan','comercio'],pres:1.2,nombra:'presidente'}:{id:'dir_X',n:nm==='Subdirector'?'Subdirector':'Director general',nivel:'nac',rango:nm==='Subdirector'?3:4,frentes:['plan','social'],pres:nm==='Subdirector'?.5:.9,nombra:'presidente'};
+      const g2=nuevaGestion(c,ciu); g2.cargo=c.id; g2.ent=emp; g2.nombreCargo=c.n+' de '+emp; g2.propio=true; S.gestion197=g2; g2.pres.total=presupuestoDe(c,ciu); } }
+  const cargoDe=g=>{ const c=cargoPorId(g.cargo); return c||{id:g.cargo,n:g.nombreCargo||'Funcionario',nivel:'nac',rango:3,frentes:Object.keys(g.ind),pres:1,nombra:'presidente'}; };
+  const nombreCargo=g=>g.nombreCargo||(cargoDe(g).n+(ELEGIDOS[g.cargo]?' de '+g.ciudad:''));
+
+  /* ---- el año ---- */
+  function anual(){
+    if(!S||!S.p||S.muerto) return; sync(); const g=G(), h=H();
+    if(g) cierre(g);
+    // tras las elecciones, el nuevo gobierno reparte cargos
+    if(S.gobierno&&S.gobierno.desde&&h.gobVisto!==S.gobierno.desde){ const prim=h.gobVisto===null; h.gobVisto=S.gobierno.desde;
+      if(!prim&&A()>=1886&&S.p.edad>=25){ if(!G()){ const ev=evOfertaCargos('El gobierno que empezó'); if(ev&&chance(clamp(.25+perfil().pts/160+(perfil().apoyado?.25:0),.1,.9))) cola.push(ev); } } }
+  }
+  function cierre(g){
+    const c=cargoDe(g); g.anios++; const P=g.pres;
+    // los proyectos avanzan y se abren los nuevos
+    g.lic.forEach(l=>avanzar(g,l)); g.lic=g.lic.filter(l=>l.estado!=='entregada'||l.anio>=A()-2);
+    if(c.frentes.some(f=>f==='obras'||f==='plan'||f==='serv'||f==='social')&&chance(.7)) proyecto(g);
+    // el equipo trabaja
+    g.sec.forEach(s=>{ const f=(cargoPorId(s.cargo)||{frentes:[]}).frentes[0]; if(f&&g.ind[f]!=null) g.ind[f]=clamp(g.ind[f]+Math.round((s.comp-55)/18),0,100);
+      if(s.tipo!=='tecnico') g.ctrl.riesgo=clamp(g.ctrl.riesgo+(s.tipo==='pariente'&&A()>=1991?3:1),0,100); });
+    // lo que no se hace se oxida
+    Object.keys(g.ind).forEach(f=>{ g.ind[f]=clamp(g.ind[f]-3+ri(-2,2),0,100); });
+    // ejecución del presupuesto
+    const prom=Object.keys(g.ind).reduce((s,f)=>s+g.ind[f],0)/Math.max(1,Object.keys(g.ind).length);
+    P.ejec=Math.min(P.total*1.05,P.ejec+Math.round(P.total*clamp(.18+prom/400+g.dec*.01,.15,.4)));
+    const ej=P.total>0?P.ejec/P.total:0;
+    g.ultimoEj=Math.round(ej*100);
+    const des=clamp(Math.round(ej*38+prom*.35+g.pol.apoyo*.22-g.ctrl.riesgo*.12+10),0,100); g.ultimoDes=des;
+    if(des>=62){ g.buenos++; g.malos=0; g.pol.apoyo=clamp(g.pol.apoyo+3,0,100); } else if(des<45){ g.malos++; g.buenos=0; g.pol.apoyo=clamp(g.pol.apoyo-5,0,100); } else { g.buenos=0; g.malos=0; }
+    g.hist.push({a:A(),des,ej:g.ultimoEj}); if(g.hist.length>12) g.hist.shift();
+    log('Balance del año en <b>'+esc(g.ent)+'</b>: ejecutaste '+g.ultimoEj+'% del presupuesto ('+fm(P.ejec)+' de '+fm(P.total)+'); desempeño '+des+'/100.',des>=62?'bien':des<45?'mal':'');
+    // el presupuesto del año siguiente; lo no ejecutado se arrastra en parte
+    const sobra=Math.max(0,P.total-P.ejec); P.total=Math.round(presupuestoDe(c,g.ciudad)*rnd(.94,1.08)+sobra*.3); P.comp=Math.round(P.comp*.35); P.ejec=Math.round(P.ejec*.0); g.dec=0;
+    // los organismos de control
+    const r=g.ctrl.riesgo; if(r>=35&&chance(clamp((r-25)/100+g.ctrl.hallazgos*.04,.05,.8))) cola.push(evControl(g));
+    g.ctrl.riesgo=clamp(g.ctrl.riesgo-4,0,100);
+    // cambio de gobierno: los cargos de confianza se ratifican o no
+    if(c.nombra!=='voto'&&S.gobierno&&S.gobierno.desde&&g.gobDesde!==S.gobierno.desde){ const quedo=chance(clamp(.35+g.pol.jefe/200+(S.gobierno.apoyado?.25:0)+des/250,.1,.92)); g.gobDesde=S.gobierno.desde; if(quedo) log('El nuevo gobierno te ratificó en <b>'+esc(nombreCargo(g))+'</b>.','bien'); else cola.push(evSalida(g)); }
+    else if(g.malos>=2&&c.nombra!=='voto') cola.push(evSalida(g,true));
+    else if(g.buenos>=2&&c.rango<6&&!g.propio) { g.buenos=0; const sig=CARGOS.filter(x=>vigente(x,A())&&x.rango===Math.min(6,c.rango+1)&&x.nivel==='nac'||x.rango===c.rango+1&&x.nivel===c.nivel&&vigente(x,A())); const o=sig.length&&perfil().edad>=sig[0].edad&&(perfil().edu>=sig[0].edu-1)?pick(sig):null; if(o) cola.push(evAscenso(g,o)); }
+  }
+  function evControl(g){ const sev=g.ctrl.riesgo>=75; const quien=sev?'La Fiscalía':pick(['La Contraloría','La Procuraduría']); const tipo=sev?'una investigación penal por contratación':quien==='La Contraloría'?'un hallazgo fiscal':'un proceso disciplinario';
+    return {p:10,c:()=>!!G()&&G()===g,t:()=>'<b>'+quien+' abrió '+tipo+' en '+esc(g.ent)+'.</b> Revisan '+(g.lic.filter(l=>l.estado!=='estudios').length||'varios')+' contrato(s) y las decisiones de tu despacho. El riesgo acumulado de tu gestión es '+Math.round(g.ctrl.riesgo)+'/100.',
+      o:[{t:'Responder con soportes y abogados ('+fm(Math.max(15,g.pres.total*.01))+')',f:()=>{ tomar(Math.max(15,g.pres.total*.01)); const ok=chance(clamp(.75-g.ctrl.riesgo/130+(g.ctrl.hallazgos?-.05*g.ctrl.hallazgos:0),.12,.85)); if(ok){ g.ctrl.riesgo=Math.max(0,g.ctrl.riesgo-18); return 'Tus soportes aguantaron: el caso se archivó.'; } return castigar(g,sev); }},
+         {t:'Pagar de tu bolsillo el detrimento ('+fm(Math.max(20,g.pres.total*.015))+')',f:()=>{ const x=tomar(Math.max(20,g.pres.total*.015)); g.ctrl.riesgo=Math.max(0,g.ctrl.riesgo-12); g.ctrl.hallazgos=Math.max(0,g.ctrl.hallazgos-1); return 'Pagaste '+fm(x)+' y el hallazgo se cerró sin sanción.'; }},
+         {t:'Culpar al contratista y al equipo',f:()=>{ const s=g.sec.find(x=>x.tipo!=='tecnico'); if(s){ g.sec=g.sec.filter(x=>x!==s); } g.pol.apoyo=clamp(g.pol.apoyo-6,0,100); return chance(.5)?'La culpa recayó en otro y saliste limpio, pero la gente lo notó.':castigar(g,sev); }},
+         {t:'Renunciar antes de que te destituyan',f:()=>{ moverPrestigio(-3,'renunció bajo investigación'); const n=nombreCargo(g); cerrarGestion('renunció bajo investigación'); return 'Renunciaste a '+n+' antes de la decisión.'; }}]}; }
+  function castigar(g,penal){ const n=nombreCargo(g); if(penal){ try{ registrarDelito('contratación indebida',2,'investigación por contratación en '+g.ent); abrirEscandalo129('politica','La investigación a '+n,3); }catch(e){} S.p.reputacion=clamp(S.p.reputacion-10,0,100); moverPrestigio(-8,'investigación por contratación'); const q=S.carrera&&S.carrera.politica; if(q&&q.activo) q.activo=false; cerrarGestion('destituido por la Fiscalía',8); return 'La Fiscalía te imputó cargos por contratación. Quedas por fuera de '+n+' y no podrás ocupar cargos públicos por ocho años.'; }
+    S.p.reputacion=clamp(S.p.reputacion-6,0,100); moverPrestigio(-4,'sanción disciplinaria'); g.ctrl.hallazgos++; if(g.ctrl.hallazgos>=3){ cerrarGestion('destituido e inhabilitado',5); return 'Te destituyeron e inhabilitaron cinco años: ya van tres hallazgos.'; } return 'Te sancionaron con una multa y un llamado de atención. Queda anotado.'; }
+  function evSalida(g,porDesempeno){ return {p:9,c:()=>!!G()&&G()===g,t:()=>porDesempeno?'<b>Te piden la renuncia en '+esc(g.ent)+'.</b> Dos años de resultados flojos: los números no acompañan y tu jefe necesita el puesto.':'<b>El nuevo gobierno no te ratificó en '+esc(g.ent)+'.</b> Tu cargo es de libre nombramiento y quien llega trae a su gente.',
+      o:[{t:'Aceptar y salir con dignidad',f:()=>{ const n=nombreCargo(g); cerrarGestion(porDesempeno?'renuncia por desempeño':'no ratificado'); return 'Saliste de '+n+'. Quedas bien visto en el partido.'; }},
+         {t:'Pelear el puesto con tus apoyos',f:()=>{ if(chance(clamp(.25+(S.p.redes||0)/200+g.pol.jefe/300,.1,.7))){ g.malos=0; g.pol.jefe=clamp(g.pol.jefe+8,0,100); return 'Moviste tus contactos y te quedaste en el cargo.'; } const n=nombreCargo(g); S.p.redes=clamp((S.p.redes||0)-5,0,100); cerrarGestion('no ratificado'); return 'Te quedaste sin el puesto y quemaste contactos peleándolo.'; }}]}; }
+  function evAscenso(g,o){ const ciu=g.ciudad||(S.hogar&&S.hogar.ciudad)||'Bogotá';
+    return {p:8,c:()=>!!G()&&G()===g,t:()=>'<b>Tu desempeño en '+esc(g.ent)+' llamó la atención.</b> Dos años de buenos resultados: te ofrecen '+esc(o.n.toLowerCase())+' ('+esc(entidad(o,ciu))+').',
+      o:[{t:'Aceptar el ascenso',f:()=>{ cerrarGestion('ascendido'); S.carrera.ruta=null; return aceptar(o,ciu); }},{t:'Quedarte donde estás',f:()=>'Preferiste terminar lo que empezaste.'}]}; }
+
+  /* ---- panel ---- */
+  const barra=(v,t)=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v)+(t||'');
+  function escenaGestion(){
+    sync(); const g=G(); if(!g){ escena({rubro:'Sector público',titulo:'No tienes un cargo de confianza',cerrable:true,cuerpo:'Cuando el nuevo gobierno reparta cargos, o si lo pides, aquí aparecerá el panel de gestión de tu despacho.',opciones:[]}); return; }
+    const c=cargoDe(g), P=g.pres, ej=P.total>0?Math.round(P.ejec/P.total*100):0, nl=g.lic.filter(l=>l.estado==='estudios'||l.estado==='abierta'||l.estado==='ejecucion').length;
+    const frs=Object.keys(g.ind);
+    let tabla='<table class="libro"><tr><td>Presupuesto del año</td><td>'+fm(P.total)+'</td></tr><tr><td>Comprometido</td><td>'+fm(P.comp)+'</td></tr><tr><td>Ejecutado</td><td>'+fm(P.ejec)+' ('+ej+'%)</td></tr>'
+      +'<tr><td>Apoyo político</td><td>'+barra(g.pol.apoyo)+'</td></tr><tr><td>Riesgo ante los organismos de control</td><td>'+barra(100-g.ctrl.riesgo,' de limpieza')+'</td></tr><tr><td>Hallazgos abiertos</td><td>'+g.ctrl.hallazgos+'</td></tr>'
+      +frs.map(f=>'<tr><td>'+esc(FRENTES[f].n)+'</td><td>'+barra(g.ind[f])+'</td></tr>').join('')+'</table>';
+    const op=[];
+    frs.forEach(f=>op.push({t:'Decidir en '+FRENTES[f].n.toLowerCase(),cat:'legado',cerrar:false,d:'Tres maneras de mover el frente; cada decisión es una movida.',dis:S.mov<1?'Sin movidas':null,run:()=>escenaFrente(f)}));
+    op.push({t:'Licitaciones y contratos ('+nl+')',cat:'compania',cerrar:false,d:'Abrir, evaluar y adjudicar, y vigilar las obras en ejecución.',run:()=>escenaLicitaciones()});
+    if(g.sec.length||ELEGIDOS[g.cargo]) op.push({t:'Tu equipo de gobierno',cat:'familia',cerrar:false,d:'Los secretarios que nombraste: quién es quién y a quién cambiar.',run:()=>escenaEquipo()});
+    op.push({t:'Renunciar al cargo',cat:'riesgo',cerrar:false,dis:ELEGIDOS[g.cargo]?'Los cargos de elección terminan con el período':null,run:()=>escenaRenuncia()});
+    escena({rubro:esc(g.ent),titulo:esc(nombreCargo(g)),ancho:true,cerrable:true,
+      cuerpo:'Panel de gestión · año '+(g.anios+1)+' en el cargo. '+(ELEGIDOS[g.cargo]?'Te eligió el voto: tu apoyo político es la opinión de la gente.':'Es un cargo de libre nombramiento: depende de quien te nombró y de tus resultados.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(g.ultimoDes==null?'aún sin balance':g.ultimoDes+'/100')+'.</span>',
+      html:tabla,opciones:op});
+  }
+  function escenaFrente(f){ const g=G(); if(!g) return; const F=FRENTES[f];
+    escena({rubro:esc(g.ent),titulo:esc(F.n),ancho:true,cerrable:true,cuerpo:'Indicador actual: <b>'+Math.round(g.ind[f])+'/100</b>. Presupuesto disponible: '+fm(Math.max(0,g.pres.total-g.pres.comp))+'.',
+      opciones:F.dec.map(d=>{ const costo=Math.round(g.pres.total*d[2]); return {t:d[0]+(costo?' ('+fm(costo)+' del presupuesto)':''),cat:'legado',cerrar:false,d:d[1],dis:S.mov<1?'Sin movidas':(costo>Math.max(0,g.pres.total-g.pres.comp)?'No alcanza el presupuesto':null),
+        run:()=>{ S.mov=Math.max(0,S.mov-1); g.pres.comp+=costo; g.pres.ejec+=Math.round(costo*.7); g.dec++; g.ind[f]=clamp(g.ind[f]+d[3],0,100); g.pol.apoyo=clamp(g.pol.apoyo+d[4],0,100); g.ctrl.riesgo=clamp(g.ctrl.riesgo-d[5]*.5+(d[6]>0?d[6]:d[6]),0,100); g.pol.jefe=clamp(g.pol.jefe+(d[4]>0?1:-1),0,100);
+          log('En <b>'+esc(g.ent)+'</b>: '+d[0].toLowerCase()+'.'); escenaGestion(); }}; })});
+  }
+  function escenaLicitaciones(){ const g=G(); if(!g) return; const ops=[];
+    g.lic.filter(l=>l.estado!=='entregada').forEach(l=>{ const lbl=l.obj.charAt(0).toUpperCase()+l.obj.slice(1)+' · '+fm(l.valor);
+      if(l.estado==='estudios') ops.push({t:'Abrir la licitación: '+lbl,cat:'compania',cerrar:false,d:'Proyecto con estudios listos. Al abrirla llegan las ofertas.',dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); abrir(l); escenaLicitaciones(); }});
+      else if(l.estado==='abierta') ops.push({t:'Evaluar ofertas: '+lbl,cat:'compania',cerrar:false,d:l.ofertas.length+' ofertas recibidas.',run:()=>escenaOfertas(l)});
+      else if(l.estado==='ejecucion') ops.push({t:'En ejecución: '+lbl+' ('+Math.round(l.avance)+'%)',cat:'compania',cerrar:false,d:(l.inter?'Con interventoría. ':'Sin interventoría. ')+'Contratista: '+esc(l.gan.nombre)+(l.extra?'. Sobrecosto acumulado '+fm(l.extra):''),
+        dis:l.inter?'Ya tiene interventoría':(S.mov<1?'Sin movidas':null),run:()=>{ S.mov=Math.max(0,S.mov-1); l.inter=true; g.pres.comp+=Math.round(l.valor*.03); g.ctrl.riesgo=clamp(g.ctrl.riesgo-5,0,100); log('Contrataste interventoría para '+esc(l.obj)+'.'); escenaLicitaciones(); }}); });
+    if(!ops.length) ops.push({t:'No hay proyectos en trámite',cat:'casa',dis:'Los proyectos nuevos aparecen cada año si tu frente lo permite',cerrar:false,run:()=>{}});
+    ops.push({t:'Volver al panel',cat:'casa',cerrar:false,run:()=>escenaGestion()});
+    escena({rubro:esc(g.ent),titulo:'Licitaciones y contratos',ancho:true,cerrable:true,cuerpo:(A()<1993?'Antes de 1993 cada entidad contrataba con su propio reglamento y la discrecionalidad era mayor. ':'La ley de contratación obliga a licitar, evaluar con criterios públicos y publicar. ')+'Un contrato bien hecho se ve; uno mal hecho llega a la Contraloría.',opciones:ops});
+  }
+  function escenaOfertas(l){ const g=G(); if(!g) return; const O=l.ofertas;
+    const modos=[['puntaje','Adjudicar al mejor puntaje técnico','Lo defendible: la oferta con mejor calificación.'],['barato','Adjudicar al más barato','Ahorras plata hoy; la calidad puede fallar.'],['aliado','Adjudicar al aliado político','Te devuelve el favor… por fuera. Es delito.']];
+    if(O.some(o=>o.vinculo==='tuyo')) modos.push(['propia','Adjudicarle a tu propia compañía','Conflicto de intereses: dinero fácil y un riesgo enorme.']);
+    escena({rubro:esc(g.ent),titulo:'Ofertas: '+esc(l.obj),ancho:true,cerrable:true,cuerpo:'Valor del proyecto '+fm(l.valor)+'.<br>'+O.map(o=>'• <b>'+esc(o.nombre)+'</b>: precio '+fm(o.precio)+', puntaje '+o.calif+'/100'+(o.vinculo==='aliado'?' (cercano a tu grupo político)':o.vinculo==='tuyo'?' (es tuya)':'')).join('<br>'),
+      opciones:modos.map(m=>({t:m[1],cat:m[0]==='puntaje'?'compania':'riesgo',d:m[2],cerrar:false,dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); const msg=adjudicar(l,m[0]); log(msg); escenaLicitaciones(); }}))});
+  }
+  function escenaEquipo(){ const g=G(); if(!g) return; const nuevos=ELEGIDOS[g.cargo]?(g.cargo==='alcalde'?['sec_hacienda','sec_obras','sec_gobierno','sec_educ','sec_salud']:['dep_hacienda','dep_infra','dep_gobierno','dep_educ','dep_salud']):[];
+    const ops=g.sec.map((s,i)=>({t:'Cambiar a '+s.nombre+' ('+s.rol+')',cat:'familia',cerrar:false,d:TIPO_TXT[s.tipo]+' · competencia '+s.comp+' · lealtad '+s.lealtad,dis:S.mov<1?'Sin movidas':null,run:()=>escenaCandidatos(s.cargo,i)}));
+    nuevos.filter(id=>vigente(cargoPorId(id),A())&&!g.sec.some(s=>s.cargo===id)).slice(0,2).forEach(id=>ops.push({t:'Nombrar a un '+(cargoPorId(id).n.toLowerCase()),cat:'familia',cerrar:false,dis:S.mov<1?'Sin movidas':null,run:()=>escenaCandidatos(id,-1)}));
+    ops.push({t:'Volver al panel',cat:'casa',cerrar:false,run:()=>escenaGestion()});
+    escena({rubro:esc(g.ent),titulo:'Tu equipo de gobierno',ancho:true,cerrable:true,cuerpo:'Los técnicos rinden pero no te deben nada; los políticos te sostienen en el concejo o la asamblea; un pariente es lealtad total'+(A()>=1991?', pero <b>desde 1991 la Constitución prohíbe nombrar parientes</b> y la Procuraduría lo sanciona':'')+'.',opciones:ops});
+  }
+  function escenaCandidatos(cargoId,idx){ const g=G(); if(!g) return; const cs=['tecnico','politico','amigo','pariente'].map(t=>candidato(cargoId,t));
+    escena({rubro:esc(g.ent),titulo:'¿A quién nombras? ('+esc(cargoPorId(cargoId).n)+')',cerrable:true,opciones:cs.map(c=>({t:c.nombre+' · '+TIPO_TXT[c.tipo],cat:'familia',cerrar:false,d:'Competencia '+c.comp+' · lealtad '+c.lealtad+(c.tipo==='pariente'&&A()>=1991?' · prohibido desde 1991: la Procuraduría lo sanciona':''),run:()=>{ S.mov=Math.max(0,S.mov-1); if(idx>=0) g.sec[idx]=c; else g.sec.push(c); if(c.tipo==='pariente'&&A()>=1991){ g.ctrl.riesgo=clamp(g.ctrl.riesgo+12,0,100); log('Nombraste a un pariente: la Procuraduría ya tiene el expediente abierto.','mal'); } else if(c.tipo==='politico') g.pol.apoyo=clamp(g.pol.apoyo+4,0,100); log('Nombraste a <b>'+esc(c.nombre)+'</b> como '+esc(cargoPorId(cargoId).n.toLowerCase())+'.'); escenaEquipo(); }}))});
+  }
+  function escenaRenuncia(){ const g=G(); if(!g) return; escena({rubro:esc(g.ent),titulo:'¿Renunciar a '+esc(nombreCargo(g))+'?',cerrable:true,cuerpo:'Si renuncias dejas el cargo con el prestigio que tengas hoy. Tu desempeño del último balance fue '+(g.ultimoDes==null?'—':g.ultimoDes)+'/100.',
+    opciones:[{t:'Renunciar',cat:'riesgo',cerrar:false,run:()=>{ const n=nombreCargo(g), bien=(g.ultimoDes||50)>=55; moverPrestigio(bien?1:-2,'renunció a '+n); cerrarGestion('renuncia voluntaria'); log('Renunciaste a '+esc(n)+'.'); cerrarModal(); render(); }},{t:'Mejor me quedo',cat:'legado',cerrar:false,run:()=>escenaGestion()}]}); }
+
+  /* ---- pedir un cargo y enganches ---- */
+  function escenaPedirCargo(){ const L=disponibles(), pf=perfil(); if(!L.length||G()){ escena({rubro:'Sector público',titulo:'Un cargo público',cerrable:true,cuerpo:G()?'Ya tienes un cargo: el panel de gestión está en "Tu cargo público".':'Ahora no hay nada que se ajuste a tu perfil (edad, estudios, prestigio o inhabilidad).',opciones:[]}); return; }
+    const ciu=(S.hogar&&S.hogar.ciudad)||'Bogotá';
+    const cs=L.slice().sort((a,b)=>b.rango-a.rango).slice(0,6);
+    escena({rubro:'Sector público',titulo:'Pedir un cargo de confianza',ancho:true,cerrable:true,cuerpo:'Tocas puertas entre los que nombran. Cuenta tu peso político ('+Math.round(pf.pts)+'/100: prestigio, redes, reputación y el apoyo que hayas dado) y cuesta una movida.',
+      opciones:cs.map(c=>({t:c.n+' ('+entidad(c,ciu)+')',cat:'empleo',cerrar:false,dis:S.mov<1?'Sin movidas':null,d:'Probabilidad aproximada '+Math.round(clamp(.15+pf.pts/130-(c.rango-2)*.09,.04,.8)*100)+'%.',
+        run:()=>{ S.mov=Math.max(0,S.mov-1); const p=clamp(.15+pf.pts/130-(c.rango-2)*.09,.04,.8); if(chance(p)){ log(aceptar(c,ciu)); } else { S.p.redes=clamp((S.p.redes||0)-2,0,100); log('Pediste '+esc(c.n.toLowerCase())+' y no hubo cupo: ese puesto ya tenía dueño.','mal'); } cerrarModal(); render(); }}))});
+  }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA197_PASO) return; window.__SA197_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)){ ['Tu cargo público','Pedir un cargo público'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); } }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA197_ACC) return; window.__SA197_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ try{ sync(); }catch(e){}
+        const g=G(); if(g&&!L.some(x=>x.t==='Tu cargo público')) L.push({t:'Tu cargo público',cat:'empleo',d:nombreCargo(g)+' en '+g.ent+': presupuesto, ejecución, licitaciones y control.',mov:0,modal:false,run:()=>escenaGestion()});
+        else if(!g&&S.p.edad>=25&&A()>=1886&&(H().inhab||0)<=A()&&!L.some(x=>x.t==='Pedir un cargo público')&&disponibles().length) L.push({t:'Pedir un cargo público',cat:'empleo',d:'Secretarías, direcciones generales, viceministerios y ministerios de libre nombramiento.',mov:1,modal:true,run:()=>escenaPedirCargo()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v197=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA197_CAT) return; window.__SA197_CAT=true; window.catDe=function(t){ if(t==='Tu cargo público'||t==='Pedir un cargo público') return 'empleo'; return old.apply(this,arguments); }; }
+  function init197(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{CARGOS_197:CARGOS,FRENTES_197:FRENTES,gestion197:G,cargosDisponibles197:disponibles,iniciarGestion197:iniciarGestion,cerrarGestion197:cerrarGestion,aceptarCargo197:aceptar,evOfertaCargos197:evOfertaCargos,anualGestion197:anual,cierreGestion197:cierre,escenaGestion197:escenaGestion,escenaFrente197:escenaFrente,escenaLicitaciones197:escenaLicitaciones,escenaOfertas197:escenaOfertas,escenaEquipo197:escenaEquipo,escenaPedirCargo197:escenaPedirCargo,
+      adjudicar197:adjudicar,abrirLicitacion197:abrir,proyecto197:proyecto,evControl197:evControl,evSalida197:evSalida,evAscenso197:evAscenso,syncGestion197:sync,entidad197:entidad,presupuestoDe197:presupuestoDe,candidato197:candidato,estadoCargos197:H}); }
+  init197(); setTimeout(init197,40); setTimeout(init197,220); setTimeout(init197,650); setTimeout(init197,950); setTimeout(init197,1500);
+  window.__SA197={version:V197};
 })();
 </script>
 
