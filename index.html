@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v203</div>
+<div class="version-badge" id="versionBadge">v204</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25243,11 +25243,11 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
    ========================================================================== */
 (function(){
   const V125='v125';
-  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena'};
+  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pasto':'pasto'};
   const TIPOS125=['apartamento','casa','duplex','mansion','penthouse'];
   const ok={};
   function precargar(){ if(window.__SA125_PRE) return; window.__SA125_PRE=true; let pend=0, t=null;
-    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const k=c+'_'+tp, im=new Image(); pend++;
+    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const hh=window.FOTOS_HECHAS_204; if(hh&&hh[c]&&!hh[c].includes(tp)) return; /*v204: no pedir fotos que todavía no existen*/ const k=c+'_'+tp, im=new Image(); pend++;
       const fin=()=>{ clearTimeout(t); t=setTimeout(()=>{ try{ if(S&&S.p&&typeof render==='function'&&!document.querySelector('#escenaHost .lienzo')) render(); }catch(e){} },150); };
       im.onload=()=>{ ok[k]=true; fin(); }; im.onerror=()=>{ ok[k]=false; }; im.src='img/ciudades/'+k+'.jpg'; })); }
   function claveDe(b){
@@ -27794,7 +27794,7 @@ install();setTimeout(install,1200);
     const a=AREA[b.tipo]; return {t,etq:P1[t].r,extra:a?'≈ '+a[i].toLocaleString('es-CO')+' m²':''};
   }
   const barras=t=>{ const i=NIV.indexOf(t); return [0,1,2].map(k=>'<i class="'+(k<=i?'on':'')+'"></i>').join(''); };
-  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena'};
+  const CIU={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pasto':'pasto'};
   const TIPOF={apartamento:'apartamento',casa:'casa',casa_pequena:'casa',casa_grande:'duplex',mansion:'mansion',penthouse:'penthouse'};
   function decorar(svg,b,mini){
     if(typeof svg!=='string'||mini||!/<\/svg>\s*$/.test(svg)) return svg;
@@ -37258,6 +37258,35 @@ install();setTimeout(install,1200);
     Object.assign(window,{serv203:E,fuenteCarrera203:fuenteActual,anualPensiones203:anualPensiones,otorgarPension203:otorgar,escenaPensiones203:escenaPensiones,anualCasa203:anualCasa,ramasConCarrera203:ramas,EFECTOS_CASA_203:EFECTOS,FUENTES_203:FUENTES,rotularCarreras203:rotular}); }
   init203(); setTimeout(init203,40); setTimeout(init203,220); setTimeout(init203,650); setTimeout(init203,950); setTimeout(init203,1500);
   window.__SA203={version:V203};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v204 · FOTOS PROPIAS DE VIVIENDA PARA LAS CIUDADES NUEVAS
+   Las 20 ciudades de la v194 no tenían fotos de vivienda (las nueve de
+   siempre sí: img/ciudades/{ciudad}_{tipo}.jpg). Esta versión deja listo el
+   camino: un registro con el nombre de archivo de cada ciudad nueva y de qué
+   tipos ya hay foto, y las primeras fotos propias de Pasto (casa, dúplex y
+   mansión). Las ciudades y tipos que aún no tienen foto siguen mostrando el
+   dibujo de siempre; v125 mira por separado cada pareja ciudad-tipo, así que
+   una ciudad con fotos a medias funciona sin problema.
+   Para sumar una ciudad: copiar los .jpg a img/ciudades/, anotar su nombre en
+   CIUDADES125 y CIU (v125 y v146) y marcar aquí los tipos que ya existen.
+   ========================================================================== */
+(function(){
+  const V204='v204';
+  const TIPOS=['apartamento','casa','duplex','mansion','penthouse'];
+  const SLUG={'Pereira':'pereira','Armenia':'armenia','Cúcuta':'cucuta','Ibagué':'ibague','Villavicencio':'villavicencio','Neiva':'neiva','Pasto':'pasto','Popayán':'popayan','Santa Marta':'santa_marta','Valledupar':'valledupar','Tunja':'tunja','Sincelejo':'sincelejo','Riohacha':'riohacha','Quibdó':'quibdo','Buenaventura':'buenaventura','Rionegro':'rionegro','Barrancabermeja':'barrancabermeja','Yopal':'yopal','San Andrés':'san_andres','Florencia':'florencia'};
+  // tipos que ya tienen foto en img/ciudades/{slug}_{tipo}.jpg
+  const HECHAS={pasto:['casa','duplex','mansion']};
+  function pendientes(){
+    const r=[]; Object.keys(SLUG).forEach(c=>{ const s=SLUG[c], h=HECHAS[s]||[]; const f=TIPOS.filter(t=>!h.includes(t)); if(f.length) r.push({ciudad:c,slug:s,tipos:f}); });
+    return r; }
+  function conFotos(){ return Object.keys(HECHAS).filter(s=>HECHAS[s].length); }
+  function init204(){ Object.assign(window,{SLUG_CIUDAD_204:SLUG,FOTOS_HECHAS_204:HECHAS,fotosPendientes204:pendientes,ciudadesConFotos204:conFotos}); }
+  init204(); setTimeout(init204,40); setTimeout(init204,220); setTimeout(init204,650); setTimeout(init204,950); setTimeout(init204,1500);
+  window.__SA204={version:V204};
 })();
 </script>
 
