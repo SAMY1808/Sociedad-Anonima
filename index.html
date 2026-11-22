@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v199</div>
+<div class="version-badge" id="versionBadge">v200</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -36742,6 +36742,141 @@ install();setTimeout(install,1200);
     Object.assign(window,{rector199:G,universidades199:universidades,rectoriasElegibles199:elegibles,famaPide199:famaPide,probRectoria199:probabilidad,posesionarRector199:posesionar,salirRectoria199:salir,anualRectoria199:anual,hacerRector199:hacer,escenaRector199:escenaRector,escenaRectoria199:escenaRectoria,evOfertaRectoria199:evOferta,evParoRector199:evParo,evEscandaloRector199:evEscandalo,evMocionRector199:evMocion,evReeleccionRector199:evReeleccion,DEC_RECTOR_199:DEC,vigilarRector199:vigilar}); }
   init199(); setTimeout(init199,40); setTimeout(init199,220); setTimeout(init199,650); setTimeout(init199,950); setTimeout(init199,1500);
   window.__SA199={version:V199};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v200 · LA JUDICATURA A FONDO Y LA PUERTA GIRATORIA
+   1. EL DESPACHO. Quien está en la carrera judicial (apoyo judicial, juez,
+      juez de circuito, magistrado de tribunal, magistrado de alta corte) tiene
+      un panel: calidad de los fallos, independencia, rapidez y el rezago de
+      expedientes, y casos que tú decides: la disputa de tierras, el pleito de
+      una casa rival, la demanda contra el gobierno, el homicidio con
+      ramificaciones, la tutela por salud (desde 1991), el caso de tu propia
+      compañía. Fallar según la ley, inclinar la balanza a cambio de algo o
+      declararte impedido: cada camino tiene su precio. Las presiones, las
+      amenazas y el Consejo Superior de la Judicatura (desde 1991) cuentan.
+   2. LA PUERTA GIRATORIA. Quien sale de un cargo público (o de la
+      magistratura) recibe ofertas del sector privado: juntas directivas,
+      consultorías de asuntos públicos y arbitrajes. Dejan plata y contactos,
+      y una revisión de la Procuraduría si quedan cerca de tu antigua entidad.
+   3. EL CONFLICTO DE INTERESES. Si entras a un cargo público teniendo compañías,
+      debes resolverlo: fideicomiso ciego, declararte impedido o mirar para
+      otro lado.
+   ========================================================================== */
+(function(){
+  const V200='v200';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const NIV=['Abogado de apoyo judicial','Juez','Juez de circuito','Magistrado de tribunal','Magistrado de alta corte'];
+  const Q=()=>(S.carrera&&S.carrera.judicatura)||null;
+  const activo=()=>{ const q=Q(); return !!(q&&q.activo); };
+  const J=()=>S.juez200||null;
+
+  /* ---- el despacho ---- */
+  function nuevoDespacho(){ return {desde:A(),anios:0,ind:{calidad:ri(48,60),independencia:ri(55,68),rapidez:ri(42,56)},rezago:ri(20,40),presion:ri(5,15),riesgo:0,casos:[],hist:[],buenos:0,malos:0,ultimoDes:null,nc:0,dec:0}; }
+  function sync(){ if(!S||!S.p||S.muerto) return; const j=J();
+    if(!activo()){ if(j){ cerrar('dejó la judicatura'); } return; }
+    if(!j){ S.juez200=nuevoDespacho(); sembrar(S.juez200); } }
+  function cerrar(motivo){ const j=J(); if(!j) return; const q=Q(); const h=(S.puerta200||(S.puerta200=nuevaPuerta())); h.ex={cargo:q&&q.nivel>=0?NIV[clamp(q.nivel,0,4)]:'Juez',ent:'la Rama Judicial',rango:q?clamp(q.nivel,0,4)+2:2,anio:A(),bien:(j.ultimoDes||50)>=55&&!/destituido|imputado/.test(motivo),judicial:true}; S.juez200=null; }
+
+  const TIPOS=[['tierras','una disputa de tierras entre una familia y un colono','ciudadano'],['homicidio','un homicidio con ramificaciones políticas','poderoso'],['comercial','un pleito comercial entre dos casas rivales','rival'],['gobierno','una demanda contra el gobierno por un contrato','gobierno'],['laboral','un conflicto laboral con un sindicato','ciudadano'],['tutela','una tutela por un tratamiento de salud','ciudadano',1991],['armado','la causa contra un jefe de un grupo armado','armado'],['empresa','un pleito en el que es parte una compañía tuya','tuya']];
+  function sembrar(j){ if(j.casos.filter(c=>c.estado==='abierto').length>=3) return; const L=TIPOS.filter(t=>(!t[3]||A()>=t[3])&&(t[2]!=='tuya'||companias().length)&&(t[2]!=='rival'||(typeof rivalesVivas==='function'&&rivalesVivas().length))&&(t[2]!=='armado'||(A()>=1960&&A()<=2016)));
+    const t=pick(L); const c={id:'c'+(++j.nc),tipo:t[0],txt:t[1],parte:t[2],estado:'abierto',anio:A(),sev:ri(1,3)};
+    if(t[2]==='tuya'){ const e=pick(companias()); c.emp=e.nombre; c.txt='un pleito en el que es parte '+e.nombre; }
+    if(t[2]==='rival'){ const r=pick(rivalesVivas()); c.rival=r.apellido; c.txt='un pleito comercial de la casa '+r.apellido; }
+    j.casos.push(c); return c; }
+  function fallar(c,modo){ const j=J(); if(!j) return ''; c.estado='fallado'; c.modo=modo; j.rezago=Math.max(0,j.rezago-6); let m='Fallaste '+c.txt+' '+(modo==='ley'?'según la ley y las pruebas.':modo==='poderoso'?'inclinando la balanza hacia el más poderoso.':'declarándote impedido: lo falló otro despacho.');
+    if(modo==='ley'){ j.ind.calidad=clamp(j.ind.calidad+3,0,100); j.ind.independencia=clamp(j.ind.independencia+(c.parte==='poderoso'||c.parte==='armado'||c.parte==='gobierno'?5:2),0,100); if(c.parte==='poderoso'||c.parte==='armado'||c.parte==='rival'){ j.presion=clamp(j.presion+10,0,100); m+=' Los perjudicados lo anotaron.'; } if(c.parte==='tuya'){ j.riesgo=clamp(j.riesgo+18,0,100); m+=' Era una compañía tuya: debiste declararte impedido.'; } }
+    else if(modo==='poderoso'){ const x=Math.round(40*(1+(A()-1900)*.004)*c.sev); S.efectivo+=x; j.ind.independencia=clamp(j.ind.independencia-12,0,100); j.ind.calidad=clamp(j.ind.calidad-6,0,100); j.riesgo=clamp(j.riesgo+22,0,100); m+=' Te "agradecieron" con '+fm(x)+'.'; try{ registrarDelito('prevaricato',.8,'falló a favor de una parte a cambio de un beneficio'); }catch(e){} }
+    else { j.ind.rapidez=clamp(j.ind.rapidez-2,0,100); j.ind.independencia=clamp(j.ind.independencia+3,0,100); j.presion=clamp(j.presion-3,0,100); }
+    return m; }
+  const DEC=[
+    ['descongestionar','Descongestionar el despacho','Turnos extra y decisiones rápidas: baja el rezago, sube la rapidez y se pierde algo de calidad.',0,j=>{ j.rezago=Math.max(0,j.rezago-14); j.ind.rapidez+=9; j.ind.calidad-=3; return 'Bajaste el rezago de expedientes.'; }],
+    ['estudiar','Estudiar a fondo los casos difíciles','Jurisprudencia y doctrina: mejores fallos, más lentos.',0,j=>{ j.ind.calidad+=8; j.ind.rapidez-=4; S.p.atr.intelecto=clamp(S.p.atr.intelecto+0,1,10); return 'Tus fallos ganaron en calidad.'; }],
+    ['capacitar','Capacitarte en derecho constitucional y comparado','Cursos y estancias: sube la calidad y la fama en el gremio.',6,j=>{ j.ind.calidad+=4; S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Te capacitaste: la calidad de tus fallos subió.'; }],
+    ['proteccion','Pedir protección y esquema de seguridad','Escoltas para ti y tu familia: baja la presión de los poderosos.',8,j=>{ j.presion=Math.max(0,j.presion-14); S.p.felicidad=clamp(S.p.felicidad+2,0,100); return 'Te asignaron escoltas.'; }]];
+  const pago=d=>Math.round(d[3]*(1+(A()-1900)*.004)*5);
+  function hacer(i){ const j=J(); if(!j) return; const d=DEC[i], p=pago(d); if(S.mov<1||S.efectivo<p) return; S.mov=Math.max(0,S.mov-1); if(p) tomar(p); const m=d[4](j); Object.keys(j.ind).forEach(k=>{ j.ind[k]=clamp(j.ind[k],0,100); }); j.rezago=clamp(j.rezago,0,100); j.dec++; log(m+(p?' Costó '+fm(p)+'.':'')); escenaDespacho(); }
+
+  /* ---- el año ---- */
+  function anualJuez(){ const j=J(); if(!j) return; j.anios++; const q=Q();
+    j.rezago=clamp(j.rezago+10+j.casos.filter(c=>c.estado==='abierto').length*3-j.ind.rapidez/8,0,100); j.ind.rapidez=clamp(j.ind.rapidez-Math.round(j.rezago/25)+ri(-1,1),0,100);
+    ['calidad','independencia'].forEach(k=>{ j.ind[k]=clamp(j.ind[k]-1+ri(-1,1),0,100); }); j.presion=clamp(j.presion+ri(0,4)-(A()>=1991?1:0),0,100); j.riesgo=clamp(j.riesgo-3,0,100);
+    j.casos.filter(c=>c.estado==='abierto'&&A()-c.anio>=2).forEach(c=>{ c.estado='vencido'; j.ind.rapidez=clamp(j.ind.rapidez-5,0,100); j.riesgo=clamp(j.riesgo+3,0,100); });
+    j.casos=j.casos.filter(c=>c.estado==='abierto'||A()-c.anio<=3); sembrar(j); if(chance(.45)) sembrar(j);
+    const prom=(j.ind.calidad+j.ind.independencia+j.ind.rapidez)/3, des=clamp(Math.round(prom*.8+(100-j.rezago)*.15-j.riesgo*.15+8),0,100); j.ultimoDes=des; j.hist.push({a:A(),des}); if(j.hist.length>12) j.hist.shift();
+    if(q&&des>=62) q.anios=(q.anios||0)+.5; if(des>=62){ j.buenos++; j.malos=0; } else if(des<42){ j.malos++; j.buenos=0; } else { j.buenos=0; j.malos=0; }
+    log('Balance de tu despacho: desempeño '+des+'/100 (calidad '+Math.round(j.ind.calidad)+', independencia '+Math.round(j.ind.independencia)+', rapidez '+Math.round(j.ind.rapidez)+'; rezago '+Math.round(j.rezago)+').',des>=62?'bien':des<42?'mal':'');
+    if(j.presion>=45&&chance(j.presion/220)) cola.push(evPresion(j));
+    if(j.riesgo>=35&&chance(j.riesgo/130)) cola.push(evDisciplinario(j)); }
+  function evPresion(j){ return {p:9,c:()=>J()===j,t:()=>'<b>Te hacen llegar un mensaje.</b> Alguien que perdió un caso (o que teme perder uno) sabe dónde estudian tus hijos. '+(A()>=1985&&A()<=1995?'Los magistrados de tu generación no la han pasado bien.':'No es la primera vez que le pasa a un juez.'),
+    o:[{t:'Pedir protección ('+fm(pago(DEC[3]))+')',f:()=>{ tomar(pago(DEC[3])); j.presion=Math.max(0,j.presion-20); return 'Te dieron escoltas y cambiaron tu rutina.'; }},
+       {t:'Denunciar públicamente',f:()=>{ j.ind.independencia=clamp(j.ind.independencia+6,0,100); j.presion=clamp(j.presion+6,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Denunciaste las presiones: el gremio te respaldó y tú quedaste más expuesto.'; }},
+       {t:'Ceder en el próximo caso',f:()=>{ j.ind.independencia=clamp(j.ind.independencia-12,0,100); j.presion=Math.max(0,j.presion-25); j.riesgo=clamp(j.riesgo+15,0,100); return 'Cediste: la presión se acabó, la conciencia no.'; }}]}; }
+  function evDisciplinario(j){ const org=A()>=1991?'la Sala Disciplinaria del Consejo Superior de la Judicatura':'la Corte Suprema'; return {p:10,c:()=>J()===j,t:()=>'<b>'+org.charAt(0).toUpperCase()+org.slice(1)+' abrió una investigación disciplinaria en tu contra.</b> Revisan fallos recientes y a quién favorecieron. Riesgo acumulado: '+Math.round(j.riesgo)+'/100.',
+    o:[{t:'Defenderte con pruebas ('+fm(pago(['',0,0,6]))+')',f:()=>{ tomar(pago(['',0,0,6])); if(chance(clamp(.78-j.riesgo/130,.15,.85))){ j.riesgo=Math.max(0,j.riesgo-20); return 'Tus fallos resistieron la revisión.'; } return castigar(j); }},
+       {t:'Renunciar antes del fallo',f:()=>{ const q=Q(); moverPrestigio(-2,'renunció bajo investigación'); if(q){ q.activo=false; q.cargo=null; q.nivel=-1; q.anios=0; } cerrar('renuncia bajo investigación'); return 'Renunciaste a la judicatura antes de la decisión.'; }}]}; }
+  function castigar(j){ const q=Q(); S.p.reputacion=clamp(S.p.reputacion-8,0,100); moverPrestigio(-5,'sanción disciplinaria'); if(j.riesgo>=60){ if(q){ q.activo=false; q.cargo=null; q.nivel=-1; q.anios=0; } cerrar('destituido por la Sala Disciplinaria'); S.puerta200.inhab=A()+10; return 'Te destituyeron e inhabilitaron diez años: ya no podrás ocupar cargos públicos.'; } j.riesgo=Math.max(0,j.riesgo-10); j.ind.independencia=clamp(j.ind.independencia-5,0,100); return 'Te sancionaron con una suspensión y una anotación en tu hoja de vida.'; }
+
+  /* ---- la puerta giratoria ---- */
+  function nuevaPuerta(){ return {ex:null,junta:null,consultoria:null,arbitraje:false,ingresos:0,inhab:0,ofertas:0}; }
+  const P=()=>S.puerta200||(S.puerta200=nuevaPuerta());
+  function salidaPublica(){ const h=P(), c=window.estadoCargos197&&window.estadoCargos197(); if(!c||!Array.isArray(c.hist)||!c.hist.length) return; const u=c.hist[c.hist.length-1]; if(h.visto===u.hasta+'|'+u.cargo+'|'+u.desde) return; h.visto=u.hasta+'|'+u.cargo+'|'+u.desde;
+    const cg=(window.CARGOS_197||[]).find(x=>x.id===u.cargo); const rango=cg?cg.rango:(u.cargo==='alcalde'||u.cargo==='gobernador'?4:3);
+    h.ex={cargo:cg?cg.n:u.cargo,ent:u.ent,rango,anio:u.hasta,bien:(u.desemp||50)>=50&&!/destituido|imputado|investigación/.test(u.motivo||'')}; }
+  function ofertasPuerta(){ const h=P(); if(!h.ex||!h.ex.bien) return []; const sinCargo=!(window.gestion197&&window.gestion197())&&!activo(); if(!sinCargo||A()-h.ex.anio>6||(h.inhab||0)>A()) return [];
+    const L=[]; if(!h.junta) L.push('junta'); if(!h.consultoria&&!h.ex.judicial) L.push('consultoria'); if(h.ex.judicial&&!h.arbitraje) L.push('arbitraje'); return L; }
+  function evPuerta(){ const h=P(), ex=h.ex, L=ofertasPuerta(); if(!L.length) return null; const ing=Math.round((30+ex.rango*22)*(1+(A()-1900)*.004)); const emp=(companias()[0]&&pick(['Grupo Aburrá','Banco del Occidente Andino','Cementos Antares','Alimentos Nutrandes','Interconexión Andina','Petrocolombia']))||pick(['Grupo Aburrá','Cementos Antares','Interconexión Andina']);
+    const OPC={junta:{t:'Entrar a la junta directiva de '+emp+' ('+fm(ing)+' al año)',f:()=>{ h.junta={emp,desde:A(),ing}; h.ofertas++; S.p.redes=clamp((S.p.redes||0)+4,0,100); return 'Entraste a la junta de '+emp+': honorarios, contactos y una pregunta que algún día te harán sobre tu antigua entidad.'; }},
+      consultoria:{t:'Abrir una consultoría de asuntos públicos ('+fm(Math.round(ing*1.3))+' al año)',f:()=>{ h.consultoria={desde:A(),ing:Math.round(ing*1.3)}; h.ofertas++; return 'Abriste una consultoría de asuntos públicos: vendes el conocimiento de los pasillos.'; }},
+      arbitraje:{t:'Ser árbitro en la Cámara de Comercio ('+fm(Math.round(ing*.8))+' al año)',f:()=>{ h.arbitraje=true; h.arbIng=Math.round(ing*.8); h.ofertas++; moverPrestigio(1,'árbitro'); return 'Empezaste a actuar como árbitro: ingreso estable y prestigio.'; }}};
+    return {p:7,c:()=>!!P().ex&&ofertasPuerta().length>0,t:()=>'<b>Del sector privado te llaman.</b> Saliste de <b>'+esc(ex.cargo)+'</b> ('+esc(ex.ent)+') con buen nombre y varias puertas se abren. Pero la ley (la Ley 80 de 1993 y luego la Ley 1474 de 2011) te pone límites con tu antigua entidad.',
+      o:L.map(k=>OPC[k]).concat([{t:'Seguir fuera del Estado sin compromisos',f:()=>'Dejaste pasar las ofertas.'}])}; }
+  function anualPuerta(){ const h=P(); salidaPublica(); let x=0;
+    if(h.junta){ x+=h.junta.ing; } if(h.consultoria){ x+=h.consultoria.ing; } if(h.arbitraje) x+=h.arbIng||0; if(x>0){ S.efectivo+=x; h.ingresos+=x; log('Tus ingresos de la puerta giratoria este año: '+fm(x)+'.'); }
+    if((h.junta||h.consultoria)&&h.ex&&A()-h.ex.anio<=2&&chance(.15)) cola.push(evRevision(h));
+    if(h.ex&&chance(clamp(.18+(h.ex.rango||2)*.03,.1,.45))){ const ev=evPuerta(); if(ev) cola.push(ev); } }
+  function evRevision(h){ return {p:9,c:()=>!!(h.junta||h.consultoria),t:()=>'<b>La Procuraduría revisa tu puerta giratoria.</b> Saliste de '+esc(h.ex.ent)+' hace menos de dos años y ya haces negocios cerca de esa entidad. Hay una inhabilidad en juego.',
+    o:[{t:'Retirarte del negocio sensible',f:()=>{ h.junta=null; h.consultoria=null; S.p.reputacion=clamp(S.p.reputacion+2,0,100); return 'Te retiraste y la revisión se archivó.'; }},{t:'Defender que no hay conflicto ('+fm(25)+')',f:()=>{ tomar(25); if(chance(.5)) return 'La Procuraduría aceptó tus explicaciones.'; moverPrestigio(-4,'la puerta giratoria'); h.inhab=A()+3; h.junta=null; h.consultoria=null; try{ abrirEscandalo129('politica','La puerta giratoria de '+h.ex.cargo,2); }catch(e){} return 'La Procuraduría te sancionó: tres años sin cargos públicos y la junta se acabó.'; }}]}; }
+
+  /* ---- conflicto de intereses al entrar al gobierno ---- */
+  function conflicto(){ const g=window.gestion197&&window.gestion197(); if(!g||g.conflicto200!==undefined) return; g.conflicto200=false; const cs=companias().filter(e=>miPct(e)>=.2); if(!cs.length) return; g.conflicto200=true; const c=cs[0];
+    cola.push({p:9,c:()=>!!(window.gestion197&&window.gestion197()===g),t:()=>'<b>Conflicto de intereses.</b> Eres dueño de una parte de <b>'+esc(c.nombre)+'</b> y ahora diriges '+esc(g.ent)+'. La ley te obliga a resolverlo antes de que la Procuraduría pregunte.',
+      o:[{t:'Fideicomiso ciego ('+fm(Math.round(20*(1+(A()-1900)*.004)))+')',f:()=>{ tomar(20*(1+(A()-1900)*.004)); g.ctrl.riesgo=Math.max(0,g.ctrl.riesgo-12); g.impedido200=true; return 'Pusiste tu parte en un fideicomiso ciego: limpio, caro y sin sorpresas.'; }},
+         {t:'Declararte impedido en los asuntos de '+c.nombre,f:()=>{ g.ctrl.riesgo=Math.max(0,g.ctrl.riesgo-6); g.impedido200=true; return 'Te declaraste impedido: otro funcionario decide lo que toque a tu compañía.'; }},
+         {t:'Mirar para otro lado',f:()=>{ g.ctrl.riesgo=clamp(g.ctrl.riesgo+12,0,100); return 'No hiciste nada: el riesgo de que alguien lo señale quedó sobre tu despacho.'; }}]}); }
+
+  /* ---- panel judicial ---- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaDespacho(){ sync(); const j=J(); if(!j){ escena({rubro:'Rama judicial',titulo:'Sin despacho',cerrable:true,cuerpo:'Cuando entres a la carrera judicial tendrás tu despacho: expedientes, casos y presiones.',opciones:[]}); return; }
+    const q=Q(), nv=NIV[clamp(q.nivel,0,4)], abiertos=j.casos.filter(c=>c.estado==='abierto');
+    const t='<table class="libro"><tr><td>Calidad de los fallos</td><td>'+barra(j.ind.calidad)+'</td></tr><tr><td>Independencia</td><td>'+barra(j.ind.independencia)+'</td></tr><tr><td>Rapidez</td><td>'+barra(j.ind.rapidez)+'</td></tr><tr><td>Rezago de expedientes</td><td>'+barra(100-j.rezago)+' al día</td></tr><tr><td>Presión de los poderosos</td><td>'+barra(j.presion)+'</td></tr><tr><td>Riesgo disciplinario</td><td>'+barra(j.riesgo)+'</td></tr></table>';
+    const ops=abiertos.map(c=>({t:'Decidir: '+c.txt,cat:'legado',cerrar:false,d:'Parte: '+({ciudadano:'un ciudadano',poderoso:'un poderoso',rival:'una casa rival',gobierno:'el gobierno',armado:'un grupo armado',tuya:'una compañía tuya'})[c.parte]+'. Gravedad '+c.sev+'/3.',dis:S.mov<1?'Sin movidas':null,run:()=>escenaCaso(c)}));
+    DEC.forEach((d,i)=>{ const p=pago(d); ops.push({t:d[1]+(p?' ('+fm(p)+')':''),cat:'empleo',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<p?'No te alcanza':null),run:()=>hacer(i)}); });
+    escena({rubro:'Rama judicial',titulo:'Tu despacho · '+esc(nv),ancho:true,cerrable:true,cuerpo:'Año '+(j.anios+1)+' en el despacho. '+(A()>=1991?'Te vigila el Consejo Superior de la Judicatura; la tutela llena tu mesa.':'Hasta 1991 la Corte Suprema nombra y vigila a sus jueces.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(j.ultimoDes==null?'aún sin balance':j.ultimoDes+'/100')+'. Casos abiertos: '+abiertos.length+'.</span>',html:t,opciones:ops}); }
+  function escenaCaso(c){ const j=J(); if(!j) return; const ops=[{t:'Fallar según la ley y las pruebas',cat:'legado',cerrar:false,d:'Lo correcto. Puede costarte enemigos.',run:()=>{ S.mov=Math.max(0,S.mov-1); log(fallar(c,'ley')); escenaDespacho(); }},
+      {t:'Inclinar la balanza hacia el más poderoso',cat:'riesgo',cerrar:false,d:'Te lo agradecerán por fuera. Es prevaricato.',run:()=>{ S.mov=Math.max(0,S.mov-1); log(fallar(c,'poderoso')); escenaDespacho(); }}];
+    if(c.parte==='tuya'||c.parte==='rival'||c.parte==='gobierno') ops.push({t:'Declararte impedido',cat:'legado',cerrar:false,d:c.parte==='tuya'?'Lo que debes hacer: el caso es de tu compañía.':'Lo falla otro despacho.',run:()=>{ S.mov=Math.max(0,S.mov-1); log(fallar(c,'impedido')); escenaDespacho(); }});
+    ops.push({t:'Volver al despacho',cat:'casa',cerrar:false,run:()=>escenaDespacho()});
+    escena({rubro:'Rama judicial',titulo:'El caso: '+esc(c.tipo),cerrable:true,cuerpo:'Llegó a tu mesa '+esc(c.txt)+'.',opciones:ops}); }
+
+  /* ---- enganches ---- */
+  function anual(){ if(!S||!S.p||S.muerto) return; sync(); anualJuez(); try{ conflicto(); }catch(e){} anualPuerta(); }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA200_PASO) return; window.__SA200_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu despacho judicial')) g.miembros.push(['Influencia','Tu despacho judicial']); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA200_ACC) return; window.__SA200_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ sync(); if(J()&&!L.some(x=>x.t==='Tu despacho judicial')) L.push({t:'Tu despacho judicial',cat:'empleo',d:'Casos, expedientes, presiones y el Consejo Superior de la Judicatura.',mov:0,modal:false,run:()=>escenaDespacho()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v200=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA200_CAT) return; window.__SA200_CAT=true; window.catDe=function(t){ if(t==='Tu despacho judicial') return 'empleo'; return old.apply(this,arguments); }; }
+  function init200(){ wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{juez200:J,puerta200:P,syncJuez200:sync,anualJuez200:anualJuez,anualPuerta200:anualPuerta,escenaDespacho200:escenaDespacho,escenaCaso200:escenaCaso,fallarCaso200:fallar,sembrarCasos200:sembrar,hacerJuez200:hacer,evPresion200:evPresion,evDisciplinario200:evDisciplinario,evPuerta200:evPuerta,evRevision200:evRevision,conflicto200:conflicto,salidaPublica200:salidaPublica,ofertasPuerta200:ofertasPuerta,anual200:anual}); }
+  init200(); setTimeout(init200,40); setTimeout(init200,220); setTimeout(init200,650); setTimeout(init200,950); setTimeout(init200,1500);
+  window.__SA200={version:V200};
 })();
 </script>
 
