@@ -1393,10 +1393,21 @@ svg.foto116{display:block;background:#1d2a23}
 .panel176{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
 .panel176 .apunte{margin:4px 0 8px}
 </style>
+<style>
+.maus207{margin:10px 0 4px}
+.maus207 .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:640px){.maus207 .gr{grid-template-columns:repeat(2,1fr)}}
+.maus207 figure{margin:0;text-align:center}
+.maus207 img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;border:1px solid rgba(214,166,72,.35);box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.maus207 figcaption{font-size:.78rem;opacity:.85;margin-top:5px;line-height:1.25}
+.maus207.uno{max-width:260px;margin:12px auto 6px}
+.maus207.uno figcaption{font-size:.85rem}
+.maus207 .aqui img{border-color:#D6A648;box-shadow:0 0 0 2px rgba(214,166,72,.45),0 2px 10px rgba(0,0,0,.35)}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v206</div>
+<div class="version-badge" id="versionBadge">v207</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -8841,7 +8852,7 @@ function renderLienzo(){
       +'<div class="family-house-card"><div class="fh-label">Fundación</div><div class="fh-title">'+(S.fundacion?esc(S.fundacion.nombre):'No creada')+'</div><div class="fh-meta">'+(S.fundacion?fmt(valorFundacion())+' en activos familiares':'Puedes constituirla y administrarla desde aquí.')+'</div></div>'
       +'<div class="family-house-card"><div class="fh-label">Banca familiar</div><div class="fh-title">'+(S.bancoFamilia?fmt(valorBancoFamilia()):'No creada')+'</div><div class="fh-meta">'+(S.bancoFamilia?fmt(S.bancoFamilia.reserva)+' de reserva · '+((S.bancoFamilia.prestamosFamilia||[]).length)+' crédito'+(((S.bancoFamilia.prestamosFamilia||[]).length)===1?'':'s'):'Puede financiar la casa y sus compañías.')+'</div></div>'
       +'<div class="family-house-card"><div class="fh-label">Family office</div><div class="fh-title">'+(S.familyOffice?fmt(valorFamilyOffice()):'No creado')+'</div><div class="fh-meta">'+(S.familyOffice?('Director: '+esc(S.familyOffice.director?.nombre||'pendiente')+' · '+(S.familyOffice.estrategia||'balanceada')+' · '+pc(S.familyOffice.educacionPct||0)+' para educación'):'Administra, reinvierte y conserva patrimonio de la casa entre generaciones.')+'</div></div>'
-      +'<div class="family-house-card"><div class="fh-label">Memoria familiar</div><div class="fh-title">'+(S.mausoleo?(S.mausoleo.tipo==='nichos'?'Nichos familiares':'Mausoleo familiar'):'Sin sepultura familiar')+'</div><div class="fh-meta">'+(S.mausoleo?((S.mausoleo.cupos||0)+' cupos libres · '+((S.mausoleo.enterrados||[]).length)+' enterrado'+((S.mausoleo.enterrados||[]).length===1?'':'s')):'Puedes resolverlo antes de que haga falta.')+'</div></div>'
+      +'<div class="family-house-card"><div class="fh-label">Memoria familiar</div><div class="fh-title">'+(S.mausoleo?(({nichos:'Nichos familiares',mausoleo:'Mausoleo familiar',cripta:'Cripta familiar',capilla:'Capilla familiar'})[S.mausoleo.tipo]||'Mausoleo familiar'):'Sin sepultura familiar')+'</div><div class="fh-meta">'+(S.mausoleo?((S.mausoleo.cupos||0)+' cupos libres · '+((S.mausoleo.enterrados||[]).length)+' enterrado'+((S.mausoleo.enterrados||[]).length===1?'':'s')):'Puedes resolverlo antes de que haga falta.')+'</div></div>'
       +'</div>'
       +'<div class="apunte">Estas herramientas siguen teniendo consecuencias económicas: la fundación inmoviliza activos, la banca familiar necesita capital y reserva, y la sepultura tiene cupos y costos. El prestigio es el hilo que las conecta.</div>'
       +baraja(casaAcc,false)+'<\/div>'
@@ -12043,7 +12054,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
         const epitafio=epitafio45();
         if(S.mausoleo&&S.mausoleo.cupos>0){
           S.mausoleo.cupos--; S.mausoleo.enterrados=(S.mausoleo.enterrados||[]).concat([S.p.nombre+' '+S.p.apellido]);
-          log('Descansa en el '+(S.mausoleo.tipo==='nichos'?'nicho':'mausoleo')+' de la familia.');
+          log('Descansa en '+(({nichos:'el nicho',mausoleo:'el mausoleo',cripta:'la cripta',capilla:'la capilla'})[S.mausoleo.tipo]||'el mausoleo')+' de la familia.');
         }
         if(window.__SA44&&window.__SA44.publicar) window.__SA44.publicar('MURIÓ '+(S.p.nombre+' '+S.p.apellido).toUpperCase(),epitafio,'mal');
       }catch(e){}
@@ -37446,6 +37457,82 @@ install();setTimeout(install,1200);
   function init206(){ completar(); Object.assign(window,{TIPOS_FOTO_206:TIPOS}); }
   init206(); setTimeout(init206,40); setTimeout(init206,220); setTimeout(init206,650);
   window.__SA206={version:V206};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v207 · LA SEPULTURA DE LA CASA, CON SU FOTO Y DOS NIVELES MÁS
+   Llegaron cuatro imágenes de época para las sepulturas. Ahora hay cuatro
+   niveles, cada uno con la suya:
+   - Nichos familiares (2 cupos): el cementerio municipal. Discreto.
+   - Mausoleo familiar (8 cupos): el apellido en mármol. Como siempre.
+   - Cripta familiar (14 cupos): piedra, cruz y reja de hierro forjado.
+   - Capilla familiar (24 cupos): altar propio y vitral; la familia reza en
+     su casa de los muertos.
+   Al decidir dónde enterrar a los tuyos se ven los cuatro con su precio, y la
+   sepultura que ya tienes se muestra con su foto. Se puede mejorar al nivel
+   siguiente pagando la diferencia (los cupos ocupados se conservan) y
+   ampliarla con cuatro cupos más, como antes. Los nichos y mausoleos de las
+   partidas anteriores quedan como estaban. La tarjeta de Memoria familiar y
+   el mensaje de la muerte usan el nombre del nivel.
+   ========================================================================== */
+(function(){
+  const V207='v207';
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const ORDEN=['nichos','mausoleo','cripta','capilla'];
+  const SEP={
+    nichos:{n:'Nichos familiares',el:'el nicho',cupos:2,img:'nicho_sencillo',prest:0,precio:p=>Math.max(35,p*.006),t:'Comprar unos nichos',corto:'Nichos',d:'Dos cupos en el cementerio municipal. Discreto y suficiente.'},
+    mausoleo:{n:'Mausoleo familiar',el:'el mausoleo',cupos:8,img:'mausoleo_familiar',prest:6,precio:p=>Math.max(180,p*.035),t:'Mandar a construir el mausoleo',corto:'Mausoleo',d:'Ocho cupos, con el apellido en mármol.'},
+    cripta:{n:'Cripta familiar',el:'la cripta',cupos:14,img:'cripta_familiar',prest:9,precio:p=>Math.max(420,p*.07),t:'Mandar a construir una cripta',corto:'Cripta',d:'Catorce cupos, bajo una cruz de piedra y una reja de hierro forjado.'},
+    capilla:{n:'Capilla familiar',el:'la capilla',cupos:24,img:'capilla_familiar',prest:14,precio:p=>Math.max(900,p*.14),t:'Mandar a construir una capilla',corto:'Capilla',d:'Veinticuatro cupos y un altar propio: la familia reza en su casa de los muertos.'}};
+  const pat=()=>{ try{ return patrimonio(); }catch(e){ return 0; } };
+  const foto=t=>'img/mausoleos/'+SEP[t].img+'.jpg';
+  const tipoDe=M=>SEP[M&&M.tipo]?M.tipo:'mausoleo';
+  const nombreTipo=t=>(SEP[t]||SEP.mausoleo).n;
+  const elTipo=t=>(SEP[t]||SEP.mausoleo).el;
+  const capacidad=M=>(M.cupos||0)+((M.enterrados||[]).length);
+  const siguiente=t=>ORDEN[ORDEN.indexOf(t)+1]||null;
+  const costoMejora=(cur,sig)=>{ const p=pat(); return Math.max(SEP[sig].precio(p)*.5,SEP[sig].precio(p)-SEP[cur].precio(p)*.6); };
+  const mover=(n,t)=>{ try{ if(n) moverPrestigio(n,t||''); }catch(e){} };
+
+  function escenaMausoleo207(){
+    if(!(S&&S.p)) return;
+    if(S.mausoleo){
+      const M=S.mausoleo, t=tipoDe(M); if(!M.ciudad) M.ciudad=(S.hogar&&S.hogar.ciudad)||'Bogotá';
+      const ampl=Math.max(90,pat()*.02), sig=siguiente(t), ops=[];
+      ops.push({t:'Ampliarlo',cat:'legado',d:'Cuatro cupos más por '+fmt(ampl)+'.',dis:S.efectivo<ampl?'No te alcanza':null,
+        run:()=>{ S.efectivo-=ampl; M.cupos+=4; mover(2,''); log('Ampliaste '+elTipo(t)+' de la familia: quedan '+M.cupos+' cupos.'); S.mov--; }});
+      if(sig){ const c=costoMejora(t,sig), T=SEP[sig];
+        ops.push({t:'Mejorarlo a '+T.n.toLowerCase(),cat:'legado',d:T.d+' Pagas la diferencia: '+fmt(c)+'. Lo que ya hay adentro se conserva.',dis:S.efectivo<c?'No te alcanza':null,
+          run:()=>{ const cap0=capacidad(M); S.efectivo-=c; M.tipo=sig; M.cupos=Math.max(cap0,T.cupos)-(M.enterrados||[]).length; mover(T.prest-SEP[t].prest,'la sepultura de la casa '+S.dinastia);
+            M.mejoradoEn=S.anio; log('Mejoraste la sepultura de la casa '+E(S.dinastia)+': ahora es una <b>'+E(T.n.toLowerCase())+'</b> en '+E(M.ciudad)+' ('+M.cupos+' cupos libres).','hito'); try{ hito('Mejoró la sepultura de la casa a '+T.n.toLowerCase()); }catch(e){} S.mov--; }}); }
+      ops.push({t:'Dejarlo así',cat:'legado',run:()=>{}});
+      escena({rubro:'Cementerio',titulo:({nichos:'Los nichos de la casa',mausoleo:'El mausoleo de la casa',cripta:'La cripta de la casa',capilla:'La capilla de la casa'})[t]||'El mausoleo de la casa',ancho:true,
+        html:'<figure class="maus207 uno"><img src="'+foto(t)+'" alt="'+E(nombreTipo(t))+'"><figcaption><b>'+E(nombreTipo(t))+'</b> · '+E(M.ciudad)+'</figcaption></figure>',
+        cuerpo:'Construido en '+M.desde+' en <b>'+E(M.ciudad)+'</b>. Quedan <b>'+M.cupos+'</b> cupos'+((M.enterrados||[]).length?'. Reposan ahí: '+M.enterrados.map(E).join(', ')+'.':' y todavía nadie adentro.'),
+        opciones:ops});
+      return;
+    }
+    const p=pat(), st={ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá'};
+    const cds=(typeof CIUDADES!=='undefined'&&Array.isArray(CIUDADES))?CIUDADES.map(c=>c.n||c):[st.ciudad];
+    const caja=escena({rubro:'Cementerio',titulo:'Dónde van a quedar los tuyos',ancho:true,
+      cuerpo:'Tarde o temprano hay que resolverlo, y resolverlo antes sale más barato que resolverlo con el muerto en la casa. En esta ciudad, la sepultura de una familia dice tanto como su casa.',
+      html:'<div class="maus207"><div class="gr">'+ORDEN.map(t=>'<figure><img src="'+foto(t)+'" alt="'+E(SEP[t].n)+'" loading="lazy"><figcaption><b>'+E(SEP[t].corto)+'</b><br>'+SEP[t].cupos+' cupos · '+fmt(SEP[t].precio(p))+'</figcaption></figure>').join('')+'</div></div>'
+        +'<label class="campo">Ciudad de la sepultura</label><div class="fichas-sel" id="cMaus207">'+cds.map(n=>'<button type="button" class="opcion" data-v="'+E(n)+'" aria-pressed="'+(n===st.ciudad?'true':'false')+'">'+E(n)+'</button>').join('')+'</div>',
+      opciones:ORDEN.map(t=>{ const T=SEP[t], c=T.precio(p);
+        return {t:T.t,cat:'legado',d:T.d+' '+fmt(c)+'.',dis:S.efectivo<c?'No te alcanza':null,
+          run:()=>{ S.efectivo-=c; S.mausoleo={desde:S.anio,cupos:T.cupos,tipo:t,enterrados:[],ciudad:st.ciudad}; mover(T.prest,'la sepultura de la casa '+S.dinastia);
+            if(t==='nichos') log('Compraste dos nichos en '+E(st.ciudad)+'.');
+            else { log('Mandaste a construir '+E(T.el)+' de la casa '+E(S.dinastia)+' en '+E(st.ciudad)+'.','hito'); try{ hito('Construyó '+T.el+' de la casa'); }catch(e){} }
+            S.mov--; }}; }).concat([{t:'Eso se ve después',cat:'legado',run:()=>{}}])});
+    try{ caja.querySelectorAll('#cMaus207 .opcion').forEach(b=>{ b.onclick=()=>{ caja.querySelectorAll('#cMaus207 .opcion').forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); st.ciudad=b.dataset.v; }; }); }catch(e){}
+  }
+  let TOPE=null;
+  function instalar(){ if(typeof window.escenaMausoleo!=='function'||window.escenaMausoleo===TOPE) return; window.escenaMausoleo=escenaMausoleo207; TOPE=escenaMausoleo207; try{ escenaMausoleo=escenaMausoleo207; }catch(e){} }
+  function init207(){ instalar(); Object.assign(window,{SEPULTURAS_207:SEP,ORDEN_SEPULTURA_207:ORDEN,nombreSepultura207:nombreTipo,fotoSepultura207:foto,costoMejoraSepultura207:costoMejora,escenaMausoleo207}); }
+  init207(); setTimeout(init207,40); setTimeout(init207,220); setTimeout(init207,650); setTimeout(init207,950); setTimeout(init207,1500);
+  window.__SA207={version:V207};
 })();
 </script>
 
