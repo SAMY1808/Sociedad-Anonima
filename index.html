@@ -1396,7 +1396,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v200</div>
+<div class="version-badge" id="versionBadge">v201</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -36877,6 +36877,165 @@ install();setTimeout(install,1200);
     Object.assign(window,{juez200:J,puerta200:P,syncJuez200:sync,anualJuez200:anualJuez,anualPuerta200:anualPuerta,escenaDespacho200:escenaDespacho,escenaCaso200:escenaCaso,fallarCaso200:fallar,sembrarCasos200:sembrar,hacerJuez200:hacer,evPresion200:evPresion,evDisciplinario200:evDisciplinario,evPuerta200:evPuerta,evRevision200:evRevision,conflicto200:conflicto,salidaPublica200:salidaPublica,ofertasPuerta200:ofertasPuerta,anual200:anual}); }
   init200(); setTimeout(init200,40); setTimeout(init200,220); setTimeout(init200,650); setTimeout(init200,950); setTimeout(init200,1500);
   window.__SA200={version:V200};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v201 · LA CARRERA MILITAR
+   Ejército, Armada, Fuerza Aérea y Policía Nacional, con nueve grados de
+   subteniente a general. La carrera se vive año por año en un panel:
+   - EL GRADO Y SU PIRÁMIDE: cada grado exige años mínimos y un consejo de
+     ascensos que pondera méritos, mando, padrinos, cursos y hoja de vida.
+     Arriba la pirámide se estrecha: quien no asciende a tiempo es llamado a
+     calificar servicios.
+   - EL DESTINO: zona de combate (más mérito, más sueldo, más riesgo de
+     vida), estado mayor en la capital (padrinos), comando de unidad, agregado
+     militar en el exterior o instructor en la Escuela Militar.
+   - LAS OPERACIONES: planeadas con inteligencia, ofensivas o cautelosas, con
+     el nombre de la época (independencia, guerras civiles, La Violencia,
+     Marquetalia, la guerra contra las guerrillas y los carteles, la
+     posguerra). Dan méritos y condecoraciones; las heridas y la muerte en
+     combate existen.
+   - LA HOJA DE VIDA: derechos humanos (hasta 1991 la justicia penal militar
+     juzga a los suyos), contratos de la intendencia, política. Los golpes de
+     1953 y 1957 buscan a los generales.
+   - EL RETIRO: a los 20 años de servicio hay asignación de retiro; después,
+     ofertas de seguridad privada, juntas y, si llegaste lejos, el Ministerio
+     de Defensa.
+   - LA LIBRETA MILITAR: el servicio obligatorio, la cuota de compensación o
+     el favor.
+   Mujeres: en la Policía desde 1953 y en las Fuerzas Militares desde 1976.
+   ========================================================================== */
+(function(){
+  const V201='v201';
+  const A=()=>(S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const GRADOS={
+    ejercito:['Subteniente','Teniente','Capitán','Mayor','Teniente coronel','Coronel','Brigadier general','Mayor general','General'],
+    armada:['Alférez de corbeta','Teniente de corbeta','Teniente de fragata','Capitán de corbeta','Capitán de fragata','Capitán de navío','Contralmirante','Vicealmirante','Almirante'],
+    fac:['Subteniente','Teniente','Capitán','Mayor','Teniente coronel','Coronel','Brigadier general del aire','Mayor general del aire','General del aire'],
+    policia:['Subteniente','Teniente','Capitán','Mayor','Teniente coronel','Coronel','Brigadier general','Mayor general','General']};
+  const RAMAS={ejercito:{n:'Ejército',desde:1800,esc:'la Escuela Militar de Cadetes'},armada:{n:'Armada',desde:1900,esc:'la Escuela Naval de Cadetes'},fac:{n:'Fuerza Aérea',desde:1930,esc:'la Escuela Militar de Aviación'},policia:{n:'Policía Nacional',desde:1891,esc:'la Escuela de Cadetes de Policía'}};
+  const MIN_ANIOS=[2,3,4,4,4,5,3,3,0], MAX_ANIOS=[5,6,7,7,7,8,5,5,0], SAL=[22,30,42,58,80,110,150,190,240];
+  const S2=()=>S.mil201||null;
+  const nombreGrado=(rama,i)=>(GRADOS[rama]||GRADOS.ejercito)[clamp(i,0,8)];
+  function registrar(){ if(typeof RUTAS==='undefined'||RUTAS.militar) return; RUTAS.militar={n:'Carrera militar',niveles:SAL.map((s,i)=>({get n(){ const m=S&&S.mil201; return nombreGrado(m?m.rama:'ejercito',i); },s,edu:1}))}; }
+  function ramasDisponibles(){ const sx=S.p.sexo, a=A(); return Object.keys(RAMAS).filter(k=>a>=RAMAS[k].desde&&(sx!=='m'||(k==='policia'?a>=1953:a>=1976))); }
+  const operacion=a=>a<1830?'una campaña de la guerra de independencia':a<1903?'una campaña de las guerras civiles':a<1948?'una operación de orden público en la frontera':a<1959?'la pacificación de los Llanos y el Tolima':a<1985?'el plan contra la guerrilla en el sur del país':a<2017?'una operación contra la guerrilla, los paramilitares y los carteles':'una operación contra las disidencias, el ELN y las bandas criminales';
+  const riesgoVida=a=>a<1830?.12:a<1899?.07:a<1903?.14:a<1948?.01:a<1959?.06:a<1985?.04:a<2017?.065:.03;
+  const enServicio=()=>!!(S2()&&S.carrera&&S.carrera.ruta==='militar');
+
+  /* ---- entrada y retiro ---- */
+  function ingresar(rama){ if(S2()) return 'Ya estás en servicio.'; registrar(); const m={rama,rango:0,anios:0,aniosRango:0,destino:{tipo:'escuela',txt:'recién egresado de '+RAMAS[rama].esc,ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá'},ind:{merito:ri(40,52),mando:ri(40,52),padrinos:clamp(Math.round((S.p.redes||0)/3),5,60)},riesgo:0,heridas:0,cond:[],cursos:0,ultimoDes:null,buenos:0,malos:0,dec:0,hist:[],ops:0,golpes:{}};
+    S.mil201=m; S.carrera=S.carrera||{}; S.carrera.ruta='militar'; S.carrera.nivel=0; S.carrera.anios=0; S.carrera.desempeno=60; S.carrera.empleador=RAMAS[rama].n; S.libreta201=true;
+    hito('Ingresó a '+RAMAS[rama].n.toLowerCase()+' como '+nombreGrado(rama,0).toLowerCase()); log('Egresaste de <b>'+esc(RAMAS[rama].esc)+'</b> como <b>'+esc(nombreGrado(rama,0).toLowerCase())+'</b> del '+esc(RAMAS[rama].n)+'. Se activó el panel de la carrera militar.','hito'); return 'Ingresaste a '+RAMAS[rama].n+'.'; }
+  function retirar(motivo,forzoso){ const m=S2(); if(!m) return; const rh=(S.milHist201||(S.milHist201=[])); const g=nombreGrado(m.rama,m.rango); const anios=m.anios; const pens=anios>=20?Math.round(SAL[m.rango]*(.5+Math.min(.3,(anios-20)*.02))):0;
+    rh.push({rama:m.rama,grado:g,anios,motivo,desde:A()-anios,hasta:A(),cond:m.cond.length}); S.pension201=pens?{monto:pens,desde:A(),grado:g}:null;
+    const h=(S.puerta200||(S.puerta200={ex:null,junta:null,consultoria:null,arbitraje:false,ingresos:0,inhab:0,ofertas:0})); h.ex={cargo:g+' (r)',ent:'las Fuerzas Militares',rango:m.rango>=7?6:m.rango>=5?5:m.rango>=3?4:2,anio:A(),bien:!forzoso||m.rango>=5,militar:true}; h.visto='mil201';
+    S.mil201=null; if(S.carrera&&S.carrera.ruta==='militar'){ S.carrera.ruta='desempleado'; S.carrera.empleador=null; S.carrera.nivel=-1; }
+    log('Te retiraste del '+esc(RAMAS[m.rama].n)+' como <b>'+esc(g.toLowerCase())+'</b> ('+motivo+').'+(pens?' Recibes una asignación de retiro de '+fm(pens)+' al año.':''),'hito'); }
+
+  /* ---- decisiones: destino, operación, curso, padrinos, intendencia ---- */
+  const DESTINOS=[
+    ['combate','Zona de combate y orden público','Más mérito y sueldo (+25%), pero te juegas la vida y la hoja de vida.',0,()=>true],
+    ['estado','Estado Mayor en la capital','Cerca del poder: padrinos y planes, poco mérito de campo.',0,()=>true],
+    ['comando','Comando de una unidad','Mando directo sobre tropa y presupuesto.',2,()=>true],
+    ['exterior','Agregado militar en el exterior','Washington, Londres o Madrid: padrinos y mundo.',3,()=>A()>=1900],
+    ['escuela','Instructor en la escuela de cadetes','Seguro y formativo: mando y nombre entre los jóvenes.',1,()=>true]];
+  function escenaDestino(){ const m=S2(); if(!m) return; const ops=DESTINOS.filter(d=>m.rango>=d[3]&&d[4]()).map(d=>({t:d[1],cat:'empleo',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(m.destino.tipo===d[0]?'Ya estás ahí':null),run:()=>{ S.mov=Math.max(0,S.mov-1); m.destino={tipo:d[0],txt:d[1].toLowerCase(),ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá'}; log('Pediste destino: <b>'+esc(d[1].toLowerCase())+'</b>.'); escenaMilitar(); }})); ops.push({t:'Volver',cat:'casa',cerrar:false,run:()=>escenaMilitar()}); escena({rubro:RAMAS[m.rama].n,titulo:'Pedir un destino',cerrable:true,cuerpo:'Hoy estás en: '+esc(m.destino.txt)+'.',opciones:ops}); }
+  function operacionResultado(m,modo){ const base={planeada:{p:.72,me:8,dd:3},ofensiva:{p:.55,me:14,dd:12},cautelosa:{p:.9,me:3,dd:0}}[modo]; const p=clamp(base.p+(m.ind.mando-50)/300,.2,.95); const ok=chance(p); m.ops++;
+    let msg='Dirigiste '+operacion(A())+' ('+(modo==='planeada'?'planeada con inteligencia':modo==='ofensiva'?'ofensiva y agresiva':'cautelosa')+').';
+    if(ok){ m.ind.merito=clamp(m.ind.merito+base.me,0,100); m.ind.mando=clamp(m.ind.mando+3,0,100); msg+=' Salió bien: mérito '+('+'+base.me)+'.'; if(base.me>=8&&chance(.35)){ const c=pick(['Cruz de Boyacá','Medalla al Valor','Orden Militar José María Córdova']); m.cond.push({c,a:A()}); msg+=' Te condecoraron con la <b>'+c+'</b>.'; moverPrestigio(2,'condecoración'); } }
+    else { m.ind.merito=clamp(m.ind.merito-3,0,100); m.heridas++; S.p.salud=clamp(S.p.salud-ri(6,14),0,100); msg+=' Salió mal: hubo bajas y quedaste herido.'; }
+    if(base.dd){ m.riesgo=clamp(m.riesgo+base.dd+(A()>=2002&&A()<=2010&&modo==='ofensiva'?6:0),0,100); }
+    return msg; }
+  function escenaOperacion(){ const m=S2(); if(!m) return; const ops=[['planeada','Planear con inteligencia y apoyo aéreo','Más lenta, más segura: buenos resultados con poco riesgo de abusos.'],['ofensiva','Ofensiva agresiva','Resultados rápidos y mérito alto; riesgo de abusos y de bajas.'],['cautelosa','Operación cautelosa','Poco mérito, poco riesgo.']].map(o=>({t:o[1],cat:'riesgo',cerrar:false,d:o[2],dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); log(operacionResultado(m,o[0])); escenaMilitar(); }})); ops.push({t:'Volver',cat:'casa',cerrar:false,run:()=>escenaMilitar()}); escena({rubro:RAMAS[m.rama].n,titulo:'Una operación',cerrable:true,cuerpo:'Te toca dirigir '+esc(operacion(A()))+'.',opciones:ops}); }
+  const costoCurso=()=>Math.round(18*(1+(A()-1900)*.004));
+  const OTRAS=[
+    ['curso','Curso en la Escuela Superior de Guerra','Estado mayor y estrategia: sin él no se llega a coronel.',m=>m.rango>=3&&m.cursos<2&&A()>=1909,costoCurso,m=>{ m.cursos++; m.ind.merito=clamp(m.ind.merito+5,0,100); m.ind.mando=clamp(m.ind.mando+4,0,100); return 'Terminaste el curso de la Escuela Superior de Guerra.'; }],
+    ['padrinos','Cultivar padrinos políticos','Cenas, favores y lealtades: el consejo de ascensos también cuenta con ellos.',m=>true,()=>0,m=>{ m.ind.padrinos=clamp(m.ind.padrinos+8,0,100); S.p.redes=clamp((S.p.redes||0)+2,0,100); return 'Cultivaste a tus padrinos políticos.'; }],
+    ['intendencia','Negocios de la intendencia','Contratos de suministros: plata fácil y expediente.',m=>m.rango>=2,()=>0,m=>{ const x=Math.round(30*(1+m.rango*.35)*(1+(A()-1900)*.004)); S.efectivo+=x; m.riesgo=clamp(m.riesgo+14,0,100); try{ registrarDelito('peculado',.6,'contratos de intendencia'); }catch(e){} return 'Firmaste contratos de la intendencia y recibiste '+fm(x)+' por fuera.'; }],
+    ['retiro','Pedir el retiro con asignación','Con 20 años de servicio hay asignación de retiro.',m=>m.anios>=20,()=>0,m=>{ retirar('retiro voluntario',false); return 'Pasaste a retiro.'; }]];
+  function hacerOtra(i){ const m=S2(); if(!m) return; const d=OTRAS[i], c=d[4](); if(S.mov<1||S.efectivo<c) return; S.mov=Math.max(0,S.mov-1); if(c) tomar(c); const msg=d[5](m); m.dec++; if(S2()){ log(msg+(c?' Costó '+fm(c)+'.':'')); escenaMilitar(); } else { log(msg); cerrarModal(); render(); } }
+
+  /* ---- el año ---- */
+  function puntaje(m){ return m.ind.merito*.38+m.ind.mando*.2+m.ind.padrinos*.2+m.cursos*5+Math.min(m.aniosRango,6)*1.5-m.riesgo*.22; }
+  function anual(){ if(!S||!S.p||S.muerto) return; anualPension(); const m=S2(); if(!m) return; registrar(); if(!enServicio()) return; m.anios++; m.aniosRango++; const d=m.destino||{tipo:'estado'};
+    // sueldo extra, desgaste y mérito del destino
+    if(d.tipo==='combate'){ const bono=Math.round(SAL[m.rango]*.25); S.efectivo+=bono; m.ind.merito=clamp(m.ind.merito+4,0,100); S.p.salud=clamp(S.p.salud-ri(1,4),0,100); m.riesgo=clamp(m.riesgo+2,0,100);
+      if(chance(riesgoVida(A())*(m.ind.mando<45?1.4:1))){ if(chance(.2)&&A()!==1948){ log('<b>Caíste en combate.</b> Una emboscada en '+esc(operacion(A()))+'.','mal'); S.p.salud=0; setTimeout(()=>{ try{ procesarCola(()=>morir()); }catch(e){} },0); return; } m.heridas++; S.p.salud=clamp(S.p.salud-ri(10,25),0,100); cola.push(evHerida(m)); } }
+    else if(d.tipo==='estado'){ m.ind.padrinos=clamp(m.ind.padrinos+3,0,100); m.ind.merito=clamp(m.ind.merito+1,0,100); }
+    else if(d.tipo==='comando'){ m.ind.mando=clamp(m.ind.mando+5,0,100); m.ind.merito=clamp(m.ind.merito+3,0,100); if(chance(.12)) m.riesgo=clamp(m.riesgo+4,0,100); }
+    else if(d.tipo==='exterior'){ m.ind.padrinos=clamp(m.ind.padrinos+3,0,100); m.ind.merito=clamp(m.ind.merito+2,0,100); }
+    else if(d.tipo==='escuela'){ m.ind.mando=clamp(m.ind.mando+3,0,100); m.ind.merito=clamp(m.ind.merito+1,0,100); }
+    Object.keys(m.ind).forEach(k=>{ m.ind[k]=clamp(m.ind[k]-1+ri(-1,1),0,100); }); m.riesgo=clamp(m.riesgo-3,0,100);
+    const des=clamp(Math.round(m.ind.merito*.4+m.ind.mando*.3+m.ind.padrinos*.1-m.riesgo*.2+20),0,100); m.ultimoDes=des; m.hist.push({a:A(),des}); if(m.hist.length>12) m.hist.shift(); if(S.carrera) S.carrera.desempeno=clamp(48+(des-50)/3,40,100); if(S.carrera) S.carrera.nivel=m.rango;
+    // consejo de ascensos
+    if(m.rango<8&&m.aniosRango>=MIN_ANIOS[m.rango]){ const p=clamp((puntaje(m)-42)/50*(m.rango>=6?.55:1)+(S.gobierno&&S.gobierno.apoyado&&m.rango>=6?.1:0),.04,.85); if(chance(p)){ m.rango++; m.aniosRango=0; const g=nombreGrado(m.rama,m.rango); S.carrera.nivel=m.rango; S.carrera.anios=0; S.p.redes=clamp((S.p.redes||0)+4,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); moverPrestigio(m.rango>=6?4:1,'ascendió a '+g.toLowerCase()); log('El consejo de ascensos te promovió a <b>'+esc(g.toLowerCase())+'</b>.','hito'); if(m.rango>=6) hito('Ascendió a '+g); }
+      else if(m.aniosRango>=MAX_ANIOS[m.rango]&&m.rango<8) cola.push(evCalificar(m)); }
+    log('Balance del año ('+esc(nombreGrado(m.rama,m.rango).toLowerCase())+', '+esc(m.destino.txt)+'): desempeño '+des+'/100, mérito '+Math.round(m.ind.merito)+', padrinos '+Math.round(m.ind.padrinos)+'.',des>=62?'bien':des<42?'mal':'');
+    if(m.riesgo>=40&&chance(m.riesgo/140)) cola.push(evDDHH(m));
+    if(m.rango>=6&&(A()===1953||A()===1957)&&!m.golpes[A()]) { m.golpes[A()]=1; cola.push(evGolpe(m,A())); }
+    if(m.rango>=6&&S.gobierno&&!S.gobierno.apoyado&&S.gobierno.desde===A()&&chance(.25)) cola.push(evCalificar(m,true));
+  }
+  function evHerida(m){ return {p:7,c:()=>S2()===m,t:()=>'<b>Quedaste herido en combate.</b> Una emboscada en '+esc(operacion(A()))+' te dejó fuera de servicio por meses.',o:[{t:'Recuperarte en la clínica militar',f:()=>{ S.p.salud=clamp(S.p.salud+12,0,100); m.ind.merito=clamp(m.ind.merito+2,0,100); m.cond.push({c:'Medalla al Valor',a:A()}); return 'Te recuperaste y te dieron una condecoración por la herida.'; }},{t:'Volver a la zona de inmediato',f:()=>{ m.ind.mando=clamp(m.ind.mando+4,0,100); S.p.salud=clamp(S.p.salud-6,0,100); return 'Volviste al frente sin esperar: tu tropa lo notó y tu cuerpo también.'; }}]}; }
+  function evCalificar(m,politico){ return {p:9,c:()=>S2()===m,t:()=>politico?'<b>El nuevo gobierno quiere su propia cúpula.</b> Te llaman a calificar servicios: es el retiro "por la conveniencia de la institución".':'<b>Te llaman a calificar servicios.</b> Llevas demasiados años en el mismo grado y la pirámide se estrecha: hay otros esperando tu puesto.',
+    o:[{t:'Aceptar el retiro con honores',f:()=>{ retirar('llamado a calificar servicios',true); return 'Aceptaste el retiro.'; }},{t:'Pelear el puesto con tus padrinos',f:()=>{ if(chance(clamp(.2+m.ind.padrinos/150,.1,.7))){ m.aniosRango=Math.max(0,m.aniosRango-2); m.ind.padrinos=clamp(m.ind.padrinos-6,0,100); return 'Tus padrinos movieron los hilos y te quedaste otro tiempo.'; } retirar('llamado a calificar servicios',true); S.p.redes=clamp((S.p.redes||0)-4,0,100); return 'Tus padrinos no alcanzaron: te retiraron.'; }}]}; }
+  function evDDHH(m){ const antes=A()<1991; return {p:10,c:()=>S2()===m,t:()=>'<b>Te acusan de violaciones de derechos humanos.</b> Denuncian muertes de civiles en operaciones bajo tu mando. '+(antes?'Hasta 1991 la justicia penal militar juzga a los suyos.':'Desde 1991 el caso lo lleva la justicia ordinaria.')+' Riesgo en tu hoja de vida: '+Math.round(m.riesgo)+'/100.',
+    o:[{t:'Dejar que lo resuelva la justicia'+(antes?' penal militar':''),f:()=>{ if(antes&&chance(.8)){ m.riesgo=Math.max(0,m.riesgo-20); return 'La justicia penal militar archivó el caso.'; } if(chance(clamp(.7-m.riesgo/150,.15,.7))){ m.riesgo=Math.max(0,m.riesgo-15); return 'Los jueces archivaron el caso por falta de pruebas.'; } return condena(m); }},
+       {t:'Colaborar y entregar a los responsables',f:()=>{ m.riesgo=Math.max(0,m.riesgo-25); m.ind.padrinos=clamp(m.ind.padrinos-8,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Colaboraste con la investigación: perdiste padrinos y ganaste la conciencia.'; }},
+       {t:'Pedir el retiro antes de la imputación',f:()=>{ retirar('retiro antes de una investigación',true); return 'Te retiraste.'; }}]}; }
+  function condena(m){ try{ registrarDelito('violaciones de derechos humanos',2,'caso bajo su mando'); abrirEscandalo129('politica','El caso del '+nombreGrado(m.rama,m.rango).toLowerCase(),3); }catch(e){} moverPrestigio(-8,'una condena por derechos humanos'); S.p.reputacion=clamp(S.p.reputacion-10,0,100); retirar('condenado por derechos humanos',true); return 'Te condenaron: saliste de las Fuerzas Militares con una mancha que no se borra.'; }
+  function evGolpe(m,a){ const quien=a===1953?'un grupo de oficiales y políticos conservadores y liberales que quieren sacar a Laureano Gómez del poder':'un grupo de oficiales y civiles que quieren la salida del general Rojas Pinilla'; return {p:9,c:()=>S2()===m,t:()=>'<b>Te sondean para un golpe.</b> Te buscan '+quien+'. Como '+esc(nombreGrado(m.rama,m.rango).toLowerCase())+', tu respaldo pesa.',
+    o:[{t:'Sumarte',f:()=>{ if(chance(.8)){ m.ind.padrinos=clamp(m.ind.padrinos+20,0,100); m.rango=Math.min(8,m.rango+1); m.aniosRango=0; if(S.carrera) S.carrera.nivel=m.rango; moverPrestigio(4,'participó en un cambio de gobierno'); return 'El golpe triunfó: te recompensaron con un ascenso y un puesto en el nuevo orden.'; } m.riesgo=clamp(m.riesgo+25,0,100); return 'El golpe se enredó y quedaste señalado.'; }},{t:'Negarte y callar',f:()=>'No quisiste saber nada y nadie te reclamó.'},{t:'Denunciarlo al gobierno',f:()=>{ m.ind.padrinos=clamp(m.ind.padrinos-10,0,100); S.p.reputacion=clamp(S.p.reputacion+3,0,100); return 'Los denunciaste: ganaste la confianza del gobierno y enemigos entre tus colegas.'; }}]}; }
+
+  /* ---- la libreta militar ---- */
+  function necesitaLibreta(){ return S.p.sexo==='h'&&S.p.edad>=18&&S.p.edad<=50&&!S.libreta201&&!S2()&&A()>=1900; }
+  function escenaLibreta(){ const c=Math.round(Math.max(10,patrimonio()*.01)); const ops=[
+    {t:'Prestar el servicio militar como soldado bachiller',cat:'empleo',cerrar:false,d:'Un año de uniforme: disciplina, contactos y la libreta.',dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); S.libreta201=true; S.p.atr.disciplina=clamp((S.p.atr.disciplina||5)+1,1,10); S.p.redes=clamp((S.p.redes||0)+2,0,100); S.p.felicidad=clamp(S.p.felicidad-3,0,100); log('Prestaste el servicio militar y recibiste tu libreta.','bien'); cerrarModal(); render(); }},
+    {t:'Pagar la cuota de compensación militar ('+fm(c)+')',cat:'capital',cerrar:false,d:'Pagas una cuota proporcional a tu patrimonio y te libras del servicio.',dis:S.efectivo<c?'No te alcanza':null,run:()=>{ tomar(c); S.libreta201=true; log('Pagaste la cuota de compensación y obtuviste tu libreta.'); cerrarModal(); render(); }},
+    {t:'Conseguir la libreta con un contacto',cat:'riesgo',cerrar:false,d:'Un favor en el distrito militar. Si lo saben, es un escándalo menor.',run:()=>{ S.libreta201=true; if(chance(.18)){ moverPrestigio(-2,'la libreta militar'); log('Conseguiste la libreta por un contacto, y alguien lo comentó en el club.','mal'); } else log('Conseguiste la libreta con un favor.'); cerrarModal(); render(); }}];
+    escena({rubro:'Obligaciones',titulo:'Tu libreta militar',cerrable:true,cuerpo:'El servicio militar es obligatorio para los hombres. Hay tres caminos y ninguno es gratis.',opciones:ops}); }
+
+  /* ---- panel ---- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaMilitar(){ const m=S2(); if(!m){ escenaIngreso(); return; } registrar();
+    const g=nombreGrado(m.rama,m.rango), sig=m.rango<8?nombreGrado(m.rama,m.rango+1):null;
+    const t='<table class="libro"><tr><td>Grado</td><td>'+esc(g)+' · '+RAMAS[m.rama].n+' · '+m.anios+' año'+(m.anios===1?'':'s')+' de servicio</td></tr><tr><td>Destino</td><td>'+esc(m.destino.txt)+'</td></tr>'
+      +'<tr><td>Méritos</td><td>'+barra(m.ind.merito)+'</td></tr><tr><td>Mando</td><td>'+barra(m.ind.mando)+'</td></tr><tr><td>Padrinos políticos</td><td>'+barra(m.ind.padrinos)+'</td></tr><tr><td>Riesgo en la hoja de vida</td><td>'+barra(m.riesgo)+'</td></tr>'
+      +'<tr><td>Ascenso</td><td>'+(sig?'a '+esc(sig.toLowerCase())+': '+Math.max(0,MIN_ANIOS[m.rango]-m.aniosRango)+' año(s) para el consejo; puntaje '+Math.round(puntaje(m))+'/100':'cúspide de la carrera')+'</td></tr><tr><td>Condecoraciones · cursos · heridas</td><td>'+m.cond.length+' · '+m.cursos+' · '+m.heridas+'</td></tr></table>';
+    const ops=[{t:'Pedir un destino',cat:'empleo',cerrar:false,d:'Combate, estado mayor, comando, exterior o escuela.',run:()=>escenaDestino()}];
+    if(m.destino.tipo==='combate'||m.destino.tipo==='comando') ops.push({t:'Dirigir una operación',cat:'riesgo',cerrar:false,d:'Mérito a cambio de riesgo.',dis:S.mov<1?'Sin movidas':null,run:()=>escenaOperacion()});
+    OTRAS.forEach((d,i)=>{ if(!d[3](m)) return; const c=d[4](); ops.push({t:d[1]+(c?' ('+fm(c)+')':''),cat:i===2?'riesgo':'empleo',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<c?'No te alcanza':null),run:()=>hacerOtra(i)}); });
+    ops.push({t:'Dar de baja del servicio',cat:'riesgo',cerrar:false,d:'Solicitas la baja. Sin 20 años no hay asignación.',run:()=>{ retirar('baja voluntaria',false); cerrarModal(); render(); }});
+    escena({rubro:esc(RAMAS[m.rama].n),titulo:esc(g)+' · tu carrera militar',ancho:true,cerrable:true,cuerpo:'Año '+(m.anios+1)+' de servicio. '+(m.rango>=6?'Ya eres oficial general: arriba la política pesa tanto como los méritos.':'Cada grado pide años y un consejo de ascensos.')+'<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(m.ultimoDes==null?'aún sin balance':m.ultimoDes+'/100')+'.</span>',html:t,opciones:ops}); }
+  function escenaIngreso(){ const ramas=ramasDisponibles(), edad=S.p.edad||0, ok=edad>=17&&edad<=26;
+    const ops=ramas.map(k=>({t:'Ingresar al '+RAMAS[k].n+' ('+RAMAS[k].esc.replace(/^la /,'')+')',cat:'empleo',cerrar:false,d:'Egresas como '+nombreGrado(k,0).toLowerCase()+'. Una carrera de ascensos por consejo, destinos y operaciones.',dis:!ok?'Se ingresa entre los 17 y los 26 años':(S.carrera&&S.carrera.ruta&&S.carrera.ruta!=='desempleado'?'Ya tienes una carrera':(S.mov<1?'Sin movidas':null)),run:()=>{ S.mov=Math.max(0,S.mov-1); log(ingresar(k)); cerrarModal(); render(); }}));
+    if(!ops.length) ops.push({t:'No hay una rama abierta para ti en esta época',cat:'casa',cerrar:false,dis:'Las mujeres ingresan a la Policía desde 1953 y a las Fuerzas Militares desde 1976',run:()=>{}});
+    escena({rubro:'Armas',titulo:'La carrera militar',ancho:true,cerrable:true,cuerpo:'Cadete, oficial, comandante, general. Ejército, Armada, Fuerza Aérea o Policía: cada una con su escuela, su pirámide y su historia.',opciones:ops}); }
+
+  /* ---- enganches ---- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA201_PASO) return; window.__SA201_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)){ ['Tu carrera militar','Ingresar a las armas','Tu libreta militar'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); } }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA201_ACC) return; window.__SA201_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} let L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){
+        if(enServicio()){ for(let i=L.length-1;i>=0;i--){ const t=L[i]&&L[i].t; if(typeof t==='string'&&(/^(Pedir el ascenso a|Trabajar duro este año|Negociar salario|Renunciar$|Tomarte unas vacaciones)/.test(t))) L.splice(i,1); }
+          if(!L.some(x=>x.t==='Tu carrera militar')) L.push({t:'Tu carrera militar',cat:'empleo',d:nombreGrado(S2().rama,S2().rango)+' del '+RAMAS[S2().rama].n+': destino, operaciones, ascensos y hoja de vida.',mov:0,modal:false,run:()=>escenaMilitar()}); }
+        else { for(let i=L.length-1;i>=0;i--){ if(L[i]&&L[i].t==='Emplearte: Carrera militar') L.splice(i,1); }
+          if(!S2()&&ramasDisponibles().length&&(S.p.edad||0)>=17&&(S.p.edad||0)<=26&&!L.some(x=>x.t==='Ingresar a las armas')) L.push({t:'Ingresar a las armas',cat:'empleo',d:'Ejército, Armada, Fuerza Aérea o Policía: escuela de cadetes, grados y consejo de ascensos.',mov:1,modal:true,run:()=>escenaIngreso()});
+          if(necesitaLibreta()&&!L.some(x=>x.t==='Tu libreta militar')) L.push({t:'Tu libreta militar',cat:'casa',d:'Servicio obligatorio, cuota de compensación o un favor.',mov:0,modal:true,run:()=>escenaLibreta()}); } } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v201=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA201_CAT) return; window.__SA201_CAT=true; window.catDe=function(t){ if(t==='Tu carrera militar'||t==='Ingresar a las armas') return 'empleo'; if(t==='Tu libreta militar') return 'casa'; return old.apply(this,arguments); }; }
+  function wrapPension(){ /* la asignación de retiro se paga cada año junto con el balance */ }
+  function anualPension(){ const p=S.pension201; if(!p||S2()) return; S.efectivo+=p.monto; log('Tu asignación de retiro de '+esc(p.grado.toLowerCase())+': '+fm(p.monto)+'.'); }
+  function init201(){ registrar(); wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{mil201:S2,registrarMil201:registrar,ingresarMil201:ingresar,retirarMil201:retirar,anualMil201:anual,anualPension201:anualPension,escenaMilitar201:escenaMilitar,escenaIngresoMil201:escenaIngreso,escenaDestino201:escenaDestino,escenaOperacion201:escenaOperacion,escenaLibreta201:escenaLibreta,hacerOtraMil201:hacerOtra,operacionResultado201:operacionResultado,ramasMil201:ramasDisponibles,nombreGrado201:nombreGrado,GRADOS_201:GRADOS,RAMAS_201:RAMAS,puntajeAscenso201:puntaje,evHerida201:evHerida,evCalificar201:evCalificar,evDDHH201:evDDHH,evGolpe201:evGolpe,necesitaLibreta201:necesitaLibreta,riesgoVida201:riesgoVida,operacion201:operacion}); }
+  init201(); setTimeout(init201,40); setTimeout(init201,220); setTimeout(init201,650); setTimeout(init201,950); setTimeout(init201,1500);
+  window.__SA201={version:V201};
 })();
 </script>
 
