@@ -37556,6 +37556,12 @@ install();setTimeout(install,1200);
 (function(){
   const V208='v208';
   window.EDAD_MAYORIA_208=18;
+  /* a los 18 aparecen tres acciones de casa (irte a vivir aparte, mudarte, residencia internacional):
+     se guardan en el grupo «Propiedades» para que la lista no crezca */
+  function grupo(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const g=G.find(x=>x.id==='propiedades'); if(!g||!Array.isArray(g.miembros)) return;
+    ['Irte a vivir aparte','Mudarte a otra ciudad','Abrir residencia internacional'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Mudarte',t]); }); }
+  function init208(){ try{ grupo(); }catch(e){} }
+  init208(); setTimeout(init208,40); setTimeout(init208,220); setTimeout(init208,650); setTimeout(init208,950); setTimeout(init208,1500);
   window.__SA208={version:V208};
 })();
 </script>
