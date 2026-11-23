@@ -1404,10 +1404,17 @@ svg.foto116{display:block;background:#1d2a23}
 .maus207.uno figcaption{font-size:.85rem}
 .maus207 .aqui img{border-color:#D6A648;box-shadow:0 0 0 2px rgba(214,166,72,.45),0 2px 10px rgba(0,0,0,.35)}
 </style>
+<style>
+.respaldo213{margin:26px 0 0;max-width:560px;text-align:left}
+.respaldo213 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.respaldo213 .botones213{display:flex;flex-wrap:wrap;gap:8px}
+.respaldo213 .btn{flex:1 1 200px}
+.respaldo213 .apunte{margin-top:8px;font-size:12.5px;opacity:.85;line-height:1.4}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v212</div>
+<div class="version-badge" id="versionBadge">v213</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -37739,6 +37746,129 @@ install();setTimeout(install,1200);
   const V212='v212';
   window.EDAD_ADULTO_HIJOS_212=18;
   window.__SA212={version:V212};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v213 · RESPALDO DE PARTIDAS Y JUEGO SIN INTERNET
+   Para jugar en el iPhone (o en cualquier celular) sin miedo a perder la
+   dinastía ni depender de la señal. En la portada, debajo de «Tus partidas»:
+   - «Guardar una copia en un archivo»: arma un archivo con tus tres ranuras
+     y el salón de la fama. En el iPhone abre el menú de compartir (Guardar
+     en Archivos, AirDrop, correo); en un computador lo descarga.
+   - «Recuperar una copia»: lees ese archivo, el juego revisa que sea un
+     respaldo de verdad (solo acepta partidas y el salón de la fama; no
+     ejecuta nada del archivo), te cuenta qué trae y, si aceptas, reemplaza
+     lo que tienes.
+   - «Jugar sin internet»: baja de una vez las fotos del juego (unos 16 MB)
+     al teléfono, con un contador, para que se vean sin señal. Solo funciona
+     en la versión publicada (el service worker no corre desde un archivo).
+   El manifiesto ahora trae los iconos de 192 y 512 píxeles.
+   ========================================================================== */
+(function(){
+  const V213='v213', PREF='sociedad-anonima:', CACHE='sociedad-anonima-v213';
+  const ls={get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+  const av=m=>{ try{ if(typeof aviso==='function') aviso(m); }catch(e){} };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+
+  /* ---------- el archivo de respaldo ---------- */
+  function recoger(){ const out={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(PREF)===0) out[k]=localStorage.getItem(k); } }catch(e){} return out; }
+  function armar(){ return {juego:'Sociedad Anónima',formato:1,exportado:new Date().toISOString(),version:(document.getElementById('versionBadge')||{}).textContent||'',claves:recoger()}; }
+  function nombreArchivo(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return 'sociedad-anonima-respaldo-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json'; }
+  const hayPartidas=o=>Object.keys(o.claves).some(k=>/:ranura:[1-3]$/.test(k)||/:partida$/.test(k));
+  async function exportar(){
+    const obj=armar();
+    if(!hayPartidas(obj)){ av('Todavía no hay partidas guardadas para respaldar.'); return false; }
+    const txt=JSON.stringify(obj), nombre=nombreArchivo();
+    try{ const file=new File([txt],nombre,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Respaldo de Sociedad Anónima'}); av('El respaldo quedó listo.'); return true; } }
+    catch(e){ if(e&&e.name==='AbortError') return false; }
+    try{ const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})), a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); av('Se descargó '+nombre+'.'); return true; }
+    catch(e){ av('No se pudo guardar el respaldo.'); return false; }
+  }
+  /* solo entra lo que el juego sabe leer: tres ranuras con un personaje, el salón de la fama y la marca del tutorial */
+  function validar(o){
+    if(!o||typeof o!=='object'||o.juego!=='Sociedad Anónima'||!o.claves||typeof o.claves!=='object') return {error:'Ese archivo no es un respaldo de Sociedad Anónima.'};
+    const claves={}, resumen=[];
+    Object.keys(o.claves).forEach(k=>{ const v=o.claves[k]; if(typeof v!=='string'||k.indexOf(PREF)!==0) return; const r=k.slice(PREF.length);
+      if(/^ranura:[1-3]$/.test(r)){ try{ const g=JSON.parse(v); if(g&&typeof g==='object'&&g.p&&typeof g.p==='object'){ claves[k]=v; resumen.push({n:+r.slice(7),casa:String(g.dinastia||g.p.apellido||'sin nombre'),anio:g.anio,gen:g.gen}); } }catch(e){} }
+      else if(r==='salon'){ try{ if(Array.isArray(JSON.parse(v))) claves[k]=v; }catch(e){} }
+      else if(r==='tutorial'){ claves[k]=String(v).slice(0,20); } });
+    if(!resumen.length) return {error:'El respaldo no trae ninguna partida que se pueda leer.'};
+    resumen.sort((a,b)=>a.n-b.n);
+    return {claves,resumen,exportado:o.exportado||'',version:o.version||''};
+  }
+  function actuales(){ let n=0; for(let i=1;i<=3;i++) if(ls.get(PREF+'ranura:'+i)) n++; return n; }
+  function aplicar(v){
+    for(let i=1;i<=3;i++) ls.del(PREF+'ranura:'+i);
+    ls.del(PREF+'salon');
+    Object.keys(v.claves).forEach(k=>ls.set(k,v.claves[k]));
+  }
+  async function importar(file){
+    if(!file) return false;
+    if(file.size>20*1024*1024){ av('Ese archivo es demasiado grande para ser un respaldo.'); return false; }
+    let o; try{ o=JSON.parse(await file.text()); }catch(e){ av('No se pudo leer el archivo: no es un respaldo válido.'); return false; }
+    const v=validar(o); if(v.error){ av(v.error); return false; }
+    const lista=v.resumen.map(r=>'Ranura '+r.n+': casa '+E(r.casa)+(r.anio?', '+E(r.anio):'')+(r.gen?', generación '+E(typeof genLabel==='function'?genLabel(r.gen):r.gen):'')).join('<br>');
+    const hoy=actuales();
+    escena({rubro:'Respaldo',titulo:'Recuperar el respaldo',ancho:true,cerrable:true,
+      cuerpo:'El respaldo trae '+v.resumen.length+' partida'+(v.resumen.length===1?'':'s')+(v.exportado?' (guardado el '+E(String(v.exportado).slice(0,10))+')':'')+':<br>'+lista+'<br><br>'
+        +(hoy?'Si sigues, se reemplaza'+(hoy===1?' la <b>1</b> partida que tienes':'n las <b>'+hoy+'</b> partidas que tienes')+' ahora en este teléfono o computador.':'Aquí no tienes partidas guardadas: se agregan todas.'),
+      opciones:[{t:'Reemplazar mis partidas',cat:'riesgo',d:'Lo que hay ahora se borra y queda lo del respaldo.',cerrar:false,run:()=>{ aplicar(v); try{ cerrarModal(); }catch(e){} av('Respaldo recuperado.'); setTimeout(()=>{ try{ location.reload(); }catch(e){} },400); }},
+        {t:'Mejor no',cat:'legado',run:()=>{}}]});
+    return true;
+  }
+
+  /* ---------- jugar sin internet ---------- */
+  const conSW=()=>('serviceWorker' in navigator)&&location.protocol!=='file:';
+  async function listaPrecarga(){ const r=await fetch('./precache.json',{cache:'no-cache'}); const j=await r.json(); return Array.isArray(j.urls)?j.urls:[]; }
+  async function estadoOffline(){
+    if(!conSW()) return {modo:'no'};
+    try{ const lista=await listaPrecarga(), c=await caches.open(CACHE), ks=await c.keys(), set=new Set(ks.map(r=>new URL(r.url).pathname));
+      const hechas=lista.filter(u=>set.has(new URL(u,location.href).pathname)).length;
+      return {modo:lista.length&&hechas>=lista.length?'listo':'pendiente',hechas,total:lista.length}; }
+    catch(e){ return {modo:'no'}; }
+  }
+  async function descargar(){
+    if(!conSW()){ av('Esto solo funciona en la versión publicada del juego, no desde un archivo.'); return false; }
+    try{ const reg=await navigator.serviceWorker.ready, w=reg.active||navigator.serviceWorker.controller;
+      if(!w){ av('Todavía no está listo. Inténtalo de nuevo en unos segundos.'); return false; }
+      const lista=await listaPrecarga(); w.postMessage({tipo:'precargar',urls:lista}); return true; }
+    catch(e){ av('No se pudo empezar la descarga.'); return false; }
+  }
+  function textoOffline(s){
+    if(s.modo==='no') return conSW()?'':'El modo sin internet solo funciona en la versión publicada del juego.';
+    if(s.modo==='listo') return 'Ya está descargado: el juego y sus '+s.total+' fotos se ven sin internet.';
+    return s.hechas?'Faltan '+(s.total-s.hechas)+' de '+s.total+' fotos para jugar sin internet.':'Descarga las '+s.total+' fotos (unos 16 MB) para jugar sin señal. Tus partidas ya se guardan en el teléfono.';
+  }
+
+  /* ---------- la portada ---------- */
+  function pintar(){
+    const port=document.getElementById('portada'); if(!port) return;
+    const ancla=document.getElementById('salon100')||document.getElementById('ranuras100')||port.querySelector('.entrada'); if(!ancla) return;
+    let r=document.getElementById('respaldo213');
+    if(!r){ r=document.createElement('div'); r.id='respaldo213'; r.className='respaldo213'; ancla.insertAdjacentElement('afterend',r);
+      r.innerHTML='<div class="t">Respaldo y juego sin internet</div><div class="botones213"><button class="btn lisa" id="bExp213" type="button">Guardar una copia en un archivo</button><button class="btn lisa" id="bImp213" type="button">Recuperar una copia</button><button class="btn lisa" id="bOff213" type="button">Jugar sin internet</button></div><div class="apunte" id="estado213"></div><input type="file" id="fImp213" accept="application/json,.json" hidden>';
+      r.querySelector('#bExp213').onclick=()=>{ exportar(); };
+      r.querySelector('#bImp213').onclick=()=>{ r.querySelector('#fImp213').click(); };
+      r.querySelector('#fImp213').onchange=ev=>{ const f=ev.target.files&&ev.target.files[0]; ev.target.value=''; importar(f); };
+      r.querySelector('#bOff213').onclick=async()=>{ const est=r.querySelector('#estado213'); est.textContent='Empezando la descarga…'; const ok=await descargar(); if(!ok) refrescarEstado(); };
+      refrescarEstado(); }
+    else if(r.previousElementSibling!==ancla){ ancla.insertAdjacentElement('afterend',r); }
+  }
+  async function refrescarEstado(){ const e=document.getElementById('estado213'); if(!e) return; const s=await estadoOffline(); e.textContent=textoOffline(s); const b=document.getElementById('bOff213'); if(b){ b.disabled=!conSW(); b.textContent=s.modo==='listo'?'Actualizar la descarga':'Jugar sin internet'; } }
+  function oir(){ if(!conSW()||window.__SA213_MSG) return; window.__SA213_MSG=true;
+    navigator.serviceWorker.addEventListener('message',ev=>{ const d=ev.data; if(!d||(d.tipo!=='progreso'&&d.tipo!=='fin')) return; const e=document.getElementById('estado213'); if(!e) return;
+      if(d.tipo==='progreso') e.textContent='Descargando fotos… '+d.hechas+' de '+d.total+(d.fallos?' ('+d.fallos+' no se pudieron bajar)':'');
+      else { e.textContent=d.fallos?'Terminó con '+d.fallos+' fotos que no se pudieron bajar. Inténtalo otra vez con mejor señal.':'Listo: el juego y sus '+d.total+' fotos se ven sin internet.'; refrescarEstado(); } }); }
+  function vigilar(){ if(window.__SA213_OBS||typeof MutationObserver==='undefined') return; window.__SA213_OBS=true; new MutationObserver(()=>{ try{ pintar(); }catch(e){} }).observe(document.body,{childList:true,subtree:true}); }
+  function init213(){ try{ oir(); vigilar(); pintar(); }catch(e){ console.error(e); }
+    Object.assign(window,{exportarPartidas213:exportar,importarPartidas213:importar,validarRespaldo213:validar,armarRespaldo213:armar,aplicarRespaldo213:aplicar,descargarSinInternet213:descargar,estadoSinInternet213:estadoOffline,CACHE_SW_213:CACHE}); }
+  init213(); setTimeout(init213,40); setTimeout(init213,220); setTimeout(init213,650); setTimeout(init213,950); setTimeout(init213,1500);
+  window.__SA213={version:V213};
 })();
 </script>
 
