@@ -1,145 +1,123 @@
 
 /* ==========================================================================
-   v221 · CRIPTOACTIVOS
-   Hasta aquí las criptomonedas solo salían como rescate de un hackeo. Ahora
-   hay un panel, «Tus criptoactivos», con lo que se compra, se guarda, se
-   mina y se vende, según la época:
-   - MONEDAS: Bitcoin (desde 2012, cuando llega la primera plata de verdad),
-     tokens y altcoins (2017, la burbuja de las ICO), Ether (2016) y
-     stablecoins (2018). Cada una sigue su trayectoria histórica año por año
-     (aproximada, y con las subidas de las burbujas de 2013 y 2017 limitadas
-     a 5 veces para que el juego no se rompa); desde 2025 se mueven al azar.
-   - CUSTODIA: en un exchange (cómodo, pero si el exchange se hunde, se
-     hunde tu plata: Mt. Gox 2014, FTX 2022) o en una billetera propia (sin
-     intermediarios, pero si pierdes la llave, pierdes todo).
-   - MINERÍA: una granja de minería (2013-2024) paga según el precio del
-     Bitcoin, gasta electricidad, se deprecia rápido y el pago se parte en
-     dos con cada halving (2016, 2020, 2024).
-   - IMPUESTOS: las ganancias pagan ganancia ocasional (10%, 15% desde 2019,
-     20% desde 2023); desde 2018 la DIAN pide reportarlas.
-   - SUCESOS: el exchange hackeado, la quiebra del exchange, el colapso de
-     Terra/Luna, la estafa de «duplica tu bitcoin», el reporte a la DIAN y la
-     llave perdida.
-   Las criptos cuentan en el patrimonio y pasan a los herederos (con la
-   sucesión descontada).
+   v222 · LOS HIJOS Y LOS NIETOS CON LAS CARRERAS NUEVAS
+   Al orientar a un hijo o a un nieto (v44, v203) se pueden escoger también
+   la carrera DEPORTIVA, la ARTÍSTICA y la PERIODÍSTICA de la v216:
+   - LA ÉPOCA Y EL SEXO FILTRAN LA OFERTA: la deportiva entre los 14 y los 32
+     años, la artística desde los 16 y la periodística desde los 18, y solo
+     si hay una disciplina o una sección abierta para esa persona en esa
+     época (las mujeres llegaron más tarde a muchas). La disciplina se sortea
+     entre las disponibles y queda en su título («Estrella (fútbol)»).
+   - EL DEPORTISTA TIENE CARRERA CORTA: se retira a los 36 (o antes si no
+     despegó), y queda como «Exdeportista» con el título que alcanzó.
+   - APORTAN A LA CASA desde la mitad de la escalera: la figura del deporte y
+     el artista le dan nombre; el periodista, oído en las redacciones.
+   - PREMIOS: con los años reciben los premios de su oficio (los mismos de la
+     v218: deportista del año, premios nacionales, Grammy Latino, Cabot...) y
+     quedan en el «Salón de honor de la casa».
+   - SUCESOS QUE TE PIDEN UNA DECISIÓN: la lesión del deportista (el mejor
+     especialista, con la cobertura de salud) y la convocatoria a las
+     grandes citas; la primera exposición del artista, la crítica que lo
+     destroza y la bohemia; las amenazas al periodista, la chiva contra un
+     amigo de la casa y la demanda por calumnia.
    ========================================================================== */
 (function(){
-  const V221='v221';
+  const V222='v222';
   const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
   const fm=x=>fmt(Math.round(x));
   const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
-  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
   const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
   const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
-  const K=()=>{ if(!S.cripto221) S.cripto221={tenencias:[],granja:null,custodia:'exchange',hechos:{},declarada:false,ganado:0,pagado:0}; return S.cripto221; };
-  const tens=()=>((typeof S!=='undefined'&&S&&S.cripto221&&S.cripto221.tenencias)||[]);
-  const granja=()=>((typeof S!=='undefined'&&S&&S.cripto221&&S.cripto221.granja)||null);
-  const valor=()=>tens().reduce((a,t)=>a+(t.valor||0),0)+((granja()&&granja().valor)||0);
+  const cob=()=>{ try{ return typeof window.factorRehab215==='function'?window.factorRehab215():1; }catch(e){ return 1; } };
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const TIPOS=['deportiva','artistica','periodistica'];
+  const MAPA={deportiva:'deportista',artistica:'artista',periodistica:'periodista'};
+  const TIT={deportiva:['Promesa del deporte','Deportista profesional','Figura del deporte','Leyenda del deporte'],
+    artistica:['Aprendiz de artista','Artista profesional','Artista reconocido','Maestro de las artes'],
+    periodistica:['Reportero','Redactor','Columnista o corresponsal','Gran firma o director']};
+  const NOMBRE=h=>(h.nombre||'')+' '+(h.apellido||(S.p&&S.p.apellido)||'');
+  const hijoA=h=>h.sexo==='m'?'hija':'hijo';
+  const C216=()=>window.CARRERAS_216||null;
 
-  /* ---------- las monedas y su trayectoria (retorno de fin de año a fin de año) ---------- */
-  const MON={
-    btc:{n:'Bitcoin',desde:2012,vol:.55,mu:.12,fee:.015,d:'La primera y la más conocida: oro digital para unos, humo para otros.',
-      r:{2012:1.85,2013:4,2014:-.6,2015:.34,2016:1.24,2017:4,2018:-.73,2019:.92,2020:3.03,2021:.6,2022:-.64,2023:1.56,2024:1.21}},
-    eth:{n:'Ether',desde:2016,vol:.7,mu:.12,fee:.015,d:'La red donde se programan contratos: más volátil que el Bitcoin.',
-      r:{2016:4,2017:4,2018:-.82,2019:-.03,2020:4,2021:4,2022:-.67,2023:.91,2024:.46}},
-    alt:{n:'Tokens y altcoins',desde:2017,vol:.95,mu:0,fee:.02,d:'Cientos de monedas nuevas: algunas se multiplican y casi todas se hunden.',
-      r:{2017:4,2018:-.85,2019:-.1,2020:1.2,2021:3,2022:-.85,2023:.6,2024:.8}},
-    usdt:{n:'Stablecoins (dólar digital)',desde:2018,vol:.01,mu:0,fee:.01,d:'Una moneda que vale un dólar: no sube ni baja, pero tampoco te hace rico.',r:{}}};
-  const IDS=Object.keys(MON);
-  const disp=a=>IDS.filter(k=>(a||A())>=MON[k].desde);
-  const HALVING=[2012,2016,2020,2024];
-  function retorno(id,a){ a=a||A(); const m=MON[id]; if(!m) return 0; if(id==='usdt') return 0;
-    if(m.r[a]!==undefined) return m.r[a];
-    if(a<m.desde) return 0;
-    return clamp(m.mu+m.vol*(rnd(-1,1)+rnd(-1,1)+rnd(-1,1))/1.7,-.8,2.5); }
-  const tasaGO=a=>(a||A())>=2023?.2:(a||A())>=2019?.15:.1;
+  /* ---------- quién puede y con qué disciplina ---------- */
+  function discDe(k,h){ const c=C216()&&C216()[MAPA[k]]; if(!c) return []; return c.disc.filter(d=>A()>=(h.sexo==='m'?d.m:d.d)); }
+  function disponible(k,h){ if(!TIPOS.includes(k)) return true; const e=(h&&h.edad)||0;
+    if(k==='deportiva'&&(e<14||e>32||A()<1900)) return false; if(k==='artistica'&&(e<16||A()<1800)) return false; if(k==='periodistica'&&(e<18||e>60||A()<1810)) return false;
+    return discDe(k,h).length>0; }
+  function rotulo(c){ const t=TIT[c.tipo]; if(!t||!c.discN222) return; const base=t[clamp(c.nivel||0,0,3)]; c.titulo=c.retirada222?('Exdeportista ('+base.toLowerCase()+', '+c.discN222.toLowerCase()+')'):base+' ('+c.discN222.toLowerCase()+')'; }
+  function asignar(h,k){ const c=h.casa43&&h.casa43.carreraPublica; if(!c||c.tipo!==k||c.disc222) return; const L=discDe(k,h); if(!L.length) return; const d=L[ri(0,L.length-1)]; c.disc222=d.id; c.discN222=d.n; rotulo(c); }
+  function alOrientar(h,k){ if(!TIPOS.includes(k)) return; asignar(h,k); const c=h.casa43.carreraPublica; if(c&&c.discN222) log('La disciplina de <b>'+E(NOMBRE(h))+'</b> será '+E(c.discN222.toLowerCase())+'.'); }
 
-  /* ---------- operar ---------- */
-  function buscar(id){ return tens().find(t=>t.coin===id); }
-  function comprar(id,x){ const m=MON[id]; if(!m||A()<m.desde||x<=0) return null; const fee=Math.max(2,x*m.fee); if(S.efectivo<x+fee) return null; S.efectivo-=x+fee;
-    let t=buscar(id); if(!t){ t={coin:id,valor:0,costo:0,desde:A()}; K().tenencias.push(t); } t.valor+=x; t.costo+=x;
-    log('Compraste <b>'+E(m.n)+'</b> por '+fm(x)+' (comisión '+fm(fee)+').'); return t; }
-  function vender(id,fr){ const t=buscar(id); if(!t||t.valor<=0) return null; const m=MON[id]; const x=t.valor*fr, costoP=t.costo*fr, fee=x*.01, ganancia=Math.max(0,x-costoP), imp=ganancia*tasaGO();
-    t.valor-=x; t.costo-=costoP; S.efectivo+=x-fee-imp; const k=K(); k.ganado+=ganancia; k.pagado+=imp; if(t.valor<1) k.tenencias=k.tenencias.filter(z=>z!==t);
-    log('Vendiste '+E(m.n)+' por '+fm(x)+(ganancia>0?': ganancia de '+fm(ganancia)+' y impuesto de ganancia ocasional de '+fm(imp)+' ('+Math.round(tasaGO()*100)+'%).':'.')); return {x,imp,ganancia}; }
-  function costoGranja(){ return pago(300); }
-  function montarGranja(){ const x=costoGranja(); if(A()<2013||A()>2024||granja()||S.efectivo<x) return null; S.efectivo-=x; K().granja={valor:x,costo:x,desde:A()}; log('Montaste una <b>granja de minería</b> de Bitcoin por '+fm(x)+': máquinas, galpón y un contrato de energía.','hito'); return K().granja; }
-  function venderGranja(){ const g=granja(); if(!g) return 0; const x=g.valor*.6; S.efectivo+=x; K().granja=null; log('Vendiste la granja de minería por '+fm(x)+' (las máquinas usadas valen poco).'); return x; }
-  const halvings=g=>HALVING.filter(h=>h>=g.desde&&h<=A()).length;
+  /* ---------- las ramas con carrera nueva ---------- */
+  function ramas(){ const out=[]; const rec=(arr,g)=>{ (arr||[]).forEach(h=>{ if(!h) return; const c=h.casa43&&h.casa43.carreraPublica; if(c&&TIPOS.includes(c.tipo)) out.push({h,c,gen:g}); rec(h.hijos,g+1); }); }; rec(S.familia&&S.familia.hijos,1); return out; }
+  const rel=(h,g)=>g>=2?(h.sexo==='m'?'nieta':'nieto'):hijoA(h);
 
-  /* ---------- el año ---------- */
-  function anual(res){ if(!ACTIVO()||nino()) return; const k=K(); if(!tens().length&&!granja()) return; const a=A(); let tot=0;
-    tens().slice().forEach(t=>{ const r=retorno(t.coin,a); const antes=t.valor; t.valor=Math.max(0,t.valor*(1+r)); tot+=t.valor-antes; if(t.valor<1) k.tenencias=k.tenencias.filter(z=>z!==t); });
-    if(res&&tot!==0) res.push(['Criptoactivos',tot,tot>=0?'pos':'neg']);
-    const g=granja(); if(g){ const rb=retorno('btc',a), rev=g.valor*clamp(.45+rb*.35,.05,1.2)/Math.pow(2,halvings(g)), gasto=g.valor*.28; g.valor*=.72; S.efectivo+=rev-gasto; if(res) res.push(['Granja de minería',rev-gasto,(rev-gasto)>=0?'pos':'neg']); if(g.valor<costoGranja()*.05) K().granja=null; }
-    if(k.custodia==='propia'&&chance(.02)&&tens().length){ const x=valor(); k.tenencias=[]; log('<b>Perdiste la llave de tu billetera.</b> '+fm(x)+' en criptoactivos quedaron para siempre en la red, sin dueño.','mal'); }
-    if(HALVING.includes(a)&&granja()) log('Llegó el <b>halving</b> del Bitcoin: tu granja recibe la mitad por cada bloque.','mal');
-    let L=[]; try{ L=sucesos(); }catch(e){ console.error(e); } L.slice(0,1).forEach(ev=>{ try{ cola.push(ev); }catch(e){} }); }
+  /* ---------- retiro, aportes y premios ---------- */
+  function retirar(h,motivo){ const c=h.casa43&&h.casa43.carreraPublica; if(!c||c.retirada222) return; c.retirada222=A(); rotulo(c);
+    log('<b>'+E(NOMBRE(h))+'</b> se retiró del deporte '+E(motivo)+': '+E(c.titulo)+'.','bien'); if(c.nivel>=2){ try{ moverPrestigio(1,'una carrera deportiva en la casa'); }catch(e){} } if(c.nivel>=3){ try{ hito(NOMBRE(h)+' se retiró del deporte como leyenda'); }catch(e){} } }
+  function aporte(h,c,g){ if(c.retirada222&&c.tipo==='deportiva') return; if((c.nivel||0)<2||c.exilio222>0) return; const n=c.nivel;
+    if(c.tipo==='periodistica') S.p.redes=clamp((S.p.redes||0)+(n>=3?2:1),0,100); else { S.p.reputacion=clamp(S.p.reputacion+(n>=3?2:1),0,100); if(n>=3) S.p.redes=clamp((S.p.redes||0)+1,0,100); } }
+  const EQ=n=>n>=3?5:n===2?3:n===1?1:0;
+  function premios(h,c,g){ if(typeof window.otorgarPremio218!=='function'||(h.edad||0)<18) return; const OF=window.OFICIO_218; if(!OF) return; const key=c.tipo==='deportiva'?'deportista':c.tipo==='artistica'?c.disc222:'periodista'; const T=OF[key]; if(!T) return; const eq=EQ(c.nivel||0);
+    T.forEach(p=>{ if(A()<p[1]||eq<p[2]) return; const hk='ofh:'+(h.fid||h.nombre)+':'+p[0]; const P=S.premios218; if(P&&P.hechos&&P.hechos[hk]) return; let pr=clamp(.04+(eq-p[2])*.06,.04,.2); if(p[0]==='Premio Pulitzer') pr=.015; if(!chance(pr)) return;
+      const x=window.otorgarPremio218({id:hk,n:p[0],cat:'oficio',quienN:NOMBRE(h),rel:rel(h,g),pres:Math.max(1,p[3]-1),hito:p[3]>=5,nota:E(NOMBRE(h))+' ('+E(c.titulo||'')+') recibió el premio.'}); S.premios218.hechos[hk]=1; }); }
 
   /* ---------- los sucesos ---------- */
-  function evHackeo(){ const k=K(), perdida=.2+Math.random()*.2;
-    return {p:9,c:()=>ACTIVO()&&tens().length>0,t:()=>'<b>Hackean el exchange donde guardas tus criptoactivos.</b> Desaparecen cientos de miles de monedas y el sitio se queda sin responder. Nadie sabe si volverá a abrir.',
-      o:[{t:'Esperar a que el exchange responda',f:()=>{ if(k.custodia!=='exchange') return 'Tu billetera es propia: el hackeo no te tocó.'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'Perdiste el '+Math.round(perdida*100)+'% de tus criptoactivos ('+fm(x)+'): el exchange repartió lo que quedaba.'; }},
-         {t:'Sacar lo que se pueda a una billetera propia',f:()=>{ if(k.custodia==='exchange'){ if(chance(.5)){ k.custodia='propia'; return 'Alcanzaste a sacar tus monedas a una billetera propia: te salvaste y ya no dependes de nadie.'; } let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'No alcanzaste: perdiste '+fm(x)+'.'; } return 'Ya estabas en una billetera propia: no te tocó.'; }}]}; }
-  function evQuiebra(){ const k=K(), perdida=.25+Math.random()*.35;
-    return {p:9,c:()=>ACTIVO()&&tens().length>0,t:()=>'<b>Quiebra el exchange donde tienes tus criptoactivos.</b> Se descubre que usaban la plata de los clientes para apostar. Frenan los retiros y piden la liquidación.',
-      o:[{t:'Reclamar en el proceso de quiebra',f:()=>{ if(k.custodia!=='exchange') return 'Tu plata está en una billetera propia: no te tocó.'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'El proceso reparte centavos: perdiste '+fm(x)+' ('+Math.round(perdida*100)+'%).'; }},
-         {t:'Pasarte a billetera propia con lo que quede',f:()=>{ if(k.custodia==='exchange'){ k.custodia='propia'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida*.7; t.valor-=p; t.costo*=1-perdida*.7; x+=p; }); return 'Alcanzaste a sacar parte: perdiste '+fm(x)+' y ahora guardas tú.'; } return 'Ya guardabas tú: no te tocó.'; }}]}; }
-  function evTerra(){ const alt=buscar('alt'), usdt=buscar('usdt');
-    return {p:8,c:()=>ACTIVO()&&!!(buscar('alt')||buscar('usdt')),t:()=>'<b>Se derrumba Terra/Luna.</b> Una "stablecoin algorítmica" pierde su ancla al dólar y arrastra a medio mercado de tokens. Los precios caen en picada.',
-      o:[{t:'Vender los tokens ya, con pérdidas',f:()=>{ const t=buscar('alt'); if(t){ const r=vender('alt',1); return 'Vendiste tus tokens: recuperaste '+fm(r.x)+'.'; } return 'No tenías tokens: te salvaste.'; }},
-         {t:'Aguantar a ver qué pasa',f:()=>'Aguantaste: el mercado sigue su curso y verás qué queda.'}]}; }
-  function evEstafa(){ const x=Math.round(Math.max(10,S.efectivo*.2));
-    return {p:7,c:()=>ACTIVO(),t:()=>'<b>Te ofrecen "duplicar tu bitcoin".</b> Un conocido de un conocido promete rendimientos del 10% mensual con un "algoritmo de arbitraje". Su oficina es hermosa y el video, muy convincente.',
-      o:[{t:'Invertir '+fm(x),f:()=>{ if(S.efectivo<x) return 'No te alcanza.'; S.efectivo-=x; if(chance(.1)){ S.efectivo+=x*1.4; return 'Qué suerte: te pagaron '+fm(x*1.4)+' antes de que se cayera el esquema.'; } try{ moverPrestigio(-1,'cayó en una pirámide'); }catch(e){} return 'Era una pirámide: perdiste los '+fm(x)+'.'; }},
-         {t:'Rechazar y denunciar',f:()=>{ try{ moverPrestigio(1,'denunció una pirámide'); }catch(e){} return 'Rechazaste y denunciaste: los fiscales te agradecieron.'; }}]}; }
-  function evDian(){ const k=K();
-    return {p:8,c:()=>ACTIVO()&&tens().length>0&&!k.declarada,t:()=>'<b>La DIAN exige reportar los criptoactivos.</b> Los exchanges le entregan a la autoridad la lista de quienes operan con ellos y pide que declares lo que tienes.',
-      o:[{t:'Declararlos y pagar lo que toque',f:()=>{ k.declarada=true; return 'Declaraste tus criptoactivos: quedaste en regla.'; }},
-         {t:'Ignorar el requerimiento',f:()=>{ if(chance(.4)){ const mu=valor()*.2; tens().forEach(t=>{ t.valor*=.8; t.costo*=.8; }); try{ S.p.escandalos=(S.p.escandalos||0)+1; moverPrestigio(-3,'una sanción de la DIAN por criptoactivos'); }catch(e){} k.declarada=true; return 'La DIAN cruzó la información: te cobró una multa de '+fm(mu)+' y quedaste declarado.'; } return 'Ignoraste el requerimiento y por ahora nadie te molestó.'; }}]}; }
-  function sucesos(){ const a=A(), k=K(), L=[]; if(!tens().length&&a<2016) return L;
-    if(a===2014&&!k.hechos[2014]&&tens().some(t=>t.coin==='btc')){ k.hechos[2014]=1; L.push(evHackeo()); }
-    if(a===2022&&!k.hechos[2022]){ k.hechos[2022]=1; if(tens().length) L.push(evQuiebra()); if(buscar('alt')||buscar('usdt')) L.push(evTerra()); }
-    if(a>=2018&&tens().length&&!k.declarada&&!k.hechos['d'+a]&&chance(.15)){ k.hechos['d'+a]=1; L.push(evDian()); }
-    if(a>=2016&&chance(.06)) L.push(evEstafa());
-    if(a>=2016&&a!==2014&&a!==2022&&k.custodia==='exchange'&&tens().length&&chance(.03)) L.push(evHackeo());
-    return L.sort((x,y)=>y.p-x.p); }
+  const vive=(h,c)=>ACTIVO()&&ramas().some(x=>x.h===h&&x.c===c);
+  function evLesion(h,c){ const costo=Math.round(pago(30)*cob());
+    return {p:8,c:()=>vive(h,c)&&!c.retirada222,t:()=>'<b>'+E(NOMBRE(h))+' se lesiona.</b> Una rotura seria que lo saca de las canchas meses. El médico del club dice que depende de cómo lo trates.',
+      o:[{t:'Pagarle el mejor especialista ('+fm(costo)+')',f:()=>{ tomar(costo); h.vinculo=clamp((h.vinculo||60)+3,0,100); return 'Se operó con el mejor especialista'+(cob()<1?' (tu cobertura de salud pagó parte)':'')+' y volvió a entrenar.'; }},
+         {t:'Dejar que el club se encargue',f:()=>{ if(chance(clamp(.5-(c.nivel||0)*.1,.15,.5))){ retirar(h,'por una lesión mal curada'); return 'La lesión se complicó y tuvo que dejar el deporte.'; } return 'Se recuperó con lo que el club le dio, sin mayores secuelas.'; }},
+         {t:'Pedirle que se retire',f:()=>{ h.vinculo=clamp((h.vinculo||60)-6,0,100); retirar(h,'por decisión de la familia'); return 'Se retiró, algo resentido con la casa.'; }}]}; }
+  function evDopaje(h,c){ const costo=pago(40);
+    return {p:8,c:()=>vive(h,c)&&!c.retirada222,t:()=>'<b>A '+E(NOMBRE(h))+' le sale positivo un control antidopaje.</b> Dice que no sabía lo que le dieron. La federación abre un proceso y la prensa ya lo sabe.',
+      o:[{t:'Pagar abogados ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(.6)){ return 'Los abogados demostraron la contaminación: lo exoneraron.'; } try{ moverPrestigio(-3,'un escándalo de dopaje en la familia'); }catch(e){} retirar(h,'sancionado por dopaje'); return 'Lo sancionaron de por vida: el escándalo salpicó a la casa.'; }},
+         {t:'Aceptar la sanción de un año',f:()=>{ try{ moverPrestigio(-2,'una sanción por dopaje'); }catch(e){} c.nivel=Math.max(0,(c.nivel||0)-1); rotulo(c); return 'Lo suspendieron un año y bajó de categoría.'; }}]}; }
+  function evConvocatoria(h,c){ const d=((C216()||{}).deportista||{disc:[]}).disc.find(x=>x.id===c.disc222); const cita=d&&d.cita; if(!cita||!(cita[1](A())>0)) return evLesion(h,c); const costo=pago(25);
+    const resolver=lujo=>{ const r=ri(0,100)+(c.nivel||0)*12+(lujo?15:0)+((h.casa43&&h.casa43.prestigio)||30)/5; if(r>=95){ if(typeof window.otorgarPremio218==='function'){ window.otorgarPremio218({id:'cita:'+(h.fid||h.nombre)+':'+A(),n:'Triunfo en '+cita[0],cat:'oficio',quienN:NOMBRE(h),rel:'descendiente',pres:3,hito:true,nota:E(NOMBRE(h))+' triunfó.'}); } return E(NOMBRE(h))+' triunfó en '+cita[0]+': el país entero lo vio.'; } if(r>=70){ try{ moverPrestigio(1,'un buen papel en '+cita[0]); }catch(e){} return 'Hizo un buen papel en '+cita[0]+'.'; } return 'No le fue bien en '+cita[0]+': la prensa fue dura.'; };
+    return {p:8,c:()=>vive(h,c)&&!c.retirada222,t:()=>'<b>Convocan a '+E(NOMBRE(h))+' a '+E(cita[0])+'.</b> Es la oportunidad de su vida y la familia entera está pendiente.',
+      o:[{t:'Pagarle la preparación ('+fm(costo)+')',f:()=>{ tomar(costo); return resolver(true); }},{t:'Dejarlo ir con lo que tiene',f:()=>resolver(false)}]}; }
+  function evExposicion(h,c){ const costo=pago(20);
+    return {p:7,c:()=>vive(h,c),t:()=>'<b>'+E(NOMBRE(h))+' va a presentar su obra por primera vez.</b> Necesita una sala, invitaciones y quien pague el montaje: sin plata, la obra se queda en el taller.',
+      o:[{t:'Financiarle la presentación ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(.65)){ c.anios=(c.anios||0)+2; try{ moverPrestigio(1,'el éxito de un artista de la casa'); }catch(e){} return 'La presentación fue un éxito: la crítica lo notó.'; } return 'La presentación pasó sin pena ni gloria.'; }},
+         {t:'Que se las arregle solo',f:()=>{ if(chance(.35)){ c.anios=(c.anios||0)+1; return 'Contra todo pronóstico, su obra llamó la atención.'; } h.vinculo=clamp((h.vinculo||60)-3,0,100); return 'No consiguió sala: la obra se quedó en el taller.'; }}]}; }
+  function evCritica(h,c){ return {p:6,c:()=>vive(h,c),t:()=>'<b>Un crítico destroza a '+E(NOMBRE(h))+'.</b> Una reseña dura con su apellido en el titular. Llega a la casa destrozado.',
+      o:[{t:'Consolarlo y animarlo a seguir',f:()=>{ h.vinculo=clamp((h.vinculo||60)+5,0,100); return 'Lo animaste: siguió con más ganas.'; }},
+         {t:'Decirle que busque algo serio',f:()=>{ h.vinculo=clamp((h.vinculo||60)-10,0,100); if(chance(.4)){ h.casa43.carreraPublica=null; log('<b>'+E(NOMBRE(h))+'</b> dejó el arte por consejo de la familia.'); return 'Hizo caso y dejó el arte: la casa se quedó sin artista.'; } return 'Te oyó, pero no te hizo caso: sigue con su obra, algo distanciado.'; }}]}; }
+  function evBohemia(h,c){ const costo=Math.round(pago(15)*cob());
+    return {p:7,c:()=>vive(h,c),t:()=>'<b>La bohemia pasa factura a '+E(NOMBRE(h))+'.</b> Noches largas, licor y mala compañía: los amigos de la casa lo comentan.',
+      o:[{t:'Internarlo unas semanas ('+fm(costo)+')',f:()=>{ tomar(costo); h.vinculo=clamp((h.vinculo||60)+4,0,100); return 'Salió mejor de la clínica'+(cob()<1?' (tu cobertura pagó parte)':'')+'.'; }},
+         {t:'Dejarlo que aprenda solo',f:()=>{ try{ moverPrestigio(-1,'un escándalo bohemio en la familia'); }catch(e){} h.vinculo=clamp((h.vinculo||60)-6,0,100); return 'Siguió igual: el escándalo se comentó en los salones.'; }}]}; }
+  function evAmenaza(h,c){ const costo=pago(25);
+    return {p:9,c:()=>vive(h,c),t:()=>'<b>Amenazan a '+E(NOMBRE(h))+' por lo que publicó.</b> '+(A()>=1980?'Una llamada anónima, un panfleto y un carro que lo sigue.':'Una carta sin firma y alguien que lo vigila a la salida.')+' El miedo es real.',
+      o:[{t:'Pagarle un esquema de seguridad ('+fm(costo)+')',f:()=>{ tomar(costo); h.vinculo=clamp((h.vinculo||60)+3,0,100); return 'Le pusiste escoltas: duerme mejor, aunque lo siguen a todas partes.'; }},
+         {t:'Pedirle que se vaya del país un tiempo',f:()=>{ c.exilio222=3; return 'Se fue al exterior unos años: vivo, pero lejos de sus fuentes.'; }},
+         {t:'Respaldarlo en público',f:()=>{ try{ moverPrestigio(1,'la casa respaldó a su periodista'); }catch(e){} if(chance(.25)){ try{ S.p.estres=clamp((S.p.estres||30)+10,0,100); }catch(e){} c.exilio222=2; return 'Hubo un atentado: sobrevivió, pero tuvo que salir del país un par de años.'; } return 'La casa lo respaldó y el asunto se enfrió.'; }}]}; }
+  function evChiva(h,c){ return {p:7,c:()=>vive(h,c),t:()=>'<b>'+E(NOMBRE(h))+' investiga a un amigo de la casa.</b> Tiene los documentos y la noticia lo haría famoso, pero salpica a alguien que te ha hecho favores.',
+      o:[{t:'Pedirle que no la publique',f:()=>{ S.p.redes=clamp((S.p.redes||0)+3,0,100); h.vinculo=clamp((h.vinculo||60)-10,0,100); return 'No la publicó, y a tu amigo le quedó un favor contigo; a ti, un hijo resentido.'; }},
+         {t:'Dejar que la publique',f:()=>{ try{ moverPrestigio(1,'la independencia de un periodista de la casa'); }catch(e){} S.p.redes=clamp((S.p.redes||0)-3,0,100); return 'La publicó: el periodista se hizo famoso y tu amigo se volvió enemigo.'; }}]}; }
+  function evCalumnia(h,c){ const costo=pago(20);
+    return {p:6,c:()=>vive(h,c),t:()=>'<b>Demandan a '+E(NOMBRE(h))+' por calumnia.</b> Alguien nombrado en su último texto dice que lo difamó y pide cárcel y rectificación.',
+      o:[{t:'Pagarle los abogados ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(.7)){ return 'Ganaron el pleito: tenía con qué probarlo.'; } return 'Perdieron el pleito y tuvo que rectificar.'; }},
+         {t:'Que rectifique y cierre el asunto',f:()=>{ h.vinculo=clamp((h.vinculo||60)-4,0,100); return 'Rectificó: el asunto se cerró, pero el orgullo quedó herido.'; }}]}; }
+  function evento(h,c){ const k=c.tipo, L=[]; if(k==='deportiva'){ L.push(()=>evLesion(h,c)); if(A()>=1968) L.push(()=>evDopaje(h,c)); if((c.nivel||0)>=1) L.push(()=>evConvocatoria(h,c)); }
+    if(k==='artistica'){ L.push(()=>evExposicion(h,c)); L.push(()=>evCritica(h,c)); if((c.nivel||0)>=1) L.push(()=>evBohemia(h,c)); }
+    if(k==='periodistica'){ L.push(()=>evAmenaza(h,c)); if((c.nivel||0)>=1) L.push(()=>evChiva(h,c)); L.push(()=>evCalumnia(h,c)); }
+    return L.length?L[ri(0,L.length-1)]():null; }
 
-  /* ---------- paneles ---------- */
-  function escenaPanel(){ const k=K(), T=tens(), g=granja(), sinMov=S.mov<1?'Sin movidas':null;
-    let t='<table class="libro">'+(T.length?T.map(x=>{ const m=MON[x.coin], gan=x.costo>0?Math.round((x.valor/x.costo-1)*100):0; return '<tr><td>'+E(m.n)+'</td><td>'+fm(x.valor)+' · '+(gan>=0?'+':'')+gan+'% sobre lo que pagaste</td></tr>'; }).join(''):'<tr><td>Criptoactivos</td><td>Ninguno todavía</td></tr>')+(g?'<tr><td>Granja de minería</td><td>'+fm(g.valor)+' · se deprecia 28% al año</td></tr>':'')
-      +'<tr class="suma"><td>Total en criptoactivos</td><td>'+fm(valor())+'</td></tr><tr><td>Custodia</td><td>'+(k.custodia==='exchange'?'en el exchange (cómoda, con riesgo de quiebra o hackeo)':'billetera propia (sin intermediarios; si pierdes la llave, lo pierdes todo)')+'</td></tr><tr><td>Impuesto a las ganancias</td><td>'+Math.round(tasaGO()*100)+'%'+(A()>=2018?' · '+(k.declarada?'declarados ante la DIAN':'sin reportar'):'')+'</td></tr><tr><td>Ganado y tributado (acumulado)</td><td>'+fm(k.ganado)+' · '+fm(k.pagado)+'</td></tr></table>';
-    const ops=[];
-    disp().forEach(id=>{ const m=MON[id]; ops.push({t:'Comprar '+m.n,cat:'mercado',cerrar:false,d:m.d+' Comisión '+(m.fee*100).toFixed(1)+'%.',dis:S.efectivo<20?'No tienes con qué':sinMov,run:()=>escenaComprar(id)}); });
-    T.forEach(x=>{ const m=MON[x.coin]; ops.push({t:'Vender '+m.n+' ('+fm(x.valor)+')',cat:'mercado',cerrar:false,d:'Comisión del 1% y, si hay ganancia, el impuesto de ganancia ocasional.',dis:sinMov,run:()=>escenaVender(x.coin)}); });
-    if(T.length&&k.custodia==='exchange') ops.push({t:'Pasar a una billetera propia ('+fm(pago(5))+')',cat:'capital',cerrar:false,d:'Sin intermediarios: ya no te toca un hackeo ni una quiebra, pero perder la llave cuesta todo (2% al año).',dis:S.efectivo<pago(5)?'No te alcanza':sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); S.efectivo-=pago(5); k.custodia='propia'; log('Pasaste tus criptoactivos a una billetera propia.'); escenaPanel(); }});
-    if(T.length&&k.custodia==='propia') ops.push({t:'Volver a guardarlas en un exchange',cat:'capital',cerrar:false,d:'Más cómodo, pero dependes de la empresa.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); k.custodia='exchange'; escenaPanel(); }});
-    if(A()>=2018&&T.length&&!k.declarada) ops.push({t:'Declarar tus criptoactivos ante la DIAN',cat:'legado',cerrar:false,d:'Quedas en regla: ya no te pueden multar por no reportarlos.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); k.declarada=true; log('Declaraste tus criptoactivos ante la DIAN.'); escenaPanel(); }});
-    if(A()>=2013&&A()<=2024&&!g) ops.push({t:'Montar una granja de minería ('+fm(costoGranja())+')',cat:'capital',cerrar:false,d:'Máquinas y energía: paga según el precio del Bitcoin, se deprecia rápido y el pago se parte en dos en cada halving.',dis:S.efectivo<costoGranja()?'No te alcanza':sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); montarGranja(); escenaPanel(); }});
-    if(g) ops.push({t:'Vender la granja ('+fm(g.valor*.6)+')',cat:'capital',cerrar:false,d:'Las máquinas usadas valen el 60% de lo que se les calcula.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); venderGranja(); escenaPanel(); }});
-    escena({rubro:'Inversiones',titulo:'Tus criptoactivos',ancho:true,cerrable:true,cuerpo:'Monedas que solo existen en una red: suben y bajan por ciclos de euforia y pánico. '+(A()<2013?'Todavía casi nadie las conoce.':A()<2018?'Ya hay exchanges en América Latina.':'Los reguladores y los estafadores las miran igual de fijo.'),html:t,opciones:ops}); }
-  function escenaComprar(id){ const m=MON[id], base=S.efectivo;
-    const ops=[[.1,'una décima parte'],[.25,'un cuarto'],[.5,'la mitad']].map(([f,n])=>{ const x=base*f; return {t:'Comprar '+n+' de tu caja ('+fm(x)+')',cat:'mercado',cerrar:false,d:'Comisión de '+fm(Math.max(2,x*m.fee))+'.',dis:S.mov<1?'Sin movidas':(S.efectivo<x+Math.max(2,x*m.fee)?'No te alcanza':null),run:()=>{ S.mov=Math.max(0,S.mov-1); comprar(id,x); escenaPanel(); }}; });
-    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
-    escena({rubro:'Inversiones',titulo:'Comprar '+m.n,ancho:true,cerrable:true,cuerpo:m.d+' Tienes '+fm(base)+' en tu caja.',opciones:ops}); }
-  function escenaVender(id){ const t=buscar(id); if(!t){ escenaPanel(); return; } const m=MON[id];
-    const ops=[[.25,'un cuarto'],[.5,'la mitad'],[1,'todo']].map(([f,n])=>{ const x=t.valor*f, gan=Math.max(0,x-t.costo*f); return {t:'Vender '+n+' ('+fm(x)+')',cat:'mercado',cerrar:false,d:gan>0?'Ganancia de '+fm(gan)+' y un impuesto de '+fm(gan*tasaGO())+'.':'Sin ganancia: no pagas impuesto.',dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); vender(id,f); escenaPanel(); }}; });
-    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
-    escena({rubro:'Inversiones',titulo:'Vender '+m.n,ancho:true,cerrable:true,cuerpo:'Tienes '+fm(t.valor)+' en '+m.n+' (pagaste '+fm(t.costo)+').',opciones:ops}); }
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()) return; const R=ramas(); if(!R.length) return;
+    R.forEach(x=>{ const {h,c,gen}=x; if(!c.disc222) asignar(h,c.tipo); if(c.exilio222>0) c.exilio222--; rotulo(c);
+      if(c.tipo==='deportiva'&&!c.retirada222){ const e=h.edad||0; if(e>=36||(c.nivel<2&&e>=32&&chance(.3))) retirar(h,e>=36?'por la edad':'sin haber despegado'); }
+      aporte(h,c,gen); try{ premios(h,c,gen); }catch(e){ console.error(e); } });
+    const act=R.filter(x=>!(x.c.retirada222)&&!(x.c.exilio222>0)); if(act.length&&chance(.2)){ const x=act[ri(0,act.length-1)]; try{ const ev=evento(x.h,x.c); if(ev) cola.push(ev); }catch(e){ console.error(e); } }
+    if(act.length&&chance(.2)){ const x=act[ri(0,act.length-1)], c=x.c; if((c.nivel||0)>=2) log(E(NOMBRE(x.h))+', '+E((c.titulo||'').toLowerCase())+', le da nombre a la casa'+(c.tipo==='periodistica'?' en las redacciones.':c.tipo==='deportiva'?' en los estadios.':' en los salones.')); } }
 
   /* ---------- enganches ---------- */
-  function wrapFund(){ const old=window.correrFundacion; if(typeof old!=='function'||old.__v221) return; const f=function(res,m){ const r=old.apply(this,arguments); try{ anual(res); }catch(e){ console.error(e); } return r; }; f.__v221=true; window.correrFundacion=f; }
-  const TIT='Tus criptoactivos';
-  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA221_ACC) return; window.__SA221_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
-      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&A()>=2012&&(S.p.edad||0)>=18&&!L.some(x=>x&&x.t===TIT)&&(S.efectivo>=20||tens().length||granja())){ const v=valor(); L.push({t:TIT,cat:'mercado',d:v>0?'Tienes '+fm(v)+' en criptoactivos: comprar, vender, guardar y minar.':'Bitcoin, Ether, stablecoins y tokens: comprar, guardar, minar y pagar impuestos por las ganancias.',mov:0,modal:true,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
-      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
-      return L; }; window.listaAcciones.__v221=true; }
-  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA221_CAT) return; window.__SA221_CAT=true; window.catDe=function(t){ if(t===TIT) return 'mercado'; return old.apply(this,arguments); }; }
-  function legado(tarifa){ const T=tens(), g=granja(); if(!T.length&&!g) return null; const c=JSON.parse(JSON.stringify(S.cripto221)); c.tenencias.forEach(t=>{ t.valor*=(1-(tarifa||0)); t.costo=t.valor; }); if(c.granja) c.granja.valor*=(1-(tarifa||0)); c.hechos={}; return c; }
-  function init221(){ wrapFund(); wrapAcciones(); wrapCat();
-    Object.assign(window,{valorCripto221:valor,tenenciasCripto221:tens,granjaCripto221:granja,legadoCripto221:legado,escenaCripto221:escenaPanel,comprarCripto221:comprar,venderCripto221:vender,montarGranjaCripto221:montarGranja,venderGranjaCripto221:venderGranja,anualCripto221:anual,sucesosCripto221:sucesos,retornoCripto221:retorno,tasaCripto221:tasaGO,disponiblesCripto221:disp,MONEDAS_221:MON,HALVING_221:HALVING,estadoCripto221:K,
-      eventosCripto221:{hackeo:evHackeo,quiebra:evQuiebra,terra:evTerra,estafa:evEstafa,dian:evDian}}); }
-  init221(); setTimeout(init221,40); setTimeout(init221,220); setTimeout(init221,650); setTimeout(init221,950); setTimeout(init221,1500);
-  window.__SA221={version:V221};
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA222_PASO) return; window.__SA222_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function init222(){ wrapPaso();
+    Object.assign(window,{carreraDisponible222:disponible,alOrientar222:alOrientar,anualHijos222:anual,ramasCarreras222:ramas,retirarHijo222:retirar,premiosHijo222:premios,aporteHijo222:aporte,discDeHijo222:discDe,rotuloHijo222:rotulo,TITULOS_222:TIT,
+      eventosHijos222:{lesion:evLesion,dopaje:evDopaje,convocatoria:evConvocatoria,exposicion:evExposicion,critica:evCritica,bohemia:evBohemia,amenaza:evAmenaza,chiva:evChiva,calumnia:evCalumnia},eventoHijo222:evento}); }
+  init222(); setTimeout(init222,40); setTimeout(init222,220); setTimeout(init222,650); setTimeout(init222,950); setTimeout(init222,1500);
+  window.__SA222={version:V222};
 })();
