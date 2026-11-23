@@ -1407,7 +1407,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v209</div>
+<div class="version-badge" id="versionBadge">v210</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -22246,7 +22246,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      d:'Fundar una compañía que manejas tú, o constituir una sociedad aparte que administra alguien más.',
      miembros:[['La manejas tú','Fundar una compañía'],['La maneja otro','Constituir una sociedad']]},
     {id:'empleo',t:'Buscar empleo',cat:'empleo',
-     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta.',
+     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta. También aquí: las armas y la vida religiosa.',
      prefijos:[['Dónde','Emplearte: ']]},
     {id:'opa',t:'Toma hostil',cat:'mercado',
      d:'Ofrecerles a los accionistas de otra casa por encima del precio para quedarte con ella. Cuesta dos movidas.',
@@ -37033,7 +37033,7 @@ install();setTimeout(install,1200);
 
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA201_PASO) return; window.__SA201_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)){ ['Tu carrera militar','Ingresar a las armas','Tu libreta militar'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); } }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; ['Ingresar a las armas','Tu carrera militar','Tu libreta militar'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Fuerzas armadas',t]); }); } }   /* v210: la carrera militar se busca donde se busca empleo */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA201_ACC) return; window.__SA201_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} let L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){
@@ -37183,7 +37183,9 @@ install();setTimeout(install,1200);
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA202_PASO) return; window.__SA202_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
   const TITULOS=['Tu vida eclesiástica','Seguir la vocación religiosa','Mandar a un familiar al convento o al seminario'];
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)) TITULOS.forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'), e=Gp.find(x=>x.id==='empleo');   /* v210: la vocación religiosa y la vida eclesiástica se buscan donde se busca empleo */
+    if(g&&Array.isArray(g.miembros)) ['Mandar a un familiar al convento o al seminario'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); });
+    if(e){ e.miembros=e.miembros||[]; ['Seguir la vocación religiosa','Tu vida eclesiástica'].forEach(t=>{ if(!e.miembros.some(m=>m[1]===t)) e.miembros.push(['Iglesia',t]); }); } }
   const MATRIMONIO=/^(Casarte|Buscar un buen matrimonio|Casarse dentro de la familia|Salir a conocer gente|Buscar intimidad|Vida sentimental y relaciones)/;
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA202_ACC) return; window.__SA202_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
@@ -37668,6 +37670,27 @@ install();setTimeout(install,1200);
     Object.assign(window,{coberturaSalud209:cobertura,factorSalud209:factor,probSalud209:prob,curaSalud209:cura,textoSalud209:texto,textoPantallaSalud209:textoPantalla,textoColombiaSalud209:textoColombia,CLASE_EPS_209:EPS,tieneAfiliacion209:tieneAfiliacion,tienePrepagada209:tienePrepagada}); }
   init209(); setTimeout(init209,40); setTimeout(init209,220); setTimeout(init209,650); setTimeout(init209,950); setTimeout(init209,1500);
   window.__SA209={version:V209};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v210 · LAS CARRERAS SE BUSCAN DONDE SE BUSCA EMPLEO
+   «Ingresar a las armas», «Tu carrera militar», «Tu libreta militar»,
+   «Seguir la vocación religiosa» y «Tu vida eclesiástica» estaban metidas en
+   «Influencia y palancas», con los favores y las leyes. Ahora están donde
+   está el resto de los oficios: dentro de «Buscar empleo», en sus propias
+   secciones («Fuerzas armadas» e «Iglesia»). «Mandar a un familiar al
+   convento o al seminario» se queda con la influencia, porque es un asunto
+   de familia y no de oficio.
+   ========================================================================== */
+(function(){
+  const V210='v210';
+  const ESTAS=['Ingresar a las armas','Tu carrera militar','Tu libreta militar','Seguir la vocación religiosa','Tu vida eclesiástica'];
+  function limpiar(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const p=G.find(x=>x.id==='palancas'); if(p&&Array.isArray(p.miembros)) p.miembros=p.miembros.filter(m=>!ESTAS.includes(m[1])); }
+  function init210(){ try{ limpiar(); }catch(e){} Object.assign(window,{CARRERAS_EN_EMPLEO_210:ESTAS}); }
+  init210(); setTimeout(init210,40); setTimeout(init210,220); setTimeout(init210,650); setTimeout(init210,950); setTimeout(init210,1500);
+  window.__SA210={version:V210};
 })();
 </script>
 
