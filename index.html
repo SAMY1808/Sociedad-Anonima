@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v222</div>
+<div class="version-badge" id="versionBadge">v223</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6001,7 +6001,7 @@ function escenaQuiebra(luego){
        cerrar:false,
        run:()=>{
          const queda=Math.max(0,(valuar(e)*.5-e.deuda))*miPct(e);
-         S.efectivo+=queda;
+         S.efectivo+=queda; if(window.alLiquidar223) window.alLiquidar223(e);
          moverPrestigio(-14,'la quiebra de '+e.nombre);
          S.p.reputacion=clamp(S.p.reputacion-20,0,100);
          log('<b>'+esc(e.nombre)+'</b> se liquidó. Después de pagarle a todo el mundo te quedaron '+fmt(queda)+'.','mal');
@@ -35251,9 +35251,9 @@ install();setTimeout(install,1200);
     const sobra=Math.max(0,neto-pasivo), falta=Math.max(0,pasivo-neto), mio=sobra*pct; let t='<b>'+E(e.nombre)+'</b> se liquidó. ';
     if(mio>0){ S.efectivo+=mio; t+='Después de pagar a todos sobraron '+fm(sobra)+' y te tocaron '+fm(mio)+'. '; } else t+='No alcanzó para pagar todo: faltaron '+fm(falta)+'. ';
     if(neto<laboral){ prest(-3,'los trabajadores de '+e.nombre+' sin pagar'); try{ if(typeof window.abrirEscandalo129==='function') window.abrirEscandalo129('empresa','La liquidación de '+e.nombre,1); }catch(x){} t+='Los trabajadores se quedaron sin sus prestaciones y salió en la prensa. '; }
-    let resp=0; if(presideE(e)&&falta>0){ let f=.08+(v.garantia?.2:0); if(v.vaciado>0) f+=.25; resp=Math.min(falta*f,pat()*.45); }
+    let resp=0; if((presideE(e)||(window.ilimitada223&&window.ilimitada223(e)))&&falta>0){ let f=.08+(v.garantia?.2:0); if(v.vaciado>0) f+=.25; if(window.factorResp223) f=window.factorResp223(e,f); resp=Math.min(falta*f,pat()*(window.topeResp223?window.topeResp223(e):.45)); }
     if(v.vaciado>0&&chance(cl(.55+liq.honrado*.03,.4,.85))){ const x=Math.min(v.vaciado*1.3,Math.max(0,S.efectivo)); S.efectivo-=x; prest(-10,'vació una compañía antes de la liquidación'); t+=E(liq.nombre)+' <b>descubrió el vaciamiento</b>: tuviste que devolver '+fm(x)+' y el escándalo es público. '; }
-    if(resp>0){ const x=pagar(resp); t+='Como administrador respondiste con '+fm(x)+' de tu patrimonio'+(v.garantia?' (firmaste de codeudor)':'')+'. '; }
+    if(resp>0){ const x=pagar(resp); t+=(window.textoResp223?window.textoResp223(e):'Como administrador respondiste')+' con '+fm(x)+' de tu patrimonio'+(v.garantia?' (firmaste de codeudor)':'')+'. '; }
     prest(-14,'la liquidación de '+e.nombre); S.p.reputacion=cl((S.p.reputacion||50)-15,0,100); hito('Se liquidó '+e.nombre);
     try{ sacarDelGrupo(e); if(!S.emp&&S.carrera) Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:45}); }catch(x){ S.grupo=grupo().filter(y=>y!==e); }
     log(t,'mal'); return 'La liquidación terminó. '+(mio>0?'Recibiste '+fm(mio)+'.':'No quedó nada para los accionistas.'); }
@@ -39146,6 +39146,141 @@ install();setTimeout(install,1200);
       eventosHijos222:{lesion:evLesion,dopaje:evDopaje,convocatoria:evConvocatoria,exposicion:evExposicion,critica:evCritica,bohemia:evBohemia,amenaza:evAmenaza,chiva:evChiva,calumnia:evCalumnia},eventoHijo222:evento}); }
   init222(); setTimeout(init222,40); setTimeout(init222,220); setTimeout(init222,650); setTimeout(init222,950); setTimeout(init222,1500);
   window.__SA222={version:V222};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v223 · LAS FORMAS DE SOCIEDAD: S.A., S.A.S., LTDA., COLECTIVA Y COMANDITA
+   Cada compañía tiene ahora una forma legal, según la época, y la forma
+   importa:
+   - LAS FORMAS: la sociedad colectiva y la de comandita (desde siempre), la
+     anónima (S.A., desde 1850), la limitada (Ltda., Ley 124 de 1937), la
+     empresa unipersonal (E.U., Ley 222 de 1995, hasta 2008) y la sociedad
+     por acciones simplificada (S.A.S., Ley 1258 de 2008, que reemplaza a la
+     unipersonal).
+   - LA RESPONSABILIDAD: en la colectiva los socios responden solidaria e
+     ilimitadamente con todo su patrimonio; en la comandita, el socio
+     gestor (aquí, el que preside) responde igual y los comanditarios solo
+     hasta lo aportado; en las demás, hasta el capital. Se nota en la
+     liquidación y en la quiebra: con forma ilimitada, el faltante lo pagas
+     tú.
+   - LOS COSTOS: la matrícula y la renovación cada año; la S.A. además
+     exige revisor fiscal y junta, y es la más cara; la S.A.S. y la colectiva,
+     las más baratas.
+   - LOS LÍMITES: solo la S.A. puede salir a bolsa (una S.A.S. o una Ltda. se
+     transforma antes); la Ltda. admite hasta 25 socios, la unipersonal uno,
+     la colectiva hasta 10 y la comandita hasta 15: más allá no se abren
+     rondas de capital.
+   - TRANSFORMAR LA SOCIEDAD: la Cámara de Comercio cobra la reforma de
+     estatutos (gratis en el año de constitución) y hace falta la mayoría.
+     En 2008 las empresas unipersonales pasan solas a S.A.S.
+   Las compañías nuevas se constituyen con la forma más prudente de la época
+   (S.A., Ltda. o S.A.S.) y las de antes se reparten por su época y su tamaño.
+   ========================================================================== */
+(function(){
+  const V223='v223';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const pct=e=>{ try{ return miPct(e); }catch(x){ return 1; } };
+  const preside=e=>{ try{ return typeof presides==='function'&&!!presides(e); }catch(x){ return false; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const val=e=>{ try{ const x=valuar(e); return isFinite(x)?x:0; }catch(x){ return 0; } };
+  const hash=s=>{ let h=7; String(s||'').split('').forEach(c=>{ h=(h*31+c.charCodeAt(0))%9973; }); return h; };
+
+  const FORMAS={
+    colectiva:{n:'Sociedad colectiva',sigla:'y Cía.',desde:1800,resp:'ilimitada',max:10,bolsa:false,anual:.0004,tr:1,d:'Los socios responden solidaria e ilimitadamente, con todo su patrimonio, por las deudas de la sociedad. Barata y de confianza entre familiares y amigos.'},
+    comandita:{n:'Sociedad en comandita',sigla:'S. en C.',desde:1800,resp:'gestor',max:15,bolsa:false,anual:.0005,tr:1,d:'Combina socios gestores (administran y responden con todo su patrimonio) y socios comanditarios (solo responden por lo aportado y no administran). Aquí el gestor es quien preside.'},
+    sa:{n:'Sociedad anónima',sigla:'S.A.',desde:1850,resp:'limitada',max:Infinity,bolsa:true,anual:.003,tr:2,d:'Capital dividido en acciones; la única que puede cotizar en bolsa. Exige junta directiva y revisor fiscal: la más cara de mantener.'},
+    ltda:{n:'Sociedad limitada',sigla:'Ltda.',desde:1937,resp:'limitada',max:25,bolsa:false,anual:.0008,tr:1,d:'Capital dividido en cuotas sociales y hasta 25 socios. No cotiza en bolsa y los socios responden hasta lo aportado.'},
+    unipersonal:{n:'Empresa unipersonal',sigla:'E.U.',desde:1995,hasta:2007,resp:'limitada',max:1,bolsa:false,anual:.0005,tr:1,d:'Un solo dueño con responsabilidad limitada (Ley 222 de 1995). En 2008 la reemplaza la S.A.S.'},
+    sas:{n:'Sociedad por acciones simplificada',sigla:'S.A.S.',desde:2008,resp:'limitada',max:Infinity,bolsa:false,anual:.0007,tr:1,d:'Estructura flexible (Ley 1258 de 2008): puede tener un único accionista, sin junta ni revisor obligatorios. No puede cotizar en bolsa: para salir a bolsa hay que transformarla en S.A.'}};
+  const IDS=Object.keys(FORMAS);
+  const disp=(id,a)=>{ const f=FORMAS[id]; a=a||A(); return !!f&&a>=f.desde&&(f.hasta===undefined||a<=f.hasta); };
+  const dispon=a=>IDS.filter(k=>disp(k,a));
+
+  /* ---------- la forma de cada compañía ---------- */
+  function porDefecto(e,nueva){ const y=nueva?A():(e.fundada||A()), h=hash(e.nombre)%100; const unico=(e.holders||[]).length<=1;
+    if(e.publica) return 'sa';
+    if(nueva) return y>=2008?'sas':y>=1937?'ltda':y>=1850?'sa':'comandita';
+    if(y<1850) return h<55?'colectiva':'comandita';
+    if(y<1937) return !unico?'sa':(h<55?'colectiva':h<80?'comandita':'sa');
+    if(y<1995) return !unico?'sa':(h<70?'ltda':h<85?'colectiva':'comandita');
+    if(y<2008) return !unico?(h<55?'ltda':'sa'):(h<40?'unipersonal':h<85?'ltda':'sa');
+    return h<80?'sas':h<88?'ltda':'sa'; }
+  function asegurar(e,nueva){ if(!e) return null; if(!e.forma223||!FORMAS[e.forma223.id]){ e.forma223={id:porDefecto(e,nueva),desde:A(),cambio:A(),porDefecto:!!nueva}; }
+    if(e.publica&&e.forma223.id!=='sa'){ const ant=e.forma223.id; e.forma223={id:'sa',desde:A(),cambio:A()}; log('<b>'+E(e.nombre)+'</b> cotiza en bolsa y quedó como <b>S.A.</b>: ya no puede ser '+E(FORMAS[ant].n.toLowerCase())+'.'); }
+    return e.forma223; }
+  const forma=e=>FORMAS[(asegurar(e)||{}).id]||FORMAS.sa;
+  const idForma=e=>(asegurar(e)||{}).id;
+  const etiqueta=e=>forma(e).n+' ('+forma(e).sigla+')';
+
+  /* ---------- la responsabilidad ---------- */
+  function ilimitada(e){ const id=idForma(e); if(id==='colectiva') return pct(e)>0||preside(e); if(id==='comandita') return preside(e); return false; }
+  function factorResp(e,f){ return ilimitada(e)?Math.max(f,.9):f; }
+  function topeResp(e){ return ilimitada(e)?.9:.45; }
+  function textoResp(e){ const id=idForma(e); return ilimitada(e)?(id==='colectiva'?'Como socio de una sociedad colectiva respondiste solidariamente':'Como socio gestor de una sociedad en comandita respondiste'):'Como administrador respondiste'; }
+  function alLiquidar(e){ if(!ilimitada(e)) return 0; const falta=Math.max(0,(e.deuda||0)-val(e)*.5); if(falta<=0) return 0; const resp=Math.min(falta*clamp(pct(e)+.25,.4,1),pat()*.6); const x=Math.min(resp,Math.max(0,S.efectivo)); S.efectivo-=x; if(resp>x) S.deuda=(S.deuda||0)+(resp-x);
+    log(E(textoResp(e))+' con <b>'+fm(resp)+'</b> de tu patrimonio por lo que '+E(e.nombre)+' dejó de pagar.','mal'); try{ moverPrestigio(-2,'respondió con su patrimonio por una sociedad'); }catch(x2){} return resp; }
+
+  /* ---------- los costos ---------- */
+  const costoAnual=e=>Math.max(1,Math.round((e.ingresos||0)*forma(e).anual));
+  const costoTransformar=(e,id)=>{ if(e.fundada===A()&&e.forma223&&e.forma223.porDefecto) return 0; return Math.max(8,Math.round(val(e)*.004*FORMAS[id].tr)); };
+
+  /* ---------- transformar ---------- */
+  function puedeTransformar(e,id){ const f=FORMAS[id]; if(!f) return 'No existe'; if(idForma(e)===id) return 'Ya tiene esa forma';
+    if(A()<f.desde) return 'Todavía no existe en esta época ('+f.desde+')'; if(f.hasta!==undefined&&A()>f.hasta) return 'Ya no existe: la reemplazó la S.A.S.';
+    if(e.publica&&id!=='sa') return 'Cotiza en bolsa: solo puede ser S.A.';
+    const n=(e.holders||[]).filter(h=>h.n>0).length; if(n>f.max) return 'Tiene '+n+' socios y esta forma admite máximo '+f.max;
+    if(n>1&&pct(e)<.5) return 'No tienes la mayoría para reformar los estatutos';
+    const c=costoTransformar(e,id); if(S.efectivo<c) return 'No te alcanza ('+fm(c)+')';
+    if(S.mov<1) return 'Sin movidas'; return null; }
+  function transformar(e,id){ const why=puedeTransformar(e,id); if(why) return why; const ant=forma(e), c=costoTransformar(e,id); S.efectivo-=c; S.mov=Math.max(0,S.mov-1);
+    e.forma223={id,desde:e.forma223.desde,cambio:A()}; log('<b>'+E(e.nombre)+'</b> pasó de '+E(ant.n.toLowerCase())+' a <b>'+E(FORMAS[id].n.toLowerCase())+'</b>'+(c?' (trámite en la Cámara de Comercio: '+fm(c)+')':' (reforma de estatutos sin costo, en el año de constitución)')+'.','hito');
+    if(id==='sa') try{ hito(e.nombre+' se transformó en S.A.'); }catch(x){} return null; }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()) return; comps().forEach(e=>{ const f=asegurar(e); if(!f) return;
+      if(f.id==='unipersonal'&&A()>=2008){ e.forma223={id:'sas',desde:f.desde,cambio:A()}; log('Con la Ley 1258, la empresa unipersonal <b>'+E(e.nombre)+'</b> pasó a ser <b>S.A.S.</b>.','hito'); }
+      const c=costoAnual(e); e.caja=(e.caja||0)-c; }); }
+
+  /* ---------- paneles ---------- */
+  function respTxt(e){ const f=forma(e); return f.resp==='ilimitada'?'<span style="color:#D06A60">ilimitada: tu patrimonio responde</span>':f.resp==='gestor'?(ilimitada(e)?'<span style="color:#D06A60">ilimitada: eres el socio gestor</span>':'limitada: eres comanditario'):'limitada al capital'; }
+  function escenaFormas(){ const G=comps();
+    const cat=dispon().map(id=>{ const f=FORMAS[id]; return '<tr><td><b>'+E(f.n)+'</b> ('+E(f.sigla)+')</td><td>'+(f.resp==='limitada'?'limitada':f.resp==='ilimitada'?'ilimitada':'gestor ilimitado')+' · '+(f.max===Infinity?'sin tope de socios':'hasta '+f.max+' socio'+(f.max===1?'':'s'))+(f.bolsa?' · cotiza en bolsa':'')+'</td></tr>'; }).join('');
+    const tabla='<table class="libro">'+G.map(e=>'<tr><td>'+E(e.nombre)+'</td><td>'+E(etiqueta(e))+' · '+respTxt(e)+' · '+fm(costoAnual(e))+' al año</td></tr>').join('')+'</table><div class="apunte" style="margin-top:10px">Formas que existen hoy:</div><table class="libro">'+cat+'</table>';
+    const ops=G.map(e=>({t:E(e.nombre)+' · '+forma(e).sigla,cat:'compania',cerrar:false,d:'Reformar sus estatutos: cambiar de forma legal.',run:()=>escenaTransformar(e)}));
+    ops.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Cámara de Comercio',titulo:'Las formas legales de tus compañías',ancho:true,cerrable:true,cuerpo:'La forma legal decide quién responde por las deudas, cuánto cuesta mantenerla, cuántos socios admite y si puede ir a bolsa.',html:tabla,opciones:ops}); }
+  function escenaTransformar(e){ const f=forma(e);
+    const ops=dispon().filter(id=>id!==idForma(e)||false).map(id=>{ const F=FORMAS[id], why=puedeTransformar(e,id), c=costoTransformar(e,id); return {t:'Transformar en '+F.n+' ('+F.sigla+')'+(c?' · '+fm(c):' · gratis'),cat:'compania',cerrar:false,d:F.d+' Mantenerla cuesta '+fm(Math.max(1,Math.round((e.ingresos||0)*F.anual)))+' al año.',dis:why,run:()=>{ const r=transformar(e,id); if(r) return; escenaFormas(); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaFormas()});
+    escena({rubro:'Cámara de Comercio',titulo:E(e.nombre)+' · '+E(f.sigla),ancho:true,cerrable:true,cuerpo:'Hoy es <b>'+E(f.n.toLowerCase())+'</b>. '+E(f.d)+' Responsabilidad: '+respTxt(e)+'.',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapFundar(){ const old=window.fundarEn; if(typeof old!=='function'||old.__v223) return; const f=function(){ const n0=comps().length; const r=old.apply(this,arguments);
+      try{ const g=comps(), e=g[g.length-1]; if(e&&g.length>n0&&!e.forma223){ asegurar(e,true); log('<b>'+E(e.nombre)+'</b> se constituyó como <b>'+E(forma(e).n.toLowerCase())+' ('+E(forma(e).sigla)+')</b>. Este año puedes cambiarle la forma sin costo en «Las formas legales de tus compañías».','hito'); } }catch(x){ console.error(x); }
+      return r; }; f.__v223=true; Object.keys(old).forEach(k=>{ f[k]=old[k]; }); window.fundarEn=f; }
+  const TIT='Las formas legales de tus compañías';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA223_ACC) return; window.__SA223_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18){ const g=comps(); g.forEach(e=>asegurar(e));
+          if(g.length&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'compania',d:'S.A., S.A.S., Ltda., colectiva o comandita: quién responde por las deudas, cuánto cuesta y si puede ir a bolsa.',mov:0,modal:true,run:()=>escenaFormas()});
+          const e=S.emp; if(e){ const f=forma(e);
+            const b=L.find(x=>x&&x.t==='Sacar la compañía a bolsa'); if(b&&!f.bolsa&&!b.dis) b.dis='Una '+f.n.toLowerCase()+' no puede cotizar: transfórmala antes en S.A. (en «'+TIT+'»)';
+            const r=L.find(x=>x&&x.t==='Ronda de capital privado'); const n=(e.holders||[]).filter(h=>h.n>0).length; if(r&&!r.dis&&n>=f.max) r.dis='Una '+f.n.toLowerCase()+' admite máximo '+f.max+' socio'+(f.max===1?'':'s')+': transfórmala para abrir una ronda'; } } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v223=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA223_CAT) return; window.__SA223_CAT=true; window.catDe=function(t){ if(t===TIT) return 'compania'; return old.apply(this,arguments); }; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA223_PASO) return; window.__SA223_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function init223(){ wrapFundar(); wrapAcciones(); wrapCat(); wrapPaso();
+    Object.assign(window,{FORMAS_223:FORMAS,formaDe223:forma,idFormaDe223:idForma,etiquetaForma223:etiqueta,asegurarForma223:asegurar,defectoForma223:porDefecto,ilimitada223:ilimitada,factorResp223:factorResp,topeResp223:topeResp,textoResp223:textoResp,alLiquidar223:alLiquidar,costoAnualForma223:costoAnual,costoTransformar223:costoTransformar,puedeTransformar223:puedeTransformar,transformar223:transformar,anualFormas223:anual,escenaFormas223:escenaFormas,escenaTransformar223:escenaTransformar,formasDisponibles223:dispon}); }
+  init223(); setTimeout(init223,40); setTimeout(init223,220); setTimeout(init223,650); setTimeout(init223,950); setTimeout(init223,1500);
+  window.__SA223={version:V223};
 })();
 </script>
 
