@@ -1407,7 +1407,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v210</div>
+<div class="version-badge" id="versionBadge">v211</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -22246,7 +22246,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      d:'Fundar una compañía que manejas tú, o constituir una sociedad aparte que administra alguien más.',
      miembros:[['La manejas tú','Fundar una compañía'],['La maneja otro','Constituir una sociedad']]},
     {id:'empleo',t:'Buscar empleo',cat:'empleo',
-     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta. También aquí: las armas y la vida religiosa.',
+     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta. También aquí: los cargos públicos, la docencia y la rectoría, la judicatura, las armas y la vida religiosa.',
      prefijos:[['Dónde','Emplearte: ']]},
     {id:'opa',t:'Toma hostil',cat:'mercado',
      d:'Ofrecerles a los accionistas de otra casa por encima del precio para quedarte con ella. Cuesta dos movidas.',
@@ -36497,7 +36497,7 @@ install();setTimeout(install,1200);
         run:()=>{ S.mov=Math.max(0,S.mov-1); const p=clamp(.15+pf.pts/130-(c.rango-2)*.09,.04,.8); if(chance(p)){ log(aceptar(c,ciu)); } else { S.p.redes=clamp((S.p.redes||0)-2,0,100); log('Pediste '+esc(c.n.toLowerCase())+' y no hubo cupo: ese puesto ya tenía dueño.','mal'); } cerrarModal(); render(); }}))});
   }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA197_PASO) return; window.__SA197_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)){ ['Tu cargo público','Pedir un cargo público'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); } }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; ['Tu cargo público','Pedir un cargo público'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Sector público',t]); }); } }   /* v211: los cargos se buscan donde se busca empleo */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA197_ACC) return; window.__SA197_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ try{ sync(); }catch(e){}
@@ -36619,7 +36619,7 @@ install();setTimeout(install,1200);
 
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA198_PASO) return; window.__SA198_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu vida académica y docente')) g.miembros.push(['Influencia','Tu vida académica y docente']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu vida académica y docente')) g.miembros.push(['Academia','Tu vida académica y docente']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA198_ACC) return; window.__SA198_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ sync(); const g=G(); if(g&&!L.some(x=>x.t==='Tu vida académica y docente')) L.push({t:'Tu vida académica y docente',cat:'empleo',d:(g.pista==='universidad'?'Artículos, libros, tesis, grupo de investigación y fama académica en ':'El aula, la comunidad, el escalafón y el magisterio en ')+g.ent+'.',mov:0,modal:false,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
@@ -36746,7 +36746,7 @@ install();setTimeout(install,1200);
 
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA199_PASO) return; window.__SA199_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu rectoría')) g.miembros.push(['Influencia','Tu rectoría']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu rectoría')) g.miembros.push(['Academia','Tu rectoría']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA199_ACC) return; window.__SA199_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); vigilar(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ const r=G(); if(r&&!L.some(x=>x.t==='Tu rectoría')) L.push({t:'Tu rectoría',cat:'empleo',d:'Rector de '+r.uni+': calidad, finanzas, apoyos y protestas.',mov:0,modal:false,run:()=>escenaRector()}); } }catch(x){ console.error(x); }
@@ -36881,7 +36881,7 @@ install();setTimeout(install,1200);
   /* ---- enganches ---- */
   function anual(){ if(!S||!S.p||S.muerto) return; sync(); anualJuez(); try{ conflicto(); }catch(e){} anualPuerta(); }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA200_PASO) return; window.__SA200_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu despacho judicial')) g.miembros.push(['Influencia','Tu despacho judicial']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu despacho judicial')) g.miembros.push(['Justicia','Tu despacho judicial']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA200_ACC) return; window.__SA200_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ sync(); if(J()&&!L.some(x=>x.t==='Tu despacho judicial')) L.push({t:'Tu despacho judicial',cat:'empleo',d:'Casos, expedientes, presiones y el Consejo Superior de la Judicatura.',mov:0,modal:false,run:()=>escenaDespacho()}); } }catch(x){ console.error(x); }
@@ -37686,11 +37686,31 @@ install();setTimeout(install,1200);
    ========================================================================== */
 (function(){
   const V210='v210';
-  const ESTAS=['Ingresar a las armas','Tu carrera militar','Tu libreta militar','Seguir la vocación religiosa','Tu vida eclesiástica'];
+  const ESTAS=['Ingresar a las armas','Tu carrera militar','Tu libreta militar','Seguir la vocación religiosa','Tu vida eclesiástica','Tu cargo público','Pedir un cargo público','Tu vida académica y docente','Tu rectoría','Tu despacho judicial'];   /* v211 suma los cargos, la docencia, la rectoría y la judicatura */
   function limpiar(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const p=G.find(x=>x.id==='palancas'); if(p&&Array.isArray(p.miembros)) p.miembros=p.miembros.filter(m=>!ESTAS.includes(m[1])); }
   function init210(){ try{ limpiar(); }catch(e){} Object.assign(window,{CARRERAS_EN_EMPLEO_210:ESTAS}); }
   init210(); setTimeout(init210,40); setTimeout(init210,220); setTimeout(init210,650); setTimeout(init210,950); setTimeout(init210,1500);
   window.__SA210={version:V210};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v211 · TODAS LAS CARRERAS SE BUSCAN DONDE SE BUSCA EMPLEO
+   Después de las armas y la Iglesia (v210), las demás carreras también salen
+   de «Influencia y palancas» y se van a «Buscar empleo», cada una en su
+   sección:
+   - Sector público: «Pedir un cargo público» y «Tu cargo público».
+   - Academia: «Tu vida académica y docente» y «Tu rectoría».
+   - Justicia: «Tu despacho judicial».
+   - Fuerzas armadas e Iglesia, como en la v210.
+   En «Influencia y palancas» quedan los favores, las leyes, la prensa, el
+   poder, las empresas públicas, los gremios, las otras casas y la política.
+   ========================================================================== */
+(function(){
+  const V211='v211';
+  window.SECCIONES_EMPLEO_211=['Fuerzas armadas','Iglesia','Sector público','Academia','Justicia'];
+  window.__SA211={version:V211};
 })();
 </script>
 
