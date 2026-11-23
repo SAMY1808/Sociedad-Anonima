@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v214</div>
+<div class="version-badge" id="versionBadge">v215</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -23369,7 +23369,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const PLAN_TXT={buscar:'buscando un hijo',natural:'lo que venga',cuidarse:'sin hijos por ahora'};
   function escenaPareja108(){
     const q=pz(); if(!q) return;
-    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25);
+    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=Math.round(costo(.02,25)*(window.factorFertilidad215?window.factorFertilidad215():1));
     const html='<div class="pareja108">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:60})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años · '+esc(q.rol||'')+' · '+(q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja')+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
       +'<div class="chips">'+(q.rasgo108?'<i>'+esc(rasgoTxt(q))+'</i>':'')+(isFinite(q.compat108)?'<i>'+compatTxt(q.compat108)+'</i>':'')+'<i>hijos: '+PLAN_TXT[plan()]+'</i>'+(q.separacionBienes?'<i>con capitulaciones</i>':'')+'</div></div></div>'
       +medida('la relación',Math.round(q.paciencia||0),100,(q.paciencia||0)<35?'r':'v');
@@ -24418,7 +24418,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const q=pz(); if(!q) return;
     const años=isFinite(q.desde108)?S.anio-q.desde108:null;
     const quien=q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja';
-    const cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25), cRegalo=Math.max(25,pat()*.02);
+    const cCita=costo(.002,2), cViaje=costo(.01,10), cFert=Math.round(costo(.02,25)*(window.factorFertilidad215?window.factorFertilidad215():1)), cRegalo=Math.max(25,pat()*.02);
     const extra=[q.casa&&q.casa.apellido?'de los '+esc(q.casa.apellido):'',q.porInteres?'fue un matrimonio por conveniencia':'',q.divorcioEnCurso?'<b>divorcio en curso</b>':''].filter(Boolean).join(' · ');
     const html='<div class="pareja108 pareja113">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:64})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años'+(q.rol?' · '+esc(q.rol):'')+' · '+quien+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
       +(extra?'<div class="sub">'+extra+'</div>':'')
@@ -25497,7 +25497,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
          {t:'Pagarle a la otra parte para que desaparezca',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.006,10)); if(chance(.5)){ cerrar(e,'tapado'); return 'Se fue con la plata. Tu hijo no te lo perdona.'; } crecer(e,1); return 'Lo contó todo en la radio, incluida tu oferta.'; }},DEJAR()]});
     E({p:.5,c:()=>adulto()&&S.anio>=1970&&!!hijoEntre(16,30),
       t:()=>{ const h=hijoEntre(16,30); S._h129=h.nombre; abrir('hijos',P1(h.nombre)+' en las páginas judiciales',2,h.nombre); return '<b>Escándalo con los hijos.</b> Detuvieron a '+esc(h.nombre)+' en una fiesta donde había droga. Salió en las páginas judiciales con el apellido completo.'; },
-      o:[{t:()=>'Clínica de rehabilitación ('+fmt(costo(.005,10))+')',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,costo(.005,10)); if(h){ h.salud=clamp((h.salud||80)+5,0,100); h.vinculo=clamp((h.vinculo||55)+5,0,100); } cerrar(e,'superado'); return 'Seis meses en una clínica. Volvió distinto, y la prensa perdió interés.'; }},
+      o:[{t:()=>'Clínica de rehabilitación ('+fmt(Math.round(costo(.005,10)*(window.factorRehab215?window.factorRehab215():1)))+')',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,Math.round(costo(.005,10)*(window.factorRehab215?window.factorRehab215():1))); if(h){ h.salud=clamp((h.salud||80)+5,0,100); h.vinculo=clamp((h.vinculo||55)+5,0,100); } cerrar(e,'superado'); return 'Seis meses en una clínica. Volvió distinto, y la prensa perdió interés.'; }},
          {t:'Sacarlo con los mejores abogados',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.004,8)); if(chance(.6)){ cerrar(e,'tapado'); return 'Salió sin cargos. Todos saben por qué.'; } return 'Salió, pero el tema sigue en la prensa.'; }},DEJAR()]});
     E({p:.7,c:()=>adulto()&&S.anio>=2005&&!!hijoEntre(15,30),
       t:()=>{ const h=hijoEntre(15,30); S._h129=h.nombre; abrir('hijos','El video viral de '+P1(h.nombre),1,h.nombre); return '<b>Escándalo con los hijos.</b> Un video de '+esc(h.nombre)+' gritándole "¿usted no sabe quién soy yo?" a un mesero se volvió viral. Tiene millones de vistas y el apellido es tendencia.'; },
@@ -37912,6 +37912,87 @@ install();setTimeout(install,1200);
   function init214(){ try{ instalar(); wrapAcciones(); afinar(); }catch(e){ console.error(e); } Object.assign(window,{TIPO_BODEGA_214:BODEGA,afinarVinicolas214:afinar}); }
   init214(); setTimeout(init214,40); setTimeout(init214,220); setTimeout(init214,650); setTimeout(init214,950); setTimeout(init214,1500);
   window.__SA214={version:V214};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v215 · SALUD MÁS PROFUNDA: LA COBERTURA LLEGA A LA FERTILIDAD Y A LA
+   REHABILITACIÓN, Y LA SUPERINTENDENCIA PUEDE INTERVENIR TU EPS
+   1. LA COBERTURA. La v209 abarató tratamientos, controles y cuidados. Ahora
+      también pesa en dos gastos que quedaban sin cobertura:
+      · El tratamiento de fertilidad: la afiliación casi no ayuda (el plan
+        obligatorio no cubre la alta complejidad: pagas 90%); la prepagada
+        sí (60%); las dos juntas, 55%.
+      · La clínica de rehabilitación de un hijo: la afiliación cubre una
+        parte, como en cualquier tratamiento (70%); con prepagada, la mitad.
+   2. LA EPS INTERVENIDA. Una EPS tuya que se hunde ya no se cae sola:
+      · Cuando pierde la reputación o la caja dos años seguidos, la
+        Superintendencia de Salud la pone en vigilancia especial (puedes
+        presentar un plan de choque, defenderte o dejarlo pasar).
+      · Si sigue mal, la intervienen: toma posesión y nombra un interventor.
+        Puedes poner capital y un plan para recuperarla en tres años, pedir
+        que la vendan o aceptar que la liquiden.
+      · Intervenida pierde ventas, moral y presidente; si en tres años no se
+        recupera, se liquida. Liquidada sale del grupo y te toca una parte de
+        lo que quede después de las deudas.
+   ========================================================================== */
+(function(){
+  const V215='v215';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+
+  /* ---------- 1. la cobertura ---------- */
+  function factorFertilidad(){ const c=typeof window.coberturaSalud209==='function'?window.coberturaSalud209():'ninguna'; return c==='ambas'?.55:c==='prepagada'?.6:c==='afiliacion'?.9:1; }
+  function factorRehab(){ return typeof window.factorSalud209==='function'?window.factorSalud209(.5):1; }
+
+  /* ---------- 2. la EPS vigilada, intervenida y liquidada ---------- */
+  const esEPS=e=>!!(e&&e.red176&&e.red176.clase==='eps');
+  const est=e=>{ if(!e.eps215||typeof e.eps215!=='object') e.eps215={estado:'normal',quejas:0,mala:0,desde:null,hasta:null}; return e.eps215; };
+  const unidades=e=>((e.red176&&e.red176.unidades)||[]).filter(u=>!u.enObra);
+  const reputacion=e=>{ const u=unidades(e); return u.length?u.reduce((s,x)=>s+(isFinite(x.rep)?x.rep:50),0)/u.length:50; };
+  function mala(e){ const ing=Math.max(1,e.ingresos||0); return reputacion(e)<45||(e.caja||0)<0||((e.utilidad||0)<0&&(e.deuda||0)>ing*.5)||(e.presidente&&e.presidente.honrado<=3&&reputacion(e)<55); }
+  const miPart=e=>{ try{ return miPct(e); }catch(x){ return 1; } };
+  const valorMio=e=>{ try{ return Math.max(0,valuar(e)*miPart(e)); }catch(x){ return 0; } };
+  const enGrupo=e=>comps().includes(e);
+  const quitar=e=>{ try{ sacarDelGrupo(e); }catch(x){ S.grupo=comps().filter(z=>z!==e); } };
+  const ente=()=>A()>=1997?'la Superintendencia Nacional de Salud':'el Ministerio de Salud';
+
+  function evVigilancia(e){ const x=Math.round(Math.max(25,(e.ingresos||0)*.03));
+    return {p:9,c:()=>ACTIVO()&&enGrupo(e)&&est(e).estado==='vigilada',t:()=>'<b>'+E(ente().replace(/^la /,'La ').replace(/^el /,'El '))+' pone a '+E(e.nombre)+' en vigilancia especial.</b> Hay quejas de afiliados, demoras en las autorizaciones y las cuentas no cuadran.',
+      o:[{t:'Presentar un plan de choque ('+fm(x)+')',f:()=>{ const s=est(e); e.caja=(e.caja||0)-x; unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)+6,5,99); }); s.estado='normal'; s.quejas=0; s.mala=0; return 'El plan convenció a la autoridad: sales de la vigilancia. Costó '+fm(x)+' de la caja de '+E(e.nombre)+'.'; }},
+        {t:'Defenderte en el proceso',f:()=>{ const s=est(e); if(chance(.5)){ s.estado='normal'; s.quejas=0; return 'Ganaste: no había mérito para vigilar tu EPS.'; } unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)-4,5,99); }); return 'Perdiste el pulso: la vigilancia sigue y salió en la prensa.'; }},
+        {t:'Dejarlo pasar',f:()=>'No hiciste nada. La autoridad toma nota.'}]}; }
+  function evIntervencion(e){ const cap=Math.round(Math.max(80,(e.deuda||0)*.35+(e.ingresos||0)*.06));
+    return {p:10,c:()=>ACTIVO()&&enGrupo(e)&&est(e).estado==='intervenida',t:()=>'<b>'+E(ente().replace(/^la /,'La ').replace(/^el /,'El '))+' toma posesión de '+E(e.nombre)+'.</b> Nombra un interventor, saca a tu presidente y manda sobre la caja. Tienes tres años para recuperarla.',
+      o:[{t:'Poner capital y un plan de recuperación ('+fm(cap)+')',cat:'capital',f:()=>{ if(S.efectivo<cap) return 'No tienes '+fm(cap)+' en efectivo para ponerlos ahora.'; S.efectivo-=cap; e.caja=(e.caja||0)+cap; const s=est(e); s.hasta=A()+3; s.plan=true; unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)+8,5,99); }); return 'Pusiste '+fm(cap)+' y el plan quedó aprobado: en tres años te devuelven la EPS si sale de la zona roja.'; }},
+        {t:'Pedir que la vendan',f:()=>{ const v=valorMio(e)*.45; quitar(e); S.efectivo+=v; moverPrestigio(-3,'la intervención de '+e.nombre); return 'La Superintendencia la vendió por pedazos: te tocó '+fm(v)+' (45% de lo que valía tu parte).'; }},
+        {t:'Aceptar la liquidación',f:()=>{ const s=est(e); s.estado='liquidada'; s.desde=A(); return 'Aceptaste la liquidación: en dos años se cierra. Los trabajadores y los afiliados primero.'; }}]}; }
+
+  function anual(){
+    if(!ACTIVO()) return;
+    comps().slice().forEach(e=>{
+      if(!esEPS(e)) return; const s=est(e); const m=mala(e);
+      if(s.estado==='normal'){ if(m){ s.quejas++; } else s.quejas=Math.max(0,s.quejas-1); if(s.quejas>=2){ s.estado='vigilada'; s.mala=0; s.desde=A(); try{ cola.push(evVigilancia(e)); }catch(x){} } }
+      else if(s.estado==='vigilada'){ if(!m){ s.estado='normal'; s.quejas=0; log('La vigilancia especial de <b>'+E(e.nombre)+'</b> se levantó: se corrigió el rumbo.','bien'); }
+        else { s.mala++; if(s.mala>=2){ s.estado='intervenida'; s.desde=A(); s.hasta=A()+3; s.plan=false; e.presidente=null; try{ cola.push(evIntervencion(e)); }catch(x){} } } }
+      else if(s.estado==='intervenida'){
+        e.ingresos*=.9; e.moral=cl((e.moral||50)-4,0,100); e.presidente=null;
+        if(A()>=(s.hasta||A())){ if(!m){ s.estado='normal'; s.quejas=0; s.mala=0; log('Te devolvieron <b>'+E(e.nombre)+'</b>: salió de la intervención.','bien'); } else { s.estado='liquidada'; s.desde=A(); log('<b>'+E(e.nombre)+'</b> no se recuperó: la Superintendencia ordenó su liquidación.','mal'); } } }
+      else if(s.estado==='liquidada'){
+        e.ingresos*=.8; e.moral=cl((e.moral||50)-8,0,100);
+        if(A()-(s.desde||A())>=2){ const v=valorMio(e)*.25; const nombre=e.nombre; quitar(e); S.efectivo+=v; moverPrestigio(-4,'la liquidación de '+nombre); log('Se cerró la liquidación de <b>'+E(nombre)+'</b>: quedaron '+fm(v)+' para ti después de las deudas.','mal'); } }
+    });
+  }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA215_PASO) return; window.__SA215_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()) anual(); }catch(x){ console.error(x); } return r; }; }
+  function init215(){ try{ wrapPaso(); }catch(e){ console.error(e); } Object.assign(window,{factorFertilidad215:factorFertilidad,factorRehab215:factorRehab,anualEPS215:anual,estadoEPS215:est,malaEPS215:mala,evVigilanciaEPS215:evVigilancia,evIntervencionEPS215:evIntervencion}); }
+  init215(); setTimeout(init215,40); setTimeout(init215,220); setTimeout(init215,650); setTimeout(init215,950); setTimeout(init215,1500);
+  window.__SA215={version:V215};
 })();
 </script>
 
