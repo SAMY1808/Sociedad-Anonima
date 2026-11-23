@@ -1,119 +1,131 @@
 
 /* ==========================================================================
-   v219 · TELECOMUNICACIONES COMO CLASE DE NEGOCIO
-   Entra por la misma puerta que las demás, en «Tecnología y medios», y
-   funciona como una red de unidades por época:
-   - 1865: el TELÉGRAFO (oficinas y líneas; declina desde la radio y el
-     teléfono, y desaparece hacia 1975).
-   - 1884: la TELEFONÍA local (centrales y redes de líneas) y, desde 1925, la
-     LARGA DISTANCIA y los enlaces (el Estado entra en 1947 con Telecom).
-   - 1992: la TELEVISIÓN POR CABLE y satelital; 1994: la red CELULAR (con la
-     licitación de la telefonía móvil) y, desde 1996, el INTERNET y la banda
-     ancha; 2008: la FIBRA ÓPTICA al hogar.
-   - Apoyos: cuadrillas de instalación y mantenimiento (1865), centro de
-     operaciones y conmutación (1920), torres y antenas propias (1994) y
-     cable submarino y enlaces internacionales (2000). Bajan los costos y
-     las caídas de las unidades que cubren.
-   - Sucesos: la red que se cae, los cables y las torres robados o
-     volados (la guerra), los topes de tarifas de la regulación, las
-     licitaciones de espectro (celular 1994, 4G en 2013, 5G en 2023), las
-     guerras de precios, la clonación de celulares y los ciberataques, la
-     migración a la siguiente tecnología y la competencia de la empresa
-     estatal Telecom (1947-2003).
-   La compañía queda en el sector «Software y datos», con las regulaciones
-   de cada época: el Gobierno, el Ministerio de Comunicaciones (1967), la
-   Comisión de Regulación de Telecomunicaciones (1994) y el MinTIC y la CRC
-   (2009).
+   v220 · LA PLATA CALIENTE: EL NARCOTRÁFICO VISTO DESDE LA CASA
+   El juego ya tenía los carteles como grupos armados (v91), los delitos de
+   lavado y de prestar camiones, la extradición (v157) y el control de lavado
+   de los bancos (v151). Faltaba lo que le pasa a una familia de negocios que
+   toca esa plata sin ser parte del cartel:
+   - TRATOS: entre 1975 y 2020 llegan ofertas de plata de dudoso origen: un
+     comprador que paga en efectivo y muy por encima del precio por una
+     propiedad, y un «socio capitalista» que quiere entrar a una compañía.
+     Cada trato aceptado paga bien y sube tu EXPOSICIÓN (0 a 100). Las
+     compañías con ese socio quedan marcadas.
+   - LA ÉPOCA: la ventanilla siniestra y la bonanza (1975-83), la guerra de
+     Lara Bonilla a Galán y los Extraditables (1984-90), la Constitución del 91
+     (no extradita) y la caída de Escobar (1993), el Proceso 8000 y la lista
+     Clinton (1995), la extinción de dominio (1996 y 2002) y la extradición
+     que vuelve (1997): el clima cambia lo que cada trato cuesta.
+   - CONSECUENCIAS: allanamientos, extinción de dominio sobre las compañías
+     marcadas, la lista Clinton (te cierran las cuentas y el crédito) y la
+     justicia de Estados Unidos. La exposición baja sola con los años si no
+     sigues metido, y la reciben tus herederos rebajada.
+   - SALIDAS: auditoría forense, separarte de los socios, colaborar con la
+     Fiscalía o gastar en abogados para salir de la lista. Cada una tiene su
+     precio y sus riesgos de retaliación.
+   El panel «La plata caliente» aparece cuando hay exposición.
    ========================================================================== */
 (function(){
-  const V219='v219';
+  const V220='v220';
   const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
   const fm=x=>fmt(Math.round(x));
   const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
-  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
-  const RP=(r,u)=>window.reposUnidad176(r,u);
-  const ING=(r,u)=>Math.round(Math.max(1,u.rev||RP(r,u)*((window.tipoDe176(r.clase,u.tipo)||{rc:.5}).rc)));
-  const X=(t,o)=>window.evento176(t,o), G=(e,m)=>window.gastoRed176(e,m);
-  const R=e=>window.redNegocio176(e);
-  const TEL_DESDE=1865;
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const C=()=>{ if(!S.caliente220) S.caliente220={expo:0,tratos:[],hechos:{},clinton:null}; return S.caliente220; };
+  const expo=()=>((typeof S!=='undefined'&&S&&S.caliente220&&S.caliente220.expo)||0);
+  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const sub=n=>{ C().expo=clamp(C().expo+n,0,100); };
+  const estres=n=>{ try{ S.p.estres=clamp((S.p.estres||30)+n,0,100); }catch(e){} };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t); }catch(e){} };
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const marcadas=()=>comps().filter(e=>e&&e.caliente220);
 
-  const TEL={n:'Telecomunicaciones',sector:'tech',grupo:'Tecnología y medios',desde:TEL_DESDE,un:['red o servicio','redes y servicios'],emp:'Telecomunicaciones',
-    d:'Telégrafo, teléfono, celular, internet y fibra óptica, según la época: una red que se tiende, se conecta y se cobra por uso o por suscripción. La inversión no termina nunca y los clientes se quejan de lo que no funciona. Con cuadrillas, centro de operaciones y torres propias las caídas bajan; sin ellas, la red se enreda al crecer.',
-    cs:.1,el:.35,rs:.6,sp:.8,ts:.15,vol:.1,pand:[1.1,1.15,1.05],kv:8,
-    aut:[[1865,'el Gobierno (Correos y Telégrafos)'],[1967,'el Ministerio de Comunicaciones'],[1994,'la Comisión de Regulación de Telecomunicaciones'],[2009,'el MinTIC y la Comisión de Regulación de Comunicaciones']],
-    tit:[[1,'Operador local'],[3,'Operador regional'],[8,'Operador nacional'],[18,'Gigante de las telecomunicaciones']],
-    tipos:[
-      {id:'telegrafo',n:'Oficina y línea de telégrafo',desde:1865,hasta:1975,base:120,rc:1.3,mg:.14,u0:.7,capN:800,capU:'telegramas al día',obra:[0,1,1],princ:true,d:'Un alambre entre dos plazas y un telegrafista: lo único que viaja más rápido que un jinete.'},
-      {id:'telefonia',n:'Central telefónica y red local',desde:1884,base:300,rc:1.2,mg:.16,u0:.68,capN:3000,capU:'líneas',obra:[0,1,2],princ:true,d:'Una central, postes, cables y abonados que pagan mensualidad.'},
-      {id:'larga',n:'Larga distancia y enlaces',desde:1925,base:500,rc:1.1,mg:.2,u0:.65,capN:1500,capU:'circuitos',obra:[0,1,2],princ:true,vol:.14,d:'Conectar ciudades y países: cada circuito se cobra por minuto.'},
-      {id:'cable',n:'Televisión por cable y satelital',desde:1992,base:800,rc:1.15,mg:.18,u0:.62,capN:80000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.16,d:'Paquetes de canales por suscripción, con la guerra de contenidos de por medio.'},
-      {id:'celular',n:'Red celular (telefonía móvil)',desde:1994,base:2500,rc:1.1,mg:.22,u0:.66,capN:200000,capU:'suscriptores',obra:[1,2,2],princ:true,vol:.16,d:'Antenas, espectro y millones de minutos: el negocio de volumen del siglo.'},
-      {id:'banda',n:'Internet y banda ancha',desde:1996,base:900,rc:1.2,mg:.2,u0:.64,capN:50000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.2,d:'Conexiones por línea y por cable: cada año piden más velocidad.'},
-      {id:'fibra',n:'Fibra óptica al hogar',desde:2008,base:1500,rc:1.15,mg:.24,u0:.62,capN:100000,capU:'hogares',obra:[1,2,2],ciu:true,princ:true,vol:.2,d:'Tender fibra cuesta una fortuna y lo que se tiende no se va.'},
-      {id:'cuadrillas',n:'Cuadrillas de instalación y mantenimiento',desde:1865,base:200,rol:'apoyo',cubre:6,bono:.02,falta:.03,d:'Quien instala, repara y cambia lo que se rompe. Atiende hasta 6 redes.'},
-      {id:'central',n:'Centro de operaciones y conmutación',desde:1920,base:600,rol:'apoyo',cubre:8,bono:.025,falta:.03,d:'Vigila la red las veinticuatro horas y enruta el tráfico. Atiende hasta 8 redes.'},
-      {id:'torres',n:'Torres y antenas propias',desde:1994,base:1200,rol:'apoyo',cubre:8,bono:.03,falta:0,d:'Dejar de pagar arriendo por cada torre baja los gastos de hasta 8 redes.'},
-      {id:'submarino',n:'Cable submarino y enlaces internacionales',desde:2000,base:2000,rol:'apoyo',cubre:10,bono:.02,falta:.01,d:'Tráfico propio hacia el exterior sin pagarle peaje a nadie. Atiende hasta 10 redes.'}]};
+  /* el clima de cada época: cuánto pesa la exposición */
+  function clima(a){ a=a||A(); return a<1975?0:a<1984?.6:a<1991?1.6:a<1995?1.1:a<2002?1.5:a<2016?1.3:1; }
+  const ventana=a=>(a||A())>=1975&&(a||A())<=2020;
+  function textoClima(a){ a=a||A(); return a<1975?'sin narcotráfico organizado en tu entorno':a<1984?'bonanza: la plata entra sin preguntas (la «ventanilla siniestra»)':a<1991?'guerra declarada a los carteles: allanamientos y bombas':a<1995?'la Constitución del 91 no extradita y cae Escobar':a<2002?'Proceso 8000, lista Clinton y extinción de dominio':a<2016?'extinción de dominio y extradición: la justicia aprieta':'vigilancia internacional y plata de minería ilegal'; }
+  function trato(t,valor,quien){ const o=C(); o.tratos.push({a:A(),t,valor:Math.round(valor),quien}); if(o.tratos.length>12) o.tratos.shift(); }
 
-  const EV=[
-    /* la red se cae */
-    (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.025);
-      X('<b>Se cae la red de '+E(u.nom)+'.</b> '+(A()>=1994?'Miles de usuarios quedan sin servicio durante horas y las quejas llegan a la regulación.':'Las líneas quedan mudas un día entero y los clientes protestan en la puerta.'),
-        [{t:'Compensar a los clientes ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+4,5,99); return 'Compensaste a los clientes con '+fm(x)+': se lo reconocieron.'; }},
-         {t:'Reparar sin compensar a nadie',f:()=>{ G(e,x*.25); u.rep=cl(u.rep-6,5,99); return 'Repararon rápido y no pagaste nada, pero la reputación sufrió.'; }}]); },
-    /* cables y torres: robo, temporal o atentado */
-    (e,r,u)=>A()>=1900?()=>{ const x=Math.round(RP(r,u)*.04), guerra=(S.tension||35)>=45&&A()>=1980;
-      X('<b>'+(guerra?'Vuelan torres y cables de '+E(u.nom)+'.':A()<1960?'Un temporal derriba los postes y las líneas de '+E(u.nom)+'.':'Se roban los cables de cobre de '+E(u.nom)+'.')+'</b> '+(guerra?'La guerra llegó a la red: hay zonas sin comunicación.':'Reponer el material cuesta y la zona queda incomunicada.'),
-        [{t:'Reconstruir de inmediato ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+2,5,99); return 'Reconstruiste la red en pocos días: costó '+fm(x)+'.'; }},
-         {t:guerra?'Pedirle protección a la fuerza pública':'Reponer poco a poco',f:()=>{ G(e,x*.5); u.rep=cl(u.rep-4,5,99); if(guerra) S.tension=cl((S.tension||35)+1,0,100); return guerra?'La fuerza pública cubrió las torres, pero la zona quedó con servicio a medias.':'Repusiste de a poco: la zona sufrió y costó menos.'; }}]); }:null,
-    /* la regulación fija un tope */
-    (e,r,u)=>A()>=1947?()=>{ const x=Math.round(ING(r,u)*.06), aut=(CL_aut()||'la autoridad');
-      X('<b>'+E(aut.charAt(0).toUpperCase()+aut.slice(1))+' fija un tope a las tarifas de '+E(u.nom)+'.</b> Dice que el servicio es esencial y no puede cobrarse a cualquier precio.',
-        [{t:'Acatar el tope',f:()=>{ G(e,x); return 'Acataste el tope: dejaste de ganar '+fm(x)+' este año.'; }},
-         {t:'Demandarlo ('+fm(x*.4)+')',f:()=>{ G(e,x*.4); if(chance(.5)){ return 'Ganaste la demanda: el tope se anuló.'; } G(e,x); u.rep=cl(u.rep-2,5,99); return 'Perdiste la demanda: pagaste el abogado y acataste el tope.'; }}]); }:null,
-    /* el espectro: la licitación celular (1994), 4G (2013) y 5G (2023) */
-    (e,r,u)=>(u.tipo==='celular'&&((A()>=1994&&A()<=1996)||(A()>=2011&&A()<=2013)||(A()>=2022&&A()<=2024)))?()=>{ const gen=A()<=1996?'la telefonía celular':A()<=2013?'el 4G':'el 5G', x=Math.round(RP(r,u)*.12);
-      X('<b>El Gobierno licita el espectro de '+gen+'.</b> Quien no tenga una porción no podrá ofrecer el servicio en '+E(u.ciudad)+'.',
-        [{t:'Pujar fuerte ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+5,5,99); u.cons=cl(u.cons+8,5,99); return 'Ganaste el espectro por '+fm(x)+': tu red se prepara para '+gen+'.'; }},
-         {t:'Pujar con prudencia ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.5)){ u.rep=cl(u.rep+3,5,99); return 'Ganaste una porción pequeña por '+fm(x*.5)+'.'; } u.cons=cl(u.cons-6,5,99); return 'Perdiste la puja: tus clientes se van con quien sí tiene el espectro.'; }},
-         {t:'No participar',f:()=>{ u.cons=cl(u.cons-9,5,99); u.rep=cl(u.rep-2,5,99); return 'No participaste: te quedaste con la tecnología de antes.'; }}]); }:null,
-    /* guerra de precios */
-    (e,r,u)=>(['celular','banda','cable','larga'].includes(u.tipo)&&A()>=1992)?()=>{ const x=Math.round(ING(r,u)*.06);
-      X('<b>Estalla una guerra de precios por '+E(u.nom)+'.</b> Los competidores regalan minutos y megas para quitarte clientes.',
-        [{t:'Igualar los precios ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+1,5,99); return 'Igualaste los precios: perdiste '+fm(x)+' de margen pero conservaste a tus clientes.'; }},
-         {t:'Competir con servicio ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.55)){ u.rep=cl(u.rep+5,5,99); return 'El servicio ganó: tus clientes se quedaron.'; } u.cons=cl(u.cons-5,5,99); return 'Perdiste clientes con el servicio caro: no alcanzó.'; }}]); }:null,
-    /* fraude y ciberataques */
-    (e,r,u)=>(u.tipo==='celular'&&A()>=1995&&A()<=2008)?()=>{ const x=Math.round(ING(r,u)*.05);
-      X('<b>Clonan celulares de '+E(u.nom)+'.</b> Llegan facturas de llamadas que nadie hizo y los clientes pelean la cuenta.',
-        [{t:'Asumir el fraude y blindar la red ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'Asumiste el fraude y blindaste la red: costó '+fm(x)+'.'; }},
-         {t:'Cobrarles a los clientes',f:()=>{ u.rep=cl(u.rep-8,5,99); return 'Les cobraste a los clientes lo que no hablaron: la reputación se fue al suelo.'; }}]); }:(A()>=2010&&['banda','fibra','celular'].includes(u.tipo))?()=>{ const x=Math.round(ING(r,u)*.06);
-      X('<b>Un ciberataque tumba los sistemas de '+E(u.nom)+'.</b> Piden un rescate para devolver los datos de los clientes.',
-        [{t:'Pagar el rescate ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep-2,5,99); return 'Pagaste '+fm(x)+': los datos volvieron, la fama de segura no.'; }},
-         {t:'No pagar y reconstruir ('+fm(x*.6)+')',f:()=>{ G(e,x*.6); u.rep=cl(u.rep-5,5,99); return 'Reconstruiste los sistemas sin pagar: costó '+fm(x*.6)+' y tardó semanas.'; }}]); }:null,
-    /* migrar a la siguiente tecnología */
-    (e,r,u)=>(u.tipo==='celular'&&A()>=2010)||(u.tipo==='telefonia'&&A()>=1990&&A()<=2008)?()=>{ const x=Math.round(RP(r,u)*.08), cel=u.tipo==='celular';
-      X('<b>Los clientes de '+E(u.nom)+' piden '+(cel?'más velocidad: ya no les alcanza la red que tienes.':'líneas modernas: les resulta lenta y anticuada.')+'</b> Cada año que pasa pierdes frente a quien actualizó.',
-        [{t:'Invertir en la nueva tecnología ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+8,5,99); u.rep=cl(u.rep+3,5,99); return 'Actualizaste la red por '+fm(x)+': los clientes lo notaron.'; }},
-         {t:'Esperar un año más',f:()=>{ u.cons=cl(u.cons-6,5,99); return 'Esperaste: ahorraste plata y perdiste clientes.'; }}]); }:null,
-    /* la empresa estatal Telecom compite */
-    (e,r,u)=>(['telefonia','larga'].includes(u.tipo)&&A()>=1947&&A()<=2003)?()=>{ const x=Math.round(ING(r,u)*.05);
-      X('<b>Telecom, la empresa del Estado, baja las tarifas en '+E(u.ciudad)+'.</b> Con el subsidio del presupuesto puede cobrar menos que tú.',
-        [{t:'Bajar tus tarifas ('+fm(x)+')',f:()=>{ G(e,x); return 'Bajaste las tarifas: perdiste '+fm(x)+' de margen.'; }},
-         {t:'Quejarte ante la regulación',f:()=>{ if(chance(.4)){ u.rep=cl(u.rep+3,5,99); return 'La regulación te dio la razón y Telecom subió sus tarifas.'; } u.cons=cl(u.cons-5,5,99); return 'No te hicieron caso: perdiste clientes.'; }}]); }:null,
-    /* el declive del telégrafo */
-    (e,r,u)=>(u.tipo==='telegrafo'&&A()>=1935)?()=>{ const x=Math.round(RP(r,u)*.05);
-      X('<b>El telégrafo pierde clientes frente al teléfono y la radio.</b> La oficina de '+E(u.ciudad)+' recibe cada año menos telegramas.',
-        [{t:'Reconvertir la oficina ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+4,5,99); return 'Reconvertiste la oficina a giros y correo: se sostiene.'; }},
-         {t:'Dejarla morir',f:()=>{ u.cons=cl(u.cons-7,5,99); u.rep=cl(u.rep-2,5,99); return 'La dejaste como estaba: cada año valdrá menos.'; }}]); }:null];
-  function CL_aut(){ const a=A(); let n=null; TEL.aut.forEach(x=>{ if(a>=x[0]) n=x[1]; }); return n; }
+  /* ---------- las ofertas ---------- */
+  function evComprador(b){ const x=Math.round(b.valor*rnd(1.25,1.4));
+    return {p:8,c:()=>ACTIVO()&&(S.bienes||[]).includes(b),t:()=>'<b>Un comprador paga '+fm(x)+' en efectivo por '+E(b.nombre)+'.</b> Es mucho más de lo que vale y no pide rebaja, ni preguntas, ni testigos en la escritura. Nadie sabe de dónde viene la plata.',
+      o:[{t:'Vendérsela ('+fm(x)+')',f:()=>{ S.bienes=(S.bienes||[]).filter(z=>z!==b); S.efectivo+=Math.max(0,x-(b.hipoteca||0)); sub(7); trato('venta de '+b.nombre,x,'un comprador en efectivo'); estres(3); log('Vendiste <b>'+E(b.nombre)+'</b> por '+fm(x)+' en efectivo. La plata llegó limpia de papeles, pero no de preguntas.','hito'); return 'Vendiste con un buen sobreprecio ('+fm(x)+'): tu exposición subió.'; }},
+         {t:'Exigir transferencia bancaria y revisar su origen',f:()=>{ if(chance(.5)){ return 'El comprador se fue sin decir nada: la oferta nunca existió.'; } const y=Math.round(x*.85); S.bienes=(S.bienes||[]).filter(z=>z!==b); S.efectivo+=Math.max(0,y-(b.hipoteca||0)); sub(2); trato('venta de '+b.nombre,y,'un comprador con papeles'); return 'Los papeles salieron en regla: vendiste por '+fm(y)+' con poco riesgo.'; }},
+         {t:'Rechazar la oferta',f:()=>{ if(chance(.2)){ estres(8); return 'Rechazaste: alguien te mandó a decir que fue un error.'; } return 'Rechazaste la oferta y ahí quedó todo.'; }}]}; }
+  function evSocio(e){ const x=Math.round(Math.max(30,valuar(e)*rnd(.15,.3)));
+    return {p:8,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Un "socio capitalista" quiere poner '+fm(x)+' en '+E(e.nombre)+'.</b> No pide asiento en la junta ni cuentas claras: solo que le dejes "mover unas facturas". Es plata de alguien que no figura.',
+      o:[{t:'Aceptar al socio ('+fm(x)+')',f:()=>{ e.caja=(e.caja||0)+x; e.crecimiento=(e.crecimiento||0)+.03; e.caliente220=true; sub(12); trato('capital en '+e.nombre,x,'un socio capitalista'); estres(4); log('<b>'+E(e.nombre)+'</b> recibió '+fm(x)+' de un socio que no figura: queda marcada.','hito'); return 'La compañía recibió '+fm(x)+' y creció: queda marcada por su socio.'; }},
+         {t:'Pedirle un crédito a un banco',f:()=>{ const y=Math.round(x*.5); e.caja=(e.caja||0)+y; e.deuda=(e.deuda||0)+y; return 'Conseguiste '+fm(y)+' en un banco, con intereses y sin deberle favores a nadie.'; }},
+         {t:'Rechazar a ese socio',f:()=>{ if(chance(.15)){ estres(6); return 'Lo rechazaste: dejó un recado que no te gustó.'; } return 'Rechazaste al socio y la conversación se acabó.'; }}]}; }
+  function ofertas(){ const a=A(), k=clima(a), L=[]; if(!ventana(a)||pat()<200||expo()>=90) return L;
+    const B=(S.bienes||[]).filter(b=>b&&b.valor>=30&&!b.caliente220); if(B.length&&chance(clamp(.1*k,0,.2))) L.push(evComprador(B[ri(0,B.length-1)]));
+    const G=comps().filter(e=>e&&!e.caliente220&&valuar(e)>=60); if(G.length&&a>=1978&&chance(clamp(.06*k,0,.12))) L.push(evSocio(G[ri(0,G.length-1)]));
+    return L; }
 
-  /* ---------- instalación en la puerta ---------- */
-  function instalarClase(){ const CLs=window.CLASES_176, OR=window.ORDEN_176, GR=window.GRUPOS_PUERTA_176, EVc=window.EVC_176; if(!CLs||!OR) return false;
-    if(!CLs.telecom) CLs.telecom=TEL; if(!OR.includes('telecom')) OR.push('telecom');
-    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Tecnología y medios'); if(g){ if(!g.ids.includes('telecom')) g.ids.push('telecom'); if(!g.__v219){ g.__v219=true; const base=g.d; try{ Object.defineProperty(g,'d',{configurable:true,enumerable:true,get(){ return A()>=TEL_DESDE?base.replace(' y televisión.',', televisión y telecomunicaciones.'):base; }}); }catch(e){} } } }
-    if(EVc&&!EVc.telecom) EVc.telecom=EV; return true; }
-  function init219(){ try{ instalarClase(); }catch(e){ console.error(e); }
-    Object.assign(window,{CLASE_TELECOM_219:TEL,EVENTOS_TELECOM_219:EV,autoridadTelecom219:CL_aut}); }
-  init219(); setTimeout(init219,40); setTimeout(init219,220); setTimeout(init219,650); setTimeout(init219,950); setTimeout(init219,1500);
-  window.__SA219={version:V219};
+  /* ---------- las consecuencias ---------- */
+  function evAllanamiento(){ const costo=pago(30);
+    return {p:9,c:()=>ACTIVO(),t:()=>'<b>Allanan tu oficina.</b> La Fiscalía y la policía se llevan archivos y cuentas buscando el rastro de plata de un cartel. '+(clima()>=1.5?'Los periodistas ya están en la puerta.':'Alguien filtró tu nombre.'),
+      o:[{t:'Dar la cara con un penalista ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(clamp(.7-expo()/150,.2,.8))){ sub(-10); return 'Probaste que no sabías el origen de esa plata: el asunto se enfrió.'; } sub(6); try{ registrarDelito('lavado de activos',4,'tratos con plata de un cartel'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; prest(-4,'un allanamiento por lavado'); return 'Encontraron lo que buscaban: quedó abierto un proceso por lavado.'; }},
+         {t:'Colaborar con la Fiscalía',f:()=>{ sub(-18); estres(8); prest(-1,'colaboró con la justicia'); return 'Entregaste lo que tenías: te creyeron, pero ahora hay quien te mira con rencor.'; }},
+         {t:'Negarlo todo',f:()=>{ if(chance(.35)){ return 'Negaste todo y se aburrieron de preguntar.'; } sub(10); try{ registrarDelito('lavado de activos',5,'tratos con plata de un cartel'); }catch(x){} prest(-6,'un proceso por lavado'); return 'No te creyeron: te abrieron un proceso.'; }}]}; }
+  function evExtincion(e){ const x=Math.round(valuar(e)*(miPct(e)||1)*.5), pelea=pago(60);
+    return {p:9,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>La Fiscalía abre extinción de dominio sobre '+E(e.nombre)+'.</b> '+(A()>=1996?'Dice que se financió con plata del narcotráfico y pide que pase al Estado.':'La policía incautó sus libros: dicen que se levantó con dinero de un cartel.'),
+      o:[{t:'Pelear el proceso ('+fm(pelea)+')',f:()=>{ tomar(pelea); if(chance(clamp(.6-expo()/200,.2,.65))){ e.caliente220=false; sub(-12); return 'Demostraste el origen lícito de '+e.nombre+': te la devolvieron, con mala fama.'; } return perder(e,x); }},
+         {t:'Negociar: entregar el socio y quedarte con la compañía',f:()=>{ e.caliente220=false; sub(-20); e.caja=Math.max(0,(e.caja||0)-x*.5); estres(6); return 'Entregaste al socio: te quedaste con la compañía, pero pagaste una multa y te llegó un mensaje.'; }},
+         {t:'Dejarla ir',f:()=>perder(e,x)}]}; }
+  function perder(e,x){ try{ S.grupo=comps().filter(z=>z!==e); if(S.emp===e) S.emp=S.grupo[0]||null; }catch(z){} sub(-15); prest(-3,'perdió una compañía por extinción de dominio'); try{ hito('Perdió '+e.nombre+' por extinción de dominio'); }catch(z){} return 'El Estado se quedó con '+e.nombre+' (valía '+fm(x*2)+' y tu parte, '+fm(x)+').'; }
+  function evClinton(){ const costo=pago(120);
+    return {p:9,c:()=>ACTIVO()&&!C().clinton,t:()=>'<b>Tu nombre aparece en la lista Clinton.</b> El Tesoro de Estados Unidos prohíbe a sus bancos y a sus empresas hacer negocios contigo. Los bancos de aquí te cierran las cuentas por precaución.',
+      o:[{t:'Pagar abogados en Washington para salir de la lista ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(.45)){ sub(-25); return 'Los abogados lograron sacarte de la lista: tardó, costó y quedó la cicatriz.'; } C().clinton=A(); return 'No lograron sacarte de la lista: quedaste con las cuentas cerradas.'; }},
+         {t:'Vivir con la lista y mover plata en efectivo',f:()=>{ C().clinton=A(); sub(6); return 'Quedaste en la lista: vas a pagar caro por cada operación.'; }}]}; }
+  function evExtradicion(){ const costo=pago(80);
+    return {p:10,c:()=>ACTIVO(),t:()=>'<b>Estados Unidos pide tu extradición.</b> Una corte federal te acusa de lavar plata del narcotráfico y de ayudar a los traficantes.',
+      o:[{t:'Resistir con abogados ('+fm(costo)+')',f:()=>{ tomar(costo); try{ if(typeof window.abrirExtradicion157==='function'&&chance(.5)){ window.abrirExtradicion157(); return 'El proceso de extradición quedó abierto: empieza la batalla en los tribunales.'; } }catch(x){} sub(-8); return 'Tus abogados frenaron la petición, por ahora.'; }},
+         {t:'Colaborar con la justicia de Estados Unidos',f:()=>{ sub(-40); prest(-8,'colaboró con la justicia de Estados Unidos'); estres(12); try{ registrarDelito('lavado de activos',5,'tratos con plata del narcotráfico'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; return 'Negociaste: entregaste lo que sabías a cambio de una pena menor y de seguir vivo.'; }}]}; }
+  function consecuencias(){ const c=C(), a=A(), k=clima(a), L=[]; if(c.expo<=0||!ACTIVO()) return L;
+    if(a>=1984&&chance(clamp(c.expo/260*k,0,.3))) L.push(evAllanamiento());
+    const M=marcadas(); if(M.length&&a>=1986&&chance(clamp((c.expo-10)/220*k,0,.3))) L.push(evExtincion(M[ri(0,M.length-1)]));
+    if(a>=1995&&!c.clinton&&c.expo>=35&&chance(clamp((c.expo-25)/260*k,0,.25))) L.push(evClinton());
+    if(((a>=1984&&a<=1990)||a>=1997)&&c.expo>=60&&chance(clamp((c.expo-50)/300*k,0,.2))) L.push(evExtradicion());
+    return L; }
+
+  /* ---------- el año ---------- */
+  const HITOS={1984:'Asesinan al ministro de Justicia Rodrigo Lara Bonilla: el Gobierno declara la guerra a los carteles.',1989:'Asesinan a Luis Carlos Galán y los Extraditables llenan las ciudades de bombas.',1991:'La nueva Constitución prohíbe extraditar colombianos.',1993:'Cae abatido Pablo Escobar en Medellín.',1995:'El Proceso 8000 destapa la plata del narcotráfico en la política y EE. UU. publica la lista Clinton.',1996:'Se aprueba la primera ley de extinción de dominio.',1997:'Se restablece la extradición de colombianos.',2002:'Una nueva ley de extinción de dominio permite quitar bienes de origen ilícito sin condena penal.'};
+  function anual(){ if(!ACTIVO()||nino()) return; const c=C(), a=A();
+    try{ const v=window.conf91&&window.conf91().vinculos; if(v&&v.cartel&&a-v.cartel<=5&&a-v.cartel>=0) sub(5); }catch(e){}
+    if(c.clinton){ const x=S.efectivo*.02; if(x>0) S.efectivo-=x; try{ S.p.reputacion=clamp(S.p.reputacion-1,0,100); }catch(e){} if(chance(.1)){ c.clinton=null; log('Te sacaron de la lista Clinton: tras años de trámites te devolvieron las cuentas.','bien'); } }
+    if(c.expo>0&&!marcadas().length&&!c.clinton&&!(window.conf91&&window.conf91().vinculos&&window.conf91().vinculos.cartel&&a-window.conf91().vinculos.cartel<=5)) sub(-2);
+    if(HITOS[a]&&!c.hechos[a]&&c.expo>=10){ c.hechos[a]=1; log('<b>'+E(HITOS[a])+'</b> Tu exposición hace que lo sientas de cerca.','mal'); if(a===1984||a===1995||a===1996||a===2002) sub(3); }
+    let L=[]; try{ L=ofertas().concat(consecuencias()); }catch(e){ console.error(e); }
+    L.sort((x,y)=>y.p-x.p).slice(0,2).forEach(ev=>{ try{ cola.push(ev); }catch(e){} }); }
+
+  /* ---------- el panel ---------- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v<=25?'#79C897':v<=55?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaCaliente(){ const c=C(), M=marcadas(), sinMov=S.mov<1?'Sin movidas':null; const f=(n,m)=>m&&S.efectivo<n?'No te alcanza':sinMov;
+    let t='<table class="libro"><tr><td>Exposición</td><td>'+barra(c.expo)+'</td></tr><tr><td>El clima de la época</td><td>'+E(textoClima())+'</td></tr><tr><td>Compañías marcadas</td><td>'+(M.length?M.map(e=>E(e.nombre)).join(', '):'ninguna')+'</td></tr>'+(c.clinton?'<tr><td>Lista Clinton</td><td><span style="color:#D06A60">desde '+c.clinton+': cuentas cerradas y crédito negado</span></td></tr>':'')+(c.tratos.length?'<tr><td>Tratos recientes</td><td>'+c.tratos.slice(-4).map(x=>E(x.t)+' ('+x.a+')').join(' · ')+'</td></tr>':'')+'</table>';
+    const a1=pago(40), a2=Math.round(M.reduce((s,e)=>s+valuar(e)*(miPct(e)||1)*.08,0))||pago(20), a3=pago(120);
+    const ops=[
+      {t:'Depurar tus cuentas con una auditoría forense ('+fm(a1)+')',cat:'riesgo',cerrar:false,d:'Revisan cada trato, cada factura y cada socio: baja la exposición.',dis:c.expo<=0?'No tienes exposición':f(a1,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a1); sub(-15); log('Una auditoría forense depuró tus cuentas ('+fm(a1)+').'); escenaCaliente(); }},
+      {t:'Separarte de los socios sospechosos ('+fm(a2)+')',cat:'riesgo',cerrar:false,d:'Les compras su parte o les devuelves lo que pusieron. A veces no lo reciben bien.',dis:!M.length&&c.expo<=0?'No hay con quién':f(a2,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a2); M.forEach(e=>{ e.caliente220=false; }); sub(-20); if(chance(.25)){ estres(10); log('Los socios se fueron, pero dejaron un recado que no te gustó.','mal'); } else log('Te separaste de los socios sin mayores problemas.'); escenaCaliente(); }},
+      {t:'Colaborar con la Fiscalía',cat:'riesgo',cerrar:false,d:'Cuentas lo que sabes a cambio de borrar tu exposición. Pagas con tu tranquilidad y tu prestigio.',dis:c.expo<=0?'No tienes exposición':(A()<1985?'Todavía no hay a quién contarle':sinMov),run:()=>{ S.mov=Math.max(0,S.mov-1); c.expo=0; M.forEach(e=>{ e.caliente220=false; }); estres(10); prest(-3,'colaboró con la Fiscalía'); if(chance(.3)){ log('Después de hablar te llegó un mensaje: ya no eres de confianza para algunos.','mal'); estres(8); } else log('Hablaste con la Fiscalía y limpiaste tu historia.'); escenaCaliente(); }}];
+    if(c.clinton) ops.push({t:'Gastar en abogados para salir de la lista Clinton ('+fm(a3)+')',cat:'riesgo',cerrar:false,d:'Un trámite largo, caro y sin garantías.',dis:f(a3,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a3); if(chance(.45)){ c.clinton=null; sub(-15); log('Saliste de la lista Clinton.','bien'); } else log('El trámite no prosperó: sigues en la lista.','mal'); escenaCaliente(); }});
+    escena({rubro:'Riesgo',titulo:'La plata caliente',ancho:true,cerrable:true,cuerpo:'La plata de dudoso origen paga bien y se cobra después. Mientras más tratos aceptes, más te miran los fiscales, los bancos y los que te la trajeron.',html:t,opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA220_PASO) return; window.__SA220_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='La plata caliente';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA220_ACC) return; window.__SA220_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&A()>=1975&&(expo()>0||(S.caliente220&&S.caliente220.clinton)||marcadas().length)&&!L.some(x=>x&&x.t===TIT)){ L.push({t:TIT,cat:'riesgo',d:'Exposición '+Math.round(expo())+'/100: lo que has aceptado de plata de dudoso origen y cómo limpiarlo.',mov:0,modal:true,run:()=>escenaCaliente()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v220=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA220_CAT) return; window.__SA220_CAT=true; window.catDe=function(t){ if(t===TIT) return 'riesgo'; return old.apply(this,arguments); }; }
+  function legado(){ const c=S&&S.caliente220; if(!c||(!c.expo&&!c.clinton)) return null; return {expo:Math.round(c.expo*.6),tratos:(c.tratos||[]).slice(-4),hechos:{},clinton:null,herencia:true}; }
+  function init220(){ wrapPaso(); wrapAcciones(); wrapCat();
+    Object.assign(window,{calienteExpo220:expo,estadoCaliente220:C,climaCaliente220:clima,textoClimaCaliente220:textoClima,ofertasCaliente220:ofertas,consecuenciasCaliente220:consecuencias,anualCaliente220:anual,escenaCaliente220:escenaCaliente,legadoCaliente220:legado,marcadasCaliente220:marcadas,HITOS_CALIENTE_220:HITOS,
+      eventosCaliente220:{comprador:evComprador,socio:evSocio,allanamiento:evAllanamiento,extincion:evExtincion,clinton:evClinton,extradicion:evExtradicion}}); }
+  init220(); setTimeout(init220,40); setTimeout(init220,220); setTimeout(init220,650); setTimeout(init220,950); setTimeout(init220,1500);
+  window.__SA220={version:V220};
 })();
