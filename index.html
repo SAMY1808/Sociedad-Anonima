@@ -1404,10 +1404,17 @@ svg.foto116{display:block;background:#1d2a23}
 .maus207.uno figcaption{font-size:.85rem}
 .maus207 .aqui img{border-color:#D6A648;box-shadow:0 0 0 2px rgba(214,166,72,.45),0 2px 10px rgba(0,0,0,.35)}
 </style>
+<style>
+.respaldo213{margin:26px 0 0;max-width:560px;text-align:left}
+.respaldo213 .t{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--humo2,#7d8a80);margin:0 0 8px}
+.respaldo213 .botones213{display:flex;flex-wrap:wrap;gap:8px}
+.respaldo213 .btn{flex:1 1 200px}
+.respaldo213 .apunte{margin-top:8px;font-size:12.5px;opacity:.85;line-height:1.4}
+</style>
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v210</div>
+<div class="version-badge" id="versionBadge">v221</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2941,7 +2948,7 @@ function correrFisco(res){
       +(dur>0?' Si vas a mover algo, es ahora.':''),'hito');
   }
   // impuesto al patrimonio, sobre lo que está a tu nombre
-  const gravable=Math.max(0,patrimonio()-valorFideicomiso()-valorFundacion());
+  const gravable=Math.max(0,patrimonio()-valorFideicomiso()-valorFundacion()-(window.valorOffshoreOculto217?window.valorOffshoreOculto217():0));
   if(gravable>0&&f.patrimonio>0){
     const x=gravable*f.patrimonio;
     S.efectivo-=x;
@@ -4218,7 +4225,7 @@ function asignarVia(p){
 function correrParientes2(m){
   parientesVivos().forEach(p=>{
     if(!p.via) asignarVia(p);
-    if(p.edad<22) return;
+    if(p.edad<18) return;   /* v212: adultos a los 18 */
     const v=viaDe(p);
     let g=v.g+m.ciclo*.5+(p.capaz-5)*.006+rnd(-.09,.11);
     if(p.via==='publico') g+=((gob().publico||1)-1)*.06;
@@ -6074,7 +6081,7 @@ function iniciar(cfg,legado){
     clubFamilia:legadoValido&&legado.clubFamilia?legado.clubFamilia:null,
     gobiernoFamilia:legadoValido&&legado.gobiernoFamilia?legado.gobiernoFamilia:null,
     fisco:legadoValido&&legado.fisco?legado.fisco:null,
-    fideicomiso:legadoValido&&legado.fideicomiso?legado.fideicomiso:null,
+    fideicomiso:legadoValido&&legado.fideicomiso?legado.fideicomiso:null, offshore217:legadoValido&&legado.offshore217?legado.offshore217:null, legado216:legadoValido&&legado.legado216?legado.legado216:null, premios218:legadoValido&&legado.premios218?legado.premios218:null, caliente220:legadoValido&&legado.caliente220?legado.caliente220:null, cripto221:legadoValido&&legado.cripto221?legado.cripto221:null,
     fundacion:legadoValido&&legado.fundacion?legado.fundacion:null,
     mausoleo:legadoValido&&legado.mausoleo?legado.mausoleo:null,
     vientos:legadoValido&&legado.vientos?legado.vientos:null,
@@ -6427,7 +6434,8 @@ function patrimonio(){
   (S.bienes||[]).forEach(b=>v+=b.valor-(b.hipoteca||0));
   (S.sociedades||[]).forEach(x=>v+=x.capital);
   v+=valorParticipaciones();
-  v+=valorFideicomiso();
+  v+=valorFideicomiso()+(window.valorOffshore217?window.valorOffshore217():0);
+  v+=(window.valorCripto221?window.valorCripto221():0);
   v+=valorDivisas();
   v+=valorFamilyOffice();
   v+=valorFundacion()*.5;
@@ -7037,7 +7045,7 @@ function listaAcciones(){
         const k=pick(['intelecto','carisma','disciplina']); h.atr[k]=clamp(h.atr[k]+1,1,10);
         log(esc(h.nombre)+' avanzó en su formación ('+k+' +1).','bien');}});
   });
-  S.familia.hijos.filter(h=>h.edad>=22).forEach(h=>{
+  S.familia.hijos.filter(h=>h.edad>=18).forEach(h=>{
     if(S.emp&&!S.junta.some(j=>j.hijo===h.nombre)) A.push({t:'Meter a '+h.nombre+' en la junta', d:'Lealtad total, pero el mercado descuenta gobernanza familiar.', mov:1,
       dis:S.junta.length>=7?'Junta llena':null,
       run:()=>{ S.junta.push({nombre:h.nombre+' '+S.p.apellido,arq:'familiar',lealtad:92,anios:0,hijo:h.nombre});
@@ -7858,8 +7866,8 @@ const EVENTOS=[
        moverPrestigio(-1,'en la familia se supo');
        return 'Le dijiste que no. En los almuerzos de diciembre se va a acordar.'; }}]},
 
- {p:1.8,c:()=>S.emp&&parientesVivos().some(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=22),
-  t:()=>{ const c=parientesVivos().filter(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=22);
+ {p:1.8,c:()=>S.emp&&parientesVivos().some(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=18),
+  t:()=>{ const c=parientesVivos().filter(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=18);
     if(!c.length) return null; const pa=pick(c); S._pa=pa.pid;
     return 'Tu '+pa.rel+' '+esc(nombrePariente(pa))+' quiere entrar a trabajar en '+esc(S.emp.nombre)+'. La familia ya está opinando.'; },
   o:[{t:'Darle el puesto',f:()=>{ const pa=(S.parientes||[]).find(x=>x.pid===S._pa); if(!pa) return 'Se resolvió solo.';
@@ -8125,7 +8133,7 @@ function heredar(h,frac,vivo,pleito){
       b.destinoRentaRama=true;
     }
   });
-  const blindado=valorFideicomiso()+valorFundacion();
+  const blindado=valorFideicomiso()+valorFundacion()+(window.valorOffshoreOculto217?window.valorOffshoreOculto217():0);
   const tarifaSuc=vivo?0:fisco().sucesion;
   const efectivoTotal=(S.efectivo+S.portafolio.reduce((a,p)=>a+p.valor,0)-S.deuda+liquidado)*(1-castigo)*(1-tarifaSuc);
   if(tarifaSuc>0) log('La sucesión pagó '+pc(tarifaSuc)+' de impuesto'
@@ -8147,7 +8155,7 @@ function heredar(h,frac,vivo,pleito){
     sociedades:(S.sociedades||[]).map(x=>({...x})),
     rivales:S.rivales, tension:S.tension, macro:S.macro?JSON.parse(JSON.stringify(S.macro)):null, gobierno:S.gobierno, pleito:S.pleito, gremios:S.gremios, divisas:S.divisas, embarazos:S.familia.embarazos||[],
     tesoreria:S.tesoreria, coberturas:S.coberturas, endogamia:S.endogamia, bancoFamilia:S.bancoFamilia,
-    fisco:S.fisco, fideicomiso:S.fideicomiso,
+    fisco:S.fisco, fideicomiso:S.fideicomiso, offshore217:(window.legadoOffshore217?window.legadoOffshore217(tarifaSuc):null), legado216:S.legado216||null, premios218:(window.legadoPremios218?window.legadoPremios218():null), caliente220:(window.legadoCaliente220?window.legadoCaliente220():null), cripto221:(window.legadoCripto221?window.legadoCripto221(tarifaSuc):null),
     familyOffice:S.familyOffice?JSON.parse(JSON.stringify(S.familyOffice)):null,
     pol155:S.pol155?JSON.parse(JSON.stringify(S.pol155)):null,
     pub156:S.pub156?JSON.parse(JSON.stringify(S.pub156)):null,
@@ -8728,11 +8736,12 @@ function renderLienzo(){
         +'<td style="color:'+et.c+'">'+(v>.2?'▲ ':v<-.2?'▼ ':'')+et.t+'</td></tr>';
     });
     h+='</table>';
-    if(valorFideicomiso()>0||valorFundacion()>0){
+    if(valorFideicomiso()>0||valorFundacion()>0||(window.valorOffshoreOculto217&&window.valorOffshoreOculto217()>0)){
       h+='<h3 style="margin-top:22px">Fuera de tu nombre</h3><table class="libro">'
         +(valorFideicomiso()>0?'<tr><td>Fideicomiso en '+esc((JURISDICCIONES.find(j=>j.id===S.fideicomiso.jur)||{}).n||'—')+'</td><td>'+fmt(valorFideicomiso())+'</td></tr>':'')
         +(valorFundacion()>0?'<tr><td>'+esc(S.fundacion.nombre)+'</td><td>'+fmt(valorFundacion())+'</td></tr>':'')
-        +'<tr class="suma"><td>No paga sucesión</td><td>'+fmt(valorFideicomiso()+valorFundacion())+'</td></tr></table>';
+        +(window.filasOffshore217?window.filasOffshore217():'')
+        +'<tr class="suma"><td>No paga sucesión</td><td>'+fmt(valorFideicomiso()+valorFundacion()+(window.valorOffshoreOculto217?window.valorOffshoreOculto217():0))+'</td></tr></table>';
     }
     if(valorDivisas()>0||(S.emp&&filiales(S.emp).length)){
       const t=tasas();
@@ -10728,7 +10737,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     (S.familia?.hijos||[]).forEach(h=>{
       s35NormalizarHijo(h);
       const edad=Math.max(0,Number(h.edad)||0);
-      if(edad>=22){
+      if(edad>=18){
         const base=Number(h.patrimonio)||0;
         const salario= h.carreraProf ? rnd(20,85) : (h.rumbo?rnd(16,55):rnd(8,30));
         const rendimiento=(h.rasgos?.ambicion||50)/100*.06 + (h.reputacion||50)/100*.03 + rnd(-.035,.055);
@@ -10986,7 +10995,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     // Los nietos ya fueron envejecidos por la capa v30; aquí damos autonomía a partir de ellos.
     if(d._v40Visitado===S.anio) return;
     d._v40Visitado=S.anio;
-    if(d.edad>=22) pareja40(d);
+    if(d.edad>=18) pareja40(d);
     if(d.pareja&&d.pareja._v42ParejaAnio!==S.anio){
       d.pareja.edad=Math.min(100,Math.max(0,Number(d.pareja.edad)||Math.max(20,(d.edad||20)-ri(3,4)))+1);
       d.pareja._v42ParejaAnio=S.anio;
@@ -13093,7 +13102,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     porClase('hotel','Hoteles');
     porClase('terreno','Terrenos en desarrollo');
     const fo=safe50(()=>valorFamilyOffice(),0); if(fo) cats.push({n:'Family office',v:fo});
-    const fi=safe50(()=>valorFideicomiso(),0); if(fi) cats.push({n:'Fideicomiso',v:fi});
+    const fi=safe50(()=>valorFideicomiso(),0); if(fi) cats.push({n:'Fideicomiso',v:fi}); const of217=safe50(()=>window.valorOffshore217?window.valorOffshore217():0,0); if(of217) cats.push({n:'Estructuras en el exterior',v:of217}); const cr221=safe50(()=>window.valorCripto221?window.valorCripto221():0,0); if(cr221) cats.push({n:'Criptoactivos',v:cr221});
     const dv=safe50(()=>valorDivisas(),0); if(dv) cats.push({n:'Divisas',v:dv});
     const pa=safe50(()=>valorParticipaciones(),0); if(pa) cats.push({n:'Participaciones',v:pa});
     const fu=safe50(()=>valorFundacion()*.5,0); if(fu) cats.push({n:'Fundación (valor social)',v:fu});
@@ -13269,7 +13278,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           S.efectivo-=entrada;
           const soc={sid:'s'+ri(1000,9999),nombre,ramo:'vinicola',capital:costo,capitalInicial:costo,gerente:null,anios:0,
             metaUtilidad:.08,incumplimientos:0,ultimaUtilidad:0,ultimoObjetivo:costo*.08,alertaRendimiento:false};
-          sociedades().push(soc);
+          let compV=null; try{ if(typeof window.crearCompaniaDeSociedad205==='function'){ const rv=window.crearCompaniaDeSociedad205(soc); compV=rv&&rv.e; } }catch(x){ console.error(x); }
+          if(!compV) sociedades().push(soc);   /* v214: la vinícola es una compañía del grupo; sociedad solo si algo falló */
+          else setTimeout(()=>{ try{ if(!compV.presidente&&typeof escenaPresidente==='function') escenaPresidente(compV,true); }catch(x){} },0);
           b.vinicola={sid:soc.sid,nombre:soc.nombre};
           b.renta=.03;
           log('Fundaste <b>'+esc(nombre)+'</b>, la vinícola de la familia.','hito');
@@ -13297,9 +13308,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       }
       if(b.maduro && b.vinicola && chance(.16)){
         const buena=chance(.55);
-        const soc=(S.sociedades||[]).find(s=>s.sid===b.vinicola.sid);
+        const soc=(S.sociedades||[]).find(s=>s.sid===b.vinicola.sid)||companias().find(e=>e&&e.sid205===b.vinicola.sid);
         if(soc){
-          soc.capital=Math.max(1,soc.capital*(buena?rnd(1.03,1.1):rnd(.9,.98)));
+          if(isFinite(soc.capital)) soc.capital=Math.max(1,soc.capital*(buena?rnd(1.03,1.1):rnd(.9,.98)));
+          else { const x=Math.max(1,(soc.ingresos||0)*.03); if(buena) soc.caja=(soc.caja||0)+x; else soc.caja=(soc.caja||0)-x; if(soc.red176&&Array.isArray(soc.red176.unidades)) soc.red176.unidades.forEach(u=>{ if(isFinite(u.rep)) u.rep=Math.max(5,Math.min(99,u.rep+(buena?4:-4))); }); }   /* v214: compañía */
           log(buena?'Buena vendimia para <b>'+esc(soc.nombre)+'</b>: la cosecha salió excelente.'
                     :'Vendimia floja para <b>'+esc(soc.nombre)+'</b>: el clima no ayudó.',buena?'bien':'mal');
         }
@@ -13591,7 +13603,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function valorDe51(x){ return isFinite(x.capital)?x.capital:(isFinite(x.valor)?x.valor:(x.sector&&isFinite(x.ingresos)?Math.round(x.ingresos*1.4):0)); }   /* v205: también compañías */
   function candidatosIntegracion51(){
     const pares=[];
-    const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s));
+    const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&e.ramo205==='vinicola'&&!estaIntegrado51(e)));   /* v214 */
     const distribuidoras=(S.sociedades||[]).filter(s=>RAMOS_DISTRIBUCION_51.includes(s.ramo)&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&(RAMOS_DISTRIBUCION_51.includes(e.ramo205)||['retail','logistica'].includes(e.sector))&&!e.banco112&&!e.hotel175&&!estaIntegrado51(e)));   /* v205: las compañías de comercio y logística distribuyen */
     vinicolas.forEach(v=>distribuidoras.forEach(d=>pares.push({a:v,b:d,tipo:'distribucion'})));
     const fincas=(S.bienes||[]).filter(b=>b.clase==='finca'&&FINCAS_PROCESABLES_51.includes(b.tipo)&&!estaIntegrado51(b));
@@ -22246,7 +22258,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
      d:'Fundar una compañía que manejas tú, o constituir una sociedad aparte que administra alguien más.',
      miembros:[['La manejas tú','Fundar una compañía'],['La maneja otro','Constituir una sociedad']]},
     {id:'empleo',t:'Buscar empleo',cat:'empleo',
-     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta. También aquí: las armas y la vida religiosa.',
+     d:'Escoge dónde quieres trabajar: empresa privada, sector público, academia, consultoría o planta. También aquí: los cargos públicos, la docencia y la rectoría, la judicatura, las armas, la vida religiosa, el deporte, el arte y la música y el periodismo.',
      prefijos:[['Dónde','Emplearte: ']]},
     {id:'opa',t:'Toma hostil',cat:'mercado',
      d:'Ofrecerles a los accionistas de otra casa por encima del precio para quedarte con ella. Cuesta dos movidas.',
@@ -23359,7 +23371,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const PLAN_TXT={buscar:'buscando un hijo',natural:'lo que venga',cuidarse:'sin hijos por ahora'};
   function escenaPareja108(){
     const q=pz(); if(!q) return;
-    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25);
+    const años=isFinite(q.desde108)?S.anio-q.desde108:null, cCita=costo(.002,2), cViaje=costo(.01,10), cFert=Math.round(costo(.02,25)*(window.factorFertilidad215?window.factorFertilidad215():1));
     const html='<div class="pareja108">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:60})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años · '+esc(q.rol||'')+' · '+(q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja')+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
       +'<div class="chips">'+(q.rasgo108?'<i>'+esc(rasgoTxt(q))+'</i>':'')+(isFinite(q.compat108)?'<i>'+compatTxt(q.compat108)+'</i>':'')+'<i>hijos: '+PLAN_TXT[plan()]+'</i>'+(q.separacionBienes?'<i>con capitulaciones</i>':'')+'</div></div></div>'
       +medida('la relación',Math.round(q.paciencia||0),100,(q.paciencia||0)<35?'r':'v');
@@ -24408,7 +24420,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const q=pz(); if(!q) return;
     const años=isFinite(q.desde108)?S.anio-q.desde108:null;
     const quien=q.casados?(q.sexo==='m'?'tu esposa':'tu esposo'):'tu pareja';
-    const cCita=costo(.002,2), cViaje=costo(.01,10), cFert=costo(.02,25), cRegalo=Math.max(25,pat()*.02);
+    const cCita=costo(.002,2), cViaje=costo(.01,10), cFert=Math.round(costo(.02,25)*(window.factorFertilidad215?window.factorFertilidad215():1)), cRegalo=Math.max(25,pat()*.02);
     const extra=[q.casa&&q.casa.apellido?'de los '+esc(q.casa.apellido):'',q.porInteres?'fue un matrimonio por conveniencia':'',q.divorcioEnCurso?'<b>divorcio en curso</b>':''].filter(Boolean).join(' · ');
     const html='<div class="pareja108 pareja113">'+avatarSVG(q.nombre,{sexo:q.sexo,edad:q.edad,tam:64})+'<div class="q"><b>'+esc(q.nombre)+'</b><span>'+q.edad+' años'+(q.rol?' · '+esc(q.rol):'')+' · '+quien+(años!==null?' desde hace '+años+' año'+(años===1?'':'s'):'')+'</span>'
       +(extra?'<div class="sub">'+extra+'</div>':'')
@@ -25487,7 +25499,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
          {t:'Pagarle a la otra parte para que desaparezca',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.006,10)); if(chance(.5)){ cerrar(e,'tapado'); return 'Se fue con la plata. Tu hijo no te lo perdona.'; } crecer(e,1); return 'Lo contó todo en la radio, incluida tu oferta.'; }},DEJAR()]});
     E({p:.5,c:()=>adulto()&&S.anio>=1970&&!!hijoEntre(16,30),
       t:()=>{ const h=hijoEntre(16,30); S._h129=h.nombre; abrir('hijos',P1(h.nombre)+' en las páginas judiciales',2,h.nombre); return '<b>Escándalo con los hijos.</b> Detuvieron a '+esc(h.nombre)+' en una fiesta donde había droga. Salió en las páginas judiciales con el apellido completo.'; },
-      o:[{t:()=>'Clínica de rehabilitación ('+fmt(costo(.005,10))+')',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,costo(.005,10)); if(h){ h.salud=clamp((h.salud||80)+5,0,100); h.vinculo=clamp((h.vinculo||55)+5,0,100); } cerrar(e,'superado'); return 'Seis meses en una clínica. Volvió distinto, y la prensa perdió interés.'; }},
+      o:[{t:()=>'Clínica de rehabilitación ('+fmt(Math.round(costo(.005,10)*(window.factorRehab215?window.factorRehab215():1)))+')',f:()=>{ const e=ev(), h=(S.familia.hijos||[]).find(x=>x.nombre===S._h129); S.efectivo-=Math.min(S.efectivo,Math.round(costo(.005,10)*(window.factorRehab215?window.factorRehab215():1))); if(h){ h.salud=clamp((h.salud||80)+5,0,100); h.vinculo=clamp((h.vinculo||55)+5,0,100); } cerrar(e,'superado'); return 'Seis meses en una clínica. Volvió distinto, y la prensa perdió interés.'; }},
          {t:'Sacarlo con los mejores abogados',f:()=>{ const e=ev(); S.efectivo-=Math.min(S.efectivo,costo(.004,8)); if(chance(.6)){ cerrar(e,'tapado'); return 'Salió sin cargos. Todos saben por qué.'; } return 'Salió, pero el tema sigue en la prensa.'; }},DEJAR()]});
     E({p:.7,c:()=>adulto()&&S.anio>=2005&&!!hijoEntre(15,30),
       t:()=>{ const h=hijoEntre(15,30); S._h129=h.nombre; abrir('hijos','El video viral de '+P1(h.nombre),1,h.nombre); return '<b>Escándalo con los hijos.</b> Un video de '+esc(h.nombre)+' gritándole "¿usted no sabe quién soy yo?" a un mesero se volvió viral. Tiene millones de vistas y el apellido es tendencia.'; },
@@ -27997,7 +28009,7 @@ install();setTimeout(install,1200);
     let comp=ri(4,9), hon=ri(3,10), leal=ri(40,70), sueldo=Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
     if(origen==='adentro'){ comp=ri(3,7); leal=ri(70,92); sueldo=Math.round(sueldo*.7); }
     if(origen==='cazatalentos'){ comp=ri(7,10); sueldo=Math.round(sueldo*1.35); }
-    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=22&&!h.cargo149&&!h.cargo155); const h=H.length?pick(H):null; if(!h) return null;
+    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=18&&!h.cargo149&&!h.cargo155); const h=H.length?pick(H):null; if(!h) return null;
       nombre=h.nombre+' '+(h.apellido||S.p.apellido); comp=clamp(Math.round(((h.formacion||40)/12)+rnd(0,2)),2,9); hon=ri(6,10); leal=95; sueldo=Math.round(sueldo*.8); return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,hijo:h.nombre,edad:h.edad}; }
     return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,edad:ri(32,58)};
   }
@@ -29082,9 +29094,9 @@ install();setTimeout(install,1200);
     try{ (S.familia.hijos||[]).filter(h=>h.vivo!==false&&(h.edad||0)>=(todos?0:22)).forEach(h=>{ if(!todos&&(h.cargo155||h.presideA154||h.cargo149)) return; const a=h.atr||{};
       out.push({tipo:'hijo',key:h.fid||h.nombre,nombre:h.nombre+' '+(h.apellido||S.p.apellido||S.dinastia),rel:etiquetaHijo(h),edad:h.edad,capaz:clamp(Math.round(((a.intelecto||5)+(a.disciplina||5))/2+((h.formacion||40)-40)/25),2,10),integ:clamp(Math.round(5+((a.disciplina||5)-5)*.5),2,10),carisma:a.carisma||5,ref:h}); }); }catch(e){}
     try{ const pa=S.familia&&S.familia.pareja; if(pa&&pa.nombre&&(todos||(!pa.cargo155&&(pa.edad||0)>=25))) out.push({tipo:'pareja',key:'pareja',nombre:pa.nombre,rel:pa.sexo==='m'?'tu esposa':'tu esposo',edad:pa.edad||40,capaz:6,integ:7,carisma:5,ref:pa}); }catch(e){}
-    try{ parientesVivos().filter(q=>todos||((q.edad||0)>=22&&q.edad<=75&&!q.presideA&&!q.gerenciaDe&&!q.cargo155)).forEach(q=>out.push({tipo:'pariente',key:q.pid,nombre:nombrePariente(q),rel:relacionPorSexo(q.rel,q.sexo),edad:q.edad,capaz:clamp(Math.round(q.capaz||5),1,10),integ:clamp(Math.round(q.honrado||6),1,10),carisma:5,ref:q})); }catch(e){}
+    try{ parientesVivos().filter(q=>todos||((q.edad||0)>=18&&q.edad<=75&&!q.presideA&&!q.gerenciaDe&&!q.cargo155)).forEach(q=>out.push({tipo:'pariente',key:q.pid,nombre:nombrePariente(q),rel:relacionPorSexo(q.rel,q.sexo),edad:q.edad,capaz:clamp(Math.round(q.capaz||5),1,10),integ:clamp(Math.round(q.honrado||6),1,10),carisma:5,ref:q})); }catch(e){}
     return out; }
-  const personasCand=()=>personas(true).filter(x=>x.edad>=21&&!(x.ref.presideA||x.ref.gerenciaDe||x.ref.presideA154||x.ref.cargo149)&&!P().cargos.some(c=>c.tipo===x.tipo&&String(c.key)===String(x.key)&&c.pt!=='ele'));
+  const personasCand=()=>personas(true).filter(x=>x.edad>=18&&!(x.ref.presideA||x.ref.gerenciaDe||x.ref.presideA154||x.ref.cargo149)&&!P().cargos.some(c=>c.tipo===x.tipo&&String(c.key)===String(x.key)&&c.pt!=='ele'));
   const buscar=(tipo,key)=>personas(true).find(x=>x.tipo===tipo&&String(x.key)===String(key));
   const disponibles=tipo=>{ const p=P(); return PUESTOS.filter(x=>x.tipo===tipo&&S.anio>=x.d&&!(x.h&&S.anio>x.h)&&!p.cargos.some(c=>c.puesto===x.id)); };
   const costoPuesto=x=>({min:55,emb:38,emp:48}[x.tipo]||50)+x.poder*9;
@@ -34369,7 +34381,7 @@ install();setTimeout(install,1200);
   /* ==================== LA SUCESIÓN SE ABRE ==================== */
   function pre183(h){ const hijos=(S.familia&&S.familia.hijos)||[], T=S.testamento||null;
     const otros=hijos.filter(x=>x!==h&&x.vivo!==false&&!x.muerto);
-    let bl=0; try{ bl=valorFideicomiso()+valorFundacion(); }catch(e){}
+    let bl=0; try{ bl=valorFideicomiso()+valorFundacion()+(window.valorOffshoreOculto217?window.valorOffshoreOculto217():0); }catch(e){}
     return {desh:hijos.filter(x=>x!==h&&x.desheredado129).map(x=>({nombre:x.nombre,sexo:x.sexo})),temps:otros.filter(x=>!x.desheredado129).map(x=>x.temperamento),
       afecto:otros.length?otros.reduce((a,x)=>a+(isFinite(x.vinculo)?x.vinculo:55),0)/otros.length:60,blindado:bl,albacea:S.albacea183?Object.assign({},S.albacea183):null,
       tipoT:T&&T.tipo||null,nombreT:T&&T.nombre||null}; }
@@ -34803,7 +34815,7 @@ install();setTimeout(install,1200);
       o:[{t:'Aceptar el pacto ('+fm(c)+')',f:()=>{ pagar(c); const v=V(r); v.pacto=a+4; v.enemistad=0; prest(1,'una alianza con '+nom(r)); try{ S.p.redes=cl((S.p.redes||0)+4,0,100); }catch(e){} return 'Firmaron un pacto de cuatro años con '+E(nom(r))+'.'; }},
          {t:'Pedir más a cambio',f:()=>{ if(chance(.5)){ const v=V(r); v.pacto=a+3; try{ S.p.redes=cl((S.p.redes||0)+3,0,100); }catch(e){} return 'Negociaste y lograron un pacto de tres años, sin cuota.'; } V(r).enemistad=Math.min(100,V(r).enemistad+8); return 'Se ofendieron y levantaron la reunión.'; }},
          {t:'Declinar',f:()=>{ V(r).enemistad=Math.min(100,V(r).enemistad+10); return 'Declinaste. En esa casa lo van a tener en cuenta.'; }}]}; }
-  function evMatrimonio(r){ const h=((S.familia&&S.familia.hijos)||[]).filter(x=>x&&x.vivo!==false&&(x.edad||0)>=22&&!x.casadoCon&&!x.muerto)[0]; if(!h) return null; const dote=Math.max(60,pat()*.05);
+  function evMatrimonio(r){ const h=((S.familia&&S.familia.hijos)||[]).filter(x=>x&&x.vivo!==false&&(x.edad||0)>=18&&!x.casadoCon&&!x.muerto)[0]; if(!h) return null; const dote=Math.max(60,pat()*.05);
     return {p:8,c:()=>!!r.viva&&!!h&&!h.casadoCon,t:()=>'<b>'+E(nom(r)).replace(/^./,x=>x.toUpperCase())+' pide la mano de '+E(h.nombre)+'</b> para un hijo de la casa. Con un matrimonio así los apellidos quedan unidos, y el patriarca ofrece una dote de '+fm(dote)+'.',
       o:[{t:'Aceptar el matrimonio',f:()=>{ if((h.vinculo||55)<40&&chance(.5)){ h.vinculo=cl((h.vinculo||55)-12,0,100); return E(h.nombre)+' se negó delante de todos y quedó un papelón.'; } h.casadoCon=r.apellido; S.efectivo+=dote; const v=V(r); v.aliada='tu'; v.pacto=A()+6; v.enemistad=0; prest(4,'el matrimonio de '+h.nombre+' con '+nom(r)); try{ S.p.redes=cl((S.p.redes||0)+6,0,100); }catch(e){} hito(h.nombre+' se casó con los '+r.apellido); return 'Se casaron. Entraron '+fm(dote)+' de dote y quedan emparentados con '+E(nom(r))+', con un pacto de seis años.'; }},
          {t:'Dejar que decida '+E(h.nombre),f:()=>{ h.vinculo=cl((h.vinculo||55)+8,0,100); V(r).enemistad=Math.min(100,V(r).enemistad+6); return 'Le dijiste que eso lo decide quien se casa. En esa casa no gustó.'; }}]}; }
@@ -34836,7 +34848,7 @@ install();setTimeout(install,1200);
   function escenaCasas186(){ const L=RV(); if(!L.length){ escena({rubro:'El club',titulo:'Las otras casas',cuerpo:'Todavía no hay otras casas que seguir.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
     escena({rubro:'El club',titulo:'Las otras casas',ancho:true,cerrable:true,cuerpo:'Cada casa tiene su patriarca, sus aliados y sus enemigos. Elige una para proponerle una alianza o un matrimonio.',
       opciones:L.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{ const v=V(r); return {t:'Los '+E(r.apellido)+' · '+E(v.jefe.nombre)+', '+v.jefe.edad+' años',cat:'legado',d:fm(r.patrimonio)+' · '+E(r.compania||'')+' · '+relTxt(r)+'.',cerrar:false,run:()=>{ cerrarModal(); escenaCasa186(r); }}; })}); }
-  function escenaCasa186(r){ const v=V(r), ops=[], c=esc0(), h=((S.familia&&S.familia.hijos)||[]).find(x=>x&&x.vivo!==false&&(x.edad||0)>=22&&!x.casadoCon&&!x.muerto);
+  function escenaCasa186(r){ const v=V(r), ops=[], c=esc0(), h=((S.familia&&S.familia.hijos)||[]).find(x=>x&&x.vivo!==false&&(x.edad||0)>=18&&!x.casadoCon&&!x.muerto);
     const pr=cl(.45+(prestigio()-r.prestigio)/250-(v.enemistad/200),.12,.85);
     ops.push({t:'Proponer una alianza · '+fm(c),cat:'legado',d:'Probabilidad de que acepten: '+Math.round(pr*100)+'%. Un pacto de cuatro años: se acaba la guerra de precios y suben tus contactos.',dis:pacto(r)?'Ya hay un pacto':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(c); if(chance(pr)){ v.pacto=A()+4; v.enemistad=0; prest(1,'una alianza con '+nom(r)); log('<b>'+E(nom(r)).replace(/^./,x=>x.toUpperCase())+'</b> aceptó tu propuesta: pacto de cuatro años.','bien'); } else { v.enemistad=Math.min(100,v.enemistad+5); log(E(nom(r))+' rechazó la alianza.','mal'); } cerrarModal(); render(); }});
     if(h) ops.push({t:'Proponer un matrimonio para '+E(h.nombre),cat:'familia',d:'Une los apellidos: pacto de seis años y dote, si aceptan.',dis:v.aliada==='tu'?'Ya están emparentados':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const ok=chance(cl(pr+.05,.1,.85)); if(ok&&(h.vinculo||55)>=40){ h.casadoCon=r.apellido; const dote=Math.max(40,pat()*.03); S.efectivo+=dote; v.aliada='tu'; v.pacto=A()+6; v.enemistad=0; prest(3,'el matrimonio de '+h.nombre); log('<b>'+E(h.nombre)+'</b> se casó con los <b>'+E(r.apellido)+'</b>: entró una dote de '+fm(dote)+' y hay pacto de seis años.','hito'); } else { v.enemistad=Math.min(100,v.enemistad+4); log('Los '+E(r.apellido)+' declinaron el matrimonio.','mal'); } cerrarModal(); render(); }});
@@ -36497,7 +36509,7 @@ install();setTimeout(install,1200);
         run:()=>{ S.mov=Math.max(0,S.mov-1); const p=clamp(.15+pf.pts/130-(c.rango-2)*.09,.04,.8); if(chance(p)){ log(aceptar(c,ciu)); } else { S.p.redes=clamp((S.p.redes||0)-2,0,100); log('Pediste '+esc(c.n.toLowerCase())+' y no hubo cupo: ese puesto ya tenía dueño.','mal'); } cerrarModal(); render(); }}))});
   }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA197_PASO) return; window.__SA197_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)){ ['Tu cargo público','Pedir un cargo público'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Influencia',t]); }); } }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; ['Tu cargo público','Pedir un cargo público'].forEach(t=>{ if(!g.miembros.some(m=>m[1]===t)) g.miembros.push(['Sector público',t]); }); } }   /* v211: los cargos se buscan donde se busca empleo */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA197_ACC) return; window.__SA197_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ try{ sync(); }catch(e){}
@@ -36619,7 +36631,7 @@ install();setTimeout(install,1200);
 
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA198_PASO) return; window.__SA198_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu vida académica y docente')) g.miembros.push(['Influencia','Tu vida académica y docente']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu vida académica y docente')) g.miembros.push(['Academia','Tu vida académica y docente']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA198_ACC) return; window.__SA198_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ sync(); const g=G(); if(g&&!L.some(x=>x.t==='Tu vida académica y docente')) L.push({t:'Tu vida académica y docente',cat:'empleo',d:(g.pista==='universidad'?'Artículos, libros, tesis, grupo de investigación y fama académica en ':'El aula, la comunidad, el escalafón y el magisterio en ')+g.ent+'.',mov:0,modal:false,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
@@ -36746,7 +36758,7 @@ install();setTimeout(install,1200);
 
   /* ---- enganches ---- */
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA199_PASO) return; window.__SA199_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu rectoría')) g.miembros.push(['Influencia','Tu rectoría']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu rectoría')) g.miembros.push(['Academia','Tu rectoría']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA199_ACC) return; window.__SA199_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); vigilar(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ const r=G(); if(r&&!L.some(x=>x.t==='Tu rectoría')) L.push({t:'Tu rectoría',cat:'empleo',d:'Rector de '+r.uni+': calidad, finanzas, apoyos y protestas.',mov:0,modal:false,run:()=>escenaRector()}); } }catch(x){ console.error(x); }
@@ -36881,7 +36893,7 @@ install();setTimeout(install,1200);
   /* ---- enganches ---- */
   function anual(){ if(!S||!S.p||S.muerto) return; sync(); anualJuez(); try{ conflicto(); }catch(e){} anualPuerta(); }
   function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA200_PASO) return; window.__SA200_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='palancas'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]==='Tu despacho judicial')) g.miembros.push(['Influencia','Tu despacho judicial']); }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='empleo'); if(g){ g.miembros=g.miembros||[]; if(!g.miembros.some(m=>m[1]==='Tu despacho judicial')) g.miembros.push(['Justicia','Tu despacho judicial']); } }   /* v211 */
   function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA200_ACC) return; window.__SA200_ACC=true;
     window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
       try{ if(Array.isArray(L)&&S&&S.p){ sync(); if(J()&&!L.some(x=>x.t==='Tu despacho judicial')) L.push({t:'Tu despacho judicial',cat:'empleo',d:'Casos, expedientes, presiones y el Consejo Superior de la Judicatura.',mov:0,modal:false,run:()=>escenaDespacho()}); } }catch(x){ console.error(x); }
@@ -37334,7 +37346,7 @@ install();setTimeout(install,1200);
   const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
   const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
   const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
-  const MAPA={comercializadora:'retail',inmobiliaria:'inmobiliario',transportadora:'logistica',importadora:'retail',constructora:'construccion',agroindustria:'alimentos'};
+  const MAPA={comercializadora:'retail',inmobiliaria:'inmobiliario',transportadora:'logistica',importadora:'retail',constructora:'construccion',agroindustria:'alimentos',vinicola:'alimentos'};
   const ESTILOS=['constructor','financiero','conservador','negociador'];
 
   /* ---------- las sociedades de antes pasan a ser compañías ---------- */
@@ -37359,6 +37371,7 @@ install();setTimeout(install,1200);
       empleados:Math.max(4,Math.round(cap/26)),crecimiento:.1,publica:false,aniosMalos:0,historia:[],productos:[],
       holders:[{id:'tu',nombre:'Tú',tipo:'fundador',n:1000000}],junta:[],ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá',ramo205:soc.ramo,sid205:soc.sid};
     for(let i=0;i<5;i++){ let v=0; try{ v=valuar(e); }catch(x){} if(!isFinite(v)||v<=0) break; const r=cap/v; if(Math.abs(r-1)<.04) break; e.ingresos=Math.max(10,e.ingresos*cl(r,.4,2.5)); }
+    if(soc.integradoCon51) e.integradoCon51=soc.integradoCon51;   /* v214: la integración vertical no se pierde */
     e.presidente=presidenteDe(soc,e);
     S.grupo=comps(); S.grupo.push(e);
     if(!S.emp){ try{ sentarseEn(S.grupo.length-1); }catch(x){} }
@@ -37367,7 +37380,7 @@ install();setTimeout(install,1200);
   }
   function migrar(){
     if(!ACTIVO()||nino()||window.__noMigrar205||!Array.isArray(S.sociedades)) return 0;
-    const L=S.sociedades.filter(s=>s&&s.ramo!=='vinicola'&&!s.migrada205); if(!L.length) return 0;
+    const L=S.sociedades.filter(s=>s&&!s.migrada205); if(!L.length) return 0;   /* v214: la vinícola también pasa a ser compañía */
     const hechas=[];
     L.forEach(soc=>{ try{ const r=crear(soc); hechas.push({soc,r}); soc.migrada205=true; }catch(x){ console.error(x); } });
     S.sociedades=S.sociedades.filter(s=>!hechas.some(h=>h.soc===s));
@@ -37686,11 +37699,1325 @@ install();setTimeout(install,1200);
    ========================================================================== */
 (function(){
   const V210='v210';
-  const ESTAS=['Ingresar a las armas','Tu carrera militar','Tu libreta militar','Seguir la vocación religiosa','Tu vida eclesiástica'];
+  const ESTAS=['Ingresar a las armas','Tu carrera militar','Tu libreta militar','Seguir la vocación religiosa','Tu vida eclesiástica','Tu cargo público','Pedir un cargo público','Tu vida académica y docente','Tu rectoría','Tu despacho judicial'];   /* v211 suma los cargos, la docencia, la rectoría y la judicatura */
   function limpiar(){ const G=window.GRUPOS_91; if(!Array.isArray(G)) return; const p=G.find(x=>x.id==='palancas'); if(p&&Array.isArray(p.miembros)) p.miembros=p.miembros.filter(m=>!ESTAS.includes(m[1])); }
   function init210(){ try{ limpiar(); }catch(e){} Object.assign(window,{CARRERAS_EN_EMPLEO_210:ESTAS}); }
   init210(); setTimeout(init210,40); setTimeout(init210,220); setTimeout(init210,650); setTimeout(init210,950); setTimeout(init210,1500);
   window.__SA210={version:V210};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v211 · TODAS LAS CARRERAS SE BUSCAN DONDE SE BUSCA EMPLEO
+   Después de las armas y la Iglesia (v210), las demás carreras también salen
+   de «Influencia y palancas» y se van a «Buscar empleo», cada una en su
+   sección:
+   - Sector público: «Pedir un cargo público» y «Tu cargo público».
+   - Academia: «Tu vida académica y docente» y «Tu rectoría».
+   - Justicia: «Tu despacho judicial».
+   - Fuerzas armadas e Iglesia, como en la v210.
+   En «Influencia y palancas» quedan los favores, las leyes, la prensa, el
+   poder, las empresas públicas, los gremios, las otras casas y la política.
+   ========================================================================== */
+(function(){
+  const V211='v211';
+  window.SECCIONES_EMPLEO_211=['Fuerzas armadas','Iglesia','Sector público','Academia','Justicia'];
+  window.__SA211={version:V211};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v212 · LOS HIJOS Y LOS NIETOS SON ADULTOS A LOS 18
+   La v208 puso la mayoría de edad en 18 para quien juega y para el heredero.
+   Faltaban los hijos, los nietos y la parentela, que seguían esperando a los
+   22 para casi todo. Ahora, a los 18:
+   - Los parientes adultos empiezan a mover su caudal.
+   - Pueden tomar una silla en la junta de tus compañías.
+   - Pueden ocupar cargos y presidencias de la familia (la lista de
+     candidatos a la presidencia de una compañía y a los cargos del Estado
+     los incluye).
+   - Reciben propuestas de matrimonio de otras casas (y los nietos empiezan
+     a formar pareja).
+   - Los primos y sobrinos adultos vuelven a pedirte empleo y favores.
+   Siguen pidiendo más años los estudios y la profesión (la carrera
+   profesional llega a los 22) y los cargos de elección (que fijan sus
+   propios mínimos). El sistema viejo de la «casa viva» (v35: ingresos y
+   ofertas propias de los hijos) está apagado desde hace mucho porque busca
+   window.S, que no existe; su umbral también pasó a 18, por si algún día se
+   enciende.
+   ========================================================================== */
+(function(){
+  const V212='v212';
+  window.EDAD_ADULTO_HIJOS_212=18;
+  window.__SA212={version:V212};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v213 · RESPALDO DE PARTIDAS Y JUEGO SIN INTERNET
+   Para jugar en el iPhone (o en cualquier celular) sin miedo a perder la
+   dinastía ni depender de la señal. En la portada, debajo de «Tus partidas»:
+   - «Guardar una copia en un archivo»: arma un archivo con tus tres ranuras
+     y el salón de la fama. En el iPhone abre el menú de compartir (Guardar
+     en Archivos, AirDrop, correo); en un computador lo descarga.
+   - «Recuperar una copia»: lees ese archivo, el juego revisa que sea un
+     respaldo de verdad (solo acepta partidas y el salón de la fama; no
+     ejecuta nada del archivo), te cuenta qué trae y, si aceptas, reemplaza
+     lo que tienes.
+   - «Jugar sin internet»: baja de una vez las fotos del juego (unos 16 MB)
+     al teléfono, con un contador, para que se vean sin señal. Solo funciona
+     en la versión publicada (el service worker no corre desde un archivo).
+   El manifiesto ahora trae los iconos de 192 y 512 píxeles.
+   ========================================================================== */
+(function(){
+  const V213='v213', PREF='sociedad-anonima:', CACHE='sociedad-anonima-v213';
+  const ls={get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+    del(k){ try{ localStorage.removeItem(k); }catch(e){} }};
+  const av=m=>{ try{ if(typeof aviso==='function') aviso(m); }catch(e){} };
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+
+  /* ---------- el archivo de respaldo ---------- */
+  function recoger(){ const out={}; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf(PREF)===0) out[k]=localStorage.getItem(k); } }catch(e){} return out; }
+  function armar(){ return {juego:'Sociedad Anónima',formato:1,exportado:new Date().toISOString(),version:(document.getElementById('versionBadge')||{}).textContent||'',claves:recoger()}; }
+  function nombreArchivo(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return 'sociedad-anonima-respaldo-'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'.json'; }
+  const hayPartidas=o=>Object.keys(o.claves).some(k=>/:ranura:[1-3]$/.test(k)||/:partida$/.test(k));
+  async function exportar(){
+    const obj=armar();
+    if(!hayPartidas(obj)){ av('Todavía no hay partidas guardadas para respaldar.'); return false; }
+    const txt=JSON.stringify(obj), nombre=nombreArchivo();
+    try{ const file=new File([txt],nombre,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'Respaldo de Sociedad Anónima'}); av('El respaldo quedó listo.'); return true; } }
+    catch(e){ if(e&&e.name==='AbortError') return false; }
+    try{ const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})), a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); av('Se descargó '+nombre+'.'); return true; }
+    catch(e){ av('No se pudo guardar el respaldo.'); return false; }
+  }
+  /* solo entra lo que el juego sabe leer: tres ranuras con un personaje, el salón de la fama y la marca del tutorial */
+  function validar(o){
+    if(!o||typeof o!=='object'||o.juego!=='Sociedad Anónima'||!o.claves||typeof o.claves!=='object') return {error:'Ese archivo no es un respaldo de Sociedad Anónima.'};
+    const claves={}, resumen=[];
+    Object.keys(o.claves).forEach(k=>{ const v=o.claves[k]; if(typeof v!=='string'||k.indexOf(PREF)!==0) return; const r=k.slice(PREF.length);
+      if(/^ranura:[1-3]$/.test(r)){ try{ const g=JSON.parse(v); if(g&&typeof g==='object'&&g.p&&typeof g.p==='object'){ claves[k]=v; resumen.push({n:+r.slice(7),casa:String(g.dinastia||g.p.apellido||'sin nombre'),anio:g.anio,gen:g.gen}); } }catch(e){} }
+      else if(r==='salon'){ try{ if(Array.isArray(JSON.parse(v))) claves[k]=v; }catch(e){} }
+      else if(r==='tutorial'){ claves[k]=String(v).slice(0,20); } });
+    if(!resumen.length) return {error:'El respaldo no trae ninguna partida que se pueda leer.'};
+    resumen.sort((a,b)=>a.n-b.n);
+    return {claves,resumen,exportado:o.exportado||'',version:o.version||''};
+  }
+  function actuales(){ let n=0; for(let i=1;i<=3;i++) if(ls.get(PREF+'ranura:'+i)) n++; return n; }
+  function aplicar(v){
+    for(let i=1;i<=3;i++) ls.del(PREF+'ranura:'+i);
+    ls.del(PREF+'salon');
+    Object.keys(v.claves).forEach(k=>ls.set(k,v.claves[k]));
+  }
+  async function importar(file){
+    if(!file) return false;
+    if(file.size>20*1024*1024){ av('Ese archivo es demasiado grande para ser un respaldo.'); return false; }
+    let o; try{ o=JSON.parse(await file.text()); }catch(e){ av('No se pudo leer el archivo: no es un respaldo válido.'); return false; }
+    const v=validar(o); if(v.error){ av(v.error); return false; }
+    const lista=v.resumen.map(r=>'Ranura '+r.n+': casa '+E(r.casa)+(r.anio?', '+E(r.anio):'')+(r.gen?', generación '+E(typeof genLabel==='function'?genLabel(r.gen):r.gen):'')).join('<br>');
+    const hoy=actuales();
+    escena({rubro:'Respaldo',titulo:'Recuperar el respaldo',ancho:true,cerrable:true,
+      cuerpo:'El respaldo trae '+v.resumen.length+' partida'+(v.resumen.length===1?'':'s')+(v.exportado?' (guardado el '+E(String(v.exportado).slice(0,10))+')':'')+':<br>'+lista+'<br><br>'
+        +(hoy?'Si sigues, se reemplaza'+(hoy===1?' la <b>1</b> partida que tienes':'n las <b>'+hoy+'</b> partidas que tienes')+' ahora en este teléfono o computador.':'Aquí no tienes partidas guardadas: se agregan todas.'),
+      opciones:[{t:'Reemplazar mis partidas',cat:'riesgo',d:'Lo que hay ahora se borra y queda lo del respaldo.',cerrar:false,run:()=>{ aplicar(v); try{ cerrarModal(); }catch(e){} av('Respaldo recuperado.'); setTimeout(()=>{ try{ location.reload(); }catch(e){} },400); }},
+        {t:'Mejor no',cat:'legado',run:()=>{}}]});
+    return true;
+  }
+
+  /* ---------- jugar sin internet ---------- */
+  const conSW=()=>('serviceWorker' in navigator)&&location.protocol!=='file:';
+  async function listaPrecarga(){ const r=await fetch('./precache.json',{cache:'no-cache'}); const j=await r.json(); return Array.isArray(j.urls)?j.urls:[]; }
+  async function estadoOffline(){
+    if(!conSW()) return {modo:'no'};
+    try{ const lista=await listaPrecarga(), c=await caches.open(CACHE), ks=await c.keys(), set=new Set(ks.map(r=>new URL(r.url).pathname));
+      const hechas=lista.filter(u=>set.has(new URL(u,location.href).pathname)).length;
+      return {modo:lista.length&&hechas>=lista.length?'listo':'pendiente',hechas,total:lista.length}; }
+    catch(e){ return {modo:'no'}; }
+  }
+  async function descargar(){
+    if(!conSW()){ av('Esto solo funciona en la versión publicada del juego, no desde un archivo.'); return false; }
+    try{ const reg=await navigator.serviceWorker.ready, w=reg.active||navigator.serviceWorker.controller;
+      if(!w){ av('Todavía no está listo. Inténtalo de nuevo en unos segundos.'); return false; }
+      const lista=await listaPrecarga(); w.postMessage({tipo:'precargar',urls:lista}); return true; }
+    catch(e){ av('No se pudo empezar la descarga.'); return false; }
+  }
+  function textoOffline(s){
+    if(s.modo==='no') return conSW()?'':'El modo sin internet solo funciona en la versión publicada del juego.';
+    if(s.modo==='listo') return 'Ya está descargado: el juego y sus '+s.total+' fotos se ven sin internet.';
+    return s.hechas?'Faltan '+(s.total-s.hechas)+' de '+s.total+' fotos para jugar sin internet.':'Descarga las '+s.total+' fotos (unos 16 MB) para jugar sin señal. Tus partidas ya se guardan en el teléfono.';
+  }
+
+  /* ---------- la portada ---------- */
+  function pintar(){
+    const port=document.getElementById('portada'); if(!port) return;
+    const ancla=document.getElementById('salon100')||document.getElementById('ranuras100')||port.querySelector('.entrada'); if(!ancla) return;
+    let r=document.getElementById('respaldo213');
+    if(!r){ r=document.createElement('div'); r.id='respaldo213'; r.className='respaldo213'; ancla.insertAdjacentElement('afterend',r);
+      r.innerHTML='<div class="t">Respaldo y juego sin internet</div><div class="botones213"><button class="btn lisa" id="bExp213" type="button">Guardar una copia en un archivo</button><button class="btn lisa" id="bImp213" type="button">Recuperar una copia</button><button class="btn lisa" id="bOff213" type="button">Jugar sin internet</button></div><div class="apunte" id="estado213"></div><input type="file" id="fImp213" accept="application/json,.json" hidden>';
+      r.querySelector('#bExp213').onclick=()=>{ exportar(); };
+      r.querySelector('#bImp213').onclick=()=>{ r.querySelector('#fImp213').click(); };
+      r.querySelector('#fImp213').onchange=ev=>{ const f=ev.target.files&&ev.target.files[0]; ev.target.value=''; importar(f); };
+      r.querySelector('#bOff213').onclick=async()=>{ const est=r.querySelector('#estado213'); est.textContent='Empezando la descarga…'; const ok=await descargar(); if(!ok) refrescarEstado(); };
+      refrescarEstado(); }
+    else if(r.previousElementSibling!==ancla){ ancla.insertAdjacentElement('afterend',r); }
+  }
+  async function refrescarEstado(){ const e=document.getElementById('estado213'); if(!e) return; const s=await estadoOffline(); e.textContent=textoOffline(s); const b=document.getElementById('bOff213'); if(b){ b.disabled=!conSW(); b.textContent=s.modo==='listo'?'Actualizar la descarga':'Jugar sin internet'; } }
+  function oir(){ if(!conSW()||window.__SA213_MSG) return; window.__SA213_MSG=true;
+    navigator.serviceWorker.addEventListener('message',ev=>{ const d=ev.data; if(!d||(d.tipo!=='progreso'&&d.tipo!=='fin')) return; const e=document.getElementById('estado213'); if(!e) return;
+      if(d.tipo==='progreso') e.textContent='Descargando fotos… '+d.hechas+' de '+d.total+(d.fallos?' ('+d.fallos+' no se pudieron bajar)':'');
+      else { e.textContent=d.fallos?'Terminó con '+d.fallos+' fotos que no se pudieron bajar. Inténtalo otra vez con mejor señal.':'Listo: el juego y sus '+d.total+' fotos se ven sin internet.'; refrescarEstado(); } }); }
+  function vigilar(){ if(window.__SA213_OBS||typeof MutationObserver==='undefined') return; window.__SA213_OBS=true; new MutationObserver(()=>{ try{ pintar(); }catch(e){} }).observe(document.body,{childList:true,subtree:true}); }
+  function init213(){ try{ oir(); vigilar(); pintar(); }catch(e){ console.error(e); }
+    Object.assign(window,{exportarPartidas213:exportar,importarPartidas213:importar,validarRespaldo213:validar,armarRespaldo213:armar,aplicarRespaldo213:aplicar,descargarSinInternet213:descargar,estadoSinInternet213:estadoOffline,CACHE_SW_213:CACHE}); }
+  init213(); setTimeout(init213,40); setTimeout(init213,220); setTimeout(init213,650); setTimeout(init213,950); setTimeout(init213,1500);
+  window.__SA213={version:V213};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v214 · LA VINÍCOLA ES UNA COMPAÑÍA DEL GRUPO
+   La v205 unificó las sociedades con las compañías, pero dejó aparte la
+   vinícola de un viñedo porque vivía pegada a la finca. Ahora también lo es:
+   - Fundar una vinícola (con un viñedo maduro) crea una compañía de
+     alimentos, con su bodega vinícola como unidad principal, y abre la
+     elección de su presidente. El viñedo sigue enlazado con ella.
+   - Las vinícolas que ya tenías como sociedad se convierten solas, con su
+     gerente como presidente y su integración vertical (v51) intacta.
+   - La vendimia sigue pasando: una buena sube la reputación de la bodega y
+     deja algo de caja; una floja la baja y cuesta.
+   - La integración vertical de la v51 ve a la vinícola-compañía con las
+     distribuidoras (comercio y logística) y con las procesadoras.
+   La integración vertical que ya existía no se pierde al convertir.
+   ========================================================================== */
+(function(){
+  const V214='v214';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const BODEGA={id:'bodega',n:'Bodega vinícola',desde:1850,base:1200,rc:.8,mg:.22,u0:.7,capN:600,capU:'miles de botellas',obra:[1,2,3],princ:true,d:'Uvas del viñedo propio convertidas en vino embotellado y envejecido.'};
+  function instalar(){ const CL=window.CLASES_176; if(!CL||!CL.alimentos) return false; const t=CL.alimentos.tipos; if(!t.some(x=>x.id==='bodega')) t.push(BODEGA); return true; }
+  /* la compañía vinícola vende vino: sus unidades de frente pasan a ser bodegas */
+  function afinar(){
+    if(!ACTIVO()||!instalar()) return 0; let n=0;
+    comps().forEach(e=>{ if(!e||e.ramo205!=='vinicola'||e.bodega214||!e.red176||!Array.isArray(e.red176.unidades)||!e.red176.unidades.length) return;
+      e.red176.unidades.forEach(u=>{ const t=window.tipoDe176?window.tipoDe176('alimentos',u.tipo):null; if(t&&t.rol!=='apoyo'&&u.tipo!=='bodega'){ const resto=String(e.nombre||'').replace(/^Vinícola\s*/i,'').trim(); u.tipo='bodega'; u.nom=resto?'Bodega '+resto:'Bodega vinícola'; } });
+      e.bodega214=true; n++; });
+    return n; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__v214) return;
+    const f=function(){ try{ afinar(); }catch(x){ console.error(x); } return old.apply(this,arguments); };
+    f.__v214=true; Object.keys(old).forEach(k=>{ f[k]=old[k]; }); window.listaAcciones=f; }
+  function init214(){ try{ instalar(); wrapAcciones(); afinar(); }catch(e){ console.error(e); } Object.assign(window,{TIPO_BODEGA_214:BODEGA,afinarVinicolas214:afinar}); }
+  init214(); setTimeout(init214,40); setTimeout(init214,220); setTimeout(init214,650); setTimeout(init214,950); setTimeout(init214,1500);
+  window.__SA214={version:V214};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v215 · SALUD MÁS PROFUNDA: LA COBERTURA LLEGA A LA FERTILIDAD Y A LA
+   REHABILITACIÓN, Y LA SUPERINTENDENCIA PUEDE INTERVENIR TU EPS
+   1. LA COBERTURA. La v209 abarató tratamientos, controles y cuidados. Ahora
+      también pesa en dos gastos que quedaban sin cobertura:
+      · El tratamiento de fertilidad: la afiliación casi no ayuda (el plan
+        obligatorio no cubre la alta complejidad: pagas 90%); la prepagada
+        sí (60%); las dos juntas, 55%.
+      · La clínica de rehabilitación de un hijo: la afiliación cubre una
+        parte, como en cualquier tratamiento (70%); con prepagada, la mitad.
+   2. LA EPS INTERVENIDA. Una EPS tuya que se hunde ya no se cae sola:
+      · Cuando pierde la reputación o la caja dos años seguidos, la
+        Superintendencia de Salud la pone en vigilancia especial (puedes
+        presentar un plan de choque, defenderte o dejarlo pasar).
+      · Si sigue mal, la intervienen: toma posesión y nombra un interventor.
+        Puedes poner capital y un plan para recuperarla en tres años, pedir
+        que la vendan o aceptar que la liquiden.
+      · Intervenida pierde ventas, moral y presidente; si en tres años no se
+        recupera, se liquida. Liquidada sale del grupo y te toca una parte de
+        lo que quede después de las deudas.
+   ========================================================================== */
+(function(){
+  const V215='v215';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const fm=x=>Math.abs(x)<1?fmt(x):fmt(Math.round(x*10)/10);
+  const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+
+  /* ---------- 1. la cobertura ---------- */
+  function factorFertilidad(){ const c=typeof window.coberturaSalud209==='function'?window.coberturaSalud209():'ninguna'; return c==='ambas'?.55:c==='prepagada'?.6:c==='afiliacion'?.9:1; }
+  function factorRehab(){ return typeof window.factorSalud209==='function'?window.factorSalud209(.5):1; }
+
+  /* ---------- 2. la EPS vigilada, intervenida y liquidada ---------- */
+  const esEPS=e=>!!(e&&e.red176&&e.red176.clase==='eps');
+  const est=e=>{ if(!e.eps215||typeof e.eps215!=='object') e.eps215={estado:'normal',quejas:0,mala:0,desde:null,hasta:null}; return e.eps215; };
+  const unidades=e=>((e.red176&&e.red176.unidades)||[]).filter(u=>!u.enObra);
+  const reputacion=e=>{ const u=unidades(e); return u.length?u.reduce((s,x)=>s+(isFinite(x.rep)?x.rep:50),0)/u.length:50; };
+  function mala(e){ const ing=Math.max(1,e.ingresos||0); return reputacion(e)<45||(e.caja||0)<0||((e.utilidad||0)<0&&(e.deuda||0)>ing*.5)||(e.presidente&&e.presidente.honrado<=3&&reputacion(e)<55); }
+  const miPart=e=>{ try{ return miPct(e); }catch(x){ return 1; } };
+  const valorMio=e=>{ try{ return Math.max(0,valuar(e)*miPart(e)); }catch(x){ return 0; } };
+  const enGrupo=e=>comps().includes(e);
+  const quitar=e=>{ try{ sacarDelGrupo(e); }catch(x){ S.grupo=comps().filter(z=>z!==e); } };
+  const ente=()=>A()>=1997?'la Superintendencia Nacional de Salud':'el Ministerio de Salud';
+
+  function evVigilancia(e){ const x=Math.round(Math.max(25,(e.ingresos||0)*.03));
+    return {p:9,c:()=>ACTIVO()&&enGrupo(e)&&est(e).estado==='vigilada',t:()=>'<b>'+E(ente().replace(/^la /,'La ').replace(/^el /,'El '))+' pone a '+E(e.nombre)+' en vigilancia especial.</b> Hay quejas de afiliados, demoras en las autorizaciones y las cuentas no cuadran.',
+      o:[{t:'Presentar un plan de choque ('+fm(x)+')',f:()=>{ const s=est(e); e.caja=(e.caja||0)-x; unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)+6,5,99); }); s.estado='normal'; s.quejas=0; s.mala=0; return 'El plan convenció a la autoridad: sales de la vigilancia. Costó '+fm(x)+' de la caja de '+E(e.nombre)+'.'; }},
+        {t:'Defenderte en el proceso',f:()=>{ const s=est(e); if(chance(.5)){ s.estado='normal'; s.quejas=0; return 'Ganaste: no había mérito para vigilar tu EPS.'; } unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)-4,5,99); }); return 'Perdiste el pulso: la vigilancia sigue y salió en la prensa.'; }},
+        {t:'Dejarlo pasar',f:()=>'No hiciste nada. La autoridad toma nota.'}]}; }
+  function evIntervencion(e){ const cap=Math.round(Math.max(80,(e.deuda||0)*.35+(e.ingresos||0)*.06));
+    return {p:10,c:()=>ACTIVO()&&enGrupo(e)&&est(e).estado==='intervenida',t:()=>'<b>'+E(ente().replace(/^la /,'La ').replace(/^el /,'El '))+' toma posesión de '+E(e.nombre)+'.</b> Nombra un interventor, saca a tu presidente y manda sobre la caja. Tienes tres años para recuperarla.',
+      o:[{t:'Poner capital y un plan de recuperación ('+fm(cap)+')',cat:'capital',f:()=>{ if(S.efectivo<cap) return 'No tienes '+fm(cap)+' en efectivo para ponerlos ahora.'; S.efectivo-=cap; e.caja=(e.caja||0)+cap; const s=est(e); s.hasta=A()+3; s.plan=true; unidades(e).forEach(u=>{ u.rep=cl((u.rep||50)+8,5,99); }); return 'Pusiste '+fm(cap)+' y el plan quedó aprobado: en tres años te devuelven la EPS si sale de la zona roja.'; }},
+        {t:'Pedir que la vendan',f:()=>{ const v=valorMio(e)*.45; quitar(e); S.efectivo+=v; moverPrestigio(-3,'la intervención de '+e.nombre); return 'La Superintendencia la vendió por pedazos: te tocó '+fm(v)+' (45% de lo que valía tu parte).'; }},
+        {t:'Aceptar la liquidación',f:()=>{ const s=est(e); s.estado='liquidada'; s.desde=A(); return 'Aceptaste la liquidación: en dos años se cierra. Los trabajadores y los afiliados primero.'; }}]}; }
+
+  function anual(){
+    if(!ACTIVO()) return;
+    comps().slice().forEach(e=>{
+      if(!esEPS(e)) return; const s=est(e); const m=mala(e);
+      if(s.estado==='normal'){ if(m){ s.quejas++; } else s.quejas=Math.max(0,s.quejas-1); if(s.quejas>=2){ s.estado='vigilada'; s.mala=0; s.desde=A(); try{ cola.push(evVigilancia(e)); }catch(x){} } }
+      else if(s.estado==='vigilada'){ if(!m){ s.estado='normal'; s.quejas=0; log('La vigilancia especial de <b>'+E(e.nombre)+'</b> se levantó: se corrigió el rumbo.','bien'); }
+        else { s.mala++; if(s.mala>=2){ s.estado='intervenida'; s.desde=A(); s.hasta=A()+3; s.plan=false; e.presidente=null; try{ cola.push(evIntervencion(e)); }catch(x){} } } }
+      else if(s.estado==='intervenida'){
+        e.ingresos*=.9; e.moral=cl((e.moral||50)-4,0,100); e.presidente=null;
+        if(A()>=(s.hasta||A())){ if(!m){ s.estado='normal'; s.quejas=0; s.mala=0; log('Te devolvieron <b>'+E(e.nombre)+'</b>: salió de la intervención.','bien'); } else { s.estado='liquidada'; s.desde=A(); log('<b>'+E(e.nombre)+'</b> no se recuperó: la Superintendencia ordenó su liquidación.','mal'); } } }
+      else if(s.estado==='liquidada'){
+        e.ingresos*=.8; e.moral=cl((e.moral||50)-8,0,100);
+        if(A()-(s.desde||A())>=2){ const v=valorMio(e)*.25; const nombre=e.nombre; quitar(e); S.efectivo+=v; moverPrestigio(-4,'la liquidación de '+nombre); log('Se cerró la liquidación de <b>'+E(nombre)+'</b>: quedaron '+fm(v)+' para ti después de las deudas.','mal'); } }
+    });
+  }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA215_PASO) return; window.__SA215_PASO=true;
+    window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(ACTIVO()) anual(); }catch(x){ console.error(x); } return r; }; }
+  function init215(){ try{ wrapPaso(); }catch(e){ console.error(e); } Object.assign(window,{factorFertilidad215:factorFertilidad,factorRehab215:factorRehab,anualEPS215:anual,estadoEPS215:est,malaEPS215:mala,evVigilanciaEPS215:evVigilancia,evIntervencionEPS215:evIntervencion}); }
+  init215(); setTimeout(init215,40); setTimeout(init215,220); setTimeout(init215,650); setTimeout(init215,950); setTimeout(init215,1500);
+  window.__SA215={version:V215};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v216 · TRES CARRERAS NUEVAS: DEPORTE, ARTE Y MÚSICA, PERIODISMO
+   Se buscan donde se busca empleo («Buscar empleo», cada una en su sección)
+   y funcionan como la vida militar o la eclesiástica: un panel con sus
+   indicadores, decisiones que cuestan movida y plata, ascensos por años y
+   desempeño, un sueldo (el del núcleo) y sucesos propios de cada oficio.
+   - DEPORTE: boxeo, tenis, golf, atletismo, natación, fútbol, ciclismo y
+     automovilismo, cada uno desde su época (y las mujeres, desde la suya).
+     Forma, técnica, fama, disciplina y apoyo; el riesgo es de lesión. La
+     forma cae con la edad, así que la carrera es corta: lesiones (con la
+     cobertura de salud de la v209/v215), dopaje, partidos arreglados,
+     contrato en el exterior, las grandes citas (Mundial, Olimpiadas, Tour,
+     títulos) y el retiro.
+   - ARTE Y MÚSICA: pintura, música, literatura, teatro, fotografía y cine.
+     Talento, obra, fama, crítica y mecenas; el riesgo es la bohemia. Obras,
+     exposiciones, giras, mecenas, representante, regalías, éxitos y
+     críticas feroces, plagio, censura, excesos y encargos oficiales.
+   - PERIODISMO: política, judiciales, economía, deportes, cultura y
+     corresponsalía, en los medios de cada época. Credibilidad, fuentes,
+     audiencia e independencia; el riesgo son las amenazas. Investigar,
+     denunciar, columnas, pauta y «sobres», esquema de seguridad, demandas
+     por calumnia, la censura, el 9 de abril de 1948, el cierre de los
+     diarios en 1955-56 y el asesinato de Guillermo Cano en 1986.
+   Al terminar la carrera queda un registro (S.legado216) con los logros.
+   ========================================================================== */
+(function(){
+  const V216='v216';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(x);
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const Q=()=>(typeof S!=='undefined'&&S&&S.carr216)||null;
+  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const sub=(q,k,d)=>{ q.ind[k]=clamp((q.ind[k]||0)+d,0,100); };
+  const rie=(q,d)=>{ q.riesgo=clamp(q.riesgo+d,0,100); };
+  const feli=d=>{ try{ S.p.felicidad=clamp(S.p.felicidad+d,0,100); }catch(e){} };
+  const salud=d=>{ try{ if(S.p.salud!=null) S.p.salud=clamp(S.p.salud+d,0,100); }catch(e){} };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t); }catch(e){} };
+  const cob=()=>{ try{ return typeof window.factorRehab215==='function'?window.factorRehab215():1; }catch(e){ return 1; } };
+  const mujer=()=>S.p.sexo==='m';
+  const ciudad=()=>(S.hogar&&S.hogar.ciudad)||'Bogotá';
+  const nv=(q)=>{ const c=CAR[q.id]; return {n:c.niv[clamp(q.nivel,0,5)],s:c.sal[clamp(q.nivel,0,5)]}; };
+  const logro=(q,t)=>{ q.logros.push({a:A(),t}); if(q.logros.length>30) q.logros.shift(); };
+
+  /* ====================== LOS TRES OFICIOS ====================== */
+  const CAR={};
+  const GRANDES=[1962,1990,1994,1998,2014,2018,2022];
+  const CLUBES=[['Millonarios',1946],['Independiente Santa Fe',1941],['Atlético Nacional',1947],['Deportivo Cali',1912],['América de Cali',1927],['Junior de Barranquilla',1924],['Once Caldas',1961],['Deportes Tolima',1954]];
+  const MEDIOS=[['La Gaceta de Colombia',1821],['El Neogranadino',1848],['El Espectador',1887],['El Nuevo Tiempo',1902],['El Tiempo',1911],['El Colombiano',1912],['El Heraldo',1933],['El Siglo',1936],['Caracol Radio',1948],['RCN Radio',1948],['El País de Cali',1950],['Telediario',1954],['Revista Semana',1982],['Noticiero CM&',1992],['Noticias RCN',1998],['un portal de noticias',2005]];
+
+  /* ----- DEPORTE ----- */
+  const DISC_D=[
+    {id:'boxeo',n:'Boxeo',d:1900,m:1990,cita:['una pelea por el título mundial',a=>a>=1965?.3:0],emp:q=>'el gimnasio de boxeo de '+q.ciudad},
+    {id:'tenis',n:'Tenis',d:1910,m:1920,cita:['un torneo del Grand Slam o la Copa Davis',a=>a>=1960?.3:0],emp:q=>'el Club de Tenis de '+q.ciudad},
+    {id:'golf',n:'Golf',d:1910,m:1930,cita:['un torneo grande del circuito',a=>a>=1960?.25:0],emp:q=>'el Country Club de '+q.ciudad},
+    {id:'atletismo',n:'Atletismo',d:1920,m:1932,cita:['los Juegos Olímpicos',a=>(a>=1948&&a%4===0)?.85:0],emp:q=>'la liga de atletismo de '+q.ciudad},
+    {id:'natacion',n:'Natación',d:1920,m:1928,cita:['los Juegos Olímpicos',a=>(a>=1948&&a%4===0)?.85:0],emp:q=>'el club de natación de '+q.ciudad},
+    {id:'futbol',n:'Fútbol',d:1948,m:1990,cita:['la Selección Colombia en el Mundial',a=>GRANDES.includes(a)?.85:((a>=1948&&a%4===0)?.15:0)],emp:q=>{ const L=CLUBES.filter(c=>A()>=c[1]); return L.length?L[ri(0,L.length-1)][0]:'un club de '+q.ciudad; }},
+    {id:'ciclismo',n:'Ciclismo',d:1951,m:1975,cita:['una gran vuelta: la Vuelta a Colombia o el Tour de Francia',a=>a>=1951?.35:0],emp:q=>A()>=1983?'el equipo Café de Colombia':'el club ciclista de '+q.ciudad},
+    {id:'automovilismo',n:'Automovilismo',d:1955,m:1970,cita:['una carrera internacional',a=>a>=1960?.3:0],emp:q=>'la escudería de '+q.ciudad}];
+  CAR.deportista={ruta:'deportista',nombre:'Deporte profesional',seccion:'Deporte',titulo:'Tu carrera deportiva',entrada:'Hacerte deportista profesional',
+    desde:1900,edad:[18,34],disc:DISC_D,sal:[4,12,36,95,260,520],min:[1,2,3,3,4,0],clave:'fama',
+    niv:['Aficionado','Promesa','Profesional','Figura del equipo','Estrella','Leyenda del deporte'],
+    ind:[['forma','Forma física'],['tecnica','Técnica'],['fama','Fama'],['disciplina','Disciplina'],['apoyo','Apoyo del club y el representante']],riesgoN:'Riesgo de lesión',
+    ini:()=>({forma:ri(55,70),tecnica:ri(35,50),fama:ri(4,14),disciplina:ri(45,60),apoyo:ri(35,50)}),
+    decae:{fama:1.5,apoyo:1},
+    des:q=>q.ind.forma*.35+q.ind.tecnica*.3+q.ind.fama*.1+q.ind.disciplina*.15+q.ind.apoyo*.1-q.riesgo*.15-(q.ban>0?25:0)+8,
+    paso:q=>{ const e=S.p.edad||25; if(e>27) q.ind.forma=clamp(q.ind.forma-(e-27)*1.1,0,100); if(q.ban>0) q.ban--; },
+    extra:q=>{ const s=nv(q).s; const pat=Math.round(q.ind.fama/100*s*.6*(q.agente?1.25:1)*(q.exterior?1.8:1)*(q.ban>0?.2:1)); return {m:pat+(q.exterior?Math.round(s*.8):0),t:'patrocinios y premios'+(q.exterior?' y el contrato del exterior':'')}; },
+    empleador:q=>{ const d=DISC_D.find(x=>x.id===q.disc); return d?d.emp(q):'un club'; },
+    resumen:q=>'forma '+Math.round(q.ind.forma)+', técnica '+Math.round(q.ind.tecnica)+', fama '+Math.round(q.ind.fama),
+    decs:[
+      ['entrenar','Entrenar a doble jornada','Sube la forma y la técnica, pero te expones a lesiones.',0,q=>{ sub(q,'forma',8); sub(q,'tecnica',3); rie(q,7); return 'Entrenaste a doble jornada: más fuerte y más cansado.'; }],
+      ['tecnica','Trabajar la técnica con un entrenador especializado','Sube la técnica y la disciplina.',6,q=>{ sub(q,'tecnica',9); sub(q,'disciplina',2); return 'Pulíste los detalles con un buen técnico.'; }],
+      ['fisico','Preparación física, fisioterapia y nutrición','Sube la forma y baja el riesgo de lesión.',8,q=>{ sub(q,'forma',6); rie(q,-7); return 'Cuidaste el cuerpo con ciencia: menos riesgo de lesión.'; }],
+      ['agente','Contratar un representante','Mejores contratos y patrocinios para siempre.',4,q=>{ q.agente=true; sub(q,'apoyo',10); return 'Un representante negocia por ti: mejores contratos y patrocinios.'; },q=>!q.agente],
+      ['prensa',null,'Sube tu fama.',0,q=>{ sub(q,'fama',6); feli(1); return 'Saliste en los medios y la gente empezó a reconocerte.'; }],
+      ['descanso','Descansar y recuperarte','Baja el riesgo de lesión y recupera algo de forma.',0,q=>{ rie(q,-13); sub(q,'forma',3); feli(2); return 'Descansaste: el cuerpo lo agradeció.'; }],
+      ['exterior','Buscar un contrato en el exterior','Fichar en Europa o Estados Unidos: más plata y más fama, pero cuesta adaptarse.',12,q=>{ q.exterior=true; sub(q,'fama',8); sub(q,'forma',-3); rie(q,4); logro(q,'Fichó en el exterior'); return 'Conseguiste un contrato en el exterior: más plata, más fama y un país nuevo por aprender.'; },q=>!q.exterior&&q.nivel>=2&&(S.p.edad||0)<=32]],
+    eventos:q=>{ const L=[], e=S.p.edad||25, a=A(), d=DISC_D.find(x=>x.id===q.disc)||DISC_D[0];
+      if(chance(clamp(q.riesgo/100*.55+(q.ind.forma<35?.1:0),0,.7))) L.push(evLesion(q));
+      if(a>=1968&&q.nivel>=2&&chance(.06)) L.push(evDopaje(q));
+      if(a>=1985&&['futbol','boxeo','ciclismo','tenis'].includes(q.disc)&&q.nivel>=2&&chance(.05)) L.push(evAmano(q));
+      if(q.nivel>=2&&e<=31&&!q.exterior&&q.ind.fama>=45&&chance(.18)) L.push(evOferta(q));
+      const pc=d.cita[1](a); if(q.nivel>=2&&q.ban<=0&&pc&&chance(pc)) L.push(evCita(q,d));
+      if((e>=36&&q.ind.forma<45)||e>=41||q.ind.forma<15) L.push(evRetiro(q));
+      return L; }};
+
+  /* ----- ARTE Y MÚSICA ----- */
+  const DISC_A=[
+    {id:'pintura',n:'Pintura y escultura',d:1800,m:1800,emp:q=>'tu taller en '+q.ciudad},
+    {id:'musica',n:'Música',d:1800,m:1800,emp:q=>A()>=1930?'una orquesta y una casa disquera':'las veladas y los salones de '+q.ciudad},
+    {id:'literatura',n:'Literatura',d:1800,m:1800,emp:q=>A()>=1900?'una editorial de '+q.ciudad:'los periódicos y las tertulias de '+q.ciudad},
+    {id:'teatro',n:'Teatro',d:1800,m:1800,emp:q=>'una compañía de teatro de '+q.ciudad},
+    {id:'fotografia',n:'Fotografía',d:1860,m:1880,emp:q=>'tu estudio fotográfico en '+q.ciudad},
+    {id:'cine',n:'Cine y televisión',d:1920,m:1920,emp:q=>A()>=1954?'un canal de televisión y una productora':'una productora de cine'}];
+  CAR.artista={ruta:'artista',nombre:'Arte y música',seccion:'Arte y música',titulo:'Tu vida artística',entrada:'Dedicarte al arte o a la música',
+    desde:1800,edad:[18,65],disc:DISC_A,sal:[3,8,24,70,190,420],min:[1,2,3,4,5,0],clave:'fama',
+    niv:['Aprendiz','Aficionado con obra','Profesional','Artista reconocido','Artista consagrado','Maestro'],
+    ind:[['talento','Talento y oficio'],['obra','Obra'],['fama','Fama'],['critica','Crítica'],['mecenas','Mecenas y contactos']],riesgoN:'Bohemia y excesos',
+    ini:()=>({talento:ri(40,60),obra:ri(10,25),fama:ri(2,10),critica:ri(30,45),mecenas:ri(15,30)}),
+    decae:{obra:3,fama:2},
+    des:q=>q.ind.talento*.3+q.ind.obra*.2+q.ind.fama*.2+q.ind.critica*.15+q.ind.mecenas*.15-q.riesgo*.1+6,
+    paso:q=>{ if(q.censura>0) q.censura--; },
+    extra:q=>{ const s=nv(q).s; return {m:Math.round((q.ind.obra*.4+q.ind.fama*.6)/100*s*.55*(q.agente?1.25:1)*(1+(q.regalias||0)*.25)),t:'ventas, funciones y regalías'}; },
+    empleador:q=>{ const d=DISC_A.find(x=>x.id===q.disc); return d?d.emp(q):'tu taller'; },
+    resumen:q=>'talento '+Math.round(q.ind.talento)+', obra '+Math.round(q.ind.obra)+', fama '+Math.round(q.ind.fama),
+    decs:[
+      ['crear','Dedicar el año a una obra grande','Sube la obra y el talento.',8,q=>{ sub(q,'obra',12); sub(q,'talento',3); rie(q,2); return 'Pasaste el año encerrado con tu obra: quedó algo de lo que te sientes orgulloso.'; }],
+      ['exponer',null,'Sube la fama y mueve la crítica.',10,q=>{ sub(q,'fama',7); sub(q,'critica',q.ind.talento>=55?5:-4); sub(q,'mecenas',3); return 'El público vio tu obra: '+(q.ind.talento>=55?'la crítica fue amable.':'la crítica fue tibia.'); }],
+      ['mecenas','Buscar un mecenas o un patrocinador','Dinero y contactos para trabajar sin afán.',0,q=>{ sub(q,'mecenas',9); sub(q,'fama',1); return 'Una casa rica te abrió sus puertas y su bolsillo.'; },q=>q.nivel<=3],
+      ['estudiar','Estudiar en el exterior','Un año en París, Madrid o Nueva York: sube mucho el talento.',40,q=>{ sub(q,'talento',11); sub(q,'critica',3); q.estudio=A(); return 'Pasaste un año estudiando en el exterior: volviste con otra mirada.'; },q=>(S.p.edad||30)<=50&&(!q.estudio||A()-q.estudio>=5)],
+      ['gira','Salir de gira o presentarte en la capital','Fama y contactos, a cambio de cansancio.',14,q=>{ sub(q,'fama',8); sub(q,'mecenas',3); rie(q,3); return 'La gira te llevó a otras ciudades: más público y más cansancio.'; }],
+      ['colaborar','Colaborar con otro artista','Un poco de fama, de obra y de crítica.',0,q=>{ sub(q,'fama',4); sub(q,'obra',4); sub(q,'critica',2); return 'Trabajaste con otro artista: salió algo mejor de lo que esperabas.'; }],
+      ['agente','Firmar con un representante o una casa editorial o disquera','Mejores contratos y distribución para siempre.',5,q=>{ q.agente=true; sub(q,'mecenas',6); sub(q,'fama',3); return 'Firmaste con quien te represente: tu obra llega más lejos.'; },q=>!q.agente&&q.nivel>=1],
+      ['retiro','Retirarte a crear sin prisa','Baja la bohemia y sube el talento, aunque se enfríe la fama.',0,q=>{ rie(q,-11); sub(q,'talento',4); sub(q,'obra',3); sub(q,'fama',-3); feli(2); return 'Te retiraste a trabajar con calma: la obra ganó y la fama se enfrió.'; }]],
+    eventos:q=>{ const L=[], a=A();
+      if(q.ind.obra>=30&&q.ind.talento>=45&&chance(clamp((q.ind.obra*.3+q.ind.talento*.3+q.ind.fama*.1)/260,.05,.35))) L.push(evExito(q));
+      if(chance(.12)) L.push(evCritica(q));
+      if(q.ind.obra>=30&&q.nivel>=2&&chance(.05)) L.push(evPlagio(q));
+      if(((a>=1886&&a<=1904)||(a>=1949&&a<=1958)||(a>=1978&&a<=1982))&&q.censura<=0&&['literatura','teatro','cine','musica'].includes(q.disc)&&chance(.3)) L.push(evCensuraArte(q));
+      if(q.riesgo>=40&&chance(q.riesgo/150)) L.push(evExcesos(q));
+      if(q.nivel>=2&&chance(.1)) L.push(evEncargo(q));
+      return L; }};
+
+  /* ----- PERIODISMO ----- */
+  const DISC_P=[
+    {id:'politica',n:'Política',d:1810,m:1930,emp:null},{id:'judicial',n:'Judiciales y orden público',d:1900,m:1950,emp:null},
+    {id:'economia',n:'Economía',d:1900,m:1950,emp:null},{id:'deportes',n:'Deportes',d:1930,m:1960,emp:null},
+    {id:'cultura',n:'Cultura',d:1850,m:1880,emp:null},{id:'internacional',n:'Corresponsalía en el exterior',d:1930,m:1950,emp:null}];
+  const medioNuevo=()=>{ const L=MEDIOS.filter(m=>A()>=m[1]); return (L.length?L[ri(0,L.length-1)]:MEDIOS[0])[0]; };
+  CAR.periodista={ruta:'periodista',nombre:'Periodismo',seccion:'Periodismo',titulo:'Tu carrera de periodista',entrada:'Empezar en el periodismo',
+    desde:1810,edad:[18,55],disc:DISC_P,sal:[6,16,40,85,170,320],min:[1,2,3,4,5,0],clave:'audiencia',
+    niv:['Reportero practicante','Reportero','Redactor','Corresponsal o jefe de sección','Columnista o jefe de redacción','Director o gran firma'],
+    ind:[['credibilidad','Credibilidad'],['fuentes','Fuentes'],['audiencia','Audiencia'],['independencia','Independencia']],riesgoN:'Amenazas',
+    ini:()=>({credibilidad:ri(45,60),fuentes:ri(20,35),audiencia:ri(5,15),independencia:ri(55,75)}),
+    decae:{fuentes:2,audiencia:1.5},
+    des:q=>q.ind.credibilidad*.3+q.ind.fuentes*.25+q.ind.audiencia*.2+q.ind.independencia*.15-q.riesgo*.1+8,
+    paso:q=>{ if(q.exilio>0) q.exilio--; },
+    extra:q=>({m:Math.round(q.ind.audiencia/100*nv(q).s*.25),t:'columnas y honorarios'}),
+    empleador:q=>medioNuevo(),
+    resumen:q=>'credibilidad '+Math.round(q.ind.credibilidad)+', fuentes '+Math.round(q.ind.fuentes)+', audiencia '+Math.round(q.ind.audiencia),
+    decs:[
+      ['investigar','Investigar un tema a fondo','Más fuentes y credibilidad, y un poco más de riesgo.',6,q=>{ sub(q,'fuentes',8); sub(q,'credibilidad',5); rie(q,5); return 'Pasaste semanas investigando: ya tienes de qué escribir.'; }],
+      ['denuncia','Publicar una denuncia contra un poderoso','Sube la audiencia y la credibilidad, pero te señala.',0,q=>{ sub(q,'audiencia',10); sub(q,'credibilidad',7); sub(q,'independencia',3); rie(q,12); try{ S.p.redes=clamp((S.p.redes||0)-3,0,100); }catch(e){} return 'Tu denuncia sacudió a más de uno: la gente te lee y los señalados te recuerdan.'; }],
+      ['columna','Escribir una columna de opinión','Audiencia y un par de enemigos.',0,q=>{ sub(q,'audiencia',5); sub(q,'independencia',-1); rie(q,3); return 'Tu columna dio de qué hablar.'; }],
+      ['cubrir','Cubrir un hecho en el terreno','Fuentes y audiencia a cambio de riesgo: una guerra, un paro, un derrumbe.',0,q=>{ sub(q,'fuentes',4); sub(q,'audiencia',6); rie(q,8); return 'Estuviste donde pasaban las cosas y lo contaste de primera mano.'; }],
+      ['fuentes','Cultivar tus fuentes','Cenas, favores y llamadas: más fuentes.',5,q=>{ sub(q,'fuentes',9); return 'Cultivaste tus fuentes: te contestan el teléfono.'; }],
+      ['pauta','Aceptar pauta oficial o un «sobre»','Plata a cambio de tu independencia y de tu credibilidad.',0,q=>{ sub(q,'independencia',-12); sub(q,'credibilidad',-5); rie(q,-3); const m=pago(8+nv(q).s*.4); S.efectivo+=m; q.pauta=(q.pauta||0)+1; return 'Aceptaste el sobre y recibiste '+fm(m)+'. Quien te lo dio espera algo a cambio.'; }],
+      ['libro','Publicar un libro de crónicas','Audiencia y credibilidad.',5,q=>{ sub(q,'audiencia',6); sub(q,'credibilidad',4); return 'Tu libro de crónicas se vendió y te dio nombre.'; },q=>q.nivel>=2],
+      ['seguridad','Pedir un esquema de seguridad','Baja mucho el riesgo de amenazas.',20,q=>{ rie(q,-18); return 'Te asignaron escoltas: duermes mejor, aunque te siguen a todas partes.'; },q=>q.riesgo>=25||A()>=1985]],
+    eventos:q=>{ const L=[], a=A();
+      if(q.riesgo>=30&&chance(q.riesgo/170)) L.push(evAmenaza(q));
+      if(q.ind.audiencia>=25&&chance(.09)) L.push(evCalumnia(q));
+      if(q.ind.fuentes>=50&&q.ind.credibilidad>=50&&chance(.12)) L.push(evChiva(q));
+      if(((a>=1949&&a<=1958)||(a>=1978&&a<=1982))&&q.censura<=0&&chance(.35)) { q.censura=3; L.push(evCensuraPrensa(q)); }
+      if(q.ind.independencia<30&&chance(.15)) L.push(evVocero(q));
+      if(a===1948&&!q.hitos[1948]) { q.hitos[1948]=1; L.push(evBogotazo(q)); }
+      if(a===1955&&!q.hitos[1955]) { q.hitos[1955]=1; L.push(evCierre(q)); }
+      if(a===1986&&!q.hitos[1986]) { q.hitos[1986]=1; L.push(evCano(q)); }
+      return L; }};
+
+  /* ====================== SUCESOS DEL DEPORTE ====================== */
+  function evLesion(q){ const grave=chance(.35), costo=Math.round(pago(grave?30:12)*cob());
+    return {p:9,c:()=>Q()===q,t:()=>'<b>Te lesionaste.</b> '+(grave?'Es una lesión seria: ligamentos y meses de recuperación.':'Una lesión molesta que te saca de las canchas unas semanas.')+' El médico del club dice que depende de cómo la trates.',
+      o:[{t:'Operarte con el mejor especialista ('+fm(costo)+')',f:()=>{ if(S.efectivo<costo) return 'No te alcanza para el especialista.'; tomar(costo); rie(q,-22); sub(q,'forma',grave?-4:-1); return 'Te operaron bien y recuperaste el ritmo.'+(cob()<1?' Tu cobertura de salud pagó parte.':''); }},
+         {t:'Recuperación rápida para volver ya',f:()=>{ rie(q,6); if(chance(grave?.5:.25)){ sub(q,'forma',-13); q.malos++; return 'Volviste antes de tiempo y recaíste: perdiste forma para siempre.'; } sub(q,'forma',-2); return 'Volviste pronto y saliste bien librado.'; }},
+         {t:'Dejar el deporte',f:()=>{ salirSilencio('una lesión',true); return 'La lesión te sacó de las canchas para siempre.'; }}]}; }
+  function evDopaje(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>Te ofrecen una "ayuda".</b> El médico del equipo te propone una sustancia que no sale en los controles... casi siempre. Todos dicen que los rivales ya lo hacen.',
+      o:[{t:'Aceptarla',f:()=>{ sub(q,'forma',12); if(chance(.35)){ q.ban=2; sub(q,'fama',-14); rie(q,10); prest(-8,'un escándalo de dopaje'); logro(q,'Sancionado por dopaje'); return 'Dio positivo: dos años de suspensión y tu nombre por el suelo.'; } return 'Funcionó: rendiste como nunca... y nadie sospechó.'; }},
+         {t:'Negarte',f:()=>{ sub(q,'disciplina',3); sub(q,'apoyo',-3); return 'Dijiste que no: el médico no volvió a mirarte igual, pero dormiste tranquilo.'; }},
+         {t:'Denunciarlo',f:()=>{ sub(q,'fama',5); sub(q,'apoyo',-10); prest(1,'denunció el dopaje'); return 'Denunciaste el dopaje: la prensa te aplaudió y en el club te dieron la espalda.'; }}]}; }
+  function evAmano(q){ const m=pago(25+nv(q).s*.6);
+    return {p:8,c:()=>Q()===q,t:()=>'<b>Te proponen arreglar un resultado.</b> Un desconocido ofrece '+fm(m)+' por "perder bien" en un partido que mueve apuestas.',
+      o:[{t:'Aceptar el arreglo',f:()=>{ S.efectivo+=m; rie(q,14); if(chance(.3)){ q.ban=3; sub(q,'fama',-20); prest(-10,'un partido arreglado'); logro(q,'Sancionado por arreglar un partido'); return 'Lo descubrieron: suspensión de tres años y la vergüenza pública.'; } return 'Cobraste '+fm(m)+' y nadie se enteró... por ahora.'; }},
+         {t:'Rechazarlo',f:()=>{ sub(q,'disciplina',3); return 'Dijiste que no y te quedaste con la conciencia limpia.'; }},
+         {t:'Contárselo a las autoridades',f:()=>{ sub(q,'fama',4); prest(1,'denunció un arreglo'); rie(q,5); return 'Denunciaste el intento: la gente te lo reconoce, y a los que están detrás, no les gustó.'; }}]}; }
+  function evOferta(q){ return {p:8,c:()=>Q()===q&&!q.exterior,t:()=>'<b>Llega una oferta del exterior.</b> Un equipo de Europa o de Estados Unidos te quiere: mucha más plata y un idioma que no hablas.',
+      o:[{t:'Aceptar y mudarte',f:()=>{ q.exterior=true; sub(q,'fama',8); sub(q,'forma',-3); rie(q,4); logro(q,'Fichó en el exterior'); return 'Te fuiste al exterior: más plata y más fama, y un país entero por aprender.'; }},
+         {t:'Quedarte en casa',f:()=>{ sub(q,'apoyo',4); feli(2); return 'Preferiste quedarte: tu gente lo agradeció.'; }}]}; }
+  function evCita(q,d){ const nombre=d.cita[0], a=A();
+    return {p:9,c:()=>Q()===q,t:()=>'<b>Llega '+E(nombre)+'.</b> Es la oportunidad de tu vida: el país entero te va a mirar.',
+      o:[{t:'Ir con todo',f:()=>resultadoCita(q,nombre,0)},{t:'Cuidarte y no arriesgar',f:()=>{ rie(q,-8); return resultadoCita(q,nombre,-.3); }},{t:'Declinar',f:()=>{ sub(q,'apoyo',-4); sub(q,'fama',-2); return 'Declinaste la cita: nadie entendió por qué.'; }}]}; }
+  function resultadoCita(q,nombre,pen){ const r=clamp((q.ind.tecnica*.4+q.ind.forma*.4+q.ind.fama*.05+ri(-22,22)-q.riesgo*.1)*(1+pen),0,100);
+    if(r>=72){ sub(q,'fama',16); prest(q.nivel>=4?6:3,'un triunfo deportivo'); logro(q,'Triunfo en '+nombre); log('<b>Triunfaste en '+E(nombre)+'.</b>','hito'); try{ hito('Triunfo deportivo: '+nombre); }catch(e){} return 'Una actuación histórica: tu nombre quedó en los libros.'; }
+    if(r>=50){ sub(q,'fama',5); return 'Hiciste un buen papel en '+nombre+': el público quedó satisfecho.'; }
+    sub(q,'fama',-3); return 'Te fue mal en '+nombre+': la prensa fue dura.'; }
+  function evRetiro(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>El cuerpo ya no responde como antes.</b> A tu edad, cada partido cuesta más y los años buenos quedaron atrás. Es la hora de decidir.',
+      o:[{t:'Colgar los guantes con honores',f:()=>{ const c=CAR.deportista, m=Math.round(q.ind.fama/100*nv(q).s*3); S.efectivo+=m; if(q.nivel>=3) prest(q.nivel>=4?4:2,'una gran carrera deportiva'); logro(q,'Se retiró con honores'); salirSilencio('se retiró con honores',false); return 'Te retiraste con un homenaje y un contrato de imagen por '+fm(m)+'.'; }},
+         {t:'Un año más en un club menor',c:()=>(q.prorroga||0)<1,f:()=>{ q.prorroga=(q.prorroga||0)+1; q.nivel=Math.max(0,q.nivel-1); S.carrera.nivel=q.nivel; sub(q,'forma',3); return 'Aceptaste un año más en un club menor, con menos sueldo.'; }}].filter(o=>!o.c||o.c())}; }
+
+  /* ====================== SUCESOS DEL ARTE ====================== */
+  function evExito(q){ const m=Math.round(pago(12+nv(q).s*1.4));
+    return {p:8,c:()=>Q()===q,t:()=>'<b>Una de tus obras pega.</b> Se habla de ella en todas partes y te llegan ofertas por los derechos.',
+      o:[{t:'Vender los derechos de una vez ('+fm(m)+')',f:()=>{ S.efectivo+=m; sub(q,'fama',9); logro(q,'Un gran éxito de obra'); return 'Vendiste los derechos y cobraste '+fm(m)+'.'; }},
+         {t:'Conservar los derechos y vivir de las regalías',f:()=>{ q.regalias=(q.regalias||0)+1; sub(q,'fama',11); sub(q,'critica',4); logro(q,'Un gran éxito de obra'); return 'Conservaste los derechos: cada año te dejarán regalías.'; }}]}; }
+  function evCritica(q){ return {p:6,c:()=>Q()===q,t:()=>'<b>Un crítico te destroza.</b> Una reseña dura, con tu nombre en el titular, dice que eres un impostor.',
+      o:[{t:'Responderle por la prensa',f:()=>{ if(chance(clamp(q.ind.talento/120,.2,.7))){ sub(q,'fama',6); sub(q,'critica',3); return 'Tu respuesta fue ingeniosa: el público tomó tu lado.'; } sub(q,'critica',-6); sub(q,'fama',-2); return 'La polémica te salió mal: quedaste peor.'; }},
+         {t:'Ignorarlo',f:()=>{ sub(q,'critica',-2); return 'Lo ignoraste: se olvidó en una semana.'; }},
+         {t:'Aprender de la crítica',f:()=>{ sub(q,'talento',4); sub(q,'critica',1); return 'Algo de razón tenía: trabajaste en tus defectos.'; }}]}; }
+  function evPlagio(q){ const m=Math.round(pago(10+nv(q).s*.4));
+    return {p:7,c:()=>Q()===q,t:()=>'<b>Te acusan de plagio.</b> Otro artista dice que tu obra más conocida es una copia de la suya.',
+      o:[{t:'Demandar por difamación ('+fm(m)+')',f:()=>{ if(S.efectivo<m) return 'No te alcanza para el abogado.'; tomar(m); if(chance(.65)){ sub(q,'critica',5); sub(q,'fama',4); return 'Ganaste el pleito: tu nombre quedó limpio.'; } sub(q,'critica',-8); sub(q,'fama',-5); return 'Perdiste el pleito: quedó la duda.'; }},
+         {t:'Responder con tu obra',f:()=>{ sub(q,'obra',5); return 'Respondiste trabajando: la polémica se apagó.'; }},
+         {t:'Pagar un arreglo para que callen ('+fm(m)+')',f:()=>{ if(S.efectivo<m) return 'No te alcanza.'; tomar(m); sub(q,'critica',-2); return 'Pagaste para que callaran.'; }}]}; }
+  function evCensuraArte(q){ q.censura=4; return {p:8,c:()=>Q()===q,t:()=>'<b>La censura toca tu obra.</b> Los censores del régimen exigen cambios en lo que escribes, montas o cantas.',
+      o:[{t:'Acatar y suavizar',f:()=>{ sub(q,'mecenas',4); sub(q,'critica',-4); return 'Suavizaste la obra: pasó, pero te sientes vendido.'; }},
+         {t:'Desafiar a los censores',f:()=>{ sub(q,'fama',9); sub(q,'critica',6); rie(q,12); return 'Desafiaste la censura: te hiciste un nombre... y un enemigo.'; }},
+         {t:'Salir del país una temporada',f:()=>{ sub(q,'fama',-6); sub(q,'talento',4); rie(q,-10); return 'Te fuiste un tiempo: volverás cuando pase la tormenta.'; }}]}; }
+  function evExcesos(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>La bohemia pasa factura.</b> Noches largas, licor y mala compañía: tus amigos se preocupan.',
+      o:[{t:'Pasar un tiempo en una clínica de reposo',f:()=>{ const m=Math.round(pago(15)*cob()); tomar(m); rie(q,-25); salud(5); return 'Te internaste unas semanas'+(cob()<1?' (tu cobertura pagó parte)':'')+' y saliste mejor.'; }},
+         {t:'Seguir como si nada',f:()=>{ rie(q,6); salud(-9); sub(q,'obra',4); feli(-3); return 'Seguiste igual: la obra rindió, la salud no.'; }},
+         {t:'Cambiar de vida',f:()=>{ rie(q,-16); sub(q,'fama',-4); feli(2); return 'Cambiaste de vida: más sano, menos legendario.'; }}]}; }
+  function evEncargo(q){ const m=Math.round(pago(14+nv(q).s*.9));
+    return {p:7,c:()=>Q()===q,t:()=>'<b>Te hacen un encargo.</b> Un poderoso (el gobierno, la Iglesia o una familia rica) te ofrece '+fm(m)+' por una obra a su gusto.',
+      o:[{t:'Aceptar el encargo',f:()=>{ S.efectivo+=m; sub(q,'mecenas',7); sub(q,'critica',-3); return 'Cumpliste el encargo y cobraste '+fm(m)+'.'; }},
+         {t:'Rechazarlo por independencia',f:()=>{ sub(q,'critica',4); sub(q,'mecenas',-3); return 'Rechazaste el encargo: tu independencia te hace respetar, no cobrar.'; }}]}; }
+
+  /* ====================== SUCESOS DEL PERIODISMO ====================== */
+  function evAmenaza(q){ const m=Math.round(pago(10)*1);
+    return {p:9,c:()=>Q()===q,t:()=>'<b>Te amenazan por lo que publicaste.</b> '+(A()>=1980?'Una llamada anónima, un panfleto y un carro que te sigue.':'Una carta sin firma y alguien que te vigila a la salida.')+' El miedo es real.',
+      o:[{t:'Ignorarla y seguir trabajando',f:()=>{ sub(q,'credibilidad',3); rie(q,7); if(q.riesgo>=70&&chance(.3)){ salud(-20); rie(q,-30); return 'Hubo un atentado: sobreviviste, pero quedaste herido.'; } return 'Seguiste escribiendo: tu coraje se comenta.'; }},
+         {t:'Denunciar y pedir protección ('+fm(m)+')',f:()=>{ if(S.efectivo>=m) tomar(m); rie(q,-14); sub(q,'audiencia',2); return 'Denunciaste las amenazas y te dieron protección.'; }},
+         {t:'Salir al exilio una temporada',f:()=>{ q.exilio=3; rie(q,-30); sub(q,'fuentes',-15); sub(q,'audiencia',-5); return 'Te fuiste del país un tiempo: vivo, pero lejos de tus fuentes.'; }}]}; }
+  function evCalumnia(q){ const m=Math.round(pago(12+nv(q).s*.2));
+    return {p:7,c:()=>Q()===q,t:()=>'<b>Te demandan por calumnia.</b> Alguien a quien nombraste en tu último texto dice que lo difamaste y pide cárcel y una rectificación.',
+      o:[{t:'Rectificar',f:()=>{ sub(q,'credibilidad',-5); sub(q,'independencia',-2); return 'Rectificaste: el asunto se cerró, pero la credibilidad se resintió.'; }},
+         {t:'Sostener lo publicado con un abogado ('+fm(m)+')',f:()=>{ if(S.efectivo<m) return 'No te alcanza para el abogado.'; tomar(m); if(chance(clamp(q.ind.credibilidad/110+q.ind.fuentes/400,.3,.85))){ sub(q,'credibilidad',7); sub(q,'audiencia',5); return 'Ganaste el pleito: tenías con qué probarlo.'; } sub(q,'credibilidad',-8); return 'Perdiste el pleito y tuviste que rectificar.'; }}]}; }
+  function evChiva(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>Tienes una chiva.</b> Una fuente de confianza te da un documento que lo cambia todo: tiene fecha y firma.',
+      o:[{t:'Publicarla ya',f:()=>{ sub(q,'audiencia',12); sub(q,'credibilidad',5); rie(q,8); logro(q,'Una gran chiva periodística'); prest(1,'una gran noticia'); return 'Tu chiva abrió todos los noticieros.'; }},
+         {t:'Verificarla dos semanas más',f:()=>{ if(chance(.6)){ sub(q,'audiencia',9); sub(q,'credibilidad',8); rie(q,4); logro(q,'Una gran chiva periodística'); return 'La verificaste y la publicaste sin un solo error.'; } sub(q,'audiencia',-2); return 'Mientras verificabas, otro medio la publicó antes.'; }},
+         {t:'Venderla a quien salía perjudicado',f:()=>{ const m=pago(20+nv(q).s); S.efectivo+=m; sub(q,'independencia',-15); sub(q,'credibilidad',-8); return 'Cobraste '+fm(m)+' por callar: es un precio que se paga después.'; }}]}; }
+  function evCensuraPrensa(q){ return {p:8,c:()=>Q()===q,t:()=>'<b>Llega la censura de prensa.</b> Un oficial se instala en la sala de redacción y revisa cada página antes de que salga.',
+      o:[{t:'Autocensurarte',f:()=>{ sub(q,'independencia',-8); rie(q,-8); return 'Te autocensuraste: nadie te molestó, pero tampoco dijiste nada.'; }},
+         {t:'Desafiarla',f:()=>{ sub(q,'credibilidad',8); sub(q,'audiencia',5); rie(q,14); return 'Desafiaste la censura: los lectores te lo agradecen y el gobierno te anota.'; }},
+         {t:'Publicar desde la clandestinidad',f:()=>{ sub(q,'credibilidad',5); sub(q,'fuentes',-5); rie(q,10); return 'Publicaste clandestino: poco público, mucho respeto.'; }}]}; }
+  function evVocero(q){ return {p:6,c:()=>Q()===q,t:()=>'<b>Dicen que eres vocero de alguien.</b> Tantos favores y tanta pauta empiezan a notarse: en los cafés te llaman "el de los sobres".',
+      o:[{t:'Salir a defender tu independencia',f:()=>{ sub(q,'independencia',9); sub(q,'credibilidad',3); sub(q,'audiencia',-2); return 'Defendiste tu independencia: algunos te creyeron.'; }},
+         {t:'Seguir como estás',f:()=>{ sub(q,'credibilidad',-6); return 'Seguiste igual: la credibilidad se erosiona.'; }}]}; }
+  function evBogotazo(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>El 9 de abril de 1948 asesinan a Jorge Eliécer Gaitán.</b> Bogotá arde y tú estás con una libreta en la mano en medio de la ciudad.',
+      o:[{t:'Salir a cubrir los hechos',f:()=>{ sub(q,'audiencia',12); sub(q,'fuentes',6); rie(q,14); logro(q,'Cubrió el Bogotazo'); return 'Cubriste el Bogotazo desde la calle: tus crónicas hicieron historia.'; }},
+         {t:'Encerrarte a escribir con lo que oyes',f:()=>{ sub(q,'audiencia',4); sub(q,'credibilidad',-3); return 'Escribiste con lo que te contaban: salió un texto flojo.'; }}]}; }
+  function evCierre(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>El gobierno de Rojas Pinilla cierra diarios.</b> En 1955 clausuran El Tiempo y en 1956 a El Espectador: los periodistas quedan en la calle.',
+      o:[{t:'Escribir para otro medio o en la clandestinidad',f:()=>{ sub(q,'credibilidad',7); rie(q,10); return 'Seguiste escribiendo donde se pudo: tu credibilidad creció.'; }},
+         {t:'Esperar a que reabran',f:()=>{ sub(q,'audiencia',-6); sub(q,'fuentes',-4); return 'Esperaste en la casa: perdiste el hilo.'; }},
+         {t:'Irte a escribir al exterior',f:()=>{ q.exilio=3; sub(q,'fuentes',-8); rie(q,-15); return 'Te fuiste a escribir desde el exterior.'; }}]}; }
+  function evCano(q){ return {p:9,c:()=>Q()===q,t:()=>'<b>Asesinan al director de El Espectador, don Guillermo Cano.</b> Es diciembre de 1986: el narcotráfico le declaró la guerra a la prensa. En todas las redacciones hay duelo y miedo.',
+      o:[{t:'Marchar y escribir sin callarte',f:()=>{ sub(q,'credibilidad',9); sub(q,'audiencia',7); rie(q,16); logro(q,'Se la jugó tras el asesinato de Cano'); return 'Seguiste escribiendo contra el miedo: tu coraje inspiró a muchos.'; }},
+         {t:'Callar por miedo',f:()=>{ rie(q,-10); sub(q,'credibilidad',-6); return 'Bajaste el tono: sobrevivir también es una decisión.'; }},
+         {t:'Pedir un esquema de seguridad',f:()=>{ const m=Math.round(pago(20)); tomar(m); rie(q,-18); return 'Pediste esquema de seguridad ('+fm(m)+').'; }}]}; }
+
+  /* ====================== EL MOTOR COMÚN ====================== */
+  function tituloDec(c,d){ if(d[1]) return d[1]; if(d[0]==='prensa') return A()>=2010?'Entrevistas y redes sociales':'Entrevistas y apariciones públicas'; if(d[0]==='exponer'){ const q=Q(); const x={pintura:'Exponer en una galería',musica:'Dar un concierto',literatura:'Publicar un libro',teatro:'Estrenar una obra',fotografia:'Montar una exposición',cine:'Estrenar una película o una novela'}; return (q&&x[q.disc])||'Presentar tu obra'; } return d[0]; }
+  const decs=q=>CAR[q.id].decs.filter(d=>!d[5]||d[5](q));
+  function registrar(){ if(typeof RUTAS==='undefined') return; Object.keys(CAR).forEach(k=>{ const c=CAR[k]; if(RUTAS[c.ruta]) return; RUTAS[c.ruta]={n:c.nombre,niveles:c.sal.map((s,i)=>({n:c.niv[i],s,edu:0}))}; }); }
+  function puede(id){ const c=CAR[id], q=Q(), e=S.p.edad||0, r=(S.carrera&&S.carrera.ruta)||'desempleado';
+    if(!c||!S||!S.p||S.muerto) return 'No disponible'; if(nino()||e<18) return 'Hace falta ser mayor de edad';
+    if(A()<c.desde) return 'Todavía no existe en esta época';
+    if(q) return 'Ya tienes una carrera ('+CAR[q.id].nombre.toLowerCase()+')';
+    if(r!=='desempleado'&&r!==null) return 'Ya tienes otro camino';
+    if(e<c.edad[0]||e>c.edad[1]) return 'Se empieza entre los '+c.edad[0]+' y los '+c.edad[1]+' años';
+    if(!discDisp(c).length) return 'En esta época no hay cabida para ti en este oficio';
+    return null; }
+  const discDisp=c=>c.disc.filter(d=>A()>=(mujer()?d.m:d.d));
+  function ingresar(id,d){ const c=CAR[id]; if(Q()||!c) return 'No';
+    registrar(); const q={id,disc:d.id,discN:d.n,nivel:0,anios:0,aniosNivel:0,ind:c.ini(),riesgo:ri(0,6),desde:A(),dec:0,hist:[],logros:[],ban:0,censura:0,exilio:0,malos:0,hitos:{},ciudad:ciudad()};
+    S.carr216=q; S.carrera=S.carrera||{}; S.carrera.ruta=c.ruta; S.carrera.nivel=0; S.carrera.anios=0; S.carrera.desempeno=60; S.carrera.empleador=c.empleador(q);
+    log('Empezaste en <b>'+E(c.nombre.toLowerCase())+'</b> ('+E(d.n.toLowerCase())+') como '+E(c.niv[0].toLowerCase())+' en '+E(S.carrera.empleador)+'. Se activó el panel de tu carrera.','hito'); try{ hito('Empezó en '+c.nombre.toLowerCase()+': '+d.n.toLowerCase()); }catch(x){}
+    return 'Empezaste.'; }
+  function legado(q,motivo){ const c=CAR[q.id], L=(S.legado216||(S.legado216=[])); L.push({car:q.id,carN:c.nombre,disc:q.discN,nivel:c.niv[clamp(q.nivel,0,5)],cumbre:Math.max(q.cumbre||0,q.nivel),desde:q.desde,hasta:A(),logros:q.logros.slice(),motivo}); }
+  function salirSilencio(motivo,mal){ const q=Q(); if(!q) return; q.cumbre=Math.max(q.cumbre||0,q.nivel); legado(q,motivo); const c=CAR[q.id]; S.carr216=null; if(S.carrera&&S.carrera.ruta===c.ruta){ S.carrera.ruta='desempleado'; S.carrera.empleador=null; }
+    log('Terminó tu carrera en '+E(c.nombre.toLowerCase())+' ('+E(motivo)+').',mal?'mal':'bien'); }
+  function hacer(i){ const q=Q(); if(!q) return; const c=CAR[q.id], d=decs(q)[i]; if(!d) return; const p=pago(d[3]); if(S.mov<1||S.efectivo<p) return; S.mov=Math.max(0,S.mov-1); if(p) tomar(p);
+    const m=d[4](q); Object.keys(q.ind).forEach(k=>{ q.ind[k]=clamp(q.ind[k],0,100); }); q.riesgo=clamp(q.riesgo,0,100); q.dec++; log(m+(p?' Costó '+fm(p)+'.':'')); escenaCarrera(); }
+  function anual(){ if(!S||!S.p||S.muerto) return; const q=Q(); if(!q) return; registrar(); const c=CAR[q.id];
+    if(!S.carrera||S.carrera.ruta!==c.ruta){ salirSilencio('cambió de camino',false); return; }
+    q.anios++; q.aniosNivel++;
+    Object.keys(q.ind).forEach(k=>{ q.ind[k]=clamp(q.ind[k]-((c.decae&&c.decae[k])||1)+ri(-2,2),0,100); }); rie(q,-2);
+    if(c.paso) c.paso(q);
+    const des=clamp(Math.round(c.des(q)),0,100); q.ultimoDes=des; q.hist.push({a:A(),des}); if(q.hist.length>12) q.hist.shift();
+    S.carrera.nivel=q.nivel; S.carrera.desempeno=clamp(45+des*.55,45,100);
+    q.malos=des<38?q.malos+1:(des>=50?0:q.malos);
+    if(q.nivel<5&&q.aniosNivel>=c.min[q.nivel]){ const p=clamp((des-42)/75+((q.ind[c.clave]||50)-50)/350,.06,.75);
+      if(chance(p)){ q.nivel++; q.aniosNivel=0; q.malos=0; q.cumbre=Math.max(q.cumbre||0,q.nivel); S.carrera.nivel=q.nivel; if(q.id!=='deportista') S.carrera.empleador=c.empleador(q); const nm=c.niv[q.nivel];
+        prest(q.nivel>=4?5:q.nivel>=3?2:1,'ascendió a '+nm.toLowerCase()); S.p.reputacion=clamp(S.p.reputacion+(q.nivel>=3?2:1),0,100); log('<b>Subiste a '+E(nm.toLowerCase())+'</b> ('+E(S.carrera.empleador||'')+').','bien'); logro(q,'Llegó a '+nm.toLowerCase()); if(q.nivel===5){ try{ hito('Llegó a '+nm.toLowerCase()+' ('+c.nombre.toLowerCase()+')'); }catch(x){} } } }
+    if(q.malos>=2&&q.nivel>0){ q.nivel--; q.malos=0; q.aniosNivel=0; S.carrera.nivel=q.nivel; log('Te bajaron a <b>'+E(c.niv[q.nivel].toLowerCase())+'</b> por tus malos resultados.','mal'); }
+    else if(q.malos>=3&&q.nivel===0){ salirSilencio('no cuajó',true); return; }
+    const x=c.extra(q); if(x&&x.m>0){ S.efectivo+=x.m; }
+    log('Balance del año ('+E(c.niv[q.nivel].toLowerCase())+'): desempeño '+des+'/100, '+c.resumen(q)+(x&&x.m>0?'. Entraron '+fm(x.m)+' por '+x.t:'')+'.',des>=62?'bien':des<42?'mal':'');
+    if(q.ban>0) log('Sigues suspendido: '+q.ban+' año(s) más.','mal');
+    try{ c.eventos(q).sort((a,b)=>b.p-a.p).slice(0,2).forEach(ev=>cola.push(ev)); }catch(e){ console.error(e); } }
+
+  /* ====================== PANELES ====================== */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v>=65?'#79C897':v>=45?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  const barraRiesgo=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v<=30?'#79C897':v<=55?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaCarrera(){ const q=Q(); if(!q) return; registrar(); const c=CAR[q.id], sig=q.nivel<5?c.niv[q.nivel+1]:null;
+    const filas=c.ind.map(k=>'<tr><td>'+E(k[1])+'</td><td>'+barra(q.ind[k[0]])+'</td></tr>').join('');
+    const t='<table class="libro"><tr><td>Estado</td><td>'+E(c.niv[q.nivel])+' · '+E(q.discN)+' · '+q.anios+' año'+(q.anios===1?'':'s')+'</td></tr><tr><td>Dónde</td><td>'+E((S.carrera&&S.carrera.empleador)||'')+'</td></tr>'+filas+'<tr><td>'+E(c.riesgoN)+'</td><td>'+barraRiesgo(q.riesgo)+'</td></tr><tr><td>Siguiente paso</td><td>'+(sig?E(sig.toLowerCase())+': '+Math.max(0,c.min[q.nivel]-q.aniosNivel)+' año(s) mínimo':'cúspide')+'</td></tr>'+(q.logros.length?'<tr><td>Logros</td><td>'+q.logros.slice(-4).map(l=>E(l.t)+' ('+l.a+')').join(' · ')+'</td></tr>':'')+'</table>';
+    const ops=decs(q).map((d,i)=>{ const p=pago(d[3]); return {t:tituloDec(c,d)+(p?' ('+fm(p)+')':''),cat:'legado',cerrar:false,d:d[2],dis:S.mov<1?'Sin movidas':(S.efectivo<p?'No te alcanza':null),run:()=>hacer(i)}; });
+    ops.push({t:q.id==='deportista'?'Retirarte del deporte':'Dejar esta carrera',cat:'riesgo',cerrar:false,d:'Vuelves a la vida civil con lo que acumulaste.',run:()=>{ salirSilencio(q.id==='deportista'?'se retiró':'dejó la carrera',false); cerrarModal(); render(); }});
+    escena({rubro:E(c.seccion),titulo:E(c.niv[q.nivel])+' · '+E(c.titulo.toLowerCase()),ancho:true,cerrable:true,cuerpo:'Año '+(q.anios+1)+' en '+E(q.discN.toLowerCase())+'.<br><span style="color:var(--laton-op)">Desempeño del último balance: '+(q.ultimoDes==null?'aún sin balance':q.ultimoDes+'/100')+'.</span>',html:t,opciones:ops}); }
+  function escenaEntrada(id){ const c=CAR[id], why=puede(id); registrar();
+    const ops=discDisp(c).map(d=>({t:d.n,cat:'empleo',cerrar:false,d:id==='deportista'?'Empiezas como aficionado: la forma, la técnica y la fama dependen de lo que entrenes.':id==='artista'?'Empiezas como aprendiz: el talento y la obra hay que cultivarlos.':'Empiezas como reportero practicante en un medio de la época.',dis:why?why:(S.mov<1?'Sin movidas':null),run:()=>{ S.mov=Math.max(0,S.mov-1); ingresar(id,d); cerrarModal(); render(); }}));
+    const cuerpo={deportista:'Los años buenos del deportista son pocos: la forma se acaba. Escoge tu disciplina; algunas solo existen desde cierta época y las mujeres llegaron a ellas más tarde.',artista:'El arte da fama, a veces plata y casi siempre problemas. Escoge tu oficio y vive de él... o intenta.',periodista:'El periodista cuenta lo que pasa y a veces paga por contarlo. Escoge tu sección y el medio te recibirá como practicante.'}[id];
+    escena({rubro:E(c.seccion),titulo:E(c.nombre),ancho:true,cerrable:true,cuerpo:cuerpo+(why?'<br><span style="color:var(--laton-op)">'+E(why)+'.</span>':''),opciones:ops}); }
+
+  /* ====================== ENGANCHES ====================== */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA216_PASO) return; window.__SA216_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TITULOS=['Hacerte deportista profesional','Dedicarte al arte o a la música','Empezar en el periodismo','Tu carrera deportiva','Tu vida artística','Tu carrera de periodista'];
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const e=Gp.find(x=>x.id==='empleo'); if(!e) return; e.miembros=e.miembros||[];
+    Object.keys(CAR).forEach(k=>{ const c=CAR[k]; [c.entrada,c.titulo].forEach(t=>{ if(!e.miembros.some(m=>m[1]===t)) e.miembros.push([c.seccion,t]); }); });
+    try{ if(Array.isArray(window.SECCIONES_EMPLEO_211)) Object.keys(CAR).forEach(k=>{ if(!window.SECCIONES_EMPLEO_211.includes(CAR[k].seccion)) window.SECCIONES_EMPLEO_211.push(CAR[k].seccion); }); }catch(x){}
+  }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA216_ACC) return; window.__SA216_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); registrar(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&S&&S.p){ const q=Q(); const nombres=Object.keys(CAR).map(k=>'Emplearte: '+CAR[k].nombre);
+        for(let i=L.length-1;i>=0;i--){ const t=L[i]&&L[i].t; if(typeof t!=='string') continue; if(nombres.includes(t)) L.splice(i,1); else if(q&&/^(Pedir el ascenso a|Trabajar duro este año|Negociar salario|Renunciar$)/.test(t)) L.splice(i,1); }
+        if(!nino()) Object.keys(CAR).forEach(k=>{ const c=CAR[k];
+          if(q&&q.id===k&&!L.some(x=>x.t===c.titulo)) L.push({t:c.titulo,cat:'empleo',d:c.niv[q.nivel]+' · '+q.discN+': '+c.ind.map(z=>z[1].toLowerCase()).join(', ')+'.',mov:0,modal:false,run:()=>escenaCarrera()});
+          if(!q&&puede(k)===null&&!L.some(x=>x.t===c.entrada)) L.push({t:c.entrada,cat:'empleo',d:k==='deportista'?'Boxeo, fútbol, ciclismo, tenis y más: pocos años buenos, mucha fama.':k==='artista'?'Pintura, música, literatura, teatro, fotografía o cine.':'Reportero, columnista y, algún día, director de un medio.',mov:1,modal:true,run:()=>escenaEntrada(k)}); }); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v216=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA216_CAT) return; window.__SA216_CAT=true; window.catDe=function(t){ if(TITULOS.includes(t)) return 'empleo'; return old.apply(this,arguments); }; }
+  function init216(){ registrar(); wrapPaso(); wrapAcciones(); wrapCat(); grupo();
+    Object.assign(window,{carrera216:Q,CARRERAS_216:CAR,registrarCarreras216:registrar,puedeCarrera216:puede,ingresarCarrera216:ingresar,salirCarrera216:salirSilencio,anualCarrera216:anual,escenaCarrera216:escenaCarrera,escenaEntradaCarrera216:escenaEntrada,hacerCarrera216:hacer,decisionesCarrera216:decs,discDispCarrera216:discDisp,tituloDecCarrera216:tituloDec,pagoCarrera216:pago,
+      eventosCarrera216:{lesion:evLesion,dopaje:evDopaje,amano:evAmano,oferta:evOferta,cita:evCita,retiro:evRetiro,exito:evExito,critica:evCritica,plagio:evPlagio,censuraArte:evCensuraArte,excesos:evExcesos,encargo:evEncargo,amenaza:evAmenaza,calumnia:evCalumnia,chiva:evChiva,censuraPrensa:evCensuraPrensa,vocero:evVocero,bogotazo:evBogotazo,cierre:evCierre,cano:evCano}}); }
+  init216(); setTimeout(init216,40); setTimeout(init216,220); setTimeout(init216,650); setTimeout(init216,950); setTimeout(init216,1500);
+  window.__SA216={version:V216};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v217 · PARAÍSOS FISCALES Y ESTRUCTURAS EN EL EXTERIOR
+   Hasta aquí había un solo fideicomiso afuera, en tres países. Ahora hay un
+   panel, «Tus estructuras en el exterior», con varias estructuras a la vez:
+   - CUENTAS NUMERADAS (banca privada) y SOCIEDADES OFFSHORE (de papel), en
+     los paraísos de cada época: Liechtenstein (1926), Panamá (1927), Suiza
+     (1934, el secreto bancario), Luxemburgo (1960), Bahamas (1965), Caimán
+     (1966), Islas Vírgenes Británicas (1984), Delaware (1992) y Singapur
+     (1995). Cada una tiene su costo anual y su riesgo de destaparse.
+   - Lo que está sin declarar no paga el impuesto al patrimonio ni la
+     sucesión. Lo declarado (normalizado) sí paga, pero no se destapa.
+   - EL CERCO SE CIERRA: el riesgo sube con la época (el control de cambios
+     de 1967, la lista de la OCDE en 2000, FATCA en 2010, el intercambio
+     automático de información desde 2017), con los gobiernos reformistas y
+     con las filtraciones (SwissLeaks 2015, Panama Papers 2016, Paradise
+     Papers 2017 y Pandora Papers 2021), que te preguntan qué escondías.
+   - LA NORMALIZACIÓN TRIBUTARIA (2015, 2019 y 2022): una ventana para
+     declarar lo escondido pagando una tarifa menor; fuera de ella sale más
+     caro, y si te destapan pagas multa, escándalo y delito de evasión.
+   - Las estructuras pasan a los herederos. Lo declarado paga sucesión.
+   El fideicomiso de siempre sigue donde estaba y aparece en el panel.
+   ========================================================================== */
+(function(){
+  const V217='v217';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const O=()=>{ if(!S.offshore217) S.offshore217={estructuras:[],ahorro:0,seq:1,hechos:{}}; return S.offshore217; };
+  const lista=()=>((typeof S!=='undefined'&&S&&S.offshore217&&S.offshore217.estructuras)||[]);
+  const valor=()=>lista().reduce((a,s)=>a+(s.valor||0),0);
+  const oculto=()=>lista().filter(s=>!s.declarada).reduce((a,s)=>a+(s.valor||0),0);
+
+  const JUR=[
+    {id:'liechtenstein',n:'Liechtenstein',d:1926,costo:.020,riesgo:.016,tipos:['cuenta','sociedad'],ds:'Fundaciones y "anstalts" para fortunas europeas: caro y discreto.'},
+    {id:'panama',n:'Panamá',d:1927,costo:.012,riesgo:.045,tipos:['sociedad','cuenta'],ds:'Al lado, barato y con mala fama: nadie se sorprende de encontrarte ahí.'},
+    {id:'suiza',n:'Suiza',d:1934,costo:.022,riesgo:.018,tipos:['cuenta'],ds:'El secreto bancario manda desde 1934: caro, serio y callado.'},
+    {id:'luxemburgo',n:'Luxemburgo',d:1960,costo:.020,riesgo:.022,tipos:['cuenta','sociedad'],ds:'Fondos y holdings europeos, con buena reputación.'},
+    {id:'bahamas',n:'Bahamas',d:1965,costo:.014,riesgo:.038,tipos:['cuenta','sociedad'],ds:'Sol, bancos privados y poca pregunta.'},
+    {id:'caiman',n:'Islas Caimán',d:1966,costo:.015,riesgo:.034,tipos:['cuenta','sociedad'],ds:'Fondos y bancos sin impuestos directos.'},
+    {id:'bvi',n:'Islas Vírgenes Británicas',d:1984,costo:.011,riesgo:.042,tipos:['sociedad'],ds:'Una sociedad de papel en un día y con poca papelería.'},
+    {id:'delaware',n:'Delaware',d:1992,costo:.016,riesgo:.028,tipos:['sociedad'],ds:'Perfectamente legal, perfectamente opaco, y en inglés.'},
+    {id:'singapur',n:'Singapur',d:1995,costo:.024,riesgo:.016,tipos:['cuenta','sociedad'],ds:'Banca privada de primera y reglas claras.'}];
+  const TIPO={cuenta:{n:'Cuenta numerada',pl:'cuentas numeradas',costo:.6,riesgo:.8,d:'Banca privada: un número en vez de tu nombre.'},sociedad:{n:'Sociedad offshore',pl:'sociedades offshore',costo:1,riesgo:1,d:'Una empresa de papel que figura como dueña de la plata.'}};
+  const jur=id=>JUR.find(x=>x.id===id)||JUR[0];
+  const disp=tipo=>JUR.filter(j=>A()>=j.d&&j.tipos.includes(tipo));
+
+  /* ---------- el cerco: riesgo según la época ---------- */
+  function trans(a){ return a<1967?.7:a<1990?1:a<2001?1.2:a<2010?1.5:a<2014?2:a<2017?2.6:3.2; }
+  function riesgoAnual(s){ if(s.declarada) return 0; const j=jur(s.jur); let r=j.riesgo*trans(A())*(TIPO[s.tipo]||TIPO.sociedad).riesgo;
+    if(j.id==='suiza'&&A()>=2009) r*=1.5; if(A()>=1967&&A()<=1990) r*=1.3;
+    try{ const g=gob().id; if(g==='reformista'||g==='populista') r*=1.8; }catch(e){} return Math.min(.4,r); }
+  const NORM=[[2015,2016,.10],[2019,2020,.13],[2022,2023,.17]];
+  function ventana(){ const a=A(); const v=NORM.find(x=>a>=x[0]&&a<=x[1]); return v?v[2]:null; }
+  function tasaNorm(){ const v=ventana(); if(v!=null) return v; let t=.3; try{ t=Math.min(.5,tarifaRenta()+.12); }catch(e){} return t; }
+
+  /* ---------- abrir, mover y normalizar ---------- */
+  function crear(tipo,j,x){ const o=O(); const fee=Math.max(6,x*.015); if(S.efectivo<x+fee) return null; S.efectivo-=x+fee;
+    const s={id:'o'+(o.seq++),tipo,jur:j.id,valor:x,desde:A(),declarada:false,normalizada:null};
+    o.estructuras.push(s); log('Abriste una <b>'+E(TIPO[tipo].n.toLowerCase())+'</b> en <b>'+E(j.n)+'</b> con '+fm(x)+' (honorarios y trámites: '+fm(fee)+'). Nadie lo ve desde aquí.','hito'); return s; }
+  function meter(s){ const x=Math.max(0,S.efectivo*.3); if(x<=0) return; S.efectivo-=x; s.valor+=x*.995; log('Pasaste '+fm(x)+' a la estructura de '+E(jur(s.jur).n)+'.'); }
+  function repatriar(s,fr){ const x=s.valor*fr, c=s.declarada?.02:.06; s.valor-=x; S.efectivo+=x*(1-c);
+    if(!s.declarada&&chance(.3)){ try{ S.p.escandalos++; moverPrestigio(-4,'la plata que volvió del exterior'); }catch(e){} log('Repatriaste '+fm(x*(1-c))+' y la operación levantó preguntas.','mal'); }
+    else log('Repatriaste '+fm(x*(1-c))+(s.declarada?' (declarados).':' sin ruido.'));
+    if(s.valor<1) quitar(s); }
+  function quitar(s){ const o=O(); o.estructuras=o.estructuras.filter(z=>z!==s); }
+  function normalizar(s,silencioso){ const t=tasaNorm(), c=s.valor*t; s.valor-=c; s.declarada=true; s.normalizada=A();
+    if(!silencioso) log('Normalizaste la estructura de <b>'+E(jur(s.jur).n)+'</b>: pagaste '+fm(c)+' ('+Math.round(t*100)+'%) y quedó declarada. Ya no te la pueden destapar.','bien'); return c; }
+  function tarifaAhorro(){ let w=0,r=0; try{ w=fisco().patrimonio||0; r=tarifaRenta(); }catch(e){} return {w,r}; }
+
+  /* ---------- el año de las estructuras ---------- */
+  function anual(res,m){ if(!ACTIVO()||nino()) return; const L=lista(); if(!L.length) return; const o=O(), ta=tarifaAhorro(); let ahorro=0;
+    L.slice().forEach(s=>{ const j=jur(s.jur), tp=TIPO[s.tipo]||TIPO.sociedad;
+      const r=clamp(((m&&m.ciclo)||0)*.5+rnd(-.04,.08)+(s.tipo==='sociedad'?.01:0),-.2,.25); const antes=s.valor; s.valor*=1+r; const costo=s.valor*j.costo*tp.costo; s.valor-=costo; const neto=s.valor-antes;
+      if(res) res.push([tp.n+' en '+j.n,neto,neto>=0?'pos':'neg']);
+      if(!s.declarada){ ahorro+=s.valor*ta.w+Math.max(0,r*s.valor)*ta.r; }
+      else { const imp=Math.max(0,r*s.valor)*ta.r; if(imp>0){ s.valor-=imp; } }
+      if(!s.declarada&&chance(riesgoAnual(s))) destapar(s,'solo'); });
+    o.ahorro=(o.ahorro||0)+ahorro;
+    if(lista().length) hitos(); }
+  function destapar(s,como){ const j=jur(s.jur), mu=s.valor*rnd(.2,.45); s.valor-=mu; s.declarada=true; s.destapada=A();
+    try{ S.p.escandalos++; moverPrestigio(s.tipo==='cuenta'?-6:-9,'la estructura en '+j.n+' salió a la luz'); }catch(e){}
+    try{ if(typeof registrarDelito==='function') registrarDelito('evasión fiscal',3,'estructura en '+j.n); }catch(e){}
+    log('Se destapó la '+E(TIPO[s.tipo].n.toLowerCase())+' de <b>'+E(j.n)+'</b>'+(como==='filtracion'?' en una filtración internacional':'')+'. Multa de '+fm(mu)+', el nombre en los periódicos y, desde hoy, queda declarada.','mal'); }
+  function hitos(){ const o=O(), a=A(); const H={2000:'La OCDE publica su lista de paraísos fiscales: el mundo empieza a mirar.',2010:'Estados Unidos aprueba FATCA: los bancos del mundo tendrán que reportar cuentas.',2017:'Empieza el intercambio automático de información entre países: lo escondido se vuelve difícil.'};
+    if(H[a]&&!o.hechos[a]&&oculto()>0){ o.hechos[a]=1; log('<b>'+E(H[a])+'</b> Tus estructuras sin declarar corren más riesgo.','mal'); }
+    const F={2015:['SwissLeaks (las cuentas del HSBC en Suiza)',['suiza']],2016:['los Panama Papers',['panama','bvi','bahamas']],2017:['los Paradise Papers',['caiman','bahamas','bvi','luxemburgo']],2021:['los Pandora Papers',null]};
+    const f=F[a]; if(f&&!o.hechos['f'+a]){ const afect=lista().filter(s=>!s.declarada&&(!f[1]||f[1].includes(s.jur))); if(afect.length){ o.hechos['f'+a]=1; try{ cola.push(evFiltracion(f[0],afect)); }catch(e){ console.error(e); } } }
+    const w=NORM.find(x=>x[0]===a); if(w&&!o.hechos['n'+a]&&oculto()>0){ o.hechos['n'+a]=1; try{ cola.push(evNormalizacion(w[2])); }catch(e){ console.error(e); } } }
+  function evFiltracion(nombre,afect){ const costo=afect.reduce((x,s)=>x+s.valor*tasaNorm(),0);
+    return {p:9,c:()=>afect.some(s=>lista().includes(s)&&!s.declarada),t:()=>'<b>Una filtración internacional: '+E(nombre)+'.</b> Aparece el apellido '+E(S.p.apellido)+' entre los dueños de '+afect.length+' estructura(s) en el exterior. La DIAN ya pidió información y los periodistas llaman a tu casa.',
+      o:[{t:'Normalizar ahora y pagar ('+fm(costo)+')',f:()=>{ let c=0; afect.forEach(s=>{ if(lista().includes(s)&&!s.declarada) c+=normalizar(s,true); }); try{ moverPrestigio(-2,'la plata del exterior salió a la luz'); }catch(e){} return 'Pagaste '+fm(c)+' y declaraste todo: te salvaste de la cárcel, no de las críticas.'; }},
+         {t:'«Todo era legal»',f:()=>{ if(chance(.5)){ try{ moverPrestigio(-2,'una filtración'); }catch(e){} return 'Las estructuras eran legales... pero feas. La prensa se aburrió.'; } afect.forEach(s=>{ if(lista().includes(s)&&!s.declarada) destapar(s,'filtracion'); }); return 'La DIAN no te creyó: abrieron una investigación y te cobraron multas.'; }},
+         {t:'Repatriar todo en silencio',f:()=>{ let x=0; afect.forEach(s=>{ if(lista().includes(s)){ x+=s.valor*.9; S.efectivo+=s.valor*.9; quitar(s); } }); try{ S.p.escandalos++; moverPrestigio(-6,'una repatriación forzada'); }catch(e){} return 'Trajiste todo de vuelta ('+fm(x)+'): pagaste el costo y la sospecha quedó.'; }}]}; }
+  function evNormalizacion(t){ return {p:7,c:()=>oculto()>0,t:()=>'<b>La DIAN abre una normalización tributaria.</b> Quien declare ahora los bienes que tiene escondidos en el exterior paga solo el '+Math.round(t*100)+'% de su valor y queda en paz. Es una ventana corta.',
+      o:[{t:'Normalizar todo ('+fm(lista().filter(s=>!s.declarada).reduce((x,s)=>x+s.valor*t,0))+')',f:()=>{ let c=0; lista().filter(s=>!s.declarada).forEach(s=>{ c+=normalizar(s,true); }); return 'Declaraste todo pagando '+fm(c)+': ya nadie puede destaparte.'; }},
+         {t:'Dejarlo escondido',f:()=>'Dejaste la plata donde estaba: la ventana se cerrará y el cerco también.'}]}; }
+
+  /* ---------- paneles ---------- */
+  function filas(){ return lista().map(s=>{ const j=jur(s.jur); return '<tr><td>'+E(TIPO[s.tipo].n)+' · '+E(j.n)+'</td><td>'+fm(s.valor)+' · '+(s.declarada?'declarada':'<span style="color:#D06A60">sin declarar · riesgo '+Math.round(riesgoAnual(s)*100)+'% al año</span>')+'</td></tr>'; }).join(''); }
+  function filasUI(){ return lista().filter(s=>!s.declarada).map(s=>'<tr><td>'+E(TIPO[s.tipo].n)+' en '+E(jur(s.jur).n)+'</td><td>'+fm(s.valor)+'</td></tr>').join(''); }
+  function escenaPanel(){ const L=lista(), fid=S.fideicomiso, o=O(); const sinMov=S.mov<1?'Sin movidas':null;
+    let t='<table class="libro">'+(L.length?filas():'<tr><td>Estructuras</td><td>Ninguna todavía</td></tr>')+(fid?'<tr><td>Fideicomiso en '+E((jur(fid.jur)||{}).n||'')+'</td><td>'+fm(fid.valor)+' (aparte)</td></tr>':'')
+      +'<tr class="suma"><td>Total fuera del país</td><td>'+fm(valor()+((fid&&fid.valor)||0))+'</td></tr><tr><td>Impuestos que no pagaste (acumulado)</td><td>'+fm(o.ahorro||0)+'</td></tr><tr><td>Control de las autoridades</td><td>'+E(A()<1967?'casi nulo':A()<1990?'bajo (hay control de cambios)':A()<2001?'medio':A()<2010?'alto':A()<2017?'muy alto':'intercambio automático')+'</td></tr>'+(ventana()!=null?'<tr><td>Normalización tributaria</td><td><b>Abierta: '+Math.round(ventana()*100)+'% del valor</b></td></tr>':'')+'</table>';
+    const ops=[];
+    ['cuenta','sociedad'].forEach(tp=>{ const J=disp(tp); ops.push({t:'Abrir '+(tp==='cuenta'?'una cuenta numerada':'una sociedad offshore'),cat:'capital',cerrar:false,d:TIPO[tp].d+(J.length?' Disponibles: '+J.map(j=>j.n).join(', ')+'.':''),dis:!J.length?'Todavía no hay dónde':(S.efectivo<150?'Se necesitan al menos '+fm(150):sinMov),run:()=>escenaAbrir(tp)}); });
+    L.forEach(s=>{ const j=jur(s.jur), n=TIPO[s.tipo].n+' de '+j.n;
+      ops.push({t:'Meter más plata en la '+(s.tipo==='cuenta'?'cuenta':'sociedad')+' de '+j.n,cat:'capital',cerrar:false,d:'Pasarías '+fm(S.efectivo*.3)+'.',dis:S.efectivo<60?'No tienes qué mover':sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); meter(s); escenaPanel(); }});
+      ops.push({t:'Repatriar la mitad de '+n,cat:'capital',cerrar:false,d:'Vuelve a tu caja con un costo del '+(s.declarada?2:6)+'%.'+(s.declarada?'':' Sin declarar, levanta preguntas.'),dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); repatriar(s,.5); escenaPanel(); }});
+      if(!s.declarada) ops.push({t:'Normalizar '+n+' ('+fm(s.valor*tasaNorm())+')',cat:'legado',cerrar:false,d:(ventana()!=null?'Estás en la ventana de normalización: ':'Fuera de ventana sale más caro: ')+Math.round(tasaNorm()*100)+'% del valor. Después ya no corres riesgo, pero pagas patrimonio y sucesión.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); normalizar(s); escenaPanel(); }}); });
+    if(fid) ops.push({t:'Administrar el fideicomiso',cat:'capital',cerrar:false,d:'El fideicomiso de siempre, aparte de estas estructuras.',run:()=>escenaFideicomiso()});
+    escena({rubro:'Estructuras en el exterior',titulo:'Tus estructuras en el exterior',ancho:true,cerrable:true,cuerpo:'Lo que está en el exterior sin declarar no paga impuesto al patrimonio ni sucesión, pero cuesta mantenerlo y, si se destapa, el apellido lo paga.'+(A()>=1967&&A()<=1990?' Ojo: sacar divisas sin permiso está prohibido por el control de cambios.':''),html:t,opciones:ops}); }
+  function escenaAbrir(tp){ const J=disp(tp);
+    const ops=J.map(j=>({t:j.n,cat:'capital',cerrar:false,d:j.ds+' Cuesta '+(j.costo*TIPO[tp].costo*100).toFixed(1)+'% al año; riesgo base '+(j.riesgo*TIPO[tp].riesgo*100).toFixed(1)+'% (sube con la época).',run:()=>escenaMonto(tp,j)}));
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
+    escena({rubro:'Estructuras en el exterior',titulo:tp==='cuenta'?'Abrir una cuenta numerada':'Constituir una sociedad offshore',ancho:true,cerrable:true,cuerpo:'Escoge el país. En esta época hay '+J.length+' disponible'+(J.length===1?'':'s')+'.',opciones:ops}); }
+  function escenaMonto(tp,j){ const base=S.efectivo;
+    const ops=[[.25,'un cuarto'],[.5,'la mitad'],[.75,'tres cuartos']].map(([f,n])=>{ const x=base*f; return {t:'Mover '+n+' de tu caja ('+fm(x)+')',cat:'capital',cerrar:false,d:'Honorarios y trámites: '+fm(Math.max(6,x*.015))+'.',dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); crear(tp,j,x); escenaPanel(); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaAbrir(tp)});
+    escena({rubro:'Estructuras en el exterior',titulo:TIPO[tp].n+' en '+j.n,ancho:true,cerrable:true,cuerpo:j.ds+' Tienes '+fm(base)+' en tu caja.',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapFid(){ const old=window.correrFideicomiso; if(typeof old!=='function'||old.__v217) return; const f=function(res,m){ const r=old.apply(this,arguments); try{ anual(res,m); }catch(e){ console.error(e); } return r; }; f.__v217=true; window.correrFideicomiso=f; }
+  const TIT='Tus estructuras en el exterior';
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Crear',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA217_ACC) return; window.__SA217_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&A()>=1926&&(S.p.edad||0)>=18&&!L.some(x=>x&&x.t===TIT)&&(S.efectivo>=150||lista().length||S.fideicomiso)){ const n=lista().length;
+        L.push({t:TIT,cat:'capital',d:n?'Tienes '+n+' estructura(s) con '+fm(valor())+'. Mover plata, normalizar o abrir otra.':'Cuentas numeradas y sociedades offshore en los paraísos de tu época: no pagan patrimonio ni sucesión mientras no se destapen.',mov:1,modal:true,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v217=true; }
+  function legado(tarifa){ const L=lista(); if(!L.length) return null; const c=JSON.parse(JSON.stringify(S.offshore217)); c.estructuras.forEach(s=>{ if(s.declarada) s.valor*=(1-(tarifa||0)); }); return c; }
+  function init217(){ wrapFid(); wrapAcciones(); try{ grupo(); }catch(e){}
+    Object.assign(window,{valorOffshore217:valor,valorOffshoreOculto217:oculto,filasOffshore217:filasUI,legadoOffshore217:legado,estructurasOffshore217:lista,escenaOffshore217:escenaPanel,abrirOffshore217:crear,normalizarOffshore217:normalizar,repatriarOffshore217:repatriar,meterOffshore217:meter,destaparOffshore217:destapar,anualOffshore217:anual,riesgoOffshore217:riesgoAnual,transOffshore217:trans,tasaNormOffshore217:tasaNorm,ventanaOffshore217:ventana,JURISDICCIONES_217:JUR,TIPOS_OFFSHORE_217:TIPO,disponiblesOffshore217:disp,eventosOffshore217:{filtracion:evFiltracion,normalizacion:evNormalizacion},hitosOffshore217:hitos}); }
+  init217(); setTimeout(init217,40); setTimeout(init217,220); setTimeout(init217,650); setTimeout(init217,950); setTimeout(init217,1500);
+  window.__SA217={version:V217};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v218 · PREMIOS Y RECONOCIMIENTOS DE LA DINASTÍA
+   Un registro de lo que la casa recibe, y los sucesos que lo traen, cada uno
+   desde su época:
+   - PREMIOS NOBEL (desde 1901): Literatura (para el escritor de la casa que
+     llega a la cima de las letras), Paz (altos cargos políticos y
+     diplomáticos), y Medicina, Física, Química o Economía (desde 1969) para
+     la cima de la academia. Son rarísimos y valen mucho: el diploma, el
+     dinero y un lugar en la historia.
+   - REINADOS: la hija (o tú, si eres mujer) entre los 17 y los 26 años
+     puede ser reina de su ciudad (el Carnaval de Barranquilla, la Feria de
+     las Flores, la Feria de Cali...), del Reinado Nacional de la Belleza
+     (desde 1934) y de Miss Universo (desde 1952), con campaña de lujo o sin
+     ella.
+   - CONDECORACIONES: la Orden de Boyacá (1819), la Cruz de Boyacá (1919),
+     la Orden de San Carlos (1948) y las extranjeras (la Legión de Honor, la
+     Orden de Isabel la Católica...), para quien tiene nombre y servicios.
+   - PREMIOS DEL OFICIO: el deportista del año, los premios nacionales de
+     artes, letras y música, el Grammy Latino (2000), los de periodismo
+     (Cabot 1939, Simón Bolívar 1975) y el empresario del año, según tu
+     carrera (v216) y tus compañías.
+   - DOCTORADOS HONORIS CAUSA de las universidades de la época.
+   Todo se guarda en el «Salón de honor de la casa», pasa a los herederos y
+   suma prestigio. Cada premio tiene decisiones (viajar o donar el dinero,
+   campaña de lujo o sencilla, aceptar o rechazar por principios).
+   ========================================================================== */
+(function(){
+  const V218='v218';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const P=()=>{ if(!S.premios218) S.premios218={lista:[],hechos:{}}; return S.premios218; };
+  const lista=()=>((typeof S!=='undefined'&&S&&S.premios218&&S.premios218.lista)||[]);
+  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
+  const pres=()=>{ try{ return prestigio(); }catch(e){ return 40; } };
+  const ciudad=()=>(S.hogar&&S.hogar.ciudad)||'Bogotá';
+  const C216=()=>{ try{ return typeof window.carrera216==='function'?window.carrera216():null; }catch(e){ return null; } };
+  const yo=()=>S.p.nombre||'Tú';
+
+  /* ---------- el registro ---------- */
+  function otorgar(r){ const o=P(); const x=Object.assign({anio:A()},r); o.lista.push(x);
+    try{ if(x.pres) moverPrestigio(x.pres,x.motivo||('recibió '+x.n)); }catch(e){}
+    if(x.propio){ try{ S.p.reputacion=clamp(S.p.reputacion+(x.rep||0),0,100); S.p.redes=clamp((S.p.redes||0)+(x.redes||0),0,100); }catch(e){} }
+    if(x.dinero) S.efectivo+=x.dinero;
+    if(x.hito){ try{ hito(x.n+(x.quienN&&!x.propio?' ('+x.quienN+')':'')); }catch(e){} }
+    log('<b>'+E(x.n)+'</b>'+(x.quienN&&!x.propio?' para '+E(x.quienN):'')+'. '+(x.nota||''),'hito'); return x; }
+
+  /* ---------- Nobel ---------- */
+  const NOBEL=[['Literatura','de Literatura',1901],['Paz','de la Paz',1901],['Medicina','de Medicina',1901],['Física','de Física',1901],['Química','de Química',1901],['Economía','de Economía',1969]];
+  function polAlto(){ try{ const q=S.carrera&&S.carrera.politica; if(!q) return false; const cg=(typeof cargoPolitico==='function'&&cargoPolitico(q.cargo))||null; const n=(cg&&cg.n)||String(q.cargo||''); return !!((q.activo&&/Senador|Presidente|Gobernador/i.test(n))||(q.mandatos||0)>=3); }catch(e){ return false; } }
+  function dipAlto(){ try{ const d=S.carrera&&S.carrera.diplomacia; return !!(d&&d.activo&&d.nivel>=5); }catch(e){ return false; } }
+  function acadAlto(){ try{ return !!(S.carrera&&(S.carrera.ruta==='academico'||S.carrera.ruta==='docente')&&S.carrera.nivel>=4&&S.p.educacion>=4); }catch(e){ return false; } }
+  function nobelPosibles(){ const L=[], a=A(), q=C216(), e=S.p.edad||0; if(e<40) return L;
+    if(q&&q.id==='artista'&&q.disc==='literatura'&&q.nivel>=4&&q.ind.fama>=70&&q.ind.critica>=60&&e>=50) L.push([NOBEL[0],q.nivel>=5?.05:.025]);
+    if((polAlto()||dipAlto())&&pres()>=70&&a>=1901) L.push([NOBEL[1],.015]);
+    if(acadAlto()&&pres()>=55){ const C=NOBEL.slice(2).filter(n=>a>=n[2]); if(C.length) L.push([C[ri(0,C.length-1)],.02]); }
+    return L.filter(x=>!P().hechos['nobel:'+x[0][0]]&&a>=x[0][2]); }
+  function evNobel(n){ const premio='Premio Nobel '+n[1], dinero=pago(70), q=C216();
+    return {p:10,c:()=>ACTIVO(),t:()=>'<b>Suena el teléfono desde Estocolmo.</b> La Academia Sueca te concede el <b>'+E(premio)+'</b>. Es el reconocimiento más alto del mundo y toda la casa lo celebra.',
+      o:[{t:'Viajar a Estocolmo a recibirlo ('+fm(dinero)+' en metálico)',f:()=>{ P().hechos['nobel:'+n[0]]=1; otorgar({id:'nobel:'+n[0],n:premio,cat:'nobel',quienN:yo(),propio:true,pres:14,rep:10,redes:12,dinero,hito:true,nota:'Recibiste el diploma, la medalla y '+fm(dinero)+'.'}); if(q&&q.logros) q.logros.push({a:A(),t:premio}); return 'Recibiste el '+premio+' en Estocolmo: tu nombre entra en la historia.'; }},
+         {t:'Donar el dinero a una obra social',f:()=>{ P().hechos['nobel:'+n[0]]=1; otorgar({id:'nobel:'+n[0],n:premio,cat:'nobel',quienN:yo(),propio:true,pres:17,rep:12,redes:12,hito:true,nota:'Donaste el dinero a una obra social y el país se emocionó.'}); return 'Donaste el premio en metálico: el gesto pesó casi tanto como la medalla.'; }}]}; }
+
+  /* ---------- reinados ---------- */
+  function reinables(){ const L=[]; if(A()<1920) return L; if(S.p.sexo==='m'&&S.p.edad>=17&&S.p.edad<=26) L.push({p:S.p,nombre:yo(),k:'yo',propia:true,carisma:(S.p.atr&&S.p.atr.carisma)||5});
+    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{ if(h&&h.sexo==='m'&&h.edad>=17&&h.edad<=25) L.push({p:h,nombre:h.nombre,k:h.fid||h.nombre,propia:false,carisma:(h.atr&&h.atr.carisma)||5}); });
+    return L.filter(c=>!P().hechos['rei:'+c.k]); }
+  function reinadoLocal(){ const c=ciudad(), a=A(); if(c==='Barranquilla'&&a>=1918) return 'Reina del Carnaval de Barranquilla'; if(c==='Medellín'&&a>=1957) return 'Reina de la Feria de las Flores'; if(c==='Cali'&&a>=1957) return 'Reina de la Feria de Cali'; return a>=1920?'Reina de las fiestas de '+c:null; }
+  function tirada(c,lujo){ const bel=ri(35,85)+(c.carisma-5)*4; return bel+(lujo?15:0)+pres()/8+ri(-18,18); }
+  function evReinado(c){ const loc=reinadoLocal(), nac=A()>=1934, costo=pago(25); const quien=c.propia?'tú':c.nombre;
+    return {p:6,c:()=>ACTIVO()&&!P().hechos['rei:'+c.k],t:()=>'<b>Invitan a '+(c.propia?'participar':E(c.nombre)+' a participar')+' en el reinado'+(loc?' ('+E(loc.toLowerCase())+')':'')+'.</b> La belleza, el porte y el apellido pesan en el jurado. '+(c.propia?'Tu':'Su')+' familia está dividida entre el orgullo y la prudencia.',
+      o:[{t:'Inscribir'+(c.propia?'te':'la')+' sin gastos extra',f:()=>correr(c,false)},{t:'Financiar una campaña de lujo ('+fm(costo)+')',f:()=>{ if(S.efectivo<costo) return 'No te alcanza para la campaña.'; S.efectivo-=costo; return correr(c,true); }},{t:'No dejar'+(c.propia?'te':'la')+' participar',f:()=>{ P().hechos['rei:'+c.k]=1; return 'Decidiste que no: la tradición de la casa es otra.'; }}]}; }
+  function correr(c,lujo){ P().hechos['rei:'+c.k]=1; const loc=reinadoLocal(); let nivel=0, txt=[];
+    const r1=tirada(c,lujo); if(loc){ if(r1>=105){ nivel=1; txt.push('fue <b>'+E(loc)+'</b>'); } else if(r1>=92) txt.push('fue virreina del reinado local'); else txt.push('no pasó del reinado local'); } else { nivel=r1>=92?1:0; txt.push(nivel?'fue <b>Reina de la ciudad</b>':'no pasó del reinado de la ciudad'); }
+    if(nivel>=1&&A()>=1934){ const r2=tirada(c,lujo)-6; if(r2>=105){ nivel=2; txt.push('ganó el <b>Reinado Nacional de la Belleza</b>'); } else if(r2>=92) { nivel=1.5; txt.push('quedó virreina nacional'); } else { txt.push('no ganó el nacional'); } }
+    if(nivel>=2&&A()>=1952){ if(chance(.12)){ nivel=3; txt.push('ganó <b>Miss Universo</b>'); } else txt.push('compitió en Miss Universo y quedó entre las finalistas'); }
+    const n=nivel>=3?'Miss Universo':nivel>=2?'Reina Nacional de la Belleza':nivel>=1?(loc||'Reina de la ciudad'):null;
+    if(n){ otorgar({id:'rei:'+c.k+':'+A(),n:n,cat:'reinado',quienN:c.nombre,rel:c.propia?'tú':'hija',propio:c.propia,pres:nivel>=3?9:nivel>=2?5:2,rep:nivel>=2?4:2,redes:nivel>=2?6:3,hito:nivel>=2,nota:(c.propia?'Tú':E(c.nombre))+' '+txt.join(', ')+'.'}); return (c.propia?'Tú':c.nombre)+' '+txt.join(', ')+'.'; }
+    try{ S.p.felicidad=clamp(S.p.felicidad+(c.propia?-2:0),0,100); }catch(e){} return (c.propia?'Tú':c.nombre)+' '+txt.join(', ')+': quedó la experiencia y las fotos.'; }
+
+  /* ---------- condecoraciones y honoris causa ---------- */
+  const ORDENES=[['la Orden de Boyacá',1819,'La más alta distinción del Estado, creada por el Libertador tras la batalla.',6],['la Cruz de Boyacá',1919,'La condecoración suprema de la República por servicios excepcionales.',6],['la Orden de San Carlos',1948,'La Cancillería reconoce los servicios a la nación y a sus relaciones exteriores.',4],
+    ['la Legión de Honor de Francia',1802,'El gobierno francés te condecora por tu amistad con Francia.',4],['la Orden de Isabel la Católica',1815,'España reconoce tu aporte a los lazos entre los dos países.',3],['la Orden del Imperio Británico',1917,'Londres te condecora por tus servicios.',3],['la Orden al Mérito de Alemania',1951,'Alemania reconoce tu trabajo con sus empresas.',3]];
+  const UNIVS=[['la Universidad Nacional',1867],['la Universidad de Antioquia',1803],['la Universidad del Rosario',1653],['la Universidad Javeriana',1930],['la Universidad de los Andes',1948],['la Universidad del Valle',1945],['EAFIT',1960]];
+  function evOrden(o){ return {p:7,c:()=>ACTIVO(),t:()=>'<b>Te ofrecen '+E(o[0])+'.</b> '+E(o[2])+' La ceremonia será con discursos y fotos.',
+      o:[{t:'Aceptarla',f:()=>{ P().hechos['orden:'+o[0]]=1; otorgar({id:'orden:'+o[0],n:'Condecoración: '+o[0].replace(/^la /,'La ').replace(/^el /,'El '),cat:'orden',quienN:yo(),propio:true,pres:o[3],rep:3,redes:4,hito:o[3]>=6,nota:'Te la impusieron en una ceremonia solemne.'}); return 'Recibiste '+o[0]+': la casa ganó lustre.'; }},
+         {t:'Rechazarla por principios',f:()=>{ P().hechos['orden:'+o[0]]=1; try{ S.p.reputacion=clamp(S.p.reputacion+3,0,100); }catch(e){} return 'La rechazaste: algunos te admiraron, otros no entendieron.'; }}]}; }
+  function evHonoris(u){ return {p:6,c:()=>ACTIVO(),t:()=>'<b>'+E(u[0].replace(/^la /,'La '))+' quiere darte el doctorado Honoris Causa.</b> Reconocen tu obra y tu aporte a la educación. Hace falta un discurso.',
+      o:[{t:'Aceptarlo y dar el discurso',f:()=>{ P().hechos['hon:'+u[0]]=1; otorgar({id:'hon:'+u[0],n:'Doctor Honoris Causa de '+u[0],cat:'honoris',quienN:yo(),propio:true,pres:3,rep:3,redes:3,nota:'Te lo entregaron en un acto con toga y birrete.'}); return 'Ya eres doctor honoris causa.'; }},{t:'Declinar con modestia',f:()=>{ P().hechos['hon:'+u[0]]=1; return 'Declinaste el título.'; }}]}; }
+
+  /* ---------- premios del oficio y empresarial ---------- */
+  const OFICIO={
+    deportista:[['Deportista del Año',1950,3,4],['Premio Nacional del Deporte',1960,5,5]],
+    pintura:[['Premio del Salón Nacional de Artistas',1940,3,4],['Premio Nacional de Artes Plásticas',1970,5,5]],
+    musica:[['Premio Nacional de Música',1960,3,4],['Grammy Latino',2000,5,5]],
+    literatura:[['Premio Nacional de Literatura',1950,3,4],['Premio Rómulo Gallegos',1967,5,5]],
+    teatro:[['Premio Nacional de Teatro',1950,3,4]],fotografia:[['Premio Nacional de Fotografía',1960,3,4]],cine:[['Premio India Catalina',1985,3,4],['Premio Nacional de Cine',1960,4,4]],
+    periodista:[['Premio Maria Moors Cabot',1939,4,5],['Premio Simón Bolívar de Periodismo',1975,3,4],['Premio Pulitzer',1917,5,8]]};
+  function oficioPosibles(){ const q=C216(), L=[]; if(!q||(S.p.edad||0)<18) return L; const tabla=q.id==='deportista'?OFICIO.deportista:q.id==='artista'?OFICIO[q.disc]:OFICIO.periodista; (tabla||[]).forEach(p=>{ if(A()>=p[1]&&q.nivel>=p[2]&&!P().hechos['of:'+p[0]]){ let ok=true; if(p[0]==='Premio Pulitzer') ok=q.ind.credibilidad>=85; L.push([p,ok?clamp(.05+(q.nivel-p[2])*.08,.05,.3):0]); } }); return L; }
+  function evOficio(p){ const q=C216();
+    return {p:7,c:()=>ACTIVO()&&!!C216(),t:()=>'<b>Te otorgan el '+E(p[0].replace(/^Premio /,'premio ').replace(/^Deportista/,'galardón de Deportista'))+'.</b> '+(q?'Es el reconocimiento de tu oficio a tu carrera.':'')+' Hay una ceremonia y una entrevista.',
+      o:[{t:'Recibirlo y dar el discurso',f:()=>{ P().hechos['of:'+p[0]]=1; otorgar({id:'of:'+p[0],n:p[0],cat:'oficio',quienN:yo(),propio:true,pres:p[3],rep:3,redes:5,hito:p[3]>=5,nota:'Quedó en tu hoja de vida y en la de la casa.'}); try{ if(q){ q.ind.fama=clamp((q.ind.fama||0)+8,0,100); if(q.logros) q.logros.push({a:A(),t:p[0]}); } }catch(e){} return 'Recibiste el '+p[0]+'.'; }},
+         {t:'Agradecerlo sin ceremonia',f:()=>{ P().hechos['of:'+p[0]]=1; otorgar({id:'of:'+p[0],n:p[0],cat:'oficio',quienN:yo(),propio:true,pres:Math.max(1,p[3]-2),rep:2,redes:2,nota:'Lo recibiste con discreción.'}); return 'Recibiste el premio sin ruido.'; }}]}; }
+  function evEmpresario(e){ const n=A()>=1990?'Empresario del Año':'Reconocimiento al mérito empresarial de la ANDI';
+    return {p:6,c:()=>ACTIVO()&&companias().includes(e),t:()=>'<b>Te eligen "'+E(n)+'" por <b>'+E(e.nombre)+'</b>.</b> Los gremios reconocen su crecimiento, sus empleos y su reputación.',
+      o:[{t:'Recibirlo en la cena de gala',f:()=>{ P().hechos['emp:'+e.nombre+':'+A()]=1; otorgar({id:'emp:'+e.nombre+':'+A(),n:n+' ('+e.nombre+')',cat:'empresa',quienN:yo(),propio:true,pres:4,rep:3,redes:5,nota:'La compañía ganó marca.'}); try{ e.marca=clamp((e.marca||50)+4,0,100); }catch(x){} return 'Recibiste el premio: '+e.nombre+' ganó marca.'; }},{t:'Dárselo al equipo de la compañía',f:()=>{ P().hechos['emp:'+e.nombre+':'+A()]=1; otorgar({id:'emp:'+e.nombre+':'+A(),n:n+' ('+e.nombre+')',cat:'empresa',quienN:yo(),propio:true,pres:5,rep:4,redes:4,nota:'Lo compartiste con tus empleados.'}); try{ e.moral=clamp((e.moral||50)+6,0,100); }catch(x){} return 'Se lo diste al equipo: la moral subió.'; }}]}; }
+
+  /* ---------- el año ---------- */
+  function candidatos(){ const L=[], a=A(); if(!ACTIVO()||nino()) return L;
+    nobelPosibles().forEach(x=>{ if(chance(x[1])) L.push({w:10,ev:evNobel(x[0])}); });
+    if(a>=1920&&chance(.4)){ const R=reinables(); if(R.length) L.push({w:6,ev:evReinado(R[ri(0,R.length-1)])}); }
+    if((S.p.edad||0)>=30){ const O=ORDENES.filter(o=>a>=o[1]&&!P().hechos['orden:'+o[0]]); const pp=clamp((pres()-50)/450,0,.07); if(O.length&&pp>0&&chance(pp)) L.push({w:7,ev:evOrden(O[ri(0,O.length-1)])});
+      const U=UNIVS.filter(u=>a>=u[1]&&!P().hechos['hon:'+u[0]]); if(U.length&&pres()>=55&&chance(.03+(pres()-55)/900)) L.push({w:6,ev:evHonoris(U[ri(0,U.length-1)])}); }
+    oficioPosibles().forEach(x=>{ if(x[1]>0&&chance(x[1])) L.push({w:7,ev:evOficio(x[0])}); });
+    if(a>=1944&&(S.p.edad||0)>=25){ const g=(typeof companias==='function'?companias():[]).filter(e=>(e.marca||0)>=55&&(e.moral||0)>=45&&!e.quiebra&&!P().hechos['emp:'+e.nombre+':'+a]); if(g.length&&chance(.05)) L.push({w:6,ev:evEmpresario(g.sort((x,y)=>(y.marca||0)-(x.marca||0))[0])}); }
+    return L; }
+  function anual(){ if(!ACTIVO()) return; let L=[]; try{ L=candidatos(); }catch(e){ console.error(e); } L.sort((x,y)=>y.w-x.w).slice(0,2).forEach(c=>{ try{ cola.push(c.ev); }catch(e){} }); }
+
+  /* ---------- el salón de honor ---------- */
+  const CATS=[['nobel','Premios Nobel'],['reinado','Reinados'],['orden','Condecoraciones'],['honoris','Doctorados honoris causa'],['oficio','Premios del oficio'],['empresa','Premios empresariales']];
+  function escenaSalon(){ const L=lista(); let t='<table class="libro">';
+    if(!L.length) t+='<tr><td>Premios</td><td>Todavía ninguno</td></tr>';
+    CATS.forEach(c=>{ const x=L.filter(r=>r.cat===c[0]); if(!x.length) return; t+='<tr><td><b>'+E(c[1])+'</b></td><td>'+x.length+'</td></tr>'+x.map(r=>'<tr><td>'+E(r.n)+'</td><td>'+(r.propio?'tú':E(r.quienN||''))+(r.rel&&!r.propio?' ('+E(r.rel)+')':'')+' · '+r.anio+'</td></tr>').join(''); });
+    const suma=L.reduce((a,r)=>a+(r.pres||0),0); t+='<tr class="suma"><td>Peso en prestigio de la casa</td><td>+'+Math.round(suma)+'</td></tr></table>';
+    const pist=[]; if(!L.some(r=>r.cat==='nobel')) pist.push('Un Nobel solo le llega a quien toca la cima de las letras, de la academia o de la política y la diplomacia.');
+    pist.push('Los reinados llaman a las hijas (y a ti, si eres mujer) entre los 17 y los 26 años; las condecoraciones, a quien tiene nombre y servicios; los premios del oficio, a quien llega alto en el deporte, las artes o el periodismo.');
+    escena({rubro:'Legado',titulo:'Salón de honor de la casa',ancho:true,cerrable:true,cuerpo:'Los premios y reconocimientos de la dinastía: de quien los recibió y del año. Pasan a los herederos.'+'<br><span style="color:var(--laton-op)">'+E(pist.join(' '))+'</span>',html:t,opciones:[{t:'Cerrar el salón',cat:'legado',run:()=>{}}]}); }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA218_PASO) return; window.__SA218_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='Salón de honor de la casa';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA218_ACC) return; window.__SA218_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&A()>=1800&&!L.some(x=>x&&x.t===TIT)){ const n=lista().length; L.push({t:TIT,cat:'legado',d:n?'Tienes '+n+' reconocimiento'+(n===1?'':'s')+' de la casa: Nobel, reinados, condecoraciones y premios.':'Nobel, reinados, condecoraciones y premios: lo que la casa recibe y cómo se consigue.',mov:0,modal:true,run:()=>escenaSalon()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v218=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA218_CAT) return; window.__SA218_CAT=true; window.catDe=function(t){ if(t===TIT) return 'legado'; return old.apply(this,arguments); }; }
+  function legado(){ const L=lista(); return L.length?JSON.parse(JSON.stringify(S.premios218)):null; }
+  function init218(){ wrapPaso(); wrapAcciones(); wrapCat();
+    Object.assign(window,{premios218:lista,otorgarPremio218:otorgar,anualPremios218:anual,candidatosPremios218:candidatos,escenaSalon218:escenaSalon,legadoPremios218:legado,nobelPosibles218:nobelPosibles,oficioPosibles218:oficioPosibles,reinables218:reinables,reinadoLocal218:reinadoLocal,correrReinado218:correr,ORDENES_218:ORDENES,UNIVS_218:UNIVS,OFICIO_218:OFICIO,NOBEL_218:NOBEL,
+      eventosPremios218:{nobel:evNobel,reinado:evReinado,orden:evOrden,honoris:evHonoris,oficio:evOficio,empresario:evEmpresario}}); }
+  init218(); setTimeout(init218,40); setTimeout(init218,220); setTimeout(init218,650); setTimeout(init218,950); setTimeout(init218,1500);
+  window.__SA218={version:V218};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v219 · TELECOMUNICACIONES COMO CLASE DE NEGOCIO
+   Entra por la misma puerta que las demás, en «Tecnología y medios», y
+   funciona como una red de unidades por época:
+   - 1865: el TELÉGRAFO (oficinas y líneas; declina desde la radio y el
+     teléfono, y desaparece hacia 1975).
+   - 1884: la TELEFONÍA local (centrales y redes de líneas) y, desde 1925, la
+     LARGA DISTANCIA y los enlaces (el Estado entra en 1947 con Telecom).
+   - 1992: la TELEVISIÓN POR CABLE y satelital; 1994: la red CELULAR (con la
+     licitación de la telefonía móvil) y, desde 1996, el INTERNET y la banda
+     ancha; 2008: la FIBRA ÓPTICA al hogar.
+   - Apoyos: cuadrillas de instalación y mantenimiento (1865), centro de
+     operaciones y conmutación (1920), torres y antenas propias (1994) y
+     cable submarino y enlaces internacionales (2000). Bajan los costos y
+     las caídas de las unidades que cubren.
+   - Sucesos: la red que se cae, los cables y las torres robados o
+     volados (la guerra), los topes de tarifas de la regulación, las
+     licitaciones de espectro (celular 1994, 4G en 2013, 5G en 2023), las
+     guerras de precios, la clonación de celulares y los ciberataques, la
+     migración a la siguiente tecnología y la competencia de la empresa
+     estatal Telecom (1947-2003).
+   La compañía queda en el sector «Software y datos», con las regulaciones
+   de cada época: el Gobierno, el Ministerio de Comunicaciones (1967), la
+   Comisión de Regulación de Telecomunicaciones (1994) y el MinTIC y la CRC
+   (2009).
+   ========================================================================== */
+(function(){
+  const V219='v219';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const RP=(r,u)=>window.reposUnidad176(r,u);
+  const ING=(r,u)=>Math.round(Math.max(1,u.rev||RP(r,u)*((window.tipoDe176(r.clase,u.tipo)||{rc:.5}).rc)));
+  const X=(t,o)=>window.evento176(t,o), G=(e,m)=>window.gastoRed176(e,m);
+  const R=e=>window.redNegocio176(e);
+  const TEL_DESDE=1865;
+
+  const TEL={n:'Telecomunicaciones',sector:'tech',grupo:'Tecnología y medios',desde:TEL_DESDE,un:['red o servicio','redes y servicios'],emp:'Telecomunicaciones',
+    get d(){ const a=A(), t=[]; if(a<=1975) t.push('telégrafo'); if(a>=1884) t.push('teléfono'); if(a>=1992) t.push('cable'); if(a>=1994) t.push('celular'); if(a>=1996) t.push('internet'); if(a>=2008) t.push('fibra óptica'); const l=t.length>1?t.slice(0,-1).join(', ')+' y '+t[t.length-1]:t[0]; return 'Redes de '+l+': una red que se tiende, se conecta y se cobra por uso o por suscripción. La inversión no termina nunca y los clientes se quejan de lo que no funciona. Con '+(a>=1994?'cuadrillas, centro de operaciones y torres propias':a>=1920?'cuadrillas y centro de operaciones':'cuadrillas propias')+' las caídas bajan; sin ellas, la red se enreda al crecer.'; },
+    cs:.1,el:.35,rs:.6,sp:.8,ts:.15,vol:.1,pand:[1.1,1.15,1.05],kv:8,
+    aut:[[1865,'el Gobierno (Correos y Telégrafos)'],[1967,'el Ministerio de Comunicaciones'],[1994,'la Comisión de Regulación de Telecomunicaciones'],[2009,'el MinTIC y la Comisión de Regulación de Comunicaciones']],
+    tit:[[1,'Operador local'],[3,'Operador regional'],[8,'Operador nacional'],[18,'Gigante de las telecomunicaciones']],
+    tipos:[
+      {id:'telegrafo',n:'Oficina y línea de telégrafo',desde:1865,hasta:1975,base:120,rc:1.3,mg:.14,u0:.7,capN:800,capU:'telegramas al día',obra:[0,1,1],princ:true,d:'Un alambre entre dos plazas y un telegrafista: lo único que viaja más rápido que un jinete.'},
+      {id:'telefonia',n:'Central telefónica y red local',desde:1884,base:300,rc:1.2,mg:.16,u0:.68,capN:3000,capU:'líneas',obra:[0,1,2],princ:true,d:'Una central, postes, cables y abonados que pagan mensualidad.'},
+      {id:'larga',n:'Larga distancia y enlaces',desde:1925,base:500,rc:1.1,mg:.2,u0:.65,capN:1500,capU:'circuitos',obra:[0,1,2],princ:true,vol:.14,d:'Conectar ciudades y países: cada circuito se cobra por minuto.'},
+      {id:'cable',n:'Televisión por cable y satelital',desde:1992,base:800,rc:1.15,mg:.18,u0:.62,capN:80000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.16,d:'Paquetes de canales por suscripción, con la guerra de contenidos de por medio.'},
+      {id:'celular',n:'Red celular (telefonía móvil)',desde:1994,base:2500,rc:1.1,mg:.22,u0:.66,capN:200000,capU:'suscriptores',obra:[1,2,2],princ:true,vol:.16,d:'Antenas, espectro y millones de minutos: el negocio de volumen del siglo.'},
+      {id:'banda',n:'Internet y banda ancha',desde:1996,base:900,rc:1.2,mg:.2,u0:.64,capN:50000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.2,d:'Conexiones por línea y por cable: cada año piden más velocidad.'},
+      {id:'fibra',n:'Fibra óptica al hogar',desde:2008,base:1500,rc:1.15,mg:.24,u0:.62,capN:100000,capU:'hogares',obra:[1,2,2],ciu:true,princ:true,vol:.2,d:'Tender fibra cuesta una fortuna y lo que se tiende no se va.'},
+      {id:'cuadrillas',n:'Cuadrillas de instalación y mantenimiento',desde:1865,base:200,rol:'apoyo',cubre:6,bono:.02,falta:.03,d:'Quien instala, repara y cambia lo que se rompe. Atiende hasta 6 redes.'},
+      {id:'central',n:'Centro de operaciones y conmutación',desde:1920,base:600,rol:'apoyo',cubre:8,bono:.025,falta:.03,d:'Vigila la red las veinticuatro horas y enruta el tráfico. Atiende hasta 8 redes.'},
+      {id:'torres',n:'Torres y antenas propias',desde:1994,base:1200,rol:'apoyo',cubre:8,bono:.03,falta:0,d:'Dejar de pagar arriendo por cada torre baja los gastos de hasta 8 redes.'},
+      {id:'submarino',n:'Cable submarino y enlaces internacionales',desde:2000,base:2000,rol:'apoyo',cubre:10,bono:.02,falta:.01,d:'Tráfico propio hacia el exterior sin pagarle peaje a nadie. Atiende hasta 10 redes.'}]};
+
+  const EV=[
+    /* la red se cae */
+    (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.025);
+      X('<b>Se cae la red de '+E(u.nom)+'.</b> '+(A()>=1994?'Miles de usuarios quedan sin servicio durante horas y las quejas llegan a la regulación.':'Las líneas quedan mudas un día entero y los clientes protestan en la puerta.'),
+        [{t:'Compensar a los clientes ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+4,5,99); return 'Compensaste a los clientes con '+fm(x)+': se lo reconocieron.'; }},
+         {t:'Reparar sin compensar a nadie',f:()=>{ G(e,x*.25); u.rep=cl(u.rep-6,5,99); return 'Repararon rápido y no pagaste nada, pero la reputación sufrió.'; }}]); },
+    /* cables y torres: robo, temporal o atentado */
+    (e,r,u)=>A()>=1900?()=>{ const x=Math.round(RP(r,u)*.04), guerra=(S.tension||35)>=45&&A()>=1980;
+      X('<b>'+(guerra?'Vuelan torres y cables de '+E(u.nom)+'.':A()<1960?'Un temporal derriba los postes y las líneas de '+E(u.nom)+'.':'Se roban los cables de cobre de '+E(u.nom)+'.')+'</b> '+(guerra?'La guerra llegó a la red: hay zonas sin comunicación.':'Reponer el material cuesta y la zona queda incomunicada.'),
+        [{t:'Reconstruir de inmediato ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+2,5,99); return 'Reconstruiste la red en pocos días: costó '+fm(x)+'.'; }},
+         {t:guerra?'Pedirle protección a la fuerza pública':'Reponer poco a poco',f:()=>{ G(e,x*.5); u.rep=cl(u.rep-4,5,99); if(guerra) S.tension=cl((S.tension||35)+1,0,100); return guerra?'La fuerza pública cubrió las torres, pero la zona quedó con servicio a medias.':'Repusiste de a poco: la zona sufrió y costó menos.'; }}]); }:null,
+    /* la regulación fija un tope */
+    (e,r,u)=>A()>=1947?()=>{ const x=Math.round(ING(r,u)*.06), aut=(CL_aut()||'la autoridad');
+      X('<b>'+E(aut.charAt(0).toUpperCase()+aut.slice(1))+' fija un tope a las tarifas de '+E(u.nom)+'.</b> Dice que el servicio es esencial y no puede cobrarse a cualquier precio.',
+        [{t:'Acatar el tope',f:()=>{ G(e,x); return 'Acataste el tope: dejaste de ganar '+fm(x)+' este año.'; }},
+         {t:'Demandarlo ('+fm(x*.4)+')',f:()=>{ G(e,x*.4); if(chance(.5)){ return 'Ganaste la demanda: el tope se anuló.'; } G(e,x); u.rep=cl(u.rep-2,5,99); return 'Perdiste la demanda: pagaste el abogado y acataste el tope.'; }}]); }:null,
+    /* el espectro: la licitación celular (1994), 4G (2013) y 5G (2023) */
+    (e,r,u)=>(u.tipo==='celular'&&((A()>=1994&&A()<=1996)||(A()>=2011&&A()<=2013)||(A()>=2022&&A()<=2024)))?()=>{ const gen=A()<=1996?'la telefonía celular':A()<=2013?'el 4G':'el 5G', x=Math.round(RP(r,u)*.12);
+      X('<b>El Gobierno licita el espectro de '+gen+'.</b> Quien no tenga una porción no podrá ofrecer el servicio en '+E(u.ciudad)+'.',
+        [{t:'Pujar fuerte ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+5,5,99); u.cons=cl(u.cons+8,5,99); return 'Ganaste el espectro por '+fm(x)+': tu red se prepara para '+gen+'.'; }},
+         {t:'Pujar con prudencia ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.5)){ u.rep=cl(u.rep+3,5,99); return 'Ganaste una porción pequeña por '+fm(x*.5)+'.'; } u.cons=cl(u.cons-6,5,99); return 'Perdiste la puja: tus clientes se van con quien sí tiene el espectro.'; }},
+         {t:'No participar',f:()=>{ u.cons=cl(u.cons-9,5,99); u.rep=cl(u.rep-2,5,99); return 'No participaste: te quedaste con la tecnología de antes.'; }}]); }:null,
+    /* guerra de precios */
+    (e,r,u)=>(['celular','banda','cable','larga'].includes(u.tipo)&&A()>=1992)?()=>{ const x=Math.round(ING(r,u)*.06);
+      X('<b>Estalla una guerra de precios por '+E(u.nom)+'.</b> Los competidores regalan minutos y megas para quitarte clientes.',
+        [{t:'Igualar los precios ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+1,5,99); return 'Igualaste los precios: perdiste '+fm(x)+' de margen pero conservaste a tus clientes.'; }},
+         {t:'Competir con servicio ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.55)){ u.rep=cl(u.rep+5,5,99); return 'El servicio ganó: tus clientes se quedaron.'; } u.cons=cl(u.cons-5,5,99); return 'Perdiste clientes con el servicio caro: no alcanzó.'; }}]); }:null,
+    /* fraude y ciberataques */
+    (e,r,u)=>(u.tipo==='celular'&&A()>=1995&&A()<=2008)?()=>{ const x=Math.round(ING(r,u)*.05);
+      X('<b>Clonan celulares de '+E(u.nom)+'.</b> Llegan facturas de llamadas que nadie hizo y los clientes pelean la cuenta.',
+        [{t:'Asumir el fraude y blindar la red ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'Asumiste el fraude y blindaste la red: costó '+fm(x)+'.'; }},
+         {t:'Cobrarles a los clientes',f:()=>{ u.rep=cl(u.rep-8,5,99); return 'Les cobraste a los clientes lo que no hablaron: la reputación se fue al suelo.'; }}]); }:(A()>=2010&&['banda','fibra','celular'].includes(u.tipo))?()=>{ const x=Math.round(ING(r,u)*.06);
+      X('<b>Un ciberataque tumba los sistemas de '+E(u.nom)+'.</b> Piden un rescate para devolver los datos de los clientes.',
+        [{t:'Pagar el rescate ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep-2,5,99); return 'Pagaste '+fm(x)+': los datos volvieron, la fama de segura no.'; }},
+         {t:'No pagar y reconstruir ('+fm(x*.6)+')',f:()=>{ G(e,x*.6); u.rep=cl(u.rep-5,5,99); return 'Reconstruiste los sistemas sin pagar: costó '+fm(x*.6)+' y tardó semanas.'; }}]); }:null,
+    /* migrar a la siguiente tecnología */
+    (e,r,u)=>(u.tipo==='celular'&&A()>=2010)||(u.tipo==='telefonia'&&A()>=1990&&A()<=2008)?()=>{ const x=Math.round(RP(r,u)*.08), cel=u.tipo==='celular';
+      X('<b>Los clientes de '+E(u.nom)+' piden '+(cel?'más velocidad: ya no les alcanza la red que tienes.':'líneas modernas: les resulta lenta y anticuada.')+'</b> Cada año que pasa pierdes frente a quien actualizó.',
+        [{t:'Invertir en la nueva tecnología ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+8,5,99); u.rep=cl(u.rep+3,5,99); return 'Actualizaste la red por '+fm(x)+': los clientes lo notaron.'; }},
+         {t:'Esperar un año más',f:()=>{ u.cons=cl(u.cons-6,5,99); return 'Esperaste: ahorraste plata y perdiste clientes.'; }}]); }:null,
+    /* la empresa estatal Telecom compite */
+    (e,r,u)=>(['telefonia','larga'].includes(u.tipo)&&A()>=1947&&A()<=2003)?()=>{ const x=Math.round(ING(r,u)*.05);
+      X('<b>Telecom, la empresa del Estado, baja las tarifas en '+E(u.ciudad)+'.</b> Con el subsidio del presupuesto puede cobrar menos que tú.',
+        [{t:'Bajar tus tarifas ('+fm(x)+')',f:()=>{ G(e,x); return 'Bajaste las tarifas: perdiste '+fm(x)+' de margen.'; }},
+         {t:'Quejarte ante la regulación',f:()=>{ if(chance(.4)){ u.rep=cl(u.rep+3,5,99); return 'La regulación te dio la razón y Telecom subió sus tarifas.'; } u.cons=cl(u.cons-5,5,99); return 'No te hicieron caso: perdiste clientes.'; }}]); }:null,
+    /* el declive del telégrafo */
+    (e,r,u)=>(u.tipo==='telegrafo'&&A()>=1935)?()=>{ const x=Math.round(RP(r,u)*.05);
+      X('<b>El telégrafo pierde clientes frente al teléfono y la radio.</b> La oficina de '+E(u.ciudad)+' recibe cada año menos telegramas.',
+        [{t:'Reconvertir la oficina ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+4,5,99); return 'Reconvertiste la oficina a giros y correo: se sostiene.'; }},
+         {t:'Dejarla morir',f:()=>{ u.cons=cl(u.cons-7,5,99); u.rep=cl(u.rep-2,5,99); return 'La dejaste como estaba: cada año valdrá menos.'; }}]); }:null];
+  function CL_aut(){ const a=A(); let n=null; TEL.aut.forEach(x=>{ if(a>=x[0]) n=x[1]; }); return n; }
+
+  /* ---------- instalación en la puerta ---------- */
+  function instalarClase(){ const CLs=window.CLASES_176, OR=window.ORDEN_176, GR=window.GRUPOS_PUERTA_176, EVc=window.EVC_176; if(!CLs||!OR) return false;
+    if(!CLs.telecom) CLs.telecom=TEL; if(!OR.includes('telecom')) OR.push('telecom');
+    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Tecnología y medios'); if(g){ if(!g.ids.includes('telecom')) g.ids.push('telecom'); if(!g.__v219){ g.__v219=true; const base=g.d; try{ Object.defineProperty(g,'d',{configurable:true,enumerable:true,get(){ return A()>=TEL_DESDE?base.replace(' y televisión.',', televisión y telecomunicaciones.'):base; }}); }catch(e){} } } }
+    if(EVc&&!EVc.telecom) EVc.telecom=EV; return true; }
+  function init219(){ try{ instalarClase(); }catch(e){ console.error(e); }
+    Object.assign(window,{CLASE_TELECOM_219:TEL,EVENTOS_TELECOM_219:EV,autoridadTelecom219:CL_aut}); }
+  init219(); setTimeout(init219,40); setTimeout(init219,220); setTimeout(init219,650); setTimeout(init219,950); setTimeout(init219,1500);
+  window.__SA219={version:V219};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v220 · LA PLATA CALIENTE: EL NARCOTRÁFICO VISTO DESDE LA CASA
+   El juego ya tenía los carteles como grupos armados (v91), los delitos de
+   lavado y de prestar camiones, la extradición (v157) y el control de lavado
+   de los bancos (v151). Faltaba lo que le pasa a una familia de negocios que
+   toca esa plata sin ser parte del cartel:
+   - TRATOS: entre 1975 y 2020 llegan ofertas de plata de dudoso origen: un
+     comprador que paga en efectivo y muy por encima del precio por una
+     propiedad, y un «socio capitalista» que quiere entrar a una compañía.
+     Cada trato aceptado paga bien y sube tu EXPOSICIÓN (0 a 100). Las
+     compañías con ese socio quedan marcadas.
+   - LA ÉPOCA: la ventanilla siniestra y la bonanza (1975-83), la guerra de
+     Lara Bonilla a Galán y los Extraditables (1984-90), la Constitución del 91
+     (no extradita) y la caída de Escobar (1993), el Proceso 8000 y la lista
+     Clinton (1995), la extinción de dominio (1996 y 2002) y la extradición
+     que vuelve (1997): el clima cambia lo que cada trato cuesta.
+   - CONSECUENCIAS: allanamientos, extinción de dominio sobre las compañías
+     marcadas, la lista Clinton (te cierran las cuentas y el crédito) y la
+     justicia de Estados Unidos. La exposición baja sola con los años si no
+     sigues metido, y la reciben tus herederos rebajada.
+   - SALIDAS: auditoría forense, separarte de los socios, colaborar con la
+     Fiscalía o gastar en abogados para salir de la lista. Cada una tiene su
+     precio y sus riesgos de retaliación.
+   El panel «La plata caliente» aparece cuando hay exposición.
+   ========================================================================== */
+(function(){
+  const V220='v220';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const C=()=>{ if(!S.caliente220) S.caliente220={expo:0,tratos:[],hechos:{},clinton:null}; return S.caliente220; };
+  const expo=()=>((typeof S!=='undefined'&&S&&S.caliente220&&S.caliente220.expo)||0);
+  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const sub=n=>{ C().expo=clamp(C().expo+n,0,100); };
+  const estres=n=>{ try{ S.p.estres=clamp((S.p.estres||30)+n,0,100); }catch(e){} };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t); }catch(e){} };
+  const tomar=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const marcadas=()=>comps().filter(e=>e&&e.caliente220);
+
+  /* el clima de cada época: cuánto pesa la exposición */
+  function clima(a){ a=a||A(); return a<1975?0:a<1984?.6:a<1991?1.6:a<1995?1.1:a<2002?1.5:a<2016?1.3:1; }
+  const ventana=a=>(a||A())>=1975&&(a||A())<=2020;
+  function textoClima(a){ a=a||A(); return a<1975?'sin narcotráfico organizado en tu entorno':a<1984?'bonanza: la plata entra sin preguntas (la «ventanilla siniestra»)':a<1991?'guerra declarada a los carteles: allanamientos y bombas':a<1995?'la Constitución del 91 no extradita y cae Escobar':a<2002?'Proceso 8000, lista Clinton y extinción de dominio':a<2016?'extinción de dominio y extradición: la justicia aprieta':'vigilancia internacional y plata de minería ilegal'; }
+  function trato(t,valor,quien){ const o=C(); o.tratos.push({a:A(),t,valor:Math.round(valor),quien}); if(o.tratos.length>12) o.tratos.shift(); }
+
+  /* ---------- las ofertas ---------- */
+  function evComprador(b){ const x=Math.round(b.valor*rnd(1.25,1.4));
+    return {p:8,c:()=>ACTIVO()&&(S.bienes||[]).includes(b),t:()=>'<b>Un comprador paga '+fm(x)+' en efectivo por '+E(b.nombre)+'.</b> Es mucho más de lo que vale y no pide rebaja, ni preguntas, ni testigos en la escritura. Nadie sabe de dónde viene la plata.',
+      o:[{t:'Vendérsela ('+fm(x)+')',f:()=>{ S.bienes=(S.bienes||[]).filter(z=>z!==b); S.efectivo+=Math.max(0,x-(b.hipoteca||0)); sub(7); trato('venta de '+b.nombre,x,'un comprador en efectivo'); estres(3); log('Vendiste <b>'+E(b.nombre)+'</b> por '+fm(x)+' en efectivo. La plata llegó limpia de papeles, pero no de preguntas.','hito'); return 'Vendiste con un buen sobreprecio ('+fm(x)+'): tu exposición subió.'; }},
+         {t:'Exigir transferencia bancaria y revisar su origen',f:()=>{ if(chance(.5)){ return 'El comprador se fue sin decir nada: la oferta nunca existió.'; } const y=Math.round(x*.85); S.bienes=(S.bienes||[]).filter(z=>z!==b); S.efectivo+=Math.max(0,y-(b.hipoteca||0)); sub(2); trato('venta de '+b.nombre,y,'un comprador con papeles'); return 'Los papeles salieron en regla: vendiste por '+fm(y)+' con poco riesgo.'; }},
+         {t:'Rechazar la oferta',f:()=>{ if(chance(.2)){ estres(8); return 'Rechazaste: alguien te mandó a decir que fue un error.'; } return 'Rechazaste la oferta y ahí quedó todo.'; }}]}; }
+  function evSocio(e){ const x=Math.round(Math.max(30,valuar(e)*rnd(.15,.3)));
+    return {p:8,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>Un "socio capitalista" quiere poner '+fm(x)+' en '+E(e.nombre)+'.</b> No pide asiento en la junta ni cuentas claras: solo que le dejes "mover unas facturas". Es plata de alguien que no figura.',
+      o:[{t:'Aceptar al socio ('+fm(x)+')',f:()=>{ e.caja=(e.caja||0)+x; e.crecimiento=(e.crecimiento||0)+.03; e.caliente220=true; sub(12); trato('capital en '+e.nombre,x,'un socio capitalista'); estres(4); log('<b>'+E(e.nombre)+'</b> recibió '+fm(x)+' de un socio que no figura: queda marcada.','hito'); return 'La compañía recibió '+fm(x)+' y creció: queda marcada por su socio.'; }},
+         {t:'Pedirle un crédito a un banco',f:()=>{ const y=Math.round(x*.5); e.caja=(e.caja||0)+y; e.deuda=(e.deuda||0)+y; return 'Conseguiste '+fm(y)+' en un banco, con intereses y sin deberle favores a nadie.'; }},
+         {t:'Rechazar a ese socio',f:()=>{ if(chance(.15)){ estres(6); return 'Lo rechazaste: dejó un recado que no te gustó.'; } return 'Rechazaste al socio y la conversación se acabó.'; }}]}; }
+  function ofertas(){ const a=A(), k=clima(a), L=[]; if(!ventana(a)||pat()<200||expo()>=90) return L;
+    const B=(S.bienes||[]).filter(b=>b&&b.valor>=30&&!b.caliente220); if(B.length&&chance(clamp(.1*k,0,.2))) L.push(evComprador(B[ri(0,B.length-1)]));
+    const G=comps().filter(e=>e&&!e.caliente220&&valuar(e)>=60); if(G.length&&a>=1978&&chance(clamp(.06*k,0,.12))) L.push(evSocio(G[ri(0,G.length-1)]));
+    return L; }
+
+  /* ---------- las consecuencias ---------- */
+  function evAllanamiento(){ const costo=pago(30);
+    return {p:9,c:()=>ACTIVO(),t:()=>'<b>Allanan tu oficina.</b> La Fiscalía y la policía se llevan archivos y cuentas buscando el rastro de plata de un cartel. '+(clima()>=1.5?'Los periodistas ya están en la puerta.':'Alguien filtró tu nombre.'),
+      o:[{t:'Dar la cara con un penalista ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(clamp(.7-expo()/150,.2,.8))){ sub(-10); return 'Probaste que no sabías el origen de esa plata: el asunto se enfrió.'; } sub(6); try{ registrarDelito('lavado de activos',4,'tratos con plata de un cartel'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; prest(-4,'un allanamiento por lavado'); return 'Encontraron lo que buscaban: quedó abierto un proceso por lavado.'; }},
+         {t:'Colaborar con la Fiscalía',f:()=>{ sub(-18); estres(8); prest(-1,'colaboró con la justicia'); return 'Entregaste lo que tenías: te creyeron, pero ahora hay quien te mira con rencor.'; }},
+         {t:'Negarlo todo',f:()=>{ if(chance(.35)){ return 'Negaste todo y se aburrieron de preguntar.'; } sub(10); try{ registrarDelito('lavado de activos',5,'tratos con plata de un cartel'); }catch(x){} prest(-6,'un proceso por lavado'); return 'No te creyeron: te abrieron un proceso.'; }}]}; }
+  function evExtincion(e){ const x=Math.round(valuar(e)*(miPct(e)||1)*.5), pelea=pago(60);
+    return {p:9,c:()=>ACTIVO()&&comps().includes(e),t:()=>'<b>La Fiscalía abre extinción de dominio sobre '+E(e.nombre)+'.</b> '+(A()>=1996?'Dice que se financió con plata del narcotráfico y pide que pase al Estado.':'La policía incautó sus libros: dicen que se levantó con dinero de un cartel.'),
+      o:[{t:'Pelear el proceso ('+fm(pelea)+')',f:()=>{ tomar(pelea); if(chance(clamp(.6-expo()/200,.2,.65))){ e.caliente220=false; sub(-12); return 'Demostraste el origen lícito de '+e.nombre+': te la devolvieron, con mala fama.'; } return perder(e,x); }},
+         {t:'Negociar: entregar el socio y quedarte con la compañía',f:()=>{ e.caliente220=false; sub(-20); e.caja=Math.max(0,(e.caja||0)-x*.5); estres(6); return 'Entregaste al socio: te quedaste con la compañía, pero pagaste una multa y te llegó un mensaje.'; }},
+         {t:'Dejarla ir',f:()=>perder(e,x)}]}; }
+  function perder(e,x){ try{ S.grupo=comps().filter(z=>z!==e); if(S.emp===e) S.emp=S.grupo[0]||null; }catch(z){} sub(-15); prest(-3,'perdió una compañía por extinción de dominio'); try{ hito('Perdió '+e.nombre+' por extinción de dominio'); }catch(z){} return 'El Estado se quedó con '+e.nombre+' (valía '+fm(x*2)+' y tu parte, '+fm(x)+').'; }
+  function evClinton(){ const costo=pago(120);
+    return {p:9,c:()=>ACTIVO()&&!C().clinton,t:()=>'<b>Tu nombre aparece en la lista Clinton.</b> El Tesoro de Estados Unidos prohíbe a sus bancos y a sus empresas hacer negocios contigo. Los bancos de aquí te cierran las cuentas por precaución.',
+      o:[{t:'Pagar abogados en Washington para salir de la lista ('+fm(costo)+')',f:()=>{ tomar(costo); if(chance(.45)){ sub(-25); return 'Los abogados lograron sacarte de la lista: tardó, costó y quedó la cicatriz.'; } C().clinton=A(); return 'No lograron sacarte de la lista: quedaste con las cuentas cerradas.'; }},
+         {t:'Vivir con la lista y mover plata en efectivo',f:()=>{ C().clinton=A(); sub(6); return 'Quedaste en la lista: vas a pagar caro por cada operación.'; }}]}; }
+  function evExtradicion(){ const costo=pago(80);
+    return {p:10,c:()=>ACTIVO(),t:()=>'<b>Estados Unidos pide tu extradición.</b> Una corte federal te acusa de lavar plata del narcotráfico y de ayudar a los traficantes.',
+      o:[{t:'Resistir con abogados ('+fm(costo)+')',f:()=>{ tomar(costo); try{ if(typeof window.abrirExtradicion157==='function'&&chance(.5)){ window.abrirExtradicion157(); return 'El proceso de extradición quedó abierto: empieza la batalla en los tribunales.'; } }catch(x){} sub(-8); return 'Tus abogados frenaron la petición, por ahora.'; }},
+         {t:'Colaborar con la justicia de Estados Unidos',f:()=>{ sub(-40); prest(-8,'colaboró con la justicia de Estados Unidos'); estres(12); try{ registrarDelito('lavado de activos',5,'tratos con plata del narcotráfico'); }catch(x){} S.p.escandalos=(S.p.escandalos||0)+1; return 'Negociaste: entregaste lo que sabías a cambio de una pena menor y de seguir vivo.'; }}]}; }
+  function consecuencias(){ const c=C(), a=A(), k=clima(a), L=[]; if(c.expo<=0||!ACTIVO()) return L;
+    if(a>=1984&&chance(clamp(c.expo/260*k,0,.3))) L.push(evAllanamiento());
+    const M=marcadas(); if(M.length&&a>=1986&&chance(clamp((c.expo-10)/220*k,0,.3))) L.push(evExtincion(M[ri(0,M.length-1)]));
+    if(a>=1995&&!c.clinton&&c.expo>=35&&chance(clamp((c.expo-25)/260*k,0,.25))) L.push(evClinton());
+    if(((a>=1984&&a<=1990)||a>=1997)&&c.expo>=60&&chance(clamp((c.expo-50)/300*k,0,.2))) L.push(evExtradicion());
+    return L; }
+
+  /* ---------- el año ---------- */
+  const HITOS={1984:'Asesinan al ministro de Justicia Rodrigo Lara Bonilla: el Gobierno declara la guerra a los carteles.',1989:'Asesinan a Luis Carlos Galán y los Extraditables llenan las ciudades de bombas.',1991:'La nueva Constitución prohíbe extraditar colombianos.',1993:'Cae abatido Pablo Escobar en Medellín.',1995:'El Proceso 8000 destapa la plata del narcotráfico en la política y EE. UU. publica la lista Clinton.',1996:'Se aprueba la primera ley de extinción de dominio.',1997:'Se restablece la extradición de colombianos.',2002:'Una nueva ley de extinción de dominio permite quitar bienes de origen ilícito sin condena penal.'};
+  function anual(){ if(!ACTIVO()||nino()) return; const c=C(), a=A();
+    try{ const v=window.conf91&&window.conf91().vinculos; if(v&&v.cartel&&a-v.cartel<=5&&a-v.cartel>=0) sub(5); }catch(e){}
+    if(c.clinton){ const x=S.efectivo*.02; if(x>0) S.efectivo-=x; try{ S.p.reputacion=clamp(S.p.reputacion-1,0,100); }catch(e){} if(chance(.1)){ c.clinton=null; log('Te sacaron de la lista Clinton: tras años de trámites te devolvieron las cuentas.','bien'); } }
+    if(c.expo>0&&!marcadas().length&&!c.clinton&&!(window.conf91&&window.conf91().vinculos&&window.conf91().vinculos.cartel&&a-window.conf91().vinculos.cartel<=5)) sub(-2);
+    if(HITOS[a]&&!c.hechos[a]&&c.expo>=10){ c.hechos[a]=1; log('<b>'+E(HITOS[a])+'</b> Tu exposición hace que lo sientas de cerca.','mal'); if(a===1984||a===1995||a===1996||a===2002) sub(3); }
+    let L=[]; try{ L=ofertas().concat(consecuencias()); }catch(e){ console.error(e); }
+    L.sort((x,y)=>y.p-x.p).slice(0,2).forEach(ev=>{ try{ cola.push(ev); }catch(e){} }); }
+
+  /* ---------- el panel ---------- */
+  const barra=v=>'<span style="display:inline-block;width:96px;height:8px;background:rgba(255,255,255,.12);border-radius:4px;vertical-align:middle;margin-right:6px"><i style="display:block;height:8px;width:'+Math.round(clamp(v,0,100))+'%;background:'+(v<=25?'#79C897':v<=55?'#D8AB4F':'#D06A60')+';border-radius:4px"></i></span>'+Math.round(v);
+  function escenaCaliente(){ const c=C(), M=marcadas(), sinMov=S.mov<1?'Sin movidas':null; const f=(n,m)=>m&&S.efectivo<n?'No te alcanza':sinMov;
+    let t='<table class="libro"><tr><td>Exposición</td><td>'+barra(c.expo)+'</td></tr><tr><td>El clima de la época</td><td>'+E(textoClima())+'</td></tr><tr><td>Compañías marcadas</td><td>'+(M.length?M.map(e=>E(e.nombre)).join(', '):'ninguna')+'</td></tr>'+(c.clinton?'<tr><td>Lista Clinton</td><td><span style="color:#D06A60">desde '+c.clinton+': cuentas cerradas y crédito negado</span></td></tr>':'')+(c.tratos.length?'<tr><td>Tratos recientes</td><td>'+c.tratos.slice(-4).map(x=>E(x.t)+' ('+x.a+')').join(' · ')+'</td></tr>':'')+'</table>';
+    const a1=pago(40), a2=Math.round(M.reduce((s,e)=>s+valuar(e)*(miPct(e)||1)*.08,0))||pago(20), a3=pago(120);
+    const ops=[
+      {t:'Depurar tus cuentas con una auditoría forense ('+fm(a1)+')',cat:'riesgo',cerrar:false,d:'Revisan cada trato, cada factura y cada socio: baja la exposición.',dis:c.expo<=0?'No tienes exposición':f(a1,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a1); sub(-15); log('Una auditoría forense depuró tus cuentas ('+fm(a1)+').'); escenaCaliente(); }},
+      {t:'Separarte de los socios sospechosos ('+fm(a2)+')',cat:'riesgo',cerrar:false,d:'Les compras su parte o les devuelves lo que pusieron. A veces no lo reciben bien.',dis:!M.length&&c.expo<=0?'No hay con quién':f(a2,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a2); M.forEach(e=>{ e.caliente220=false; }); sub(-20); if(chance(.25)){ estres(10); log('Los socios se fueron, pero dejaron un recado que no te gustó.','mal'); } else log('Te separaste de los socios sin mayores problemas.'); escenaCaliente(); }},
+      {t:'Colaborar con la Fiscalía',cat:'riesgo',cerrar:false,d:'Cuentas lo que sabes a cambio de borrar tu exposición. Pagas con tu tranquilidad y tu prestigio.',dis:c.expo<=0?'No tienes exposición':(A()<1985?'Todavía no hay a quién contarle':sinMov),run:()=>{ S.mov=Math.max(0,S.mov-1); c.expo=0; M.forEach(e=>{ e.caliente220=false; }); estres(10); prest(-3,'colaboró con la Fiscalía'); if(chance(.3)){ log('Después de hablar te llegó un mensaje: ya no eres de confianza para algunos.','mal'); estres(8); } else log('Hablaste con la Fiscalía y limpiaste tu historia.'); escenaCaliente(); }}];
+    if(c.clinton) ops.push({t:'Gastar en abogados para salir de la lista Clinton ('+fm(a3)+')',cat:'riesgo',cerrar:false,d:'Un trámite largo, caro y sin garantías.',dis:f(a3,true),run:()=>{ S.mov=Math.max(0,S.mov-1); tomar(a3); if(chance(.45)){ c.clinton=null; sub(-15); log('Saliste de la lista Clinton.','bien'); } else log('El trámite no prosperó: sigues en la lista.','mal'); escenaCaliente(); }});
+    escena({rubro:'Riesgo',titulo:'La plata caliente',ancho:true,cerrable:true,cuerpo:'La plata de dudoso origen paga bien y se cobra después. Mientras más tratos aceptes, más te miran los fiscales, los bancos y los que te la trajeron.',html:t,opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA220_PASO) return; window.__SA220_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='La plata caliente';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA220_ACC) return; window.__SA220_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&A()>=1975&&(expo()>0||(S.caliente220&&S.caliente220.clinton)||marcadas().length)&&!L.some(x=>x&&x.t===TIT)){ L.push({t:TIT,cat:'riesgo',d:'Exposición '+Math.round(expo())+'/100: lo que has aceptado de plata de dudoso origen y cómo limpiarlo.',mov:0,modal:true,run:()=>escenaCaliente()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v220=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA220_CAT) return; window.__SA220_CAT=true; window.catDe=function(t){ if(t===TIT) return 'riesgo'; return old.apply(this,arguments); }; }
+  function legado(){ const c=S&&S.caliente220; if(!c||(!c.expo&&!c.clinton)) return null; return {expo:Math.round(c.expo*.6),tratos:(c.tratos||[]).slice(-4),hechos:{},clinton:null,herencia:true}; }
+  function init220(){ wrapPaso(); wrapAcciones(); wrapCat();
+    Object.assign(window,{calienteExpo220:expo,estadoCaliente220:C,climaCaliente220:clima,textoClimaCaliente220:textoClima,ofertasCaliente220:ofertas,consecuenciasCaliente220:consecuencias,anualCaliente220:anual,escenaCaliente220:escenaCaliente,legadoCaliente220:legado,marcadasCaliente220:marcadas,HITOS_CALIENTE_220:HITOS,
+      eventosCaliente220:{comprador:evComprador,socio:evSocio,allanamiento:evAllanamiento,extincion:evExtincion,clinton:evClinton,extradicion:evExtradicion}}); }
+  init220(); setTimeout(init220,40); setTimeout(init220,220); setTimeout(init220,650); setTimeout(init220,950); setTimeout(init220,1500);
+  window.__SA220={version:V220};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v221 · CRIPTOACTIVOS
+   Hasta aquí las criptomonedas solo salían como rescate de un hackeo. Ahora
+   hay un panel, «Tus criptoactivos», con lo que se compra, se guarda, se
+   mina y se vende, según la época:
+   - MONEDAS: Bitcoin (desde 2012, cuando llega la primera plata de verdad),
+     tokens y altcoins (2017, la burbuja de las ICO), Ether (2016) y
+     stablecoins (2018). Cada una sigue su trayectoria histórica año por año
+     (aproximada, y con las subidas de las burbujas de 2013 y 2017 limitadas
+     a 5 veces para que el juego no se rompa); desde 2025 se mueven al azar.
+   - CUSTODIA: en un exchange (cómodo, pero si el exchange se hunde, se
+     hunde tu plata: Mt. Gox 2014, FTX 2022) o en una billetera propia (sin
+     intermediarios, pero si pierdes la llave, pierdes todo).
+   - MINERÍA: una granja de minería (2013-2024) paga según el precio del
+     Bitcoin, gasta electricidad, se deprecia rápido y el pago se parte en
+     dos con cada halving (2016, 2020, 2024).
+   - IMPUESTOS: las ganancias pagan ganancia ocasional (10%, 15% desde 2019,
+     20% desde 2023); desde 2018 la DIAN pide reportarlas.
+   - SUCESOS: el exchange hackeado, la quiebra del exchange, el colapso de
+     Terra/Luna, la estafa de «duplica tu bitcoin», el reporte a la DIAN y la
+     llave perdida.
+   Las criptos cuentan en el patrimonio y pasan a los herederos (con la
+   sucesión descontada).
+   ========================================================================== */
+(function(){
+  const V221='v221';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
+  const K=()=>{ if(!S.cripto221) S.cripto221={tenencias:[],granja:null,custodia:'exchange',hechos:{},declarada:false,ganado:0,pagado:0}; return S.cripto221; };
+  const tens=()=>((typeof S!=='undefined'&&S&&S.cripto221&&S.cripto221.tenencias)||[]);
+  const granja=()=>((typeof S!=='undefined'&&S&&S.cripto221&&S.cripto221.granja)||null);
+  const valor=()=>tens().reduce((a,t)=>a+(t.valor||0),0)+((granja()&&granja().valor)||0);
+
+  /* ---------- las monedas y su trayectoria (retorno de fin de año a fin de año) ---------- */
+  const MON={
+    btc:{n:'Bitcoin',desde:2012,vol:.55,mu:.12,fee:.015,d:'La primera y la más conocida: oro digital para unos, humo para otros.',
+      r:{2012:1.85,2013:4,2014:-.6,2015:.34,2016:1.24,2017:4,2018:-.73,2019:.92,2020:3.03,2021:.6,2022:-.64,2023:1.56,2024:1.21}},
+    eth:{n:'Ether',desde:2016,vol:.7,mu:.12,fee:.015,d:'La red donde se programan contratos: más volátil que el Bitcoin.',
+      r:{2016:4,2017:4,2018:-.82,2019:-.03,2020:4,2021:4,2022:-.67,2023:.91,2024:.46}},
+    alt:{n:'Tokens y altcoins',desde:2017,vol:.95,mu:0,fee:.02,d:'Cientos de monedas nuevas: algunas se multiplican y casi todas se hunden.',
+      r:{2017:4,2018:-.85,2019:-.1,2020:1.2,2021:3,2022:-.85,2023:.6,2024:.8}},
+    usdt:{n:'Stablecoins (dólar digital)',desde:2018,vol:.01,mu:0,fee:.01,d:'Una moneda que vale un dólar: no sube ni baja, pero tampoco te hace rico.',r:{}}};
+  const IDS=Object.keys(MON);
+  const disp=a=>IDS.filter(k=>(a||A())>=MON[k].desde);
+  const HALVING=[2012,2016,2020,2024];
+  function retorno(id,a){ a=a||A(); const m=MON[id]; if(!m) return 0; if(id==='usdt') return 0;
+    if(m.r[a]!==undefined) return m.r[a];
+    if(a<m.desde) return 0;
+    return clamp(m.mu+m.vol*(rnd(-1,1)+rnd(-1,1)+rnd(-1,1))/1.7,-.8,2.5); }
+  const tasaGO=a=>(a||A())>=2023?.2:(a||A())>=2019?.15:.1;
+
+  /* ---------- operar ---------- */
+  function buscar(id){ return tens().find(t=>t.coin===id); }
+  function comprar(id,x){ const m=MON[id]; if(!m||A()<m.desde||x<=0) return null; const fee=Math.max(2,x*m.fee); if(S.efectivo<x+fee) return null; S.efectivo-=x+fee;
+    let t=buscar(id); if(!t){ t={coin:id,valor:0,costo:0,desde:A()}; K().tenencias.push(t); } t.valor+=x; t.costo+=x;
+    log('Compraste <b>'+E(m.n)+'</b> por '+fm(x)+' (comisión '+fm(fee)+').'); return t; }
+  function vender(id,fr){ const t=buscar(id); if(!t||t.valor<=0) return null; const m=MON[id]; const x=t.valor*fr, costoP=t.costo*fr, fee=x*.01, ganancia=Math.max(0,x-costoP), imp=ganancia*tasaGO();
+    t.valor-=x; t.costo-=costoP; S.efectivo+=x-fee-imp; const k=K(); k.ganado+=ganancia; k.pagado+=imp; if(t.valor<1) k.tenencias=k.tenencias.filter(z=>z!==t);
+    log('Vendiste '+E(m.n)+' por '+fm(x)+(ganancia>0?': ganancia de '+fm(ganancia)+' y impuesto de ganancia ocasional de '+fm(imp)+' ('+Math.round(tasaGO()*100)+'%).':'.')); return {x,imp,ganancia}; }
+  function costoGranja(){ return pago(300); }
+  function montarGranja(){ const x=costoGranja(); if(A()<2013||A()>2024||granja()||S.efectivo<x) return null; S.efectivo-=x; K().granja={valor:x,costo:x,desde:A()}; log('Montaste una <b>granja de minería</b> de Bitcoin por '+fm(x)+': máquinas, galpón y un contrato de energía.','hito'); return K().granja; }
+  function venderGranja(){ const g=granja(); if(!g) return 0; const x=g.valor*.6; S.efectivo+=x; K().granja=null; log('Vendiste la granja de minería por '+fm(x)+' (las máquinas usadas valen poco).'); return x; }
+  const halvings=g=>HALVING.filter(h=>h>=g.desde&&h<=A()).length;
+
+  /* ---------- el año ---------- */
+  function anual(res){ if(!ACTIVO()||nino()) return; const k=K(); if(!tens().length&&!granja()) return; const a=A(); let tot=0;
+    tens().slice().forEach(t=>{ const r=retorno(t.coin,a); const antes=t.valor; t.valor=Math.max(0,t.valor*(1+r)); tot+=t.valor-antes; if(t.valor<1) k.tenencias=k.tenencias.filter(z=>z!==t); });
+    if(res&&tot!==0) res.push(['Criptoactivos',tot,tot>=0?'pos':'neg']);
+    const g=granja(); if(g){ const rb=retorno('btc',a), rev=g.valor*clamp(.45+rb*.35,.05,1.2)/Math.pow(2,halvings(g)), gasto=g.valor*.28; g.valor*=.72; S.efectivo+=rev-gasto; if(res) res.push(['Granja de minería',rev-gasto,(rev-gasto)>=0?'pos':'neg']); if(g.valor<costoGranja()*.05) K().granja=null; }
+    if(k.custodia==='propia'&&chance(.02)&&tens().length){ const x=valor(); k.tenencias=[]; log('<b>Perdiste la llave de tu billetera.</b> '+fm(x)+' en criptoactivos quedaron para siempre en la red, sin dueño.','mal'); }
+    if(HALVING.includes(a)&&granja()) log('Llegó el <b>halving</b> del Bitcoin: tu granja recibe la mitad por cada bloque.','mal');
+    let L=[]; try{ L=sucesos(); }catch(e){ console.error(e); } L.slice(0,1).forEach(ev=>{ try{ cola.push(ev); }catch(e){} }); }
+
+  /* ---------- los sucesos ---------- */
+  function evHackeo(){ const k=K(), perdida=.2+Math.random()*.2;
+    return {p:9,c:()=>ACTIVO()&&tens().length>0,t:()=>'<b>Hackean el exchange donde guardas tus criptoactivos.</b> Desaparecen cientos de miles de monedas y el sitio se queda sin responder. Nadie sabe si volverá a abrir.',
+      o:[{t:'Esperar a que el exchange responda',f:()=>{ if(k.custodia!=='exchange') return 'Tu billetera es propia: el hackeo no te tocó.'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'Perdiste el '+Math.round(perdida*100)+'% de tus criptoactivos ('+fm(x)+'): el exchange repartió lo que quedaba.'; }},
+         {t:'Sacar lo que se pueda a una billetera propia',f:()=>{ if(k.custodia==='exchange'){ if(chance(.5)){ k.custodia='propia'; return 'Alcanzaste a sacar tus monedas a una billetera propia: te salvaste y ya no dependes de nadie.'; } let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'No alcanzaste: perdiste '+fm(x)+'.'; } return 'Ya estabas en una billetera propia: no te tocó.'; }}]}; }
+  function evQuiebra(){ const k=K(), perdida=.25+Math.random()*.35;
+    return {p:9,c:()=>ACTIVO()&&tens().length>0,t:()=>'<b>Quiebra el exchange donde tienes tus criptoactivos.</b> Se descubre que usaban la plata de los clientes para apostar. Frenan los retiros y piden la liquidación.',
+      o:[{t:'Reclamar en el proceso de quiebra',f:()=>{ if(k.custodia!=='exchange') return 'Tu plata está en una billetera propia: no te tocó.'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida; t.valor-=p; t.costo*=1-perdida; x+=p; }); return 'El proceso reparte centavos: perdiste '+fm(x)+' ('+Math.round(perdida*100)+'%).'; }},
+         {t:'Pasarte a billetera propia con lo que quede',f:()=>{ if(k.custodia==='exchange'){ k.custodia='propia'; let x=0; tens().forEach(t=>{ const p=t.valor*perdida*.7; t.valor-=p; t.costo*=1-perdida*.7; x+=p; }); return 'Alcanzaste a sacar parte: perdiste '+fm(x)+' y ahora guardas tú.'; } return 'Ya guardabas tú: no te tocó.'; }}]}; }
+  function evTerra(){ const alt=buscar('alt'), usdt=buscar('usdt');
+    return {p:8,c:()=>ACTIVO()&&!!(buscar('alt')||buscar('usdt')),t:()=>'<b>Se derrumba Terra/Luna.</b> Una "stablecoin algorítmica" pierde su ancla al dólar y arrastra a medio mercado de tokens. Los precios caen en picada.',
+      o:[{t:'Vender los tokens ya, con pérdidas',f:()=>{ const t=buscar('alt'); if(t){ const r=vender('alt',1); return 'Vendiste tus tokens: recuperaste '+fm(r.x)+'.'; } return 'No tenías tokens: te salvaste.'; }},
+         {t:'Aguantar a ver qué pasa',f:()=>'Aguantaste: el mercado sigue su curso y verás qué queda.'}]}; }
+  function evEstafa(){ const x=Math.round(Math.max(10,S.efectivo*.2));
+    return {p:7,c:()=>ACTIVO(),t:()=>'<b>Te ofrecen "duplicar tu bitcoin".</b> Un conocido de un conocido promete rendimientos del 10% mensual con un "algoritmo de arbitraje". Su oficina es hermosa y el video, muy convincente.',
+      o:[{t:'Invertir '+fm(x),f:()=>{ if(S.efectivo<x) return 'No te alcanza.'; S.efectivo-=x; if(chance(.1)){ S.efectivo+=x*1.4; return 'Qué suerte: te pagaron '+fm(x*1.4)+' antes de que se cayera el esquema.'; } try{ moverPrestigio(-1,'cayó en una pirámide'); }catch(e){} return 'Era una pirámide: perdiste los '+fm(x)+'.'; }},
+         {t:'Rechazar y denunciar',f:()=>{ try{ moverPrestigio(1,'denunció una pirámide'); }catch(e){} return 'Rechazaste y denunciaste: los fiscales te agradecieron.'; }}]}; }
+  function evDian(){ const k=K();
+    return {p:8,c:()=>ACTIVO()&&tens().length>0&&!k.declarada,t:()=>'<b>La DIAN exige reportar los criptoactivos.</b> Los exchanges le entregan a la autoridad la lista de quienes operan con ellos y pide que declares lo que tienes.',
+      o:[{t:'Declararlos y pagar lo que toque',f:()=>{ k.declarada=true; return 'Declaraste tus criptoactivos: quedaste en regla.'; }},
+         {t:'Ignorar el requerimiento',f:()=>{ if(chance(.4)){ const mu=valor()*.2; tens().forEach(t=>{ t.valor*=.8; t.costo*=.8; }); try{ S.p.escandalos=(S.p.escandalos||0)+1; moverPrestigio(-3,'una sanción de la DIAN por criptoactivos'); }catch(e){} k.declarada=true; return 'La DIAN cruzó la información: te cobró una multa de '+fm(mu)+' y quedaste declarado.'; } return 'Ignoraste el requerimiento y por ahora nadie te molestó.'; }}]}; }
+  function sucesos(){ const a=A(), k=K(), L=[]; if(!tens().length&&a<2016) return L;
+    if(a===2014&&!k.hechos[2014]&&tens().some(t=>t.coin==='btc')){ k.hechos[2014]=1; L.push(evHackeo()); }
+    if(a===2022&&!k.hechos[2022]){ k.hechos[2022]=1; if(tens().length) L.push(evQuiebra()); if(buscar('alt')||buscar('usdt')) L.push(evTerra()); }
+    if(a>=2018&&tens().length&&!k.declarada&&!k.hechos['d'+a]&&chance(.15)){ k.hechos['d'+a]=1; L.push(evDian()); }
+    if(a>=2016&&chance(.06)) L.push(evEstafa());
+    if(a>=2016&&a!==2014&&a!==2022&&k.custodia==='exchange'&&tens().length&&chance(.03)) L.push(evHackeo());
+    return L.sort((x,y)=>y.p-x.p); }
+
+  /* ---------- paneles ---------- */
+  function escenaPanel(){ const k=K(), T=tens(), g=granja(), sinMov=S.mov<1?'Sin movidas':null;
+    let t='<table class="libro">'+(T.length?T.map(x=>{ const m=MON[x.coin], gan=x.costo>0?Math.round((x.valor/x.costo-1)*100):0; return '<tr><td>'+E(m.n)+'</td><td>'+fm(x.valor)+' · '+(gan>=0?'+':'')+gan+'% sobre lo que pagaste</td></tr>'; }).join(''):'<tr><td>Criptoactivos</td><td>Ninguno todavía</td></tr>')+(g?'<tr><td>Granja de minería</td><td>'+fm(g.valor)+' · se deprecia 28% al año</td></tr>':'')
+      +'<tr class="suma"><td>Total en criptoactivos</td><td>'+fm(valor())+'</td></tr><tr><td>Custodia</td><td>'+(k.custodia==='exchange'?'en el exchange (cómoda, con riesgo de quiebra o hackeo)':'billetera propia (sin intermediarios; si pierdes la llave, lo pierdes todo)')+'</td></tr><tr><td>Impuesto a las ganancias</td><td>'+Math.round(tasaGO()*100)+'%'+(A()>=2018?' · '+(k.declarada?'declarados ante la DIAN':'sin reportar'):'')+'</td></tr><tr><td>Ganado y tributado (acumulado)</td><td>'+fm(k.ganado)+' · '+fm(k.pagado)+'</td></tr></table>';
+    const ops=[];
+    disp().forEach(id=>{ const m=MON[id]; ops.push({t:'Comprar '+m.n,cat:'mercado',cerrar:false,d:m.d+' Comisión '+(m.fee*100).toFixed(1)+'%.',dis:S.efectivo<20?'No tienes con qué':sinMov,run:()=>escenaComprar(id)}); });
+    T.forEach(x=>{ const m=MON[x.coin]; ops.push({t:'Vender '+m.n+' ('+fm(x.valor)+')',cat:'mercado',cerrar:false,d:'Comisión del 1% y, si hay ganancia, el impuesto de ganancia ocasional.',dis:sinMov,run:()=>escenaVender(x.coin)}); });
+    if(T.length&&k.custodia==='exchange') ops.push({t:'Pasar a una billetera propia ('+fm(pago(5))+')',cat:'capital',cerrar:false,d:'Sin intermediarios: ya no te toca un hackeo ni una quiebra, pero perder la llave cuesta todo (2% al año).',dis:S.efectivo<pago(5)?'No te alcanza':sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); S.efectivo-=pago(5); k.custodia='propia'; log('Pasaste tus criptoactivos a una billetera propia.'); escenaPanel(); }});
+    if(T.length&&k.custodia==='propia') ops.push({t:'Volver a guardarlas en un exchange',cat:'capital',cerrar:false,d:'Más cómodo, pero dependes de la empresa.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); k.custodia='exchange'; escenaPanel(); }});
+    if(A()>=2018&&T.length&&!k.declarada) ops.push({t:'Declarar tus criptoactivos ante la DIAN',cat:'legado',cerrar:false,d:'Quedas en regla: ya no te pueden multar por no reportarlos.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); k.declarada=true; log('Declaraste tus criptoactivos ante la DIAN.'); escenaPanel(); }});
+    if(A()>=2013&&A()<=2024&&!g) ops.push({t:'Montar una granja de minería ('+fm(costoGranja())+')',cat:'capital',cerrar:false,d:'Máquinas y energía: paga según el precio del Bitcoin, se deprecia rápido y el pago se parte en dos en cada halving.',dis:S.efectivo<costoGranja()?'No te alcanza':sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); montarGranja(); escenaPanel(); }});
+    if(g) ops.push({t:'Vender la granja ('+fm(g.valor*.6)+')',cat:'capital',cerrar:false,d:'Las máquinas usadas valen el 60% de lo que se les calcula.',dis:sinMov,run:()=>{ S.mov=Math.max(0,S.mov-1); venderGranja(); escenaPanel(); }});
+    escena({rubro:'Inversiones',titulo:'Tus criptoactivos',ancho:true,cerrable:true,cuerpo:'Monedas que solo existen en una red: suben y bajan por ciclos de euforia y pánico. '+(A()<2013?'Todavía casi nadie las conoce.':A()<2018?'Ya hay exchanges en América Latina.':'Los reguladores y los estafadores las miran igual de fijo.'),html:t,opciones:ops}); }
+  function escenaComprar(id){ const m=MON[id], base=S.efectivo;
+    const ops=[[.1,'una décima parte'],[.25,'un cuarto'],[.5,'la mitad']].map(([f,n])=>{ const x=base*f; return {t:'Comprar '+n+' de tu caja ('+fm(x)+')',cat:'mercado',cerrar:false,d:'Comisión de '+fm(Math.max(2,x*m.fee))+'.',dis:S.mov<1?'Sin movidas':(S.efectivo<x+Math.max(2,x*m.fee)?'No te alcanza':null),run:()=>{ S.mov=Math.max(0,S.mov-1); comprar(id,x); escenaPanel(); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
+    escena({rubro:'Inversiones',titulo:'Comprar '+m.n,ancho:true,cerrable:true,cuerpo:m.d+' Tienes '+fm(base)+' en tu caja.',opciones:ops}); }
+  function escenaVender(id){ const t=buscar(id); if(!t){ escenaPanel(); return; } const m=MON[id];
+    const ops=[[.25,'un cuarto'],[.5,'la mitad'],[1,'todo']].map(([f,n])=>{ const x=t.valor*f, gan=Math.max(0,x-t.costo*f); return {t:'Vender '+n+' ('+fm(x)+')',cat:'mercado',cerrar:false,d:gan>0?'Ganancia de '+fm(gan)+' y un impuesto de '+fm(gan*tasaGO())+'.':'Sin ganancia: no pagas impuesto.',dis:S.mov<1?'Sin movidas':null,run:()=>{ S.mov=Math.max(0,S.mov-1); vender(id,f); escenaPanel(); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
+    escena({rubro:'Inversiones',titulo:'Vender '+m.n,ancho:true,cerrable:true,cuerpo:'Tienes '+fm(t.valor)+' en '+m.n+' (pagaste '+fm(t.costo)+').',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapFund(){ const old=window.correrFundacion; if(typeof old!=='function'||old.__v221) return; const f=function(res,m){ const r=old.apply(this,arguments); try{ anual(res); }catch(e){ console.error(e); } return r; }; f.__v221=true; window.correrFundacion=f; }
+  const TIT='Tus criptoactivos';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA221_ACC) return; window.__SA221_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&A()>=2012&&(S.p.edad||0)>=18&&!L.some(x=>x&&x.t===TIT)&&(S.efectivo>=20||tens().length||granja())){ const v=valor(); L.push({t:TIT,cat:'mercado',d:v>0?'Tienes '+fm(v)+' en criptoactivos: comprar, vender, guardar y minar.':'Bitcoin, Ether, stablecoins y tokens: comprar, guardar, minar y pagar impuestos por las ganancias.',mov:0,modal:true,run:()=>escenaPanel()}); } }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v221=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA221_CAT) return; window.__SA221_CAT=true; window.catDe=function(t){ if(t===TIT) return 'mercado'; return old.apply(this,arguments); }; }
+  function legado(tarifa){ const T=tens(), g=granja(); if(!T.length&&!g) return null; const c=JSON.parse(JSON.stringify(S.cripto221)); c.tenencias.forEach(t=>{ t.valor*=(1-(tarifa||0)); t.costo=t.valor; }); if(c.granja) c.granja.valor*=(1-(tarifa||0)); c.hechos={}; return c; }
+  function init221(){ wrapFund(); wrapAcciones(); wrapCat();
+    Object.assign(window,{valorCripto221:valor,tenenciasCripto221:tens,granjaCripto221:granja,legadoCripto221:legado,escenaCripto221:escenaPanel,comprarCripto221:comprar,venderCripto221:vender,montarGranjaCripto221:montarGranja,venderGranjaCripto221:venderGranja,anualCripto221:anual,sucesosCripto221:sucesos,retornoCripto221:retorno,tasaCripto221:tasaGO,disponiblesCripto221:disp,MONEDAS_221:MON,HALVING_221:HALVING,estadoCripto221:K,
+      eventosCripto221:{hackeo:evHackeo,quiebra:evQuiebra,terra:evTerra,estafa:evEstafa,dian:evDian}}); }
+  init221(); setTimeout(init221,40); setTimeout(init221,220); setTimeout(init221,650); setTimeout(init221,950); setTimeout(init221,1500);
+  window.__SA221={version:V221};
 })();
 </script>
 
