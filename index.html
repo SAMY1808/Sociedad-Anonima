@@ -1407,7 +1407,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v211</div>
+<div class="version-badge" id="versionBadge">v212</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4218,7 +4218,7 @@ function asignarVia(p){
 function correrParientes2(m){
   parientesVivos().forEach(p=>{
     if(!p.via) asignarVia(p);
-    if(p.edad<22) return;
+    if(p.edad<18) return;   /* v212: adultos a los 18 */
     const v=viaDe(p);
     let g=v.g+m.ciclo*.5+(p.capaz-5)*.006+rnd(-.09,.11);
     if(p.via==='publico') g+=((gob().publico||1)-1)*.06;
@@ -7037,7 +7037,7 @@ function listaAcciones(){
         const k=pick(['intelecto','carisma','disciplina']); h.atr[k]=clamp(h.atr[k]+1,1,10);
         log(esc(h.nombre)+' avanzó en su formación ('+k+' +1).','bien');}});
   });
-  S.familia.hijos.filter(h=>h.edad>=22).forEach(h=>{
+  S.familia.hijos.filter(h=>h.edad>=18).forEach(h=>{
     if(S.emp&&!S.junta.some(j=>j.hijo===h.nombre)) A.push({t:'Meter a '+h.nombre+' en la junta', d:'Lealtad total, pero el mercado descuenta gobernanza familiar.', mov:1,
       dis:S.junta.length>=7?'Junta llena':null,
       run:()=>{ S.junta.push({nombre:h.nombre+' '+S.p.apellido,arq:'familiar',lealtad:92,anios:0,hijo:h.nombre});
@@ -7858,8 +7858,8 @@ const EVENTOS=[
        moverPrestigio(-1,'en la familia se supo');
        return 'Le dijiste que no. En los almuerzos de diciembre se va a acordar.'; }}]},
 
- {p:1.8,c:()=>S.emp&&parientesVivos().some(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=22),
-  t:()=>{ const c=parientesVivos().filter(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=22);
+ {p:1.8,c:()=>S.emp&&parientesVivos().some(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=18),
+  t:()=>{ const c=parientesVivos().filter(x=>['primo','prima','sobrino','sobrina'].includes(x.rel)&&x.edad>=18);
     if(!c.length) return null; const pa=pick(c); S._pa=pa.pid;
     return 'Tu '+pa.rel+' '+esc(nombrePariente(pa))+' quiere entrar a trabajar en '+esc(S.emp.nombre)+'. La familia ya está opinando.'; },
   o:[{t:'Darle el puesto',f:()=>{ const pa=(S.parientes||[]).find(x=>x.pid===S._pa); if(!pa) return 'Se resolvió solo.';
@@ -10728,7 +10728,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     (S.familia?.hijos||[]).forEach(h=>{
       s35NormalizarHijo(h);
       const edad=Math.max(0,Number(h.edad)||0);
-      if(edad>=22){
+      if(edad>=18){
         const base=Number(h.patrimonio)||0;
         const salario= h.carreraProf ? rnd(20,85) : (h.rumbo?rnd(16,55):rnd(8,30));
         const rendimiento=(h.rasgos?.ambicion||50)/100*.06 + (h.reputacion||50)/100*.03 + rnd(-.035,.055);
@@ -10986,7 +10986,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     // Los nietos ya fueron envejecidos por la capa v30; aquí damos autonomía a partir de ellos.
     if(d._v40Visitado===S.anio) return;
     d._v40Visitado=S.anio;
-    if(d.edad>=22) pareja40(d);
+    if(d.edad>=18) pareja40(d);
     if(d.pareja&&d.pareja._v42ParejaAnio!==S.anio){
       d.pareja.edad=Math.min(100,Math.max(0,Number(d.pareja.edad)||Math.max(20,(d.edad||20)-ri(3,4)))+1);
       d.pareja._v42ParejaAnio=S.anio;
@@ -27997,7 +27997,7 @@ install();setTimeout(install,1200);
     let comp=ri(4,9), hon=ri(3,10), leal=ri(40,70), sueldo=Math.round(escala(e)*(6+comp*2.2)*(/^filial/.test(r)?1.4:1));
     if(origen==='adentro'){ comp=ri(3,7); leal=ri(70,92); sueldo=Math.round(sueldo*.7); }
     if(origen==='cazatalentos'){ comp=ri(7,10); sueldo=Math.round(sueldo*1.35); }
-    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=22&&!h.cargo149&&!h.cargo155); const h=H.length?pick(H):null; if(!h) return null;
+    if(origen==='familia'){ const H=((S.familia&&S.familia.hijos)||[]).filter(h=>h.vivo!==false&&h.edad>=18&&!h.cargo149&&!h.cargo155); const h=H.length?pick(H):null; if(!h) return null;
       nombre=h.nombre+' '+(h.apellido||S.p.apellido); comp=clamp(Math.round(((h.formacion||40)/12)+rnd(0,2)),2,9); hon=ri(6,10); leal=95; sueldo=Math.round(sueldo*.8); return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,hijo:h.nombre,edad:h.edad}; }
     return {nombre,comp,hon,leal,sueldo,origen,desde:S.anio,edad:ri(32,58)};
   }
@@ -29082,9 +29082,9 @@ install();setTimeout(install,1200);
     try{ (S.familia.hijos||[]).filter(h=>h.vivo!==false&&(h.edad||0)>=(todos?0:22)).forEach(h=>{ if(!todos&&(h.cargo155||h.presideA154||h.cargo149)) return; const a=h.atr||{};
       out.push({tipo:'hijo',key:h.fid||h.nombre,nombre:h.nombre+' '+(h.apellido||S.p.apellido||S.dinastia),rel:etiquetaHijo(h),edad:h.edad,capaz:clamp(Math.round(((a.intelecto||5)+(a.disciplina||5))/2+((h.formacion||40)-40)/25),2,10),integ:clamp(Math.round(5+((a.disciplina||5)-5)*.5),2,10),carisma:a.carisma||5,ref:h}); }); }catch(e){}
     try{ const pa=S.familia&&S.familia.pareja; if(pa&&pa.nombre&&(todos||(!pa.cargo155&&(pa.edad||0)>=25))) out.push({tipo:'pareja',key:'pareja',nombre:pa.nombre,rel:pa.sexo==='m'?'tu esposa':'tu esposo',edad:pa.edad||40,capaz:6,integ:7,carisma:5,ref:pa}); }catch(e){}
-    try{ parientesVivos().filter(q=>todos||((q.edad||0)>=22&&q.edad<=75&&!q.presideA&&!q.gerenciaDe&&!q.cargo155)).forEach(q=>out.push({tipo:'pariente',key:q.pid,nombre:nombrePariente(q),rel:relacionPorSexo(q.rel,q.sexo),edad:q.edad,capaz:clamp(Math.round(q.capaz||5),1,10),integ:clamp(Math.round(q.honrado||6),1,10),carisma:5,ref:q})); }catch(e){}
+    try{ parientesVivos().filter(q=>todos||((q.edad||0)>=18&&q.edad<=75&&!q.presideA&&!q.gerenciaDe&&!q.cargo155)).forEach(q=>out.push({tipo:'pariente',key:q.pid,nombre:nombrePariente(q),rel:relacionPorSexo(q.rel,q.sexo),edad:q.edad,capaz:clamp(Math.round(q.capaz||5),1,10),integ:clamp(Math.round(q.honrado||6),1,10),carisma:5,ref:q})); }catch(e){}
     return out; }
-  const personasCand=()=>personas(true).filter(x=>x.edad>=21&&!(x.ref.presideA||x.ref.gerenciaDe||x.ref.presideA154||x.ref.cargo149)&&!P().cargos.some(c=>c.tipo===x.tipo&&String(c.key)===String(x.key)&&c.pt!=='ele'));
+  const personasCand=()=>personas(true).filter(x=>x.edad>=18&&!(x.ref.presideA||x.ref.gerenciaDe||x.ref.presideA154||x.ref.cargo149)&&!P().cargos.some(c=>c.tipo===x.tipo&&String(c.key)===String(x.key)&&c.pt!=='ele'));
   const buscar=(tipo,key)=>personas(true).find(x=>x.tipo===tipo&&String(x.key)===String(key));
   const disponibles=tipo=>{ const p=P(); return PUESTOS.filter(x=>x.tipo===tipo&&S.anio>=x.d&&!(x.h&&S.anio>x.h)&&!p.cargos.some(c=>c.puesto===x.id)); };
   const costoPuesto=x=>({min:55,emb:38,emp:48}[x.tipo]||50)+x.poder*9;
@@ -34803,7 +34803,7 @@ install();setTimeout(install,1200);
       o:[{t:'Aceptar el pacto ('+fm(c)+')',f:()=>{ pagar(c); const v=V(r); v.pacto=a+4; v.enemistad=0; prest(1,'una alianza con '+nom(r)); try{ S.p.redes=cl((S.p.redes||0)+4,0,100); }catch(e){} return 'Firmaron un pacto de cuatro años con '+E(nom(r))+'.'; }},
          {t:'Pedir más a cambio',f:()=>{ if(chance(.5)){ const v=V(r); v.pacto=a+3; try{ S.p.redes=cl((S.p.redes||0)+3,0,100); }catch(e){} return 'Negociaste y lograron un pacto de tres años, sin cuota.'; } V(r).enemistad=Math.min(100,V(r).enemistad+8); return 'Se ofendieron y levantaron la reunión.'; }},
          {t:'Declinar',f:()=>{ V(r).enemistad=Math.min(100,V(r).enemistad+10); return 'Declinaste. En esa casa lo van a tener en cuenta.'; }}]}; }
-  function evMatrimonio(r){ const h=((S.familia&&S.familia.hijos)||[]).filter(x=>x&&x.vivo!==false&&(x.edad||0)>=22&&!x.casadoCon&&!x.muerto)[0]; if(!h) return null; const dote=Math.max(60,pat()*.05);
+  function evMatrimonio(r){ const h=((S.familia&&S.familia.hijos)||[]).filter(x=>x&&x.vivo!==false&&(x.edad||0)>=18&&!x.casadoCon&&!x.muerto)[0]; if(!h) return null; const dote=Math.max(60,pat()*.05);
     return {p:8,c:()=>!!r.viva&&!!h&&!h.casadoCon,t:()=>'<b>'+E(nom(r)).replace(/^./,x=>x.toUpperCase())+' pide la mano de '+E(h.nombre)+'</b> para un hijo de la casa. Con un matrimonio así los apellidos quedan unidos, y el patriarca ofrece una dote de '+fm(dote)+'.',
       o:[{t:'Aceptar el matrimonio',f:()=>{ if((h.vinculo||55)<40&&chance(.5)){ h.vinculo=cl((h.vinculo||55)-12,0,100); return E(h.nombre)+' se negó delante de todos y quedó un papelón.'; } h.casadoCon=r.apellido; S.efectivo+=dote; const v=V(r); v.aliada='tu'; v.pacto=A()+6; v.enemistad=0; prest(4,'el matrimonio de '+h.nombre+' con '+nom(r)); try{ S.p.redes=cl((S.p.redes||0)+6,0,100); }catch(e){} hito(h.nombre+' se casó con los '+r.apellido); return 'Se casaron. Entraron '+fm(dote)+' de dote y quedan emparentados con '+E(nom(r))+', con un pacto de seis años.'; }},
          {t:'Dejar que decida '+E(h.nombre),f:()=>{ h.vinculo=cl((h.vinculo||55)+8,0,100); V(r).enemistad=Math.min(100,V(r).enemistad+6); return 'Le dijiste que eso lo decide quien se casa. En esa casa no gustó.'; }}]}; }
@@ -34836,7 +34836,7 @@ install();setTimeout(install,1200);
   function escenaCasas186(){ const L=RV(); if(!L.length){ escena({rubro:'El club',titulo:'Las otras casas',cuerpo:'Todavía no hay otras casas que seguir.',opciones:[{t:'Volver',cat:'legado',run:()=>{}}],cerrable:true}); return; }
     escena({rubro:'El club',titulo:'Las otras casas',ancho:true,cerrable:true,cuerpo:'Cada casa tiene su patriarca, sus aliados y sus enemigos. Elige una para proponerle una alianza o un matrimonio.',
       opciones:L.slice().sort((a,b)=>b.patrimonio-a.patrimonio).map(r=>{ const v=V(r); return {t:'Los '+E(r.apellido)+' · '+E(v.jefe.nombre)+', '+v.jefe.edad+' años',cat:'legado',d:fm(r.patrimonio)+' · '+E(r.compania||'')+' · '+relTxt(r)+'.',cerrar:false,run:()=>{ cerrarModal(); escenaCasa186(r); }}; })}); }
-  function escenaCasa186(r){ const v=V(r), ops=[], c=esc0(), h=((S.familia&&S.familia.hijos)||[]).find(x=>x&&x.vivo!==false&&(x.edad||0)>=22&&!x.casadoCon&&!x.muerto);
+  function escenaCasa186(r){ const v=V(r), ops=[], c=esc0(), h=((S.familia&&S.familia.hijos)||[]).find(x=>x&&x.vivo!==false&&(x.edad||0)>=18&&!x.casadoCon&&!x.muerto);
     const pr=cl(.45+(prestigio()-r.prestigio)/250-(v.enemistad/200),.12,.85);
     ops.push({t:'Proponer una alianza · '+fm(c),cat:'legado',d:'Probabilidad de que acepten: '+Math.round(pr*100)+'%. Un pacto de cuatro años: se acaba la guerra de precios y suben tus contactos.',dis:pacto(r)?'Ya hay un pacto':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; pagar(c); if(chance(pr)){ v.pacto=A()+4; v.enemistad=0; prest(1,'una alianza con '+nom(r)); log('<b>'+E(nom(r)).replace(/^./,x=>x.toUpperCase())+'</b> aceptó tu propuesta: pacto de cuatro años.','bien'); } else { v.enemistad=Math.min(100,v.enemistad+5); log(E(nom(r))+' rechazó la alianza.','mal'); } cerrarModal(); render(); }});
     if(h) ops.push({t:'Proponer un matrimonio para '+E(h.nombre),cat:'familia',d:'Une los apellidos: pacto de seis años y dote, si aceptan.',dis:v.aliada==='tu'?'Ya están emparentados':sinMov(),cerrar:false,run:()=>{ if(!movida()) return; const ok=chance(cl(pr+.05,.1,.85)); if(ok&&(h.vinculo||55)>=40){ h.casadoCon=r.apellido; const dote=Math.max(40,pat()*.03); S.efectivo+=dote; v.aliada='tu'; v.pacto=A()+6; v.enemistad=0; prest(3,'el matrimonio de '+h.nombre); log('<b>'+E(h.nombre)+'</b> se casó con los <b>'+E(r.apellido)+'</b>: entró una dote de '+fm(dote)+' y hay pacto de seis años.','hito'); } else { v.enemistad=Math.min(100,v.enemistad+4); log('Los '+E(r.apellido)+' declinaron el matrimonio.','mal'); } cerrarModal(); render(); }});
@@ -37711,6 +37711,34 @@ install();setTimeout(install,1200);
   const V211='v211';
   window.SECCIONES_EMPLEO_211=['Fuerzas armadas','Iglesia','Sector público','Academia','Justicia'];
   window.__SA211={version:V211};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v212 · LOS HIJOS Y LOS NIETOS SON ADULTOS A LOS 18
+   La v208 puso la mayoría de edad en 18 para quien juega y para el heredero.
+   Faltaban los hijos, los nietos y la parentela, que seguían esperando a los
+   22 para casi todo. Ahora, a los 18:
+   - Los parientes adultos empiezan a mover su caudal.
+   - Pueden tomar una silla en la junta de tus compañías.
+   - Pueden ocupar cargos y presidencias de la familia (la lista de
+     candidatos a la presidencia de una compañía y a los cargos del Estado
+     los incluye).
+   - Reciben propuestas de matrimonio de otras casas (y los nietos empiezan
+     a formar pareja).
+   - Los primos y sobrinos adultos vuelven a pedirte empleo y favores.
+   Siguen pidiendo más años los estudios y la profesión (la carrera
+   profesional llega a los 22) y los cargos de elección (que fijan sus
+   propios mínimos). El sistema viejo de la «casa viva» (v35: ingresos y
+   ofertas propias de los hijos) está apagado desde hace mucho porque busca
+   window.S, que no existe; su umbral también pasó a 18, por si algún día se
+   enciende.
+   ========================================================================== */
+(function(){
+  const V212='v212';
+  window.EDAD_ADULTO_HIJOS_212=18;
+  window.__SA212={version:V212};
 })();
 </script>
 
