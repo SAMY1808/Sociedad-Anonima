@@ -1,147 +1,119 @@
 
 /* ==========================================================================
-   v218 · PREMIOS Y RECONOCIMIENTOS DE LA DINASTÍA
-   Un registro de lo que la casa recibe, y los sucesos que lo traen, cada uno
-   desde su época:
-   - PREMIOS NOBEL (desde 1901): Literatura (para el escritor de la casa que
-     llega a la cima de las letras), Paz (altos cargos políticos y
-     diplomáticos), y Medicina, Física, Química o Economía (desde 1969) para
-     la cima de la academia. Son rarísimos y valen mucho: el diploma, el
-     dinero y un lugar en la historia.
-   - REINADOS: la hija (o tú, si eres mujer) entre los 17 y los 26 años
-     puede ser reina de su ciudad (el Carnaval de Barranquilla, la Feria de
-     las Flores, la Feria de Cali...), del Reinado Nacional de la Belleza
-     (desde 1934) y de Miss Universo (desde 1952), con campaña de lujo o sin
-     ella.
-   - CONDECORACIONES: la Orden de Boyacá (1819), la Cruz de Boyacá (1919),
-     la Orden de San Carlos (1948) y las extranjeras (la Legión de Honor, la
-     Orden de Isabel la Católica...), para quien tiene nombre y servicios.
-   - PREMIOS DEL OFICIO: el deportista del año, los premios nacionales de
-     artes, letras y música, el Grammy Latino (2000), los de periodismo
-     (Cabot 1939, Simón Bolívar 1975) y el empresario del año, según tu
-     carrera (v216) y tus compañías.
-   - DOCTORADOS HONORIS CAUSA de las universidades de la época.
-   Todo se guarda en el «Salón de honor de la casa», pasa a los herederos y
-   suma prestigio. Cada premio tiene decisiones (viajar o donar el dinero,
-   campaña de lujo o sencilla, aceptar o rechazar por principios).
+   v219 · TELECOMUNICACIONES COMO CLASE DE NEGOCIO
+   Entra por la misma puerta que las demás, en «Tecnología y medios», y
+   funciona como una red de unidades por época:
+   - 1865: el TELÉGRAFO (oficinas y líneas; declina desde la radio y el
+     teléfono, y desaparece hacia 1975).
+   - 1884: la TELEFONÍA local (centrales y redes de líneas) y, desde 1925, la
+     LARGA DISTANCIA y los enlaces (el Estado entra en 1947 con Telecom).
+   - 1992: la TELEVISIÓN POR CABLE y satelital; 1994: la red CELULAR (con la
+     licitación de la telefonía móvil) y, desde 1996, el INTERNET y la banda
+     ancha; 2008: la FIBRA ÓPTICA al hogar.
+   - Apoyos: cuadrillas de instalación y mantenimiento (1865), centro de
+     operaciones y conmutación (1920), torres y antenas propias (1994) y
+     cable submarino y enlaces internacionales (2000). Bajan los costos y
+     las caídas de las unidades que cubren.
+   - Sucesos: la red que se cae, los cables y las torres robados o
+     volados (la guerra), los topes de tarifas de la regulación, las
+     licitaciones de espectro (celular 1994, 4G en 2013, 5G en 2023), las
+     guerras de precios, la clonación de celulares y los ciberataques, la
+     migración a la siguiente tecnología y la competencia de la empresa
+     estatal Telecom (1947-2003).
+   La compañía queda en el sector «Software y datos», con las regulaciones
+   de cada época: el Gobierno, el Ministerio de Comunicaciones (1967), la
+   Comisión de Regulación de Telecomunicaciones (1994) y el MinTIC y la CRC
+   (2009).
    ========================================================================== */
 (function(){
-  const V218='v218';
+  const V219='v219';
   const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
   const fm=x=>fmt(Math.round(x));
   const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
-  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
-  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
-  const P=()=>{ if(!S.premios218) S.premios218={lista:[],hechos:{}}; return S.premios218; };
-  const lista=()=>((typeof S!=='undefined'&&S&&S.premios218&&S.premios218.lista)||[]);
-  const pago=b=>Math.round((b||0)*(1+(A()-1900)*.004));
-  const pres=()=>{ try{ return prestigio(); }catch(e){ return 40; } };
-  const ciudad=()=>(S.hogar&&S.hogar.ciudad)||'Bogotá';
-  const C216=()=>{ try{ return typeof window.carrera216==='function'?window.carrera216():null; }catch(e){ return null; } };
-  const yo=()=>S.p.nombre||'Tú';
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const RP=(r,u)=>window.reposUnidad176(r,u);
+  const ING=(r,u)=>Math.round(Math.max(1,u.rev||RP(r,u)*((window.tipoDe176(r.clase,u.tipo)||{rc:.5}).rc)));
+  const X=(t,o)=>window.evento176(t,o), G=(e,m)=>window.gastoRed176(e,m);
+  const R=e=>window.redNegocio176(e);
+  const TEL_DESDE=1865;
 
-  /* ---------- el registro ---------- */
-  function otorgar(r){ const o=P(); const x=Object.assign({anio:A()},r); o.lista.push(x);
-    try{ if(x.pres) moverPrestigio(x.pres,x.motivo||('recibió '+x.n)); }catch(e){}
-    if(x.propio){ try{ S.p.reputacion=clamp(S.p.reputacion+(x.rep||0),0,100); S.p.redes=clamp((S.p.redes||0)+(x.redes||0),0,100); }catch(e){} }
-    if(x.dinero) S.efectivo+=x.dinero;
-    if(x.hito){ try{ hito(x.n+(x.quienN&&!x.propio?' ('+x.quienN+')':'')); }catch(e){} }
-    log('<b>'+E(x.n)+'</b>'+(x.quienN&&!x.propio?' para '+E(x.quienN):'')+'. '+(x.nota||''),'hito'); return x; }
+  const TEL={n:'Telecomunicaciones',sector:'tech',grupo:'Tecnología y medios',desde:TEL_DESDE,un:['red o servicio','redes y servicios'],emp:'Telecomunicaciones',
+    d:'Telégrafo, teléfono, celular, internet y fibra óptica, según la época: una red que se tiende, se conecta y se cobra por uso o por suscripción. La inversión no termina nunca y los clientes se quejan de lo que no funciona. Con cuadrillas, centro de operaciones y torres propias las caídas bajan; sin ellas, la red se enreda al crecer.',
+    cs:.1,el:.35,rs:.6,sp:.8,ts:.15,vol:.1,pand:[1.1,1.15,1.05],kv:8,
+    aut:[[1865,'el Gobierno (Correos y Telégrafos)'],[1967,'el Ministerio de Comunicaciones'],[1994,'la Comisión de Regulación de Telecomunicaciones'],[2009,'el MinTIC y la Comisión de Regulación de Comunicaciones']],
+    tit:[[1,'Operador local'],[3,'Operador regional'],[8,'Operador nacional'],[18,'Gigante de las telecomunicaciones']],
+    tipos:[
+      {id:'telegrafo',n:'Oficina y línea de telégrafo',desde:1865,hasta:1975,base:120,rc:1.3,mg:.14,u0:.7,capN:800,capU:'telegramas al día',obra:[0,1,1],princ:true,d:'Un alambre entre dos plazas y un telegrafista: lo único que viaja más rápido que un jinete.'},
+      {id:'telefonia',n:'Central telefónica y red local',desde:1884,base:300,rc:1.2,mg:.16,u0:.68,capN:3000,capU:'líneas',obra:[0,1,2],princ:true,d:'Una central, postes, cables y abonados que pagan mensualidad.'},
+      {id:'larga',n:'Larga distancia y enlaces',desde:1925,base:500,rc:1.1,mg:.2,u0:.65,capN:1500,capU:'circuitos',obra:[0,1,2],princ:true,vol:.14,d:'Conectar ciudades y países: cada circuito se cobra por minuto.'},
+      {id:'cable',n:'Televisión por cable y satelital',desde:1992,base:800,rc:1.15,mg:.18,u0:.62,capN:80000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.16,d:'Paquetes de canales por suscripción, con la guerra de contenidos de por medio.'},
+      {id:'celular',n:'Red celular (telefonía móvil)',desde:1994,base:2500,rc:1.1,mg:.22,u0:.66,capN:200000,capU:'suscriptores',obra:[1,2,2],princ:true,vol:.16,d:'Antenas, espectro y millones de minutos: el negocio de volumen del siglo.'},
+      {id:'banda',n:'Internet y banda ancha',desde:1996,base:900,rc:1.2,mg:.2,u0:.64,capN:50000,capU:'suscriptores',obra:[0,1,2],princ:true,vol:.2,d:'Conexiones por línea y por cable: cada año piden más velocidad.'},
+      {id:'fibra',n:'Fibra óptica al hogar',desde:2008,base:1500,rc:1.15,mg:.24,u0:.62,capN:100000,capU:'hogares',obra:[1,2,2],ciu:true,princ:true,vol:.2,d:'Tender fibra cuesta una fortuna y lo que se tiende no se va.'},
+      {id:'cuadrillas',n:'Cuadrillas de instalación y mantenimiento',desde:1865,base:200,rol:'apoyo',cubre:6,bono:.02,falta:.03,d:'Quien instala, repara y cambia lo que se rompe. Atiende hasta 6 redes.'},
+      {id:'central',n:'Centro de operaciones y conmutación',desde:1920,base:600,rol:'apoyo',cubre:8,bono:.025,falta:.03,d:'Vigila la red las veinticuatro horas y enruta el tráfico. Atiende hasta 8 redes.'},
+      {id:'torres',n:'Torres y antenas propias',desde:1994,base:1200,rol:'apoyo',cubre:8,bono:.03,falta:0,d:'Dejar de pagar arriendo por cada torre baja los gastos de hasta 8 redes.'},
+      {id:'submarino',n:'Cable submarino y enlaces internacionales',desde:2000,base:2000,rol:'apoyo',cubre:10,bono:.02,falta:.01,d:'Tráfico propio hacia el exterior sin pagarle peaje a nadie. Atiende hasta 10 redes.'}]};
 
-  /* ---------- Nobel ---------- */
-  const NOBEL=[['Literatura','de Literatura',1901],['Paz','de la Paz',1901],['Medicina','de Medicina',1901],['Física','de Física',1901],['Química','de Química',1901],['Economía','de Economía',1969]];
-  function polAlto(){ try{ const q=S.carrera&&S.carrera.politica; if(!q) return false; const cg=(typeof cargoPolitico==='function'&&cargoPolitico(q.cargo))||null; const n=(cg&&cg.n)||String(q.cargo||''); return !!((q.activo||q.mandatos>0)&&/Senador|Presidente|Gobernador/i.test(n)); }catch(e){ return false; } }
-  function dipAlto(){ try{ const d=S.carrera&&S.carrera.diplomacia; return !!(d&&d.activo&&d.nivel>=5); }catch(e){ return false; } }
-  function acadAlto(){ try{ return !!(S.carrera&&(S.carrera.ruta==='academico'||S.carrera.ruta==='docente')&&S.carrera.nivel>=4&&S.p.educacion>=4); }catch(e){ return false; } }
-  function nobelPosibles(){ const L=[], a=A(), q=C216(), e=S.p.edad||0; if(e<40) return L;
-    if(q&&q.id==='artista'&&q.disc==='literatura'&&q.nivel>=4&&q.ind.fama>=70&&q.ind.critica>=60&&e>=50) L.push([NOBEL[0],q.nivel>=5?.05:.025]);
-    if((polAlto()||dipAlto())&&pres()>=70&&a>=1901) L.push([NOBEL[1],.015]);
-    if(acadAlto()&&pres()>=55){ const C=NOBEL.slice(2).filter(n=>a>=n[2]); if(C.length) L.push([C[ri(0,C.length-1)],.02]); }
-    return L.filter(x=>!P().hechos['nobel:'+x[0][0]]&&a>=x[0][2]); }
-  function evNobel(n){ const premio='Premio Nobel '+n[1], dinero=pago(70), q=C216();
-    return {p:10,c:()=>ACTIVO(),t:()=>'<b>Suena el teléfono desde Estocolmo.</b> La Academia Sueca te concede el <b>'+E(premio)+'</b>. Es el reconocimiento más alto del mundo y toda la casa lo celebra.',
-      o:[{t:'Viajar a Estocolmo a recibirlo ('+fm(dinero)+' en metálico)',f:()=>{ P().hechos['nobel:'+n[0]]=1; otorgar({id:'nobel:'+n[0],n:premio,cat:'nobel',quienN:yo(),propio:true,pres:14,rep:10,redes:12,dinero,hito:true,nota:'Recibiste el diploma, la medalla y '+fm(dinero)+'.'}); if(q&&q.logros) q.logros.push({a:A(),t:premio}); return 'Recibiste el '+premio+' en Estocolmo: tu nombre entra en la historia.'; }},
-         {t:'Donar el dinero a una obra social',f:()=>{ P().hechos['nobel:'+n[0]]=1; otorgar({id:'nobel:'+n[0],n:premio,cat:'nobel',quienN:yo(),propio:true,pres:17,rep:12,redes:12,hito:true,nota:'Donaste el dinero a una obra social y el país se emocionó.'}); return 'Donaste el premio en metálico: el gesto pesó casi tanto como la medalla.'; }}]}; }
+  const EV=[
+    /* la red se cae */
+    (e,r,u)=>()=>{ const x=Math.round(RP(r,u)*.025);
+      X('<b>Se cae la red de '+E(u.nom)+'.</b> '+(A()>=1994?'Miles de usuarios quedan sin servicio durante horas y las quejas llegan a la regulación.':'Las líneas quedan mudas un día entero y los clientes protestan en la puerta.'),
+        [{t:'Compensar a los clientes ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+4,5,99); return 'Compensaste a los clientes con '+fm(x)+': se lo reconocieron.'; }},
+         {t:'Reparar sin compensar a nadie',f:()=>{ G(e,x*.25); u.rep=cl(u.rep-6,5,99); return 'Repararon rápido y no pagaste nada, pero la reputación sufrió.'; }}]); },
+    /* cables y torres: robo, temporal o atentado */
+    (e,r,u)=>A()>=1900?()=>{ const x=Math.round(RP(r,u)*.04), guerra=(S.tension||35)>=45&&A()>=1980;
+      X('<b>'+(guerra?'Vuelan torres y cables de '+E(u.nom)+'.':A()<1960?'Un temporal derriba los postes y las líneas de '+E(u.nom)+'.':'Se roban los cables de cobre de '+E(u.nom)+'.')+'</b> '+(guerra?'La guerra llegó a la red: hay zonas sin comunicación.':'Reponer el material cuesta y la zona queda incomunicada.'),
+        [{t:'Reconstruir de inmediato ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+2,5,99); return 'Reconstruiste la red en pocos días: costó '+fm(x)+'.'; }},
+         {t:guerra?'Pedirle protección a la fuerza pública':'Reponer poco a poco',f:()=>{ G(e,x*.5); u.rep=cl(u.rep-4,5,99); if(guerra) S.tension=cl((S.tension||35)+1,0,100); return guerra?'La fuerza pública cubrió las torres, pero la zona quedó con servicio a medias.':'Repusiste de a poco: la zona sufrió y costó menos.'; }}]); }:null,
+    /* la regulación fija un tope */
+    (e,r,u)=>A()>=1947?()=>{ const x=Math.round(ING(r,u)*.06), aut=(CL_aut()||'la autoridad');
+      X('<b>'+E(aut.charAt(0).toUpperCase()+aut.slice(1))+' fija un tope a las tarifas de '+E(u.nom)+'.</b> Dice que el servicio es esencial y no puede cobrarse a cualquier precio.',
+        [{t:'Acatar el tope',f:()=>{ G(e,x); return 'Acataste el tope: dejaste de ganar '+fm(x)+' este año.'; }},
+         {t:'Demandarlo ('+fm(x*.4)+')',f:()=>{ G(e,x*.4); if(chance(.5)){ return 'Ganaste la demanda: el tope se anuló.'; } G(e,x); u.rep=cl(u.rep-2,5,99); return 'Perdiste la demanda: pagaste el abogado y acataste el tope.'; }}]); }:null,
+    /* el espectro: la licitación celular (1994), 4G (2013) y 5G (2023) */
+    (e,r,u)=>(u.tipo==='celular'&&((A()>=1994&&A()<=1996)||(A()>=2011&&A()<=2013)||(A()>=2022&&A()<=2024)))?()=>{ const gen=A()<=1996?'la telefonía celular':A()<=2013?'el 4G':'el 5G', x=Math.round(RP(r,u)*.12);
+      X('<b>El Gobierno licita el espectro de '+gen+'.</b> Quien no tenga una porción no podrá ofrecer el servicio en '+E(u.ciudad)+'.',
+        [{t:'Pujar fuerte ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+5,5,99); u.cons=cl(u.cons+8,5,99); return 'Ganaste el espectro por '+fm(x)+': tu red se prepara para '+gen+'.'; }},
+         {t:'Pujar con prudencia ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.5)){ u.rep=cl(u.rep+3,5,99); return 'Ganaste una porción pequeña por '+fm(x*.5)+'.'; } u.cons=cl(u.cons-6,5,99); return 'Perdiste la puja: tus clientes se van con quien sí tiene el espectro.'; }},
+         {t:'No participar',f:()=>{ u.cons=cl(u.cons-9,5,99); u.rep=cl(u.rep-2,5,99); return 'No participaste: te quedaste con la tecnología de antes.'; }}]); }:null,
+    /* guerra de precios */
+    (e,r,u)=>(['celular','banda','cable','larga'].includes(u.tipo)&&A()>=1992)?()=>{ const x=Math.round(ING(r,u)*.06);
+      X('<b>Estalla una guerra de precios por '+E(u.nom)+'.</b> Los competidores regalan minutos y megas para quitarte clientes.',
+        [{t:'Igualar los precios ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+1,5,99); return 'Igualaste los precios: perdiste '+fm(x)+' de margen pero conservaste a tus clientes.'; }},
+         {t:'Competir con servicio ('+fm(x*.5)+')',f:()=>{ G(e,x*.5); if(chance(.55)){ u.rep=cl(u.rep+5,5,99); return 'El servicio ganó: tus clientes se quedaron.'; } u.cons=cl(u.cons-5,5,99); return 'Perdiste clientes con el servicio caro: no alcanzó.'; }}]); }:null,
+    /* fraude y ciberataques */
+    (e,r,u)=>(u.tipo==='celular'&&A()>=1995&&A()<=2008)?()=>{ const x=Math.round(ING(r,u)*.05);
+      X('<b>Clonan celulares de '+E(u.nom)+'.</b> Llegan facturas de llamadas que nadie hizo y los clientes pelean la cuenta.',
+        [{t:'Asumir el fraude y blindar la red ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep+3,5,99); return 'Asumiste el fraude y blindaste la red: costó '+fm(x)+'.'; }},
+         {t:'Cobrarles a los clientes',f:()=>{ u.rep=cl(u.rep-8,5,99); return 'Les cobraste a los clientes lo que no hablaron: la reputación se fue al suelo.'; }}]); }:(A()>=2010&&['banda','fibra','celular'].includes(u.tipo))?()=>{ const x=Math.round(ING(r,u)*.06);
+      X('<b>Un ciberataque tumba los sistemas de '+E(u.nom)+'.</b> Piden un rescate para devolver los datos de los clientes.',
+        [{t:'Pagar el rescate ('+fm(x)+')',f:()=>{ G(e,x); u.rep=cl(u.rep-2,5,99); return 'Pagaste '+fm(x)+': los datos volvieron, la fama de segura no.'; }},
+         {t:'No pagar y reconstruir ('+fm(x*.6)+')',f:()=>{ G(e,x*.6); u.rep=cl(u.rep-5,5,99); return 'Reconstruiste los sistemas sin pagar: costó '+fm(x*.6)+' y tardó semanas.'; }}]); }:null,
+    /* migrar a la siguiente tecnología */
+    (e,r,u)=>(u.tipo==='celular'&&A()>=2010)||(u.tipo==='telefonia'&&A()>=1990&&A()<=2008)?()=>{ const x=Math.round(RP(r,u)*.08), cel=u.tipo==='celular';
+      X('<b>Los clientes de '+E(u.nom)+' piden '+(cel?'más velocidad: ya no les alcanza la red que tienes.':'líneas modernas: les resulta lenta y anticuada.')+'</b> Cada año que pasa pierdes frente a quien actualizó.',
+        [{t:'Invertir en la nueva tecnología ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+8,5,99); u.rep=cl(u.rep+3,5,99); return 'Actualizaste la red por '+fm(x)+': los clientes lo notaron.'; }},
+         {t:'Esperar un año más',f:()=>{ u.cons=cl(u.cons-6,5,99); return 'Esperaste: ahorraste plata y perdiste clientes.'; }}]); }:null,
+    /* la empresa estatal Telecom compite */
+    (e,r,u)=>(['telefonia','larga'].includes(u.tipo)&&A()>=1947&&A()<=2003)?()=>{ const x=Math.round(ING(r,u)*.05);
+      X('<b>Telecom, la empresa del Estado, baja las tarifas en '+E(u.ciudad)+'.</b> Con el subsidio del presupuesto puede cobrar menos que tú.',
+        [{t:'Bajar tus tarifas ('+fm(x)+')',f:()=>{ G(e,x); return 'Bajaste las tarifas: perdiste '+fm(x)+' de margen.'; }},
+         {t:'Quejarte ante la regulación',f:()=>{ if(chance(.4)){ u.rep=cl(u.rep+3,5,99); return 'La regulación te dio la razón y Telecom subió sus tarifas.'; } u.cons=cl(u.cons-5,5,99); return 'No te hicieron caso: perdiste clientes.'; }}]); }:null,
+    /* el declive del telégrafo */
+    (e,r,u)=>(u.tipo==='telegrafo'&&A()>=1935)?()=>{ const x=Math.round(RP(r,u)*.05);
+      X('<b>El telégrafo pierde clientes frente al teléfono y la radio.</b> La oficina de '+E(u.ciudad)+' recibe cada año menos telegramas.',
+        [{t:'Reconvertir la oficina ('+fm(x)+')',f:()=>{ G(e,x); u.cons=cl(u.cons+4,5,99); return 'Reconvertiste la oficina a giros y correo: se sostiene.'; }},
+         {t:'Dejarla morir',f:()=>{ u.cons=cl(u.cons-7,5,99); u.rep=cl(u.rep-2,5,99); return 'La dejaste como estaba: cada año valdrá menos.'; }}]); }:null];
+  function CL_aut(){ const a=A(); let n=null; TEL.aut.forEach(x=>{ if(a>=x[0]) n=x[1]; }); return n; }
 
-  /* ---------- reinados ---------- */
-  function reinables(){ const L=[]; if(S.p.sexo==='m'&&S.p.edad>=17&&S.p.edad<=26) L.push({p:S.p,nombre:yo(),k:'yo',propia:true,carisma:(S.p.atr&&S.p.atr.carisma)||5});
-    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{ if(h&&h.sexo==='m'&&h.edad>=17&&h.edad<=25) L.push({p:h,nombre:h.nombre,k:h.fid||h.nombre,propia:false,carisma:(h.atr&&h.atr.carisma)||5}); });
-    return L.filter(c=>!P().hechos['rei:'+c.k]); }
-  function reinadoLocal(){ const c=ciudad(), a=A(); if(c==='Barranquilla'&&a>=1918) return 'Reina del Carnaval de Barranquilla'; if(c==='Medellín'&&a>=1957) return 'Reina de la Feria de las Flores'; if(c==='Cali'&&a>=1957) return 'Reina de la Feria de Cali'; return a>=1920?'Reina de las fiestas de '+c:null; }
-  function tirada(c,lujo){ const bel=ri(35,85)+(c.carisma-5)*4; return bel+(lujo?15:0)+pres()/8+ri(-18,18); }
-  function evReinado(c){ const loc=reinadoLocal(), nac=A()>=1934, costo=pago(25); const quien=c.propia?'tú':c.nombre;
-    return {p:6,c:()=>ACTIVO()&&!P().hechos['rei:'+c.k],t:()=>'<b>Invitan a '+(c.propia?'participar':E(c.nombre)+' a participar')+' en el reinado'+(loc?' ('+E(loc.toLowerCase())+')':'')+'.</b> La belleza, el porte y el apellido pesan en el jurado. '+(c.propia?'Tu':'Su')+' familia está dividida entre el orgullo y la prudencia.',
-      o:[{t:'Inscribir'+(c.propia?'te':'la')+' sin gastos extra',f:()=>correr(c,false)},{t:'Financiar una campaña de lujo ('+fm(costo)+')',f:()=>{ if(S.efectivo<costo) return 'No te alcanza para la campaña.'; S.efectivo-=costo; return correr(c,true); }},{t:'No dejar'+(c.propia?'te':'la')+' participar',f:()=>{ P().hechos['rei:'+c.k]=1; return 'Decidiste que no: la tradición de la casa es otra.'; }}]}; }
-  function correr(c,lujo){ P().hechos['rei:'+c.k]=1; const loc=reinadoLocal(); let nivel=0, txt=[];
-    const r1=tirada(c,lujo); if(loc){ if(r1>=105){ nivel=1; txt.push('fue <b>'+E(loc)+'</b>'); } else if(r1>=92) txt.push('fue virreina del reinado local'); else txt.push('no pasó del reinado local'); } else nivel=r1>=92?1:0;
-    let reina=nivel>=1&&A()>=1934;
-    if(nivel>=1&&A()>=1934){ const r2=tirada(c,lujo)-6; if(r2>=105){ nivel=2; txt.push('ganó el <b>Reinado Nacional de la Belleza</b>'); } else if(r2>=92) { nivel=1.5; txt.push('quedó virreina nacional'); } else { txt.push('no ganó el nacional'); } }
-    if(nivel>=2&&A()>=1952){ if(chance(.12)){ nivel=3; txt.push('ganó <b>Miss Universo</b>'); } else txt.push('compitió en Miss Universo y quedó entre las finalistas'); }
-    const n=nivel>=3?'Miss Universo':nivel>=2?'Reina Nacional de la Belleza':nivel>=1?(loc||'Reina de la ciudad'):null;
-    if(n){ otorgar({id:'rei:'+c.k+':'+A(),n:n,cat:'reinado',quienN:c.nombre,rel:c.propia?'tú':'hija',propio:c.propia,pres:nivel>=3?9:nivel>=2?5:2,rep:nivel>=2?4:2,redes:nivel>=2?6:3,hito:nivel>=2,nota:(c.propia?'Tú':E(c.nombre))+' '+txt.join(', ')+'.'}); return (c.propia?'Tú':c.nombre)+' '+txt.join(', ')+'.'; }
-    try{ S.p.felicidad=clamp(S.p.felicidad+(c.propia?-2:0),0,100); }catch(e){} return (c.propia?'Tú':c.nombre)+' '+txt.join(', ')+': quedó la experiencia y las fotos.'; }
-
-  /* ---------- condecoraciones y honoris causa ---------- */
-  const ORDENES=[['la Orden de Boyacá',1819,'La más alta distinción del Estado, creada por el Libertador tras la batalla.',6],['la Cruz de Boyacá',1919,'La condecoración suprema de la República por servicios excepcionales.',6],['la Orden de San Carlos',1948,'La Cancillería reconoce los servicios a la nación y a sus relaciones exteriores.',4],
-    ['la Legión de Honor de Francia',1802,'El gobierno francés te condecora por tu amistad con Francia.',4],['la Orden de Isabel la Católica',1815,'España reconoce tu aporte a los lazos entre los dos países.',3],['la Orden del Imperio Británico',1917,'Londres te condecora por tus servicios.',3],['la Orden al Mérito de Alemania',1951,'Alemania reconoce tu trabajo con sus empresas.',3]];
-  const UNIVS=[['la Universidad Nacional',1867],['la Universidad de Antioquia',1803],['la Universidad del Rosario',1653],['la Universidad Javeriana',1930],['la Universidad de los Andes',1948],['la Universidad del Valle',1945],['EAFIT',1960]];
-  function evOrden(o){ return {p:7,c:()=>ACTIVO(),t:()=>'<b>Te ofrecen '+E(o[0])+'.</b> '+E(o[2])+' La ceremonia será con discursos y fotos.',
-      o:[{t:'Aceptarla',f:()=>{ P().hechos['orden:'+o[0]]=1; otorgar({id:'orden:'+o[0],n:'Condecoración: '+o[0].replace(/^la /,'La ').replace(/^el /,'El '),cat:'orden',quienN:yo(),propio:true,pres:o[3],rep:3,redes:4,hito:o[3]>=6,nota:'Te la impusieron en una ceremonia solemne.'}); return 'Recibiste '+o[0]+': la casa ganó lustre.'; }},
-         {t:'Rechazarla por principios',f:()=>{ P().hechos['orden:'+o[0]]=1; try{ S.p.reputacion=clamp(S.p.reputacion+3,0,100); }catch(e){} return 'La rechazaste: algunos te admiraron, otros no entendieron.'; }}]}; }
-  function evHonoris(u){ return {p:6,c:()=>ACTIVO(),t:()=>'<b>'+E(u[0].replace(/^la /,'La '))+' quiere darte el doctorado Honoris Causa.</b> Reconocen tu obra y tu aporte a la educación. Hace falta un discurso.',
-      o:[{t:'Aceptarlo y dar el discurso',f:()=>{ P().hechos['hon:'+u[0]]=1; otorgar({id:'hon:'+u[0],n:'Doctor Honoris Causa de '+u[0],cat:'honoris',quienN:yo(),propio:true,pres:3,rep:3,redes:3,nota:'Te lo entregaron en un acto con toga y birrete.'}); return 'Ya eres doctor honoris causa.'; }},{t:'Declinar con modestia',f:()=>{ P().hechos['hon:'+u[0]]=1; return 'Declinaste el título.'; }}]}; }
-
-  /* ---------- premios del oficio y empresarial ---------- */
-  const OFICIO={
-    deportista:[['Deportista del Año',1950,3,4],['Premio Nacional del Deporte',1960,5,5]],
-    pintura:[['Premio del Salón Nacional de Artistas',1940,3,4],['Premio Nacional de Artes Plásticas',1970,5,5]],
-    musica:[['Premio Nacional de Música',1960,3,4],['Grammy Latino',2000,5,5]],
-    literatura:[['Premio Nacional de Literatura',1950,3,4],['Premio Rómulo Gallegos',1967,5,5]],
-    teatro:[['Premio Nacional de Teatro',1950,3,4]],fotografia:[['Premio Nacional de Fotografía',1960,3,4]],cine:[['Premio India Catalina',1985,3,4],['Premio Nacional de Cine',1960,4,4]],
-    periodista:[['Premio Maria Moors Cabot',1939,4,5],['Premio Simón Bolívar de Periodismo',1975,3,4],['Premio Pulitzer',1917,5,8]]};
-  function oficioPosibles(){ const q=C216(), L=[]; if(!q||(S.p.edad||0)<18) return L; const tabla=q.id==='deportista'?OFICIO.deportista:q.id==='artista'?OFICIO[q.disc]:OFICIO.periodista; (tabla||[]).forEach(p=>{ if(A()>=p[1]&&q.nivel>=p[2]&&!P().hechos['of:'+p[0]]){ let ok=true; if(p[0]==='Premio Pulitzer') ok=q.ind.credibilidad>=85; L.push([p,ok?clamp(.05+(q.nivel-p[2])*.08,.05,.3):0]); } }); return L; }
-  function evOficio(p){ const q=C216();
-    return {p:7,c:()=>ACTIVO()&&!!C216(),t:()=>'<b>Te otorgan el '+E(p[0].replace(/^Premio /,'premio ').replace(/^Deportista/,'galardón de Deportista'))+'.</b> '+(q?'Es el reconocimiento de tu oficio a tu carrera.':'')+' Hay una ceremonia y una entrevista.',
-      o:[{t:'Recibirlo y dar el discurso',f:()=>{ P().hechos['of:'+p[0]]=1; otorgar({id:'of:'+p[0],n:p[0],cat:'oficio',quienN:yo(),propio:true,pres:p[3],rep:3,redes:5,hito:p[3]>=5,nota:'Quedó en tu hoja de vida y en la de la casa.'}); try{ if(q){ q.ind.fama=clamp((q.ind.fama||0)+8,0,100); if(q.logros) q.logros.push({a:A(),t:p[0]}); } }catch(e){} return 'Recibiste el '+p[0]+'.'; }},
-         {t:'Agradecerlo sin ceremonia',f:()=>{ P().hechos['of:'+p[0]]=1; otorgar({id:'of:'+p[0],n:p[0],cat:'oficio',quienN:yo(),propio:true,pres:Math.max(1,p[3]-2),rep:2,redes:2,nota:'Lo recibiste con discreción.'}); return 'Recibiste el premio sin ruido.'; }}]}; }
-  function evEmpresario(e){ const n=A()>=1990?'Empresario del Año':'Reconocimiento al mérito empresarial de la ANDI';
-    return {p:6,c:()=>ACTIVO()&&companias().includes(e),t:()=>'<b>Te eligen "'+E(n)+'" por <b>'+E(e.nombre)+'</b>.</b> Los gremios reconocen su crecimiento, sus empleos y su reputación.',
-      o:[{t:'Recibirlo en la cena de gala',f:()=>{ P().hechos['emp:'+e.nombre+':'+A()]=1; otorgar({id:'emp:'+e.nombre+':'+A(),n:n+' ('+e.nombre+')',cat:'empresa',quienN:yo(),propio:true,pres:4,rep:3,redes:5,nota:'La compañía ganó marca.'}); try{ e.marca=clamp((e.marca||50)+4,0,100); }catch(x){} return 'Recibiste el premio: '+e.nombre+' ganó marca.'; }},{t:'Dárselo al equipo de la compañía',f:()=>{ P().hechos['emp:'+e.nombre+':'+A()]=1; otorgar({id:'emp:'+e.nombre+':'+A(),n:n+' ('+e.nombre+')',cat:'empresa',quienN:yo(),propio:true,pres:5,rep:4,redes:4,nota:'Lo compartiste con tus empleados.'}); try{ e.moral=clamp((e.moral||50)+6,0,100); }catch(x){} return 'Se lo diste al equipo: la moral subió.'; }}]}; }
-
-  /* ---------- el año ---------- */
-  function candidatos(){ const L=[], a=A(); if(!ACTIVO()||nino()) return L;
-    nobelPosibles().forEach(x=>{ if(chance(x[1])) L.push({w:10,ev:evNobel(x[0])}); });
-    if(a>=1900&&chance(.4)){ const R=reinables(); if(R.length) L.push({w:6,ev:evReinado(R[ri(0,R.length-1)])}); }
-    if((S.p.edad||0)>=30){ const O=ORDENES.filter(o=>a>=o[1]&&!P().hechos['orden:'+o[0]]); const pp=clamp((pres()-50)/450,0,.07); if(O.length&&pp>0&&chance(pp)) L.push({w:7,ev:evOrden(O[ri(0,O.length-1)])});
-      const U=UNIVS.filter(u=>a>=u[1]&&!P().hechos['hon:'+u[0]]); if(U.length&&pres()>=55&&chance(.03+(pres()-55)/900)) L.push({w:6,ev:evHonoris(U[ri(0,U.length-1)])}); }
-    oficioPosibles().forEach(x=>{ if(x[1]>0&&chance(x[1])) L.push({w:7,ev:evOficio(x[0])}); });
-    if(a>=1944&&(S.p.edad||0)>=25){ const g=(typeof companias==='function'?companias():[]).filter(e=>(e.marca||0)>=55&&(e.moral||0)>=45&&!e.quiebra&&!P().hechos['emp:'+e.nombre+':'+a]); if(g.length&&chance(.05)) L.push({w:6,ev:evEmpresario(g.sort((x,y)=>(y.marca||0)-(x.marca||0))[0])}); }
-    return L; }
-  function anual(){ if(!ACTIVO()) return; let L=[]; try{ L=candidatos(); }catch(e){ console.error(e); } L.sort((x,y)=>y.w-x.w).slice(0,2).forEach(c=>{ try{ cola.push(c.ev); }catch(e){} }); }
-
-  /* ---------- el salón de honor ---------- */
-  const CATS=[['nobel','Premios Nobel'],['reinado','Reinados'],['orden','Condecoraciones'],['honoris','Doctorados honoris causa'],['oficio','Premios del oficio'],['empresa','Premios empresariales']];
-  function escenaSalon(){ const L=lista(); let t='<table class="libro">';
-    if(!L.length) t+='<tr><td>Premios</td><td>Todavía ninguno</td></tr>';
-    CATS.forEach(c=>{ const x=L.filter(r=>r.cat===c[0]); if(!x.length) return; t+='<tr><td><b>'+E(c[1])+'</b></td><td>'+x.length+'</td></tr>'+x.map(r=>'<tr><td>'+E(r.n)+'</td><td>'+(r.propio?'tú':E(r.quienN||''))+(r.rel&&!r.propio?' ('+E(r.rel)+')':'')+' · '+r.anio+'</td></tr>').join(''); });
-    const suma=L.reduce((a,r)=>a+(r.pres||0),0); t+='<tr class="suma"><td>Peso en prestigio de la casa</td><td>+'+Math.round(suma)+'</td></tr></table>';
-    const pist=[]; if(!L.some(r=>r.cat==='nobel')) pist.push('Un Nobel solo le llega a quien toca la cima de las letras, de la academia o de la política y la diplomacia.');
-    pist.push('Los reinados llaman a las hijas (y a ti, si eres mujer) entre los 17 y los 26 años; las condecoraciones, a quien tiene nombre y servicios; los premios del oficio, a quien llega alto en el deporte, las artes o el periodismo.');
-    escena({rubro:'Legado',titulo:'Salón de honor de la casa',ancho:true,cerrable:true,cuerpo:'Los premios y reconocimientos de la dinastía: de quien los recibió y del año. Pasan a los herederos.'+'<br><span style="color:var(--laton-op)">'+E(pist.join(' '))+'</span>',html:t,opciones:[{t:'Cerrar el salón',cat:'legado',run:()=>{}}]}); }
-
-  /* ---------- enganches ---------- */
-  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA218_PASO) return; window.__SA218_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
-  const TIT='Salón de honor de la casa';
-  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA218_ACC) return; window.__SA218_ACC=true;
-    window.listaAcciones=function(){ const L=old.apply(this,arguments);
-      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&A()>=1800&&!L.some(x=>x&&x.t===TIT)){ const n=lista().length; L.push({t:TIT,cat:'legado',d:n?'Tienes '+n+' reconocimiento'+(n===1?'':'s')+' de la casa: Nobel, reinados, condecoraciones y premios.':'Nobel, reinados, condecoraciones y premios: lo que la casa recibe y cómo se consigue.',mov:0,modal:true,run:()=>escenaSalon()}); } }catch(x){ console.error(x); }
-      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
-      return L; }; window.listaAcciones.__v218=true; }
-  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA218_CAT) return; window.__SA218_CAT=true; window.catDe=function(t){ if(t===TIT) return 'legado'; return old.apply(this,arguments); }; }
-  function legado(){ const L=lista(); return L.length?JSON.parse(JSON.stringify(S.premios218)):null; }
-  function init218(){ wrapPaso(); wrapAcciones(); wrapCat();
-    Object.assign(window,{premios218:lista,otorgarPremio218:otorgar,anualPremios218:anual,candidatosPremios218:candidatos,escenaSalon218:escenaSalon,legadoPremios218:legado,nobelPosibles218:nobelPosibles,oficioPosibles218:oficioPosibles,reinables218:reinables,reinadoLocal218:reinadoLocal,correrReinado218:correr,ORDENES_218:ORDENES,UNIVS_218:UNIVS,OFICIO_218:OFICIO,NOBEL_218:NOBEL,
-      eventosPremios218:{nobel:evNobel,reinado:evReinado,orden:evOrden,honoris:evHonoris,oficio:evOficio,empresario:evEmpresario}}); }
-  init218(); setTimeout(init218,40); setTimeout(init218,220); setTimeout(init218,650); setTimeout(init218,950); setTimeout(init218,1500);
-  window.__SA218={version:V218};
+  /* ---------- instalación en la puerta ---------- */
+  function instalarClase(){ const CLs=window.CLASES_176, OR=window.ORDEN_176, GR=window.GRUPOS_PUERTA_176, EVc=window.EVC_176; if(!CLs||!OR) return false;
+    if(!CLs.telecom) CLs.telecom=TEL; if(!OR.includes('telecom')) OR.push('telecom');
+    if(Array.isArray(GR)){ const g=GR.find(x=>x.n==='Tecnología y medios'); if(g){ if(!g.ids.includes('telecom')) g.ids.push('telecom'); if(!g.__v219){ g.__v219=true; const base=g.d; try{ Object.defineProperty(g,'d',{configurable:true,enumerable:true,get(){ return A()>=TEL_DESDE?base.replace(' y televisión.',', televisión y telecomunicaciones.'):base; }}); }catch(e){} } } }
+    if(EVc&&!EVc.telecom) EVc.telecom=EV; return true; }
+  function init219(){ try{ instalarClase(); }catch(e){ console.error(e); }
+    Object.assign(window,{CLASE_TELECOM_219:TEL,EVENTOS_TELECOM_219:EV,autoridadTelecom219:CL_aut}); }
+  init219(); setTimeout(init219,40); setTimeout(init219,220); setTimeout(init219,650); setTimeout(init219,950); setTimeout(init219,1500);
+  window.__SA219={version:V219};
 })();
