@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v213</div>
+<div class="version-badge" id="versionBadge">v214</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -13276,7 +13276,9 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
           S.efectivo-=entrada;
           const soc={sid:'s'+ri(1000,9999),nombre,ramo:'vinicola',capital:costo,capitalInicial:costo,gerente:null,anios:0,
             metaUtilidad:.08,incumplimientos:0,ultimaUtilidad:0,ultimoObjetivo:costo*.08,alertaRendimiento:false};
-          sociedades().push(soc);
+          let compV=null; try{ if(typeof window.crearCompaniaDeSociedad205==='function'){ const rv=window.crearCompaniaDeSociedad205(soc); compV=rv&&rv.e; } }catch(x){ console.error(x); }
+          if(!compV) sociedades().push(soc);   /* v214: la vinícola es una compañía del grupo; sociedad solo si algo falló */
+          else setTimeout(()=>{ try{ if(!compV.presidente&&typeof escenaPresidente==='function') escenaPresidente(compV,true); }catch(x){} },0);
           b.vinicola={sid:soc.sid,nombre:soc.nombre};
           b.renta=.03;
           log('Fundaste <b>'+esc(nombre)+'</b>, la vinícola de la familia.','hito');
@@ -13304,9 +13306,10 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       }
       if(b.maduro && b.vinicola && chance(.16)){
         const buena=chance(.55);
-        const soc=(S.sociedades||[]).find(s=>s.sid===b.vinicola.sid);
+        const soc=(S.sociedades||[]).find(s=>s.sid===b.vinicola.sid)||companias().find(e=>e&&e.sid205===b.vinicola.sid);
         if(soc){
-          soc.capital=Math.max(1,soc.capital*(buena?rnd(1.03,1.1):rnd(.9,.98)));
+          if(isFinite(soc.capital)) soc.capital=Math.max(1,soc.capital*(buena?rnd(1.03,1.1):rnd(.9,.98)));
+          else { const x=Math.max(1,(soc.ingresos||0)*.03); if(buena) soc.caja=(soc.caja||0)+x; else soc.caja=(soc.caja||0)-x; if(soc.red176&&Array.isArray(soc.red176.unidades)) soc.red176.unidades.forEach(u=>{ if(isFinite(u.rep)) u.rep=Math.max(5,Math.min(99,u.rep+(buena?4:-4))); }); }   /* v214: compañía */
           log(buena?'Buena vendimia para <b>'+esc(soc.nombre)+'</b>: la cosecha salió excelente.'
                     :'Vendimia floja para <b>'+esc(soc.nombre)+'</b>: el clima no ayudó.',buena?'bien':'mal');
         }
@@ -13598,7 +13601,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   function valorDe51(x){ return isFinite(x.capital)?x.capital:(isFinite(x.valor)?x.valor:(x.sector&&isFinite(x.ingresos)?Math.round(x.ingresos*1.4):0)); }   /* v205: también compañías */
   function candidatosIntegracion51(){
     const pares=[];
-    const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s));
+    const vinicolas=(S.sociedades||[]).filter(s=>s.ramo==='vinicola'&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&e.ramo205==='vinicola'&&!estaIntegrado51(e)));   /* v214 */
     const distribuidoras=(S.sociedades||[]).filter(s=>RAMOS_DISTRIBUCION_51.includes(s.ramo)&&!estaIntegrado51(s)).concat(companias().filter(e=>e&&(RAMOS_DISTRIBUCION_51.includes(e.ramo205)||['retail','logistica'].includes(e.sector))&&!e.banco112&&!e.hotel175&&!estaIntegrado51(e)));   /* v205: las compañías de comercio y logística distribuyen */
     vinicolas.forEach(v=>distribuidoras.forEach(d=>pares.push({a:v,b:d,tipo:'distribucion'})));
     const fincas=(S.bienes||[]).filter(b=>b.clase==='finca'&&FINCAS_PROCESABLES_51.includes(b.tipo)&&!estaIntegrado51(b));
@@ -37341,7 +37344,7 @@ install();setTimeout(install,1200);
   const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
   const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
   const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
-  const MAPA={comercializadora:'retail',inmobiliaria:'inmobiliario',transportadora:'logistica',importadora:'retail',constructora:'construccion',agroindustria:'alimentos'};
+  const MAPA={comercializadora:'retail',inmobiliaria:'inmobiliario',transportadora:'logistica',importadora:'retail',constructora:'construccion',agroindustria:'alimentos',vinicola:'alimentos'};
   const ESTILOS=['constructor','financiero','conservador','negociador'];
 
   /* ---------- las sociedades de antes pasan a ser compañías ---------- */
@@ -37366,6 +37369,7 @@ install();setTimeout(install,1200);
       empleados:Math.max(4,Math.round(cap/26)),crecimiento:.1,publica:false,aniosMalos:0,historia:[],productos:[],
       holders:[{id:'tu',nombre:'Tú',tipo:'fundador',n:1000000}],junta:[],ciudad:(S.hogar&&S.hogar.ciudad)||'Bogotá',ramo205:soc.ramo,sid205:soc.sid};
     for(let i=0;i<5;i++){ let v=0; try{ v=valuar(e); }catch(x){} if(!isFinite(v)||v<=0) break; const r=cap/v; if(Math.abs(r-1)<.04) break; e.ingresos=Math.max(10,e.ingresos*cl(r,.4,2.5)); }
+    if(soc.integradoCon51) e.integradoCon51=soc.integradoCon51;   /* v214: la integración vertical no se pierde */
     e.presidente=presidenteDe(soc,e);
     S.grupo=comps(); S.grupo.push(e);
     if(!S.emp){ try{ sentarseEn(S.grupo.length-1); }catch(x){} }
@@ -37374,7 +37378,7 @@ install();setTimeout(install,1200);
   }
   function migrar(){
     if(!ACTIVO()||nino()||window.__noMigrar205||!Array.isArray(S.sociedades)) return 0;
-    const L=S.sociedades.filter(s=>s&&s.ramo!=='vinicola'&&!s.migrada205); if(!L.length) return 0;
+    const L=S.sociedades.filter(s=>s&&!s.migrada205); if(!L.length) return 0;   /* v214: la vinícola también pasa a ser compañía */
     const hechas=[];
     L.forEach(soc=>{ try{ const r=crear(soc); hechas.push({soc,r}); soc.migrada205=true; }catch(x){ console.error(x); } });
     S.sociedades=S.sociedades.filter(s=>!hechas.some(h=>h.soc===s));
@@ -37869,6 +37873,45 @@ install();setTimeout(install,1200);
     Object.assign(window,{exportarPartidas213:exportar,importarPartidas213:importar,validarRespaldo213:validar,armarRespaldo213:armar,aplicarRespaldo213:aplicar,descargarSinInternet213:descargar,estadoSinInternet213:estadoOffline,CACHE_SW_213:CACHE}); }
   init213(); setTimeout(init213,40); setTimeout(init213,220); setTimeout(init213,650); setTimeout(init213,950); setTimeout(init213,1500);
   window.__SA213={version:V213};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v214 · LA VINÍCOLA ES UNA COMPAÑÍA DEL GRUPO
+   La v205 unificó las sociedades con las compañías, pero dejó aparte la
+   vinícola de un viñedo porque vivía pegada a la finca. Ahora también lo es:
+   - Fundar una vinícola (con un viñedo maduro) crea una compañía de
+     alimentos, con su bodega vinícola como unidad principal, y abre la
+     elección de su presidente. El viñedo sigue enlazado con ella.
+   - Las vinícolas que ya tenías como sociedad se convierten solas, con su
+     gerente como presidente y su integración vertical (v51) intacta.
+   - La vendimia sigue pasando: una buena sube la reputación de la bodega y
+     deja algo de caja; una floja la baja y cuesta.
+   - La integración vertical de la v51 ve a la vinícola-compañía con las
+     distribuidoras (comercio y logística) y con las procesadoras.
+   La integración vertical que ya existía no se pierde al convertir.
+   ========================================================================== */
+(function(){
+  const V214='v214';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const BODEGA={id:'bodega',n:'Bodega vinícola',desde:1850,base:1200,rc:.8,mg:.22,u0:.7,capN:600,capU:'miles de botellas',obra:[1,2,3],princ:true,d:'Uvas del viñedo propio convertidas en vino embotellado y envejecido.'};
+  function instalar(){ const CL=window.CLASES_176; if(!CL||!CL.alimentos) return false; const t=CL.alimentos.tipos; if(!t.some(x=>x.id==='bodega')) t.push(BODEGA); return true; }
+  /* la compañía vinícola vende vino: sus unidades de frente pasan a ser bodegas */
+  function afinar(){
+    if(!ACTIVO()||!instalar()) return 0; let n=0;
+    comps().forEach(e=>{ if(!e||e.ramo205!=='vinicola'||e.bodega214||!e.red176||!Array.isArray(e.red176.unidades)||!e.red176.unidades.length) return;
+      e.red176.unidades.forEach(u=>{ const t=window.tipoDe176?window.tipoDe176('alimentos',u.tipo):null; if(t&&t.rol!=='apoyo'&&u.tipo!=='bodega'){ const resto=String(e.nombre||'').replace(/^Vinícola\s*/i,'').trim(); u.tipo='bodega'; u.nom=resto?'Bodega '+resto:'Bodega vinícola'; } });
+      e.bodega214=true; n++; });
+    return n; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||old.__v214) return;
+    const f=function(){ try{ afinar(); }catch(x){ console.error(x); } return old.apply(this,arguments); };
+    f.__v214=true; Object.keys(old).forEach(k=>{ f[k]=old[k]; }); window.listaAcciones=f; }
+  function init214(){ try{ instalar(); wrapAcciones(); afinar(); }catch(e){ console.error(e); } Object.assign(window,{TIPO_BODEGA_214:BODEGA,afinarVinicolas214:afinar}); }
+  init214(); setTimeout(init214,40); setTimeout(init214,220); setTimeout(init214,650); setTimeout(init214,950); setTimeout(init214,1500);
+  window.__SA214={version:V214};
 })();
 </script>
 
