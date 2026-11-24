@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v223</div>
+<div class="version-badge" id="versionBadge">v224</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2294,7 +2294,7 @@ function sacarDelGrupo(e){
   else sentarseEn(Math.min(S.empIdx,S.grupo.length-1));
 }
 function presides(e){ return e===S.emp && S.carrera.ruta==='fundador'; }
-function valorGrupo(){ return companias().reduce((a,e)=>a+miPct(e)*valuar(e),0); }
+function valorGrupo(){ return companias().reduce((a,e)=>a+(window.pctPropio224?window.pctPropio224(e):miPct(e))*valuar(e),0); }
 function hayMatriz(){ return !!(S.holding&&S.holding.nombre); }
 
 /* ---- quién queda al frente de las que no diriges ---- */
@@ -3034,7 +3034,7 @@ function escenaFundacion(){
              log('<b>'+esc(b.nombre)+'</b> pasó a la fundación.','hito'); }
            S.mov--; }},
         {t:'Disolverla',cat:'riesgo',d:'Recuperas cerca del 60% y el apellido pierde lo que había ganado.',
-         run:()=>{ const x=F.activos*.6; S.efectivo+=x;
+         run:()=>{ if(window.alDisolver224) window.alDisolver224(); const x=F.activos*.6; S.efectivo+=x;
            moverPrestigio(-10,'se disolvió la fundación');
            log('Disolviste la fundación. Volvieron '+fmt(x)+' y quedó la pregunta de para qué la habías creado.','mal');
            S.fundacion=null; S.mov--; }},
@@ -6429,7 +6429,7 @@ function revisarEscandalos(){
 /* ---------------- patrimonio ---------------- */
 function patrimonio(){
   let v=S.efectivo-S.deuda;
-  companias().forEach(e=>v+=miPct(e)*valuar(e));
+  companias().forEach(e=>v+=(window.pctPropio224?window.pctPropio224(e):miPct(e))*valuar(e));
   S.portafolio.forEach(p=>v+=p.valor);
   (S.bienes||[]).forEach(b=>v+=b.valor-(b.hipoteca||0));
   (S.sociedades||[]).forEach(x=>v+=x.capital);
@@ -6787,7 +6787,7 @@ function listaAcciones(){
           hito('Abrió planta nueva de '+e.nombre);
           return 'Abrió la planta nueva de '+esc(e.nombre)+'. Otra escala: ingresos en '+fmt(e.ingresos)+'.';
         }}); }});
-    A.push({t:'Repartir dividendos', d:'Sacas utilidad de la caja a los accionistas. Te llega tu '+pc(miPct(e))+'.', mov:1, modal:true,
+    A.push({t:'Repartir dividendos', d:'Sacas utilidad de la caja a los accionistas. Te llega tu '+pc((window.pctPropio224?window.pctPropio224(e):miPct(e)))+'.', mov:1, modal:true,
       dis: e.caja<=50?'Caja insuficiente':null,
       run:()=>modalDividendos()});
     A.push({t:'Vender la compañía', d:'Exit completo: recibes tu parte en efectivo y quedas libre.', mov:2, modal:true,
@@ -8053,8 +8053,8 @@ function tomarDeuda(v){
   log('Tomaste '+fmt(v)+' de deuda bancaria para '+esc(e.nombre)+'.');
 }
 function repartirDividendos(v){
-  const e=S.emp; const mio=v*miPct(e);
-  e.caja-=v; S.efectivo+=mio;
+  const e=S.emp; const mio=v*(window.pctPropio224?window.pctPropio224(e):miPct(e));
+  e.caja-=v; S.efectivo+=mio; if(window.repartoFundacion224) window.repartoFundacion224(e,v);
   S.junta.forEach(j=>{if(j.arq==='financiero'||j.arq==='independiente') j.lealtad=clamp(j.lealtad+9,0,100);});
   log('Dividendo de '+fmt(v)+' aprobado. A tu bolsillo entraron '+fmt(mio)+'.','bien');
 }
@@ -9352,7 +9352,7 @@ function modalDividendos(){
   deslizador({rubro:'Asamblea de accionistas',titulo:'Repartir dividendos',
     cuerpo:'Hay '+fmt(e.caja)+' en caja. Te llega tu '+pc(miPct(e))+' de lo que se reparta. La junta financiera lo premia; la caja repartida ya no financia crecimiento.',
     etiqueta:'Cuánto se reparte',max:max,valor:40,boton:'Aprobar el reparto',
-    nota:v=>'Se reparten '+fmt(v)+' y a tu bolsillo entran '+fmt(v*miPct(e))+'.',
+    nota:v=>'Se reparten '+fmt(v)+' y a tu bolsillo entran '+fmt(v*(window.pctPropio224?window.pctPropio224(e):miPct(e)))+'.',
     accion:v=>repartirDividendos(v)});
 }
 function modalVenderAcciones(){
@@ -12496,8 +12496,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       opciones:[
         {t:'Repartir '+fmt(monto)+' entre los accionistas',cat:'capital',dis:e.caja<monto?'No hay caja suficiente':null,run:()=>{
           e.caja-=monto;
-          const tuyo=monto*miPct(e);
-          S.efectivo+=tuyo;
+          const tuyo=monto*(window.pctPropio224?window.pctPropio224(e):miPct(e));
+          S.efectivo+=tuyo; if(window.repartoFundacion224) window.repartoFundacion224(e,monto);
           log('<b>'+esc(e.nombre)+'</b> repartió un dividendo extraordinario de '+fmt(monto)+'. Te tocaron '+fmt(tuyo)+'.','hito');
           S.mov--;
         }},
@@ -13089,7 +13089,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     asegurar50();
     const cats=[];
     cats.push({n:'Efectivo neto (caja menos deudas)',v:S.efectivo-S.deuda});
-    const empresas=safe50(()=>companias().reduce((a,e)=>a+miPct(e)*valuar(e),0),0);
+    const empresas=safe50(()=>companias().reduce((a,e)=>a+(window.pctPropio224?window.pctPropio224(e):miPct(e))*valuar(e),0),0);
     if(Math.abs(empresas)>.5) cats.push({n:'Empresas propias',v:empresas});
     const soc=safe50(()=>(S.sociedades||[]).reduce((a,x)=>a+x.capital,0),0);
     if(soc) cats.push({n:'Sociedades y negocios',v:soc});
@@ -13490,8 +13490,8 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     if(exito){
       const monto=x.caja*rnd(fracMin,fracMax);
       x.caja-=monto;
-      const mio=monto*miPct(x);
-      S.efectivo+=mio;
+      const mio=monto*(window.pctPropio224?window.pctPropio224(x):miPct(x));
+      S.efectivo+=mio; if(window.repartoFundacion224) window.repartoFundacion224(x,monto);
       log('La junta de <b>'+esc(x.nombre)+'</b> cedió: repartieron '+fmt(monto)+' en dividendos. A tu bolsillo entraron '+fmt(mio)+'.','bien');
       if(dureza>.7&&x.junta) x.junta.forEach(j=>j.lealtad=clamp(j.lealtad-6,0,100));
     } else {
@@ -39281,6 +39281,125 @@ install();setTimeout(install,1200);
     Object.assign(window,{FORMAS_223:FORMAS,formaDe223:forma,idFormaDe223:idForma,etiquetaForma223:etiqueta,asegurarForma223:asegurar,defectoForma223:porDefecto,ilimitada223:ilimitada,factorResp223:factorResp,topeResp223:topeResp,textoResp223:textoResp,alLiquidar223:alLiquidar,costoAnualForma223:costoAnual,costoTransformar223:costoTransformar,puedeTransformar223:puedeTransformar,transformar223:transformar,anualFormas223:anual,escenaFormas223:escenaFormas,escenaTransformar223:escenaTransformar,formasDisponibles223:dispon}); }
   init223(); setTimeout(init223,40); setTimeout(init223,220); setTimeout(init223,650); setTimeout(init223,950); setTimeout(init223,1500);
   window.__SA223={version:V223};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v224 · LAS COMPAÑÍAS EN LA FUNDACIÓN FAMILIAR
+   La fundación de la casa solo recibía plata y bienes. Ahora puede ser
+   ACCIONISTA de tus compañías, como el family office (v153), pero con las
+   reglas de una entidad sin ánimo de lucro:
+   - «Pasar compañías a la fundación»: entregas el 25%, el 50% o casi todas
+     tus acciones de una compañía. La fundación queda como accionista y la
+     familia la preside: el voto sigue contigo (tu control no cambia), pero
+     en lo económico esa parte ya no es tuya.
+   - Lo que entra sale de tu patrimonio (cuenta a medias en el de la
+     fundación, como todo lo que hay adentro), del impuesto al patrimonio y de
+     la sucesión.
+   - Los dividendos de esa parte son de la fundación y financian obra social
+     (más prestigio). Cada año las compañías le giran el 35% de la utilidad
+     que le corresponde, si tienen caja.
+   - Es IRREVOCABLE: lo donado no se recupera; solo disolviendo la
+     fundación, y eso cuesta el 40% de lo aportado.
+   - Una fundación no puede ser socia colectiva ni gestora (v223), y la
+     unipersonal no admite un segundo dueño: hay que transformarlas antes.
+   - RIESGOS: la DIAN puede cuestionar el régimen especial cuando la
+     fundación pesa mucho en tu patrimonio, y los hijos mayores se sienten
+     desheredados.
+   ========================================================================== */
+(function(){
+  const V224='v224';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const comps=()=>{ try{ return companias(); }catch(e){ return []; } };
+  const val=e=>{ try{ const x=valuar(e); return isFinite(x)?x:0; }catch(x){ return 0; } };
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const ID='fund224';
+  const hold=e=>(e&&Array.isArray(e.holders))?e.holders.find(h=>h.id===ID):null;
+  const fundPct=e=>{ const h=hold(e); if(!h) return 0; try{ return h.n/totalAcciones(e); }catch(x){ return 0; } };
+  const valorAcciones=()=>comps().reduce((a,e)=>a+fundPct(e)*val(e),0);
+  const tuHolder=e=>(e.holders||[]).find(h=>h.id==='tu');
+  const tuPct=e=>{ const h=tuHolder(e); if(!h) return 0; try{ return h.n/totalAcciones(e); }catch(x){ return 0; } };
+
+  /* ---------- quién puede aportar ---------- */
+  function puede(e){ if(!S.fundacion) return 'Primero hay que crear la fundación familiar'; const h=tuHolder(e); if(!h||h.n<2) return 'No tienes acciones libres de esta compañía';
+    let id=null; try{ id=typeof window.idFormaDe223==='function'?window.idFormaDe223(e):null; }catch(x){}
+    if(id==='colectiva'||id==='comandita') return 'Una fundación no puede ser socia colectiva ni gestora: transforma la sociedad primero';
+    if(id==='unipersonal') return 'Una empresa unipersonal no admite otro dueño: transfórmala primero';
+    if(!hold(e)&&id==='ltda'){ const n=(e.holders||[]).filter(x=>x.n>0).length; if(n>=25) return 'La Ltda. ya tiene 25 socios'; }
+    return null; }
+  function aportar(e,frac){ const why=puede(e); if(why||!S.fundacion) return 0; const mio=tuHolder(e); const n=Math.min(Math.round(mio.n*frac),mio.n-1); if(n<1) return 0;
+    const total=totalAcciones(e), v=val(e)*(n/total), costo=Math.max(5,Math.round(v*.01)); if(S.efectivo<costo) return 0; S.efectivo-=costo;
+    mio.n-=n; let h=hold(e); if(!h){ h={id:ID,nombre:S.fundacion.nombre,tipo:'fundación',n:0}; e.holders.push(h); } h.n+=n;
+    try{ moverPrestigio(clamp(Math.round(v/Math.max(1,pat())*30)+2,2,7),'la fundación recibió acciones de '+e.nombre); }catch(x){}
+    log('Pasaste a la <b>'+E(S.fundacion.nombre)+'</b> el '+Math.round(n/total*100)+'% de <b>'+E(e.nombre)+'</b> ('+fm(v)+'; trámite '+fm(costo)+'). El voto sigue contigo, pero esa parte ya no es tuya.','hito');
+    return n; }
+  function revertir(e){ const h=hold(e); if(!h) return 0; let mio=tuHolder(e); if(!mio){ mio={id:'tu',nombre:'Tú',tipo:'control',n:0}; e.holders.unshift(mio); } const n=h.n; mio.n+=n; e.holders=e.holders.filter(x=>x!==h); return n; }
+
+  /* ---------- la plata: dividendos, sucesión y patrimonio ---------- */
+  const pctPropio=e=>{ try{ return miPct(e)-fundPct(e); }catch(x){ return 0; } };
+  function repartoFundacion(e,v){ const f=fundPct(e); if(f<=0||!S.fundacion) return 0; const x=v*f; S.fundacion.activos+=x; log('<b>'+E(S.fundacion.nombre)+'</b> recibió '+fm(x)+' del dividendo de '+E(e.nombre)+' ('+Math.round(f*100)+'% de la compañía).'); return x; }
+
+  /* ---------- el año ---------- */
+  function evDian(){ const v=valorAcciones(), costo=Math.max(10,Math.round(v*.01)), dif=Math.max(10,Math.round(v*.04)), sanc=Math.max(20,Math.round(v*.1));
+    return {p:8,c:()=>ACTIVO()&&!!S.fundacion&&valorAcciones()>0,t:()=>'<b>La DIAN cuestiona el régimen especial de la fundación.</b> Dice que '+E(S.fundacion.nombre)+' es un vehículo de la familia para no pagar impuestos: es dueña de pedazos de tus compañías y sus dividendos nunca salen de la casa.',
+      o:[{t:'Defender el régimen con abogados ('+fm(costo)+')',f:()=>{ tom(costo); if(chance(.6)) return 'Los abogados demostraron que la obra social es real: la DIAN archivó el caso.'; const x=Math.min(sanc,S.fundacion.activos); S.fundacion.activos-=x; try{ moverPrestigio(-3,'una sanción de la DIAN a la fundación'); }catch(e){} return 'Perdieron el caso: la fundación pagó '+fm(x)+' de sanción.'; }},
+         {t:'Pagar la diferencia y regularizar ('+fm(dif)+')',f:()=>{ const x=Math.min(dif,S.fundacion.activos); S.fundacion.activos-=x; return 'La fundación pagó '+fm(x)+' y quedó en regla.'; }}]}; }
+  function evHijos(){ const hs=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&(h.edad||0)>=18), costo=Math.round(pat()*.03);
+    return {p:7,c:()=>ACTIVO()&&!!S.fundacion&&((S.familia&&S.familia.hijos)||[]).some(h=>h&&(h.edad||0)>=18),t:()=>'<b>Tus hijos reclaman por la fundación.</b> '+E((hs[0]||{nombre:'Uno de tus hijos'}).nombre)+' dice en la mesa que '+E(S.fundacion.nombre)+' se está quedando con lo que debería ser de ellos: "nos vas a dejar la fama y a ella la plata".',
+      o:[{t:'Compensarlos con efectivo ('+fm(costo)+')',f:()=>{ tom(costo); hs.forEach(h=>{ h.vinculo=clamp((h.vinculo||60)+6,0,100); }); return 'Les repartiste '+fm(costo)+' y se calmaron.'; }},
+         {t:'Explicarles que es el legado de la casa',f:()=>{ const bien=chance(.5); hs.forEach(h=>{ h.vinculo=clamp((h.vinculo||60)+(bien?2:-3),0,100); }); return bien?'Los convenciste: entendieron que la fundación le sirve al apellido.':'No los convenciste del todo: quedó un silencio largo.'; }},
+         {t:'No darles explicaciones',f:()=>{ hs.forEach(h=>{ h.vinculo=clamp((h.vinculo||60)-8,0,100); }); return 'No les diste explicaciones: se fueron molestos de la mesa.'; }}]}; }
+  function anual(){ if(!ACTIVO()||nino()) return; const F=S.fundacion;
+    if(!F){ comps().forEach(e=>{ if(hold(e)) revertir(e); }); return; }
+    let tot=0; comps().forEach(e=>{ const f=fundPct(e); if(f<=0) return; const x=Math.max(0,e.utilidad||0)*f*.35; if(x>0&&(e.caja||0)>=x*3){ e.caja-=x; F.activos+=x; tot+=x; } });
+    if(tot>0){ log('Las compañías le giraron <b>'+fm(tot)+'</b> en dividendos a la fundación <b>'+E(F.nombre)+'</b>.'); if(chance(clamp(tot/Math.max(100,F.activos)*2,0,.4))) { try{ moverPrestigio(1,'la obra de la fundación'); }catch(x){} } }
+    const v=valorAcciones(); if(v<=0) return; const peso=v/Math.max(1,pat());
+    if(A()>=1960&&peso>=.25&&chance(.05+peso*.1)) cola.push(evDian());
+    const k=S.fundacion; if(peso>=.3&&A()-(k.hijos224||0)>=15&&((S.familia&&S.familia.hijos)||[]).some(h=>h&&(h.edad||0)>=18)&&chance(.12)){ k.hijos224=A(); cola.push(evHijos()); } }
+
+  /* ---------- disolver: lo donado cuesta el 40% ---------- */
+  function alDisolver(){ let costo=0, n=0; comps().forEach(e=>{ const f=fundPct(e); if(f<=0) return; costo+=f*val(e)*.4; n++; revertir(e); });
+    if(n>0){ const x=tom(costo); if(costo>x) S.deuda=(S.deuda||0)+(costo-x); log('Al disolver la fundación, las acciones de '+n+' compañía'+(n===1?'':'s')+' volvieron a tu nombre y pagaste '+fm(costo)+' de impuestos y sanciones por lo donado.','mal'); }
+    return costo; }
+
+  /* ---------- paneles ---------- */
+  function escenaPanel(){ const F=S.fundacion; if(!F){ escena({rubro:'Notaría',titulo:'Pasar compañías a la fundación',ancho:true,cerrable:true,cuerpo:'Primero tienes que crear la fundación familiar: entonces podrá ser accionista de tus compañías.',opciones:[{t:'Cerrar',cat:'legado',run:()=>{}}]}); return; }
+    const G=comps().filter(e=>tuHolder(e)||hold(e));
+    const tabla='<table class="libro">'+G.map(e=>{ const f=fundPct(e), w=puede(e); return '<tr><td>'+E(e.nombre)+'</td><td>'+Math.round(tuPct(e)*100)+'% tuyo · '+Math.round(f*100)+'% de la fundación'+(f>0?' ('+fm(f*val(e))+')':'')+(w&&!f?' · <span style="color:#D06A60">'+E(w)+'</span>':'')+'</td></tr>'; }).join('')+'<tr class="suma"><td>Acciones en la fundación</td><td>'+fm(valorAcciones())+'</td></tr></table>';
+    const ops=G.filter(e=>!puede(e)).map(e=>({t:'Pasar acciones de '+E(e.nombre),cat:'legado',cerrar:false,d:'Tienes el '+Math.round(tuPct(e)*100)+'% a tu nombre. El voto sigue contigo; lo económico, no.',dis:S.mov<1?'Sin movidas':null,run:()=>escenaCuanto(e)}));
+    ops.push({t:'Cerrar',cat:'legado',run:()=>{}});
+    escena({rubro:'Fundación '+E(F.nombre),titulo:'Pasar compañías a la fundación',ancho:true,cerrable:true,cuerpo:'La fundación puede ser accionista de tus compañías: esa parte sale de tu patrimonio, del impuesto al patrimonio y de la sucesión, y sus dividendos financian la obra social. <b>Es irrevocable</b>: solo se recupera disolviendo la fundación, y eso cuesta el 40% de lo donado.',html:tabla,opciones:ops}); }
+  function escenaCuanto(e){ const mio=tuHolder(e), total=totalAcciones(e);
+    const ops=[[.25,'Un cuarto'],[.5,'La mitad'],[1,'Casi todas']].map(([f,n])=>{ const k=Math.min(Math.round(mio.n*f),mio.n-1), v=val(e)*(k/total), c=Math.max(5,Math.round(v*.01)); return {t:n+' de tus acciones ('+Math.round(k/total*100)+'% de la compañía · '+fm(v)+')',cat:'legado',cerrar:false,d:'Trámite en la notaría: '+fm(c)+'. Lo que se pasa deja de ser tuyo.',dis:S.mov<1?'Sin movidas':(S.efectivo<c?'No te alcanza el trámite':(k<1?'No hay acciones para pasar':null)),run:()=>{ S.mov=Math.max(0,S.mov-1); aportar(e,f); escenaPanel(); }}; });
+    ops.push({t:'Volver',cat:'legado',cerrar:false,run:()=>escenaPanel()});
+    escena({rubro:'Fundación '+E(S.fundacion.nombre),titulo:E(e.nombre),ancho:true,cerrable:true,cuerpo:'Tienes el <b>'+Math.round(tuPct(e)*100)+'%</b> a tu nombre y la fundación ya tiene el '+Math.round(fundPct(e)*100)+'%. Cuánto le pasas:',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapMiPct(){ const old=window.miPct; if(typeof old!=='function'||old.__v224) return; const f=function(e){ const v=old.apply(this,arguments); try{ const p=fundPct(e); if(p>0){ S._venta224={e,efectivo:S.efectivo}; return v+p; } }catch(x){} return v; }; f.__v224=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.miPct=f; }
+  function wrapSalida(){ const old=window.sacarDelGrupo; if(typeof old!=='function'||old.__v224) return; const f=function(e){ const r=old.apply(this,arguments);
+      try{ const s=S._venta224, p=fundPct(e); if(S.fundacion&&p>0&&s&&s.e===e){ const tot=miPct(e), d=S.efectivo-s.efectivo; const fo=(e.holders||[]).find(h=>h.id==='fo153'); let pfo=0; try{ pfo=fo?fo.n/totalAcciones(e):0; }catch(x){} const resto=Math.max(.0001,tot-pfo); if(d>0){ const x=Math.min(d,d*p/resto); S.efectivo-=x; S.fundacion.activos+=x; log('De lo que dejó '+E(e.nombre)+', '+fm(x)+' fueron para la fundación, dueña de '+Math.round(p*100)+'% de la compañía.'); } } S._venta224=null; }catch(x){}
+      return r; }; f.__v224=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.sacarDelGrupo=f; }
+  function wrapValor(){ const old=window.valorFundacion; if(typeof old!=='function'||old.__v224) return; const f=function(){ let v=old.apply(this,arguments); try{ if(S.fundacion) v+=valorAcciones(); }catch(x){} return v; }; f.__v224=true; window.valorFundacion=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA224_PASO) return; window.__SA224_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='Pasar compañías a la fundación';
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='instituciones'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Crear',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA224_ACC) return; window.__SA224_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&S.fundacion&&comps().some(e=>tuHolder(e)||hold(e))&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'legado',d:'La fundación como accionista de tus compañías: sale de tu patrimonio y de la sucesión, y sus dividendos financian obra social. Es irrevocable.',mov:0,modal:true,run:()=>escenaPanel()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v224=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA224_CAT) return; window.__SA224_CAT=true; window.catDe=function(t){ if(t===TIT) return 'legado'; return old.apply(this,arguments); }; }
+  function init224(){ wrapMiPct(); wrapSalida(); wrapValor(); wrapPaso(); wrapAcciones(); wrapCat(); try{ grupo(); }catch(e){}
+    Object.assign(window,{pctFundacion224:fundPct,pctPropio224:pctPropio,valorAccionesFundacion224:valorAcciones,puedeAportarFundacion224:puede,aportarFundacion224:aportar,revertirFundacion224:revertir,repartoFundacion224:repartoFundacion,alDisolver224:alDisolver,anualFundacion224:anual,escenaFundacionAcciones224:escenaPanel,escenaFundacionCuanto224:escenaCuanto,
+      eventosFundacion224:{dian:evDian,hijos:evHijos}}); }
+  init224(); setTimeout(init224,40); setTimeout(init224,220); setTimeout(init224,650); setTimeout(init224,950); setTimeout(init224,1500);
+  window.__SA224={version:V224};
 })();
 </script>
 
