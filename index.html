@@ -1558,7 +1558,7 @@ const GLOBAL_ZONEAS={
   'Singapur':['Orchard','River Valley','Marina Bay'], 'Hong Kong':['Kowloon','Mid-Levels','Central'],
   'Fráncfort':['Westend','Sachsenhausen','Innenstadt'], 'París':['Montparnasse','Passy','8e arrondissement'],
   'Tokio':['Shibuya','Minato','Chiyoda'], 'Shanghái':['Jing’an','Pudong','French Concession'],
-  'São Paulo':['Pinheiros','Jardins','Itaim Bibi'], 'Ciudad de Panamá':['San Francisco','Punta Pacífica','Costa del Este']
+  'São Paulo':['Pinheiros','Jardins','Itaim Bibi'], 'Ciudad de Panamá':['Bella Vista','San Francisco','Punta Paitilla','Punta Pacífica']
 };
 /*v194*/ function ciudadVigente(n,anio){ const c=CIUDADES.find(x=>x.n===n); const a=isFinite(anio)?anio:((typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026); return !c||!c.desde||c.desde<=a; }
 function datosCiudad(c){ const l=CIUDADES.find(x=>x.n===c); if(l)return l; const g=CIUDADES_GLOBALES.find(x=>x.n===c); return g?{...g,ef:{redes:g.redes}}:null; }
