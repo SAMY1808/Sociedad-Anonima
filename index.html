@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v224</div>
+<div class="version-badge" id="versionBadge">v225</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -25270,11 +25270,14 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
    ========================================================================== */
 (function(){
   const V125='v125';
-  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pereira':'pereira','Armenia':'armenia','Cúcuta':'cucuta','Ibagué':'ibague','Villavicencio':'villavicencio','Neiva':'neiva','Pasto':'pasto','Popayán':'popayan','Santa Marta':'santa_marta','Valledupar':'valledupar','Tunja':'tunja','Sincelejo':'sincelejo','Riohacha':'riohacha','Quibdó':'quibdo','Buenaventura':'buenaventura','Rionegro':'rionegro','Barrancabermeja':'barrancabermeja','Yopal':'yopal','San Andrés':'san_andres','Florencia':'florencia'};
+  const CIUDADES125={'Bogotá':'bogota','Medellín':'medellin','La Estrella':'la_estrella','Cali':'cali','Barranquilla':'barranquilla','Bucaramanga':'bucaramanga','Manizales':'manizales','Montería':'monteria','Cartagena':'cartagena','Pereira':'pereira','Armenia':'armenia','Cúcuta':'cucuta','Ibagué':'ibague','Villavicencio':'villavicencio','Neiva':'neiva','Pasto':'pasto','Popayán':'popayan','Santa Marta':'santa_marta','Valledupar':'valledupar','Tunja':'tunja','Sincelejo':'sincelejo','Riohacha':'riohacha','Quibdó':'quibdo','Buenaventura':'buenaventura','Rionegro':'rionegro','Barrancabermeja':'barrancabermeja','Yopal':'yopal','San Andrés':'san_andres','Florencia':'florencia',
+    /*v225*/'Miami':'miami','Nueva York':'nueva_york','Londres':'londres','Dubái':'dubai','Singapur':'singapur','Hong Kong':'hong_kong','Fráncfort':'francfort','París':'paris','Tokio':'tokio','Shanghái':'shanghai','São Paulo':'sao_paulo','Ciudad de Panamá':'ciudad_de_panama'};
+  /*v225: las fotos del exterior existen y se cargan al mostrarse, no al abrir el juego*/
+  const EXTERIOR125=['miami','nueva_york','londres','dubai','singapur','hong_kong','francfort','paris','tokio','shanghai','sao_paulo','ciudad_de_panama'];
   const TIPOS125=['apartamento','casa','duplex','mansion','penthouse'];
   const ok={};
   function precargar(){ if(window.__SA125_PRE) return; window.__SA125_PRE=true; let pend=0, t=null;
-    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const hh=window.FOTOS_HECHAS_204; if(hh&&hh[c]){ if(hh[c].includes(tp)) ok[c+'_'+tp]=true; return; } /*v204/v206: las fotos del registro existen y se cargan al mostrarse, no al abrir el juego*/ const k=c+'_'+tp, im=new Image(); pend++;
+    Object.values(CIUDADES125).forEach(c=>TIPOS125.forEach(tp=>{ const hh=window.FOTOS_HECHAS_204; if(EXTERIOR125.includes(c)){ ok[c+'_'+tp]=true; return; } if(hh&&hh[c]){ if(hh[c].includes(tp)) ok[c+'_'+tp]=true; return; } /*v204/v206: las fotos del registro existen y se cargan al mostrarse, no al abrir el juego*/ const k=c+'_'+tp, im=new Image(); pend++;
       const fin=()=>{ clearTimeout(t); t=setTimeout(()=>{ try{ if(S&&S.p&&typeof render==='function'&&!document.querySelector('#escenaHost .lienzo')) render(); }catch(e){} },150); };
       im.onload=()=>{ ok[k]=true; fin(); }; im.onerror=()=>{ ok[k]=false; }; im.src='img/ciudades/'+k+'.jpg'; })); }
   function claveDe(b){
@@ -39400,6 +39403,41 @@ install();setTimeout(install,1200);
       eventosFundacion224:{dian:evDian,hijos:evHijos}}); }
   init224(); setTimeout(init224,40); setTimeout(init224,220); setTimeout(init224,650); setTimeout(init224,950); setTimeout(init224,1500);
   window.__SA224={version:V224};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v225 · LAS CASAS DEL EXTERIOR, EN VINTAGE
+   Las 12 ciudades del exterior (Miami, Nueva York, Londres, Dubái, Singapur,
+   Hong Kong, Fráncfort, París, Tokio, Shanghái, São Paulo y Ciudad de Panamá)
+   mostraban la foto general de antes cuando comprabas o arrendabas allí.
+   Ahora cada una tiene su serie propia de cinco fotos, con el mismo marco de
+   las nueve ciudades de siempre (nombre de la ciudad arriba, tipo de vivienda
+   abajo): casa, dúplex, mansión, apartamento y penthouse.
+   - Las fotos viven en img/ciudades/{ciudad}_{tipo}.jpg (300×400) y entran en
+     la lista de «Jugar sin internet» (precache.json).
+   - v125 las reconoce por el nombre de la ciudad (CIUDADES125) y, como las de
+     las ciudades nuevas de la v204, se cargan al mostrarse y no al abrir el
+     juego, para no sumar 60 descargas al arranque.
+   - Este registro deja a la vista qué ciudad del exterior usa qué nombre de
+     archivo y qué tipos tienen foto.
+   Para sumar otra ciudad del exterior: copiar los .jpg a img/ciudades/,
+   anotarla en CIUDADES125 y en EXTERIOR125 (v125) y aquí.
+   ========================================================================== */
+(function(){
+  const V225='v225';
+  const TIPOS=['apartamento','casa','duplex','mansion','penthouse'];
+  const SLUG={'Miami':'miami','Nueva York':'nueva_york','Londres':'londres','Dubái':'dubai','Singapur':'singapur','Hong Kong':'hong_kong','Fráncfort':'francfort','París':'paris','Tokio':'tokio','Shanghái':'shanghai','São Paulo':'sao_paulo','Ciudad de Panamá':'ciudad_de_panama'};
+  // tipos que ya tienen foto en img/ciudades/{slug}_{tipo}.jpg
+  const HECHAS={}; Object.keys(SLUG).forEach(c=>{ HECHAS[SLUG[c]]=TIPOS.slice(); });
+  function archivos(){ const r=[]; Object.keys(HECHAS).forEach(s=>HECHAS[s].forEach(t=>r.push('img/ciudades/'+s+'_'+t+'.jpg'))); return r; }
+  function pendientes(){ const r=[]; Object.keys(SLUG).forEach(c=>{ const s=SLUG[c], f=TIPOS.filter(t=>!HECHAS[s].includes(t)); if(f.length) r.push({ciudad:c,slug:s,tipos:f}); }); return r; }
+  // ¿la foto de esta ciudad y tipo está lista para mostrarse? (la misma que mira v125)
+  function foto(ciudad,tipo){ try{ const s=SLUG[ciudad]; if(!s||!HECHAS[s].includes(tipo)) return false; const ok=window.fotosCiudad125||{}; return ok[s+'_'+tipo]===true; }catch(e){ return false; } }
+  function init225(){ Object.assign(window,{SLUG_EXTERIOR_225:SLUG,FOTOS_EXTERIOR_225:HECHAS,archivosExterior225:archivos,fotosPendientes225:pendientes,fotoExterior225:foto}); }
+  init225(); setTimeout(init225,40); setTimeout(init225,220); setTimeout(init225,650); setTimeout(init225,950); setTimeout(init225,1500);
+  window.__SA225={version:V225};
 })();
 </script>
 
