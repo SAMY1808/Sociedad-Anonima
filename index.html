@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v227</div>
+<div class="version-badge" id="versionBadge">v228</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -39777,7 +39777,7 @@ install();setTimeout(install,1200);
   function penaSocial(){ const a=A(); let n=a<1960?1:a<1990?2:3; if(S.p.sexo==='m') n*=2;
     try{ const c=S.hogar&&S.hogar.ciudad; if(c&&typeof window.toleranciaDivorcio226==='function'){ const t=window.toleranciaDivorcio226(c,a); if(t!=null) n*=cl(1.3-t,.4,1.2); } }catch(e){}
     return n; }
-  function escandalo(g,motivo){ const n=Math.max(.5,penaSocial()*g); prest(-Math.round(n),motivo||'un escándalo familiar'); S.p.escandalos=cl((S.p.escandalos||0)+g*1.2,0,20); try{ S.p.reputacion=cl((S.p.reputacion||50)-g*2,0,100); }catch(e){} return n; }
+  function escandalo(g,motivo){ const n=Math.max(.5,penaSocial()*g); prest(-Math.round(n),motivo||'un escándalo familiar'); S.p.escandalos=cl((S.p.escandalos||0)+g*1.2,0,20); try{ S.p.reputacion=cl((S.p.reputacion||50)-g*2,0,100); }catch(e){} try{ if(typeof window.alEscandalo228==='function') window.alEscandalo228(g); }catch(e){} return n; }
 
   /* ---------- herencia: el hijo reconocido y el que no ---------- */
   const sinDerecho=h=>!!(h&&h.medio227&&h.reconocido227===false&&!h.filiacion227);
@@ -39895,6 +39895,132 @@ install();setTimeout(install,1200);
       eventosOtraCasa227:{decidir:evDecidir,descubre:evDescubre,saben:evSaben,demanda:evDemanda,puesto:evPuesto,carta:evCarta}}); }
   init227(); setTimeout(init227,40); setTimeout(init227,220); setTimeout(init227,650); setTimeout(init227,950); setTimeout(init227,1500);
   window.__SA227={version:V227};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v228 · EL RECHAZO SOCIAL AL DIVORCIO
+   Separarse siempre costó prestigio (v181, v182), pero el costo era un número
+   que se pagaba una vez. Ahora es una temperatura: lo que la ciudad, la
+   Iglesia y el club le cobran a quien rompe un matrimonio depende de la época,
+   de quién eres y de dónde vives, y se enfría con los años.
+   - Al terminar un matrimonio (divorcio o anulación) nace «el nombre en la
+     ciudad»: un nivel de 0 a 100. Antes de 1930 es casi un destierro; hacia
+     1990 se comenta; hoy casi no se nota. La anulación eclesiástica lo baja
+     (se ve como un trámite, no como una ruptura); a ellas se les cobra más;
+     Pasto o Popayán perdonan menos que Barranquilla o Cartagena; y en el
+     exterior pesa distinto (París no es Dubái).
+   - Mientras está alto: el club te suspende, el párroco te niega la
+     comunión, el colegio católico incomoda a los niños, un banquero
+     conservador te cierra el crédito. Cada uno con salidas: pelear, pagar,
+     donar, irte unos años afuera, pedir la nulidad.
+   - Segundas nupcias: casarse otra vez antes de 2005 reabre la herida (y
+     antes de 1991, solo por lo civil).
+   - Con los años se enfría; cuando baja del todo, te vuelven a invitar.
+   - Un escándalo de infidelidad (v227) deja una versión más suave del mismo
+     nombre en la ciudad, aunque no haya divorcio.
+   - La acción «Divorciarte» ahora dice cuánto te va a costar socialmente.
+   Los niveles y los años están ajustados para el juego, no son datos exactos.
+   ========================================================================== */
+(function(){
+  const V228='v228';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const menores=()=>((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18);
+
+  /* ---------- cuánto pesa, según la época, el lugar y quién eres ---------- */
+  const BASE=a=>a<1930?85:a<1960?75:a<1976?62:a<1991?45:a<2005?25:a<2020?12:6;
+  const CIUD={'Pasto':1.25,'Popayán':1.25,'Tunja':1.2,'Medellín':1.15,'La Estrella':1.15,'Manizales':1.15,'Bucaramanga':1.1,'Rionegro':1.1,'Pereira':1.05,'Armenia':1.05,'Bogotá':1,'Cali':.95,'Cartagena':.95,'Barranquilla':.9,'Santa Marta':.9,'San Andrés':.85};
+  function factorLugar(){ const c=S.hogar&&S.hogar.ciudad; if(!c) return 1; let g=null; try{ g=ciudadGlobalDe(c); }catch(e){}
+    if(g){ const t=(typeof window.toleranciaDivorcio226==='function')?window.toleranciaDivorcio226(c,A()):null; return t!=null?cl(1.3-t,.4,1.2):.8; }
+    return CIUD[c]||1; }
+  function nivelInicial(anulacion){ const a=A(); let n=BASE(a); if(anulacion) n*=.6; if(S.p.sexo==='m') n*=1.5; n*=factorLugar(); if((S.p.escandalos||0)>=5) n+=8; if(menores().length) n*=1.1; return cl(Math.round(n),2,100); }
+  const clima=()=>{ const n=BASE(A())*factorLugar(); return n>=65?'se castiga duro':n>=40?'se comenta':n>=18?'se murmura':'casi no se nota'; };
+
+  /* ---------- el estado ---------- */
+  function ES(){ const e=S.estigma228; if(e&&e.gen!==S.gen){ delete S.estigma228; return null; } return e||null; }
+  function crear(){ let e=ES(); if(!e) e=S.estigma228={nivel:0,desde:A(),gen:S.gen,motivo:'divorcio',n:0,hechos:{},anulada:false}; return e; }
+  function alTerminar(anulacion){ const e=crear(); const n0=nivelInicial(!!anulacion); const prev=e.nivel||0; e.nivel=cl(Math.max(prev,n0)+(prev>10?5:0),2,100); e.desde=A(); e.motivo=anulacion?'anulación':'divorcio'; e.n=(e.n||0)+1; e.hechos={}; e.anulada=!!anulacion;
+    const redes=Math.round(e.nivel/10), rep=Math.round(e.nivel/20); try{ S.p.redes=cl((S.p.redes||0)-redes,0,100); S.p.reputacion=cl((S.p.reputacion||50)-rep,0,100); }catch(x){}
+    const a=A(); log(a<1960?'En la ciudad no se habla de otra cosa: <b>te cierran puertas</b> en las casas que antes te recibían.':a<1991?'<b>Se comenta en el club, en la misa y en las comidas.</b> Algunos amigos dejan de llamar.':a<2005?'Algunos murmuran. La mayoría es discreta; los más conservadores, no.':'Casi nadie dice nada, aunque hay quien lo comenta en voz baja.','mal');
+    return e; }
+  function alEscandalo(g){ if(!ACTIVO()||nino()) return; const a=A(); const add=Math.round(g*6*(BASE(a)/50)*factorLugar()); if(add<=0) return; const e=crear(); if(!e.n){ e.motivo='escándalo'; e.desde=A(); } e.nivel=cl((e.nivel||0)+add,0,100); }
+  function alCasarse(){ const e=ES(); if(!e||e.nivel<10||A()>=2005) return; const c=Math.round((A()<1991?14:8)*factorLugar()); e.nivel=cl(e.nivel+c,0,100); if(S.p) S.p.reputacion=cl((S.p.reputacion||50)-1,0,100);
+    cola.push(evSegundas()); }
+
+  /* ---------- eventos ---------- */
+  const hecho=(k)=>{ const e=ES(); if(e) e.hechos[k]=A(); };
+  function evClub(){ const c1=Math.round(Math.max(6,pat()*.006)), c2=Math.round(Math.max(4,pat()*.003));
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=45&&!!S.clubFamilia&&!ES().hechos.club,t:()=>'<b>El consejo del club se reúne a puerta cerrada.</b> Hay quien dice que, con lo de tu separación, «un socio en esa situación no da buena imagen». Te piden que te presentes.',
+      o:[{t:'Pelear tu puesto con abogados ('+fm(c1)+')',f:()=>{ hecho('club'); tom(c1); if(chance(clamp(.4+((S.p.reputacion||50)-50)/150,.2,.7))){ return 'Conservaste tu puesto, aunque más de uno dejó de saludarte.'; } S.clubFamilia.nivel=Math.max(1,(S.clubFamilia.nivel||1)-1); ES().nivel=cl(ES().nivel+4,0,100); return 'Te suspendieron seis meses. Todo el mundo se enteró.'; }},
+         {t:'Pagar una cuota extraordinaria ('+fm(c2)+')',f:()=>{ hecho('club'); tom(c2); ES().nivel=cl(ES().nivel-6,0,100); return 'Pagaste una «cuota de mejoramiento» y el tema se cerró, sin que nadie lo mencionara.'; }},
+         {t:'Retirarte del club',f:()=>{ hecho('club'); S.clubFamilia.nivel=Math.max(1,(S.clubFamilia.nivel||1)-1); S.p.redes=cl((S.p.redes||0)-4,0,100); return 'Te retiraste antes de que te sacaran. Se pierde mucho más que una mesa de golf.'; }}]}; }
+  function evIglesia(){ const c1=Math.round(Math.max(6,pat()*.004)), c2=Math.round(Math.max(8,pat()*.008)), anul=A()<1991&&!(ES()&&ES().anulada);
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=35&&(A()<1991||ES().nivel>=50)&&!ES().hechos.iglesia,t:()=>'<b>El párroco te pide que pases por la casa cural.</b> '+(A()<1991?'Con el matrimonio roto, no puedes comulgar ni ser padrino de nadie. En la misa de domingo se nota el hueco en tu banca.':'Dice que lo tuyo «no es un buen ejemplo para la comunidad» y que conviene un tiempo de recogimiento.'),
+      o:[{t:'Donar para la restauración de la iglesia ('+fm(c1)+')',f:()=>{ hecho('iglesia'); tom(c1); ES().nivel=cl(ES().nivel-12,0,100); prest(1,'una donación a la parroquia'); return 'La torre de la iglesia tendrá campanas nuevas. El párroco volvió a saludarte.'; }},
+         anul?{t:'Pedir la nulidad al tribunal eclesiástico ('+fm(c2)+')',f:()=>{ hecho('iglesia'); tom(c2); if(chance(clamp(.4+((S.p.reputacion||50)-50)/200,.25,.65))){ ES().anulada=true; ES().nivel=Math.round(ES().nivel*.5); return 'El tribunal declaró nulo tu matrimonio: ahora puedes volver a la Iglesia, y la ciudad lo ve como un trámite, no como una ruptura.'; } ES().nivel=cl(ES().nivel+3,0,100); return 'El tribunal negó la nulidad. El párroco, en cambio, tomó nota.'; }}:{t:'Hablar con el obispo',f:()=>{ hecho('iglesia'); ES().nivel=cl(ES().nivel-4,0,100); return 'El obispo te recibió con cortesía y no prometió nada.'; }},
+         {t:'Dejar de ir a misa',f:()=>{ hecho('iglesia'); prest(-1,'se alejó de la Iglesia'); ES().nivel=cl(ES().nivel+5,0,100); return 'Dejaste de ir. «Se volvió ateo», dicen en la casa de los vecinos.'; }}]}; }
+  function evColegio(){ const c1=Math.round(Math.max(6,pat()*.003)), c2=Math.round(Math.max(8,pat()*.005)), kids=menores();
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=35&&menores().length>0&&!ES().hechos.colegio,t:()=>'<b>En el colegio de los niños hay comentarios.</b> Otros padres dicen «hijos de divorciados» y la hermana rectora ha preguntado por la situación de la casa.',
+      o:[{t:'Cambiar a los niños de colegio ('+fm(c1)+')',f:()=>{ hecho('colegio'); tom(c1); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-2,0,100); }); return 'Los cambiaste a otro colegio, más moderno. Extrañan a sus amigos, pero nadie los mira raro.'; }},
+         {t:'Hacer una donación al colegio ('+fm(c2)+')',f:()=>{ hecho('colegio'); tom(c2); ES().nivel=cl(ES().nivel-6,0,100); return 'Donaste el laboratorio de ciencias. Los comentarios pararon de golpe.'; }},
+         {t:'Dejarlos ahí',f:()=>{ hecho('colegio'); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-4,0,100); }); return 'Los niños siguieron en el colegio, con los murmullos a cuestas.'; }}]}; }
+  function evCredito(){ const c1=Math.round(Math.max(8,pat()*.006)), c2=Math.round(Math.max(4,pat()*.002));
+    return {p:8,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=50&&A()<2000&&!ES().hechos.credito,t:()=>'<b>Un banquero conservador te cierra el crédito.</b> No lo dice así: «el comité prefiere esperar a que su situación personal se aclare».',
+      o:[{t:'Aceptar peores condiciones y mejores garantías ('+fm(c1)+')',f:()=>{ hecho('credito'); tom(c1); return 'Aceptaste una tasa más alta y garantías de sobra. El crédito salió.'; }},
+         {t:'Buscar otro banco ('+fm(c2)+')',f:()=>{ hecho('credito'); tom(c2); S.p.redes=cl((S.p.redes||0)-2,0,100); return 'Un banco más joven te recibió sin hacer preguntas. En el club se comentó que «ahora te financian los nuevos».'; }},
+         {t:'Quejarte con los amigos',f:()=>{ hecho('credito'); prest(-1,'se quejó de un banquero'); return 'Te desahogaste en una comida. Se supo, y no ayudó.'; }}]}; }
+  function evSegundas(){ const c1=Math.round(Math.max(3,pat()*.002)), c2=Math.round(Math.max(10,pat()*.01));
+    return {p:9,c:()=>ACTIVO()&&!!ES(),t:()=>'<b>Segundas nupcias.</b> '+(A()<1991?'Casarte otra vez, estando el primer matrimonio roto, solo puede ser por lo civil: no habrá misa, ni bendición, ni familia de uno de los dos en las bancas.':'Casarte otra vez abre de nuevo la conversación. Hay a quienes les gusta y a quienes no.'),
+      o:[{t:'Una ceremonia discreta ('+fm(c1)+')',f:()=>{ tom(c1); ES().nivel=cl(ES().nivel-2,0,100); return 'La ceremonia fue pequeña, en una notaría. Nadie pudo decir que fue una provocación.'; }},
+         {t:'Una fiesta como se debe ('+fm(c2)+')',f:()=>{ tom(c2); ES().nivel=cl(ES().nivel+(A()<1991?8:2),0,100); if(A()>=1991) prest(1,'una boda como se debe'); return A()<1991?'La fiesta fue grande y hubo asientos vacíos de los invitados de siempre. Pesó como una provocación.':'La fiesta salió muy bien, y casi nadie hizo comentarios.'; }}]}; }
+  function evInvita(){ return {p:7,c:()=>ACTIVO()&&!!ES()&&ES().nivel<=22&&A()-ES().desde>=3&&!ES().hechos.invita,t:()=>'<b>Te vuelven a invitar.</b> La familia que dejó de llamarte hace unos años te manda una tarjeta para la fiesta del mes entrante. Nadie menciona lo de antes.',
+      o:[{t:'Ir y comportarte como si nada',f:()=>{ hecho('invita'); S.p.redes=cl((S.p.redes||0)+4,0,100); ES().nivel=cl(ES().nivel-5,0,100); return 'Fuiste. Te recibieron con una sonrisa correcta, y algo se cerró para siempre.'; }},{t:'No ir',f:()=>{ hecho('invita'); return 'No fuiste. No se dijo más.'; }}]}; }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()) return; const e=ES(); if(!e) return; if((S.p.edad||0)<18) return;
+    let dec=A()<1991?.10:.15; try{ if(S.hogar&&S.hogar.ciudad&&ciudadGlobalDe(S.hogar.ciudad)) dec*=1.5; }catch(x){} e.nivel=cl(e.nivel*(1-dec)-(e.anulada?.5:0),0,100);
+    if(e.nivel>=25) S.p.redes=cl((S.p.redes||0)-e.nivel/50,0,100);
+    if(e.nivel<1.5){ delete S.estigma228; return; }
+    let n=0; const push=ev=>{ if(n>=1) return; n++; cola.push(ev); }; const p=cl(.25+e.nivel/200,0,.6);
+    [evClub,evIglesia,evColegio,evCredito,evInvita].forEach(f=>{ try{ const ev=f(); if(ev.c()&&chance(p)) push(ev); }catch(x){} }); }
+
+  /* ---------- el panel y la acción ---------- */
+  const TIT='Tu nombre en la ciudad';
+  const barra=n=>'<span style="display:inline-block;width:90px;height:8px;border-radius:4px;background:rgba(127,127,127,.25);vertical-align:middle"><span style="display:block;height:8px;border-radius:4px;width:'+Math.round(cl(n,0,100)*0.9)+'px;background:'+(n>=60?'#D06A60':n>=30?'#D6A64F':'#4FA36B')+'"></span></span> '+Math.round(n);
+  function escenaNombre(){ const e=ES(); if(!e){ escena({rubro:'Vida social',titulo:TIT,ancho:true,cerrable:true,cuerpo:'Nadie habla mal de ti por tu vida matrimonial. Hoy, en tu ciudad, '+clima()+'.',opciones:[{t:'Cerrar',cat:'familia',run:()=>{}}]}); return; }
+    const sinM=S.mov<1?'Sin movidas':null, mov=()=>{ S.mov=Math.max(0,S.mov-1); }, c1=Math.round(Math.max(6,pat()*.003)), c2=Math.round(Math.max(3,pat()*.001));
+    const tabla='<table class="libro"><tr><td>Lo que se dice</td><td>'+barra(e.nivel)+'</td></tr><tr><td>Desde</td><td>'+e.desde+' · '+E(e.motivo)+(e.anulada?' · con nulidad':'')+'</td></tr><tr><td>Hoy, en tu ciudad</td><td>'+clima()+'</td></tr></table>';
+    const ops=[{t:'Donar a la obra de la parroquia ('+fm(c1)+')',cat:'familia',cerrar:false,d:'Baja lo que se dice y sube un poco tu prestigio.',dis:sinM||(S.efectivo<c1?'No alcanza':null),run:()=>{ mov(); tom(c1); e.nivel=cl(e.nivel-10,0,100); prest(1,'una donación a la parroquia'); log('Tu donación a la parroquia se agradeció desde el púlpito.'); escenaNombre(); }},
+      {t:'Dar una cena con los amigos que te quedan ('+fm(c2)+')',cat:'familia',cerrar:false,d:'Recompones algunos lazos.',dis:sinM||(S.efectivo<c2?'No alcanza':null),run:()=>{ mov(); tom(c2); e.nivel=cl(e.nivel-5,0,100); S.p.redes=cl((S.p.redes||0)+3,0,100); log('La cena fue pequeña y sincera. Se habló de todo menos de lo que todos pensaban.'); escenaNombre(); }},
+      {t:'Irte una temporada a otra ciudad',cat:'familia',cerrar:false,d:'En el exterior o en una ciudad más abierta, se te cobra menos.',run:()=>{ try{ cerrarModal(); }catch(x){} escenaCiudad(); }},
+      {t:'Cerrar',cat:'familia',run:()=>{}}];
+    escena({rubro:'Vida social',titulo:TIT,ancho:true,cerrable:true,cuerpo:'Lo que la ciudad dice de ti desde tu '+E(e.motivo)+'. Se enfría con los años, y más rápido lejos de donde todos te conocen.',html:tabla,opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapHito(){ const old=window.hito; if(typeof old!=='function'||old.__v228) return; const f=function(t){ const r=old.apply(this,arguments); try{ const s=String(t||''); if(/^Se divorció de /.test(s)) alTerminar(false); else if(/^Anuló su matrimonio con /.test(s)) alTerminar(true); else if(/^Se casó con (?!su )/.test(s)) alCasarse(); }catch(e){ console.error(e); } return r; }; f.__v228=true; window.hito=f; }
+  function wrapDesc(){ const old=window.descFin181; if(typeof old!=='function'||old.__v228) return; const f=function(){ let d=old.apply(this,arguments); try{ const n=nivelInicial(typeof window.tituloFin181==='function'&&/anulación/i.test(window.tituloFin181())); d+=' Costo social estimado: '+(n>=60?'muy alto':n>=35?'alto':n>=15?'medio':'bajo')+' (hoy, aquí, '+clima()+').'; }catch(e){} return d; }; f.__v228=true; window.descFin181=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA228_PASO) return; window.__SA228_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='matrimonio'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Tu matrimonio',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA228_ACC) return; window.__SA228_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ const e=ES(); if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&e&&e.nivel>=8&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'familia',d:'Lo que la ciudad dice de ti desde tu '+e.motivo+': el club, la Iglesia, el colegio y los bancos.',mov:0,modal:true,run:()=>escenaNombre()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v228=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA228_CAT) return; window.__SA228_CAT=true; window.catDe=function(t){ if(t===TIT) return 'familia'; return old.apply(this,arguments); }; }
+  function init228(){ wrapHito(); wrapDesc(); wrapPaso(); wrapAcciones(); wrapCat(); try{ grupo(); }catch(e){}
+    Object.assign(window,{estigmaDivorcio228:ES,nivelInicialEstigma228:nivelInicial,climaDivorcio228:clima,baseEstigma228:BASE,alTerminarMatrimonio228:alTerminar,alEscandalo228:alEscandalo,alCasarse228:alCasarse,anualEstigma228:anual,escenaNombre228:escenaNombre,
+      eventosEstigma228:{club:evClub,iglesia:evIglesia,colegio:evColegio,credito:evCredito,segundas:evSegundas,invita:evInvita}}); }
+  init228(); setTimeout(init228,40); setTimeout(init228,220); setTimeout(init228,650); setTimeout(init228,950); setTimeout(init228,1500);
+  window.__SA228={version:V228};
 })();
 </script>
 
