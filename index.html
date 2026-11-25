@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v229</div>
+<div class="version-badge" id="versionBadge">v230</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -2290,7 +2290,9 @@ function sentarseEn(i){
 }
 function sacarDelGrupo(e){
   S.grupo=companias().filter(x=>x!==e);
-  if(!S.grupo.length){ S.emp=null; S.junta=[]; S.empIdx=0; }
+  if(!S.grupo.length){ S.emp=null; S.junta=[]; S.empIdx=0;
+    // sin compañías ya no se preside nada: si no, el HUD se rompe con «presidente de null»
+    if(S.carrera&&S.carrera.ruta==='fundador') Object.assign(S.carrera,{ruta:'desempleado',nivel:-1,empleador:null,anios:0,desempeno:55}); }
   else sentarseEn(Math.min(S.empIdx,S.grupo.length-1));
 }
 function presides(e){ return e===S.emp && S.carrera.ruta==='fundador'; }
@@ -3848,11 +3850,14 @@ function escenaCronica(){
   const nota=caja.querySelector('#cronNota');
   const btns=caja.querySelectorAll('#eleccion .carta');
   btns[0].onclick=()=>{
+    const fallo=()=>{ if(nota) nota.textContent='No se pudo copiar sola: selecciona el texto y cópialo a mano.'; };
+    const bien=()=>{ if(nota) nota.textContent='Copiada. Pégala donde quieras.'; };
+    const manual=()=>{ try{ ta.removeAttribute('readonly'); ta.select(); const r=document.execCommand('copy'); ta.setAttribute('readonly','readonly'); if(r) bien(); else fallo(); }catch(e){ fallo(); } };
     try{
-      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(texto); }
-      else { ta.removeAttribute('readonly'); ta.select(); document.execCommand('copy'); ta.setAttribute('readonly','readonly'); }
-      if(nota) nota.textContent='Copiada. Pégala donde quieras.';
-    }catch(e){ if(nota) nota.textContent='No se pudo copiar sola: selecciona el texto y cópialo a mano.'; }
+      // la promesa del portapapeles puede rechazarse (permiso negado): se intenta a mano y, si no, se avisa
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(texto).then(bien,manual); }
+      else manual();
+    }catch(e){ manual(); }
   };
   btns[1].onclick=()=>{
     try{
@@ -7042,7 +7047,7 @@ function listaAcciones(){
     const costo=42+h.edad*3;
     A.push({t:'Invertir en la formación de '+h.nombre, d:fmt(costo)+' al año: colegio, idiomas, universidad afuera.', mov:1,
       dis:S.efectivo<costo?'No te alcanza':null,
-      run:()=>{ S.efectivo-=costo; h.formacion+=ri(9,17); h.vinculo+=4;
+      run:()=>{ S.efectivo-=costo; h.formacion=clamp((h.formacion||0)+ri(9,17),0,100); h.vinculo=clamp((h.vinculo||0)+4,0,100);
         const k=pick(['intelecto','carisma','disciplina']); h.atr[k]=clamp(h.atr[k]+1,1,10);
         log(esc(h.nombre)+' avanzó en su formación ('+k+' +1).','bien');}});
   });
@@ -7050,7 +7055,7 @@ function listaAcciones(){
     if(S.emp&&!S.junta.some(j=>j.hijo===h.nombre)) A.push({t:'Meter a '+h.nombre+' en la junta', d:'Lealtad total, pero el mercado descuenta gobernanza familiar.', mov:1,
       dis:S.junta.length>=7?'Junta llena':null,
       run:()=>{ S.junta.push({nombre:h.nombre+' '+S.p.apellido,arq:'familiar',lealtad:92,anios:0,hijo:h.nombre});
-        h.vinculo+=10; log(esc(h.nombre)+' entró a la junta directiva.','hito');}});
+        h.vinculo=clamp((h.vinculo||0)+10,0,100); log(esc(h.nombre)+' entró a la junta directiva.','hito');}});
   });
   A.push({t:'Cuidarte: médico y ejercicio', d:'Sube salud. Los herederos necesitan tiempo para aprender.', mov:1,
     run:()=>{ S.p.salud=clamp(S.p.salud+ri(6,13),0,100); S.p.felicidad+=3; S.efectivo-=Math.min(S.efectivo,12);
@@ -8378,7 +8383,7 @@ function renderHud(){
   $('hudCara').innerHTML=avatarSVG(p.nombre+' '+p.apellido,{sexo:p.sexo,edad:p.edad,tam:44,anillo:'#D6A648'});
   const c=S.carrera;
   const crHud=c.profesion&&carreraProfesionalDe(c.profesion);
-  let rol = c.ruta==='fundador' ? 'presidente de '+e.nombre
+  let rol = c.ruta==='fundador' ? 'presidente de '+(e?e.nombre:'tu compañía')
     : c.ruta==='profesional'&&crHud ? crHud.n+' · '+crHud.niveles[clamp(c.nivelProf||0,0,crHud.niveles.length-1)].n.toLowerCase()
     : (c.ruta&&c.ruta!=='desempleado') ? RUTAS[c.ruta].niveles[c.nivel].n.toLowerCase()
     : (e?'accionista':'sin empleo');
@@ -13067,7 +13072,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init49,40);
   setTimeout(init49,220);
   setTimeout(init49,650);
-  window.__SA49={version:V49,resumenInmobiliario:resumenInmobiliario49,indiceZona:indiceZona49};
+  window.__SA49={version:V49,resumenInmobiliario:resumenInmobiliario49,indiceZona:indiceZona49,completar:completarDesarrollo49,proyectos:PROYECTOS_49};
 })();
 </script>
 <script>
@@ -14225,7 +14230,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
   setTimeout(init55,40);
   setTimeout(init55,220);
   setTimeout(init55,650);
-  window.__SA55={version:V55,catalogoRD:catalogoRD55};
+  window.__SA55={version:V55,catalogoRD:catalogoRD55,resolverRD:resolverRD55};
 })();
 </script>
 <script>
@@ -36352,7 +36357,7 @@ install();setTimeout(install,1200);
     plan:['el estudio de movilidad','la actualización del catastro','el plan maestro'],
     agro:['el centro de acopio','la vía veredal','el distrito de riego'],
     recaudo:['el sistema de recaudo','la modernización de las rentas'],comercio:['la feria comercial','la zona franca de servicios']};
-  function proyecto(g){ if(g.lic.filter(l=>l.estado==='estudios'||l.estado==='abierta').length>=3) return null; const c=cargoPorId(g.cargo); const f=pick(c.frentes.filter(x=>OBJETOS[x]).length?c.frentes.filter(x=>OBJETOS[x]):['obras']);
+  function proyecto(g){ if(g.lic.filter(l=>l.estado==='estudios'||l.estado==='abierta').length>=3) return null; const c=cargoPorId(g.cargo)||cargoDe(g); const f=pick(c.frentes.filter(x=>OBJETOS[x]).length?c.frentes.filter(x=>OBJETOS[x]):['obras']);
     const valor=Math.max(20,Math.round(g.pres.total*rnd(.06,.18))); const l={id:'p'+(++g.nlic),obj:pick(OBJETOS[f]),frente:f,valor,estado:'estudios',ofertas:[],gan:null,avance:0,anio:A(),extra:0,inter:false,calidad:60};
     g.lic.push(l); return l; }
   function ofertas(l){ const ap=(S.hogar&&apellidoCiudad(S.hogar.ciudad))||'Pérez'; const tiene=companias().find(c=>/construc|energia/.test(c.sector||''))||companias()[0]||null;
@@ -40122,6 +40127,84 @@ install();setTimeout(install,1200);
   function init229(){ Object.assign(window,{conocerAmante229:conocer,escenaAmbiente229:escenaAmbiente,escenaCandidatas229:escenaCandidatas,cortejarAmante229:cortejar,probCortejo229:prob,candidatasAmante229:generar,ambientesAmante229:ambs,AMBIENTES_AMANTE_229:AMB}); }
   init229(); setTimeout(init229,40); setTimeout(init229,220); setTimeout(init229,650); setTimeout(init229,950); setTimeout(init229,1500);
   window.__SA229={version:V229};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v230 · LO QUE ESTÁ EN CURSO SOBREVIVE AL GUARDADO, Y LOS NÚMEROS NO SE SALEN
+   Hallazgos de la revisión general del juego (un bot jugó cientos de años):
+   1. Los compromisos de varios años (la expansión, la planta, la filial, el
+      proceso de adopción, el estudio, la obra, la investigación, el divorcio...)
+      guardaban su «qué pasa al terminar» como una función. Una función no se
+      guarda: al «Retomar la partida guardada» el compromiso seguía en la lista,
+      descontaba años, y al llegar a cero no pasaba nada. Se pagaba por una
+      planta que nunca abría. Ahora, al cerrar el año, el que no tiene su
+      función se reconstruye desde su título y su compañía.
+   2. Dentro de la partida guardada, el proceso de divorcio, el pleito de la
+      sucesión y el cuidado de un pariente apuntaban a su compromiso con una
+      copia, no con el original: al terminar, el original seguía ocupando una
+      movida. Se vuelven a enlazar.
+   3. Varios efectos sumaban felicidad o vínculo sin tope: la felicidad llegaba
+      a -22 y el vínculo de un hijo a 109. Ahora, antes de pintar y al cerrar el
+      año, felicidad, salud, reputación, contactos, vínculo y paciencia se
+      mantienen entre 0 y 100.
+   ========================================================================== */
+(function(){
+  const V230='v230';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const emp=n=>{ try{ return companias().find(e=>e.nombre===n)||null; }catch(e){ return null; } };
+  const principal=()=>{ try{ return (S.emp&&companias().includes(S.emp))?S.emp:null; }catch(e){ return null; } };
+
+  /* ---------- 1. reconstruir el «qué pasa al terminar» desde el título ---------- */
+  const nivelEdu=t=>{ try{ return EDU.findIndex(n=>n&&(t===n||t.indexOf(n+' en ')===0)); }catch(e){ return -1; } };
+  const RECETAS=[
+    [/^Proceso de (?:divorcio|anulación) con /,()=>()=>window.ejecutarDivorcio()],
+    [/^Pleito por la sucesión$|^Cuidar a /,()=>()=>{}],
+    [/^Proceso de adopción$/,()=>()=>{
+      if(!chance(clamp(.62+prestigio()/300+(S.familia.pareja?.12:0)-((S.p.escandalos||0)*.12),.2,.92))) return 'El proceso de adopción no prosperó: la respuesta fue no.';
+      const sx=chance(.5)?'h':'m'; const h=nuevoHijo(nombreLocal(S.p.ciudad,sx),sx,ri(1,9)); h.adoptado='icbf'; h.origen='adopcion'; h.vinculo=55; S.familia.hijos.push(h);
+      moverPrestigio(5,'la adopción'); S.p.felicidad=clamp(S.p.felicidad+14,0,100); anunciarLlegadaHijo(h,'adopcion'); setTimeout(()=>escenaBautizo(h,'Adopción cerrada'),0);
+      return '<b>'+E(h.nombre)+'</b> llegó a la casa: '+h.edad+' años y toda una vida por delante.'; }],
+    [/^Expansión de (.+)$/,m=>()=>{ const e=emp(m[1]); if(!e) return 'La expansión murió con la compañía.'; const dis=(S.p.atr&&S.p.atr.disciplina)||5;
+      if(chance(.60+dis/60)){ e.ingresos*=1+rnd(.16,.34)*escalaTamano(e); e.empleados=Math.round(e.empleados*1.25); return 'Terminó la expansión de '+E(e.nombre)+': ingresos ahora en '+fmt(e.ingresos)+'.'; }
+      e.ingresos*=rnd(1.0,1.06); e.moral-=8; return 'La expansión de '+E(e.nombre)+' se atascó: costos arriba y poco ingreso nuevo.'; }],
+    [/^Integración de (.+)$/,m=>()=>{ const e=principal(); if(!e) return null; e.ingresos*=1+rnd(.22,.42)*escalaTamano(e); e.empleados=Math.round(e.empleados*1.4); e.eficiencia=clamp(e.eficiencia-6,0,100); return 'Quedó integrada '+E(m[1])+' en '+E(e.nombre)+'.'; }],
+    [/^Planta nueva de (.+)$/,m=>()=>{ const e=emp(m[1]); if(!e) return null; e.ingresos*=1+rnd(.4,.75)*escalaTamano(e); e.eficiencia=clamp(e.eficiencia+14,0,100); e.empleados=Math.round(e.empleados*1.5); hito('Abrió planta nueva de '+e.nombre); return 'Abrió la planta nueva de '+E(e.nombre)+'. Otra escala: ingresos en '+fmt(e.ingresos)+'.'; }],
+    [/^Filial en (.+)$/,m=>()=>{ const pz=(typeof PAISES!=='undefined'?PAISES:[]).find(x=>x.n===m[1]); const e=principal(); if(!pz||!e) return null; if(chance(pz.riesgo)) return 'La filial en '+pz.n+' no levantó: se perdió la inversión y toca cerrarla.';
+      filiales(e).push({pais:pz.id,n:pz.n,desde:S.anio,base:e.ingresos*pz.costo,div:pz.div,ret:pz.ret,riesgo:pz.riesgo}); if(esMultinacional(e)) moverPrestigio(6,E(e.nombre)+' es multinacional'); hito(e.nombre+' abrió filial en '+pz.n); return 'Quedó abierta la filial de '+E(e.nombre)+' en '+pz.n+'.'; }],
+    [/^Construcción en (.+)$/,m=>()=>{ const b=(S.bienes||[]).find(x=>x&&x.nombreOriginal===m[1]&&x.enConstruccion); const k=window.__SA49; if(!b||!k||!k.completar) return null; const p=(k.proyectos||[]).find(x=>x.id===b.proyecto); if(!p) return null; return k.completar(b,p); }],
+    [/^Investigación: (.+) \((.+)\)$/,m=>()=>{ const e=emp(m[2]); const k=window.__SA55; if(!e||!k||!k.catalogoRD||!k.resolverRD) return null; const d=(k.catalogoRD(e)||[]).find(x=>x.n===m[1]); if(!d) return null; return k.resolverRD(e,d); }]
+  ];
+  function receta(c){ const t=String(c&&c.titulo||''); for(let i=0;i<RECETAS.length;i++){ const m=t.match(RECETAS[i][0]); if(m) return RECETAS[i][1](m); }
+    const n=nivelEdu(t); if(n>=0) return ()=>{ const p=S.p; p.educacion=Math.max(p.educacion||0,n); p.atr.intelecto=clamp(p.atr.intelecto+1,1,10); p.redes=clamp(p.redes+(t.indexOf(' en ')>0?8:5),0,100); p.felicidad=clamp(p.felicidad+2,0,100); hito('Obtuvo '+EDU[n].toLowerCase()); return 'Terminaste '+t.toLowerCase()+'.'; };
+    return null; }
+  function rehidratar(){ let n=0; try{ ((S&&S.compromisos)||[]).forEach(c=>{ if(!c||typeof c.cerrar==='function') return; const f=receta(c); c.cerrar=f||(()=>null); c._rehidratado230=f?'receta':'vacio'; n++; }); }catch(e){ console.error(e); } return n; }
+
+  /* ---------- 2. volver a enlazar el compromiso con su original ---------- */
+  function relinkar(){ let n=0; try{ const cs=(S&&S.compromisos)||[]; if(!cs.length) return 0;
+      const fix=h=>{ if(!h||typeof h!=='object') return; const c=h.compromiso; if(!c||typeof c!=='object'||cs.includes(c)) return; const o=cs.find(x=>x&&x.titulo===c.titulo); if(o){ h.compromiso=o; n++; } };
+      const pa=S.familia&&S.familia.pareja; if(pa) fix(pa.proceso182); fix(S.impug183);
+      const v=S.vejez188; if(v&&v.cuidado){ if(Array.isArray(v.cuidado)) v.cuidado.forEach(fix); else { fix(v.cuidado); Object.keys(v.cuidado).forEach(k=>{ if(v.cuidado[k]&&typeof v.cuidado[k]==='object') fix(v.cuidado[k]); }); } }
+      ((S.parientes)||[]).forEach(fix); }catch(e){ console.error(e); } return n; }
+
+  /* ---------- 3. los números no se salen de 0–100 ---------- */
+  const R=['felicidad','salud','reputacion','redes'];
+  function normalizar(){ try{ const p=S&&S.p; if(!p) return 0; let n=0;
+      R.forEach(k=>{ const v=p[k]; if(typeof v!=='number') return; const w=isFinite(v)?cl(v,0,100):50; if(w!==v){ p[k]=w; n++; } });
+      const hijos=(S.familia&&S.familia.hijos)||[]; hijos.forEach(h=>{ if(!h) return; [['vinculo',55],['formacion',0]].forEach(([k,d])=>{ const v=h[k]; if(typeof v!=='number') return; const w=isFinite(v)?cl(v,0,100):d; if(w!==v){ h[k]=w; n++; } }); });
+      const pa=S.familia&&S.familia.pareja; if(pa) ['paciencia','afecto'].forEach(k=>{ const v=pa[k]; if(typeof v!=='number') return; const w=isFinite(v)?cl(v,0,100):60; if(w!==v){ pa[k]=w; n++; } });
+      return n; }catch(e){ return 0; } }
+
+  /* ---------- enganches ---------- */
+  function wrapCorrer(){ const old=window.correrCompromisos; if(typeof old!=='function'||old.__v230) return; const f=function(){ try{ rehidratar(); relinkar(); }catch(e){} return old.apply(this,arguments); }; f.__v230=true; window.correrCompromisos=f; }
+  function wrapRender(){ const old=window.render; if(typeof old!=='function'||old.__v230) return; const f=function(){ normalizar(); return old.apply(this,arguments); }; f.__v230=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.render=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA230_PASO) return; window.__SA230_PASO=true; window.pasarAnio=function(){ try{ rehidratar(); relinkar(); }catch(e){} const r=old.apply(this,arguments); try{ normalizar(); }catch(e){} return r; }; }
+  function init230(){ wrapCorrer(); wrapRender(); wrapPaso(); Object.assign(window,{rehidratarCompromisos230:rehidratar,relinkarCompromisos230:relinkar,normalizarEstado230:normalizar,recetaCompromiso230:receta}); }
+  init230(); setTimeout(init230,40); setTimeout(init230,220); setTimeout(init230,650); setTimeout(init230,950); setTimeout(init230,1500);
+  window.__SA230={version:V230};
 })();
 </script>
 
