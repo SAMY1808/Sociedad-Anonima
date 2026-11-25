@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v228</div>
+<div class="version-badge" id="versionBadge">v229</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4570,7 +4570,8 @@ function escenaAmantes(){
   const cuerpo=(q?'Tu vida sentimental tiene una relación formal y también puede tener relaciones fuera de ella. ':'')+
     'Una relación paralela puede elevar el ánimo, pero introduce riesgo de conflicto, reputación y descendencia natural fuera de la pareja.';
   const opciones=[];
-  if(S.p.edad>=18) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',d:'Una relación adulta, privada y sin promesa de matrimonio. Puede mejorar tu ánimo.',run:()=>{
+  if(S.p.edad>=18) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',cerrar:false,d:'Una relación adulta, privada y sin promesa de matrimonio. Se conquista: eliges dónde buscarla y a quién cortejar.',run:()=>{
+    if(window.conocerAmante229&&window.conocerAmante229()) return;   // v229: ahora se conquista
     const a=nuevoAmante(); S.familia.amantes.push(a); S.p.felicidad=clamp(S.p.felicidad+ri(7,13),0,100); S.p.escandalos=clamp((S.p.escandalos||0)+(q?0.4:.1),0,20); S.mov--; log('Conociste discretamente a <b>'+esc(a.nombre)+'</b>. Tu ánimo mejoró, pero ahora hay algo más que cuidar.','bien'); cerrarModal(); render();
   }});
   activos.slice(0,4).forEach(a=>opciones.push({t:'Ver a '+a.nombre.split(' ')[0],cat:'familia',d:'Sube el ánimo, pero una relación paralela tiene riesgo.',run:()=>{
@@ -39797,7 +39798,7 @@ install();setTimeout(install,1200);
     a.casa227={desde:A(),nivel}; a.afecto=cl((a.afecto||50)+6,0,100); a.discrecion=cl((a.discrecion||50)-(nivel===2?10:nivel===1?4:0),0,100); S.p.felicidad=cl(S.p.felicidad+NIVEL[nivel].fel,0,100);
     log('Le pusiste a <b>'+E(primer(a.nombre))+'</b> '+NIVEL[nivel].n+'. Cuesta cerca de '+fm(costoCasa(a))+' al año y, en la ciudad, algo se comenta.','hito'); return true; }
   function cerrarCasa(a){ if(!a||!a.casa227) return false; delete a.casa227; a.afecto=cl((a.afecto||50)-10,0,100); log('Cerraste la casa de <b>'+E(primer(a.nombre))+'</b>.'); return true; }
-  function pDesc(a){ let b=.05+(a.casa227?.05*NIVEL[cl(a.casa227.nivel,0,2)].vis:0)+(hijoDe(a).length?.05:0); return cl(b*cl(1.35-(a.discrecion||50)/100,.4,1),.01,.4); }
+  function pDesc(a){ let b=.05+(a.casa227?.05*NIVEL[cl(a.casa227.nivel,0,2)].vis:0)+(hijoDe(a).length?.05:0)+(a.civil229==='casada'?.05:0); return cl(b*cl(1.35-(a.discrecion||50)/100,.4,1),.01,.4); }
 
   function evDescubre(a){ const q=PA(), pr=q&&q.nombre?primer(q.nombre):'tu pareja', celoso=q&&q.rasgo108==='celoso';
     return {p:10,c:()=>ACTIVO()&&!!PA()&&activos().includes(a),t:()=>'<b>'+E(pr)+' se enteró de lo de '+E(primer(a.nombre))+'.</b> '+(a.casa227?'Alguien lo vio entrar a '+NIVEL[cl(a.casa227.nivel,0,2)].n+' dos veces por semana y se lo contó.':'Un comentario en una comida, una llamada que se dejó a medias, y ya está.')+(hijoDe(a).length?' Y hay un hijo de por medio.':''),
@@ -40021,6 +40022,106 @@ install();setTimeout(install,1200);
       eventosEstigma228:{club:evClub,iglesia:evIglesia,colegio:evColegio,credito:evCredito,segundas:evSegundas,invita:evInvita}}); }
   init228(); setTimeout(init228,40); setTimeout(init228,220); setTimeout(init228,650); setTimeout(init228,950); setTimeout(init228,1500);
   window.__SA228={version:V228};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v229 · QUE TE LA PRESENTEN, Y LA CONQUISTES
+   «Conocer a alguien discretamente» regalaba una amante al azar. Ahora una
+   amante se conquista:
+   - Primero eliges DÓNDE: el club, el trabajo, una cena de sociedad, un viaje
+     de negocios, la colonia colombiana (si vives afuera) o un amigo que te la
+     presenta. Cada sitio tiene su costo, su discreción y su probabilidad.
+   - Después te presentan a tres candidatas (o candidatos) con su edad, su
+     oficio según la época, su carácter (reservada, apasionada, ambiciosa...)
+     y su estado: soltera, casada o viuda. Una casada es más riesgosa.
+   - Eliges a quién cortejar y no está garantizado: pesan tu carisma, tu
+     prestigio, la época (antes de 1960 era más difícil y más vigilado), tu
+     historial de escándalos y la discreción de ella. Un solo intento por año.
+   - Si sale bien, entra a tu vida privada (v108/v227) con sus datos; si sale
+     mal, puede quedar en un comentario: pierdes prestigio y tu pareja se
+     entera de rumores.
+   ========================================================================== */
+(function(){
+  const V229='v229';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const abroad=()=>{ try{ return !!(S.hogar&&S.hogar.ciudad&&ciudadGlobalDe(S.hogar.ciudad)); }catch(e){ return false; } };
+  const trabaja=()=>{ try{ return !!S.emp||(S.carrera&&S.carrera.ruta&&S.carrera.ruta!=='desempleado'); }catch(e){ return false; } };
+
+  /* ---------- dónde ---------- */
+  const AMB=[
+    {id:'club',donde:'en el club de la familia',n:'En el club de la familia',d:'Ahí todos se conocen: es fácil, pero todo se comenta.',base:.45,disc:-12,costo:0,casada:.35,ok:()=>!!S.clubFamilia||A()>=1900},
+    {id:'trabajo',donde:'en el trabajo',n:'En el trabajo o en tus compañías',d:'Una colega, una clienta, una proveedora. Cómodo y con testigos.',base:.5,disc:-6,costo:0,casada:.25,ok:()=>trabaja()},
+    {id:'sociedad',donde:'en una cena de sociedad',n:'En una cena o fiesta de sociedad',d:'Vestirse bien, llegar tarde y saber qué decir.',base:.4,disc:0,costo:.0005,casada:.3,ok:()=>true},
+    {id:'viaje',donde:'en un viaje de negocios',n:'En un viaje de negocios',d:'Lejos de tu gente se puede ser otro. Cuesta más y se nota menos.',base:.55,disc:15,costo:.003,casada:.15,ok:()=>true},
+    {id:'colonia',donde:'en la colonia colombiana',n:'En la colonia colombiana',d:'Gente de tu tierra, lejos de casa.',base:.5,disc:5,costo:.0008,casada:.25,ok:()=>abroad()},
+    {id:'amigo',donde:'con la presentación de un amigo',n:'Un amigo te la presenta',d:'Depende de a quién conozcas. Poco ruido, pero le debes un favor.',base:.6,disc:5,costo:.001,casada:.2,ok:()=>(S.p.redes||0)>=30}
+  ];
+  const CARACT=[
+    {id:'reservada',n:'reservada',disc:10,afe:-5},{id:'apasionada',n:'apasionada',disc:-8,afe:8},{id:'ambiciosa',n:'ambiciosa',disc:-3,afe:0},
+    {id:'independiente',n:'independiente',disc:3,afe:-2},{id:'divertida',n:'divertida',disc:-2,afe:4},{id:'culta',n:'culta',disc:2,afe:2}];
+  const hint=d=>d>=60?'muy discreta':d>=45?'discreta':'comentadora';
+  const ambs=()=>AMB.filter(a=>{ try{ return a.ok(); }catch(e){ return false; } });
+  const ambDe=id=>AMB.find(a=>a.id===id)||null;
+  const costo=a=>Math.round(Math.max(0,pat()*a.costo));
+
+  /* ---------- candidatas ---------- */
+  function candidata(amb){ let a=null; try{ a=nuevoAmante(); }catch(e){ return null; }
+    const car=CARACT[ri(0,CARACT.length-1)]; a.caracter229=car.id; a.discrecion=cl((a.discrecion||50)+car.disc+amb.disc,10,95); a.afecto=cl((a.afecto||50)+car.afe,5,95); a.ambiente229=amb.id;
+    const r=Math.random(); const era=A(); const pCasada=amb.casada*(era<1960?.7:1);
+    a.civil229=r<pCasada?'casada':r<pCasada+.15?'viuda':'soltera'; if(a.civil229==='casada') a.discrecion=cl(a.discrecion+5,10,95);
+    return a; }
+  function generar(amb){ const c=S.cand229; if(c&&c.anio===A()&&c.amb===amb.id&&Array.isArray(c.lista)&&c.lista.length) return c.lista; const lista=[]; for(let i=0;i<3;i++){ const a=candidata(amb); if(a) lista.push(a); }
+    S.cand229={anio:A(),amb:amb.id,lista}; return lista; }
+
+  /* ---------- la probabilidad ---------- */
+  function prob(a,amb){ const car=(S.p.atr&&S.p.atr.carisma)||5; let p=amb.base+(car-5)/25+((S.p.reputacion||50)-50)/300-(S.p.escandalos||0)*.012;
+    const era=A(); if(era<1960) p-=.12; else if(era<1990) p-=.04;
+    if(a.civil229==='casada') p-=.12; else if(a.civil229==='viuda') p+=.04;
+    if(a.caracter229==='independiente') p-=.05; if(a.caracter229==='apasionada') p+=.06;
+    const q=PA(); if(q&&q.casados&&era<1960) p-=.05;
+    return cl(p,.1,.9); }
+
+  /* ---------- el intento ---------- */
+  function cortejar(a,amb){ if(!ACTIVO()||nino()) return {ok:false,txt:''}; if(S.cortejo229===A()) return {ok:false,txt:'Ya lo intentaste este año.'}; if((S.mov||0)<1) return {ok:false,txt:'No te quedan movidas.'};
+    const c=costo(amb); if(S.efectivo<c) return {ok:false,txt:'No alcanza para el costo ('+fm(c)+').'};
+    S.mov=Math.max(0,S.mov-1); S.cortejo229=A(); tom(c); if(amb.id==='amigo') S.p.redes=cl((S.p.redes||0)-1,0,100); delete S.cand229;
+    const p=prob(a,amb), q=PA();
+    if(Math.random()<p){ if(!Array.isArray(S.familia.amantes)) S.familia.amantes=[]; a.activo=true; a.desde=A(); S.familia.amantes.push(a);
+      S.p.felicidad=cl((S.p.felicidad||60)+ri(7,13),0,100); S.p.escandalos=cl((S.p.escandalos||0)+(q?0.4:.1),0,20);
+      const txt='Lo que empezó '+amb.donde+' terminó en algo más: <b>'+E(a.nombre)+'</b> ('+E(a.rol||'')+', '+a.edad+' años, '+({soltera:'soltera',casada:'casada',viuda:'viuda'})[a.civil229]+') aceptó verte a solas.'+(a.civil229==='casada'?' Ella tiene marido: esto es más riesgoso de lo que parece.':'');
+      log(txt,'bien'); return {ok:true,txt,amante:a}; }
+    // salió mal
+    const rumor=Math.random()<cl(.25*(amb.id==='club'||amb.id==='sociedad'?1.5:1)*(a.civil229==='casada'?1.4:1),.05,.6); let extra='';
+    if(rumor){ try{ if(typeof window.escandaloFamiliar227==='function') window.escandaloFamiliar227(.3,'un cortejo fallido'); else prest(-1,'un cortejo fallido'); }catch(e){} if(q) q.paciencia=cl((q.paciencia||60)-4,0,100); extra=' Y alguien lo comentó en la ciudad.'; }
+    const txt='<b>'+E(primer(a.nombre))+'</b> te dio las gracias y nada más.'+extra; log(txt,'mal'); S.p.felicidad=cl((S.p.felicidad||60)-2,0,100); return {ok:false,txt,rumor}; }
+
+  /* ---------- las escenas ---------- */
+  function escenaAmbiente(){ const ya=S.cortejo229===A(), sinM=(S.mov||0)<1?'No te quedan movidas':null;
+    const ops=ambs().map(a=>({t:a.n+(a.costo?' · ~'+fm(Math.max(1,pat()*a.costo)):' · sin costo'),cat:'familia',cerrar:false,d:a.d+' Discreción: '+(a.disc>0?'alta':a.disc<-6?'baja':'media')+'.',dis:ya?'Ya lo intentaste este año':(sinM||(S.efectivo<costo(a)?'No alcanza':null)),run:()=>escenaCandidatas(a)}));
+    ops.push({t:'Mejor no',cat:'familia',run:()=>{}});
+    escena({rubro:'Vida sentimental',titulo:'Conocer a alguien discretamente',ancho:true,cerrable:true,cuerpo:ya?'Este año ya cortejaste a alguien. Las cosas se hacen con tiempo.':'Una relación así no se compra ni se regala: se conquista. ¿Dónde quieres buscarla?',opciones:ops}); }
+  function escenaCandidatas(amb){ const L=generar(amb); if(!L.length){ escenaAmbiente(); return; }
+    const filas='<table class="libro">'+L.map(a=>'<tr><td>'+E(a.nombre)+' · '+E(a.rol||'')+'</td><td>'+a.edad+' años · '+a.caracter229+' · '+a.civil229+' · '+hint(a.discrecion)+'</td></tr>').join('')+'</table>';
+    const ops=L.map(a=>({t:'Cortejar a '+E(primer(a.nombre))+' · '+Math.round(prob(a,amb)*100)+'%',cat:'familia',d:(a.civil229==='casada'?'Casada: más riesgo si se sabe. ':'')+'Un solo intento por año.',cerrar:true,run:()=>{ const r=cortejar(a,amb); if(r&&!r.ok&&/^(Ya lo|No )/.test(r.txt||'')) log(r.txt,'mal'); try{ if(typeof render==='function') render(); }catch(e){} }}));
+    ops.push({t:'Volver',cat:'familia',cerrar:false,run:()=>escenaAmbiente()});
+    escena({rubro:'Vida sentimental',titulo:amb.n,ancho:true,cerrable:true,cuerpo:'Te presentan a tres personas. Eliges a quién cortejar; no hay garantías.',html:filas,opciones:ops}); }
+  function conocer(){ if(!ACTIVO()||nino()||(S.p.edad||0)<18) return false; escenaAmbiente(); return true; }
+
+  function init229(){ Object.assign(window,{conocerAmante229:conocer,escenaAmbiente229:escenaAmbiente,escenaCandidatas229:escenaCandidatas,cortejarAmante229:cortejar,probCortejo229:prob,candidatasAmante229:generar,ambientesAmante229:ambs,AMBIENTES_AMANTE_229:AMB}); }
+  init229(); setTimeout(init229,40); setTimeout(init229,220); setTimeout(init229,650); setTimeout(init229,950); setTimeout(init229,1500);
+  window.__SA229={version:V229};
 })();
 </script>
 
