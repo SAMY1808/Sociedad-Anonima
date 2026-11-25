@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v226</div>
+<div class="version-badge" id="versionBadge">v227</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -24736,7 +24736,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const cony=pa&&pa.casados&&pa.vivo!==false&&!pa.divorcioEnCurso?pa:null;
     const gan=cony&&!pa.separacionBienes?.5:0;
     if(cony) out.lineas.push(gan?'Por la sociedad conyugal, la mitad de lo que hay (gananciales) es de '+esc(primer(cony.nombre))+' y no entra a la herencia.':esc(primer(cony.nombre))+' firmó capitulaciones: no recibe gananciales.');
-    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0&&!x.desheredado129);   // v129: el desheredado no hereda
+    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0&&!x.desheredado129&&!(window.sinDerechoHerencia227&&window.sinDerechoHerencia227(x)));   // v129: el desheredado no hereda · v227: el hijo sin reconocer, tampoco
     const estirpes=vivos.map(x=>({miembros:[{key:'h:'+x.nombre,nombre:x.nombre+' '+apellidoCompletoDeHijo(x),rel:x.sexo==='m'?'hija':'hijo',sexo:x.sexo}]}));
     let extras=[]; try{ extras=(typeof window.herederosExtra108==='function'?window.herederosExtra108():[]).filter(x=>x._huerfano108); }catch(e){}
     const porPadre={}; extras.forEach(g=>{ const k=g._padre108||'?'; (porPadre[k]=porPadre[k]||[]).push(g); });
@@ -24752,6 +24752,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       else if(T&&T.tipo==='parejo'){ out.base='testamento'; out.lineas.push('Testamento: por partes iguales entre los hijos.'); }
       else out.lineas.push('Sin testamento, manda la ley: los hijos heredan por partes iguales'+(Object.keys(porPadre).length?', y los hijos de un hijo fallecido reciben la parte de su papá o mamá':'')+'.');
       estirpes.forEach((e,i)=>e.miembros.forEach(m=>out.her.push(Object.assign({},m,{pct:partes[i]*masa/e.miembros.length}))));
+      try{ if(window.ajustarPartes227) window.ajustarPartes227(out); }catch(x){}   // v227: el hijo reconocido fuera del matrimonio hereda según la época
     } else {
       const masa=1-gan;
       const padres=(S.parientes||[]).filter(p=>p.vivo&&/^(padre|madre)$/.test(p.rel));
@@ -39718,6 +39719,182 @@ install();setTimeout(install,1200);
       eventosExterior226:{ciudad:eventosCiudad,sinPapeles:evSinPapeles,doble:evDoble,bajaImposicion:evBajaImp,oro:evOro,nostalgia:evNostalgia,colegio:evColegio,historia:()=>HIST.slice()}}); }
   init226(); setTimeout(init226,40); setTimeout(init226,220); setTimeout(init226,650); setTimeout(init226,950); setTimeout(init226,1500);
   window.__SA226={version:V226};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v227 · LA OTRA CASA Y LOS MEDIOS HERMANOS
+   Los amantes ya existían (v108), y también los hijos naturales. Esta capa
+   le pone casa, ley y consecuencias a lo que se sabe y no se dice.
+   - La casa chica: a quien ves con regularidad le puedes poner casa (un
+     apartamento discreto, una casa cómoda o una con servicio y chofer). Cuesta
+     cada año, sube el ánimo y también el riesgo de que se sepa.
+   - Cuando se sabe: la pareja se entera por una indiscreción y decides
+     entre pedir perdón, negarlo todo o admitirlo. El costo social cambia con
+     la época (antes de 1960 era un secreto a voces del hombre de plata;
+     después se comenta más), con el sexo de quien lo hizo (a ellas se les
+     cobra el doble) y con la ciudad en que vives.
+   - El hijo de fuera: cuando nace, en vez de escoger apellido decides si lo
+     reconoces (apellido y derechos), lo apoyas en silencio (mesada sin papeles)
+     o lo niegas. Lo que quede sin reconocer no entra en la herencia, salvo que
+     gane un pleito de filiación (desde 1968 se puede investigar la paternidad; desde
+     1988, con prueba de ADN). El hijo reconocido hereda según la época: un
+     cuarto, hasta 1935; la mitad, de 1936 a 1981; igual que los demás, desde
+     1982.
+   - Los medios hermanos: los hijos de la casa y los de fuera se enteran,
+     se comparan y pelean por el lugar. Hay que presentarlos, separarlos o
+     dejar que ellos decidan; y cuando crecen piden capital o reconocimiento.
+   - Tus padres también tuvieron su vida: puede llegar una carta de un
+     abogado con un medio hermano que tú no conocías.
+   Las leyes y los años de filiación están aproximados para el juego: no son
+   una guía legal.
+   ========================================================================== */
+(function(){
+  const V227='v227';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const AM=()=>((S&&S.familia&&S.familia.amantes)||[]);
+  const activos=()=>AM().filter(a=>a&&a.activo!==false&&(a.edad||0)>=18);
+  const hijos=()=>((S&&S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&!h.muerto);
+  const medios=()=>hijos().filter(h=>h.medio227);
+  const hijoDe=a=>hijos().filter(h=>h.medio227&&h.amanteId227===a.id);
+  const legit=()=>hijos().filter(h=>!h.medio227);
+
+  /* ---------- la ley y la sociedad según la época ---------- */
+  const pesoRec=a=>a<1936?.25:a<1982?.5:1;
+  const puedeInvestigar=a=>a>=1968;
+  const hayADN=a=>a>=1988;
+  function penaSocial(){ const a=A(); let n=a<1960?1:a<1990?2:3; if(S.p.sexo==='m') n*=2;
+    try{ const c=S.hogar&&S.hogar.ciudad; if(c&&typeof window.toleranciaDivorcio226==='function'){ const t=window.toleranciaDivorcio226(c,a); if(t!=null) n*=cl(1.3-t,.4,1.2); } }catch(e){}
+    return n; }
+  function escandalo(g,motivo){ const n=Math.max(.5,penaSocial()*g); prest(-Math.round(n),motivo||'un escándalo familiar'); S.p.escandalos=cl((S.p.escandalos||0)+g*1.2,0,20); try{ S.p.reputacion=cl((S.p.reputacion||50)-g*2,0,100); }catch(e){} return n; }
+
+  /* ---------- herencia: el hijo reconocido y el que no ---------- */
+  const sinDerecho=h=>!!(h&&h.medio227&&h.reconocido227===false&&!h.filiacion227);
+  function ajustarPartes(out){ try{ if(!out||!Array.isArray(out.her)) return;
+      const por=x=>{ const k=String(x.key||''); if(k.indexOf('h:')!==0) return 1; const nom=k.slice(2); const h=hijos().find(y=>y.nombre===nom); if(!h||!h.medio227||h.reconocido227!==true) return 1; return pesoRec(A()); };
+      const ks=out.her.filter(x=>!x._cony&&/^h:/.test(String(x.key||''))); if(!ks.length) return;
+      const w=ks.map(por); if(w.every(v=>v===1)) return;
+      const antes=ks.reduce((s,x)=>s+x.pct,0), nuevo=ks.reduce((s,x,i)=>s+x.pct*w[i],0); if(nuevo<=0) return; const f=antes/nuevo;
+      ks.forEach((x,i)=>{ x.pct=x.pct*w[i]*f; });
+      out.lineas.push('Los hijos reconocidos nacidos fuera del matrimonio reciben '+(pesoRec(A())===.5?'la mitad de la parte de los demás (ley de 1936)':'una parte menor que los demás (antes de 1936)')+'.'); }catch(e){ console.error(e); } }
+
+  /* ---------- la casa chica ---------- */
+  const NIVEL=[{n:'un apartamento discreto',f:.002,fel:2,vis:.6},{n:'una casa cómoda',f:.005,fel:3,vis:1},{n:'una casa con servicio y chofer',f:.012,fel:4,vis:1.6}];
+  const costoCasa=a=>(a&&a.casa227)?Math.max(2,Math.round(pat()*NIVEL[cl(a.casa227.nivel,0,2)].f)):0;
+  const mesada=h=>Math.max(1,Math.round(pat()*.002));
+  function ponerCasa(a,nivel){ if(!a||a.activo===false) return false; nivel=cl(nivel,0,2); const c0=Math.max(2,Math.round(pat()*NIVEL[nivel].f*2)); if(S.efectivo<c0) return false; tom(c0);
+    a.casa227={desde:A(),nivel}; a.afecto=cl((a.afecto||50)+6,0,100); a.discrecion=cl((a.discrecion||50)-(nivel===2?10:nivel===1?4:0),0,100); S.p.felicidad=cl(S.p.felicidad+NIVEL[nivel].fel,0,100);
+    log('Le pusiste a <b>'+E(primer(a.nombre))+'</b> '+NIVEL[nivel].n+'. Cuesta cerca de '+fm(costoCasa(a))+' al año y, en la ciudad, algo se comenta.','hito'); return true; }
+  function cerrarCasa(a){ if(!a||!a.casa227) return false; delete a.casa227; a.afecto=cl((a.afecto||50)-10,0,100); log('Cerraste la casa de <b>'+E(primer(a.nombre))+'</b>.'); return true; }
+  function pDesc(a){ let b=.05+(a.casa227?.05*NIVEL[cl(a.casa227.nivel,0,2)].vis:0)+(hijoDe(a).length?.05:0); return cl(b*cl(1.35-(a.discrecion||50)/100,.4,1),.01,.4); }
+
+  function evDescubre(a){ const q=PA(), pr=q&&q.nombre?primer(q.nombre):'tu pareja', celoso=q&&q.rasgo108==='celoso';
+    return {p:10,c:()=>ACTIVO()&&!!PA()&&activos().includes(a),t:()=>'<b>'+E(pr)+' se enteró de lo de '+E(primer(a.nombre))+'.</b> '+(a.casa227?'Alguien lo vio entrar a '+NIVEL[cl(a.casa227.nivel,0,2)].n+' dos veces por semana y se lo contó.':'Un comentario en una comida, una llamada que se dejó a medias, y ya está.')+(hijoDe(a).length?' Y hay un hijo de por medio.':''),
+      o:[{t:'Pedir perdón y terminar la relación',f:()=>{ a.activo=false; a.fin=A(); delete a.casa227; q.paciencia=cl((q.paciencia||60)-(celoso?16:10),0,100); escandalo(.6,'una infidelidad conocida'); return 'Terminaste con '+primer(a.nombre)+' y pediste perdón. '+pr+' lo recibió callada: la confianza ya no es la misma.'; }},
+         {t:'Negarlo todo',f:()=>{ const cree=chance(.35+(a.discrecion||50)/200); if(cree){ q.paciencia=cl((q.paciencia||60)-3,0,100); return 'Lo negaste con aplomo y '+pr+' decidió creerte. Por ahora.'; } q.paciencia=cl((q.paciencia||60)-(celoso?32:24),0,100); escandalo(1,'una infidelidad negada'); return 'No te creyeron: negar lo evidente empeoró todo. '+pr+' ya no te habla en la mesa.'; }},
+         {t:A()>=1990?'Admitirlo y seguir: «cada uno tiene su vida»':'Callar y mantener las apariencias',f:()=>{ q.paciencia=cl((q.paciencia||60)-(A()>=1990?18:12),0,100); escandalo(A()>=1990?.9:.6,'una segunda vida a la vista'); return A()>=1990?pr+' no lo aceptó, pero se quedó: el escándalo va a ser más caro para los dos.':'Las apariencias se mantuvieron. Se sabe sin decirse, y la casa se enfrió.'; }}]}; }
+
+  /* ---------- el hijo de fuera ---------- */
+  function reconocer(h){ if(!h) return false; h.reconocido227=true; h.negado227=false; const otro=AM().find(a=>a.id===h.amanteId227)||null; const c=Math.max(4,Math.round(pat()*.006)); tom(c);
+    try{ const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap1||h.apellido; }catch(e){}
+    h.vinculo=cl((h.vinculo||60)+8,0,100); const q=PA(); if(q) q.paciencia=cl((q.paciencia||60)-(A()<1982?18:12),0,100); escandalo(A()<1982?1:.7,'reconoció a un hijo fuera del matrimonio');
+    log('Reconociste a <b>'+E(h.nombre)+'</b> ante notario ('+fm(c)+'): lleva tu apellido y '+(A()<1982?'tiene derechos reducidos ('+(pesoRec(A())===.5?'la mitad':'un cuarto')+') de herencia':'los mismos derechos que tus otros hijos')+'.','hito'); return true; }
+  function apoyar(h){ if(!h) return false; h.reconocido227=false; h.apoyo227=true; try{ const otro=AM().find(a=>a.id===h.amanteId227)||null; const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap2||aps.ap1||h.apellido; }catch(e){}
+    log('Acordaste apoyar a <b>'+E(h.nombre)+'</b> sin reconocerlo: una mesada de '+fm(mesada(h))+' al año, sin papeles.'); return true; }
+  function negar(h){ if(!h) return false; h.reconocido227=false; h.negado227=true; try{ const otro=AM().find(a=>a.id===h.amanteId227)||null; const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap2||aps.ap1||h.apellido; }catch(e){}
+    h.vinculo=cl((h.vinculo||60)-20,0,100); log('Negaste ser el padre de <b>'+E(h.nombre)+'</b>. No quedó nada escrito, pero el niño existe.','mal'); return true; }
+  function escenaReconocer(h,otro){ const nom=h.nombre, por=otro&&otro.nombre?E(primer(otro.nombre)):'su madre', era=A();
+    escena({rubro:'Familia',titulo:'El hijo de '+por,ancho:true,cerrable:false,cuerpo:'Nació <b>'+E(nom)+'</b>, hijo de '+por+' y tuyo, fuera de tu matrimonio. Lo que decidas hoy marca su vida y la herencia: '+(era<1936?'antes de 1936, un hijo natural casi no tiene derechos (un cuarto), y solo si lo reconoces.':era<1982?'entre 1936 y 1981, un hijo natural reconocido hereda la mitad que los demás.':'desde 1982, un hijo reconocido hereda igual que los demás.'),
+      opciones:[{t:'Reconocerlo ante notario',cat:'familia',d:'Lleva tu apellido y entra en la herencia. Tu pareja y la ciudad se van a enterar.',run:()=>{ reconocer(h); try{ setTimeout(()=>{ if(typeof window.__escenaApellido227==='function') window.__escenaApellido227(h,otro); },0); }catch(e){} }},
+        {t:'Apoyarlo en silencio',cat:'familia',d:'Una mesada de '+fm(mesada(h))+' al año, sin papeles ni apellido. No hereda, salvo que más adelante gane un pleito.',run:()=>{ apoyar(h); }},
+        {t:'Negar ser el padre',cat:'familia',d:'No pagas ni reconoces. Es lo más barato hoy y lo más peligroso mañana: de grande puede demandar.',run:()=>{ negar(h); }}]}); }
+  function evDecidir(h){ const otro=AM().find(a=>a.id===h.amanteId227)||null, por=otro&&otro.nombre?primer(otro.nombre):'su madre';
+    return {p:9,c:()=>ACTIVO()&&hijos().includes(h)&&!!h.medio227&&h.reconocido227===undefined,t:()=>'<b>Todavía no has decidido qué hacer con '+E(primer(h.nombre))+'</b>, el hijo de '+E(por)+'. El tiempo pasa y ya empieza a preguntar por su papá.',
+      o:[{t:'Reconocerlo ante notario',f:()=>{ reconocer(h); return ''; }},{t:'Apoyarlo en silencio',f:()=>{ apoyar(h); return ''; }},{t:'Negar ser el padre',f:()=>{ negar(h); return ''; }}]}; }
+  function wrapApellido(){ const old=window.escenaApellidoHijo; if(typeof old!=='function'||old.__v227) return; window.__escenaApellido227=old;
+    const f=function(h,otro){ try{ if(h&&h.fertilizacionContexto==='amante'&&h.reconocido227===undefined&&!h.__suprimir227){ h.medio227=true; if(otro&&otro.id) h.amanteId227=otro.id; escenaReconocer(h,otro); return; } }catch(e){ console.error(e); } return old.apply(this,arguments); };
+    f.__v227=true; window.escenaApellidoHijo=f; }
+  function wrapCrear(){ const old=window.crearHijoBiologico; if(typeof old!=='function'||old.__v227) return; const f=function(origen,otro,contexto){ const h=old.apply(this,arguments); try{ if(h&&contexto==='amante'){ h.medio227=true; if(origen&&origen.id) h.amanteId227=origen.id; else if(otro&&otro.id) h.amanteId227=otro.id; } }catch(e){} return h; };
+    f.__v227=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.crearHijoBiologico=f; }
+
+  /* ---------- los medios hermanos ---------- */
+  function evSaben(m){ const L=legit().filter(h=>(h.edad||0)>=6).slice(0,3), nombres=L.map(h=>primer(h.nombre)).join(' y ');
+    return {p:9,c:()=>ACTIVO()&&!m.hermanosSaben227&&hijos().includes(m)&&legit().some(h=>(h.edad||0)>=6),t:()=>'<b>'+E(nombres||'Tus hijos')+' se enteraron de que tienen un medio hermano: '+E(primer(m.nombre))+'.</b> '+(m.reconocido227?'Lo supieron en el colegio, por un compañero.':'Lo supieron escuchando una conversación que no era para ellos.'),
+      o:[{t:'Presentarlos y que convivan',f:()=>{ m.hermanosSaben227=true; const bien=chance(.55); L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+(bien?4:-3),0,100); }); m.vinculo=cl((m.vinculo||60)+6,0,100); return bien?'Se llevaron mejor de lo que esperabas: hay pelea de hermanos, pero de los de verdad.':'Hubo celos y silencios. Cuesta que se acepten.'; }},
+         {t:'Mantener los mundos separados',f:()=>{ m.hermanosSaben227=true; L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-2,0,100); }); m.vinculo=cl((m.vinculo||60)-4,0,100); return 'Cada quien siguió en su casa. Se sabe y no se habla.'; }},
+         {t:'Dejar que ellos decidan',f:()=>{ m.hermanosSaben227=true; const d=chance(.5); L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+(d?3:-2),0,100); }); return d?'Se buscaron entre ellos, sin tu mediación.':'No se buscaron. Quizás más adelante.'; }}]}; }
+  function evDemanda(m){ const sin=A()<1988, c1=Math.max(4,Math.round(pat()*.01)), c2=Math.max(6,Math.round(pat()*.03));
+    return {p:9,c:()=>ACTIVO()&&sinDerecho(m)&&hijos().includes(m)&&(m.edad||0)>=18&&puedeInvestigar(A()),t:()=>'<b>'+E(primer(m.nombre))+' demanda para que lo reconozcas como hijo.</b> Ya es mayor de edad y quiere el apellido y su parte. '+(sin?'No hay prueba de ADN todavía: todo se resuelve con testigos, cartas y fotos.':'Con la prueba de ADN no hay mucho que discutir.'),
+      o:[{t:'Reconocerlo ya y evitar el pleito',f:()=>{ reconocer(m); m.filiacion227=true; return 'Lo reconociste. Saltó el titular, pero el pleito no llegó a juicio.'; }},
+         {t:sin?'Ir a juicio de filiación ('+fm(c1)+')':'Aceptar la prueba de ADN ('+fm(c1)+')',f:()=>{ tom(c1); const gana=sin?chance(.55+(m.apoyo227?.15:0)):true; if(gana){ m.reconocido227=true; m.filiacion227=true; const x=tom(Math.round(pat()*.02)); m.vinculo=cl((m.vinculo||50)-5,0,100); escandalo(1,'perdió un pleito de filiación'); return (sin?'El juez le dio la razón.':'La prueba salió positiva.')+' Quedó reconocido por ley, con atrasos de '+fm(x)+'.'; } m.vinculo=cl((m.vinculo||50)-12,0,100); return 'El juez no le creyó. Se fue molesto, pero sin nada.'; }},
+         {t:'Pagarle para que retire la demanda ('+fm(c2)+')',f:()=>{ tom(c2); if(chance(.7)){ m.vinculo=cl((m.vinculo||50)-6,0,100); return 'Retiró la demanda a cambio de la plata. Quedó un resentimiento largo.'; } escandalo(1.2,'un hijo comprado'); return 'Cobró y después lo contó todo a una revista.'; }}]}; }
+  function evPuesto(m){ const x=Math.round(Math.max(8,pat()*.012));
+    return {p:8,c:()=>ACTIVO()&&m.reconocido227===true&&hijos().includes(m)&&(m.edad||0)>=21,t:()=>'<b>'+E(primer(m.nombre))+' quiere su lugar en la casa.</b> Dice que lleva tu apellido pero no tiene lo que tienen tus otros hijos, y pide capital para empezar algo propio.',
+      o:[{t:'Darle capital de arranque ('+fm(x)+')',f:()=>{ tom(x); m.vinculo=cl((m.vinculo||60)+10,0,100); legit().forEach(h=>{ h.vinculo=cl((h.vinculo||60)-3,0,100); }); return 'Le diste un capital de '+fm(x)+'. Tus otros hijos preguntaron en voz baja: «¿y a mí?»'; }},
+         {t:'Decirle que se gane lo suyo',f:()=>{ m.vinculo=cl((m.vinculo||60)-8,0,100); if(chance(.25)){ escandalo(.7,'un hijo ignorado'); return 'Lo contó en una entrevista: «mi papá me reconoció, pero nunca me quiso». La ciudad lo comentó.'; } return 'Se fue sin decir nada. No volvió a escribir.'; }}]}; }
+  function evCarta(){ const pad=(S.parientes||[]).find(p=>p&&p.vivo&&/^(padre|madre)$/.test(p.rel)&&(p.edad||0)>=50); const papa=pad&&pad.rel==='madre'?'tu mamá':'tu papá', c1=Math.max(6,Math.round(pat()*.01)), sx=chance(.5)?'h':'m';
+    return {p:8,c:()=>ACTIVO()&&!nino()&&!!pad&&pad.vivo&&!S.carta227,t:()=>'<b>Llega una carta de un abogado.</b> Dice representar a una persona de '+ri(20,44)+' años que sostiene ser '+(sx==='m'?'hija':'hijo')+' de '+papa+', y que la familia nunca lo reconoció. Pide hablar contigo antes de ir más lejos.',
+      o:[{t:'Hablar primero con '+papa,f:()=>{ S.carta227=A(); pad.afecto=cl((pad.afecto||60)-(chance(.5)?6:0),0,100); const real=chance(.75); if(real){ const pa=nuevoPariente(sx==='m'?'hermana':'hermano',sx,ri(20,44)); pa.nombre=nombreLocal(S.p.ciudad,sx); pa.afecto=55; pa.natural102=true; pa.medio227=true; (S.parientes=S.parientes||[]).push(pa); return capitalize(papa)+' bajó la cabeza y lo admitió: hay un medio hermano. Hoy es parte de la familia, a medias.'; } return capitalize(papa)+' juró que no era cierto. El abogado nunca volvió a llamar.'; }},
+         {t:hayADN(A())?'Pedir una prueba de ADN ('+fm(c1)+')':'Contratar un detective ('+fm(c1)+')',f:()=>{ S.carta227=A(); tom(c1); const real=chance(.7); if(real){ const pa=nuevoPariente(sx==='m'?'hermana':'hermano',sx,ri(20,44)); pa.nombre=nombreLocal(S.p.ciudad,sx); pa.afecto=40; pa.natural102=true; pa.medio227=true; (S.parientes=S.parientes||[]).push(pa); return (hayADN(A())?'La prueba salió positiva. ':'El detective trajo pruebas. ')+'Tienes un medio hermano que nadie te había contado.'; } return (hayADN(A())?'La prueba salió negativa: era un montaje. ':'El detective no encontró nada. ')+'Se acabó el asunto.'; }},
+         {t:'No contestar la carta',f:()=>{ S.carta227=A(); if(chance(.3)){ escandalo(.8,'una carta ignorada que llegó a la prensa'); return 'Al mes la historia salió en una revista. Tuviste que dar explicaciones por algo que no sabías.'; } return 'Nunca volvió a llegar nada. A veces te acuerdas.'; }}]}; }
+  const capitalize=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()||(S.p.edad||0)<18) return; let n=0; const push=ev=>{ if(n>=2) return; n++; cola.push(ev); };
+    // lo que cuesta la otra casa y la mesada de los no reconocidos
+    let tot=0; activos().forEach(a=>{ if(a.casa227){ tot+=tom(costoCasa(a)); S.p.felicidad=cl(S.p.felicidad+1,0,100); } });
+    medios().forEach(h=>{ if(h.apoyo227&&h.reconocido227===false&&(h.edad||0)<18) tot+=tom(mesada(h)); });
+    if(tot>0&&A()%3===0) log('Entre la otra casa y las mesadas se te fueron '+fm(tot)+' este año.');
+    // un hijo de fuera sin decidir (la pantalla se perdió o se pospuso)
+    medios().filter(h=>h.reconocido227===undefined&&(h.edad||0)>=1).slice(0,1).forEach(h=>push(evDecidir(h)));
+    // se sabe
+    if(PA()){ activos().forEach(a=>{ if(n<2&&chance(pDesc(a))) push(evDescubre(a)); }); }
+    // los medios hermanos
+    medios().forEach(m=>{ if((m.edad||0)>=6&&!m.hermanosSaben227&&legit().some(h=>(h.edad||0)>=6)&&chance(.3)) push(evSaben(m));
+      if(sinDerecho(m)&&(m.edad||0)>=18&&puedeInvestigar(A())&&chance(m.negado227?.22:.1)) push(evDemanda(m));
+      if(m.reconocido227===true&&(m.edad||0)>=21&&!m.puesto227&&chance(.08)){ m.puesto227=A(); push(evPuesto(m)); } });
+    // la carta del abogado: los padres también tuvieron su vida
+    if(!S.carta227&&A()>=1900&&chance(.025)&&evCarta().c()) push(evCarta());
+  }
+
+  /* ---------- el panel ---------- */
+  const TIT='La otra casa';
+  function escenaOtraCasa(){ const act=activos(), mh=medios(), q=PA();
+    const filas=act.map(a=>'<tr><td>'+E(a.nombre)+' · '+E(a.rol||'')+'</td><td>'+(a.casa227?E(NIVEL[cl(a.casa227.nivel,0,2)].n)+' · '+fm(costoCasa(a))+' al año':'sin casa')+' · riesgo de que se sepa: '+Math.round(pDesc(a)*100)+'%</td></tr>').join('')
+      +mh.map(h=>'<tr><td>'+E(h.nombre)+' · '+(h.edad||0)+' años</td><td>'+(h.reconocido227===true?'reconocido'+(h.filiacion227?' por pleito':''):h.reconocido227===false?(h.apoyo227?'apoyado en silencio':'negado'):'sin decidir')+'</td></tr>').join('');
+    const sinM=S.mov<1?'Sin movidas':null, ops=[];
+    act.forEach(a=>{ if(!a.casa227) NIVEL.forEach((nv,i)=>ops.push({t:'Ponerle a '+E(primer(a.nombre))+' '+nv.n+' (~'+fm(Math.max(2,pat()*nv.f))+' al año)',cat:'familia',cerrar:false,d:i===0?'Discreta: casi no se nota.':i===1?'Cómoda: se nota en el barrio.':'Con servicio y chofer: se nota en toda la ciudad.',dis:sinM||(S.efectivo<Math.max(2,pat()*nv.f*2)?'No alcanza para instalarla':null),run:()=>{ S.mov=Math.max(0,S.mov-1); ponerCasa(a,i); escenaOtraCasa(); }}));
+      else ops.push({t:'Cerrar la casa de '+E(primer(a.nombre)),cat:'familia',cerrar:false,d:'Dejas de pagarla. Baja el riesgo, pero la relación se enfría.',run:()=>{ cerrarCasa(a); escenaOtraCasa(); }}); });
+    mh.filter(h=>h.reconocido227===false&&!h.filiacion227).forEach(h=>ops.push({t:'Reconocer a '+E(primer(h.nombre))+' ante notario',cat:'familia',cerrar:false,d:'Lleva tu apellido y entra en la herencia (según la época).',dis:sinM,run:()=>{ S.mov=Math.max(0,S.mov-1); reconocer(h); escenaOtraCasa(); }}));
+    if(!ops.length) ops.push({t:'Cerrar',cat:'familia',run:()=>{}});
+    escena({rubro:'Vida privada',titulo:'La otra casa',ancho:true,cerrable:true,cuerpo:'Lo que se sabe y no se dice. '+(q?E(primer(q.nombre))+' cree conocerte.':'Nadie espera por ti en la casa.')+' Aquí ves lo que cuesta cada relación y cada hijo de fuera, y lo que puede pasar.',html:'<table class="libro">'+(filas||'<tr><td colspan="2">Nada que mostrar.</td></tr>')+'</table>',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA227_PASO) return; window.__SA227_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='matrimonio'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Tu matrimonio',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA227_ACC) return; window.__SA227_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&(activos().length||medios().length)&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'familia',d:'Lo que se sabe y no se dice: la casa chica, los hijos de fuera y lo que puede salir a la luz.',mov:0,modal:true,run:()=>escenaOtraCasa()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v227=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA227_CAT) return; window.__SA227_CAT=true; window.catDe=function(t){ if(t===TIT) return 'familia'; return old.apply(this,arguments); }; }
+  function init227(){ wrapCrear(); wrapApellido(); wrapPaso(); wrapAcciones(); wrapCat(); try{ grupo(); }catch(e){}
+    Object.assign(window,{sinDerechoHerencia227:sinDerecho,ajustarPartes227:ajustarPartes,pesoFilial227:pesoRec,puedeInvestigarPaternidad227:puedeInvestigar,hayADN227:hayADN,penaSocialOtraCasa227:penaSocial,escandaloFamiliar227:escandalo,
+      ponerCasaChica227:ponerCasa,cerrarCasaChica227:cerrarCasa,costoCasaChica227:costoCasa,probDescubrir227:pDesc,reconocerHijo227:reconocer,apoyarHijo227:apoyar,negarHijo227:negar,mediosHermanos227:medios,anualOtraCasa227:anual,escenaOtraCasa227:escenaOtraCasa,escenaReconocer227:escenaReconocer,
+      eventosOtraCasa227:{decidir:evDecidir,descubre:evDescubre,saben:evSaben,demanda:evDemanda,puesto:evPuesto,carta:evCarta}}); }
+  init227(); setTimeout(init227,40); setTimeout(init227,220); setTimeout(init227,650); setTimeout(init227,950); setTimeout(init227,1500);
+  window.__SA227={version:V227};
 })();
 </script>
 
