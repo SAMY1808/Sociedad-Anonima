@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v225</div>
+<div class="version-badge" id="versionBadge">v226</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -6484,7 +6484,7 @@ function escenaResidenciaInternacional(){
       ],cerrable:true});
     return;
   }
-  const destinos=CIUDADES_GLOBALES.filter(x=>x.n!==S.hogar.ciudad);
+  const destinos=CIUDADES_GLOBALES.filter(x=>x.n!==S.hogar.ciudad&&(!window.ciudadAbierta226||window.ciudadAbierta226(x.n)));
   escena({rubro:'Vida internacional',titulo:'Abrir una segunda base',ancho:true,
     cuerpo:'Puedes mantener tu hogar principal donde estás y abrir una residencia internacional en otra plaza. Sirve para estancias largas, redes y negocios; no te muda automáticamente.',
     opciones:destinos.map(x=>{const costo=Math.max(120,x.traslado*1.8); return {t:x.n+' · '+x.pais,cat:'casa',d:x.d+' Instalación inicial: '+fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{S.efectivo-=costo;S.residenciaInternacional={ciudad:x.n,desde:S.anio,hasta:S.anio+5,redes:1,segundaBase:true,pagoAnio:0};moverPrestigio(5,'abrió una segunda base internacional');log('Abriste una residencia de larga duración en <b>'+esc(x.n)+'</b> sin dejar tu hogar principal.','hito');hito('Abrió segunda base en '+x.n);S.mov--;}}}),cerrable:true});
@@ -9697,7 +9697,7 @@ function escenaMudanzaGlobal(g){
 
 function escenaCiudad(){
   const nacionales=Object.keys(ZONAS).filter(c=>c!==S.hogar.ciudad&&!esCiudadGlobal(c)&&ciudadVigente(c));
-  const globales=CIUDADES_GLOBALES.filter(g=>g.n!==S.hogar.ciudad);
+  const globales=CIUDADES_GLOBALES.filter(g=>g.n!==S.hogar.ciudad&&(!window.ciudadAbierta226||window.ciudadAbierta226(g.n)));
   escena({rubro:'Mudanza',titulo:'Irte a otra ciudad',ancho:true,
     cuerpo:'Mudarte dentro del país es relativamente barato. Irte al exterior implica traslado, instalación y depósito, y después un costo de vida acorde con la ciudad que elegiste. Puedes vivir fuera del país aunque todavía vivas con tu familia: al elegir una ciudad extranjera, el juego te instala por tu cuenta.',
     opciones:nacionales.map(c=>({t:c,cat:'casa',d:'Costo de vida '+(multCiudad(c)>1?'alto':multCiudad(c)>.82?'medio':'bajo')+'. '+(CIUDADES.find(x=>x.n===c)?CIUDADES.find(x=>x.n===c).d:''),run:()=>{const viv=viviendaPropia();if(viv){const neto=venderBien(viv,.05);log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.');}S.hogar.ciudad=c;S.hogar.zona=1;S.hogar.conLosPadres=false;S.hogar.vivienda=null;S.p.ciudad=c;S.p.redes=clamp(S.p.redes*.62,0,100);S.efectivo-=Math.min(S.efectivo,arriendoActual()*.8);log('Te mudaste a <b>'+esc(c)+'</b>. Toca rehacer los contactos.','hito');hito('Se mudó a '+c);S.mov--;}})).concat(globales.map(g=>({t:g.n+' · '+g.pais,cat:'casa',d:g.d+' Costo de vida relativo '+g.costo.toFixed(2)+'x. Seleccionas la zona y confirmas el costo completo antes de mudarte.',run:()=>{cerrarModal();escenaMudanzaGlobal(g);}}))),cerrable:true});
@@ -39438,6 +39438,286 @@ install();setTimeout(install,1200);
   function init225(){ Object.assign(window,{SLUG_EXTERIOR_225:SLUG,FOTOS_EXTERIOR_225:HECHAS,archivosExterior225:archivos,fotosPendientes225:pendientes,fotoExterior225:foto}); }
   init225(); setTimeout(init225,40); setTimeout(init225,220); setTimeout(init225,650); setTimeout(init225,950); setTimeout(init225,1500);
   window.__SA225={version:V225};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v226 · VIVIR EN EL EXTERIOR
+   Mudarse a una de las doce ciudades del exterior era solo cambiar de
+   dirección. Ahora es una vida con papeles, impuestos, nostalgia y época.
+   - Cada ciudad se abre en su época (Dubái, 1975; Singapur, 1970; Miami,
+     1950...) y Shanghái se cierra a los extranjeros entre 1949 y 1978. Si
+     vivías allá cuando cierra, te sacan.
+   - Estatus migratorio en cuatro peldaños: sin papeles, visa temporal,
+     residente y ciudadano. Cada país tiene su dificultad por época y, más
+     tarde, su «visa dorada»: se compra un apartamento allá y se entra
+     como residente (EB-5, Tier 1, visa de naciones amigas...). Antes de 1991
+     nacionalizarte en otro país te cuesta la nacionalidad colombiana.
+   - Impuestos: mientras tu domicilio fiscal siga en Colombia, el fisco de
+     allá y la DIAN pueden cobrarte los dos (el convenio contra la doble
+     tributación lo evita donde existe). Si lo cambias al exterior pagas
+     el régimen local cada año, y las plazas de baja imposición atraen
+     el ojo de la DIAN.
+   - Nostalgia y colonia: cuanto más lejos el idioma y la costumbre, más
+     pesa estar fuera; la colonia colombiana la aliviana. Al subir mucho, la
+     familia pide volver.
+   - Los hijos que nacen en un país que da nacionalidad por nacimiento (Estados
+     Unidos, Brasil, Panamá, y el Reino Unido hasta 1983) salen con segundo
+     pasaporte; los que crecen afuera echan raíces. Hay que escoger colegio.
+   - Eventos propios de cada ciudad y época: la plata caliente de Miami, el
+     Blitz de Londres, el traspaso de Hong Kong, la inflación de São Paulo, la
+     invasión de Panamá, Fukushima, los papeles de Panamá...
+   - Los barrios de Dubái, Singapur, Shanghái y Ciudad de Panamá cambian de
+     nombre según la época (Costa del Este no existía en 1950).
+   Los convenios contra la doble tributación y las visas de inversión están
+   aproximados para el juego: no son una guía legal.
+   ========================================================================== */
+(function(){
+  const V226='v226';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const gl=n=>{ try{ return ciudadGlobalDe(n); }catch(e){ return null; } };
+  const primer=n=>String(n||'').split(' ')[0];
+
+  /* ---------- cuándo se puede vivir allá ---------- */
+  const ABRE={'Londres':1800,'París':1800,'Nueva York':1850,'Hong Kong':1860,'Fráncfort':1870,'Tokio':1900,'Shanghái':1900,'Ciudad de Panamá':1903,'São Paulo':1920,'Miami':1950,'Singapur':1970,'Dubái':1975};
+  const CERRADA={'Shanghái':[1949,1978]};
+  function abierta(c,a){ a=a==null?A():a; const d=ABRE[c]; if(d!=null&&a<d) return false; const w=CERRADA[c]; if(w&&a>=w[0]&&a<=w[1]) return false; return true; }
+
+  /* ---------- el régimen de cada país ----------
+     acc: facilidad para entrar [antes de 1945, 1945-1989, desde 1990]
+     oro: la visa de inversión {d desde, h hasta, n nombre, min en apartamento}
+     ciud: años para pedir la ciudadanía (0 = no hay)
+     terr: tributa solo lo que se gana allá · tasa: carga anual sobre la renta
+     idioma: lo lejos que queda de nuestra costumbre (0 a 1)
+     conv: año desde el que hay convenio contra la doble tributación (aprox.)
+     jus: da nacionalidad por nacimiento (1, o hasta el año dado) */
+  const REG={
+    'Miami':{pais:'Estados Unidos',nac:'estadounidense',acc:[.7,.3,.5],oro:{d:1990,n:'la visa EB-5 de inversionista',min:180},ciud:5,terr:0,tasa:.30,idioma:.35,conv:0,jus:1},
+    'Nueva York':{pais:'Estados Unidos',nac:'estadounidense',acc:[.7,.3,.5],oro:{d:1990,n:'la visa EB-5 de inversionista',min:220},ciud:5,terr:0,tasa:.36,idioma:.4,conv:0,jus:1},
+    'Londres':{pais:'Reino Unido',nac:'británica',acc:[.85,.45,.4],oro:{d:1994,h:2022,n:'la visa de inversionista (Tier 1)',min:260},ciud:5,terr:0,tasa:.28,idioma:.45,conv:2014,jus:1983},
+    'Dubái':{pais:'Emiratos Árabes Unidos',nac:'emiratí',acc:[.4,.5,.75],oro:{d:2002,n:'la residencia por propiedad (desde 2019, la visa dorada)',min:150},ciud:0,terr:1,tasa:0,idioma:.85,conv:2022,jus:0},
+    'Singapur':{pais:'Singapur',nac:'singapurense',acc:[.8,.35,.4],oro:{d:2004,n:'el programa de inversionistas globales',min:300},ciud:6,terr:1,tasa:.15,idioma:.6,conv:0,jus:0},
+    'Hong Kong':{pais:'China (Hong Kong)',nac:'china',acc:[.9,.55,.55],oro:{d:2003,h:2015,n:'el programa de admisión de inversionistas',min:220},ciud:7,terr:1,tasa:.15,idioma:.8,conv:0,jus:0},
+    'Fráncfort':{pais:'Alemania',nac:'alemana',acc:[.65,.3,.4],oro:null,ciud:8,terr:0,tasa:.40,idioma:.6,conv:2016,jus:0},
+    'París':{pais:'Francia',nac:'francesa',acc:[.8,.35,.4],oro:null,ciud:5,terr:0,tasa:.38,idioma:.55,conv:2015,jus:0},
+    'Tokio':{pais:'Japón',nac:'japonesa',acc:[.2,.15,.25],oro:{d:2015,n:'la visa de gerente de negocios',min:100},ciud:5,terr:0,tasa:.33,idioma:.95,conv:2022,jus:0},
+    'Shanghái':{pais:'China',nac:'china',acc:[.75,0,.35],oro:null,ciud:0,terr:0,tasa:.30,idioma:.95,conv:0,jus:0},
+    'São Paulo':{pais:'Brasil',nac:'brasileña',acc:[.85,.6,.55],oro:{d:2012,n:'la visa de inversionista',min:120},ciud:4,terr:0,tasa:.27,idioma:.4,conv:0,jus:1},
+    'Ciudad de Panamá':{pais:'Panamá',nac:'panameña',acc:[.95,.8,.85],oro:{d:2012,n:'la visa de naciones amigas',min:80},ciud:5,terr:1,tasa:.12,idioma:.1,conv:0,jus:1}
+  };
+  const ESTATUS=['sin papeles','visa temporal','residente permanente','ciudadano'];
+  const era=a=>a<1945?0:a<1990?1:2;
+  const acceso=(c,a)=>{ const r=REG[c]; return r?r.acc[era(a)]:.5; };
+  const oroDe=(c,a)=>{ const r=REG[c], o=r&&r.oro; if(!o) return null; a=a==null?A():a; if(a<o.d||(o.h&&a>o.h)) return null; return o; };
+  const convenio=(c,a)=>{ const r=REG[c]; return !!(r&&r.conv&&(a==null?A():a)>=r.conv); };
+  const dazJus=(c,a)=>{ const r=REG[c]; if(!r||!r.jus) return false; return r.jus===1||(a==null?A():a)<r.jus; };
+  const tolerancia=(c,a)=>{ a=a==null?A():a; const t={'Miami':.8,'Nueva York':.85,'Londres':.85,'París':.9,'Fráncfort':.8,'São Paulo':.6,'Ciudad de Panamá':.55,'Tokio':.55,'Singapur':.5,'Hong Kong':.5,'Shanghái':.35,'Dubái':.2}[c]; if(t==null) return null; return a<1960?t*.5:a<1990?t*.8:t; };
+
+  /* ---------- el estado ---------- */
+  function ext(){ const c=S&&S.hogar&&S.hogar.ciudad; return (c&&gl(c))?c:null; }
+  function X(){ const c=ext(); if(!c) return null; let x=S.ext226;
+    if(!x||x.ciudad!==c){ const hist=(x&&x.hist)||[]; if(x&&x.ciudad) hist.push({c:x.ciudad,d:x.desde,h:A()});
+      x=S.ext226={ciudad:c,desde:A(),est:0,hasta:null,nost:12,colonia:0,dom:'co',anios:0,hechos:{},veto:0,hist}; }
+    if(!x.hechos) x.hechos={}; x.anios=Math.max(0,A()-x.desde); return x; }
+  const viviendo=()=>ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&!!ext();
+  const cargoAnual=c=>{ const r=REG[c]; if(!r) return 0; return Math.round(r.tasa*pat()*.03*(r.terr?.4:1)); };
+  const origen=()=>{ const n=S.p&&S.p.nacioEn; if(n&&!gl(n)&&(typeof ZONAS!=='undefined'?ZONAS[n]:true)) return n; return 'Bogotá'; };
+
+  /* ---------- volver a Colombia (a la fuerza o por gusto) ---------- */
+  function volver(motivo){ const c=ext(); if(!c) return false; const dest=origen();
+    try{ const viv=viviendaPropia(); if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.15); if(neto!==null) log('Vendiste a toda prisa la vivienda en '+E(c)+' por '+fm(neto)+' netos.'); } }catch(e){}
+    S.hogar.ciudad=dest; S.hogar.zona=0; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=dest;
+    S.p.redes=cl((S.p.redes||0)*.7,0,100);
+    const x=S.ext226; if(x){ x.hist=x.hist||[]; x.hist.push({c:c,d:x.desde,h:A(),volvio:true}); S.ext226=null; }
+    log('Volviste a <b>'+E(dest)+'</b>'+(motivo?': '+motivo:'')+'.','hito'); try{ hito('Volvió de '+c+' a '+dest); }catch(e){} return true; }
+
+  /* ---------- trámites ---------- */
+  const costoTramite=(c,k)=>Math.max(8,Math.round((gl(c)?gl(c).traslado:150)*k));
+  function probTramite(c,base){ let p=base+((S.p.reputacion||50)-50)/300-((S.caliente220&&S.caliente220.expo)||0)/220-((S.p.escandalos||0))*.015;
+    if(S.caliente220&&S.caliente220.clinton) p-=.3; return cl(p,.04,.95); }
+  function tramitar(tipo){ const x=X(), c=x&&x.ciudad, r=REG[c]; if(!x||!r) return {ok:false,txt:''}; const a=A();
+    if(x.veto&&a<x.veto) return {ok:false,txt:'Te cerraron la puerta hasta '+x.veto+'.'};
+    if(tipo==='visa'){ const k=costoTramite(c,.35); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,acceso(c,a)))){ x.est=1; x.hasta=a+3; log('Te dieron la <b>visa</b> de '+E(r.pais)+' por tres años.','bien'); return {ok:true,txt:'Visa concedida.'}; }
+      x.veto=a+2; log('Te negaron la visa de '+E(r.pais)+'. No puedes volver a pedirla hasta '+x.veto+'.','mal'); return {ok:false,txt:'Visa negada.'}; }
+    if(tipo==='dorada'){ const o=oroDe(c,a); if(!o) return {ok:false,txt:'No hay visa de inversión en esta época.'}; if(S.efectivo<o.min) return {ok:false,txt:'Hay que comprar un apartamento de '+fm(o.min)+'.'};
+      let b=null; try{ b=comprarBien({clase:'vivienda',tipo:'apartamento',nombre:'Apartamento de inversionista en '+(zonasVivienda(c)[1]||{n:c}).n,valor:o.min,mant:.012,ciudad:c,zona:1,cuotaInicial:1,anios:15}); }catch(e){ console.error(e); }
+      if(!b) return {ok:false,txt:'No se pudo hacer la compra.'}; x.est=Math.max(x.est,2); x.hasta=null; x.dorada=true; prest(1,'residencia por inversión en '+c);
+      log('Con '+E(o.n)+' compraste un apartamento en '+E(c)+' y entraste como <b>residente</b>.','hito'); return {ok:true,txt:'Residente por inversión.'}; }
+    if(tipo==='residente'){ if(x.est<1) return {ok:false,txt:'Primero la visa.'}; const k=costoTramite(c,.5); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,acceso(c,a)*.9+.1))){ x.est=2; x.hasta=null; log('Te dieron la <b>residencia permanente</b> en '+E(r.pais)+'.','bien'); return {ok:true,txt:'Residencia concedida.'}; }
+      log('Negaron tu residencia en '+E(r.pais)+'. Sigues con la visa.','mal'); return {ok:false,txt:'Residencia negada.'}; }
+    if(tipo==='ciudadano'){ if(x.est<2||!r.ciud) return {ok:false,txt:'No hay ciudadanía para ti.'}; const k=costoTramite(c,.8); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,.85))){ x.est=3; x.hasta=null; let extra=''; if(a<1991){ x.sinNacionalidadCo=true; prest(-3,'renunció a la nacionalidad colombiana'); extra=' Como todavía no hay doble nacionalidad, perdiste la colombiana.'; }
+          else { prest(1,'segunda nacionalidad'); }
+          log('Eres <b>ciudadano '+E(r.nac)+'</b>.'+extra,'hito'); return {ok:true,txt:'Ciudadanía concedida.'+extra}; }
+      log('Te negaron la ciudadanía de '+E(r.pais)+'.','mal'); return {ok:false,txt:'Ciudadanía negada.'}; }
+    return {ok:false,txt:''}; }
+  function cambiarDomicilio(a){ const x=X(); if(!x) return false; if(a==='local'){ if(x.est<1||x.anios<2) return false; x.dom='local'; log('Trasladaste tu domicilio fiscal a <b>'+E(REG[x.ciudad].pais)+'</b>: desde ahora pagas allá.','hito'); return true; }
+    x.dom='co'; log('Volviste tu domicilio fiscal a Colombia.','hito'); return true; }
+
+  /* ---------- eventos de plata y de ánimo ---------- */
+  const hecho=(x,k)=>{ x.hechos[k]=A(); };
+  function evSinPapeles(){ const c=ext(), x=X(), k=costoTramite(c,.35)*2, multa=costoTramite(c,.2);
+    return {p:10,c:()=>viviendo()&&X()&&X().est===0,t:()=>'<b>Llevas un año en '+E(c)+' sin papeles en regla.</b> Ya no eres un visitante: la oficina de migración te pide que regularices o te vayas.',
+      o:[{t:'Tramitar la visa ya ('+fm(k)+')',f:()=>{ tom(k); const p=cl(probTramite(c,acceso(c,A()))+.1,.1,.95); if(chance(p)){ x.est=1; x.hasta=A()+3; return 'Regularizaste tu situación: tienes visa por tres años.'; } x.veto=A()+2; return 'La visa fue negada. Te dieron un plazo para irte.'; }},
+         {t:'Seguir como estás y pagar la multa ('+fm(multa)+')',f:()=>{ tom(multa); prest(-1,'una multa de migración'); try{ S.p.estres=cl((S.p.estres||0)+5,0,100); }catch(e){} return 'Pagaste la multa. El problema sigue ahí.'; }},
+         {t:'Volver a Colombia',f:()=>{ volver('se te acabó el permiso'); return 'Cerraste la casa y volviste.'; }}]}; }
+  function evDoble(){ const c=ext(), r=REG[c], cv=convenio(c), p1=Math.round(pat()*.006), p2=Math.round(pat()*.0015);
+    return {p:9,c:()=>viviendo()&&X()&&X().dom==='co',t:()=>'<b>Dos fiscos, la misma renta.</b> La DIAN te cobra porque sigues siendo residente en Colombia, y la oficina de impuestos de '+E(r.pais)+' te cobra por lo que ganas allá.'+(cv?' Hay un convenio para evitar la doble tributación entre los dos países.':' No hay convenio entre los dos países.'),
+      o:[{t:'Pagar en los dos países ('+fm(p1)+')',f:()=>{ tom(p1); return 'Pagaste dos veces. Duele, pero no hay pleito.'; }},
+         {t:'Pedir el crédito por lo pagado afuera ('+fm(p2)+')',f:()=>{ tom(p2); if(chance(cv?.88:.35)){ return cv?'El convenio funcionó: descontaron lo que pagaste allá.':'Te aceptaron el descuento, aunque no hay convenio.'; } tom(p1); return 'Te rechazaron el descuento y terminaste pagando los dos.'; }},
+         {t:'Cambiar tu domicilio fiscal a '+E(r.pais),f:()=>{ if(!cambiarDomicilio('local')) return 'No puedes cambiarlo todavía: necesitas visa y dos años allá.'; return 'Cambiaste el domicilio fiscal: desde ahora pagas el régimen local.'; }}]}; }
+  function evBajaImp(){ const c=ext(), r=REG[c], x=X(), cost=Math.round(pat()*.012);
+    return {p:8,c:()=>viviendo()&&A()>=2007&&X()&&X().dom==='local'&&!!REG[ext()].terr,t:()=>'<b>La DIAN pone la lupa en tu domicilio en '+E(c)+'.</b> Dice que '+E(r.pais)+' es una jurisdicción de baja imposición y que tu familia y tus negocios siguen en Colombia: para ella, sigues siendo residente fiscal.',
+      o:[{t:'Demostrar que vives allá ('+fm(cost)+')',f:()=>{ tom(cost); if(chance(clamp(.45+(x.anios||0)*.04,.3,.8))) return 'Mostraste contratos, colegio y vida afuera: la DIAN archivó el caso.'; x.dom='co'; return 'No te creyeron: sigues como residente en Colombia y pagaste el proceso.'; }},
+         {t:'Volver el domicilio a Colombia',f:()=>{ x.dom='co'; return 'Regularizaste: tu domicilio fiscal vuelve a ser Colombia.'; }}]}; }
+  function evOro(){ const c=ext(), o=oroDe(c,A()), x=X(); if(!o||!x) return {p:0,c:()=>false,t:()=>'',o:[]};
+    return {p:14,c:()=>viviendo()&&X()&&X().est<2&&!X().hechos.oro&&!!oroDe(ext(),A())&&pat()>oroDe(ext(),A()).min*6,t:()=>'<b>Un abogado te habla de '+E(o.n)+'.</b> Compras un apartamento de '+fm(o.min)+' en '+E(c)+' y entras como residente, sin esperar años de visas.',
+      o:[{t:'Comprar el apartamento y entrar ('+fm(o.min)+')',f:()=>{ hecho(x,'oro'); const r=tramitar('dorada'); return r.txt; }},{t:'Dejarlo pasar',f:()=>{ hecho(x,'oro'); return 'Dijiste que lo ibas a pensar.'; }}]}; }
+  function evNostalgia(){ const c=ext(), x=X(); const kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<18).length;
+    return {p:10,c:()=>viviendo()&&X()&&X().nost>=75,t:()=>'<b>La casa de Colombia pesa más cada año.</b> '+(S.familia&&S.familia.pareja?E(primer(S.familia.pareja.nombre))+' habla de las Navidades lejos'+(kids?' y de que los niños ya piensan en otro idioma':'')+'.':'Cada diciembre se te hace más largo en '+E(c)+'.'),
+      o:[{t:'Volver a Colombia',f:()=>{ volver('la nostalgia ganó'); return 'Volviste.'; }},
+         {t:'Viajar más a menudo ('+fm(pat()*.004)+')',f:()=>{ tom(pat()*.004); x.nost=cl(x.nost-25,0,100); S.p.felicidad=cl(S.p.felicidad+3,0,100); return 'Armaron un calendario de viajes: dos veces al año, al menos.'; }},
+         {t:'Quedarse y apretar los dientes',f:()=>{ S.p.felicidad=cl(S.p.felicidad-4,0,100); x.nost=cl(x.nost-8,0,100); return 'Se quedaron. Cuesta más de lo que dijeron.'; }}]}; }
+  function evColegio(){ const c=ext(), x=X(), r=REG[c], kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18);
+    const k1=Math.round(Math.max(8,pat()*.004)), k2=Math.round(Math.max(3,pat()*.0012));
+    return {p:11,c:()=>viviendo()&&X()&&!X().hechos.colegio&&((S.familia&&S.familia.hijos)||[]).some(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18),t:()=>'<b>¿En qué colegio estudian los niños en '+E(c)+'?</b> En la colonia dicen que el internacional los prepara para cualquier lugar del mundo; el colegio local los integra, pero cambia su idioma de la casa.',
+      o:[{t:'Colegio internacional ('+fm(k1)+')',f:()=>{ hecho(x,'colegio'); tom(k1); kids.forEach(h=>{ h.formacion=cl((h.formacion||0)+8,0,100); h.arraigo226=cl((h.arraigo226||0)+4,0,100); }); return 'Los niños salieron de ahí hablando dos idiomas y con amigos de todo el mundo.'; }},
+         {t:'Colegio local ('+fm(k2)+')',f:()=>{ hecho(x,'colegio'); tom(k2); kids.forEach(h=>{ h.arraigo226=cl((h.arraigo226||0)+12,0,100); }); x.nost=cl(x.nost-6,0,100); return 'Los niños se integraron rápido: más raíces allá y más distancia de Colombia.'; }},
+         {t:'Colegio de la colonia colombiana ('+fm(k2)+')',f:()=>{ hecho(x,'colegio'); tom(k2); x.colonia=cl(x.colonia+8,0,100); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+3,0,100); }); return 'Mantienen el español, las costumbres y a los primos en las fiestas.'; }}]}; }
+
+  /* ---------- historia de cada ciudad ---------- */
+  function perder(x){ return tom(x); }
+  function evInv(r){ const x=Math.round(Math.max(10,pat()*r.f)); return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Invertir allá ('+fm(x)+')',f:()=>{ hecho(X(),r.id); if(S.efectivo<x) return 'No te alcanzó la caja para entrar.'; tom(x); if(chance(r.ok)){ S.efectivo+=Math.round(x*r.gan); return r.si+' Ganaste '+fm(x*(r.gan-1))+'.'; } return r.no+' Perdiste '+fm(x*.6)+'.'; }},
+         {t:'Mirar de lejos',f:()=>{ hecho(X(),r.id); return 'Lo viste pasar. Otros se quedaron con el negocio.'; }}]}; }
+  function evCrisis(r){ const x=Math.round(Math.max(8,pat()*r.sev)); return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Aguantar y esperar',f:()=>{ hecho(X(),r.id); const u=perder(x*.6); S.p.felicidad=cl(S.p.felicidad-3,0,100); return 'Esperaste la tormenta. Costó '+fm(u)+'.'; }},
+         {t:'Vender y salir del mercado',f:()=>{ hecho(X(),r.id); const u=perder(x*.3); try{ S.p.estres=cl((S.p.estres||0)-3,0,100); }catch(e){} return 'Vendiste lo que tenías allá a precio de salida: '+fm(u)+' menos.'; }},
+         {t:'Aprovechar y comprar barato ('+fm(x*.6)+')',f:()=>{ hecho(X(),r.id); if(S.efectivo<x*.6) return 'No tenías caja para aprovechar.'; tom(x*.6); if(chance(.6)){ S.efectivo+=Math.round(x*1.7); return 'Compraste cuando todos vendían y, con los años, salió bien: ganaste '+fm(x*1.1)+'.'; } return 'La crisis duró más de lo que pensabas: perdiste '+fm(x*.6)+'.'; }}]}; }
+  function evMiedo(r){ return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Quedarte, a la altura de la gente de allá',f:()=>{ hecho(X(),r.id); prest(1,'se quedó en '+r.ciudad+' en un momento difícil'); S.p.felicidad=cl(S.p.felicidad-3,0,100); X().nost=cl(X().nost+6,0,100); return 'Te quedaste. En la colonia te lo agradecen y en la casa se nota la tensión.'; }},
+         {t:'Mandar a la familia a Colombia',f:()=>{ hecho(X(),r.id); const u=perder(Math.round(pat()*.004)); (S.familia.hijos||[]).forEach(h=>{ h.vinculo=cl((h.vinculo||60)+2,0,100); }); return 'La familia viajó a Colombia y tú te quedaste solo unos meses. Costó '+fm(u)+'.'; }},
+         {t:'Volver a Colombia',f:()=>{ hecho(X(),r.id); volver(r.motivo||'las cosas se pusieron difíciles'); return 'Volviste.'; }}]}; }
+  const HIST=[
+    {id:'miami_cuba',tipo:'inv',ciudad:'Miami',d:[1959,1975],p:.22,f:.03,ok:.65,gan:2.2,titulo:'Llegan los exiliados cubanos a Miami.',txt:'Ya no es un balneario: es una ciudad con una cola de gente que lo perdió todo y compra casas, bancos y comercio.',si:'Entraste con el barrio nuevo.',no:'El mercado se enfrió antes de tiempo.'},
+    {id:'ny_11s',tipo:'miedo',ciudad:'Nueva York',d:[2001,2001],p:1,titulo:'El 11 de septiembre cambia a Nueva York.',txt:'El humo se ve desde la ventana, los mercados cierran y la ciudad queda en silencio. Para un extranjero, el miedo viene con preguntas en cada aeropuerto.',motivo:'después del 11 de septiembre'},
+    {id:'lon_blitz',tipo:'miedo',ciudad:'Londres',d:[1940,1941],p:.9,titulo:'Los bombardeos alemanes llegan a Londres.',txt:'Cada noche suenan las sirenas y la gente baja a los refugios del metro. En la embajada te aconsejan salir; en el club te piden resistir.',motivo:'escapando de los bombardeos'},
+    {id:'hk_1997',tipo:'miedo',ciudad:'Hong Kong',d:[1997,1997],p:1,titulo:'Hong Kong pasa de Gran Bretaña a China.',txt:'La bandera cambia a medianoche. Los bancos dicen que nada cambia; los taxistas, que sí. La gente de dinero tiene el pasaporte de otro país en el cajón.',motivo:'por el traspaso a China'},
+    {id:'hk_2019',tipo:'miedo',ciudad:'Hong Kong',d:[2019,2020],p:.8,titulo:'Las protestas y la ley de seguridad sacuden Hong Kong.',txt:'Marchas, gases en la calle, cierres de oficinas y una ley nueva que nadie termina de entender. Los clientes empiezan a mover el dinero a Singapur.',motivo:'por la ley de seguridad'},
+    {id:'pa_1989',tipo:'miedo',ciudad:'Ciudad de Panamá',d:[1989,1990],p:1,titulo:'Estados Unidos invade Panamá para sacar a Noriega.',txt:'Helicópteros, toque de queda, saqueos en el centro y los bancos cerrados. Las llamadas a Colombia no entran.',motivo:'tras la invasión'},
+    {id:'sh_pudong',tipo:'inv',ciudad:'Shanghái',d:[1992,2010],p:.2,f:.04,ok:.7,gan:2.6,titulo:'Pudong se levanta de la nada.',txt:'Donde había arrozales hoy hay grúas. Un socio local te ofrece entrar en un edificio de oficinas antes de que lo terminen.',si:'El edificio se llenó antes de abrir.',no:'El socio se quedó con la mejor parte.'},
+    {id:'sp_inflacion',tipo:'crisis',ciudad:'São Paulo',d:[1986,1994],p:.5,sev:.015,titulo:'La inflación de Brasil no deja respirar.',txt:'Los precios cambian cada semana, las listas del supermercado se tachan con marcador y quien tiene reales en el bolsillo los pierde.'},
+    {id:'sp_lavajato',tipo:'crisis',ciudad:'São Paulo',d:[2014,2019],p:.4,sev:.02,titulo:'La Lava Jato llega a las constructoras de São Paulo.',txt:'Tus socios locales aparecen en los periódicos, los contratos se congelan y los bancos piden garantías hasta por los cafés.'},
+    {id:'tk_burbuja',tipo:'crisis',ciudad:'Tokio',d:[1990,1993],p:.7,sev:.025,titulo:'Estalla la burbuja japonesa.',txt:'Los terrenos del centro de Tokio valían más que California; ahora nadie quiere comprar.'},
+    {id:'tk_fukushima',tipo:'miedo',ciudad:'Tokio',d:[2011,2011],p:1,titulo:'El terremoto y Fukushima paralizan Japón.',txt:'El edificio se mueve durante minutos, hay apagones, y en la colonia circulan listas de vuelos a Colombia.',motivo:'después del terremoto'},
+    {id:'du_2009',tipo:'crisis',ciudad:'Dubái',d:[2009,2010],p:.8,sev:.02,titulo:'Dubái pide aplazar su deuda.',txt:'Las grúas se paran, los inquilinos se van y los precios de las torres caen a la mitad.'},
+    {id:'lon_2016',tipo:'crisis',ciudad:'Londres',d:[2016,2019],p:.7,sev:.012,titulo:'El Brexit sacude la libra.',txt:'Los bancos dudan, la libra cae y los dueños de casas en Londres no saben si vender.'},
+    {id:'cris_2008',tipo:'crisis',ciudad:'Nueva York',d:[2008,2009],p:.9,sev:.02,titulo:'Lehman Brothers cae y Wall Street se congela.',txt:'Los créditos desaparecen y todos los conocidos de la colonia financiera tienen la misma cara.'},
+    {id:'mia_andrew',tipo:'crisis',ciudad:'Miami',d:[1992,1992],p:1,sev:.012,titulo:'El huracán Andrew pasa por Miami.',txt:'Techos arrancados, árboles en la calle y semanas sin luz. Las aseguradoras se hacen las de oídos sordos.'}
+  ];
+  function evShanghai(){ return {p:100,c:()=>viviendo()&&ext()==='Shanghái'&&A()>=1949&&A()<=1978&&!X().hechos.cierre,t:()=>'<b>La nueva China cierra la puerta a los extranjeros.</b> Los bancos extranjeros están intervenidos y la policía te da pocos días para salir de Shanghái. Lo que tenías allá queda atrás.',
+      o:[{t:'Salir con lo puesto y volver a Colombia',f:()=>{ hecho(X(),'cierre'); const u=perder(Math.round(pat()*.03)); volver('te sacaron de Shanghái'); return 'Saliste en el último barco. Lo que dejaste vale '+fm(u)+' menos para ti.'; }}]}; }
+  function evPanamaPapers(){ const tiene=!!(S.fideicomiso||(S.offshore217&&((S.offshore217.estructuras||S.offshore217.lista||[]).length||Object.keys(S.offshore217).length>0))); const c1=Math.round(pat()*.01);
+    return {p:100,c:()=>viviendo()&&ext()==='Ciudad de Panamá'&&A()===2016&&!X().hechos.papers,t:()=>'<b>Salen los «papeles de Panamá».</b> Un bufete de la ciudad filtró millones de documentos y los periodistas buscan nombres de toda América Latina.'+(tiene?' Tu nombre puede estar entre ellos: tienes estructuras en el exterior.':' Aunque no estés en los papeles, vivir aquí te pone bajo sospecha.'),
+      o:[{t:'Salir a dar la cara ('+fm(c1)+')',f:()=>{ hecho(X(),'papers'); tom(c1); if(tiene){ prest(-3,'los papeles de Panamá'); return 'Explicaste que todo era legal, pero el titular ya había salido.'; } prest(1,'dio la cara por los papeles de Panamá'); return 'Dijiste lo que había que decir, y te creyeron.'; }},
+         {t:'No decir nada',f:()=>{ hecho(X(),'papers'); if(tiene&&chance(.5)){ prest(-5,'los papeles de Panamá'); return 'Tu silencio se interpretó como culpa: la prensa te puso en la lista.'; } return 'La tormenta pasó sin mencionarte.'; }}]}; }
+  function evMiamiCaliente(){ return {p:60,c:()=>viviendo()&&ext()==='Miami'&&A()>=1979&&A()<=1987&&!X().hechos.mia80,t:()=>'<b>En Miami, hasta los vecinos pagan en efectivo.</b> Es la época de los «cowboys de la cocaína»: bancos que cuentan billetes en bolsas, lanchas nuevas cada mes y socios que no explican de dónde viene su plata.',
+      o:[{t:'Hacerte el de la vista gorda y aceptar un «socio»',f:()=>{ hecho(X(),'mia80'); const c=S.caliente220=S.caliente220||{expo:0,tratos:[],hechos:{},clinton:null}; c.expo=cl((c.expo||0)+12,0,100); S.efectivo+=Math.round(pat()*.02); return 'Entró dinero fácil. También entró algo que después va a cobrar.'; }},
+         {t:'Mantener distancia',f:()=>{ hecho(X(),'mia80'); prest(1,'se negó a negocios sucios en Miami'); return 'Perdiste algunos contactos y ganaste tranquilidad.'; }},
+         {t:'Volver a Colombia',f:()=>{ hecho(X(),'mia80'); volver('Miami se puso muy caliente'); return 'Volviste.'; }}]}; }
+  function eventosCiudad(){ const L=[]; HIST.forEach(r=>{ L.push(r.tipo==='inv'?evInv(r):r.tipo==='crisis'?evCrisis(r):evMiedo(r)); }); L.push(evShanghai(),evPanamaPapers(),evMiamiCaliente()); return L; }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()) return; const c=ext();
+    if(!c){ if(S.ext226&&S.ext226.ciudad){ const x0=S.ext226; x0.hist=x0.hist||[]; x0.hist.push({c:x0.ciudad,d:x0.desde,h:A(),volvio:true}); S.ext226=null; } return; }
+    if((S.p.edad||0)<18) return; const x=X(), r=REG[c], g=gl(c); x.anios=A()-x.desde;
+    // estatus: la visa vence
+    if(x.est===1&&x.hasta!=null&&A()>x.hasta){ const k=costoTramite(c,.15); if(S.efectivo>=k&&chance(probTramite(c,.8))){ tom(k); x.hasta=A()+3; log('Renovaste la visa de '+E(r.pais)+' por tres años más.'); } else { x.est=0; x.hasta=null; log('Se te venció la visa de '+E(r.pais)+' y no pudiste renovarla.','mal'); } }
+    // domicilio fiscal local: se paga el régimen del país
+    if(x.dom==='local'){ const cg=cargoAnual(c); if(cg>0){ tom(cg); if(x.anios%3===0) log('Pagaste '+fm(cg)+' al fisco de '+E(r.pais)+' como residente fiscal.'); } }
+    // nostalgia y colonia
+    const kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<18).length;
+    const meta=15+r.idioma*70+(A()<1960?12:A()<1990?5:0)-x.colonia*.3-(S.p.redes||0)*.2-(x.est>=2?5:0)+(kids?3:0); x.nost=cl(x.nost+(meta-x.nost)*.25,0,100); // se acerca poco a poco a lo que pesa vivir ahí
+    if(x.nost>=70) S.p.felicidad=cl(S.p.felicidad-2,0,100);
+    x.colonia=cl(x.colonia-2,0,100);
+    // los hijos
+    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{ if(!h||h.vivo===false) return; const nace=h.nacioEn&&gl(h.nacioEn)?h.nacioEn:null;
+      if(nace&&!h.nac226){ const rr=REG[nace]; const por=dazJus(nace,h.nacido||A()); h.nac226=por?rr.nac:'colombiana'; if(por) log('<b>'+E(primer(h.nombre))+'</b> nació en '+E(nace)+' y tiene nacionalidad '+E(rr.nac)+': un segundo pasaporte que le puede servir toda la vida.','hito'); }
+      if((h.edad||0)<18&&ext()){ h.arraigo226=cl((h.arraigo226||0)+3,0,100); } });
+    // eventos (como mucho dos por año, para no ahogar la mesa)
+    let n=0; const push=ev=>{ if(n>=2) return; n++; cola.push(ev); };
+    if(A()>=1949&&c==='Shanghái'&&A()<=1978&&!x.hechos.cierre){ cola.push(evShanghai()); return; }
+    eventosCiudad().forEach(ev=>{ try{ if(ev.c()&&chance(Math.min(1,ev.p>1?ev.p/100:ev.p))) push(ev); }catch(e){} }); // primero la historia de la ciudad
+    if(x.est===0&&x.anios>=1&&!x.hechos.sinpapeles226&&chance(.5)){ x.hechos.sinpapeles226=A(); push(evSinPapeles()); }
+    else if(x.hechos.sinpapeles226&&x.est===0&&A()-x.hechos.sinpapeles226>=4){ delete x.hechos.sinpapeles226; }
+    if(x.dom==='co'&&A()>=1950&&x.anios>=1&&chance(convenio(c)?.03:.08)) push(evDoble());
+    if(x.dom==='local'&&A()>=2007&&r.terr&&chance(.08)) push(evBajaImp());
+    if(x.nost>=75&&chance(.3)) push(evNostalgia());
+    if(chance(.18)&&evOro().c()) push(evOro());
+    if(evColegio().c()&&chance(.5)) push(evColegio());
+  }
+
+  /* ---------- el panel ---------- */
+  const barra=n=>'<span style="display:inline-block;width:90px;height:8px;border-radius:4px;background:rgba(127,127,127,.25);vertical-align:middle"><span style="display:block;height:8px;border-radius:4px;width:'+Math.round(cl(n,0,100)*0.9)+'px;background:'+(n>=70?'#D06A60':n>=45?'#D6A64F':'#4FA36B')+'"></span></span> '+Math.round(n);
+  function escenaVida(){ const x=X(); if(!x){ escena({rubro:'Exterior',titulo:'Tu vida en el exterior',ancho:true,cerrable:true,cuerpo:'Hoy vives en Colombia. Cuando te mudes a una ciudad del exterior, aquí vas a llevar tus papeles, tus impuestos y cómo se siente estar lejos.',opciones:[{t:'Cerrar',cat:'casa',run:()=>{}}]}); return; }
+    const c=x.ciudad, r=REG[c], a=A(), o=oroDe(c,a), cg=cargoAnual(c);
+    const hijos=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<26&&(h.nac226||h.arraigo226));
+    const tabla='<table class="libro">'
+      +'<tr><td>Ciudad</td><td>'+E(c)+', '+E(r.pais)+' · '+x.anios+' año'+(x.anios===1?'':'s')+'</td></tr>'
+      +'<tr><td>Estatus</td><td>'+E(ESTATUS[x.est])+(x.est===1&&x.hasta?' · vence en '+x.hasta:'')+(x.dorada?' · por inversión':'')+(x.sinNacionalidadCo?' · sin nacionalidad colombiana':'')+(x.veto&&a<x.veto?' · puerta cerrada hasta '+x.veto:'')+'</td></tr>'
+      +'<tr><td>Domicilio fiscal</td><td>'+(x.dom==='local'?E(r.pais)+' · pagas cerca de '+fm(cg)+' al año':'Colombia'+(convenio(c)?' · hay convenio para no pagar dos veces':' · sin convenio: riesgo de pagar dos veces'))+'</td></tr>'
+      +'<tr><td>Nostalgia</td><td>'+barra(x.nost)+'</td></tr>'
+      +'<tr><td>Colonia colombiana</td><td>'+barra(x.colonia)+'</td></tr>'
+      +(hijos.length?'<tr><td>Tus hijos</td><td>'+hijos.map(h=>E(primer(h.nombre))+(h.nac226&&h.nac226!=='colombiana'?' ('+E(h.nac226)+')':'')).join(', ')+'</td></tr>':'')+'</table>';
+    const sinM=S.mov<1?'Sin movidas':null, mov=()=>{ S.mov=Math.max(0,S.mov-1); }, ops=[];
+    const lanzar=(tipo)=>{ mov(); const rr=tramitar(tipo); escenaVida(); return rr; };
+    if(x.est===0) ops.push({t:'Tramitar la visa ('+fm(costoTramite(c,.35))+')',cat:'casa',cerrar:false,d:'Acceso estimado: '+Math.round(probTramite(c,acceso(c,a))*100)+'%. Si te la niegan, hay que esperar dos años.',dis:sinM||(x.veto&&a<x.veto?'Puerta cerrada hasta '+x.veto:null),run:()=>lanzar('visa')});
+    if(o&&x.est<2) ops.push({t:'Residencia por inversión: '+o.n+' ('+fm(o.min)+')',cat:'casa',cerrar:false,d:'Compras un apartamento y entras como residente.',dis:sinM||(S.efectivo<o.min?'Necesitas '+fm(o.min):null),run:()=>lanzar('dorada')});
+    if(x.est===1) ops.push({t:'Pedir la residencia permanente ('+fm(costoTramite(c,.5))+')',cat:'casa',cerrar:false,d:'Con la visa vigente, el siguiente paso.',dis:sinM,run:()=>lanzar('residente')});
+    if(x.est===2&&r.ciud) ops.push({t:'Pedir la ciudadanía '+E(r.nac)+' ('+fm(costoTramite(c,.8))+')',cat:'casa',cerrar:false,d:(a<1991?'Ojo: todavía no hay doble nacionalidad; perderías la colombiana. ':'Desde 1991 puedes tener las dos. ')+'Piden '+r.ciud+' años de residencia.',dis:sinM||(x.anios<r.ciud?'Piden '+r.ciud+' años en el país':null),run:()=>lanzar('ciudadano')});
+    if(x.dom==='co') ops.push({t:'Cambiar el domicilio fiscal a '+E(r.pais),cat:'casa',cerrar:false,d:'Pagas el régimen local ('+Math.round(r.tasa*100)+'% sobre la renta'+(r.terr?', solo lo que ganas allá':'')+'); la DIAN deja de cobrarte por lo de afuera.',dis:(x.est<1||x.anios<2)?'Necesitas visa y dos años allá':sinM,run:()=>{ mov(); cambiarDomicilio('local'); escenaVida(); }});
+    else ops.push({t:'Volver el domicilio fiscal a Colombia',cat:'casa',cerrar:false,d:'Dejas de pagar el régimen local.',dis:sinM,run:()=>{ mov(); cambiarDomicilio('co'); escenaVida(); }});
+    ops.push({t:'Frecuentar la colonia colombiana ('+fm(Math.max(2,pat()*.0008))+')',cat:'casa',cerrar:false,d:'Almuerzos, partidos y novenas. Baja la nostalgia.',dis:sinM,run:()=>{ mov(); tom(Math.max(2,pat()*.0008)); x.colonia=cl(x.colonia+10,0,100); x.nost=cl(x.nost-8,0,100); S.p.redes=cl((S.p.redes||0)+1,0,100); log('Pasaste la tarde con la gente de la colonia en '+E(c)+'.'); escenaVida(); }});
+    ops.push({t:'Volver a vivir en Colombia',cat:'casa',cerrar:false,d:'Abre el menú de ciudades del país.',run:()=>{ try{ cerrarModal(); }catch(e){} escenaCiudad(); }});
+    escena({rubro:'Exterior',titulo:'Tu vida en '+E(c),ancho:true,cerrable:true,cuerpo:'Vivir afuera es otra vida: papeles, impuestos y la distancia con tu gente. '+E((gl(c)&&gl(c).d)||''),html:tabla,opciones:ops}); }
+
+  /* ---------- barrios según la época ---------- */
+  const ZE={
+    'Ciudad de Panamá':[[[1903,'Santa Ana'],[1925,'Bella Vista']],[[1903,'Casco Viejo'],[1950,'San Francisco']],[[1903,'El Cangrejo'],[1965,'Punta Paitilla']],[[1903,'Cerro Ancón'],[1914,'Balboa'],[2000,'Punta Pacífica']]],
+    'Dubái':[[[1960,'Deira'],[2006,'Business Bay']],[[1960,'Jumeirah']],[[1960,'Bur Dubai'],[2004,'Downtown Dubai']]],
+    'Singapur':[[[1819,'Orchard']],[[1819,'River Valley']],[[1819,'Tanglin'],[2005,'Marina Bay']]],
+    'Shanghái':[[[1843,'Jing’an']],[[1843,'El Bund'],[1992,'Pudong']],[[1843,'French Concession']]]
+  };
+  const nombreZona=(c,i,a)=>{ const z=ZE[c]&&ZE[c][i]; if(!z) return null; let n=z[0][1]; z.forEach(([d,nm])=>{ if(a>=d) n=nm; }); return n; };
+  function wrapZonas(){ const old=window.zonasVivienda; if(typeof old!=='function'||old.__v226) return; const f=function(c){ const L=old.apply(this,arguments); try{ if(ZE[c]&&Array.isArray(L)){ const a=A(); return L.map((z,i)=>{ const n=nombreZona(c,i,a); return n?Object.assign({},z,{n}):z; }); } }catch(e){} return L; };
+    f.__v226=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.zonasVivienda=f; }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA226_PASO) return; window.__SA226_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='Tu vida en el exterior';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA226_ACC) return; window.__SA226_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&viviendo()&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'casa',d:'Vives en '+ext()+': tus papeles, tus impuestos, la nostalgia y la colonia colombiana.',mov:0,modal:true,run:()=>escenaVida()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v226=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA226_CAT) return; window.__SA226_CAT=true; window.catDe=function(t){ if(t===TIT) return 'casa'; return old.apply(this,arguments); }; }
+  function init226(){ wrapZonas(); wrapPaso(); wrapAcciones(); wrapCat();
+    Object.assign(window,{ciudadAbierta226:abierta,REGIMEN_226:REG,estatusExterior226:X,tramitarExterior226:tramitar,domicilioFiscalExterior226:cambiarDomicilio,volverDelExterior226:volver,anualExterior226:anual,escenaVidaExterior226:escenaVida,
+      toleranciaDivorcio226:tolerancia,nombreZona226:nombreZona,convenioFiscal226:convenio,visaOro226:oroDe,cargoExterior226:cargoAnual,accesoExterior226:acceso,probTramite226:probTramite,
+      eventosExterior226:{ciudad:eventosCiudad,sinPapeles:evSinPapeles,doble:evDoble,bajaImposicion:evBajaImp,oro:evOro,nostalgia:evNostalgia,colegio:evColegio,historia:()=>HIST.slice()}}); }
+  init226(); setTimeout(init226,40); setTimeout(init226,220); setTimeout(init226,650); setTimeout(init226,950); setTimeout(init226,1500);
+  window.__SA226={version:V226};
 })();
 </script>
 
