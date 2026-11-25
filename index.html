@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v225</div>
+<div class="version-badge" id="versionBadge">v229</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -4570,7 +4570,8 @@ function escenaAmantes(){
   const cuerpo=(q?'Tu vida sentimental tiene una relación formal y también puede tener relaciones fuera de ella. ':'')+
     'Una relación paralela puede elevar el ánimo, pero introduce riesgo de conflicto, reputación y descendencia natural fuera de la pareja.';
   const opciones=[];
-  if(S.p.edad>=18) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',d:'Una relación adulta, privada y sin promesa de matrimonio. Puede mejorar tu ánimo.',run:()=>{
+  if(S.p.edad>=18) opciones.push({t:'Conocer a alguien discretamente',cat:'familia',cerrar:false,d:'Una relación adulta, privada y sin promesa de matrimonio. Se conquista: eliges dónde buscarla y a quién cortejar.',run:()=>{
+    if(window.conocerAmante229&&window.conocerAmante229()) return;   // v229: ahora se conquista
     const a=nuevoAmante(); S.familia.amantes.push(a); S.p.felicidad=clamp(S.p.felicidad+ri(7,13),0,100); S.p.escandalos=clamp((S.p.escandalos||0)+(q?0.4:.1),0,20); S.mov--; log('Conociste discretamente a <b>'+esc(a.nombre)+'</b>. Tu ánimo mejoró, pero ahora hay algo más que cuidar.','bien'); cerrarModal(); render();
   }});
   activos.slice(0,4).forEach(a=>opciones.push({t:'Ver a '+a.nombre.split(' ')[0],cat:'familia',d:'Sube el ánimo, pero una relación paralela tiene riesgo.',run:()=>{
@@ -6484,7 +6485,7 @@ function escenaResidenciaInternacional(){
       ],cerrable:true});
     return;
   }
-  const destinos=CIUDADES_GLOBALES.filter(x=>x.n!==S.hogar.ciudad);
+  const destinos=CIUDADES_GLOBALES.filter(x=>x.n!==S.hogar.ciudad&&(!window.ciudadAbierta226||window.ciudadAbierta226(x.n)));
   escena({rubro:'Vida internacional',titulo:'Abrir una segunda base',ancho:true,
     cuerpo:'Puedes mantener tu hogar principal donde estás y abrir una residencia internacional en otra plaza. Sirve para estancias largas, redes y negocios; no te muda automáticamente.',
     opciones:destinos.map(x=>{const costo=Math.max(120,x.traslado*1.8); return {t:x.n+' · '+x.pais,cat:'casa',d:x.d+' Instalación inicial: '+fmt(costo)+'.',dis:S.efectivo<costo?'No te alcanza':null,run:()=>{S.efectivo-=costo;S.residenciaInternacional={ciudad:x.n,desde:S.anio,hasta:S.anio+5,redes:1,segundaBase:true,pagoAnio:0};moverPrestigio(5,'abrió una segunda base internacional');log('Abriste una residencia de larga duración en <b>'+esc(x.n)+'</b> sin dejar tu hogar principal.','hito');hito('Abrió segunda base en '+x.n);S.mov--;}}}),cerrable:true});
@@ -9697,7 +9698,7 @@ function escenaMudanzaGlobal(g){
 
 function escenaCiudad(){
   const nacionales=Object.keys(ZONAS).filter(c=>c!==S.hogar.ciudad&&!esCiudadGlobal(c)&&ciudadVigente(c));
-  const globales=CIUDADES_GLOBALES.filter(g=>g.n!==S.hogar.ciudad);
+  const globales=CIUDADES_GLOBALES.filter(g=>g.n!==S.hogar.ciudad&&(!window.ciudadAbierta226||window.ciudadAbierta226(g.n)));
   escena({rubro:'Mudanza',titulo:'Irte a otra ciudad',ancho:true,
     cuerpo:'Mudarte dentro del país es relativamente barato. Irte al exterior implica traslado, instalación y depósito, y después un costo de vida acorde con la ciudad que elegiste. Puedes vivir fuera del país aunque todavía vivas con tu familia: al elegir una ciudad extranjera, el juego te instala por tu cuenta.',
     opciones:nacionales.map(c=>({t:c,cat:'casa',d:'Costo de vida '+(multCiudad(c)>1?'alto':multCiudad(c)>.82?'medio':'bajo')+'. '+(CIUDADES.find(x=>x.n===c)?CIUDADES.find(x=>x.n===c).d:''),run:()=>{const viv=viviendaPropia();if(viv){const neto=venderBien(viv,.05);log('Vendiste la casa de '+esc(S.hogar.ciudad)+' por '+fmt(neto)+' netos.');}S.hogar.ciudad=c;S.hogar.zona=1;S.hogar.conLosPadres=false;S.hogar.vivienda=null;S.p.ciudad=c;S.p.redes=clamp(S.p.redes*.62,0,100);S.efectivo-=Math.min(S.efectivo,arriendoActual()*.8);log('Te mudaste a <b>'+esc(c)+'</b>. Toca rehacer los contactos.','hito');hito('Se mudó a '+c);S.mov--;}})).concat(globales.map(g=>({t:g.n+' · '+g.pais,cat:'casa',d:g.d+' Costo de vida relativo '+g.costo.toFixed(2)+'x. Seleccionas la zona y confirmas el costo completo antes de mudarte.',run:()=>{cerrarModal();escenaMudanzaGlobal(g);}}))),cerrable:true});
@@ -24736,7 +24737,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
     const cony=pa&&pa.casados&&pa.vivo!==false&&!pa.divorcioEnCurso?pa:null;
     const gan=cony&&!pa.separacionBienes?.5:0;
     if(cony) out.lineas.push(gan?'Por la sociedad conyugal, la mitad de lo que hay (gananciales) es de '+esc(primer(cony.nombre))+' y no entra a la herencia.':esc(primer(cony.nombre))+' firmó capitulaciones: no recibe gananciales.');
-    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0&&!x.desheredado129);   // v129: el desheredado no hereda
+    const vivos=(S.familia.hijos||[]).filter(x=>x.vivo!==false&&!x.muerto&&(x.edad||0)>=0&&!x.desheredado129&&!(window.sinDerechoHerencia227&&window.sinDerechoHerencia227(x)));   // v129: el desheredado no hereda · v227: el hijo sin reconocer, tampoco
     const estirpes=vivos.map(x=>({miembros:[{key:'h:'+x.nombre,nombre:x.nombre+' '+apellidoCompletoDeHijo(x),rel:x.sexo==='m'?'hija':'hijo',sexo:x.sexo}]}));
     let extras=[]; try{ extras=(typeof window.herederosExtra108==='function'?window.herederosExtra108():[]).filter(x=>x._huerfano108); }catch(e){}
     const porPadre={}; extras.forEach(g=>{ const k=g._padre108||'?'; (porPadre[k]=porPadre[k]||[]).push(g); });
@@ -24752,6 +24753,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:'){
       else if(T&&T.tipo==='parejo'){ out.base='testamento'; out.lineas.push('Testamento: por partes iguales entre los hijos.'); }
       else out.lineas.push('Sin testamento, manda la ley: los hijos heredan por partes iguales'+(Object.keys(porPadre).length?', y los hijos de un hijo fallecido reciben la parte de su papá o mamá':'')+'.');
       estirpes.forEach((e,i)=>e.miembros.forEach(m=>out.her.push(Object.assign({},m,{pct:partes[i]*masa/e.miembros.length}))));
+      try{ if(window.ajustarPartes227) window.ajustarPartes227(out); }catch(x){}   // v227: el hijo reconocido fuera del matrimonio hereda según la época
     } else {
       const masa=1-gan;
       const padres=(S.parientes||[]).filter(p=>p.vivo&&/^(padre|madre)$/.test(p.rel));
@@ -39438,6 +39440,688 @@ install();setTimeout(install,1200);
   function init225(){ Object.assign(window,{SLUG_EXTERIOR_225:SLUG,FOTOS_EXTERIOR_225:HECHAS,archivosExterior225:archivos,fotosPendientes225:pendientes,fotoExterior225:foto}); }
   init225(); setTimeout(init225,40); setTimeout(init225,220); setTimeout(init225,650); setTimeout(init225,950); setTimeout(init225,1500);
   window.__SA225={version:V225};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v226 · VIVIR EN EL EXTERIOR
+   Mudarse a una de las doce ciudades del exterior era solo cambiar de
+   dirección. Ahora es una vida con papeles, impuestos, nostalgia y época.
+   - Cada ciudad se abre en su época (Dubái, 1975; Singapur, 1970; Miami,
+     1950...) y Shanghái se cierra a los extranjeros entre 1949 y 1978. Si
+     vivías allá cuando cierra, te sacan.
+   - Estatus migratorio en cuatro peldaños: sin papeles, visa temporal,
+     residente y ciudadano. Cada país tiene su dificultad por época y, más
+     tarde, su «visa dorada»: se compra un apartamento allá y se entra
+     como residente (EB-5, Tier 1, visa de naciones amigas...). Antes de 1991
+     nacionalizarte en otro país te cuesta la nacionalidad colombiana.
+   - Impuestos: mientras tu domicilio fiscal siga en Colombia, el fisco de
+     allá y la DIAN pueden cobrarte los dos (el convenio contra la doble
+     tributación lo evita donde existe). Si lo cambias al exterior pagas
+     el régimen local cada año, y las plazas de baja imposición atraen
+     el ojo de la DIAN.
+   - Nostalgia y colonia: cuanto más lejos el idioma y la costumbre, más
+     pesa estar fuera; la colonia colombiana la aliviana. Al subir mucho, la
+     familia pide volver.
+   - Los hijos que nacen en un país que da nacionalidad por nacimiento (Estados
+     Unidos, Brasil, Panamá, y el Reino Unido hasta 1983) salen con segundo
+     pasaporte; los que crecen afuera echan raíces. Hay que escoger colegio.
+   - Eventos propios de cada ciudad y época: la plata caliente de Miami, el
+     Blitz de Londres, el traspaso de Hong Kong, la inflación de São Paulo, la
+     invasión de Panamá, Fukushima, los papeles de Panamá...
+   - Los barrios de Dubái, Singapur, Shanghái y Ciudad de Panamá cambian de
+     nombre según la época (Costa del Este no existía en 1950).
+   Los convenios contra la doble tributación y las visas de inversión están
+   aproximados para el juego: no son una guía legal.
+   ========================================================================== */
+(function(){
+  const V226='v226';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const gl=n=>{ try{ return ciudadGlobalDe(n); }catch(e){ return null; } };
+  const primer=n=>String(n||'').split(' ')[0];
+
+  /* ---------- cuándo se puede vivir allá ---------- */
+  const ABRE={'Londres':1800,'París':1800,'Nueva York':1850,'Hong Kong':1860,'Fráncfort':1870,'Tokio':1900,'Shanghái':1900,'Ciudad de Panamá':1903,'São Paulo':1920,'Miami':1950,'Singapur':1970,'Dubái':1975};
+  const CERRADA={'Shanghái':[1949,1978]};
+  function abierta(c,a){ a=a==null?A():a; const d=ABRE[c]; if(d!=null&&a<d) return false; const w=CERRADA[c]; if(w&&a>=w[0]&&a<=w[1]) return false; return true; }
+
+  /* ---------- el régimen de cada país ----------
+     acc: facilidad para entrar [antes de 1945, 1945-1989, desde 1990]
+     oro: la visa de inversión {d desde, h hasta, n nombre, min en apartamento}
+     ciud: años para pedir la ciudadanía (0 = no hay)
+     terr: tributa solo lo que se gana allá · tasa: carga anual sobre la renta
+     idioma: lo lejos que queda de nuestra costumbre (0 a 1)
+     conv: año desde el que hay convenio contra la doble tributación (aprox.)
+     jus: da nacionalidad por nacimiento (1, o hasta el año dado) */
+  const REG={
+    'Miami':{pais:'Estados Unidos',nac:'estadounidense',acc:[.7,.3,.5],oro:{d:1990,n:'la visa EB-5 de inversionista',min:180},ciud:5,terr:0,tasa:.30,idioma:.35,conv:0,jus:1},
+    'Nueva York':{pais:'Estados Unidos',nac:'estadounidense',acc:[.7,.3,.5],oro:{d:1990,n:'la visa EB-5 de inversionista',min:220},ciud:5,terr:0,tasa:.36,idioma:.4,conv:0,jus:1},
+    'Londres':{pais:'Reino Unido',nac:'británica',acc:[.85,.45,.4],oro:{d:1994,h:2022,n:'la visa de inversionista (Tier 1)',min:260},ciud:5,terr:0,tasa:.28,idioma:.45,conv:2014,jus:1983},
+    'Dubái':{pais:'Emiratos Árabes Unidos',nac:'emiratí',acc:[.4,.5,.75],oro:{d:2002,n:'la residencia por propiedad (desde 2019, la visa dorada)',min:150},ciud:0,terr:1,tasa:0,idioma:.85,conv:2022,jus:0},
+    'Singapur':{pais:'Singapur',nac:'singapurense',acc:[.8,.35,.4],oro:{d:2004,n:'el programa de inversionistas globales',min:300},ciud:6,terr:1,tasa:.15,idioma:.6,conv:0,jus:0},
+    'Hong Kong':{pais:'China (Hong Kong)',nac:'china',acc:[.9,.55,.55],oro:{d:2003,h:2015,n:'el programa de admisión de inversionistas',min:220},ciud:7,terr:1,tasa:.15,idioma:.8,conv:0,jus:0},
+    'Fráncfort':{pais:'Alemania',nac:'alemana',acc:[.65,.3,.4],oro:null,ciud:8,terr:0,tasa:.40,idioma:.6,conv:2016,jus:0},
+    'París':{pais:'Francia',nac:'francesa',acc:[.8,.35,.4],oro:null,ciud:5,terr:0,tasa:.38,idioma:.55,conv:2015,jus:0},
+    'Tokio':{pais:'Japón',nac:'japonesa',acc:[.2,.15,.25],oro:{d:2015,n:'la visa de gerente de negocios',min:100},ciud:5,terr:0,tasa:.33,idioma:.95,conv:2022,jus:0},
+    'Shanghái':{pais:'China',nac:'china',acc:[.75,0,.35],oro:null,ciud:0,terr:0,tasa:.30,idioma:.95,conv:0,jus:0},
+    'São Paulo':{pais:'Brasil',nac:'brasileña',acc:[.85,.6,.55],oro:{d:2012,n:'la visa de inversionista',min:120},ciud:4,terr:0,tasa:.27,idioma:.4,conv:0,jus:1},
+    'Ciudad de Panamá':{pais:'Panamá',nac:'panameña',acc:[.95,.8,.85],oro:{d:2012,n:'la visa de naciones amigas',min:80},ciud:5,terr:1,tasa:.12,idioma:.1,conv:0,jus:1}
+  };
+  const ESTATUS=['sin papeles','visa temporal','residente permanente','ciudadano'];
+  const era=a=>a<1945?0:a<1990?1:2;
+  const acceso=(c,a)=>{ const r=REG[c]; return r?r.acc[era(a)]:.5; };
+  const oroDe=(c,a)=>{ const r=REG[c], o=r&&r.oro; if(!o) return null; a=a==null?A():a; if(a<o.d||(o.h&&a>o.h)) return null; return o; };
+  const convenio=(c,a)=>{ const r=REG[c]; return !!(r&&r.conv&&(a==null?A():a)>=r.conv); };
+  const dazJus=(c,a)=>{ const r=REG[c]; if(!r||!r.jus) return false; return r.jus===1||(a==null?A():a)<r.jus; };
+  const tolerancia=(c,a)=>{ a=a==null?A():a; const t={'Miami':.8,'Nueva York':.85,'Londres':.85,'París':.9,'Fráncfort':.8,'São Paulo':.6,'Ciudad de Panamá':.55,'Tokio':.55,'Singapur':.5,'Hong Kong':.5,'Shanghái':.35,'Dubái':.2}[c]; if(t==null) return null; return a<1960?t*.5:a<1990?t*.8:t; };
+
+  /* ---------- el estado ---------- */
+  function ext(){ const c=S&&S.hogar&&S.hogar.ciudad; return (c&&gl(c))?c:null; }
+  function X(){ const c=ext(); if(!c) return null; let x=S.ext226;
+    if(!x||x.ciudad!==c){ const hist=(x&&x.hist)||[]; if(x&&x.ciudad) hist.push({c:x.ciudad,d:x.desde,h:A()});
+      x=S.ext226={ciudad:c,desde:A(),est:0,hasta:null,nost:12,colonia:0,dom:'co',anios:0,hechos:{},veto:0,hist}; }
+    if(!x.hechos) x.hechos={}; x.anios=Math.max(0,A()-x.desde); return x; }
+  const viviendo=()=>ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&!!ext();
+  const cargoAnual=c=>{ const r=REG[c]; if(!r) return 0; return Math.round(r.tasa*pat()*.03*(r.terr?.4:1)); };
+  const origen=()=>{ const n=S.p&&S.p.nacioEn; if(n&&!gl(n)&&(typeof ZONAS!=='undefined'?ZONAS[n]:true)) return n; return 'Bogotá'; };
+
+  /* ---------- volver a Colombia (a la fuerza o por gusto) ---------- */
+  function volver(motivo){ const c=ext(); if(!c) return false; const dest=origen();
+    try{ const viv=viviendaPropia(); if(viv){ const neto=(window.alMudarse109&&window.alMudarse109(viv))?null:venderBien(viv,.15); if(neto!==null) log('Vendiste a toda prisa la vivienda en '+E(c)+' por '+fm(neto)+' netos.'); } }catch(e){}
+    S.hogar.ciudad=dest; S.hogar.zona=0; S.hogar.conLosPadres=false; S.hogar.vivienda=null; S.p.ciudad=dest;
+    S.p.redes=cl((S.p.redes||0)*.7,0,100);
+    const x=S.ext226; if(x){ x.hist=x.hist||[]; x.hist.push({c:c,d:x.desde,h:A(),volvio:true}); S.ext226=null; }
+    log('Volviste a <b>'+E(dest)+'</b>'+(motivo?': '+motivo:'')+'.','hito'); try{ hito('Volvió de '+c+' a '+dest); }catch(e){} return true; }
+
+  /* ---------- trámites ---------- */
+  const costoTramite=(c,k)=>Math.max(8,Math.round((gl(c)?gl(c).traslado:150)*k));
+  function probTramite(c,base){ let p=base+((S.p.reputacion||50)-50)/300-((S.caliente220&&S.caliente220.expo)||0)/220-((S.p.escandalos||0))*.015;
+    if(S.caliente220&&S.caliente220.clinton) p-=.3; return cl(p,.04,.95); }
+  function tramitar(tipo){ const x=X(), c=x&&x.ciudad, r=REG[c]; if(!x||!r) return {ok:false,txt:''}; const a=A();
+    if(x.veto&&a<x.veto) return {ok:false,txt:'Te cerraron la puerta hasta '+x.veto+'.'};
+    if(tipo==='visa'){ const k=costoTramite(c,.35); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,acceso(c,a)))){ x.est=1; x.hasta=a+3; log('Te dieron la <b>visa</b> de '+E(r.pais)+' por tres años.','bien'); return {ok:true,txt:'Visa concedida.'}; }
+      x.veto=a+2; log('Te negaron la visa de '+E(r.pais)+'. No puedes volver a pedirla hasta '+x.veto+'.','mal'); return {ok:false,txt:'Visa negada.'}; }
+    if(tipo==='dorada'){ const o=oroDe(c,a); if(!o) return {ok:false,txt:'No hay visa de inversión en esta época.'}; if(S.efectivo<o.min) return {ok:false,txt:'Hay que comprar un apartamento de '+fm(o.min)+'.'};
+      let b=null; try{ b=comprarBien({clase:'vivienda',tipo:'apartamento',nombre:'Apartamento de inversionista en '+(zonasVivienda(c)[1]||{n:c}).n,valor:o.min,mant:.012,ciudad:c,zona:1,cuotaInicial:1,anios:15}); }catch(e){ console.error(e); }
+      if(!b) return {ok:false,txt:'No se pudo hacer la compra.'}; x.est=Math.max(x.est,2); x.hasta=null; x.dorada=true; prest(1,'residencia por inversión en '+c);
+      log('Con '+E(o.n)+' compraste un apartamento en '+E(c)+' y entraste como <b>residente</b>.','hito'); return {ok:true,txt:'Residente por inversión.'}; }
+    if(tipo==='residente'){ if(x.est<1) return {ok:false,txt:'Primero la visa.'}; const k=costoTramite(c,.5); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,acceso(c,a)*.9+.1))){ x.est=2; x.hasta=null; log('Te dieron la <b>residencia permanente</b> en '+E(r.pais)+'.','bien'); return {ok:true,txt:'Residencia concedida.'}; }
+      log('Negaron tu residencia en '+E(r.pais)+'. Sigues con la visa.','mal'); return {ok:false,txt:'Residencia negada.'}; }
+    if(tipo==='ciudadano'){ if(x.est<2||!r.ciud) return {ok:false,txt:'No hay ciudadanía para ti.'}; const k=costoTramite(c,.8); if(S.efectivo<k) return {ok:false,txt:'No alcanza el trámite ('+fm(k)+').'}; tom(k);
+      if(chance(probTramite(c,.85))){ x.est=3; x.hasta=null; let extra=''; if(a<1991){ x.sinNacionalidadCo=true; prest(-3,'renunció a la nacionalidad colombiana'); extra=' Como todavía no hay doble nacionalidad, perdiste la colombiana.'; }
+          else { prest(1,'segunda nacionalidad'); }
+          log('Eres <b>ciudadano '+E(r.nac)+'</b>.'+extra,'hito'); return {ok:true,txt:'Ciudadanía concedida.'+extra}; }
+      log('Te negaron la ciudadanía de '+E(r.pais)+'.','mal'); return {ok:false,txt:'Ciudadanía negada.'}; }
+    return {ok:false,txt:''}; }
+  function cambiarDomicilio(a){ const x=X(); if(!x) return false; if(a==='local'){ if(x.est<1||x.anios<2) return false; x.dom='local'; log('Trasladaste tu domicilio fiscal a <b>'+E(REG[x.ciudad].pais)+'</b>: desde ahora pagas allá.','hito'); return true; }
+    x.dom='co'; log('Volviste tu domicilio fiscal a Colombia.','hito'); return true; }
+
+  /* ---------- eventos de plata y de ánimo ---------- */
+  const hecho=(x,k)=>{ x.hechos[k]=A(); };
+  function evSinPapeles(){ const c=ext(), x=X(), k=costoTramite(c,.35)*2, multa=costoTramite(c,.2);
+    return {p:10,c:()=>viviendo()&&X()&&X().est===0,t:()=>'<b>Llevas un año en '+E(c)+' sin papeles en regla.</b> Ya no eres un visitante: la oficina de migración te pide que regularices o te vayas.',
+      o:[{t:'Tramitar la visa ya ('+fm(k)+')',f:()=>{ tom(k); const p=cl(probTramite(c,acceso(c,A()))+.1,.1,.95); if(chance(p)){ x.est=1; x.hasta=A()+3; return 'Regularizaste tu situación: tienes visa por tres años.'; } x.veto=A()+2; return 'La visa fue negada. Te dieron un plazo para irte.'; }},
+         {t:'Seguir como estás y pagar la multa ('+fm(multa)+')',f:()=>{ tom(multa); prest(-1,'una multa de migración'); try{ S.p.estres=cl((S.p.estres||0)+5,0,100); }catch(e){} return 'Pagaste la multa. El problema sigue ahí.'; }},
+         {t:'Volver a Colombia',f:()=>{ volver('se te acabó el permiso'); return 'Cerraste la casa y volviste.'; }}]}; }
+  function evDoble(){ const c=ext(), r=REG[c], cv=convenio(c), p1=Math.round(pat()*.006), p2=Math.round(pat()*.0015);
+    return {p:9,c:()=>viviendo()&&X()&&X().dom==='co',t:()=>'<b>Dos fiscos, la misma renta.</b> La DIAN te cobra porque sigues siendo residente en Colombia, y la oficina de impuestos de '+E(r.pais)+' te cobra por lo que ganas allá.'+(cv?' Hay un convenio para evitar la doble tributación entre los dos países.':' No hay convenio entre los dos países.'),
+      o:[{t:'Pagar en los dos países ('+fm(p1)+')',f:()=>{ tom(p1); return 'Pagaste dos veces. Duele, pero no hay pleito.'; }},
+         {t:'Pedir el crédito por lo pagado afuera ('+fm(p2)+')',f:()=>{ tom(p2); if(chance(cv?.88:.35)){ return cv?'El convenio funcionó: descontaron lo que pagaste allá.':'Te aceptaron el descuento, aunque no hay convenio.'; } tom(p1); return 'Te rechazaron el descuento y terminaste pagando los dos.'; }},
+         {t:'Cambiar tu domicilio fiscal a '+E(r.pais),f:()=>{ if(!cambiarDomicilio('local')) return 'No puedes cambiarlo todavía: necesitas visa y dos años allá.'; return 'Cambiaste el domicilio fiscal: desde ahora pagas el régimen local.'; }}]}; }
+  function evBajaImp(){ const c=ext(), r=REG[c], x=X(), cost=Math.round(pat()*.012);
+    return {p:8,c:()=>viviendo()&&A()>=2007&&X()&&X().dom==='local'&&!!REG[ext()].terr,t:()=>'<b>La DIAN pone la lupa en tu domicilio en '+E(c)+'.</b> Dice que '+E(r.pais)+' es una jurisdicción de baja imposición y que tu familia y tus negocios siguen en Colombia: para ella, sigues siendo residente fiscal.',
+      o:[{t:'Demostrar que vives allá ('+fm(cost)+')',f:()=>{ tom(cost); if(chance(clamp(.45+(x.anios||0)*.04,.3,.8))) return 'Mostraste contratos, colegio y vida afuera: la DIAN archivó el caso.'; x.dom='co'; return 'No te creyeron: sigues como residente en Colombia y pagaste el proceso.'; }},
+         {t:'Volver el domicilio a Colombia',f:()=>{ x.dom='co'; return 'Regularizaste: tu domicilio fiscal vuelve a ser Colombia.'; }}]}; }
+  function evOro(){ const c=ext(), o=oroDe(c,A()), x=X(); if(!o||!x) return {p:0,c:()=>false,t:()=>'',o:[]};
+    return {p:14,c:()=>viviendo()&&X()&&X().est<2&&!X().hechos.oro&&!!oroDe(ext(),A())&&pat()>oroDe(ext(),A()).min*6,t:()=>'<b>Un abogado te habla de '+E(o.n)+'.</b> Compras un apartamento de '+fm(o.min)+' en '+E(c)+' y entras como residente, sin esperar años de visas.',
+      o:[{t:'Comprar el apartamento y entrar ('+fm(o.min)+')',f:()=>{ hecho(x,'oro'); const r=tramitar('dorada'); return r.txt; }},{t:'Dejarlo pasar',f:()=>{ hecho(x,'oro'); return 'Dijiste que lo ibas a pensar.'; }}]}; }
+  function evNostalgia(){ const c=ext(), x=X(); const kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<18).length;
+    return {p:10,c:()=>viviendo()&&X()&&X().nost>=75,t:()=>'<b>La casa de Colombia pesa más cada año.</b> '+(S.familia&&S.familia.pareja?E(primer(S.familia.pareja.nombre))+' habla de las Navidades lejos'+(kids?' y de que los niños ya piensan en otro idioma':'')+'.':'Cada diciembre se te hace más largo en '+E(c)+'.'),
+      o:[{t:'Volver a Colombia',f:()=>{ volver('la nostalgia ganó'); return 'Volviste.'; }},
+         {t:'Viajar más a menudo ('+fm(pat()*.004)+')',f:()=>{ tom(pat()*.004); x.nost=cl(x.nost-25,0,100); S.p.felicidad=cl(S.p.felicidad+3,0,100); return 'Armaron un calendario de viajes: dos veces al año, al menos.'; }},
+         {t:'Quedarse y apretar los dientes',f:()=>{ S.p.felicidad=cl(S.p.felicidad-4,0,100); x.nost=cl(x.nost-8,0,100); return 'Se quedaron. Cuesta más de lo que dijeron.'; }}]}; }
+  function evColegio(){ const c=ext(), x=X(), r=REG[c], kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18);
+    const k1=Math.round(Math.max(8,pat()*.004)), k2=Math.round(Math.max(3,pat()*.0012));
+    return {p:11,c:()=>viviendo()&&X()&&!X().hechos.colegio&&((S.familia&&S.familia.hijos)||[]).some(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18),t:()=>'<b>¿En qué colegio estudian los niños en '+E(c)+'?</b> En la colonia dicen que el internacional los prepara para cualquier lugar del mundo; el colegio local los integra, pero cambia su idioma de la casa.',
+      o:[{t:'Colegio internacional ('+fm(k1)+')',f:()=>{ hecho(x,'colegio'); tom(k1); kids.forEach(h=>{ h.formacion=cl((h.formacion||0)+8,0,100); h.arraigo226=cl((h.arraigo226||0)+4,0,100); }); return 'Los niños salieron de ahí hablando dos idiomas y con amigos de todo el mundo.'; }},
+         {t:'Colegio local ('+fm(k2)+')',f:()=>{ hecho(x,'colegio'); tom(k2); kids.forEach(h=>{ h.arraigo226=cl((h.arraigo226||0)+12,0,100); }); x.nost=cl(x.nost-6,0,100); return 'Los niños se integraron rápido: más raíces allá y más distancia de Colombia.'; }},
+         {t:'Colegio de la colonia colombiana ('+fm(k2)+')',f:()=>{ hecho(x,'colegio'); tom(k2); x.colonia=cl(x.colonia+8,0,100); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+3,0,100); }); return 'Mantienen el español, las costumbres y a los primos en las fiestas.'; }}]}; }
+
+  /* ---------- historia de cada ciudad ---------- */
+  function perder(x){ return tom(x); }
+  function evInv(r){ const x=Math.round(Math.max(10,pat()*r.f)); return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Invertir allá ('+fm(x)+')',f:()=>{ hecho(X(),r.id); if(S.efectivo<x) return 'No te alcanzó la caja para entrar.'; tom(x); if(chance(r.ok)){ S.efectivo+=Math.round(x*r.gan); return r.si+' Ganaste '+fm(x*(r.gan-1))+'.'; } return r.no+' Perdiste '+fm(x*.6)+'.'; }},
+         {t:'Mirar de lejos',f:()=>{ hecho(X(),r.id); return 'Lo viste pasar. Otros se quedaron con el negocio.'; }}]}; }
+  function evCrisis(r){ const x=Math.round(Math.max(8,pat()*r.sev)); return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Aguantar y esperar',f:()=>{ hecho(X(),r.id); const u=perder(x*.6); S.p.felicidad=cl(S.p.felicidad-3,0,100); return 'Esperaste la tormenta. Costó '+fm(u)+'.'; }},
+         {t:'Vender y salir del mercado',f:()=>{ hecho(X(),r.id); const u=perder(x*.3); try{ S.p.estres=cl((S.p.estres||0)-3,0,100); }catch(e){} return 'Vendiste lo que tenías allá a precio de salida: '+fm(u)+' menos.'; }},
+         {t:'Aprovechar y comprar barato ('+fm(x*.6)+')',f:()=>{ hecho(X(),r.id); if(S.efectivo<x*.6) return 'No tenías caja para aprovechar.'; tom(x*.6); if(chance(.6)){ S.efectivo+=Math.round(x*1.7); return 'Compraste cuando todos vendían y, con los años, salió bien: ganaste '+fm(x*1.1)+'.'; } return 'La crisis duró más de lo que pensabas: perdiste '+fm(x*.6)+'.'; }}]}; }
+  function evMiedo(r){ return {p:r.p,c:()=>viviendo()&&ext()===r.ciudad&&A()>=r.d[0]&&A()<=r.d[1]&&!X().hechos[r.id],t:()=>'<b>'+r.titulo+'</b> '+r.txt,
+      o:[{t:'Quedarte, a la altura de la gente de allá',f:()=>{ hecho(X(),r.id); prest(1,'se quedó en '+r.ciudad+' en un momento difícil'); S.p.felicidad=cl(S.p.felicidad-3,0,100); X().nost=cl(X().nost+6,0,100); return 'Te quedaste. En la colonia te lo agradecen y en la casa se nota la tensión.'; }},
+         {t:'Mandar a la familia a Colombia',f:()=>{ hecho(X(),r.id); const u=perder(Math.round(pat()*.004)); (S.familia.hijos||[]).forEach(h=>{ h.vinculo=cl((h.vinculo||60)+2,0,100); }); return 'La familia viajó a Colombia y tú te quedaste solo unos meses. Costó '+fm(u)+'.'; }},
+         {t:'Volver a Colombia',f:()=>{ hecho(X(),r.id); volver(r.motivo||'las cosas se pusieron difíciles'); return 'Volviste.'; }}]}; }
+  const HIST=[
+    {id:'miami_cuba',tipo:'inv',ciudad:'Miami',d:[1959,1975],p:.22,f:.03,ok:.65,gan:2.2,titulo:'Llegan los exiliados cubanos a Miami.',txt:'Ya no es un balneario: es una ciudad con una cola de gente que lo perdió todo y compra casas, bancos y comercio.',si:'Entraste con el barrio nuevo.',no:'El mercado se enfrió antes de tiempo.'},
+    {id:'ny_11s',tipo:'miedo',ciudad:'Nueva York',d:[2001,2001],p:1,titulo:'El 11 de septiembre cambia a Nueva York.',txt:'El humo se ve desde la ventana, los mercados cierran y la ciudad queda en silencio. Para un extranjero, el miedo viene con preguntas en cada aeropuerto.',motivo:'después del 11 de septiembre'},
+    {id:'lon_blitz',tipo:'miedo',ciudad:'Londres',d:[1940,1941],p:.9,titulo:'Los bombardeos alemanes llegan a Londres.',txt:'Cada noche suenan las sirenas y la gente baja a los refugios del metro. En la embajada te aconsejan salir; en el club te piden resistir.',motivo:'escapando de los bombardeos'},
+    {id:'hk_1997',tipo:'miedo',ciudad:'Hong Kong',d:[1997,1997],p:1,titulo:'Hong Kong pasa de Gran Bretaña a China.',txt:'La bandera cambia a medianoche. Los bancos dicen que nada cambia; los taxistas, que sí. La gente de dinero tiene el pasaporte de otro país en el cajón.',motivo:'por el traspaso a China'},
+    {id:'hk_2019',tipo:'miedo',ciudad:'Hong Kong',d:[2019,2020],p:.8,titulo:'Las protestas y la ley de seguridad sacuden Hong Kong.',txt:'Marchas, gases en la calle, cierres de oficinas y una ley nueva que nadie termina de entender. Los clientes empiezan a mover el dinero a Singapur.',motivo:'por la ley de seguridad'},
+    {id:'pa_1989',tipo:'miedo',ciudad:'Ciudad de Panamá',d:[1989,1990],p:1,titulo:'Estados Unidos invade Panamá para sacar a Noriega.',txt:'Helicópteros, toque de queda, saqueos en el centro y los bancos cerrados. Las llamadas a Colombia no entran.',motivo:'tras la invasión'},
+    {id:'sh_pudong',tipo:'inv',ciudad:'Shanghái',d:[1992,2010],p:.2,f:.04,ok:.7,gan:2.6,titulo:'Pudong se levanta de la nada.',txt:'Donde había arrozales hoy hay grúas. Un socio local te ofrece entrar en un edificio de oficinas antes de que lo terminen.',si:'El edificio se llenó antes de abrir.',no:'El socio se quedó con la mejor parte.'},
+    {id:'sp_inflacion',tipo:'crisis',ciudad:'São Paulo',d:[1986,1994],p:.5,sev:.015,titulo:'La inflación de Brasil no deja respirar.',txt:'Los precios cambian cada semana, las listas del supermercado se tachan con marcador y quien tiene reales en el bolsillo los pierde.'},
+    {id:'sp_lavajato',tipo:'crisis',ciudad:'São Paulo',d:[2014,2019],p:.4,sev:.02,titulo:'La Lava Jato llega a las constructoras de São Paulo.',txt:'Tus socios locales aparecen en los periódicos, los contratos se congelan y los bancos piden garantías hasta por los cafés.'},
+    {id:'tk_burbuja',tipo:'crisis',ciudad:'Tokio',d:[1990,1993],p:.7,sev:.025,titulo:'Estalla la burbuja japonesa.',txt:'Los terrenos del centro de Tokio valían más que California; ahora nadie quiere comprar.'},
+    {id:'tk_fukushima',tipo:'miedo',ciudad:'Tokio',d:[2011,2011],p:1,titulo:'El terremoto y Fukushima paralizan Japón.',txt:'El edificio se mueve durante minutos, hay apagones, y en la colonia circulan listas de vuelos a Colombia.',motivo:'después del terremoto'},
+    {id:'du_2009',tipo:'crisis',ciudad:'Dubái',d:[2009,2010],p:.8,sev:.02,titulo:'Dubái pide aplazar su deuda.',txt:'Las grúas se paran, los inquilinos se van y los precios de las torres caen a la mitad.'},
+    {id:'lon_2016',tipo:'crisis',ciudad:'Londres',d:[2016,2019],p:.7,sev:.012,titulo:'El Brexit sacude la libra.',txt:'Los bancos dudan, la libra cae y los dueños de casas en Londres no saben si vender.'},
+    {id:'cris_2008',tipo:'crisis',ciudad:'Nueva York',d:[2008,2009],p:.9,sev:.02,titulo:'Lehman Brothers cae y Wall Street se congela.',txt:'Los créditos desaparecen y todos los conocidos de la colonia financiera tienen la misma cara.'},
+    {id:'mia_andrew',tipo:'crisis',ciudad:'Miami',d:[1992,1992],p:1,sev:.012,titulo:'El huracán Andrew pasa por Miami.',txt:'Techos arrancados, árboles en la calle y semanas sin luz. Las aseguradoras se hacen las de oídos sordos.'}
+  ];
+  function evShanghai(){ return {p:100,c:()=>viviendo()&&ext()==='Shanghái'&&A()>=1949&&A()<=1978&&!X().hechos.cierre,t:()=>'<b>La nueva China cierra la puerta a los extranjeros.</b> Los bancos extranjeros están intervenidos y la policía te da pocos días para salir de Shanghái. Lo que tenías allá queda atrás.',
+      o:[{t:'Salir con lo puesto y volver a Colombia',f:()=>{ hecho(X(),'cierre'); const u=perder(Math.round(pat()*.03)); volver('te sacaron de Shanghái'); return 'Saliste en el último barco. Lo que dejaste vale '+fm(u)+' menos para ti.'; }}]}; }
+  function evPanamaPapers(){ const tiene=!!(S.fideicomiso||(S.offshore217&&((S.offshore217.estructuras||S.offshore217.lista||[]).length||Object.keys(S.offshore217).length>0))); const c1=Math.round(pat()*.01);
+    return {p:100,c:()=>viviendo()&&ext()==='Ciudad de Panamá'&&A()===2016&&!X().hechos.papers,t:()=>'<b>Salen los «papeles de Panamá».</b> Un bufete de la ciudad filtró millones de documentos y los periodistas buscan nombres de toda América Latina.'+(tiene?' Tu nombre puede estar entre ellos: tienes estructuras en el exterior.':' Aunque no estés en los papeles, vivir aquí te pone bajo sospecha.'),
+      o:[{t:'Salir a dar la cara ('+fm(c1)+')',f:()=>{ hecho(X(),'papers'); tom(c1); if(tiene){ prest(-3,'los papeles de Panamá'); return 'Explicaste que todo era legal, pero el titular ya había salido.'; } prest(1,'dio la cara por los papeles de Panamá'); return 'Dijiste lo que había que decir, y te creyeron.'; }},
+         {t:'No decir nada',f:()=>{ hecho(X(),'papers'); if(tiene&&chance(.5)){ prest(-5,'los papeles de Panamá'); return 'Tu silencio se interpretó como culpa: la prensa te puso en la lista.'; } return 'La tormenta pasó sin mencionarte.'; }}]}; }
+  function evMiamiCaliente(){ return {p:60,c:()=>viviendo()&&ext()==='Miami'&&A()>=1979&&A()<=1987&&!X().hechos.mia80,t:()=>'<b>En Miami, hasta los vecinos pagan en efectivo.</b> Es la época de los «cowboys de la cocaína»: bancos que cuentan billetes en bolsas, lanchas nuevas cada mes y socios que no explican de dónde viene su plata.',
+      o:[{t:'Hacerte el de la vista gorda y aceptar un «socio»',f:()=>{ hecho(X(),'mia80'); const c=S.caliente220=S.caliente220||{expo:0,tratos:[],hechos:{},clinton:null}; c.expo=cl((c.expo||0)+12,0,100); S.efectivo+=Math.round(pat()*.02); return 'Entró dinero fácil. También entró algo que después va a cobrar.'; }},
+         {t:'Mantener distancia',f:()=>{ hecho(X(),'mia80'); prest(1,'se negó a negocios sucios en Miami'); return 'Perdiste algunos contactos y ganaste tranquilidad.'; }},
+         {t:'Volver a Colombia',f:()=>{ hecho(X(),'mia80'); volver('Miami se puso muy caliente'); return 'Volviste.'; }}]}; }
+  function eventosCiudad(){ const L=[]; HIST.forEach(r=>{ L.push(r.tipo==='inv'?evInv(r):r.tipo==='crisis'?evCrisis(r):evMiedo(r)); }); L.push(evShanghai(),evPanamaPapers(),evMiamiCaliente()); return L; }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()) return; const c=ext();
+    if(!c){ if(S.ext226&&S.ext226.ciudad){ const x0=S.ext226; x0.hist=x0.hist||[]; x0.hist.push({c:x0.ciudad,d:x0.desde,h:A(),volvio:true}); S.ext226=null; } return; }
+    if((S.p.edad||0)<18) return; const x=X(), r=REG[c], g=gl(c); x.anios=A()-x.desde;
+    // estatus: la visa vence
+    if(x.est===1&&x.hasta!=null&&A()>x.hasta){ const k=costoTramite(c,.15); if(S.efectivo>=k&&chance(probTramite(c,.8))){ tom(k); x.hasta=A()+3; log('Renovaste la visa de '+E(r.pais)+' por tres años más.'); } else { x.est=0; x.hasta=null; log('Se te venció la visa de '+E(r.pais)+' y no pudiste renovarla.','mal'); } }
+    // domicilio fiscal local: se paga el régimen del país
+    if(x.dom==='local'){ const cg=cargoAnual(c); if(cg>0){ tom(cg); if(x.anios%3===0) log('Pagaste '+fm(cg)+' al fisco de '+E(r.pais)+' como residente fiscal.'); } }
+    // nostalgia y colonia
+    const kids=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<18).length;
+    const meta=15+r.idioma*70+(A()<1960?12:A()<1990?5:0)-x.colonia*.3-(S.p.redes||0)*.2-(x.est>=2?5:0)+(kids?3:0); x.nost=cl(x.nost+(meta-x.nost)*.25,0,100); // se acerca poco a poco a lo que pesa vivir ahí
+    if(x.nost>=70) S.p.felicidad=cl(S.p.felicidad-2,0,100);
+    x.colonia=cl(x.colonia-2,0,100);
+    // los hijos
+    ((S.familia&&S.familia.hijos)||[]).forEach(h=>{ if(!h||h.vivo===false) return; const nace=h.nacioEn&&gl(h.nacioEn)?h.nacioEn:null;
+      if(nace&&!h.nac226){ const rr=REG[nace]; const por=dazJus(nace,h.nacido||A()); h.nac226=por?rr.nac:'colombiana'; if(por) log('<b>'+E(primer(h.nombre))+'</b> nació en '+E(nace)+' y tiene nacionalidad '+E(rr.nac)+': un segundo pasaporte que le puede servir toda la vida.','hito'); }
+      if((h.edad||0)<18&&ext()){ h.arraigo226=cl((h.arraigo226||0)+3,0,100); } });
+    // eventos (como mucho dos por año, para no ahogar la mesa)
+    let n=0; const push=ev=>{ if(n>=2) return; n++; cola.push(ev); };
+    if(A()>=1949&&c==='Shanghái'&&A()<=1978&&!x.hechos.cierre){ cola.push(evShanghai()); return; }
+    eventosCiudad().forEach(ev=>{ try{ if(ev.c()&&chance(Math.min(1,ev.p>1?ev.p/100:ev.p))) push(ev); }catch(e){} }); // primero la historia de la ciudad
+    if(x.est===0&&x.anios>=1&&!x.hechos.sinpapeles226&&chance(.5)){ x.hechos.sinpapeles226=A(); push(evSinPapeles()); }
+    else if(x.hechos.sinpapeles226&&x.est===0&&A()-x.hechos.sinpapeles226>=4){ delete x.hechos.sinpapeles226; }
+    if(x.dom==='co'&&A()>=1950&&x.anios>=1&&chance(convenio(c)?.03:.08)) push(evDoble());
+    if(x.dom==='local'&&A()>=2007&&r.terr&&chance(.08)) push(evBajaImp());
+    if(x.nost>=75&&chance(.3)) push(evNostalgia());
+    if(chance(.18)&&evOro().c()) push(evOro());
+    if(evColegio().c()&&chance(.5)) push(evColegio());
+  }
+
+  /* ---------- el panel ---------- */
+  const barra=n=>'<span style="display:inline-block;width:90px;height:8px;border-radius:4px;background:rgba(127,127,127,.25);vertical-align:middle"><span style="display:block;height:8px;border-radius:4px;width:'+Math.round(cl(n,0,100)*0.9)+'px;background:'+(n>=70?'#D06A60':n>=45?'#D6A64F':'#4FA36B')+'"></span></span> '+Math.round(n);
+  function escenaVida(){ const x=X(); if(!x){ escena({rubro:'Exterior',titulo:'Tu vida en el exterior',ancho:true,cerrable:true,cuerpo:'Hoy vives en Colombia. Cuando te mudes a una ciudad del exterior, aquí vas a llevar tus papeles, tus impuestos y cómo se siente estar lejos.',opciones:[{t:'Cerrar',cat:'casa',run:()=>{}}]}); return; }
+    const c=x.ciudad, r=REG[c], a=A(), o=oroDe(c,a), cg=cargoAnual(c);
+    const hijos=((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)<26&&(h.nac226||h.arraigo226));
+    const tabla='<table class="libro">'
+      +'<tr><td>Ciudad</td><td>'+E(c)+', '+E(r.pais)+' · '+x.anios+' año'+(x.anios===1?'':'s')+'</td></tr>'
+      +'<tr><td>Estatus</td><td>'+E(ESTATUS[x.est])+(x.est===1&&x.hasta?' · vence en '+x.hasta:'')+(x.dorada?' · por inversión':'')+(x.sinNacionalidadCo?' · sin nacionalidad colombiana':'')+(x.veto&&a<x.veto?' · puerta cerrada hasta '+x.veto:'')+'</td></tr>'
+      +'<tr><td>Domicilio fiscal</td><td>'+(x.dom==='local'?E(r.pais)+' · pagas cerca de '+fm(cg)+' al año':'Colombia'+(convenio(c)?' · hay convenio para no pagar dos veces':' · sin convenio: riesgo de pagar dos veces'))+'</td></tr>'
+      +'<tr><td>Nostalgia</td><td>'+barra(x.nost)+'</td></tr>'
+      +'<tr><td>Colonia colombiana</td><td>'+barra(x.colonia)+'</td></tr>'
+      +(hijos.length?'<tr><td>Tus hijos</td><td>'+hijos.map(h=>E(primer(h.nombre))+(h.nac226&&h.nac226!=='colombiana'?' ('+E(h.nac226)+')':'')).join(', ')+'</td></tr>':'')+'</table>';
+    const sinM=S.mov<1?'Sin movidas':null, mov=()=>{ S.mov=Math.max(0,S.mov-1); }, ops=[];
+    const lanzar=(tipo)=>{ mov(); const rr=tramitar(tipo); escenaVida(); return rr; };
+    if(x.est===0) ops.push({t:'Tramitar la visa ('+fm(costoTramite(c,.35))+')',cat:'casa',cerrar:false,d:'Acceso estimado: '+Math.round(probTramite(c,acceso(c,a))*100)+'%. Si te la niegan, hay que esperar dos años.',dis:sinM||(x.veto&&a<x.veto?'Puerta cerrada hasta '+x.veto:null),run:()=>lanzar('visa')});
+    if(o&&x.est<2) ops.push({t:'Residencia por inversión: '+o.n+' ('+fm(o.min)+')',cat:'casa',cerrar:false,d:'Compras un apartamento y entras como residente.',dis:sinM||(S.efectivo<o.min?'Necesitas '+fm(o.min):null),run:()=>lanzar('dorada')});
+    if(x.est===1) ops.push({t:'Pedir la residencia permanente ('+fm(costoTramite(c,.5))+')',cat:'casa',cerrar:false,d:'Con la visa vigente, el siguiente paso.',dis:sinM,run:()=>lanzar('residente')});
+    if(x.est===2&&r.ciud) ops.push({t:'Pedir la ciudadanía '+E(r.nac)+' ('+fm(costoTramite(c,.8))+')',cat:'casa',cerrar:false,d:(a<1991?'Ojo: todavía no hay doble nacionalidad; perderías la colombiana. ':'Desde 1991 puedes tener las dos. ')+'Piden '+r.ciud+' años de residencia.',dis:sinM||(x.anios<r.ciud?'Piden '+r.ciud+' años en el país':null),run:()=>lanzar('ciudadano')});
+    if(x.dom==='co') ops.push({t:'Cambiar el domicilio fiscal a '+E(r.pais),cat:'casa',cerrar:false,d:'Pagas el régimen local ('+Math.round(r.tasa*100)+'% sobre la renta'+(r.terr?', solo lo que ganas allá':'')+'); la DIAN deja de cobrarte por lo de afuera.',dis:(x.est<1||x.anios<2)?'Necesitas visa y dos años allá':sinM,run:()=>{ mov(); cambiarDomicilio('local'); escenaVida(); }});
+    else ops.push({t:'Volver el domicilio fiscal a Colombia',cat:'casa',cerrar:false,d:'Dejas de pagar el régimen local.',dis:sinM,run:()=>{ mov(); cambiarDomicilio('co'); escenaVida(); }});
+    ops.push({t:'Frecuentar la colonia colombiana ('+fm(Math.max(2,pat()*.0008))+')',cat:'casa',cerrar:false,d:'Almuerzos, partidos y novenas. Baja la nostalgia.',dis:sinM,run:()=>{ mov(); tom(Math.max(2,pat()*.0008)); x.colonia=cl(x.colonia+10,0,100); x.nost=cl(x.nost-8,0,100); S.p.redes=cl((S.p.redes||0)+1,0,100); log('Pasaste la tarde con la gente de la colonia en '+E(c)+'.'); escenaVida(); }});
+    ops.push({t:'Volver a vivir en Colombia',cat:'casa',cerrar:false,d:'Abre el menú de ciudades del país.',run:()=>{ try{ cerrarModal(); }catch(e){} escenaCiudad(); }});
+    escena({rubro:'Exterior',titulo:'Tu vida en '+E(c),ancho:true,cerrable:true,cuerpo:'Vivir afuera es otra vida: papeles, impuestos y la distancia con tu gente. '+E((gl(c)&&gl(c).d)||''),html:tabla,opciones:ops}); }
+
+  /* ---------- barrios según la época ---------- */
+  const ZE={
+    'Ciudad de Panamá':[[[1903,'Santa Ana'],[1925,'Bella Vista']],[[1903,'Casco Viejo'],[1950,'San Francisco']],[[1903,'El Cangrejo'],[1965,'Punta Paitilla']],[[1903,'Cerro Ancón'],[1914,'Balboa'],[2000,'Punta Pacífica']]],
+    'Dubái':[[[1960,'Deira'],[2006,'Business Bay']],[[1960,'Jumeirah']],[[1960,'Bur Dubai'],[2004,'Downtown Dubai']]],
+    'Singapur':[[[1819,'Orchard']],[[1819,'River Valley']],[[1819,'Tanglin'],[2005,'Marina Bay']]],
+    'Shanghái':[[[1843,'Jing’an']],[[1843,'El Bund'],[1992,'Pudong']],[[1843,'French Concession']]]
+  };
+  const nombreZona=(c,i,a)=>{ const z=ZE[c]&&ZE[c][i]; if(!z) return null; let n=z[0][1]; z.forEach(([d,nm])=>{ if(a>=d) n=nm; }); return n; };
+  function wrapZonas(){ const old=window.zonasVivienda; if(typeof old!=='function'||old.__v226) return; const f=function(c){ const L=old.apply(this,arguments); try{ if(ZE[c]&&Array.isArray(L)){ const a=A(); return L.map((z,i)=>{ const n=nombreZona(c,i,a); return n?Object.assign({},z,{n}):z; }); } }catch(e){} return L; };
+    f.__v226=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.zonasVivienda=f; }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA226_PASO) return; window.__SA226_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  const TIT='Tu vida en el exterior';
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA226_ACC) return; window.__SA226_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&viviendo()&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'casa',d:'Vives en '+ext()+': tus papeles, tus impuestos, la nostalgia y la colonia colombiana.',mov:0,modal:true,run:()=>escenaVida()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v226=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA226_CAT) return; window.__SA226_CAT=true; window.catDe=function(t){ if(t===TIT) return 'casa'; return old.apply(this,arguments); }; }
+  function init226(){ wrapZonas(); wrapPaso(); wrapAcciones(); wrapCat();
+    Object.assign(window,{ciudadAbierta226:abierta,REGIMEN_226:REG,estatusExterior226:X,tramitarExterior226:tramitar,domicilioFiscalExterior226:cambiarDomicilio,volverDelExterior226:volver,anualExterior226:anual,escenaVidaExterior226:escenaVida,
+      toleranciaDivorcio226:tolerancia,nombreZona226:nombreZona,convenioFiscal226:convenio,visaOro226:oroDe,cargoExterior226:cargoAnual,accesoExterior226:acceso,probTramite226:probTramite,
+      eventosExterior226:{ciudad:eventosCiudad,sinPapeles:evSinPapeles,doble:evDoble,bajaImposicion:evBajaImp,oro:evOro,nostalgia:evNostalgia,colegio:evColegio,historia:()=>HIST.slice()}}); }
+  init226(); setTimeout(init226,40); setTimeout(init226,220); setTimeout(init226,650); setTimeout(init226,950); setTimeout(init226,1500);
+  window.__SA226={version:V226};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v227 · LA OTRA CASA Y LOS MEDIOS HERMANOS
+   Los amantes ya existían (v108), y también los hijos naturales. Esta capa
+   le pone casa, ley y consecuencias a lo que se sabe y no se dice.
+   - La casa chica: a quien ves con regularidad le puedes poner casa (un
+     apartamento discreto, una casa cómoda o una con servicio y chofer). Cuesta
+     cada año, sube el ánimo y también el riesgo de que se sepa.
+   - Cuando se sabe: la pareja se entera por una indiscreción y decides
+     entre pedir perdón, negarlo todo o admitirlo. El costo social cambia con
+     la época (antes de 1960 era un secreto a voces del hombre de plata;
+     después se comenta más), con el sexo de quien lo hizo (a ellas se les
+     cobra el doble) y con la ciudad en que vives.
+   - El hijo de fuera: cuando nace, en vez de escoger apellido decides si lo
+     reconoces (apellido y derechos), lo apoyas en silencio (mesada sin papeles)
+     o lo niegas. Lo que quede sin reconocer no entra en la herencia, salvo que
+     gane un pleito de filiación (desde 1968 se puede investigar la paternidad; desde
+     1988, con prueba de ADN). El hijo reconocido hereda según la época: un
+     cuarto, hasta 1935; la mitad, de 1936 a 1981; igual que los demás, desde
+     1982.
+   - Los medios hermanos: los hijos de la casa y los de fuera se enteran,
+     se comparan y pelean por el lugar. Hay que presentarlos, separarlos o
+     dejar que ellos decidan; y cuando crecen piden capital o reconocimiento.
+   - Tus padres también tuvieron su vida: puede llegar una carta de un
+     abogado con un medio hermano que tú no conocías.
+   Las leyes y los años de filiación están aproximados para el juego: no son
+   una guía legal.
+   ========================================================================== */
+(function(){
+  const V227='v227';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const AM=()=>((S&&S.familia&&S.familia.amantes)||[]);
+  const activos=()=>AM().filter(a=>a&&a.activo!==false&&(a.edad||0)>=18);
+  const hijos=()=>((S&&S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&!h.muerto);
+  const medios=()=>hijos().filter(h=>h.medio227);
+  const hijoDe=a=>hijos().filter(h=>h.medio227&&h.amanteId227===a.id);
+  const legit=()=>hijos().filter(h=>!h.medio227);
+
+  /* ---------- la ley y la sociedad según la época ---------- */
+  const pesoRec=a=>a<1936?.25:a<1982?.5:1;
+  const puedeInvestigar=a=>a>=1968;
+  const hayADN=a=>a>=1988;
+  function penaSocial(){ const a=A(); let n=a<1960?1:a<1990?2:3; if(S.p.sexo==='m') n*=2;
+    try{ const c=S.hogar&&S.hogar.ciudad; if(c&&typeof window.toleranciaDivorcio226==='function'){ const t=window.toleranciaDivorcio226(c,a); if(t!=null) n*=cl(1.3-t,.4,1.2); } }catch(e){}
+    return n; }
+  function escandalo(g,motivo){ const n=Math.max(.5,penaSocial()*g); prest(-Math.round(n),motivo||'un escándalo familiar'); S.p.escandalos=cl((S.p.escandalos||0)+g*1.2,0,20); try{ S.p.reputacion=cl((S.p.reputacion||50)-g*2,0,100); }catch(e){} try{ if(typeof window.alEscandalo228==='function') window.alEscandalo228(g); }catch(e){} return n; }
+
+  /* ---------- herencia: el hijo reconocido y el que no ---------- */
+  const sinDerecho=h=>!!(h&&h.medio227&&h.reconocido227===false&&!h.filiacion227);
+  function ajustarPartes(out){ try{ if(!out||!Array.isArray(out.her)) return;
+      const por=x=>{ const k=String(x.key||''); if(k.indexOf('h:')!==0) return 1; const nom=k.slice(2); const h=hijos().find(y=>y.nombre===nom); if(!h||!h.medio227||h.reconocido227!==true) return 1; return pesoRec(A()); };
+      const ks=out.her.filter(x=>!x._cony&&/^h:/.test(String(x.key||''))); if(!ks.length) return;
+      const w=ks.map(por); if(w.every(v=>v===1)) return;
+      const antes=ks.reduce((s,x)=>s+x.pct,0), nuevo=ks.reduce((s,x,i)=>s+x.pct*w[i],0); if(nuevo<=0) return; const f=antes/nuevo;
+      ks.forEach((x,i)=>{ x.pct=x.pct*w[i]*f; });
+      out.lineas.push('Los hijos reconocidos nacidos fuera del matrimonio reciben '+(pesoRec(A())===.5?'la mitad de la parte de los demás (ley de 1936)':'una parte menor que los demás (antes de 1936)')+'.'); }catch(e){ console.error(e); } }
+
+  /* ---------- la casa chica ---------- */
+  const NIVEL=[{n:'un apartamento discreto',f:.002,fel:2,vis:.6},{n:'una casa cómoda',f:.005,fel:3,vis:1},{n:'una casa con servicio y chofer',f:.012,fel:4,vis:1.6}];
+  const costoCasa=a=>(a&&a.casa227)?Math.max(2,Math.round(pat()*NIVEL[cl(a.casa227.nivel,0,2)].f)):0;
+  const mesada=h=>Math.max(1,Math.round(pat()*.002));
+  function ponerCasa(a,nivel){ if(!a||a.activo===false) return false; nivel=cl(nivel,0,2); const c0=Math.max(2,Math.round(pat()*NIVEL[nivel].f*2)); if(S.efectivo<c0) return false; tom(c0);
+    a.casa227={desde:A(),nivel}; a.afecto=cl((a.afecto||50)+6,0,100); a.discrecion=cl((a.discrecion||50)-(nivel===2?10:nivel===1?4:0),0,100); S.p.felicidad=cl(S.p.felicidad+NIVEL[nivel].fel,0,100);
+    log('Le pusiste a <b>'+E(primer(a.nombre))+'</b> '+NIVEL[nivel].n+'. Cuesta cerca de '+fm(costoCasa(a))+' al año y, en la ciudad, algo se comenta.','hito'); return true; }
+  function cerrarCasa(a){ if(!a||!a.casa227) return false; delete a.casa227; a.afecto=cl((a.afecto||50)-10,0,100); log('Cerraste la casa de <b>'+E(primer(a.nombre))+'</b>.'); return true; }
+  function pDesc(a){ let b=.05+(a.casa227?.05*NIVEL[cl(a.casa227.nivel,0,2)].vis:0)+(hijoDe(a).length?.05:0)+(a.civil229==='casada'?.05:0); return cl(b*cl(1.35-(a.discrecion||50)/100,.4,1),.01,.4); }
+
+  function evDescubre(a){ const q=PA(), pr=q&&q.nombre?primer(q.nombre):'tu pareja', celoso=q&&q.rasgo108==='celoso';
+    return {p:10,c:()=>ACTIVO()&&!!PA()&&activos().includes(a),t:()=>'<b>'+E(pr)+' se enteró de lo de '+E(primer(a.nombre))+'.</b> '+(a.casa227?'Alguien lo vio entrar a '+NIVEL[cl(a.casa227.nivel,0,2)].n+' dos veces por semana y se lo contó.':'Un comentario en una comida, una llamada que se dejó a medias, y ya está.')+(hijoDe(a).length?' Y hay un hijo de por medio.':''),
+      o:[{t:'Pedir perdón y terminar la relación',f:()=>{ a.activo=false; a.fin=A(); delete a.casa227; q.paciencia=cl((q.paciencia||60)-(celoso?16:10),0,100); escandalo(.6,'una infidelidad conocida'); return 'Terminaste con '+primer(a.nombre)+' y pediste perdón. '+pr+' lo recibió callada: la confianza ya no es la misma.'; }},
+         {t:'Negarlo todo',f:()=>{ const cree=chance(.35+(a.discrecion||50)/200); if(cree){ q.paciencia=cl((q.paciencia||60)-3,0,100); return 'Lo negaste con aplomo y '+pr+' decidió creerte. Por ahora.'; } q.paciencia=cl((q.paciencia||60)-(celoso?32:24),0,100); escandalo(1,'una infidelidad negada'); return 'No te creyeron: negar lo evidente empeoró todo. '+pr+' ya no te habla en la mesa.'; }},
+         {t:A()>=1990?'Admitirlo y seguir: «cada uno tiene su vida»':'Callar y mantener las apariencias',f:()=>{ q.paciencia=cl((q.paciencia||60)-(A()>=1990?18:12),0,100); escandalo(A()>=1990?.9:.6,'una segunda vida a la vista'); return A()>=1990?pr+' no lo aceptó, pero se quedó: el escándalo va a ser más caro para los dos.':'Las apariencias se mantuvieron. Se sabe sin decirse, y la casa se enfrió.'; }}]}; }
+
+  /* ---------- el hijo de fuera ---------- */
+  function reconocer(h){ if(!h) return false; h.reconocido227=true; h.negado227=false; const otro=AM().find(a=>a.id===h.amanteId227)||null; const c=Math.max(4,Math.round(pat()*.006)); tom(c);
+    try{ const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap1||h.apellido; }catch(e){}
+    h.vinculo=cl((h.vinculo||60)+8,0,100); const q=PA(); if(q) q.paciencia=cl((q.paciencia||60)-(A()<1982?18:12),0,100); escandalo(A()<1982?1:.7,'reconoció a un hijo fuera del matrimonio');
+    log('Reconociste a <b>'+E(h.nombre)+'</b> ante notario ('+fm(c)+'): lleva tu apellido y '+(A()<1982?'tiene derechos reducidos ('+(pesoRec(A())===.5?'la mitad':'un cuarto')+') de herencia':'los mismos derechos que tus otros hijos')+'.','hito'); return true; }
+  function apoyar(h){ if(!h) return false; h.reconocido227=false; h.apoyo227=true; try{ const otro=AM().find(a=>a.id===h.amanteId227)||null; const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap2||aps.ap1||h.apellido; }catch(e){}
+    log('Acordaste apoyar a <b>'+E(h.nombre)+'</b> sin reconocerlo: una mesada de '+fm(mesada(h))+' al año, sin papeles.'); return true; }
+  function negar(h){ if(!h) return false; h.reconocido227=false; h.negado227=true; try{ const otro=AM().find(a=>a.id===h.amanteId227)||null; const aps=opcionesApellidoHijo(h,otro); h.apellido=aps.ap2||aps.ap1||h.apellido; }catch(e){}
+    h.vinculo=cl((h.vinculo||60)-20,0,100); log('Negaste ser el padre de <b>'+E(h.nombre)+'</b>. No quedó nada escrito, pero el niño existe.','mal'); return true; }
+  function escenaReconocer(h,otro){ const nom=h.nombre, por=otro&&otro.nombre?E(primer(otro.nombre)):'su madre', era=A();
+    escena({rubro:'Familia',titulo:'El hijo de '+por,ancho:true,cerrable:false,cuerpo:'Nació <b>'+E(nom)+'</b>, hijo de '+por+' y tuyo, fuera de tu matrimonio. Lo que decidas hoy marca su vida y la herencia: '+(era<1936?'antes de 1936, un hijo natural casi no tiene derechos (un cuarto), y solo si lo reconoces.':era<1982?'entre 1936 y 1981, un hijo natural reconocido hereda la mitad que los demás.':'desde 1982, un hijo reconocido hereda igual que los demás.'),
+      opciones:[{t:'Reconocerlo ante notario',cat:'familia',d:'Lleva tu apellido y entra en la herencia. Tu pareja y la ciudad se van a enterar.',run:()=>{ reconocer(h); try{ setTimeout(()=>{ if(typeof window.__escenaApellido227==='function') window.__escenaApellido227(h,otro); },0); }catch(e){} }},
+        {t:'Apoyarlo en silencio',cat:'familia',d:'Una mesada de '+fm(mesada(h))+' al año, sin papeles ni apellido. No hereda, salvo que más adelante gane un pleito.',run:()=>{ apoyar(h); }},
+        {t:'Negar ser el padre',cat:'familia',d:'No pagas ni reconoces. Es lo más barato hoy y lo más peligroso mañana: de grande puede demandar.',run:()=>{ negar(h); }}]}); }
+  function evDecidir(h){ const otro=AM().find(a=>a.id===h.amanteId227)||null, por=otro&&otro.nombre?primer(otro.nombre):'su madre';
+    return {p:9,c:()=>ACTIVO()&&hijos().includes(h)&&!!h.medio227&&h.reconocido227===undefined,t:()=>'<b>Todavía no has decidido qué hacer con '+E(primer(h.nombre))+'</b>, el hijo de '+E(por)+'. El tiempo pasa y ya empieza a preguntar por su papá.',
+      o:[{t:'Reconocerlo ante notario',f:()=>{ reconocer(h); return ''; }},{t:'Apoyarlo en silencio',f:()=>{ apoyar(h); return ''; }},{t:'Negar ser el padre',f:()=>{ negar(h); return ''; }}]}; }
+  function wrapApellido(){ const old=window.escenaApellidoHijo; if(typeof old!=='function'||old.__v227) return; window.__escenaApellido227=old;
+    const f=function(h,otro){ try{ if(h&&h.fertilizacionContexto==='amante'&&h.reconocido227===undefined&&!h.__suprimir227){ h.medio227=true; if(otro&&otro.id) h.amanteId227=otro.id; escenaReconocer(h,otro); return; } }catch(e){ console.error(e); } return old.apply(this,arguments); };
+    f.__v227=true; window.escenaApellidoHijo=f; }
+  function wrapCrear(){ const old=window.crearHijoBiologico; if(typeof old!=='function'||old.__v227) return; const f=function(origen,otro,contexto){ const h=old.apply(this,arguments); try{ if(h&&contexto==='amante'){ h.medio227=true; if(origen&&origen.id) h.amanteId227=origen.id; else if(otro&&otro.id) h.amanteId227=otro.id; } }catch(e){} return h; };
+    f.__v227=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.crearHijoBiologico=f; }
+
+  /* ---------- los medios hermanos ---------- */
+  function evSaben(m){ const L=legit().filter(h=>(h.edad||0)>=6).slice(0,3), nombres=L.map(h=>primer(h.nombre)).join(' y ');
+    return {p:9,c:()=>ACTIVO()&&!m.hermanosSaben227&&hijos().includes(m)&&legit().some(h=>(h.edad||0)>=6),t:()=>'<b>'+E(nombres||'Tus hijos')+' se enteraron de que tienen un medio hermano: '+E(primer(m.nombre))+'.</b> '+(m.reconocido227?'Lo supieron en el colegio, por un compañero.':'Lo supieron escuchando una conversación que no era para ellos.'),
+      o:[{t:'Presentarlos y que convivan',f:()=>{ m.hermanosSaben227=true; const bien=chance(.55); L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+(bien?4:-3),0,100); }); m.vinculo=cl((m.vinculo||60)+6,0,100); return bien?'Se llevaron mejor de lo que esperabas: hay pelea de hermanos, pero de los de verdad.':'Hubo celos y silencios. Cuesta que se acepten.'; }},
+         {t:'Mantener los mundos separados',f:()=>{ m.hermanosSaben227=true; L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-2,0,100); }); m.vinculo=cl((m.vinculo||60)-4,0,100); return 'Cada quien siguió en su casa. Se sabe y no se habla.'; }},
+         {t:'Dejar que ellos decidan',f:()=>{ m.hermanosSaben227=true; const d=chance(.5); L.forEach(h=>{ h.vinculo=cl((h.vinculo||60)+(d?3:-2),0,100); }); return d?'Se buscaron entre ellos, sin tu mediación.':'No se buscaron. Quizás más adelante.'; }}]}; }
+  function evDemanda(m){ const sin=A()<1988, c1=Math.max(4,Math.round(pat()*.01)), c2=Math.max(6,Math.round(pat()*.03));
+    return {p:9,c:()=>ACTIVO()&&sinDerecho(m)&&hijos().includes(m)&&(m.edad||0)>=18&&puedeInvestigar(A()),t:()=>'<b>'+E(primer(m.nombre))+' demanda para que lo reconozcas como hijo.</b> Ya es mayor de edad y quiere el apellido y su parte. '+(sin?'No hay prueba de ADN todavía: todo se resuelve con testigos, cartas y fotos.':'Con la prueba de ADN no hay mucho que discutir.'),
+      o:[{t:'Reconocerlo ya y evitar el pleito',f:()=>{ reconocer(m); m.filiacion227=true; return 'Lo reconociste. Saltó el titular, pero el pleito no llegó a juicio.'; }},
+         {t:sin?'Ir a juicio de filiación ('+fm(c1)+')':'Aceptar la prueba de ADN ('+fm(c1)+')',f:()=>{ tom(c1); const gana=sin?chance(.55+(m.apoyo227?.15:0)):true; if(gana){ m.reconocido227=true; m.filiacion227=true; const x=tom(Math.round(pat()*.02)); m.vinculo=cl((m.vinculo||50)-5,0,100); escandalo(1,'perdió un pleito de filiación'); return (sin?'El juez le dio la razón.':'La prueba salió positiva.')+' Quedó reconocido por ley, con atrasos de '+fm(x)+'.'; } m.vinculo=cl((m.vinculo||50)-12,0,100); return 'El juez no le creyó. Se fue molesto, pero sin nada.'; }},
+         {t:'Pagarle para que retire la demanda ('+fm(c2)+')',f:()=>{ tom(c2); if(chance(.7)){ m.vinculo=cl((m.vinculo||50)-6,0,100); return 'Retiró la demanda a cambio de la plata. Quedó un resentimiento largo.'; } escandalo(1.2,'un hijo comprado'); return 'Cobró y después lo contó todo a una revista.'; }}]}; }
+  function evPuesto(m){ const x=Math.round(Math.max(8,pat()*.012));
+    return {p:8,c:()=>ACTIVO()&&m.reconocido227===true&&hijos().includes(m)&&(m.edad||0)>=21,t:()=>'<b>'+E(primer(m.nombre))+' quiere su lugar en la casa.</b> Dice que lleva tu apellido pero no tiene lo que tienen tus otros hijos, y pide capital para empezar algo propio.',
+      o:[{t:'Darle capital de arranque ('+fm(x)+')',f:()=>{ tom(x); m.vinculo=cl((m.vinculo||60)+10,0,100); legit().forEach(h=>{ h.vinculo=cl((h.vinculo||60)-3,0,100); }); return 'Le diste un capital de '+fm(x)+'. Tus otros hijos preguntaron en voz baja: «¿y a mí?»'; }},
+         {t:'Decirle que se gane lo suyo',f:()=>{ m.vinculo=cl((m.vinculo||60)-8,0,100); if(chance(.25)){ escandalo(.7,'un hijo ignorado'); return 'Lo contó en una entrevista: «mi papá me reconoció, pero nunca me quiso». La ciudad lo comentó.'; } return 'Se fue sin decir nada. No volvió a escribir.'; }}]}; }
+  function evCarta(){ const pad=(S.parientes||[]).find(p=>p&&p.vivo&&/^(padre|madre)$/.test(p.rel)&&(p.edad||0)>=50); const papa=pad&&pad.rel==='madre'?'tu mamá':'tu papá', c1=Math.max(6,Math.round(pat()*.01)), sx=chance(.5)?'h':'m';
+    return {p:8,c:()=>ACTIVO()&&!nino()&&!!pad&&pad.vivo&&!S.carta227,t:()=>'<b>Llega una carta de un abogado.</b> Dice representar a una persona de '+ri(20,44)+' años que sostiene ser '+(sx==='m'?'hija':'hijo')+' de '+papa+', y que la familia nunca lo reconoció. Pide hablar contigo antes de ir más lejos.',
+      o:[{t:'Hablar primero con '+papa,f:()=>{ S.carta227=A(); pad.afecto=cl((pad.afecto||60)-(chance(.5)?6:0),0,100); const real=chance(.75); if(real){ const pa=nuevoPariente(sx==='m'?'hermana':'hermano',sx,ri(20,44)); pa.nombre=nombreLocal(S.p.ciudad,sx); pa.afecto=55; pa.natural102=true; pa.medio227=true; (S.parientes=S.parientes||[]).push(pa); return capitalize(papa)+' bajó la cabeza y lo admitió: hay un medio hermano. Hoy es parte de la familia, a medias.'; } return capitalize(papa)+' juró que no era cierto. El abogado nunca volvió a llamar.'; }},
+         {t:hayADN(A())?'Pedir una prueba de ADN ('+fm(c1)+')':'Contratar un detective ('+fm(c1)+')',f:()=>{ S.carta227=A(); tom(c1); const real=chance(.7); if(real){ const pa=nuevoPariente(sx==='m'?'hermana':'hermano',sx,ri(20,44)); pa.nombre=nombreLocal(S.p.ciudad,sx); pa.afecto=40; pa.natural102=true; pa.medio227=true; (S.parientes=S.parientes||[]).push(pa); return (hayADN(A())?'La prueba salió positiva. ':'El detective trajo pruebas. ')+'Tienes un medio hermano que nadie te había contado.'; } return (hayADN(A())?'La prueba salió negativa: era un montaje. ':'El detective no encontró nada. ')+'Se acabó el asunto.'; }},
+         {t:'No contestar la carta',f:()=>{ S.carta227=A(); if(chance(.3)){ escandalo(.8,'una carta ignorada que llegó a la prensa'); return 'Al mes la historia salió en una revista. Tuviste que dar explicaciones por algo que no sabías.'; } return 'Nunca volvió a llegar nada. A veces te acuerdas.'; }}]}; }
+  const capitalize=s=>s?s.charAt(0).toUpperCase()+s.slice(1):s;
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()||(S.p.edad||0)<18) return; let n=0; const push=ev=>{ if(n>=2) return; n++; cola.push(ev); };
+    // lo que cuesta la otra casa y la mesada de los no reconocidos
+    let tot=0; activos().forEach(a=>{ if(a.casa227){ tot+=tom(costoCasa(a)); S.p.felicidad=cl(S.p.felicidad+1,0,100); } });
+    medios().forEach(h=>{ if(h.apoyo227&&h.reconocido227===false&&(h.edad||0)<18) tot+=tom(mesada(h)); });
+    if(tot>0&&A()%3===0) log('Entre la otra casa y las mesadas se te fueron '+fm(tot)+' este año.');
+    // un hijo de fuera sin decidir (la pantalla se perdió o se pospuso)
+    medios().filter(h=>h.reconocido227===undefined&&(h.edad||0)>=1).slice(0,1).forEach(h=>push(evDecidir(h)));
+    // se sabe
+    if(PA()){ activos().forEach(a=>{ if(n<2&&chance(pDesc(a))) push(evDescubre(a)); }); }
+    // los medios hermanos
+    medios().forEach(m=>{ if((m.edad||0)>=6&&!m.hermanosSaben227&&legit().some(h=>(h.edad||0)>=6)&&chance(.3)) push(evSaben(m));
+      if(sinDerecho(m)&&(m.edad||0)>=18&&puedeInvestigar(A())&&chance(m.negado227?.22:.1)) push(evDemanda(m));
+      if(m.reconocido227===true&&(m.edad||0)>=21&&!m.puesto227&&chance(.08)){ m.puesto227=A(); push(evPuesto(m)); } });
+    // la carta del abogado: los padres también tuvieron su vida
+    if(!S.carta227&&A()>=1900&&chance(.025)&&evCarta().c()) push(evCarta());
+  }
+
+  /* ---------- el panel ---------- */
+  const TIT='La otra casa';
+  function escenaOtraCasa(){ const act=activos(), mh=medios(), q=PA();
+    const filas=act.map(a=>'<tr><td>'+E(a.nombre)+' · '+E(a.rol||'')+'</td><td>'+(a.casa227?E(NIVEL[cl(a.casa227.nivel,0,2)].n)+' · '+fm(costoCasa(a))+' al año':'sin casa')+' · riesgo de que se sepa: '+Math.round(pDesc(a)*100)+'%</td></tr>').join('')
+      +mh.map(h=>'<tr><td>'+E(h.nombre)+' · '+(h.edad||0)+' años</td><td>'+(h.reconocido227===true?'reconocido'+(h.filiacion227?' por pleito':''):h.reconocido227===false?(h.apoyo227?'apoyado en silencio':'negado'):'sin decidir')+'</td></tr>').join('');
+    const sinM=S.mov<1?'Sin movidas':null, ops=[];
+    act.forEach(a=>{ if(!a.casa227) NIVEL.forEach((nv,i)=>ops.push({t:'Ponerle a '+E(primer(a.nombre))+' '+nv.n+' (~'+fm(Math.max(2,pat()*nv.f))+' al año)',cat:'familia',cerrar:false,d:i===0?'Discreta: casi no se nota.':i===1?'Cómoda: se nota en el barrio.':'Con servicio y chofer: se nota en toda la ciudad.',dis:sinM||(S.efectivo<Math.max(2,pat()*nv.f*2)?'No alcanza para instalarla':null),run:()=>{ S.mov=Math.max(0,S.mov-1); ponerCasa(a,i); escenaOtraCasa(); }}));
+      else ops.push({t:'Cerrar la casa de '+E(primer(a.nombre)),cat:'familia',cerrar:false,d:'Dejas de pagarla. Baja el riesgo, pero la relación se enfría.',run:()=>{ cerrarCasa(a); escenaOtraCasa(); }}); });
+    mh.filter(h=>h.reconocido227===false&&!h.filiacion227).forEach(h=>ops.push({t:'Reconocer a '+E(primer(h.nombre))+' ante notario',cat:'familia',cerrar:false,d:'Lleva tu apellido y entra en la herencia (según la época).',dis:sinM,run:()=>{ S.mov=Math.max(0,S.mov-1); reconocer(h); escenaOtraCasa(); }}));
+    if(!ops.length) ops.push({t:'Cerrar',cat:'familia',run:()=>{}});
+    escena({rubro:'Vida privada',titulo:'La otra casa',ancho:true,cerrable:true,cuerpo:'Lo que se sabe y no se dice. '+(q?E(primer(q.nombre))+' cree conocerte.':'Nadie espera por ti en la casa.')+' Aquí ves lo que cuesta cada relación y cada hijo de fuera, y lo que puede pasar.',html:'<table class="libro">'+(filas||'<tr><td colspan="2">Nada que mostrar.</td></tr>')+'</table>',opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA227_PASO) return; window.__SA227_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='matrimonio'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Tu matrimonio',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA227_ACC) return; window.__SA227_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&(activos().length||medios().length)&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'familia',d:'Lo que se sabe y no se dice: la casa chica, los hijos de fuera y lo que puede salir a la luz.',mov:0,modal:true,run:()=>escenaOtraCasa()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v227=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA227_CAT) return; window.__SA227_CAT=true; window.catDe=function(t){ if(t===TIT) return 'familia'; return old.apply(this,arguments); }; }
+  function init227(){ wrapCrear(); wrapApellido(); wrapPaso(); wrapAcciones(); wrapCat(); try{ grupo(); }catch(e){}
+    Object.assign(window,{sinDerechoHerencia227:sinDerecho,ajustarPartes227:ajustarPartes,pesoFilial227:pesoRec,puedeInvestigarPaternidad227:puedeInvestigar,hayADN227:hayADN,penaSocialOtraCasa227:penaSocial,escandaloFamiliar227:escandalo,
+      ponerCasaChica227:ponerCasa,cerrarCasaChica227:cerrarCasa,costoCasaChica227:costoCasa,probDescubrir227:pDesc,reconocerHijo227:reconocer,apoyarHijo227:apoyar,negarHijo227:negar,mediosHermanos227:medios,anualOtraCasa227:anual,escenaOtraCasa227:escenaOtraCasa,escenaReconocer227:escenaReconocer,
+      eventosOtraCasa227:{decidir:evDecidir,descubre:evDescubre,saben:evSaben,demanda:evDemanda,puesto:evPuesto,carta:evCarta}}); }
+  init227(); setTimeout(init227,40); setTimeout(init227,220); setTimeout(init227,650); setTimeout(init227,950); setTimeout(init227,1500);
+  window.__SA227={version:V227};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v228 · EL RECHAZO SOCIAL AL DIVORCIO
+   Separarse siempre costó prestigio (v181, v182), pero el costo era un número
+   que se pagaba una vez. Ahora es una temperatura: lo que la ciudad, la
+   Iglesia y el club le cobran a quien rompe un matrimonio depende de la época,
+   de quién eres y de dónde vives, y se enfría con los años.
+   - Al terminar un matrimonio (divorcio o anulación) nace «el nombre en la
+     ciudad»: un nivel de 0 a 100. Antes de 1930 es casi un destierro; hacia
+     1990 se comenta; hoy casi no se nota. La anulación eclesiástica lo baja
+     (se ve como un trámite, no como una ruptura); a ellas se les cobra más;
+     Pasto o Popayán perdonan menos que Barranquilla o Cartagena; y en el
+     exterior pesa distinto (París no es Dubái).
+   - Mientras está alto: el club te suspende, el párroco te niega la
+     comunión, el colegio católico incomoda a los niños, un banquero
+     conservador te cierra el crédito. Cada uno con salidas: pelear, pagar,
+     donar, irte unos años afuera, pedir la nulidad.
+   - Segundas nupcias: casarse otra vez antes de 2005 reabre la herida (y
+     antes de 1991, solo por lo civil).
+   - Con los años se enfría; cuando baja del todo, te vuelven a invitar.
+   - Un escándalo de infidelidad (v227) deja una versión más suave del mismo
+     nombre en la ciudad, aunque no haya divorcio.
+   - La acción «Divorciarte» ahora dice cuánto te va a costar socialmente.
+   Los niveles y los años están ajustados para el juego, no son datos exactos.
+   ========================================================================== */
+(function(){
+  const V228='v228';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const menores=()=>((S.familia&&S.familia.hijos)||[]).filter(h=>h&&h.vivo!==false&&(h.edad||0)>=5&&(h.edad||0)<18);
+
+  /* ---------- cuánto pesa, según la época, el lugar y quién eres ---------- */
+  const BASE=a=>a<1930?85:a<1960?75:a<1976?62:a<1991?45:a<2005?25:a<2020?12:6;
+  const CIUD={'Pasto':1.25,'Popayán':1.25,'Tunja':1.2,'Medellín':1.15,'La Estrella':1.15,'Manizales':1.15,'Bucaramanga':1.1,'Rionegro':1.1,'Pereira':1.05,'Armenia':1.05,'Bogotá':1,'Cali':.95,'Cartagena':.95,'Barranquilla':.9,'Santa Marta':.9,'San Andrés':.85};
+  function factorLugar(){ const c=S.hogar&&S.hogar.ciudad; if(!c) return 1; let g=null; try{ g=ciudadGlobalDe(c); }catch(e){}
+    if(g){ const t=(typeof window.toleranciaDivorcio226==='function')?window.toleranciaDivorcio226(c,A()):null; return t!=null?cl(1.3-t,.4,1.2):.8; }
+    return CIUD[c]||1; }
+  function nivelInicial(anulacion){ const a=A(); let n=BASE(a); if(anulacion) n*=.6; if(S.p.sexo==='m') n*=1.5; n*=factorLugar(); if((S.p.escandalos||0)>=5) n+=8; if(menores().length) n*=1.1; return cl(Math.round(n),2,100); }
+  const clima=()=>{ const n=BASE(A())*factorLugar(); return n>=65?'se castiga duro':n>=40?'se comenta':n>=18?'se murmura':'casi no se nota'; };
+
+  /* ---------- el estado ---------- */
+  function ES(){ const e=S.estigma228; if(e&&e.gen!==S.gen){ delete S.estigma228; return null; } return e||null; }
+  function crear(){ let e=ES(); if(!e) e=S.estigma228={nivel:0,desde:A(),gen:S.gen,motivo:'divorcio',n:0,hechos:{},anulada:false}; return e; }
+  function alTerminar(anulacion){ const e=crear(); const n0=nivelInicial(!!anulacion); const prev=e.nivel||0; e.nivel=cl(Math.max(prev,n0)+(prev>10?5:0),2,100); e.desde=A(); e.motivo=anulacion?'anulación':'divorcio'; e.n=(e.n||0)+1; e.hechos={}; e.anulada=!!anulacion;
+    const redes=Math.round(e.nivel/10), rep=Math.round(e.nivel/20); try{ S.p.redes=cl((S.p.redes||0)-redes,0,100); S.p.reputacion=cl((S.p.reputacion||50)-rep,0,100); }catch(x){}
+    const a=A(); log(a<1960?'En la ciudad no se habla de otra cosa: <b>te cierran puertas</b> en las casas que antes te recibían.':a<1991?'<b>Se comenta en el club, en la misa y en las comidas.</b> Algunos amigos dejan de llamar.':a<2005?'Algunos murmuran. La mayoría es discreta; los más conservadores, no.':'Casi nadie dice nada, aunque hay quien lo comenta en voz baja.','mal');
+    return e; }
+  function alEscandalo(g){ if(!ACTIVO()||nino()) return; const a=A(); const add=Math.round(g*6*(BASE(a)/50)*factorLugar()); if(add<=0) return; const e=crear(); if(!e.n){ e.motivo='escándalo'; e.desde=A(); } e.nivel=cl((e.nivel||0)+add,0,100); }
+  function alCasarse(){ const e=ES(); if(!e||e.nivel<10||A()>=2005) return; const c=Math.round((A()<1991?14:8)*factorLugar()); e.nivel=cl(e.nivel+c,0,100); if(S.p) S.p.reputacion=cl((S.p.reputacion||50)-1,0,100);
+    cola.push(evSegundas()); }
+
+  /* ---------- eventos ---------- */
+  const hecho=(k)=>{ const e=ES(); if(e) e.hechos[k]=A(); };
+  function evClub(){ const c1=Math.round(Math.max(6,pat()*.006)), c2=Math.round(Math.max(4,pat()*.003));
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=45&&!!S.clubFamilia&&!ES().hechos.club,t:()=>'<b>El consejo del club se reúne a puerta cerrada.</b> Hay quien dice que, con lo de tu separación, «un socio en esa situación no da buena imagen». Te piden que te presentes.',
+      o:[{t:'Pelear tu puesto con abogados ('+fm(c1)+')',f:()=>{ hecho('club'); tom(c1); if(chance(clamp(.4+((S.p.reputacion||50)-50)/150,.2,.7))){ return 'Conservaste tu puesto, aunque más de uno dejó de saludarte.'; } S.clubFamilia.nivel=Math.max(1,(S.clubFamilia.nivel||1)-1); ES().nivel=cl(ES().nivel+4,0,100); return 'Te suspendieron seis meses. Todo el mundo se enteró.'; }},
+         {t:'Pagar una cuota extraordinaria ('+fm(c2)+')',f:()=>{ hecho('club'); tom(c2); ES().nivel=cl(ES().nivel-6,0,100); return 'Pagaste una «cuota de mejoramiento» y el tema se cerró, sin que nadie lo mencionara.'; }},
+         {t:'Retirarte del club',f:()=>{ hecho('club'); S.clubFamilia.nivel=Math.max(1,(S.clubFamilia.nivel||1)-1); S.p.redes=cl((S.p.redes||0)-4,0,100); return 'Te retiraste antes de que te sacaran. Se pierde mucho más que una mesa de golf.'; }}]}; }
+  function evIglesia(){ const c1=Math.round(Math.max(6,pat()*.004)), c2=Math.round(Math.max(8,pat()*.008)), anul=A()<1991&&!(ES()&&ES().anulada);
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=35&&(A()<1991||ES().nivel>=50)&&!ES().hechos.iglesia,t:()=>'<b>El párroco te pide que pases por la casa cural.</b> '+(A()<1991?'Con el matrimonio roto, no puedes comulgar ni ser padrino de nadie. En la misa de domingo se nota el hueco en tu banca.':'Dice que lo tuyo «no es un buen ejemplo para la comunidad» y que conviene un tiempo de recogimiento.'),
+      o:[{t:'Donar para la restauración de la iglesia ('+fm(c1)+')',f:()=>{ hecho('iglesia'); tom(c1); ES().nivel=cl(ES().nivel-12,0,100); prest(1,'una donación a la parroquia'); return 'La torre de la iglesia tendrá campanas nuevas. El párroco volvió a saludarte.'; }},
+         anul?{t:'Pedir la nulidad al tribunal eclesiástico ('+fm(c2)+')',f:()=>{ hecho('iglesia'); tom(c2); if(chance(clamp(.4+((S.p.reputacion||50)-50)/200,.25,.65))){ ES().anulada=true; ES().nivel=Math.round(ES().nivel*.5); return 'El tribunal declaró nulo tu matrimonio: ahora puedes volver a la Iglesia, y la ciudad lo ve como un trámite, no como una ruptura.'; } ES().nivel=cl(ES().nivel+3,0,100); return 'El tribunal negó la nulidad. El párroco, en cambio, tomó nota.'; }}:{t:'Hablar con el obispo',f:()=>{ hecho('iglesia'); ES().nivel=cl(ES().nivel-4,0,100); return 'El obispo te recibió con cortesía y no prometió nada.'; }},
+         {t:'Dejar de ir a misa',f:()=>{ hecho('iglesia'); prest(-1,'se alejó de la Iglesia'); ES().nivel=cl(ES().nivel+5,0,100); return 'Dejaste de ir. «Se volvió ateo», dicen en la casa de los vecinos.'; }}]}; }
+  function evColegio(){ const c1=Math.round(Math.max(6,pat()*.003)), c2=Math.round(Math.max(8,pat()*.005)), kids=menores();
+    return {p:9,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=35&&menores().length>0&&!ES().hechos.colegio,t:()=>'<b>En el colegio de los niños hay comentarios.</b> Otros padres dicen «hijos de divorciados» y la hermana rectora ha preguntado por la situación de la casa.',
+      o:[{t:'Cambiar a los niños de colegio ('+fm(c1)+')',f:()=>{ hecho('colegio'); tom(c1); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-2,0,100); }); return 'Los cambiaste a otro colegio, más moderno. Extrañan a sus amigos, pero nadie los mira raro.'; }},
+         {t:'Hacer una donación al colegio ('+fm(c2)+')',f:()=>{ hecho('colegio'); tom(c2); ES().nivel=cl(ES().nivel-6,0,100); return 'Donaste el laboratorio de ciencias. Los comentarios pararon de golpe.'; }},
+         {t:'Dejarlos ahí',f:()=>{ hecho('colegio'); kids.forEach(h=>{ h.vinculo=cl((h.vinculo||60)-4,0,100); }); return 'Los niños siguieron en el colegio, con los murmullos a cuestas.'; }}]}; }
+  function evCredito(){ const c1=Math.round(Math.max(8,pat()*.006)), c2=Math.round(Math.max(4,pat()*.002));
+    return {p:8,c:()=>ACTIVO()&&!!ES()&&ES().nivel>=50&&A()<2000&&!ES().hechos.credito,t:()=>'<b>Un banquero conservador te cierra el crédito.</b> No lo dice así: «el comité prefiere esperar a que su situación personal se aclare».',
+      o:[{t:'Aceptar peores condiciones y mejores garantías ('+fm(c1)+')',f:()=>{ hecho('credito'); tom(c1); return 'Aceptaste una tasa más alta y garantías de sobra. El crédito salió.'; }},
+         {t:'Buscar otro banco ('+fm(c2)+')',f:()=>{ hecho('credito'); tom(c2); S.p.redes=cl((S.p.redes||0)-2,0,100); return 'Un banco más joven te recibió sin hacer preguntas. En el club se comentó que «ahora te financian los nuevos».'; }},
+         {t:'Quejarte con los amigos',f:()=>{ hecho('credito'); prest(-1,'se quejó de un banquero'); return 'Te desahogaste en una comida. Se supo, y no ayudó.'; }}]}; }
+  function evSegundas(){ const c1=Math.round(Math.max(3,pat()*.002)), c2=Math.round(Math.max(10,pat()*.01));
+    return {p:9,c:()=>ACTIVO()&&!!ES(),t:()=>'<b>Segundas nupcias.</b> '+(A()<1991?'Casarte otra vez, estando el primer matrimonio roto, solo puede ser por lo civil: no habrá misa, ni bendición, ni familia de uno de los dos en las bancas.':'Casarte otra vez abre de nuevo la conversación. Hay a quienes les gusta y a quienes no.'),
+      o:[{t:'Una ceremonia discreta ('+fm(c1)+')',f:()=>{ tom(c1); ES().nivel=cl(ES().nivel-2,0,100); return 'La ceremonia fue pequeña, en una notaría. Nadie pudo decir que fue una provocación.'; }},
+         {t:'Una fiesta como se debe ('+fm(c2)+')',f:()=>{ tom(c2); ES().nivel=cl(ES().nivel+(A()<1991?8:2),0,100); if(A()>=1991) prest(1,'una boda como se debe'); return A()<1991?'La fiesta fue grande y hubo asientos vacíos de los invitados de siempre. Pesó como una provocación.':'La fiesta salió muy bien, y casi nadie hizo comentarios.'; }}]}; }
+  function evInvita(){ return {p:7,c:()=>ACTIVO()&&!!ES()&&ES().nivel<=22&&A()-ES().desde>=3&&!ES().hechos.invita,t:()=>'<b>Te vuelven a invitar.</b> La familia que dejó de llamarte hace unos años te manda una tarjeta para la fiesta del mes entrante. Nadie menciona lo de antes.',
+      o:[{t:'Ir y comportarte como si nada',f:()=>{ hecho('invita'); S.p.redes=cl((S.p.redes||0)+4,0,100); ES().nivel=cl(ES().nivel-5,0,100); return 'Fuiste. Te recibieron con una sonrisa correcta, y algo se cerró para siempre.'; }},{t:'No ir',f:()=>{ hecho('invita'); return 'No fuiste. No se dijo más.'; }}]}; }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()) return; const e=ES(); if(!e) return; if((S.p.edad||0)<18) return;
+    let dec=A()<1991?.10:.15; try{ if(S.hogar&&S.hogar.ciudad&&ciudadGlobalDe(S.hogar.ciudad)) dec*=1.5; }catch(x){} e.nivel=cl(e.nivel*(1-dec)-(e.anulada?.5:0),0,100);
+    if(e.nivel>=25) S.p.redes=cl((S.p.redes||0)-e.nivel/50,0,100);
+    if(e.nivel<1.5){ delete S.estigma228; return; }
+    let n=0; const push=ev=>{ if(n>=1) return; n++; cola.push(ev); }; const p=cl(.25+e.nivel/200,0,.6);
+    [evClub,evIglesia,evColegio,evCredito,evInvita].forEach(f=>{ try{ const ev=f(); if(ev.c()&&chance(p)) push(ev); }catch(x){} }); }
+
+  /* ---------- el panel y la acción ---------- */
+  const TIT='Tu nombre en la ciudad';
+  const barra=n=>'<span style="display:inline-block;width:90px;height:8px;border-radius:4px;background:rgba(127,127,127,.25);vertical-align:middle"><span style="display:block;height:8px;border-radius:4px;width:'+Math.round(cl(n,0,100)*0.9)+'px;background:'+(n>=60?'#D06A60':n>=30?'#D6A64F':'#4FA36B')+'"></span></span> '+Math.round(n);
+  function escenaNombre(){ const e=ES(); if(!e){ escena({rubro:'Vida social',titulo:TIT,ancho:true,cerrable:true,cuerpo:'Nadie habla mal de ti por tu vida matrimonial. Hoy, en tu ciudad, '+clima()+'.',opciones:[{t:'Cerrar',cat:'familia',run:()=>{}}]}); return; }
+    const sinM=S.mov<1?'Sin movidas':null, mov=()=>{ S.mov=Math.max(0,S.mov-1); }, c1=Math.round(Math.max(6,pat()*.003)), c2=Math.round(Math.max(3,pat()*.001));
+    const tabla='<table class="libro"><tr><td>Lo que se dice</td><td>'+barra(e.nivel)+'</td></tr><tr><td>Desde</td><td>'+e.desde+' · '+E(e.motivo)+(e.anulada?' · con nulidad':'')+'</td></tr><tr><td>Hoy, en tu ciudad</td><td>'+clima()+'</td></tr></table>';
+    const ops=[{t:'Donar a la obra de la parroquia ('+fm(c1)+')',cat:'familia',cerrar:false,d:'Baja lo que se dice y sube un poco tu prestigio.',dis:sinM||(S.efectivo<c1?'No alcanza':null),run:()=>{ mov(); tom(c1); e.nivel=cl(e.nivel-10,0,100); prest(1,'una donación a la parroquia'); log('Tu donación a la parroquia se agradeció desde el púlpito.'); escenaNombre(); }},
+      {t:'Dar una cena con los amigos que te quedan ('+fm(c2)+')',cat:'familia',cerrar:false,d:'Recompones algunos lazos.',dis:sinM||(S.efectivo<c2?'No alcanza':null),run:()=>{ mov(); tom(c2); e.nivel=cl(e.nivel-5,0,100); S.p.redes=cl((S.p.redes||0)+3,0,100); log('La cena fue pequeña y sincera. Se habló de todo menos de lo que todos pensaban.'); escenaNombre(); }},
+      {t:'Irte una temporada a otra ciudad',cat:'familia',cerrar:false,d:'En el exterior o en una ciudad más abierta, se te cobra menos.',run:()=>{ try{ cerrarModal(); }catch(x){} escenaCiudad(); }},
+      {t:'Cerrar',cat:'familia',run:()=>{}}];
+    escena({rubro:'Vida social',titulo:TIT,ancho:true,cerrable:true,cuerpo:'Lo que la ciudad dice de ti desde tu '+E(e.motivo)+'. Se enfría con los años, y más rápido lejos de donde todos te conocen.',html:tabla,opciones:ops}); }
+
+  /* ---------- enganches ---------- */
+  function wrapHito(){ const old=window.hito; if(typeof old!=='function'||old.__v228) return; const f=function(t){ const r=old.apply(this,arguments); try{ const s=String(t||''); if(/^Se divorció de /.test(s)) alTerminar(false); else if(/^Anuló su matrimonio con /.test(s)) alTerminar(true); else if(/^Se casó con (?!su )/.test(s)) alCasarse(); }catch(e){ console.error(e); } return r; }; f.__v228=true; window.hito=f; }
+  function wrapDesc(){ const old=window.descFin181; if(typeof old!=='function'||old.__v228) return; const f=function(){ let d=old.apply(this,arguments); try{ const n=nivelInicial(typeof window.tituloFin181==='function'&&/anulación/i.test(window.tituloFin181())); d+=' Costo social estimado: '+(n>=60?'muy alto':n>=35?'alto':n>=15?'medio':'bajo')+' (hoy, aquí, '+clima()+').'; }catch(e){} return d; }; f.__v228=true; window.descFin181=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA228_PASO) return; window.__SA228_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function grupo(){ const Gp=window.GRUPOS_91; if(!Array.isArray(Gp)) return; const g=Gp.find(x=>x.id==='matrimonio'); if(g&&Array.isArray(g.miembros)&&!g.miembros.some(m=>m[1]===TIT)) g.miembros.push(['Tu matrimonio',TIT]); }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA228_ACC) return; window.__SA228_ACC=true;
+    window.listaAcciones=function(){ try{ grupo(); }catch(e){} const L=old.apply(this,arguments);
+      try{ const e=ES(); if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18&&e&&e.nivel>=8&&!L.some(x=>x&&x.t===TIT)) L.push({t:TIT,cat:'familia',d:'Lo que la ciudad dice de ti desde tu '+e.motivo+': el club, la Iglesia, el colegio y los bancos.',mov:0,modal:true,run:()=>escenaNombre()}); }catch(x){ console.error(x); }
+      try{ if(typeof window.replegarAcciones192==='function') window.replegarAcciones192(L); }catch(e){}
+      return L; }; window.listaAcciones.__v228=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA228_CAT) return; window.__SA228_CAT=true; window.catDe=function(t){ if(t===TIT) return 'familia'; return old.apply(this,arguments); }; }
+  function init228(){ wrapHito(); wrapDesc(); wrapPaso(); wrapAcciones(); wrapCat(); try{ grupo(); }catch(e){}
+    Object.assign(window,{estigmaDivorcio228:ES,nivelInicialEstigma228:nivelInicial,climaDivorcio228:clima,baseEstigma228:BASE,alTerminarMatrimonio228:alTerminar,alEscandalo228:alEscandalo,alCasarse228:alCasarse,anualEstigma228:anual,escenaNombre228:escenaNombre,
+      eventosEstigma228:{club:evClub,iglesia:evIglesia,colegio:evColegio,credito:evCredito,segundas:evSegundas,invita:evInvita}}); }
+  init228(); setTimeout(init228,40); setTimeout(init228,220); setTimeout(init228,650); setTimeout(init228,950); setTimeout(init228,1500);
+  window.__SA228={version:V228};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v229 · QUE TE LA PRESENTEN, Y LA CONQUISTES
+   «Conocer a alguien discretamente» regalaba una amante al azar. Ahora una
+   amante se conquista:
+   - Primero eliges DÓNDE: el club, el trabajo, una cena de sociedad, un viaje
+     de negocios, la colonia colombiana (si vives afuera) o un amigo que te la
+     presenta. Cada sitio tiene su costo, su discreción y su probabilidad.
+   - Después te presentan a tres candidatas (o candidatos) con su edad, su
+     oficio según la época, su carácter (reservada, apasionada, ambiciosa...)
+     y su estado: soltera, casada o viuda. Una casada es más riesgosa.
+   - Eliges a quién cortejar y no está garantizado: pesan tu carisma, tu
+     prestigio, la época (antes de 1960 era más difícil y más vigilado), tu
+     historial de escándalos y la discreción de ella. Un solo intento por año.
+   - Si sale bien, entra a tu vida privada (v108/v227) con sus datos; si sale
+     mal, puede quedar en un comentario: pierdes prestigio y tu pareja se
+     entera de rumores.
+   ========================================================================== */
+(function(){
+  const V229='v229';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const abroad=()=>{ try{ return !!(S.hogar&&S.hogar.ciudad&&ciudadGlobalDe(S.hogar.ciudad)); }catch(e){ return false; } };
+  const trabaja=()=>{ try{ return !!S.emp||(S.carrera&&S.carrera.ruta&&S.carrera.ruta!=='desempleado'); }catch(e){ return false; } };
+
+  /* ---------- dónde ---------- */
+  const AMB=[
+    {id:'club',donde:'en el club de la familia',n:'En el club de la familia',d:'Ahí todos se conocen: es fácil, pero todo se comenta.',base:.45,disc:-12,costo:0,casada:.35,ok:()=>!!S.clubFamilia||A()>=1900},
+    {id:'trabajo',donde:'en el trabajo',n:'En el trabajo o en tus compañías',d:'Una colega, una clienta, una proveedora. Cómodo y con testigos.',base:.5,disc:-6,costo:0,casada:.25,ok:()=>trabaja()},
+    {id:'sociedad',donde:'en una cena de sociedad',n:'En una cena o fiesta de sociedad',d:'Vestirse bien, llegar tarde y saber qué decir.',base:.4,disc:0,costo:.0005,casada:.3,ok:()=>true},
+    {id:'viaje',donde:'en un viaje de negocios',n:'En un viaje de negocios',d:'Lejos de tu gente se puede ser otro. Cuesta más y se nota menos.',base:.55,disc:15,costo:.003,casada:.15,ok:()=>true},
+    {id:'colonia',donde:'en la colonia colombiana',n:'En la colonia colombiana',d:'Gente de tu tierra, lejos de casa.',base:.5,disc:5,costo:.0008,casada:.25,ok:()=>abroad()},
+    {id:'amigo',donde:'con la presentación de un amigo',n:'Un amigo te la presenta',d:'Depende de a quién conozcas. Poco ruido, pero le debes un favor.',base:.6,disc:5,costo:.001,casada:.2,ok:()=>(S.p.redes||0)>=30}
+  ];
+  const CARACT=[
+    {id:'reservada',n:'reservada',disc:10,afe:-5},{id:'apasionada',n:'apasionada',disc:-8,afe:8},{id:'ambiciosa',n:'ambiciosa',disc:-3,afe:0},
+    {id:'independiente',n:'independiente',disc:3,afe:-2},{id:'divertida',n:'divertida',disc:-2,afe:4},{id:'culta',n:'culta',disc:2,afe:2}];
+  const hint=d=>d>=60?'muy discreta':d>=45?'discreta':'comentadora';
+  const ambs=()=>AMB.filter(a=>{ try{ return a.ok(); }catch(e){ return false; } });
+  const ambDe=id=>AMB.find(a=>a.id===id)||null;
+  const costo=a=>Math.round(Math.max(0,pat()*a.costo));
+
+  /* ---------- candidatas ---------- */
+  function candidata(amb){ let a=null; try{ a=nuevoAmante(); }catch(e){ return null; }
+    const car=CARACT[ri(0,CARACT.length-1)]; a.caracter229=car.id; a.discrecion=cl((a.discrecion||50)+car.disc+amb.disc,10,95); a.afecto=cl((a.afecto||50)+car.afe,5,95); a.ambiente229=amb.id;
+    const r=Math.random(); const era=A(); const pCasada=amb.casada*(era<1960?.7:1);
+    a.civil229=r<pCasada?'casada':r<pCasada+.15?'viuda':'soltera'; if(a.civil229==='casada') a.discrecion=cl(a.discrecion+5,10,95);
+    return a; }
+  function generar(amb){ const c=S.cand229; if(c&&c.anio===A()&&c.amb===amb.id&&Array.isArray(c.lista)&&c.lista.length) return c.lista; const lista=[]; for(let i=0;i<3;i++){ const a=candidata(amb); if(a) lista.push(a); }
+    S.cand229={anio:A(),amb:amb.id,lista}; return lista; }
+
+  /* ---------- la probabilidad ---------- */
+  function prob(a,amb){ const car=(S.p.atr&&S.p.atr.carisma)||5; let p=amb.base+(car-5)/25+((S.p.reputacion||50)-50)/300-(S.p.escandalos||0)*.012;
+    const era=A(); if(era<1960) p-=.12; else if(era<1990) p-=.04;
+    if(a.civil229==='casada') p-=.12; else if(a.civil229==='viuda') p+=.04;
+    if(a.caracter229==='independiente') p-=.05; if(a.caracter229==='apasionada') p+=.06;
+    const q=PA(); if(q&&q.casados&&era<1960) p-=.05;
+    return cl(p,.1,.9); }
+
+  /* ---------- el intento ---------- */
+  function cortejar(a,amb){ if(!ACTIVO()||nino()) return {ok:false,txt:''}; if(S.cortejo229===A()) return {ok:false,txt:'Ya lo intentaste este año.'}; if((S.mov||0)<1) return {ok:false,txt:'No te quedan movidas.'};
+    const c=costo(amb); if(S.efectivo<c) return {ok:false,txt:'No alcanza para el costo ('+fm(c)+').'};
+    S.mov=Math.max(0,S.mov-1); S.cortejo229=A(); tom(c); if(amb.id==='amigo') S.p.redes=cl((S.p.redes||0)-1,0,100); delete S.cand229;
+    const p=prob(a,amb), q=PA();
+    if(Math.random()<p){ if(!Array.isArray(S.familia.amantes)) S.familia.amantes=[]; a.activo=true; a.desde=A(); S.familia.amantes.push(a);
+      S.p.felicidad=cl((S.p.felicidad||60)+ri(7,13),0,100); S.p.escandalos=cl((S.p.escandalos||0)+(q?0.4:.1),0,20);
+      const txt='Lo que empezó '+amb.donde+' terminó en algo más: <b>'+E(a.nombre)+'</b> ('+E(a.rol||'')+', '+a.edad+' años, '+({soltera:'soltera',casada:'casada',viuda:'viuda'})[a.civil229]+') aceptó verte a solas.'+(a.civil229==='casada'?' Ella tiene marido: esto es más riesgoso de lo que parece.':'');
+      log(txt,'bien'); return {ok:true,txt,amante:a}; }
+    // salió mal
+    const rumor=Math.random()<cl(.25*(amb.id==='club'||amb.id==='sociedad'?1.5:1)*(a.civil229==='casada'?1.4:1),.05,.6); let extra='';
+    if(rumor){ try{ if(typeof window.escandaloFamiliar227==='function') window.escandaloFamiliar227(.3,'un cortejo fallido'); else prest(-1,'un cortejo fallido'); }catch(e){} if(q) q.paciencia=cl((q.paciencia||60)-4,0,100); extra=' Y alguien lo comentó en la ciudad.'; }
+    const txt='<b>'+E(primer(a.nombre))+'</b> te dio las gracias y nada más.'+extra; log(txt,'mal'); S.p.felicidad=cl((S.p.felicidad||60)-2,0,100); return {ok:false,txt,rumor}; }
+
+  /* ---------- las escenas ---------- */
+  function escenaAmbiente(){ const ya=S.cortejo229===A(), sinM=(S.mov||0)<1?'No te quedan movidas':null;
+    const ops=ambs().map(a=>({t:a.n+(a.costo?' · ~'+fm(Math.max(1,pat()*a.costo)):' · sin costo'),cat:'familia',cerrar:false,d:a.d+' Discreción: '+(a.disc>0?'alta':a.disc<-6?'baja':'media')+'.',dis:ya?'Ya lo intentaste este año':(sinM||(S.efectivo<costo(a)?'No alcanza':null)),run:()=>escenaCandidatas(a)}));
+    ops.push({t:'Mejor no',cat:'familia',run:()=>{}});
+    escena({rubro:'Vida sentimental',titulo:'Conocer a alguien discretamente',ancho:true,cerrable:true,cuerpo:ya?'Este año ya cortejaste a alguien. Las cosas se hacen con tiempo.':'Una relación así no se compra ni se regala: se conquista. ¿Dónde quieres buscarla?',opciones:ops}); }
+  function escenaCandidatas(amb){ const L=generar(amb); if(!L.length){ escenaAmbiente(); return; }
+    const filas='<table class="libro">'+L.map(a=>'<tr><td>'+E(a.nombre)+' · '+E(a.rol||'')+'</td><td>'+a.edad+' años · '+a.caracter229+' · '+a.civil229+' · '+hint(a.discrecion)+'</td></tr>').join('')+'</table>';
+    const ops=L.map(a=>({t:'Cortejar a '+E(primer(a.nombre))+' · '+Math.round(prob(a,amb)*100)+'%',cat:'familia',d:(a.civil229==='casada'?'Casada: más riesgo si se sabe. ':'')+'Un solo intento por año.',cerrar:true,run:()=>{ const r=cortejar(a,amb); if(r&&!r.ok&&/^(Ya lo|No )/.test(r.txt||'')) log(r.txt,'mal'); try{ if(typeof render==='function') render(); }catch(e){} }}));
+    ops.push({t:'Volver',cat:'familia',cerrar:false,run:()=>escenaAmbiente()});
+    escena({rubro:'Vida sentimental',titulo:amb.n,ancho:true,cerrable:true,cuerpo:'Te presentan a tres personas. Eliges a quién cortejar; no hay garantías.',html:filas,opciones:ops}); }
+  function conocer(){ if(!ACTIVO()||nino()||(S.p.edad||0)<18) return false; escenaAmbiente(); return true; }
+
+  function init229(){ Object.assign(window,{conocerAmante229:conocer,escenaAmbiente229:escenaAmbiente,escenaCandidatas229:escenaCandidatas,cortejarAmante229:cortejar,probCortejo229:prob,candidatasAmante229:generar,ambientesAmante229:ambs,AMBIENTES_AMANTE_229:AMB}); }
+  init229(); setTimeout(init229,40); setTimeout(init229,220); setTimeout(init229,650); setTimeout(init229,950); setTimeout(init229,1500);
+  window.__SA229={version:V229};
 })();
 </script>
 
