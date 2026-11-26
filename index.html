@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v230</div>
+<div class="version-badge" id="versionBadge">v231</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -40205,6 +40205,75 @@ install();setTimeout(install,1200);
   function init230(){ wrapCorrer(); wrapRender(); wrapPaso(); Object.assign(window,{rehidratarCompromisos230:rehidratar,relinkarCompromisos230:relinkar,normalizarEstado230:normalizar,recetaCompromiso230:receta}); }
   init230(); setTimeout(init230,40); setTimeout(init230,220); setTimeout(init230,650); setTimeout(init230,950); setTimeout(init230,1500);
   window.__SA230={version:V230};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v231 · EL AÑO SIEMPRE SE PUEDE CERRAR, Y LA CASA SIEMPRE TIENE SUCESOR
+   El reporte: «a veces, después de tanto tiempo, no me deja seguir con el
+   siguiente hijo». Dos fallas de fondo hacían que cualquier tropiezo dejara
+   la partida sin salida:
+   1. El botón «Cerrar el año» se deshabilitaba antes de cerrar y se volvía a
+      habilitar después; si algo fallaba en medio, quedaba deshabilitado para
+      siempre. Ahora siempre se vuelve a habilitar y, si algo falló, se avisa.
+   2. Una compañía de una partida vieja a la que le falta un campo (el
+      historial, las patentes, las alianzas...) hacía fallar el cierre del
+      año, año tras año. Ahora esos campos se completan al retomar la partida,
+      al cerrar el año y al correr cada compañía; y si una compañía falla, no
+      arrastra a las demás.
+   3. Si la pantalla de la sucesión fallaba por algún dato raro, no había
+      con quién seguir. Ahora hay una pantalla de reserva con los hijos y, si
+      la herencia misma tropieza, se avisa y se puede escoger a otro.
+   4. La causa más probable del reporte: si la partida se guardaba cuando el
+      personaje ya había muerto (el botón Guardar durante la lectura del
+      testamento, o una copia), al retomarla quedaba «muerto», sin pantalla de
+      sucesión y con el botón de cerrar el año inerte. Ahora, al pintar o al
+      pulsar el botón, si el personaje está muerto y no hay escena abierta, se
+      reabre la lectura del testamento.
+   ========================================================================== */
+(function(){
+  const V231='v231';
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+
+  /* ---------- 2. compañías de partidas viejas ---------- */
+  function normalizarCompanias(){ let n=0; try{ const L=(typeof companias==='function')?companias():[]; L.forEach(e=>{ if(!e||typeof e!=='object') return;
+        ['historia','patentes','jv','junta','filiales','pensiones','productos'].forEach(k=>{ if(!Array.isArray(e[k])){ e[k]=[]; n++; } });
+        if(!Array.isArray(e.holders)){ e.holders=[{id:'tu',nombre:'Tú',tipo:'control',n:1000000}]; n++; }
+        ['ingresos','costos','utilidad','caja','deuda','empleados','aniosMalos','aniosAhogo','crecimiento'].forEach(k=>{ if(typeof e[k]!=='number'||!isFinite(e[k])){ e[k]=0; n++; } });
+        ['moral','eficiencia','innovacion','marca'].forEach(k=>{ if(typeof e[k]!=='number'||!isFinite(e[k])){ e[k]=50; n++; } }); }); }catch(e){ console.error(e); } return n; }
+  function wrapGrupo(){ const old=window.asegurarGrupo; if(typeof old!=='function'||old.__v231) return; const f=function(){ const r=old.apply(this,arguments); try{ normalizarCompanias(); }catch(e){} return r; }; f.__v231=true; window.asegurarGrupo=f; }
+  function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__v231) return; const f=function(res,e){ try{ if(e&&typeof e==='object'){ ['historia','patentes','jv','junta','filiales','pensiones','productos'].forEach(k=>{ if(!Array.isArray(e[k])) e[k]=[]; }); } }catch(x){}
+      try{ return old.apply(this,arguments); }catch(err){ console.error(err); try{ log('Algo se enredó en las cuentas de <b>'+E(e&&e.nombre||'una compañía')+'</b> este año; se siguió con el resto.','mal'); }catch(x){} } };
+    f.__v231=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.correrEmpresa=f; }
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA231_PASO) return; window.__SA231_PASO=true; window.pasarAnio=function(){ try{ normalizarCompanias(); }catch(e){} return old.apply(this,arguments); }; }
+
+  /* ---------- 3. la sucesión siempre tiene salida ---------- */
+  function pantallaReserva(vivo){ let hs=[]; try{ hs=(S.familia.hijos||[]).filter(h=>h&&h.edad>=0&&h.vivo!==false); }catch(e){}
+    if(!hs.length){ let em=null; try{ em=sucesorDeEmergencia(); }catch(e){} if(em){ escena({rubro:'Continuidad de la casa',titulo:'La casa necesita un sucesor',ancho:true,cuerpo:'No se pudo armar la lista de herederos. La familia extensa reconoce a una rama lejana del apellido para que la casa continúe.',opciones:[{t:'Continuar con '+E(em.nombre),cat:'familia',cerrar:false,run:()=>{ cerrarModal(); modalReparto(em,vivo); }}]}); return; } }
+    escena({rubro:'Sucesión',titulo:'¿Con quién sigue la casa?',ancho:true,cuerpo:'La lista completa de herederos no se pudo armar, pero estos son tus hijos. Con quien elijas sigues jugando.',
+      opciones:hs.map(h=>({t:E(h.nombre+' '+(h.apellido||S.p.apellido))+', '+h.edad+' años',cat:'familia',cerrar:false,run:()=>{ cerrarModal(); modalReparto(h,vivo); }}))}); }
+  function wrapPantalla(){ const old=window.pantallaSucesion; if(typeof old!=='function'||old.__v231) return; const f=function(vivo){ try{ return old.apply(this,arguments); }catch(err){ console.error(err); try{ cerrarModal(); }catch(x){} try{ pantallaReserva(vivo); }catch(x){ console.error(x); } } };
+    f.__v231=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.pantallaSucesion=f; }
+  function wrapHeredar(){ const old=window.heredar; if(typeof old!=='function'||old.__v231) return; const f=function(h,frac,vivo,pleito){ const gen0=S&&S.gen; try{ return old.apply(this,arguments); }catch(err){ console.error(err);
+        if(S&&S.gen===gen0&&!vivo){ try{ log('La sucesión tropezó con un detalle de la herencia. Elige de nuevo con quién sigue la casa.','mal'); cerrarModal(); pantallaSucesion(false); }catch(x){ console.error(x); } return; } throw err; } };
+    f.__v231=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.heredar=f; }
+
+  /* ---------- 4. una partida guardada ya muerta reabre la sucesión ---------- */
+  function revisarMuerto(){ try{ if(!S||!S.p||!S.muerto) return false; const host=document.getElementById('escenaHost'); if(host&&host.innerHTML.trim()) return false;
+      escena({rubro:'Fin de una vida',titulo:E(S.p.nombre+' '+S.p.apellido)+', '+(S.anio-S.p.edad)+'–'+S.anio,ancho:true,cuerpo:'La partida se guardó cuando la casa ya había perdido a su cabeza. Lo que sigue lo decide el testamento.',
+        opciones:[{t:'Leer el testamento',cat:'legado',cerrar:false,run:()=>{ cerrarModal(); pantallaSucesion(false); }}]}); return true; }catch(e){ console.error(e); return false; } }
+  function wrapRender(){ const old=window.render; if(typeof old!=='function'||old.__v231) return; const f=function(){ const r=old.apply(this,arguments); try{ revisarMuerto(); }catch(e){} return r; }; f.__v231=true; Object.keys(old).forEach(k=>{ if(/^__v\d+$/.test(k)) f[k]=true; }); window.render=f; }
+
+  /* ---------- 1. el botón de cerrar el año ---------- */
+  function cerrarAnioSeguro(){ const b=document.getElementById('btnAnio'); if(!S) return; if(S.muerto){ revisarMuerto(); return; } if(b) b.disabled=true;
+    setTimeout(()=>{ try{ pasarAnio(); }catch(err){ console.error(err); try{ log('Algo se enredó al cerrar el año. El año siguiente puede cerrarse de nuevo.','mal'); }catch(x){} try{ if(typeof aviso==='function') aviso('Algo se enredó al cerrar el año: intenta de nuevo.'); }catch(x){} try{ render(); }catch(x){} } finally{ if(b) b.disabled=false; } },10); }
+  function wrapBoton(){ const b=document.getElementById('btnAnio'); if(!b||b.__v231) return; b.onclick=cerrarAnioSeguro; b.__v231=true; }
+
+  function init231(){ wrapGrupo(); wrapEmpresa(); wrapPaso(); wrapPantalla(); wrapHeredar(); wrapRender(); wrapBoton();
+    Object.assign(window,{normalizarCompanias231:normalizarCompanias,pantallaReservaSucesion231:pantallaReserva,cerrarAnioSeguro231:cerrarAnioSeguro,revisarMuerto231:revisarMuerto}); }
+  init231(); setTimeout(init231,40); setTimeout(init231,220); setTimeout(init231,650); setTimeout(init231,950); setTimeout(init231,1500);
+  window.__SA231={version:V231};
 })();
 </script>
 
