@@ -40240,7 +40240,7 @@ install();setTimeout(install,1200);
   function normalizarCompanias(){ let n=0; try{ const L=(typeof companias==='function')?companias():[]; L.forEach(e=>{ if(!e||typeof e!=='object') return;
         ['historia','patentes','jv','junta','filiales','pensiones','productos'].forEach(k=>{ if(!Array.isArray(e[k])){ e[k]=[]; n++; } });
         if(!Array.isArray(e.holders)){ e.holders=[{id:'tu',nombre:'Tú',tipo:'control',n:1000000}]; n++; }
-        ['ingresos','costos','utilidad','caja','deuda','empleados'].forEach(k=>{ if(typeof e[k]!=='number'||!isFinite(e[k])){ e[k]=0; n++; } });
+        ['ingresos','costos','utilidad','caja','deuda','empleados','aniosMalos','aniosAhogo','crecimiento'].forEach(k=>{ if(typeof e[k]!=='number'||!isFinite(e[k])){ e[k]=0; n++; } });
         ['moral','eficiencia','innovacion','marca'].forEach(k=>{ if(typeof e[k]!=='number'||!isFinite(e[k])){ e[k]=50; n++; } }); }); }catch(e){ console.error(e); } return n; }
   function wrapGrupo(){ const old=window.asegurarGrupo; if(typeof old!=='function'||old.__v231) return; const f=function(){ const r=old.apply(this,arguments); try{ normalizarCompanias(); }catch(e){} return r; }; f.__v231=true; window.asegurarGrupo=f; }
   function wrapEmpresa(){ const old=window.correrEmpresa; if(typeof old!=='function'||old.__v231) return; const f=function(res,e){ try{ if(e&&typeof e==='object'){ ['historia','patentes','jv','junta','filiales','pensiones','productos'].forEach(k=>{ if(!Array.isArray(e[k])) e[k]=[]; }); } }catch(x){}
