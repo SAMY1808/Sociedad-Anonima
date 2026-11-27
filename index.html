@@ -1414,7 +1414,7 @@ svg.foto116{display:block;background:#1d2a23}
 </head>
 <body>
 
-<div class="version-badge" id="versionBadge">v231</div>
+<div class="version-badge" id="versionBadge">v232</div>
 
 <div id="portada" class="wrap portada">
   <div class="marca">Sociedad<em>Anónima</em></div>
@@ -40274,6 +40274,231 @@ install();setTimeout(install,1200);
     Object.assign(window,{normalizarCompanias231:normalizarCompanias,pantallaReservaSucesion231:pantallaReserva,cerrarAnioSeguro231:cerrarAnioSeguro,revisarMuerto231:revisarMuerto}); }
   init231(); setTimeout(init231,40); setTimeout(init231,220); setTimeout(init231,650); setTimeout(init231,950); setTimeout(init231,1500);
   window.__SA231={version:V231};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   v232 · LA SANGRE EN LA CASA
+   Hasta aquí los delitos del juego eran de dinero y de poder. Ahora también
+   hay muertes. Se cuentan como una crónica, sin escenas gráficas: lo que
+   importa son las consecuencias (la familia, la plata, la justicia, la culpa).
+   1. Contra tu casa: un atentado contra ti, el asesinato de un pariente, una
+      amenaza que no se sabe de quién es. Cada época tiene su propia violencia
+      (La Violencia de 1948–58, los años del sicariato, los secuestros) y la
+      seguridad que contrates (v91) y la ciudad en que vives la cambian.
+   2. Dentro de la familia y la sociedad: un hijo acusado de un homicidio (pagar
+      un abogado, comprar testigos, entregarlo, mandarlo lejos), el marido de una
+      amante casada, un enemigo de la casa que aparece muerto y te señalan a ti,
+      y una dolencia que no cede cuando un heredero te quiere ver afuera.
+   3. Ajustar cuentas: solo si alguien te debe una cuenta de verdad (un agravio
+      que te hicieron) se abre una puerta oscura: mandar un recado, comprar su
+      silencio o encargar lo peor. Un encargo es un homicidio: abre un secreto
+      que se va pudriendo, trae chantajistas, testigos y fiscales, y deja
+      culpa, que pesa en el ánimo, en la salud y en los hijos. Hay salidas: la
+      conciencia (confesión, ayuda, obras) o entregarte.
+   Las leyes y las épocas están aproximadas para el juego.
+   ========================================================================== */
+(function(){
+  const V232='v232';
+  const A=()=>(typeof S!=='undefined'&&S&&isFinite(S.anio))?S.anio:2026;
+  const fm=x=>fmt(Math.round(x));
+  const E=x=>{ try{ return typeof esc==='function'?esc(x):String(x==null?'':x); }catch(e){ return String(x==null?'':x); } };
+  const cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const nino=()=>{ try{ return typeof window.esNino94==='function'&&!!window.esNino94(); }catch(e){ return false; } };
+  const ACTIVO=()=>!!(typeof S!=='undefined'&&S&&S.p&&!S.muerto);
+  const pat=()=>{ try{ const x=patrimonio(); return isFinite(x)?Math.max(0,x):0; }catch(e){ return 0; } };
+  const tom=x=>{ const u=Math.min(Math.max(0,x),Math.max(0,S.efectivo)); S.efectivo-=u; return u; };
+  const prest=(n,t)=>{ try{ moverPrestigio(n,t||''); }catch(e){} };
+  const primer=n=>String(n||'').split(' ')[0];
+  const PA=()=>(S&&S.familia&&S.familia.pareja)||null;
+  const abroad=()=>{ try{ return !!(S.hogar&&S.hogar.ciudad&&ciudadGlobalDe(S.hogar.ciudad)); }catch(e){ return false; } };
+  const seg=()=>{ try{ return window.conf91?cl(window.conf91().seguridad||0,0,2):0; }catch(e){ return 0; } };
+  const SEG=[1,.6,.35];
+
+  /* ---------- el estado ---------- */
+  function ES(){ if(!S.sangre232||typeof S.sangre232!=='object') S.sangre232={culpa:0,agravios:[],secretos:[],hechos:[],ult:{},n:0};
+    const s=S.sangre232; ['agravios','secretos','hechos'].forEach(k=>{ if(!Array.isArray(s[k])) s[k]=[]; }); if(!s.ult||typeof s.ult!=='object') s.ult={}; if(!isFinite(s.culpa)) s.culpa=0; if(!isFinite(s.n)) s.n=0; return s; }
+  const hecho=(t)=>{ const e=ES(); e.hechos.push({t,anio:A()}); e.hechos=e.hechos.slice(-12); };
+
+  /* ---------- la violencia de cada época ---------- */
+  function viol(a){ a=a||A(); if(a<1899) return .3; if(a<=1902) return .7; if(a<1948) return .3; if(a<=1958) return 1; if(a<1980) return .45; if(a<=1995) return 1; if(a<=2005) return .85; if(a<=2015) return .5; return .35; }
+  function expo(){ const p=pat(); let x=.4+(p>500?.2:0)+(p>5000?.25:0)+(S.emp?.1:0);
+    try{ if(typeof window.factorRiesgoCiudad92==='function') x*=window.factorRiesgoCiudad92(); }catch(e){}
+    if(abroad()) x*=.35; return cl(x,.15,1.4); }
+  const pBase=()=>viol()*expo()*SEG[seg()];
+
+  /* ---------- gente de la que no sabemos nada ---------- */
+  const NOM_H=['Ramiro','Octavio','Heriberto','Gilberto','Edgar','Álvaro','Wilson','Fabio','Hernán','Cristóbal','Evelio','Nelson'];
+  const NOM_M=['Luz Marina','Gladys','Nubia','Amparo','Stella','Marleny','Yolanda','Esperanza'];
+  const APE=['Rojas','Quintero','Mejía','Cardona','Beltrán','Salgado','Vergara','Ospina','Londoño','Peña','Suárez','Montoya','Caicedo','Ardila'];
+  const gente=(sx)=>{ const m=sx==='m'; return pick(m?NOM_M:NOM_H)+' '+pick(APE); };
+  const vehiculo=()=>{ const a=A(); return a<1930?'Dos jinetes te cerraron el paso en una calle estrecha.':a<1975?'Un carro sin placas te cerró el paso a la salida del club.':'Dos hombres en una moto se emparejaron con tu carro en un semáforo.'; };
+
+  /* ---------- las cuentas pendientes ---------- */
+  function addAgravio(o){ const e=ES(); const nombre=o&&o.nombre; if(!nombre) return null; let a=e.agravios.find(x=>x.nombre===nombre);
+    if(!a){ a={nombre,quien:o.quien||'enemigo',motivo:o.motivo||'',apellido:o.apellido||null,anio:A()}; e.agravios.push(a); e.agravios=e.agravios.slice(-5); } return a; }
+  function enemigoPosible(){ try{ const R=(typeof rivalesVivas==='function'?rivalesVivas():[]).filter(r=>(r.relacionCasa==null?50:r.relacionCasa)<50);
+      if(R.length){ const r=pick(R); return {nombre:'un hombre de los '+r.apellido,quien:'rival',apellido:r.apellido}; } }catch(e){}
+    return {nombre:gente('h'),quien:'enemigo',apellido:null}; }
+
+  /* ---------- los parientes que mueren de mala manera ---------- */
+  function matarPariente(pa,causa){ if(!pa||!pa.vivo) return false; pa.vivo=false; pa.causaMuerte232=causa||'un homicidio'; const cercano=['padre','madre','hermano','hermana'].includes(pa.rel);
+    S.p.felicidad=cl(S.p.felicidad-(cercano?18:8),0,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres+8,0,100);
+    try{ if(['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)&&typeof encolarFuneral==='function') encolarFuneral(pa); }catch(e){}
+    try{ if((pa.caudal||0)>5&&['padre','madre','hermano','hermana','tío','tía','abuelo','abuela'].includes(pa.rel)&&typeof encolarSucesion==='function') encolarSucesion(pa); }catch(e){}
+    try{ if(pa.gerenciaDe&&typeof sociedades==='function'){ const so=sociedades().find(x=>x.sid===pa.gerenciaDe); if(so) so.gerente=null; } }catch(e){}
+    log('Asesinaron a tu '+E(pa.rel)+' <b>'+E(nombrePariente(pa))+'</b>.','mal'); return true; }
+
+  /* ---------- 1. contra tu casa ---------- */
+  function dano(){ const s=seg(); const fat=[.08,.04,.015][s], her=[.5,.35,.2][s];
+    if(chance(fat)){ S.p.salud=0; ES().ult.herida=A(); return 'Esta vez no hubo un segundo de diferencia: los médicos no pudieron hacer más.'; }
+    if(chance(her)){ S.p.salud=cl(S.p.salud-ri(20,45),1,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres+15,0,100); ES().ult.herida=A(); return 'Una bala te rozó: semanas en una clínica y la certeza de que no fue un error.'; }
+    return 'Saliste ileso, por un segundo de diferencia.'; }
+  function evAtentado(){ const c1=Math.round(Math.max(6,pat()*.004)); let d=null; const hoy=()=>{ if(d==null) d=dano(); return d; };
+    return {p:10,c:()=>ACTIVO()&&!nino()&&(S.p.edad||0)>=22,
+      t:()=>{ ES().ult.atentado=A(); return '<b>Atentado.</b> '+vehiculo()+' Se oyeron los disparos y la ciudad entera lo supo antes de que llegara la policía.'; },
+      o:[{t:'Reforzar tu seguridad',f:()=>{ const x=hoy(); let r=x+' '; try{ const c=window.conf91&&window.conf91(); if(c&&(c.seguridad||0)<2){ c.seguridad=Math.min(2,(c.seguridad||0)+1); r+='Contrataste más protección; se te cobra cada año.'; } else r+='Ya tienes todo lo que se puede comprar; lo que falta es saber quién lo mandó.'; }catch(e){} hecho('Sobrevivió a un atentado'); try{ hito('Sobrevivió a un atentado en '+A()); }catch(e){} return r; }},
+         {t:'Denunciar y exigir protección',f:()=>{ const x=hoy(); hecho('Sobrevivió a un atentado'); const ok=chance(cl(.25+(S.p.redes||0)/300,.15,.55)); if(ok) prest(1,'denunció un atentado'); return x+' '+(ok?'Capturaron al que disparó; quién lo mandó, nadie lo dice.':'La denuncia quedó en un expediente que nadie abre.'); }},
+         {t:'Investigar por tu cuenta ('+fm(c1)+')',f:()=>{ const x=hoy(); hecho('Sobrevivió a un atentado'); tom(c1); if(chance(cl(.45+(S.p.redes||0)/250,.3,.75))){ const q=enemigoPosible(); const a=addAgravio({nombre:q.nombre,quien:q.quien,apellido:q.apellido,motivo:'el atentado contra ti'}); return x+' Tu gente averiguó que lo mandó <b>'+E(a?a.nombre:q.nombre)+'</b>. Ahora tienes un nombre y una cuenta pendiente.'; } return x+' No averiguaste nada que sirva.'; }},
+         {t:'Esconderte unos meses',f:()=>{ const x=hoy(); hecho('Sobrevivió a un atentado'); S.p.felicidad=cl(S.p.felicidad-6,0,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres+10,0,100); S.p.redes=cl((S.p.redes||0)-2,0,100); return x+' Pasaste meses sin pisar la calle. La ciudad siguió sin ti.'; }}]}; }
+  function parientesAsesinables(){ try{ return parientesVivos().filter(p=>['hermano','hermana','tío','tía','primo','prima','sobrino','sobrina','primo segundo','prima segunda'].includes(p.rel)&&(p.edad||0)>=18); }catch(e){ return []; } }
+  function evAsesinato(pa){ const c1=Math.round(Math.max(8,pat()*.004)), c2=Math.round(Math.max(8,pat()*.006)); let hecho_=false; const mata=()=>{ if(!hecho_){ hecho_=true; matarPariente(pa,'un homicidio'); } };
+    return {p:10,c:()=>ACTIVO()&&!!pa&&pa.vivo,
+      t:()=>{ const a=A(); return '<b>Asesinaron a tu '+E(pa.rel)+' '+E(pa.nombre)+'.</b> '+(a>=1948&&a<=1958?'Lo sacaron de su finca una madrugada y apareció en un camino. En esos años eso ya casi ni se denuncia.':a<1975?'Lo hallaron en la calle, a pocas cuadras de su casa, y la policía habla de un robo.':'Lo balearon a la salida de su oficina. Nadie vio nada.'); },
+      o:[{t:'Presionar a las autoridades ('+fm(c1)+')',f:()=>{ mata(); tom(c1); const ok=chance(cl(.22+(S.p.redes||0)/300-(viol()>.8?.08:0),.1,.5)); return ok?'Capturaron a uno de los responsables materiales. Quién lo mandó, sigue sin saberse.':'La investigación se archivó por falta de pruebas.'; }},
+         {t:'Contratar investigadores ('+fm(c2)+')',f:()=>{ mata(); tom(c2); if(chance(cl(.45+(S.p.redes||0)/300,.3,.7))){ const q=enemigoPosible(); const a=addAgravio({nombre:q.nombre,quien:q.quien==='rival'?'rival':'autores',apellido:q.apellido,motivo:'la muerte de '+primer(pa.nombre)}); return 'Tus investigadores llegaron a un nombre: <b>'+E(a?a.nombre:q.nombre)+'</b>. Con eso puedes ir a la justicia o cobrar por tu cuenta.'; } return 'Tus investigadores no sacaron más que sospechas.'; }},
+         {t:'Pagar el entierro y guardar luto',f:()=>{ mata(); tom(Math.round(Math.max(2,pat()*.001))); prest(1,'una familia que sabe llevar un luto'); S.p.felicidad=cl(S.p.felicidad-3,0,100); return 'El entierro fue largo y la ciudad entera asistió. Hay cosas que se sienten y no se comentan.'; }}]}; }
+  function evAmenaza(){ const c1=Math.round(Math.max(6,pat()*.004)); const q=enemigoPosible(); let sig=false;
+    return {p:9,c:()=>ACTIVO()&&!nino()&&(S.p.edad||0)>=22,
+      t:()=>{ ES().ult.amenaza=A(); return '<b>Una llamada a medianoche.</b> Una voz que no reconoces describe, uno por uno, los lugares que frecuentas y los horarios de tu familia. Cuelga sin decir qué quiere.'; },
+      o:[{t:'Denunciar a las autoridades',f:()=>{ const ok=chance(cl(.2+(S.p.redes||0)/400,.1,.4)); return ok?'La policía rastreó la llamada hasta un teléfono público. Pusieron una patrulla unos días.':'La denuncia quedó en un cuaderno. Nadie volvió a llamar a la oficina.'; }},
+         {t:'Averiguar quién es ('+fm(c1)+')',f:()=>{ tom(c1); if(chance(cl(.5+(S.p.redes||0)/250,.3,.8))){ const a=addAgravio({nombre:q.nombre,quien:q.quien,apellido:q.apellido,motivo:'una amenaza contra tu familia'}); return 'La voz era de <b>'+E(a?a.nombre:q.nombre)+'</b>. Ahora sabes con quién estás hablando.'; } return 'No lograste saber de quién era la voz.'; }},
+         {t:'Reforzar tu seguridad',f:()=>{ try{ const c=window.conf91&&window.conf91(); if(c&&(c.seguridad||0)<2){ c.seguridad=Math.min(2,(c.seguridad||0)+1); return 'Contrataste más protección. Se te cobra cada año.'; } }catch(e){} return 'Ya tenías toda la protección que se compra.'; }},
+         {t:'Ignorarlo',f:()=>{ if(chance(.35)){ ES().ult.sinAtender=A(); } return 'Decidiste no darle importancia. Dormiste mal varias semanas.'; }}]}; }
+
+  /* ---------- 2. dentro de la familia y la sociedad ---------- */
+  function liberar(h){ if(h&&h.preso232&&A()>=h.preso232){ h.preso232=null; log('<b>'+E(h.nombre)+'</b> salió de la cárcel. Habla poco de lo que pasó adentro.','hito'); h.vinculo=cl((h.vinculo||55)-3,0,100); } }
+  function condenar(h,txt){ h.preso232=A()+ri(4,9); h.vinculo=cl((h.vinculo||55)-5,0,100); prest(-3,'un hijo condenado por homicidio'); S.p.felicidad=cl(S.p.felicidad-8,0,100); return txt+' Cumplirá unos '+(h.preso232-A())+' años.'; }
+  function hijosAdultos(){ try{ return (S.familia.hijos||[]).filter(h=>h&&(h.edad||0)>=18&&(h.edad||0)<=50&&!h.preso232&&!h.exilio232); }catch(e){ return []; } }
+  function evHijoAcusado(h){ const c1=Math.round(Math.max(8,pat()*.008)), c2=Math.round(Math.max(10,pat()*.012)), c3=Math.round(Math.max(8,pat()*.006)); const a=A(); const que=a>=1950&&chance(.4)?'un accidente de tránsito con licor, en el que murió un peatón':chance(.5)?'una riña a la salida de un bar que terminó con un muerto':'una discusión por una mujer que terminó con un muerto';
+    return {p:10,c:()=>ACTIVO()&&!!h&&(S.familia.hijos||[]).includes(h)&&!h.preso232,
+      t:()=>'<b>Tu '+(h.sexo==='m'?'hija':'hijo')+' '+E(h.nombre)+' está detenid'+(h.sexo==='m'?'a':'o')+'.</b> La fiscalía lo acusa de homicidio: '+que+'. Te llaman de la estación a las tres de la mañana.',
+      o:[{t:'Pagar al mejor abogado ('+fm(c1)+')',f:()=>{ tom(c1); if(chance(cl(.45+(S.p.redes||0)/300,.3,.75))){ h.vinculo=cl((h.vinculo||55)+4,0,100); return 'El abogado logró que lo dejaran libre por falta de pruebas. '+E(h.nombre)+' no dijo nada, pero entendió lo que costó.'; } return condenar(h,'El abogado no pudo con el expediente: lo condenaron.'); }},
+         {t:'Comprar testigos y encubrirlo ('+fm(c2)+')',f:()=>{ tom(c2); try{ registrarDelito('soborno judicial',4,'encubrir el caso de '+h.nombre); }catch(e){}
+            if(chance(.62)){ const e=ES(); e.culpa=cl(e.culpa+8,0,100); e.n++; e.secretos.push({id:'s'+e.n,tipo:'encubrimiento',nombre:primer(h.nombre),anio:A(),riesgo:ri(20,35)}); e.secretos=e.secretos.slice(-5); h.vinculo=cl((h.vinculo||55)+2,0,100); return 'Los testigos cambiaron su versión y el caso se cerró. La deuda, esa, no se cierra con nadie.'; }
+            try{ if(!S.penal.caso) abrirCasoPenal('soborno judicial y encubrimiento'); }catch(e){} return condenar(h,'El fiscal no se dejó comprar, y el soborno se convirtió en otro delito.'); }},
+         {t:'Entregarlo a la justicia sin intervenir',f:()=>{ if(chance(.35)){ prest(1,'respetó a la justicia'); return 'Lo absolvieron. Tu actitud no pasó desapercibida: «el apellido no compra jueces».'; } prest(1,'respetó a la justicia'); return condenar(h,'Lo condenaron.'); }},
+         {t:'Mandarlo lejos del país ('+fm(c3)+')',f:()=>{ tom(c3); h.exilio232=A(); h.vinculo=cl((h.vinculo||55)-6,0,100); try{ registrarDelito('favorecimiento de fuga',3,'sacar a '+h.nombre+' del país'); }catch(e){}
+            if(chance(.3)){ const e=ES(); e.n++; e.secretos.push({id:'s'+e.n,tipo:'fuga',nombre:primer(h.nombre),anio:A(),riesgo:ri(25,40)}); e.secretos=e.secretos.slice(-5); } S.p.felicidad=cl(S.p.felicidad-6,0,100); return 'Salió esa misma noche con un pasaporte que no era tan suyo. La casa guarda un lugar vacío en la mesa.'; }}]}; }
+  function evMarido(am){ const c1=Math.round(Math.max(8,pat()*.006)), c2=Math.round(Math.max(10,pat()*.01));
+    return {p:9,c:()=>ACTIVO()&&!nino()&&!!am&&am.activo,
+      t:()=>'<b>El marido de '+E(primer(am.nombre))+' sabe.</b> No es hombre que perdone ni que hable en público. Te mandó un recado: «que el señor se aleje de mi esposa o se atenga a las consecuencias».',
+      o:[{t:'Terminar y ofrecerle una compensación ('+fm(c1)+')',f:()=>{ tom(c1); am.activo=false; if(chance(.7)) return 'Aceptó la plata sin mirarte a la cara. No volvió a mencionarlo.'; try{ if(typeof window.escandaloFamiliar227==='function') window.escandaloFamiliar227(.4,'un marido ofendido'); }catch(e){} return 'Aceptó, pero se encargó de que en la ciudad se comentara.'; }},
+         {t:'Enfrentarlo',f:()=>{ if(chance(.5)){ prest(1,'enfrentó a un marido ofendido'); return 'Se echó atrás cuando vio que no te asustabas.'; } ES().ult.sinAtender=A(); prest(-2,'un pleito con un marido ofendido'); return 'No se echó atrás. Desde ese día te hace seguir.'; }},
+         {t:'Pagar para que lo asusten ('+fm(c2)+')',f:()=>{ tom(c2); try{ registrarDelito('amenazas',3,'asustar al marido de '+am.nombre); }catch(e){} if(chance(.5)){ am.activo=false; return 'Dejó de molestar y se mudó de ciudad.'; } try{ if(!S.penal.caso&&chance(.4)) abrirCasoPenal('amenazas contra el marido de '+primer(am.nombre)); }catch(e){} return 'Fue peor: te denunció y todos supieron por qué.'; }},
+         {t:'Dejarlo pasar',f:()=>{ if(chance(.4)) ES().ult.sinAtender=A(); return 'Decidiste esperar. La paz de los siguientes meses fue tensa.'; }}]}; }
+  function evSospechoso(r){ const c1=Math.round(Math.max(8,pat()*.006)); const n=gente('h');
+    return {p:9,c:()=>ACTIVO()&&!nino()&&!!r,
+      t:()=>'<b>Apareció muerto '+E(n)+', hombre de confianza de los '+E(r.apellido)+'.</b> Nadie lo dice en voz alta, pero en el club todos te miran a ti: «con esa familia, ustedes siempre han tenido rencillas».',
+      o:[{t:'Contratar abogados y dar la cara ('+fm(c1)+')',f:()=>{ tom(c1); const s=ES().secretos.find(x=>x.apellido===r.apellido); if(s){ s.riesgo=cl(s.riesgo+15,0,100); return 'Tus abogados te cuidaron en la declaración. Sientes que, esta vez, lo tuyo estuvo cerca.'; } prest(1,'declaró sin esconder nada'); return 'Declaraste, mostraste tus papeles y el rumor se enfrió. No tuviste nada que ver.'; }},
+         {t:'Ofrecer colaboración voluntaria a la fiscalía',f:()=>{ const s=ES().secretos.find(x=>x.apellido===r.apellido); if(s&&chance(.5)){ try{ if(!S.penal.caso) abrirCasoPenal('homicidio de un hombre de los '+r.apellido); }catch(e){} return 'La fiscalía agradeció tu colaboración... y empezó a hacer preguntas incómodas.'; } prest(1,'colaboró con la fiscalía'); return 'La fiscalía agradeció tu colaboración y cerró tu parte del asunto.'; }},
+         {t:'Hacer como si nada',f:()=>{ prest(-2,'un rumor que no desmintió'); r.relacionCasa=cl((r.relacionCasa==null?40:r.relacionCasa)-10,0,100); return 'Dejaste que el rumor se enfriara solo. La casa rival no te perdonó el silencio.'; }}]}; }
+  function evDolencia(h){ const c1=Math.round(Math.max(10,pat()*.004));
+    return {p:9,c:()=>ACTIVO()&&!!h&&(S.familia.hijos||[]).includes(h),
+      t:()=>'<b>Una dolencia que no cede.</b> Tu médico de confianza frunce el ceño: los exámenes no explican lo que sientes, y mejoras cuando viajas y empeoras al volver a casa. Hace semanas que '+E(h.nombre)+' te sirve el café en persona.',
+      o:[{t:'Mandar analizar todo en un laboratorio de fuera ('+fm(c1)+')',f:()=>{ tom(c1); if(chance(.65)){ h.desheredado129=true; h.vinculo=0; S.p.salud=cl(S.p.salud+10,0,100); S.p.felicidad=cl(S.p.felicidad-15,0,100); return 'El laboratorio lo confirmó. Lo callaste: era tu '+(h.sexo==='m'?'hija':'hijo')+'. Lo desheredaste ese mismo día y te recuperaste en semanas.'; } return 'El laboratorio no encontró nada claro. La duda se quedó en la casa.'; }},
+         {t:'Confrontarlo',f:()=>{ if(chance(.5)){ h.desheredado129=true; h.vinculo=0; S.p.salud=cl(S.p.salud+6,0,100); return E(h.nombre)+' bajó la mirada y no negó nada. Lo desheredaste. Se fue de la casa esa misma noche.'; } h.vinculo=cl((h.vinculo||55)-20,0,100); return 'Lo negó todo, ofendido. Ahora hay un silencio frío en la mesa.'; }},
+         {t:'Cambiar de médico y de servicio sin hacer preguntas',f:()=>{ if(chance(.55)){ S.p.salud=cl(S.p.salud+8,0,100); return 'Cambiaste todo sin dar explicaciones y, poco a poco, te sentiste mejor.'; } S.p.salud=cl(S.p.salud-ri(6,12),0,100); return 'Cambiaste todo y seguiste igual. Lo que sea que fuera, siguió.'; }},
+         {t:'No hacer nada',f:()=>{ S.p.salud=cl(S.p.salud-ri(10,20),0,100); return 'Decidiste no pensar en eso. Tu cuerpo, sí.'; }}]}; }
+
+  /* ---------- 3. ajustar cuentas ---------- */
+  const costoRecado=()=>Math.round(Math.max(6,pat()*.004)), costoPaz=()=>Math.round(Math.max(10,pat()*.012)), costoEncargo=()=>Math.round(Math.max(30,pat()*.02));
+  function nuevoSecreto(tipo,nombre,riesgo,apellido){ const e=ES(); e.n++; e.secretos.push({id:'s'+e.n,tipo,nombre,anio:A(),riesgo:cl(riesgo,0,100),apellido:apellido||null}); e.secretos=e.secretos.slice(-5); return e.secretos[e.secretos.length-1]; }
+  function recado(a){ const c=costoRecado(); if(S.efectivo<c) return {ok:false,txt:'No alcanza ('+fm(c)+').'}; tom(c); try{ registrarDelito('amenazas',3,'mandar un recado a '+a.nombre); }catch(e){}
+    const e=ES(); if(chance(.5)){ e.agravios=e.agravios.filter(x=>x!==a); return {ok:true,txt:'El recado llegó. <b>'+E(a.nombre)+'</b> entendió y se alejó de tu vida.'}; } e.ult.sinAtender=A(); return {ok:true,txt:'El recado llegó, pero '+E(a.nombre)+' no se asustó. Ahora hay rabia de los dos lados.'}; }
+  function comprarPaz(a){ const c=costoPaz(); if(S.efectivo<c) return {ok:false,txt:'No alcanza ('+fm(c)+').'}; tom(c); const e=ES();
+    if(chance(.62)){ e.agravios=e.agravios.filter(x=>x!==a); return {ok:true,txt:'Pagaste y <b>'+E(a.nombre)+'</b> se fue a vivir lejos. No habrá más cartas.'}; } return {ok:true,txt:'Pagaste, pero '+E(a.nombre)+' se quedó con la plata y con las ganas.'}; }
+  function encargo(a){ const c=costoEncargo(); if(S.efectivo<c) return {ok:false,txt:'No alcanza ('+fm(c)+').'}; if((S.mov||0)<1) return {ok:false,txt:'No te quedan movidas.'};
+    S.efectivo-=c; S.mov=Math.max(0,S.mov-1); try{ registrarDelito('homicidio',10,'la muerte de '+a.nombre); }catch(e){}
+    const e=ES(); e.agravios=e.agravios.filter(x=>x!==a); const pOk=cl(.6+(S.p.redes||0)/400-(a.quien==='rival'?.08:0),.4,.82);
+    if(chance(pOk)){ e.culpa=cl(e.culpa+ri(14,24),0,100); S.p.felicidad=cl(S.p.felicidad-ri(3,8),0,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres+12,0,100);
+      nuevoSecreto('homicidio',a.nombre,ri(18,30),a.apellido);
+      try{ if(a.apellido){ const r=(S.rivales||[]).find(x=>x.apellido===a.apellido&&x.viva); if(r){ r.patrimonio=Math.max(1,(r.patrimonio||0)*.92); r.relacionCasa=0; r.venganza91=A()+5; } } }catch(x){}
+      log('Se cumplió el encargo. Los periódicos hablaron de «un crimen sin esclarecer».','mal'); return {ok:true,muerto:true,txt:'<b>'+E(a.nombre)+'</b> ya no volverá a molestar a nadie. Nadie te dijo cómo; tú no preguntaste.'}; }
+    e.culpa=cl(e.culpa+6,0,100); e.ult.sinAtender=A(); nuevoSecreto('tentativa',a.nombre,ri(30,45),a.apellido); prest(-2,'un crimen que salió mal');
+    log('El encargo salió mal. La respuesta no tardará.','mal'); return {ok:true,muerto:false,txt:'El encargo salió mal: <b>'+E(a.nombre)+'</b> sobrevivió y sabe que fuiste tú. Se vienen tiempos peligrosos.'}; }
+  function escenaCuentas(){ const e=ES(); if(!e.agravios.length){ escena({rubro:'Cuentas pendientes',titulo:'Nadie te debe nada',ancho:true,cerrable:true,cuerpo:'No hay una cuenta pendiente que valga la pena. Es mejor así: lo que se paga en sangre no se termina de pagar nunca.',opciones:[]}); return; }
+    escena({rubro:'Cuentas pendientes',titulo:'Ajustar cuentas',ancho:true,cerrable:true,cuerpo:'Alguien te debe algo que no se paga con plata. ¿Qué haces con eso?',
+      opciones:e.agravios.map(a=>({t:'<b>'+E(a.nombre)+'</b> · '+E(a.motivo||'una cuenta pendiente'),cat:'riesgo',cerrar:false,run:()=>escenaDecidir(a)}))}); }
+  function escenaDecidir(a){ const c1=costoRecado(), c2=costoPaz(), c3=costoEncargo();
+    escena({rubro:'Cuentas pendientes',titulo:E(a.nombre),ancho:true,cerrable:true,cuerpo:E(a.motivo||'Una cuenta pendiente')+'. Lo que decidas queda contigo.',
+      opciones:[{t:'Buscar la justicia',cat:'legado',d:'Sin plata ni riesgo. La justicia es lenta.',cerrar:true,run:()=>{ const ok=chance(cl(.18+(S.p.redes||0)/400,.1,.4)); const e=ES(); if(ok){ e.agravios=e.agravios.filter(x=>x!==a); prest(1,'acudió a la justicia'); log('La justicia tomó el caso contra <b>'+E(a.nombre)+'</b>.','bien'); } else log('La denuncia contra '+E(a.nombre)+' quedó en un cuaderno.','mal'); }},
+        {t:'Comprar su paz y su silencio · '+fm(c2),cat:'capital',d:'No es un delito. Funciona casi dos de cada tres veces.',cerrar:true,dis:S.efectivo<c2?'No alcanza':null,run:()=>{ const r=comprarPaz(a); log(r.txt,r.ok?'':'mal'); }},
+        {t:'Mandarle un recado · '+fm(c1),cat:'riesgo',d:'Una amenaza es un delito. Puede servir; puede empeorarlo.',cerrar:true,dis:S.efectivo<c1?'No alcanza':null,run:()=>{ const r=recado(a); log(r.txt,r.ok?'':'mal'); }},
+        {t:'Encargar lo peor · '+fm(c3),cat:'riesgo',d:'Es un homicidio: el peor de los delitos. Abre un secreto que se va pudriendo, trae chantajistas y fiscales, y deja culpa. Cuesta una movida.',cerrar:true,dis:S.efectivo<c3?'No alcanza':((S.mov||0)<1?'No te quedan movidas':null),run:()=>{ const r=encargo(a); log(r.txt,r.muerto?'mal':'mal'); }},
+        {t:'Perdonar y dejarlo pasar',cat:'legado',d:'La cuenta se cierra. Pesa menos la conciencia.',cerrar:true,run:()=>{ const e=ES(); e.agravios=e.agravios.filter(x=>x!==a); e.culpa=cl(e.culpa-4,0,100); S.p.felicidad=cl(S.p.felicidad+3,0,100); log('Decidiste perdonar a <b>'+E(a.nombre)+'</b>. No fue fácil.'); }}]}); }
+
+  /* ---------- los secretos se pudren ---------- */
+  function etiquetaSecreto(s){ return s.tipo==='homicidio'?'la muerte de '+s.nombre:s.tipo==='tentativa'?'el encargo contra '+s.nombre:s.tipo==='encubrimiento'?'el caso de '+s.nombre:'la salida de '+s.nombre+' del país'; }
+  function abrirPorSecreto(s,motivo){ const e=ES(); e.secretos=e.secretos.filter(x=>x!==s); try{ if(!S.penal.caso) abrirCasoPenal(motivo); else S.penal.riesgo=cl((S.penal.riesgo||0)+15,0,100); }catch(x){} e.culpa=cl(e.culpa-10,0,100); }
+  function evSecreto(s){ const e=ES(); const v=['chantaje','testigo','fiscalia'][ri(0,2)]; const c1=Math.round(Math.max(15,pat()*.02)), c2=Math.round(Math.max(12,pat()*.01)), c3=Math.round(Math.max(20,pat()*.015));
+    const txt=v==='chantaje'?'<b>Una carta sin remitente.</b> Alguien sabe lo de '+E(etiquetaSecreto(s))+' y quiere plata para callar.':v==='testigo'?'<b>Un testigo reapareció.</b> Alguien que estuvo cerca de '+E(etiquetaSecreto(s))+' dice que está dispuesto a hablar... por un precio.':'<b>La fiscalía vuelve a preguntar.</b> Un investigador encontró un hilo que lleva a '+E(etiquetaSecreto(s))+' y te cita a una declaración.';
+    return {p:10,c:()=>ACTIVO()&&e.secretos.includes(s),t:()=>txt,
+      o:[{t:'Pagar ('+fm(c1)+')',f:()=>{ tom(c1); if(chance(.6)){ s.riesgo=cl(s.riesgo-12,0,100); e.culpa=cl(e.culpa+2,0,100); return 'Pagaste y el asunto se calmó. Por ahora.'; } s.riesgo=cl(s.riesgo+8,0,100); return 'Pagaste, pero ahora saben que pagas.'; }},
+         {t:'Buscar abogados y ganar tiempo ('+fm(c2)+')',f:()=>{ tom(c2); s.riesgo=cl(s.riesgo-(v==='fiscalia'?18:8),0,100); return 'Tus abogados armaron una defensa y ganaron tiempo. El riesgo bajó, no desapareció.'; }},
+         {t:'Silenciarlo para siempre ('+fm(c3)+')',f:()=>{ if(S.efectivo<c3||e.secretos.length>=5) return 'No pudiste.'; tom(c3); try{ registrarDelito('homicidio',10,'silenciar a quien sabía lo de '+s.nombre); }catch(x){} e.culpa=cl(e.culpa+ri(12,20),0,100); S.p.felicidad=cl(S.p.felicidad-6,0,100); s.riesgo=cl(s.riesgo+20,0,100); nuevoSecreto('homicidio','quien sabía lo de '+s.nombre,ri(25,40),s.apellido); return 'Se acabó la carta. Pero cada muerte pide otra, y esta se paga en un secreto más grande.'; }},
+         {t:'Enfrentar las consecuencias y declarar',f:()=>{ abrirPorSecreto(s,s.tipo==='homicidio'?'homicidio ('+s.nombre+')':s.tipo==='tentativa'?'tentativa de homicidio':s.tipo==='encubrimiento'?'encubrimiento de un homicidio':'favorecimiento de fuga'); prest(-5,'confesó su participación en un crimen'); return 'Te presentaste a declarar. La justicia tomó tu caso.'; }}]}; }
+  function conciencia(){ const e=ES(); if(!e.culpa&&!e.secretos.length){ escena({rubro:'La conciencia',titulo:'Tu conciencia está en paz',ancho:true,cerrable:true,cuerpo:'No cargas con nada que no puedas decir en voz alta.',opciones:[]}); return; }
+    const c1=Math.round(Math.max(3,pat()*.002)), c2=Math.round(Math.max(8,pat()*.008)), a=A();
+    escena({rubro:'La conciencia',titulo:'Lo que pesa',ancho:true,cerrable:true,cuerpo:'La culpa que cargas es de <b>'+Math.round(e.culpa)+'</b> sobre 100.'+(e.secretos.length?' Hay '+e.secretos.length+' secreto'+(e.secretos.length>1?'s':'')+' sin cerrar.':''),
+      opciones:[{t:(a>=1980?'Buscar a un psicólogo':'Confesarte con un sacerdote')+' · '+fm(c1),cat:'familia',d:'Baja la culpa y el estrés. El secreto se queda donde está.',cerrar:true,dis:S.efectivo<c1?'No alcanza':null,run:()=>{ tom(c1); e.culpa=cl(e.culpa-15,0,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres-10,0,100); S.p.felicidad=cl(S.p.felicidad+3,0,100); log('Hablaste con alguien, por fin. Pesa menos.'); }},
+        {t:'Hacer una obra de caridad · '+fm(c2),cat:'legado',d:'Baja la culpa y suma un poco de buena fama.',cerrar:true,dis:S.efectivo<c2?'No alcanza':null,run:()=>{ tom(c2); e.culpa=cl(e.culpa-8,0,100); prest(1,'una obra de caridad'); log('Donaste una obra con nombre ajeno. La ciudad lo agradeció.','bien'); }},
+        {t:'Entregarte a la justicia',cat:'riesgo',d:'Cierra todos los secretos y abre un caso. La confesión te ayuda en la pena; el apellido paga el costo.',cerrar:true,dis:e.secretos.length?null:'No tienes nada que confesar',run:()=>{ const L=e.secretos.slice(); const n=L.map(etiquetaSecreto); e.secretos=[]; e.culpa=0; try{ if(!S.penal.caso) abrirCasoPenal('homicidio ('+n.slice(0,2).join(', ')+')'); }catch(x){} try{ S.penal.confesion232=A(); S.penal.riesgo=cl((S.penal.riesgo||0)+10,0,100); }catch(x){} prest(-8,'se entregó a la justicia'); log('Te entregaste. La casa guardará silencio por años, pero ya no cargas con eso.','mal'); }},
+        {t:'Dejarlo así',cat:'legado',cerrar:true,run:()=>{}}]}); }
+
+  /* ---------- el año ---------- */
+  function anual(){ if(!ACTIVO()||nino()||(S.p.edad||0)<18) return; const e=ES(); let n=0; const push=ev=>{ if(n>=2) return false; n++; cola.push(ev); return true; };
+    // los que salen de la cárcel
+    try{ (S.familia.hijos||[]).forEach(liberar); }catch(x){}
+    // la culpa pesa
+    if(e.culpa>0){ const c=e.culpa; if(c>=20){ S.p.felicidad=cl(S.p.felicidad-Math.round(c/25),0,100); if(isFinite(S.p.estres)) S.p.estres=cl(S.p.estres+Math.round(c/20),0,100); }
+      if(c>=60&&chance(.15)) S.p.salud=cl(S.p.salud-ri(2,6),0,100); e.culpa=cl(c-1,0,100);
+      if(c>=40) try{ (S.familia.hijos||[]).forEach(h=>{ if(h&&(h.edad||0)>=14&&chance(.12)) h.vinculo=cl((h.vinculo||55)-2,0,100); }); }catch(x){} }
+    // los secretos se pudren
+    e.secretos.slice().forEach(s=>{ s.riesgo=cl(s.riesgo+2,0,100); if(n>=1) return; const p=cl(s.riesgo/100*.3+((S.penal&&S.penal.riesgo)||0)/100*.08,.02,.35); if(chance(p)) push(evSecreto(s)); });
+    // lo que no se atendió
+    const sin=e.ult.sinAtender; const pSin=(sin&&A()-sin<=1)?3:1; const ult=e.ult;
+    const lleva=(k,m)=>!ult[k]||A()-ult[k]>=m;
+    const pB=pBase();
+    const C=[];
+    C.push([cl(.05*pB*pSin,0,.2),()=>lleva('atentado',3)&&pat()>=120,()=>evAtentado()]);
+    C.push([cl(.06*viol()*(.6+expo()*.4),0,.1),()=>lleva('asesinato',5)&&parientesAsesinables().length>0,()=>{ const L=parientesAsesinables(); ult.asesinato=A(); return evAsesinato(pick(L)); }]);
+    C.push([cl(.06*pB*pSin,0,.2),()=>lleva('amenaza',3)&&(S.emp||pat()>=300),()=>evAmenaza()]);
+    C.push([cl(.015+viol()*.012,0,.04),()=>lleva('acusado',6)&&hijosAdultos().length>0,()=>{ const L=hijosAdultos().slice().sort((a,b)=>(a.vinculo||55)-(b.vinculo||55)); ult.acusado=A(); return evHijoAcusado(chance(.6)?L[0]:pick(L)); }]);
+    C.push([.07,()=>lleva('marido',5)&&(S.familia.amantes||[]).some(a=>a&&a.activo&&a.civil229==='casada'),()=>{ ult.marido=A(); return evMarido((S.familia.amantes||[]).find(a=>a&&a.activo&&a.civil229==='casada')); }]);
+    C.push([cl(.025*viol()*(e.secretos.some(s=>s.tipo==='homicidio'&&s.apellido)?3:1),0,.12),()=>lleva('sospechoso',5)&&(()=>{ try{ return rivalesVivas().some(r=>(r.relacionCasa==null?50:r.relacionCasa)<45); }catch(x){ return false; } })(),()=>{ ult.sospechoso=A(); const R=rivalesVivas().filter(r=>(r.relacionCasa==null?50:r.relacionCasa)<45); return evSospechoso(pick(R)); }]);
+    C.push([.03,()=>lleva('dolencia',8)&&(S.p.edad||0)>=60&&pat()>=800&&hijosAdultos().some(h=>(h.vinculo||55)<=25||h.desheredado129),()=>{ ult.dolencia=A(); const L=hijosAdultos().filter(h=>(h.vinculo||55)<=25||h.desheredado129); return evDolencia(pick(L)); }]);
+    C.sort(()=>Math.random()-.5);
+    for(const [p,ok,mk] of C){ if(n>=2) break; try{ if(ok()&&chance(p)) push(mk()); }catch(x){ console.error(x); } } }
+
+  /* ---------- enganches ---------- */
+  const TIT1='Ajustar cuentas', TIT2='La conciencia';
+  function wrapPaso(){ const old=window.pasarAnio; if(typeof old!=='function'||window.__SA232_PASO) return; window.__SA232_PASO=true; window.pasarAnio=function(){ const r=old.apply(this,arguments); try{ if(S&&S.p&&!S.muerto) anual(); }catch(e){ console.error(e); } return r; }; }
+  function wrapAcciones(){ const old=window.listaAcciones; if(typeof old!=='function'||window.__SA232_ACC) return; window.__SA232_ACC=true;
+    window.listaAcciones=function(){ const L=old.apply(this,arguments);
+      try{ if(Array.isArray(L)&&ACTIVO()&&!nino()&&(S.p.edad||0)>=18){ const e=ES();
+          if(e.agravios.length&&!L.some(x=>x&&x.t===TIT1)) L.push({t:TIT1,cat:'riesgo',d:'Alguien te debe una cuenta que no se paga con plata. Decide qué haces con eso.',mov:0,modal:true,run:()=>escenaCuentas()});
+          if((e.culpa>=15||e.secretos.length)&&!L.some(x=>x&&x.t===TIT2)) L.push({t:TIT2,cat:'familia',d:'Lo que pesa en el ánimo y lo que se esconde: hablar, reparar o entregarte.',mov:0,modal:true,run:()=>conciencia()}); } }catch(x){ console.error(x); }
+      return L; }; window.listaAcciones.__v232=true; }
+  function wrapCat(){ const old=window.catDe; if(typeof old!=='function'||window.__SA232_CAT) return; window.__SA232_CAT=true; window.catDe=function(t){ if(t===TIT1) return 'riesgo'; if(t===TIT2) return 'familia'; return old.apply(this,arguments); }; }
+  function wrapCausa(){ const old=window.causaMuerte97; if(typeof old!=='function'||old.__v232) return; const f=function(){ try{ const e=S&&S.sangre232; if(e&&e.ult&&e.ult.herida&&A()-e.ult.herida<=1&&(S.p.salud<=25)) return 'un atentado'; }catch(x){} return old.apply(this,arguments); }; f.__v232=true; window.causaMuerte97=f; }
+
+  function init232(){ wrapPaso(); wrapAcciones(); wrapCat(); wrapCausa();
+    Object.assign(window,{violencia232:viol,exposicion232:expo,estadoSangre232:ES,agraviar232:addAgravio,matarPariente232:matarPariente,escenaCuentas232:escenaCuentas,escenaConciencia232:conciencia,encargo232:encargo,recado232:recado,comprarPaz232:comprarPaz,anualSangre232:anual,
+      eventosSangre232:{atentado:evAtentado,asesinato:evAsesinato,amenaza:evAmenaza,acusado:evHijoAcusado,marido:evMarido,sospechoso:evSospechoso,dolencia:evDolencia,secreto:evSecreto},nuevoSecreto232:nuevoSecreto}); }
+  init232(); setTimeout(init232,40); setTimeout(init232,220); setTimeout(init232,650); setTimeout(init232,950); setTimeout(init232,1500);
+  window.__SA232={version:V232};
 })();
 </script>
 
